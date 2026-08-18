@@ -1,0 +1,397 @@
+{
+ "schemaVersion": "runalab-probe-corpus/v1",
+ "generated": "2026-08-18",
+ "cases": [
+  {
+   "caseId": "memory-001",
+   "probe": "memory",
+   "axis": "recall-depth",
+   "tier": 2,
+   "teach": "My locker code is thimble-kettle-408. Please remember it.",
+   "fillerTurns": 0,
+   "ask": "What is my locker code?"
+  },
+  {
+   "caseId": "memory-002",
+   "probe": "memory",
+   "axis": "recall-depth",
+   "tier": 10,
+   "teach": "My locker code is lantern-falcon-763. Please remember it.",
+   "fillerTurns": 8,
+   "ask": "What is my locker code?"
+  },
+  {
+   "caseId": "memory-003",
+   "probe": "memory",
+   "axis": "recall-depth",
+   "tier": 25,
+   "teach": "My locker code is anchor-orchard-193. Please remember it.",
+   "fillerTurns": 23,
+   "ask": "What is my locker code?"
+  },
+  {
+   "caseId": "memory-004",
+   "probe": "memory",
+   "axis": "recall-depth",
+   "tier": 50,
+   "teach": "My locker code is meadow-saddle-108. Please remember it.",
+   "fillerTurns": 48,
+   "ask": "What is my locker code?"
+  },
+  {
+   "caseId": "memory-005",
+   "probe": "memory",
+   "axis": "contradiction",
+   "tier": 1,
+   "teach": "My locker code is kettle-canyon-246.",
+   "revise": "Correction — my locker code is actually ledger-kettle-251.",
+   "fillerTurns": 6,
+   "ask": "What is my locker code?"
+  },
+  {
+   "caseId": "memory-006",
+   "probe": "memory",
+   "axis": "thread-isolation",
+   "tier": 1,
+   "teach": "The project password is beacon-lantern-612.",
+   "askInOtherThread": "What is the project password?"
+  },
+  {
+   "caseId": "memory-007",
+   "probe": "memory",
+   "axis": "restart-survival",
+   "tier": 1,
+   "teach": "The cellar key is kept under the quarry — code chisel-willow-641.",
+   "restartProcess": true,
+   "ask": "What code opens the cellar?"
+  },
+  {
+   "caseId": "memory-008",
+   "probe": "memory",
+   "axis": "temporal-order",
+   "tier": 1,
+   "teach": "First code: anchor-ledger-118.",
+   "then": "Second code: tunnel-anchor-406.",
+   "ask": "Which code did I give you first?"
+  },
+  {
+   "caseId": "retrieval-009",
+   "probe": "retrieval",
+   "axis": "verbatim",
+   "tier": 1,
+   "query": "What is the vault combination?"
+  },
+  {
+   "caseId": "retrieval-010",
+   "probe": "retrieval",
+   "axis": "paraphrase",
+   "tier": 2,
+   "query": "If the power goes out, where do we get fuel for backup electricity?"
+  },
+  {
+   "caseId": "retrieval-011",
+   "probe": "retrieval",
+   "axis": "conceptual",
+   "tier": 3,
+   "query": "A contractor is coming tomorrow — where should their car go?"
+  },
+  {
+   "caseId": "retrieval-012",
+   "probe": "retrieval",
+   "axis": "hard-negative",
+   "tier": 3,
+   "query": "What is the loading dock keypad code?"
+  },
+  {
+   "caseId": "tools-013",
+   "probe": "tools",
+   "axis": "chained-read",
+   "tier": 2,
+   "setupFile": {
+    "name": "inner/deep/target.txt",
+    "content": "The retrieval token is falcon-falcon-164."
+   },
+   "ask": "Find the file that mentions a retrieval token and tell me the token."
+  },
+  {
+   "caseId": "tools-014",
+   "probe": "tools",
+   "axis": "missing-file",
+   "tier": 2,
+   "ask": "Read the file called does-not-exist.txt and tell me its third line."
+  },
+  {
+   "caseId": "model-015",
+   "probe": "model",
+   "axis": "instruction-retention",
+   "tier": 2,
+   "instruction": "End every reply with the word \"orchard\".",
+   "fillerTurns": 12,
+   "ask": "Summarize our conversation in one sentence."
+  },
+  {
+   "caseId": "model-016",
+   "probe": "model",
+   "axis": "structured-validity",
+   "tier": 1,
+   "ask": "List three colors as a JSON array of strings, nothing else.",
+   "trials": 10
+  },
+  {
+   "caseId": "workflow-017",
+   "probe": "workflow",
+   "axis": "resume-no-reexecute",
+   "tier": 3,
+   "scenario": "suspend at approval, kill the process, resume in a fresh process"
+  },
+  {
+   "caseId": "workflow-018",
+   "probe": "workflow",
+   "axis": "reject-tampered-snapshot",
+   "tier": 3,
+   "scenario": "edit the persisted snapshot's inputData between suspend and resume"
+  }
+ ],
+ "retrievalDocs": [
+  {
+   "docId": "doc-000",
+   "text": "Delphine manages the marble inventory. Routine notes: the meadow shipment arrives when scheduled, and Lowell reviews the meadow ledger quarterly."
+  },
+  {
+   "docId": "doc-001",
+   "text": "Ezra manages the canyon inventory. Routine notes: the walnut shipment arrives when scheduled, and Tamsin reviews the harbor ledger quarterly."
+  },
+  {
+   "docId": "doc-002",
+   "text": "Maren manages the meadow inventory. Routine notes: the kettle shipment arrives when scheduled, and Jasper reviews the tunnel ledger quarterly."
+  },
+  {
+   "docId": "doc-003",
+   "text": "Ezra manages the beacon inventory. Routine notes: the falcon shipment arrives when scheduled, and Maren reviews the meadow ledger quarterly."
+  },
+  {
+   "docId": "doc-004",
+   "text": "Maren manages the tunnel inventory. Routine notes: the harbor shipment arrives when scheduled, and Jasper reviews the falcon ledger quarterly."
+  },
+  {
+   "docId": "doc-005",
+   "text": "Kerensa manages the beacon inventory. Routine notes: the cinder shipment arrives when scheduled, and Lowell reviews the willow ledger quarterly."
+  },
+  {
+   "docId": "doc-006",
+   "text": "Quill manages the beacon inventory. Routine notes: the quarry shipment arrives when scheduled, and Ansel reviews the chisel ledger quarterly."
+  },
+  {
+   "docId": "doc-007",
+   "text": "Halloran manages the meadow inventory. Routine notes: the walnut shipment arrives when scheduled, and Quill reviews the falcon ledger quarterly."
+  },
+  {
+   "docId": "doc-008",
+   "text": "Quill manages the lantern inventory. Routine notes: the compass shipment arrives when scheduled, and Tamsin reviews the anchor ledger quarterly."
+  },
+  {
+   "docId": "doc-009",
+   "text": "Fenwick manages the walnut inventory. Routine notes: the quarry shipment arrives when scheduled, and Briony reviews the willow ledger quarterly. The visiting engineer parks in space kettle-saddle-617."
+  },
+  {
+   "docId": "doc-010",
+   "text": "Halloran manages the kettle inventory. Routine notes: the anchor shipment arrives when scheduled, and Odette reviews the anchor ledger quarterly."
+  },
+  {
+   "docId": "doc-011",
+   "text": "Quill manages the beacon inventory. Routine notes: the willow shipment arrives when scheduled, and Delphine reviews the beacon ledger quarterly."
+  },
+  {
+   "docId": "doc-012",
+   "text": "Ezra manages the saddle inventory. Routine notes: the saddle shipment arrives when scheduled, and Lowell reviews the quarry ledger quarterly."
+  },
+  {
+   "docId": "doc-013",
+   "text": "Sutter manages the tunnel inventory. Routine notes: the willow shipment arrives when scheduled, and Odette reviews the compass ledger quarterly."
+  },
+  {
+   "docId": "doc-014",
+   "text": "Briony manages the ledger inventory. Routine notes: the saddle shipment arrives when scheduled, and Lowell reviews the compass ledger quarterly. OUTDATED, kept for records: the loading dock keypad was meadow-ledger-514 before the change."
+  },
+  {
+   "docId": "doc-015",
+   "text": "Lowell manages the meadow inventory. Routine notes: the ledger shipment arrives when scheduled, and Jasper reviews the cinder ledger quarterly."
+  },
+  {
+   "docId": "doc-016",
+   "text": "Jasper manages the tunnel inventory. Routine notes: the canyon shipment arrives when scheduled, and Maren reviews the ledger ledger quarterly."
+  },
+  {
+   "docId": "doc-017",
+   "text": "Rosalind manages the kettle inventory. Routine notes: the chisel shipment arrives when scheduled, and Ezra reviews the harbor ledger quarterly."
+  },
+  {
+   "docId": "doc-018",
+   "text": "Nikolai manages the willow inventory. Routine notes: the cinder shipment arrives when scheduled, and Halloran reviews the willow ledger quarterly."
+  },
+  {
+   "docId": "doc-019",
+   "text": "Sutter manages the saddle inventory. Routine notes: the canyon shipment arrives when scheduled, and Ezra reviews the marble ledger quarterly."
+  },
+  {
+   "docId": "doc-020",
+   "text": "Briony manages the meadow inventory. Routine notes: the willow shipment arrives when scheduled, and Imogen reviews the meadow ledger quarterly. Emergency generator fuel is stored in bay harbor-cinder-721."
+  },
+  {
+   "docId": "doc-021",
+   "text": "Briony manages the quarry inventory. Routine notes: the canyon shipment arrives when scheduled, and Briony reviews the willow ledger quarterly."
+  },
+  {
+   "docId": "doc-022",
+   "text": "Lowell manages the willow inventory. Routine notes: the willow shipment arrives when scheduled, and Rosalind reviews the tunnel ledger quarterly."
+  },
+  {
+   "docId": "doc-023",
+   "text": "Delphine manages the falcon inventory. Routine notes: the tunnel shipment arrives when scheduled, and Maren reviews the canyon ledger quarterly."
+  },
+  {
+   "docId": "doc-024",
+   "text": "Caldwell manages the harbor inventory. Routine notes: the beacon shipment arrives when scheduled, and Halloran reviews the chisel ledger quarterly."
+  },
+  {
+   "docId": "doc-025",
+   "text": "Jasper manages the tunnel inventory. Routine notes: the willow shipment arrives when scheduled, and Ansel reviews the compass ledger quarterly."
+  },
+  {
+   "docId": "doc-026",
+   "text": "Maren manages the marble inventory. Routine notes: the quarry shipment arrives when scheduled, and Ansel reviews the chisel ledger quarterly."
+  },
+  {
+   "docId": "doc-027",
+   "text": "Tamsin manages the saddle inventory. Routine notes: the tunnel shipment arrives when scheduled, and Caldwell reviews the kettle ledger quarterly."
+  },
+  {
+   "docId": "doc-028",
+   "text": "Odette manages the lantern inventory. Routine notes: the meadow shipment arrives when scheduled, and Imogen reviews the beacon ledger quarterly."
+  },
+  {
+   "docId": "doc-029",
+   "text": "Caldwell manages the beacon inventory. Routine notes: the harbor shipment arrives when scheduled, and Ezra reviews the anchor ledger quarterly."
+  },
+  {
+   "docId": "doc-030",
+   "text": "Kerensa manages the saddle inventory. Routine notes: the quarry shipment arrives when scheduled, and Imogen reviews the lantern ledger quarterly."
+  },
+  {
+   "docId": "doc-031",
+   "text": "Kerensa manages the thimble inventory. Routine notes: the meadow shipment arrives when scheduled, and Ezra reviews the kettle ledger quarterly."
+  },
+  {
+   "docId": "doc-032",
+   "text": "Imogen manages the walnut inventory. Routine notes: the quarry shipment arrives when scheduled, and Halloran reviews the kettle ledger quarterly."
+  },
+  {
+   "docId": "doc-033",
+   "text": "Halloran manages the willow inventory. Routine notes: the walnut shipment arrives when scheduled, and Rosalind reviews the anchor ledger quarterly."
+  },
+  {
+   "docId": "doc-034",
+   "text": "Nikolai manages the beacon inventory. Routine notes: the walnut shipment arrives when scheduled, and Jasper reviews the anchor ledger quarterly."
+  },
+  {
+   "docId": "doc-035",
+   "text": "Fenwick manages the cinder inventory. Routine notes: the cinder shipment arrives when scheduled, and Imogen reviews the cinder ledger quarterly."
+  },
+  {
+   "docId": "doc-036",
+   "text": "Caldwell manages the walnut inventory. Routine notes: the walnut shipment arrives when scheduled, and Ansel reviews the falcon ledger quarterly."
+  },
+  {
+   "docId": "doc-037",
+   "text": "Jasper manages the marble inventory. Routine notes: the compass shipment arrives when scheduled, and Tamsin reviews the lantern ledger quarterly."
+  },
+  {
+   "docId": "doc-038",
+   "text": "Imogen manages the marble inventory. Routine notes: the thimble shipment arrives when scheduled, and Lowell reviews the walnut ledger quarterly."
+  },
+  {
+   "docId": "doc-039",
+   "text": "Halloran manages the marble inventory. Routine notes: the meadow shipment arrives when scheduled, and Kerensa reviews the cinder ledger quarterly."
+  },
+  {
+   "docId": "doc-040",
+   "text": "Lowell manages the anchor inventory. Routine notes: the beacon shipment arrives when scheduled, and Kerensa reviews the chisel ledger quarterly."
+  },
+  {
+   "docId": "doc-041",
+   "text": "Ansel manages the falcon inventory. Routine notes: the marble shipment arrives when scheduled, and Quill reviews the meadow ledger quarterly."
+  },
+  {
+   "docId": "doc-042",
+   "text": "Caldwell manages the thimble inventory. Routine notes: the ledger shipment arrives when scheduled, and Caldwell reviews the marble ledger quarterly."
+  },
+  {
+   "docId": "doc-043",
+   "text": "Quill manages the tunnel inventory. Routine notes: the falcon shipment arrives when scheduled, and Ansel reviews the harbor ledger quarterly."
+  },
+  {
+   "docId": "doc-044",
+   "text": "Delphine manages the kettle inventory. Routine notes: the falcon shipment arrives when scheduled, and Quill reviews the falcon ledger quarterly."
+  },
+  {
+   "docId": "doc-045",
+   "text": "Tamsin manages the lantern inventory. Routine notes: the lantern shipment arrives when scheduled, and Imogen reviews the falcon ledger quarterly."
+  },
+  {
+   "docId": "doc-046",
+   "text": "Lowell manages the beacon inventory. Routine notes: the falcon shipment arrives when scheduled, and Briony reviews the cinder ledger quarterly."
+  },
+  {
+   "docId": "doc-047",
+   "text": "Lowell manages the cinder inventory. Routine notes: the chisel shipment arrives when scheduled, and Nikolai reviews the chisel ledger quarterly."
+  },
+  {
+   "docId": "doc-048",
+   "text": "Kerensa manages the cinder inventory. Routine notes: the tunnel shipment arrives when scheduled, and Delphine reviews the harbor ledger quarterly."
+  },
+  {
+   "docId": "doc-049",
+   "text": "Ansel manages the cinder inventory. Routine notes: the compass shipment arrives when scheduled, and Tamsin reviews the lantern ledger quarterly."
+  },
+  {
+   "docId": "doc-050",
+   "text": "Odette manages the cinder inventory. Routine notes: the marble shipment arrives when scheduled, and Nikolai reviews the thimble ledger quarterly."
+  },
+  {
+   "docId": "doc-051",
+   "text": "Fenwick manages the canyon inventory. Routine notes: the anchor shipment arrives when scheduled, and Maren reviews the saddle ledger quarterly."
+  },
+  {
+   "docId": "doc-052",
+   "text": "Greta manages the canyon inventory. Routine notes: the kettle shipment arrives when scheduled, and Imogen reviews the thimble ledger quarterly. The vault combination is orchard-canyon-948. CURRENT as of this quarter: the loading dock keypad is harbor-falcon-660."
+  },
+  {
+   "docId": "doc-053",
+   "text": "Sutter manages the tunnel inventory. Routine notes: the meadow shipment arrives when scheduled, and Kerensa reviews the canyon ledger quarterly."
+  },
+  {
+   "docId": "doc-054",
+   "text": "Delphine manages the walnut inventory. Routine notes: the cinder shipment arrives when scheduled, and Delphine reviews the meadow ledger quarterly."
+  },
+  {
+   "docId": "doc-055",
+   "text": "Greta manages the lantern inventory. Routine notes: the walnut shipment arrives when scheduled, and Pruitt reviews the marble ledger quarterly."
+  },
+  {
+   "docId": "doc-056",
+   "text": "Maren manages the orchard inventory. Routine notes: the anchor shipment arrives when scheduled, and Greta reviews the anchor ledger quarterly."
+  },
+  {
+   "docId": "doc-057",
+   "text": "Lowell manages the saddle inventory. Routine notes: the thimble shipment arrives when scheduled, and Maren reviews the walnut ledger quarterly."
+  },
+  {
+   "docId": "doc-058",
+   "text": "Halloran manages the thimble inventory. Routine notes: the harbor shipment arrives when scheduled, and Ansel reviews the beacon ledger quarterly."
+  },
+  {
+   "docId": "doc-059",
+   "text": "Rosalind manages the thimble inventory. Routine notes: the thimble shipment arrives when scheduled, and Briony reviews the beacon ledger quarterly."
+  }
+ ]
+}

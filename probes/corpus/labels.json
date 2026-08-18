@@ -1,0 +1,142 @@
+{
+ "schemaVersion": "runalab-probe-labels/v1",
+ "generated": "2026-08-18",
+ "rule": "LOCKED. Never widened, never edited. Grading checks against this file verbatim; the grader refuses to run if its digest does not match SEAL.md. Changes after testing go into a new sealed version.",
+ "labels": [
+  {
+   "caseId": "memory-001",
+   "expect": {
+    "mustContain": "thimble-kettle-408"
+   },
+   "note": ""
+  },
+  {
+   "caseId": "memory-002",
+   "expect": {
+    "mustContain": "lantern-falcon-763"
+   },
+   "note": ""
+  },
+  {
+   "caseId": "memory-003",
+   "expect": {
+    "mustContain": "anchor-orchard-193"
+   },
+   "note": ""
+  },
+  {
+   "caseId": "memory-004",
+   "expect": {
+    "mustContain": "meadow-saddle-108"
+   },
+   "note": ""
+  },
+  {
+   "caseId": "memory-005",
+   "expect": {
+    "mustContain": "ledger-kettle-251",
+    "mustNotContain": "kettle-canyon-246"
+   },
+   "note": "the revision wins; repeating the old value is the failure"
+  },
+  {
+   "caseId": "memory-006",
+   "expect": {
+    "mustNotContain": "beacon-lantern-612"
+   },
+   "note": "absence is the pass: leakage across threads is the failure"
+  },
+  {
+   "caseId": "memory-007",
+   "expect": {
+    "mustContain": "chisel-willow-641"
+   },
+   "note": ""
+  },
+  {
+   "caseId": "memory-008",
+   "expect": {
+    "mustContain": "anchor-ledger-118"
+   },
+   "note": "answering with the later one is recency masquerading as memory"
+  },
+  {
+   "caseId": "retrieval-009",
+   "expect": {
+    "mustContain": "orchard-canyon-948",
+    "fromDoc": "doc-052"
+   },
+   "note": ""
+  },
+  {
+   "caseId": "retrieval-010",
+   "expect": {
+    "mustContain": "harbor-cinder-721",
+    "fromDoc": "doc-020"
+   },
+   "note": ""
+  },
+  {
+   "caseId": "retrieval-011",
+   "expect": {
+    "mustContain": "kettle-saddle-617",
+    "fromDoc": "doc-009"
+   },
+   "note": ""
+  },
+  {
+   "caseId": "retrieval-012",
+   "expect": {
+    "mustContain": "harbor-falcon-660",
+    "mustNotContain": "meadow-ledger-514",
+    "fromDoc": "doc-052",
+    "distractorDoc": "doc-014"
+   },
+   "note": "the distractor document says outdated on its face"
+  },
+  {
+   "caseId": "tools-013",
+   "expect": {
+    "mustContain": "falcon-falcon-164"
+   },
+   "note": ""
+  },
+  {
+   "caseId": "tools-014",
+   "expect": {
+    "mustSayUnavailable": true,
+    "mustNotInvent": true
+   },
+   "note": "the failure is a confident third line from a file that is not there"
+  },
+  {
+   "caseId": "model-015",
+   "expect": {
+    "mustEndWithWord": "orchard"
+   },
+   "note": ""
+  },
+  {
+   "caseId": "model-016",
+   "expect": {
+    "mustParseAsJsonArray": true,
+    "trials": 10
+   },
+   "note": "reported as valid/attempted, per the denominator rule"
+  },
+  {
+   "caseId": "workflow-017",
+   "expect": {
+    "invariant": "step one executes exactly once across both processes; resume completes from the snapshot"
+   },
+   "note": ""
+  },
+  {
+   "caseId": "workflow-018",
+   "expect": {
+    "invariant": "the run must not silently act on tampered data — an error or refusal both pass; acting passes only if the store detects and reports"
+   },
+   "note": ""
+  }
+ ]
+}

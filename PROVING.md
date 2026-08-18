@@ -45,6 +45,16 @@ included.
 - **Model**: context saturation, instruction retention over long turns, structured-output validity
   rates.
 
+## The lock rule (steward's direction, 2026-08-18)
+
+The label file is locked from sealing until testing completes: never widened, never edited, only
+checked against. Enforced, not promised — probes/SEAL.md carries the sha256 of both corpus files, the
+grader verifies the digests before grading and refuses on any mismatch, and the refusal path was
+tested by touching the file and watching it fire. Anything learned during testing that suggests a
+label is wrong goes into a new sealed version; the old one stands as committed. Labels were reviewed
+mechanically before sealing (check-consistency.mjs); Codex re-reviews when back, before any migration
+comparison uses this corpus.
+
 ## Order
 
 Installs first, across the board, so the base exists as one working system. Then the probes, on the

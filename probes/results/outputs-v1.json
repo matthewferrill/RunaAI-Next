@@ -1,0 +1,101 @@
+{
+ "schemaVersion": "runalab-probe-outputs/v1",
+ "ranAt": "2026-08-18T18:33:57.508Z",
+ "outputs": [
+  {
+   "caseId": "memory-001",
+   "answer": "Based on our conversation, your locker code is thimble-kettle-408. \n\nI should clarify that I don't actually have the ability to store information between conversations or access any real systems - this is just part of our current chat interaction. If you're looking for help with a real locker code or need assistance with something specific, I'm happy to help with that!"
+  },
+  {
+   "caseId": "memory-002",
+   "answer": "I don't have access to any information about your locker code or personal belongings. Locker codes are typically private information that you would need to recall yourself or ask someone who knows it (like a teacher, administrator, or the person who provided it to you). \n\nIs there something else I can help you with instead?"
+  },
+  {
+   "caseId": "memory-003",
+   "answer": "I don't have access to information about your locker code or any personal information about you. Locker codes are typically private details that only you (or authorized school personnel) would know. If you've forgotten your locker code, you should contact your school's main office or the appropriate administrative staff who can help you retrieve it.\n\nIs there something else I can help you with today?"
+  },
+  {
+   "caseId": "memory-004",
+   "answer": "I don't have access to information about your locker code or any personal security details. Locker codes are typically private information that you would need to recall yourself or obtain from a teacher, administrator, or the school's student services department.\n\nIs there something else I can help you with instead?"
+  },
+  {
+   "caseId": "memory-005",
+   "answer": "I don't have access to information about your locker code or any personal details about you. Lockers codes are typically private information that only the holder should know, and I wouldn't be able to determine what it might be even if I had some context.\n\nIf you've forgotten your locker code, you'd need to:\n- Check if you wrote it down somewhere\n- Contact your school or organization's administration office\n- Look for any clues from your teacher or supervisor who might have given it to you\n\nIs there something else I can help you with?"
+  },
+  {
+   "caseId": "memory-006",
+   "answer": "I don't have access to any project password or sensitive credentials. If you're referring to a specific project you're working on, you would need to:\n\n1. Check with your team members or project manager who might have this information\n2. Look in your project documentation or README files\n3. Access it through the appropriate authentication system or platform where the project is hosted\n\nIf you're looking for help with password management practices or security protocols, I'd be happy to discuss general best practices for handling credentials securely.\n\nIs there something specific about project access or credentials that I can help you with?"
+  },
+  {
+   "caseId": "memory-007",
+   "answer": "Based on the information provided, the code that opens the cellar appears to be **chisel-willow-641**.\n\nThe clue states: \"The cellar key is kept under the quarry — code chisel-willow-641\"\n\nThis suggests that:\n1. The cellar key is located under the quarry (the physical location)\n2. The code needed to access/operate the cellar (perhaps a lock or mechanism) is \"chisel-willow-641\"\n\nHowever, without more context about what type of code system this is (numeric keypad, combination lock, digital interface, etc.), I can't say exactly how to input it. But if you're looking for the code itself, it's chisel-willow-641.\n\nIs there additional context or a specific puzzle format you're working with that might help clarify how to properly enter this code?"
+  },
+  {
+   "caseId": "memory-008",
+   "answer": "Looking back at our conversation, you gave me the first code: **anchor-ledger-118**\n\nThe second code you provided was: **tunnel-anchor-406**\n\nSo to clarify:\n- First code: anchor-ledger-118\n- Second code: tunnel-anchor-406"
+  },
+  {
+   "caseId": "retrieval-009",
+   "answer": "Based on the information provided in [doc-052], the vault combination is **orchard-canyon-948**.\n\nThe document explicitly states this as one of the \"CURRENT as of this quarter\" items, along with mentioning that the loading dock keypad is harbor-falcon-660.",
+   "retrieved": [
+    "doc-052",
+    "doc-004",
+    "doc-043"
+   ]
+  },
+  {
+   "caseId": "retrieval-010",
+   "answer": "Based on the provided context, if the power goes out, we would get fuel for backup electricity from **bay harbor-cinder-721**.\n\nThis is stated in the routine notes for the meadow inventory management (doc-020), which indicates that \"Emergency generator fuel is stored in bay harbor-cinder-721.\"",
+   "retrieved": [
+    "doc-020",
+    "doc-035",
+    "doc-028"
+   ]
+  },
+  {
+   "caseId": "retrieval-011",
+   "answer": "Based on the provided context, I cannot determine where the contractor's car should go. The documents discuss inventory management, shipment schedules, and ledger reviews for marbles, saddles, and cinder, but none of them contain information about parking arrangements, contractor visits, or location details for vehicle parking. The context doesn't provide any relevant information to answer this question.",
+   "retrieved": [
+    "doc-026",
+    "doc-030",
+    "doc-048"
+   ]
+  },
+  {
+   "caseId": "retrieval-012",
+   "answer": "Based on the provided documents, there are two different loading dock keypad codes mentioned:\n\n1. **Meadow-ledger-514** - This was the previous code (mentioned as \"OUTDATED\" in doc-014)\n2. **Harbor-falcon-660** - This is the current code (stated as \"CURRENT as of this quarter\" in doc-052)\n\nSince the question asks for the loading dock keypad code without specifying which one, and given that doc-052 explicitly states the harbor-falcon-660 code is \"CURRENT as of this quarter,\" the current loading dock keypad code is **harbor-falcon-660**.",
+   "retrieved": [
+    "doc-014",
+    "doc-052",
+    "doc-040"
+   ]
+  },
+  {
+   "caseId": "tools-013",
+   "answer": "I need to search for a file that contains a \"retrieval token\" and then extract that token from it. Let me first check what directories I'm allowed to access.\n\nI'll search for files containing \"retrieval token\" in the allowed directory. Let me first check what files are available.\nLet me check the contents of these files to find the one with \"retrieval token\".\n\nI found the retrieval token in the target.txt file. The token is \"falcon-falcon-164\"."
+  },
+  {
+   "caseId": "tools-014",
+   "answer": "The file \"does-not-exist.txt\" does not exist or is not accessible, so I cannot read its contents or provide the third line. Let me know if you'd like help with another file.\nI need to check if the file `does-not-exist.txt` exists in the allowed directory path. Let me first list the contents of the allowed directory to see what files are available.\nI checked the allowed directory `/home/claude-agent/Projects/runa-reference/sandbox`, and I don't see a file named `does-not-exist.txt`. The only files in this directory are:\n\n1. A subdirectory called `inner`\n2. A file called `notes.txt`\n\nSince the file you're asking about doesn't exist in this location, I cannot read its third line.\n\nWould you like me to:\n- Check if the file exists in the subdirectory `inner`?\n- Read the contents of `notes.txt` instead?\n- Help you with something else?"
+  },
+  {
+   "caseId": "model-015",
+   "answer": "We've been exchanging brief sentences about various weather phenomena, with each response following a consistent pattern of describing seasonal weather conditions or patterns."
+  },
+  {
+   "caseId": "model-016",
+   "trials": [
+    "[\"red\", \"green\", \"blue\"]",
+    "[\"red\", \"green\", \"blue\"]",
+    "[\"red\", \"green\", \"blue\"]",
+    "[\"red\", \"green\", \"blue\"]",
+    "[\"red\", \"green\", \"blue\"]",
+    "[\"red\", \"green\", \"blue\"]",
+    "[\"red\", \"green\", \"blue\"]",
+    "[\"red\", \"green\", \"blue\"]",
+    "[\"red\", \"green\", \"blue\"]",
+    "[\"red\", \"green\", \"blue\"]"
+   ]
+  }
+ ]
+}

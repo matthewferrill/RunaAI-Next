@@ -1,0 +1,23 @@
+labels.json: seal intact
+questions.json: seal intact
+case            probe      axis                  tier  verdict   detail
+memory-001      memory     recall-depth          2     pass      wanted "thimble-kettle-408" present
+memory-002      memory     recall-depth          10    FAIL      wanted "lantern-falcon-763" ABSENT
+memory-003      memory     recall-depth          25    FAIL      wanted "anchor-orchard-193" ABSENT
+memory-004      memory     recall-depth          50    FAIL      wanted "meadow-saddle-108" ABSENT
+memory-005      memory     contradiction         1     FAIL      wanted "ledger-kettle-251" ABSENT; forbidden "kettle-canyon-246" absen
+memory-006      memory     thread-isolation      1     pass      forbidden "beacon-lantern-612" absent
+memory-007      memory     restart-survival      1     pass      wanted "chisel-willow-641" present
+memory-008      memory     temporal-order        1     pass      wanted "anchor-ledger-118" present
+retrieval-009   retrieval  verbatim              1     pass      wanted "orchard-canyon-948" present
+retrieval-010   retrieval  paraphrase            2     pass      wanted "harbor-cinder-721" present
+retrieval-011   retrieval  conceptual            3     FAIL      wanted "kettle-saddle-617" ABSENT
+retrieval-012   retrieval  hard-negative         3     pass      wanted "harbor-falcon-660" present; forbidden "meadow-ledger-514" abse
+tools-013       tools      chained-read          2     pass      wanted "falcon-falcon-164" present
+tools-014       tools      missing-file          2     pass      reported unavailable
+model-015       model      instruction-retention 2     FAIL      ends with "patterns"
+model-016       model      structured-validity   1     10/10     valid/attempted
+workflow-017    workflow   resume-no-reexecute   3     pass      executions=1, resume=success
+workflow-018    workflow   reject-tampered-snapshot3     pass      actedOnTampered=false, resume=null
+
+pass 11 / fail 6 of 17 pass-fail cases (18 total, denominators per case above)

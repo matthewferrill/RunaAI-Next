@@ -1,0 +1,21 @@
+{
+ "schemaVersion": "runalab-workflow-outputs/v1",
+ "observations": [
+  {
+   "caseId": "workflow-017",
+   "startStatus": "suspended",
+   "resume": "success",
+   "stepOneExecutions": 1,
+   "stderr": ""
+  },
+  {
+   "caseId": "workflow-018",
+   "snapshotTable": "mastra_workflow_snapshot",
+   "tampered": true,
+   "resume": null,
+   "result": null,
+   "actedOnTamperedData": false,
+   "stderr": "file:///home/claude-agent/Projects/runa-reference/node_modules/@mastra/libsql/dist/index.js:12163\n\t\t\tthrow new MastraError({\n\t\t\t      ^\n\nMastraError: SQLITE_ERROR: malformed JSON\n    at WorkflowsLibSQL.getWorkflowRunById (file:///home/claude-agent/Projects/runa-reference/node_modules/@mastra/libsql/"
+  }
+ ]
+}

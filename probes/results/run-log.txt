@@ -1,0 +1,8 @@
+labels.json: seal intact
+questions.json: seal intact
+memory-001 memory-002 memory-003 memory-004 memory-005 memory-006 memory-007 memory-008 retrieval-009 retrieval-010 retrieval-011 retrieval-012 tools-013 Secure MCP Filesystem Server running on stdio
+Client does not support MCP Roots, using allowed directories set from server args: [ '/home/claude-agent/Projects/runa-reference/sandbox' ]
+tools-014 Secure MCP Filesystem Server running on stdio
+Client does not support MCP Roots, using allowed directories set from server args: [ '/home/claude-agent/Projects/runa-reference/sandbox' ]
+model-015 model-016 
+wrote 16 case outputs

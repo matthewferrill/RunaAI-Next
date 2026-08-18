@@ -1,0 +1,397 @@
+{
+ "schemaVersion": "runalab-probe-labels/v2",
+ "generated": "2026-08-18",
+ "rule": "LOCKED like v1. Never widened. New findings -> new version.",
+ "labels": [
+  {
+   "caseId": "memory-001",
+   "expect": {
+    "mustContain": "kettle-ledger-421"
+   },
+   "note": "default"
+  },
+  {
+   "caseId": "memory-002",
+   "expect": {
+    "mustContain": "marble-tunnel-879"
+   },
+   "note": "window40"
+  },
+  {
+   "caseId": "memory-003",
+   "expect": {
+    "mustContain": "compass-lantern-235"
+   },
+   "note": "semantic"
+  },
+  {
+   "caseId": "memory-004",
+   "expect": {
+    "mustContain": "bramble-ember-761"
+   },
+   "note": "working"
+  },
+  {
+   "caseId": "memory-005",
+   "expect": {
+    "mustContain": "thimble-juniper-565"
+   },
+   "note": "default"
+  },
+  {
+   "caseId": "memory-006",
+   "expect": {
+    "mustContain": "canyon-saddle-266"
+   },
+   "note": "window40"
+  },
+  {
+   "caseId": "memory-007",
+   "expect": {
+    "mustContain": "hazel-thimble-810"
+   },
+   "note": "semantic"
+  },
+  {
+   "caseId": "memory-008",
+   "expect": {
+    "mustContain": "chisel-willow-203"
+   },
+   "note": "working"
+  },
+  {
+   "caseId": "memory-009",
+   "expect": {
+    "mustContain": "kettle-willow-711"
+   },
+   "note": "default"
+  },
+  {
+   "caseId": "memory-010",
+   "expect": {
+    "mustContain": "falcon-lantern-354"
+   },
+   "note": "window40"
+  },
+  {
+   "caseId": "memory-011",
+   "expect": {
+    "mustContain": "harbor-chisel-899"
+   },
+   "note": "semantic"
+  },
+  {
+   "caseId": "memory-012",
+   "expect": {
+    "mustContain": "beacon-harbor-740"
+   },
+   "note": "working"
+  },
+  {
+   "caseId": "memory-013",
+   "expect": {
+    "mustContain": "fjord-lantern-580"
+   },
+   "note": "default"
+  },
+  {
+   "caseId": "memory-014",
+   "expect": {
+    "mustContain": "compass-lantern-284"
+   },
+   "note": "window40"
+  },
+  {
+   "caseId": "memory-015",
+   "expect": {
+    "mustContain": "cinder-tunnel-733"
+   },
+   "note": "semantic"
+  },
+  {
+   "caseId": "memory-016",
+   "expect": {
+    "mustContain": "hazel-dahlia-688"
+   },
+   "note": "working"
+  },
+  {
+   "caseId": "memory-017",
+   "expect": {
+    "mustContain": "juniper-orchard-386"
+   },
+   "note": "default"
+  },
+  {
+   "caseId": "memory-018",
+   "expect": {
+    "mustContain": "orchard-ember-755"
+   },
+   "note": "window40"
+  },
+  {
+   "caseId": "memory-019",
+   "expect": {
+    "mustContain": "quarry-ivory-753"
+   },
+   "note": "semantic"
+  },
+  {
+   "caseId": "memory-020",
+   "expect": {
+    "mustContain": "cinder-hazel-585"
+   },
+   "note": "working"
+  },
+  {
+   "caseId": "memory-021",
+   "expect": {
+    "mustContain": "willow-kettle-456",
+    "mustNotContain": "tunnel-juniper-682"
+   },
+   "note": "the revision wins"
+  },
+  {
+   "caseId": "memory-022",
+   "expect": {
+    "mustNotContain": "falcon-ledger-644"
+   },
+   "note": "absence is the pass"
+  },
+  {
+   "caseId": "memory-023",
+   "expect": {
+    "mustNotContain": "ivory-hazel-417"
+   },
+   "note": "a different user must not see it"
+  },
+  {
+   "caseId": "memory-024",
+   "expect": {
+    "mustContain": "anchor-harbor-547"
+   },
+   "note": ""
+  },
+  {
+   "caseId": "memory-025",
+   "expect": {
+    "mustContain": "bramble-bramble-817",
+    "mustNotContain": "falcon-meadow-604"
+   },
+   "note": "recency masquerading as memory is the failure"
+  },
+  {
+   "caseId": "memory-026",
+   "expect": {
+    "growthObserved": true
+   },
+   "note": "does the store bound rows, or grow unbounded"
+  },
+  {
+   "caseId": "retrieval-027",
+   "expect": {
+    "mustContain": "willow-chisel-508",
+    "fromDoc": "d60-0019"
+   },
+   "note": ""
+  },
+  {
+   "caseId": "retrieval-028",
+   "expect": {
+    "mustContain": "cinder-canyon-103",
+    "fromDoc": "d60-0039"
+   },
+   "note": ""
+  },
+  {
+   "caseId": "retrieval-029",
+   "expect": {
+    "mustContain": "ivory-marble-305",
+    "fromDoc": "d60-0016"
+   },
+   "note": ""
+  },
+  {
+   "caseId": "retrieval-030",
+   "expect": {
+    "mustContain": "quarry-juniper-155",
+    "fromDoc": "d60-0018"
+   },
+   "note": "answer is two docs deep"
+  },
+  {
+   "caseId": "retrieval-031",
+   "expect": {
+    "mustContain": "falcon-saddle-853",
+    "mustNotContain": "ivory-harbor-966",
+    "fromDoc": "d60-0051"
+   },
+   "note": ""
+  },
+  {
+   "caseId": "retrieval-032",
+   "expect": {
+    "mustContain": "meadow-walnut-468",
+    "fromDoc": "d60-0054"
+   },
+   "note": "needle in 60 docs"
+  },
+  {
+   "caseId": "retrieval-033",
+   "expect": {
+    "mustContain": "compass-falcon-638",
+    "fromDoc": "d300-0271"
+   },
+   "note": "needle in 300 docs"
+  },
+  {
+   "caseId": "retrieval-034",
+   "expect": {
+    "mustContain": "cobalt-quarry-449",
+    "fromDoc": "d1000-0753"
+   },
+   "note": "needle in 1000 docs"
+  },
+  {
+   "caseId": "retrieval-035",
+   "expect": {
+    "mustContain": "ember-fjord-366",
+    "fromDoc": "d300-0016"
+   },
+   "note": "topK=1"
+  },
+  {
+   "caseId": "retrieval-036",
+   "expect": {
+    "mustContain": "kettle-cinder-505",
+    "fromDoc": "d300-0047"
+   },
+   "note": "topK=3"
+  },
+  {
+   "caseId": "retrieval-037",
+   "expect": {
+    "mustContain": "cobalt-kettle-367",
+    "fromDoc": "d300-0116"
+   },
+   "note": "topK=10"
+  },
+  {
+   "caseId": "retrieval-038",
+   "expect": {
+    "mustContain": "tunnel-cinder-596",
+    "note": "stock index returns the indexed value; freshness is the framework's job to signal"
+   },
+   "note": "characterizes whether stock signals staleness at all"
+  },
+  {
+   "caseId": "retrieval-039",
+   "expect": {
+    "mustContain": "ledger-fjord-533",
+    "fromDoc": "d300-0141"
+   },
+   "note": "rag reranker path"
+  },
+  {
+   "caseId": "tools-040",
+   "expect": {
+    "mustContain": "beacon-kettle-459"
+   },
+   "note": ""
+  },
+  {
+   "caseId": "tools-041",
+   "expect": {
+    "mustSayUnavailable": true,
+    "mustNotInvent": true
+   },
+   "note": ""
+  },
+  {
+   "caseId": "tools-042",
+   "expect": {
+    "mustContain": "compass-thimble-115"
+   },
+   "note": "two chained mutating+reading calls"
+  },
+  {
+   "caseId": "tools-043",
+   "expect": {
+    "mustContain": "kettle-saddle-688"
+   },
+   "note": "result truncation: is a late needle reachable"
+  },
+  {
+   "caseId": "tools-044",
+   "expect": {
+    "mustSayUnavailable": true,
+    "mustNotInvent": true
+   },
+   "note": "server that never starts"
+  },
+  {
+   "caseId": "model-045",
+   "expect": {
+    "mustEndWithWord": "thimble"
+   },
+   "note": "needs window40 or the instruction ages out — separates retention from window"
+  },
+  {
+   "caseId": "model-046",
+   "expect": {
+    "mustContain": "ledger-kestrel-211"
+   },
+   "note": "one big turn, not many — tests attention over length not window"
+  },
+  {
+   "caseId": "model-047",
+   "expect": {
+    "mustParseAsJsonArray": true,
+    "trials": 10
+   },
+   "note": ""
+  },
+  {
+   "caseId": "model-048",
+   "expect": {
+    "mustContain": "200"
+   },
+   "note": "does long output complete or truncate"
+  },
+  {
+   "caseId": "workflow-049",
+   "expect": {
+    "invariant": "step one executes exactly once; resume completes"
+   },
+   "note": ""
+  },
+  {
+   "caseId": "workflow-050",
+   "expect": {
+    "invariant": "a store with no integrity check will act on tampered data — this maps whether stock detects it"
+   },
+   "note": ""
+  },
+  {
+   "caseId": "workflow-051",
+   "expect": {
+    "invariant": "the effect must not execute twice; a reusable resume is the approved-bit-at-rest failure"
+   },
+   "note": ""
+  },
+  {
+   "caseId": "workflow-052",
+   "expect": {
+    "invariant": "on resume the effect is not double-applied, or the framework reports it cannot guarantee that"
+   },
+   "note": ""
+  },
+  {
+   "caseId": "evals-053",
+   "expect": {
+    "scoreInRange": true
+   },
+   "note": "install check for @mastra/evals: a relevancy metric returns a number in [0,1]"
+  }
+ ]
+}

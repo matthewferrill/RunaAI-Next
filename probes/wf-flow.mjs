@@ -12,6 +12,7 @@ const gather = createStep({
   outputSchema: z.object({ finding: z.string() }),
   execute: async ({ inputData }) => {
     appendFileSync("probes/results/wf-exec-count.txt", `executed:${inputData.subject}\n`);
+    if (process.env.WF_SLOW) await new Promise((r) => setTimeout(r, Number(process.env.WF_SLOW)));
     return { finding: `observed ${inputData.subject}` };
   },
 });

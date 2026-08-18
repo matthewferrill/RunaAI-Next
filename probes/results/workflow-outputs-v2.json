@@ -1,0 +1,33 @@
+{
+ "observations": [
+  {
+   "caseId": "workflow-047",
+   "start": "suspended",
+   "resume": "success",
+   "executions": 1
+  },
+  {
+   "caseId": "workflow-048",
+   "tampered": true,
+   "resume": "success",
+   "actedOnTampered": true,
+   "resumeErr": false
+  },
+  {
+   "caseId": "workflow-049",
+   "firstResume": "success",
+   "secondResume": null,
+   "secondErr": "file:///home/claude-agent/Projects/runa-reference/node_modules/@mastra/core/dist",
+   "executions": 1
+  },
+  {
+   "caseId": "workflow-050",
+   "killedSignal": "SIGTERM",
+   "executionsAfterKill": 1,
+   "resume": null,
+   "resumeErr": "file:///home/claude-agent/Projects/runa-reference/node_modules/@mastra/core/dist/agent-CKA",
+   "totalExecutions": 1,
+   "reading": "effect applied once despite mid-effect crash"
+  }
+ ]
+}

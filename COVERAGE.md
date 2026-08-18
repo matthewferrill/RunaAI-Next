@@ -185,7 +185,17 @@ a finding. A cell nobody could probe is NOT PROBED, never inferred from a neighb
   stream/cache/pub-sub).
 - **Wave 4 — tools, MCP, and processors** (native vs MCP separated; processor visibility and
   bypass).
-- **Wave 5 — storage, concurrency, and operations.**
+- **Wave 5 — storage, concurrency, and operations. Run on BOTH hosts, deliberately.** The steward's
+  ruling of 2026-08-18: Runa stays on Control and calls RUNA-HOME for inference, moving only if a
+  bottleneck forces it. Control is therefore the faithful base — it is the production topology, LAN
+  hop included — and every other wave runs there and only there. Wave 5 is the exception because its
+  scenarios are the ones where the probe host stops being a dispatcher and becomes the subject: on
+  Control's 6 cores, "the stack frays under concurrency" and "this box ran out of cores" produce
+  identical-looking results and mean opposite things for the migration. Running the same load
+  scenarios on HOME's 72 cores separates them, and the GAP between the two hosts is the evidence the
+  steward's own condition needs — it measures whether the production shape has headroom, rather than
+  leaving "forced to change" as a judgement call. Control's numbers are the production answer; HOME's
+  are the ceiling; neither is reported without naming its base.
 - **Wave 6 — RAG and memory lifecycle** (the actual installed pipeline, staged).
 - **Wave 7 — model/provider ceilings** (statistically sized).
 - **Wave 8 — multi-agent**, only after Runa has a concrete need and the single-agent foundation

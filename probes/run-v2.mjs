@@ -5,16 +5,26 @@ import { Agent } from "@mastra/core/agent";
 import { MCPClient } from "@mastra/mcp";
 import { createClient } from "@libsql/client";
 import { agentFor, vectorStore, lmstudio, MODEL, embedder } from "./stack2.mjs";
+import { loadEntries, appendEntry, skipSet, consolidate, isErrorEntry } from "./checkpoint.mjs";
 
 process.env.SEAL = "probes/SEAL-v2.md"; process.env.CORPUS = "probes/corpus2";
 execSync("node probes/verify-seal.mjs", { stdio:"inherit" });
 const { cases, retrievalCorpora } = JSON.parse(readFileSync("probes/corpus2/questions.json","utf8"));
 const R = "probe-user";
-const out = [];
 const log = (m) => process.stdout.write(m + " ");
+
+// Checkpoint: every completed case lands on disk before the next starts, and a restarted run skips
+// what already succeeded (error-only cases are re-attempted, at most 3 times). See GREEN-resume.md.
+mkdirSync("probes/results", { recursive:true });
+mkdirSync("storage", { recursive:true }); // gitignored, so absent on a fresh clone; LibSQL cannot create the parent dir itself
+const CKPT = "probes/results/outputs-v2.partial.jsonl";
+const skip = skipSet(loadEntries(CKPT));
+const out = { push: (entry) => appendEntry(CKPT, entry) };
+const skipCase = (c) => { if (skip.has(c.caseId)) { log(`${c.caseId}(skip)`); return true; } return false; };
 
 // ---------- MEMORY ----------
 for (const c of cases.filter(x=>x.probe==="memory")) {
+  if (skipCase(c)) continue;
   log(c.caseId);
   const db = `file:storage/v2-${c.caseId}.db`; rmSync(db.replace("file:",""), { force:true });
   const a = agentFor(c.config ?? "default", db);
@@ -46,16 +56,21 @@ for (const c of cases.filter(x=>x.probe==="memory")) {
 
 // ---------- RETRIEVAL ----------
 const indexes = {};
+const neededSizes = new Set(cases.filter(x=>x.probe==="retrieval" && !skip.has(x.caseId)).map(c=>c.corpusSize));
 for (const { corpusSize, docs } of retrievalCorpora) {
+  if (!neededSizes.has(corpusSize)) continue;
   log(`embed:${corpusSize}`);
-  const store = vectorStore(`v2-corpus-${corpusSize}`); rmSync(`storage/v2-corpus-${corpusSize}.db`, { force:true });
-  const { embeddings } = await embedMany({ model: embedder, values: docs.map(d=>d.text) });
-  await store.createIndex({ indexName:"c", dimension: embeddings[0].length });
-  await store.upsert({ indexName:"c", vectors: embeddings, metadata: docs.map(d=>({ docId:d.docId, text:d.text })) });
-  indexes[corpusSize] = store;
+  try { // a failed index build must error this corpus's cases, not kill the sweep
+    const store = vectorStore(`v2-corpus-${corpusSize}`); rmSync(`storage/v2-corpus-${corpusSize}.db`, { force:true });
+    const { embeddings } = await embedMany({ model: embedder, values: docs.map(d=>d.text) });
+    await store.createIndex({ indexName:"c", dimension: embeddings[0].length });
+    await store.upsert({ indexName:"c", vectors: embeddings, metadata: docs.map(d=>({ docId:d.docId, text:d.text })) });
+    indexes[corpusSize] = store;
+  } catch (e) { log(`embed:${corpusSize}(failed: ${String(e.message).slice(0,60)})`); }
 }
 const ragAgent = new Agent({ name:"rag", instructions:"Answer only from the provided context. Quote the exact code if present.", model: lmstudio(MODEL) });
 for (const c of cases.filter(x=>x.probe==="retrieval")) {
+  if (skipCase(c)) continue;
   log(c.caseId);
   try {
     const store = indexes[c.corpusSize]; const topK = c.topK ?? 5;
@@ -70,6 +85,7 @@ for (const c of cases.filter(x=>x.probe==="retrieval")) {
 // ---------- TOOLS ----------
 mkdirSync("sandbox/inner/deep", { recursive:true });
 for (const c of cases.filter(x=>x.probe==="tools")) {
+  if (skipCase(c)) continue;
   log(c.caseId);
   try {
     if (c.setupFile) writeFileSync(`sandbox/${c.setupFile.name}`, c.setupFile.content);
@@ -88,6 +104,7 @@ for (const c of cases.filter(x=>x.probe==="tools")) {
 
 // ---------- MODEL ----------
 for (const c of cases.filter(x=>x.probe==="model")) {
+  if (skipCase(c)) continue;
   log(c.caseId);
   try {
     if (c.axis === "instruction-retention") {
@@ -114,6 +131,7 @@ for (const c of cases.filter(x=>x.probe==="model")) {
 
 // ---------- EVALS ----------
 for (const c of cases.filter(x=>x.probe==="evals")) {
+  if (skipCase(c)) continue;
   log(c.caseId);
   try {
     const mod = await import("@mastra/evals/nlp");
@@ -127,6 +145,7 @@ for (const c of cases.filter(x=>x.probe==="evals")) {
   } catch (e) { out.push({ caseId:c.caseId, answer:`(error: ${String(e.message).slice(0,140)})` }); }
 }
 
-mkdirSync("probes/results", { recursive:true });
-writeFileSync("probes/results/outputs-v2.json", JSON.stringify({ schemaVersion:"runalab-probe-outputs/v2", ranAt:new Date().toISOString(), outputs: out }, null, 1));
-console.log(`\nwrote ${out.length} outputs`);
+const finalOut = consolidate(loadEntries(CKPT));
+const errCount = finalOut.filter(isErrorEntry).length;
+writeFileSync("probes/results/outputs-v2.json", JSON.stringify({ schemaVersion:"runalab-probe-outputs/v2", ranAt:new Date().toISOString(), outputs: finalOut }, null, 1));
+console.log(`\nwrote ${finalOut.length} outputs (${errCount} error entries) from ${CKPT}`);

@@ -60,3 +60,15 @@ comparison uses this corpus.
 Installs first, across the board, so the base exists as one working system. Then the probes, on the
 assembled whole — a component probed in isolation hides the joins, and the estate's history says the
 joins are where everything breaks.
+
+## Runbook: running the sweep (added after the 2026-08-18 session death)
+
+Launch the sweep detached from the agent session, so a session death does not kill the run:
+
+    setsid nohup node probes/run-v2.mjs >> probes/results/run-v2-log.txt 2>&1 &
+
+Each completed case is checkpointed to `probes/results/outputs-v2.partial.jsonl` before the next
+starts. A restarted runner skips cases with a non-error result, re-attempts cases that only ever
+errored (at most 3 attempts), and consolidates `outputs-v2.json` from the checkpoint file at the
+end. Error entries caused by an unreachable endpoint are harness environment failures, never
+framework findings; the green criteria and their evidence are in `probes/GREEN-resume.md`.

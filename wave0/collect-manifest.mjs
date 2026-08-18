@@ -57,7 +57,9 @@ const manifest = {
   collectedAtHost: os.hostname(),
   frozenBase: {
     gitCommit: sh("git rev-parse HEAD"),
-    gitStatusClean: sh("git status --porcelain") === "",
+    // The manifest must not report the base dirty on account of itself: its own file is untracked on
+    // a first run and modified on every re-run. Everything else still counts.
+    gitStatusClean: (sh("git status --porcelain") || "").split("\n").filter((l) => l.trim() && !/BASE-MANIFEST\.json$/.test(l)).length === 0,
     packageLockSha256: sha(path.join(ROOT, "package-lock.json")),
     nodeVersion: process.version,
     os: { platform: process.platform, release: os.release(), arch: process.arch },

@@ -1,0 +1,931 @@
+{
+ "schemaVersion": "runalab-surface-coverage/v1",
+ "method": {
+  "basis": "static analysis of lab source; imported module specifiers plus name occurrence",
+  "establishes": "review level 3 — Runalab calls it directly",
+  "doesNotEstablish": [
+   "level 4: the real Runa migration path would call it",
+   "level 5: a scenario exercised that path",
+   "that any referenced symbol was reached at runtime"
+  ],
+  "denominator": "callable surface only (function, class, method). Types, interfaces and aliases are excluded because they cannot be probed.",
+  "direction": "name matching is generous, so referenced counts are a CEILING — real coverage is at most this, likely less"
+ },
+ "base": {
+  "packageLockSha256": "c02a64eab0ac00b17e8f516ad5addc32c69096dcc33744080f218ffcf3a1acc5",
+  "packages": {
+   "@ai-sdk/openai-compatible": "3.0.31",
+   "@mastra/core": "1.59.0",
+   "@mastra/evals": "1.7.0",
+   "@mastra/libsql": "1.20.0",
+   "@mastra/mcp": "1.16.0",
+   "@mastra/memory": "1.26.2",
+   "@mastra/rag": "2.5.0",
+   "ai": "7.0.67",
+   "zod": "4.4.3"
+  }
+ },
+ "counts": {
+  "surfaceEntriesTotal": 21831,
+  "nonOperationEntriesExcluded": 14805,
+  "operationsInventoried": 7026,
+  "operationsReferencedByLab": 152,
+  "interfaceCoverageCeiling": 0.02163,
+  "entryPointsInstalled": 100,
+  "entryPointsImportedByLab": 12
+ },
+ "importedModules": [
+  "@ai-sdk/openai-compatible",
+  "@libsql/client",
+  "@mastra/core",
+  "@mastra/core/agent",
+  "@mastra/core/workflows",
+  "@mastra/evals/checks",
+  "@mastra/evals/scorers/utils",
+  "@mastra/libsql",
+  "@mastra/mcp",
+  "@mastra/memory",
+  "@mastra/rag",
+  "ai",
+  "node:assert/strict",
+  "node:child_process",
+  "node:crypto",
+  "node:fs",
+  "zod"
+ ],
+ "modules": [
+  {
+   "module": "@mastra/libsql",
+   "package": "@mastra/libsql",
+   "imported": true,
+   "operations": 441,
+   "referenced": 44,
+   "samplesReferenced": [
+    "create",
+    "delete",
+    "list",
+    "update",
+    "delete",
+    "get",
+    "has",
+    "close"
+   ]
+  },
+  {
+   "module": "zod",
+   "package": "zod",
+   "imported": true,
+   "operations": 133,
+   "referenced": 33,
+   "samplesReferenced": [
+    "any",
+    "array",
+    "boolean",
+    "catch",
+    "check",
+    "clone",
+    "config",
+    "custom"
+   ]
+  },
+  {
+   "module": "@mastra/core/workflows",
+   "package": "@mastra/core",
+   "imported": true,
+   "operations": 156,
+   "referenced": 18,
+   "samplesReferenced": [
+    "createStep",
+    "createWorkflow",
+    "execute",
+    "execute",
+    "values",
+    "Run",
+    "restart",
+    "resume"
+   ]
+  },
+  {
+   "module": "@mastra/core/agent",
+   "package": "@mastra/core",
+   "imported": true,
+   "operations": 236,
+   "referenced": 17,
+   "samplesReferenced": [
+    "Agent",
+    "generate",
+    "listTools",
+    "resume",
+    "close",
+    "add",
+    "create",
+    "delete"
+   ]
+  },
+  {
+   "module": "@mastra/mcp",
+   "package": "@mastra/mcp",
+   "imported": true,
+   "operations": 147,
+   "referenced": 16,
+   "samplesReferenced": [
+    "delete",
+    "get",
+    "set",
+    "disconnect",
+    "tools",
+    "MCPClient",
+    "disconnect",
+    "listTools"
+   ]
+  },
+  {
+   "module": "ai",
+   "package": "ai",
+   "imported": true,
+   "operations": 196,
+   "referenced": 10,
+   "samplesReferenced": [
+    "generate",
+    "embed",
+    "embedMany",
+    "disconnect",
+    "generate",
+    "run",
+    "tool",
+    "generate"
+   ]
+  },
+  {
+   "module": "@mastra/core",
+   "package": "@mastra/core",
+   "imported": true,
+   "operations": 110,
+   "referenced": 3,
+   "samplesReferenced": [
+    "Mastra",
+    "getWorkflow",
+    "listTools"
+   ]
+  },
+  {
+   "module": "@mastra/memory",
+   "package": "@mastra/memory",
+   "imported": true,
+   "operations": 65,
+   "referenced": 3,
+   "samplesReferenced": [
+    "Memory",
+    "listTools",
+    "recall"
+   ]
+  },
+  {
+   "module": "@mastra/rag",
+   "package": "@mastra/rag",
+   "imported": true,
+   "operations": 34,
+   "referenced": 3,
+   "samplesReferenced": [
+    "query",
+    "MDocument",
+    "chunk"
+   ]
+  },
+  {
+   "module": "@mastra/evals/checks",
+   "package": "@mastra/evals",
+   "imported": true,
+   "operations": 11,
+   "referenced": 3,
+   "samplesReferenced": [
+    "includes",
+    "matches",
+    "similarity"
+   ]
+  },
+  {
+   "module": "@ai-sdk/openai-compatible",
+   "package": "@ai-sdk/openai-compatible",
+   "imported": true,
+   "operations": 22,
+   "referenced": 2,
+   "samplesReferenced": [
+    "createOpenAICompatible",
+    "textEmbeddingModel"
+   ]
+  },
+  {
+   "module": "@mastra/core/storage",
+   "package": "@mastra/core",
+   "imported": false,
+   "operations": 1172,
+   "referenced": 0,
+   "samplesReferenced": []
+  },
+  {
+   "module": "@mastra/core/workspace",
+   "package": "@mastra/core",
+   "imported": false,
+   "operations": 269,
+   "referenced": 0,
+   "samplesReferenced": []
+  },
+  {
+   "module": "@mastra/core/agent/durable",
+   "package": "@mastra/core",
+   "imported": false,
+   "operations": 256,
+   "referenced": 0,
+   "samplesReferenced": []
+  },
+  {
+   "module": "@mastra/core/auth",
+   "package": "@mastra/core",
+   "imported": false,
+   "operations": 182,
+   "referenced": 0,
+   "samplesReferenced": []
+  },
+  {
+   "module": "@mastra/core/observability",
+   "package": "@mastra/core",
+   "imported": false,
+   "operations": 159,
+   "referenced": 0,
+   "samplesReferenced": []
+  },
+  {
+   "module": "zod/mini",
+   "package": "zod",
+   "imported": false,
+   "operations": 138,
+   "referenced": 0,
+   "samplesReferenced": []
+  },
+  {
+   "module": "zod/v4-mini",
+   "package": "zod",
+   "imported": false,
+   "operations": 138,
+   "referenced": 0,
+   "samplesReferenced": []
+  },
+  {
+   "module": "zod/v4/mini",
+   "package": "zod",
+   "imported": false,
+   "operations": 138,
+   "referenced": 0,
+   "samplesReferenced": []
+  },
+  {
+   "module": "zod/v4/core",
+   "package": "zod",
+   "imported": false,
+   "operations": 137,
+   "referenced": 0,
+   "samplesReferenced": []
+  },
+  {
+   "module": "zod/v4",
+   "package": "zod",
+   "imported": false,
+   "operations": 133,
+   "referenced": 0,
+   "samplesReferenced": []
+  },
+  {
+   "module": "@mastra/core/processors",
+   "package": "@mastra/core",
+   "imported": false,
+   "operations": 115,
+   "referenced": 0,
+   "samplesReferenced": []
+  },
+  {
+   "module": "@mastra/core/mastra",
+   "package": "@mastra/core",
+   "imported": false,
+   "operations": 110,
+   "referenced": 0,
+   "samplesReferenced": []
+  },
+  {
+   "module": "@mastra/core/logger",
+   "package": "@mastra/core",
+   "imported": false,
+   "operations": 101,
+   "referenced": 0,
+   "samplesReferenced": []
+  },
+  {
+   "module": "@mastra/core/browser",
+   "package": "@mastra/core",
+   "imported": false,
+   "operations": 97,
+   "referenced": 0,
+   "samplesReferenced": []
+  },
+  {
+   "module": "@mastra/core/voice",
+   "package": "@mastra/core",
+   "imported": false,
+   "operations": 93,
+   "referenced": 0,
+   "samplesReferenced": []
+  },
+  {
+   "module": "@mastra/memory/processors",
+   "package": "@mastra/memory",
+   "imported": false,
+   "operations": 87,
+   "referenced": 0,
+   "samplesReferenced": []
+  },
+  {
+   "module": "@mastra/core/auth/ee",
+   "package": "@mastra/core",
+   "imported": false,
+   "operations": 85,
+   "referenced": 0,
+   "samplesReferenced": []
+  },
+  {
+   "module": "@mastra/core/llm",
+   "package": "@mastra/core",
+   "imported": false,
+   "operations": 83,
+   "referenced": 0,
+   "samplesReferenced": []
+  },
+  {
+   "module": "@mastra/core/server",
+   "package": "@mastra/core",
+   "imported": false,
+   "operations": 83,
+   "referenced": 0,
+   "samplesReferenced": []
+  },
+  {
+   "module": "@mastra/core/storage/domains/agents",
+   "package": "@mastra/core",
+   "imported": false,
+   "operations": 81,
+   "referenced": 0,
+   "samplesReferenced": []
+  },
+  {
+   "module": "@mastra/core/agent/message-list",
+   "package": "@mastra/core",
+   "imported": false,
+   "operations": 79,
+   "referenced": 0,
+   "samplesReferenced": []
+  },
+  {
+   "module": "@mastra/core/agent-controller",
+   "package": "@mastra/core",
+   "imported": false,
+   "operations": 75,
+   "referenced": 0,
+   "samplesReferenced": []
+  },
+  {
+   "module": "@mastra/core/harness",
+   "package": "@mastra/core",
+   "imported": false,
+   "operations": 75,
+   "referenced": 0,
+   "samplesReferenced": []
+  },
+  {
+   "module": "@mastra/core/memory",
+   "package": "@mastra/core",
+   "imported": false,
+   "operations": 68,
+   "referenced": 0,
+   "samplesReferenced": []
+  },
+  {
+   "module": "@mastra/core/editor",
+   "package": "@mastra/core",
+   "imported": false,
+   "operations": 66,
+   "referenced": 0,
+   "samplesReferenced": []
+  },
+  {
+   "module": "@mastra/core/workflows/evented",
+   "package": "@mastra/core",
+   "imported": false,
+   "operations": 64,
+   "referenced": 0,
+   "samplesReferenced": []
+  },
+  {
+   "module": "@mastra/core/storage/domains/skills",
+   "package": "@mastra/core",
+   "imported": false,
+   "operations": 61,
+   "referenced": 0,
+   "samplesReferenced": []
+  },
+  {
+   "module": "@mastra/core/storage/domains/mcp-clients",
+   "package": "@mastra/core",
+   "imported": false,
+   "operations": 60,
+   "referenced": 0,
+   "samplesReferenced": []
+  },
+  {
+   "module": "@mastra/core/storage/domains/mcp-servers",
+   "package": "@mastra/core",
+   "imported": false,
+   "operations": 60,
+   "referenced": 0,
+   "samplesReferenced": []
+  },
+  {
+   "module": "@mastra/core/storage/domains/prompt-blocks",
+   "package": "@mastra/core",
+   "imported": false,
+   "operations": 60,
+   "referenced": 0,
+   "samplesReferenced": []
+  },
+  {
+   "module": "@mastra/core/storage/domains/scorer-definitions",
+   "package": "@mastra/core",
+   "imported": false,
+   "operations": 60,
+   "referenced": 0,
+   "samplesReferenced": []
+  },
+  {
+   "module": "@mastra/core/storage/domains/workspaces",
+   "package": "@mastra/core",
+   "imported": false,
+   "operations": 60,
+   "referenced": 0,
+   "samplesReferenced": []
+  },
+  {
+   "module": "@mastra/core/channels",
+   "package": "@mastra/core",
+   "imported": false,
+   "operations": 53,
+   "referenced": 0,
+   "samplesReferenced": []
+  },
+  {
+   "module": "@mastra/core/events",
+   "package": "@mastra/core",
+   "imported": false,
+   "operations": 52,
+   "referenced": 0,
+   "samplesReferenced": []
+  },
+  {
+   "module": "zod/locales",
+   "package": "zod",
+   "imported": false,
+   "operations": 52,
+   "referenced": 0,
+   "samplesReferenced": []
+  },
+  {
+   "module": "zod/v4/locales",
+   "package": "zod",
+   "imported": false,
+   "operations": 52,
+   "referenced": 0,
+   "samplesReferenced": []
+  },
+  {
+   "module": "@mastra/core/signals",
+   "package": "@mastra/core",
+   "imported": false,
+   "operations": 51,
+   "referenced": 0,
+   "samplesReferenced": []
+  },
+  {
+   "module": "zod/v3",
+   "package": "zod",
+   "imported": false,
+   "operations": 47,
+   "referenced": 0,
+   "samplesReferenced": []
+  },
+  {
+   "module": "@mastra/core/datasets",
+   "package": "@mastra/core",
+   "imported": false,
+   "operations": 45,
+   "referenced": 0,
+   "samplesReferenced": []
+  },
+  {
+   "module": "@mastra/core/stream",
+   "package": "@mastra/core",
+   "imported": false,
+   "operations": 45,
+   "referenced": 0,
+   "samplesReferenced": []
+  },
+  {
+   "module": "@mastra/core/tools",
+   "package": "@mastra/core",
+   "imported": false,
+   "operations": 44,
+   "referenced": 0,
+   "samplesReferenced": []
+  },
+  {
+   "module": "@mastra/core/background-tasks",
+   "package": "@mastra/core",
+   "imported": false,
+   "operations": 35,
+   "referenced": 0,
+   "samplesReferenced": []
+  },
+  {
+   "module": "@mastra/evals/scorers/prebuilt",
+   "package": "@mastra/evals",
+   "imported": false,
+   "operations": 34,
+   "referenced": 0,
+   "samplesReferenced": []
+  },
+  {
+   "module": "@mastra/core/notifications",
+   "package": "@mastra/core",
+   "imported": false,
+   "operations": 32,
+   "referenced": 0,
+   "samplesReferenced": []
+  },
+  {
+   "module": "@mastra/core/tool-provider",
+   "package": "@mastra/core",
+   "imported": false,
+   "operations": 31,
+   "referenced": 0,
+   "samplesReferenced": []
+  },
+  {
+   "module": "@mastra/core/utils",
+   "package": "@mastra/core",
+   "imported": false,
+   "operations": 29,
+   "referenced": 0,
+   "samplesReferenced": []
+  },
+  {
+   "module": "@mastra/core/worker",
+   "package": "@mastra/core",
+   "imported": false,
+   "operations": 28,
+   "referenced": 0,
+   "samplesReferenced": []
+  },
+  {
+   "module": "ai/internal",
+   "package": "ai",
+   "imported": false,
+   "operations": 25,
+   "referenced": 0,
+   "samplesReferenced": []
+  },
+  {
+   "module": "@mastra/core/skills",
+   "package": "@mastra/core",
+   "imported": false,
+   "operations": 24,
+   "referenced": 0,
+   "samplesReferenced": []
+  },
+  {
+   "module": "ai/test",
+   "package": "ai",
+   "imported": false,
+   "operations": 22,
+   "referenced": 0,
+   "samplesReferenced": []
+  },
+  {
+   "module": "@mastra/core/cache",
+   "package": "@mastra/core",
+   "imported": false,
+   "operations": 20,
+   "referenced": 0,
+   "samplesReferenced": []
+  },
+  {
+   "module": "@mastra/core/storage/domains/favorites",
+   "package": "@mastra/core",
+   "imported": false,
+   "operations": 20,
+   "referenced": 0,
+   "samplesReferenced": []
+  },
+  {
+   "module": "@mastra/core/vector",
+   "package": "@mastra/core",
+   "imported": false,
+   "operations": 20,
+   "referenced": 0,
+   "samplesReferenced": []
+  },
+  {
+   "module": "@mastra/core/evals",
+   "package": "@mastra/core",
+   "imported": false,
+   "operations": 19,
+   "referenced": 0,
+   "samplesReferenced": []
+  },
+  {
+   "module": "@mastra/core/deployer",
+   "package": "@mastra/core",
+   "imported": false,
+   "operations": 18,
+   "referenced": 0,
+   "samplesReferenced": []
+  },
+  {
+   "module": "@mastra/core/mcp",
+   "package": "@mastra/core",
+   "imported": false,
+   "operations": 18,
+   "referenced": 0,
+   "samplesReferenced": []
+  },
+  {
+   "module": "@mastra/core/bundler",
+   "package": "@mastra/core",
+   "imported": false,
+   "operations": 16,
+   "referenced": 0,
+   "samplesReferenced": []
+  },
+  {
+   "module": "@mastra/core/schedules",
+   "package": "@mastra/core",
+   "imported": false,
+   "operations": 16,
+   "referenced": 0,
+   "samplesReferenced": []
+  },
+  {
+   "module": "@mastra/core/agent-builder/ee",
+   "package": "@mastra/core",
+   "imported": false,
+   "operations": 15,
+   "referenced": 0,
+   "samplesReferenced": []
+  },
+  {
+   "module": "@mastra/core/di",
+   "package": "@mastra/core",
+   "imported": false,
+   "operations": 14,
+   "referenced": 0,
+   "samplesReferenced": []
+  },
+  {
+   "module": "@mastra/core/request-context",
+   "package": "@mastra/core",
+   "imported": false,
+   "operations": 14,
+   "referenced": 0,
+   "samplesReferenced": []
+  },
+  {
+   "module": "@mastra/core/test-utils/llm-mock",
+   "package": "@mastra/core",
+   "imported": false,
+   "operations": 13,
+   "referenced": 0,
+   "samplesReferenced": []
+  },
+  {
+   "module": "@mastra/core/a2a/v1",
+   "package": "@mastra/core",
+   "imported": false,
+   "operations": 12,
+   "referenced": 0,
+   "samplesReferenced": []
+  },
+  {
+   "module": "@mastra/core/a2a",
+   "package": "@mastra/core",
+   "imported": false,
+   "operations": 12,
+   "referenced": 0,
+   "samplesReferenced": []
+  },
+  {
+   "module": "@mastra/core/error",
+   "package": "@mastra/core",
+   "imported": false,
+   "operations": 11,
+   "referenced": 0,
+   "samplesReferenced": []
+  },
+  {
+   "module": "@mastra/core/loop",
+   "package": "@mastra/core",
+   "imported": false,
+   "operations": 11,
+   "referenced": 0,
+   "samplesReferenced": []
+  },
+  {
+   "module": "@mastra/evals/scorers/utils",
+   "package": "@mastra/evals",
+   "imported": true,
+   "operations": 10,
+   "referenced": 0,
+   "samplesReferenced": []
+  },
+  {
+   "module": "@mastra/core/integration",
+   "package": "@mastra/core",
+   "imported": false,
+   "operations": 8,
+   "referenced": 0,
+   "samplesReferenced": []
+  },
+  {
+   "module": "@ai-sdk/openai-compatible/internal",
+   "package": "@ai-sdk/openai-compatible",
+   "imported": false,
+   "operations": 5,
+   "referenced": 0,
+   "samplesReferenced": []
+  },
+  {
+   "module": "@mastra/core/license",
+   "package": "@mastra/core",
+   "imported": false,
+   "operations": 5,
+   "referenced": 0,
+   "samplesReferenced": []
+  },
+  {
+   "module": "@mastra/core/workflows/builder",
+   "package": "@mastra/core",
+   "imported": false,
+   "operations": 5,
+   "referenced": 0,
+   "samplesReferenced": []
+  },
+  {
+   "module": "@mastra/core/hooks",
+   "package": "@mastra/core",
+   "imported": false,
+   "operations": 4,
+   "referenced": 0,
+   "samplesReferenced": []
+  },
+  {
+   "module": "@mastra/core/observability/context-storage",
+   "package": "@mastra/core",
+   "imported": false,
+   "operations": 4,
+   "referenced": 0,
+   "samplesReferenced": []
+  },
+  {
+   "module": "@mastra/core/relevance",
+   "package": "@mastra/core",
+   "imported": false,
+   "operations": 4,
+   "referenced": 0,
+   "samplesReferenced": []
+  },
+  {
+   "module": "@mastra/core/tts",
+   "package": "@mastra/core",
+   "imported": false,
+   "operations": 4,
+   "referenced": 0,
+   "samplesReferenced": []
+  },
+  {
+   "module": "@mastra/core/utils/safe-stringify",
+   "package": "@mastra/core",
+   "imported": false,
+   "operations": 4,
+   "referenced": 0,
+   "samplesReferenced": []
+  },
+  {
+   "module": "@mastra/core/a2a/client",
+   "package": "@mastra/core",
+   "imported": false,
+   "operations": 3,
+   "referenced": 0,
+   "samplesReferenced": []
+  },
+  {
+   "module": "@mastra/core/evals/scoreTraces",
+   "package": "@mastra/core",
+   "imported": false,
+   "operations": 3,
+   "referenced": 0,
+   "samplesReferenced": []
+  },
+  {
+   "module": "@mastra/core/schema",
+   "package": "@mastra/core",
+   "imported": false,
+   "operations": 3,
+   "referenced": 0,
+   "samplesReferenced": []
+  },
+  {
+   "module": "@mastra/core/telemetry",
+   "package": "@mastra/core",
+   "imported": false,
+   "operations": 3,
+   "referenced": 0,
+   "samplesReferenced": []
+  },
+  {
+   "module": "@mastra/core/tool-loop-agent",
+   "package": "@mastra/core",
+   "imported": false,
+   "operations": 3,
+   "referenced": 0,
+   "samplesReferenced": []
+  },
+  {
+   "module": "@mastra/core/base",
+   "package": "@mastra/core",
+   "imported": false,
+   "operations": 2,
+   "referenced": 0,
+   "samplesReferenced": []
+  },
+  {
+   "module": "@mastra/core/coding-agent",
+   "package": "@mastra/core",
+   "imported": false,
+   "operations": 2,
+   "referenced": 0,
+   "samplesReferenced": []
+  },
+  {
+   "module": "@mastra/core/processor-provider",
+   "package": "@mastra/core",
+   "imported": false,
+   "operations": 2,
+   "referenced": 0,
+   "samplesReferenced": []
+  },
+  {
+   "module": "@mastra/core/vector/filter",
+   "package": "@mastra/core",
+   "imported": false,
+   "operations": 2,
+   "referenced": 0,
+   "samplesReferenced": []
+  },
+  {
+   "module": "@mastra/core/loop/server",
+   "package": "@mastra/core",
+   "imported": false,
+   "operations": 1,
+   "referenced": 0,
+   "samplesReferenced": []
+  },
+  {
+   "module": "@mastra/core/tools/is-vercel-tool",
+   "package": "@mastra/core",
+   "imported": false,
+   "operations": 1,
+   "referenced": 0,
+   "samplesReferenced": []
+  },
+  {
+   "module": "@mastra/core/utils/collect-tool-mocks",
+   "package": "@mastra/core",
+   "imported": false,
+   "operations": 1,
+   "referenced": 0,
+   "samplesReferenced": []
+  },
+  {
+   "module": "@mastra/core/utils/zod-to-json",
+   "package": "@mastra/core",
+   "imported": false,
+   "operations": 1,
+   "referenced": 0,
+   "samplesReferenced": []
+  }
+ ]
+}

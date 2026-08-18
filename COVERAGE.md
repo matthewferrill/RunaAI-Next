@@ -65,10 +65,22 @@ installed surface is recorded as not-applicable-at-this-version, never silently 
   observability, durable-agent stream/cache/pub-sub, model routing (existence to be verified), and
   version/dependency evolution, which the first inventory missed entirely.
 
-Coverage will be reported as two measures once the register exists, and not before: **interface
-coverage** (installed public operations exercised / total inventoried) and **risk-scenario
-coverage** (preregistered scenarios executed / total preregistered), each with unique-case and
-repetition counts and links to raw evidence.
+Coverage is reported as the review's two measures, and no other:
+
+**Interface coverage — 152 / 7,026 callable operations, a ceiling of 2.16%** (`SURFACE-COVERAGE.json`,
+generated). Of 21,831 inventoried surface entries, 7,026 are callable operations (functions, classes,
+methods); the remaining 14,805 are types, interfaces and aliases, excluded because they cannot be
+probed. Of 100 installed entry points the lab has ever imported **12**. It is a *ceiling* by
+construction: the method counts an operation as referenced when the lab imports its module and writes
+its name anywhere, so it over-counts, and real coverage is at most this. It establishes only the
+review's level 3 — "Runalab calls it directly." Levels 4 and 5 (the real Runa migration path would
+call it; a scenario exercised that path) require runtime tracing and are not claimed. The single
+starkest line: `@mastra/core/storage` holds 1,172 operations and has never been imported.
+
+**Risk-scenario coverage — 0 / 345 preregistered scenarios executed.** The register exists
+(`EDGE-REGISTER.json`); no wave has run against it. The 53 v2 cases were probed before the register
+existed and are not counted as scenario executions; Wave 1 re-derives the migration-critical ones as
+preregistered scenarios with raw evidence linked to the frozen base.
 
 ## Scope ruling
 

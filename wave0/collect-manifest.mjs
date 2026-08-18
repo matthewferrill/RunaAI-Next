@@ -36,8 +36,13 @@ if (endpoint) {
 
 // LM Studio version, in order of authority: explicit env, the `lms` CLI, then the native REST API's
 // own report. Each records HOW it was learned, because a version nobody can source is not a fact.
+// LMSTUDIO_VERSION describes the ENDPOINT HOST's LM Studio, which is not necessarily this host: the
+// endpoint lives on RUNA-HOME while the probes run on Control, so the source string says whose version
+// this is and how it was learned. A version attributed to the wrong machine is worse than none.
 let lmVersion = process.env.LMSTUDIO_VERSION || null;
-let lmVersionSource = lmVersion ? "env LMSTUDIO_VERSION" : null;
+let lmVersionSource = lmVersion
+  ? `operator-supplied via env LMSTUDIO_VERSION, read from the LM Studio window on the endpoint host (${endpoint ?? "unknown endpoint"})`
+  : null;
 if (!lmVersion) {
   const cli = sh("lms version");
   if (cli) { lmVersion = cli.replace(/^.*?([0-9]+\.[0-9]+\.[0-9]+.*)$/s, "$1").trim(); lmVersionSource = "lms version (CLI on the probe host)"; }

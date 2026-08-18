@@ -24,10 +24,10 @@ for (const label of labels) {
   else if (e.scoreInRange){ if(out){ verdict=(typeof out.score==="number"&&out.score>=0&&out.score<=1)?"pass":"FAIL"; detail=`score=${out.score} via ${out.metricUsed}`; } }
   else if (e.invariant){ const o=wf.find(w=>w.caseId===label.caseId);
     if(!o) verdict="NOT RUN";
-    else if(label.caseId==="workflow-047"){ verdict=o.executions===1&&o.resume==="success"?"pass":"FAIL"; detail=`exec=${o.executions}, resume=${o.resume}`; }
-    else if(label.caseId==="workflow-048"){ verdict=o.actedOnTampered?"FAIL":"pass"; detail=o.actedOnTampered?"acted on tampered snapshot — NO integrity check":`refused/errored`; }
-    else if(label.caseId==="workflow-049"){ verdict=o.executions===1?"pass":"FAIL"; detail=`exec=${o.executions}, 2nd resume=${o.secondResume??"refused"}`; }
-    else if(label.caseId==="workflow-050"){ verdict=o.totalExecutions===1?"pass*":"FAIL"; detail=`${o.reading}; resume=${o.resume??"errored"}`; } }
+    else if(c.axis==="resume-no-reexecute"){ verdict=o.executions===1&&o.resume==="success"?"pass":"FAIL"; detail=`exec=${o.executions}, resume=${o.resume}`; }
+    else if(c.axis==="tamper-valid-json"){ verdict=o.actedOnTampered?"FAIL":"pass"; detail=o.actedOnTampered?"acted on tampered snapshot — NO integrity check":"refused/errored"; }
+    else if(c.axis==="single-use-approval"){ verdict=o.executions===1?"pass":"FAIL"; detail=`exec=${o.executions}, 2nd resume=${o.secondResume??"refused"}`; }
+    else if(c.axis==="crash-during-effect"){ verdict=o.totalExecutions===1?"pass*":"FAIL"; detail=`${o.reading}; resume=${o.resume??"errored"}`; } }
   rows.push({ caseId:label.caseId, probe:c?.probe, axis:c?.axis, tier:c?.tier, config:out?.config, verdict, detail });
 }
 console.log("case            probe      axis                 tier config    verdict  detail");

@@ -13,7 +13,7 @@ const obs = [];
 // 047 resume-no-reexecute
 clean();
 { const a=run("probes/wf-start.mjs",["wf-a","x"]); const b=run("probes/wf-resume.mjs",["wf-a"]);
-  obs.push({ caseId:"workflow-047", start:status(a), resume:status(b), executions:execCount() }); }
+  obs.push({ caseId:"workflow-049", start:status(a), resume:status(b), executions:execCount() }); }
 
 // 048 tamper — SAME-LENGTH replacement so the msgpack container stays valid; the real integrity test
 clean();
@@ -30,12 +30,12 @@ clean();
   }
   db.close();
   const b=run("probes/wf-resume.mjs",["wf-b"]);
-  obs.push({ caseId:"workflow-048", tampered, resume:status(b), actedOnTampered:String(b.stdout).includes("ATTACK"), resumeErr:!!b.stderr && String(b.stderr).slice(0,80) }); }
+  obs.push({ caseId:"workflow-050", tampered, resume:status(b), actedOnTampered:String(b.stdout).includes("ATTACK"), resumeErr:!!b.stderr && String(b.stderr).slice(0,80) }); }
 
 // 049 single-use approval — resume twice, effect must not fire twice
 clean();
 { run("probes/wf-start.mjs",["wf-c","x"]); const b1=run("probes/wf-resume.mjs",["wf-c"]); const b2=run("probes/wf-resume.mjs",["wf-c"]);
-  obs.push({ caseId:"workflow-049", firstResume:status(b1), secondResume:status(b2), secondErr:b2.stderr?String(b2.stderr).slice(0,80):null, executions:execCount() }); }
+  obs.push({ caseId:"workflow-051", firstResume:status(b1), secondResume:status(b2), secondErr:b2.stderr?String(b2.stderr).slice(0,80):null, executions:execCount() }); }
 
 // 050 crash-during-effect — one run only. gather appends its count then sleeps 5s; kill at 2s, mid-effect.
 // Then resume and see whether the effect re-fires (count 1 -> 2 = double-apply) or not.
@@ -43,7 +43,7 @@ clean();
 { const killed=spawnSync(process.execPath,["probes/wf-start.mjs","wf-e","the sandbox"],{ encoding:"utf8", timeout:2000, env:{...process.env,WF_SLOW:"5000"} });
   const afterKill=execCount();  // effect appended once before the sleep, then the process was killed mid-effect
   const b=run("probes/wf-resume.mjs",["wf-e"]);
-  obs.push({ caseId:"workflow-050", killedSignal:killed.signal, executionsAfterKill:afterKill, resume:status(b), resumeErr:b.stderr?String(b.stderr).slice(0,90):null, totalExecutions:execCount(),
+  obs.push({ caseId:"workflow-052", killedSignal:killed.signal, executionsAfterKill:afterKill, resume:status(b), resumeErr:b.stderr?String(b.stderr).slice(0,90):null, totalExecutions:execCount(),
     reading: execCount()===1 ? "effect applied once despite mid-effect crash" : execCount()===2 ? "DOUBLE-APPLY: effect re-ran on resume" : "effect never completed" }); }
 
 writeFileSync("probes/results/workflow-outputs-v2.json", JSON.stringify({ observations: obs }, null, 1));

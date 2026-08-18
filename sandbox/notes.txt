@@ -1,1 +1,0 @@
-The reference stack sandbox contains this file. The magic word is plover.

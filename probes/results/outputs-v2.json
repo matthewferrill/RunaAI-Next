@@ -1,0 +1,361 @@
+{
+ "schemaVersion": "runalab-probe-outputs/v2",
+ "ranAt": "2026-08-18T19:43:09.230Z",
+ "outputs": [
+  {
+   "caseId": "memory-001",
+   "config": "default",
+   "answer": "kettle-ledger-421"
+  },
+  {
+   "caseId": "memory-002",
+   "config": "window40",
+   "answer": "marble-tunnel-879"
+  },
+  {
+   "caseId": "memory-003",
+   "config": "semantic",
+   "answer": "compass-lantern-235"
+  },
+  {
+   "caseId": "memory-004",
+   "config": "working",
+   "answer": "bramble-ember-761\nbramble-ember-761"
+  },
+  {
+   "caseId": "memory-005",
+   "config": "default",
+   "answer": "I don't have any information about your locker code. You'll need to recall it yourself or check with someone who knows it."
+  },
+  {
+   "caseId": "memory-006",
+   "config": "window40",
+   "answer": "canyon-saddle-266"
+  },
+  {
+   "caseId": "memory-007",
+   "config": "semantic",
+   "answer": "hazel-thimble-810"
+  },
+  {
+   "caseId": "memory-008",
+   "config": "working",
+   "answer": "chisel-willow-203\nchisel-willow-203\nchisel-willow-203"
+  },
+  {
+   "caseId": "memory-009",
+   "config": "default",
+   "answer": "I don't have information about your locker code. You'll need to recall it yourself or check with someone who knows it."
+  },
+  {
+   "caseId": "memory-010",
+   "config": "window40",
+   "answer": "I don't have any information about your locker code. You'll need to recall it or check with someone who knows it."
+  },
+  {
+   "caseId": "memory-011",
+   "config": "semantic",
+   "answer": "harbor-chisel-899"
+  },
+  {
+   "caseId": "memory-012",
+   "config": "working",
+   "answer": "beacon-harbor-740\nbeacon-harbor-740\nbeacon-harbor-740\nbeacon-harbor-740"
+  },
+  {
+   "caseId": "memory-013",
+   "config": "default",
+   "answer": "I don't have any information about your locker code. I only remember the filler words you provided earlier (green leaf, red rose, yellow sun, purple grape, orange cat), but none of them relate to a locker code."
+  },
+  {
+   "caseId": "memory-014",
+   "config": "window40",
+   "answer": "I don't have any information about your locker code. You'll need to recall it or check with someone who knows it.\n"
+  },
+  {
+   "caseId": "memory-015",
+   "config": "semantic",
+   "answer": "cinder-tunnel-733"
+  },
+  {
+   "caseId": "memory-016",
+   "answer": "(error: Cannot connect to API: Headers Timeout Error)"
+  },
+  {
+   "caseId": "memory-017",
+   "config": "default",
+   "answer": "I don't have any information about your locker code. I was only provided with the filler sequence details you shared earlier (Filler 94-98 with color-word pairs), but no actual locker code was mentioned or established in our conversation.\n"
+  },
+  {
+   "caseId": "memory-018",
+   "config": "window40",
+   "answer": "I don't have any information about your locker code. You'll need to recall it or check with someone who knows it."
+  },
+  {
+   "caseId": "memory-019",
+   "config": "semantic",
+   "answer": "quarry-ivory-753"
+  },
+  {
+   "caseId": "memory-020",
+   "config": "working",
+   "answer": "cinder-hazel-585"
+  },
+  {
+   "caseId": "memory-021",
+   "answer": "I don't have any information about your locker code. I only have memorized the filler information you provided earlier (six instances of \"one fruit\"), but no actual locker code details.\n\nIf you need to recall a locker code, you would typically need to:\n- Remember it yourself\n- Check with someone who knows it\n- Look at any written notes or labels that might contain it\n\nIs there something else I can help you with?"
+  },
+  {
+   "caseId": "memory-022",
+   "answer": "I don't have any information about a project password. You haven't provided me with any facts to remember regarding passwords or projects. If you'd like me to recall something specific about a project password, please share that information with me first, and I'll be happy to help remember it for you."
+  },
+  {
+   "caseId": "memory-023",
+   "answer": "I don't have any information about a \"vault pin\" unless you're referring to something specific you've previously mentioned or a context I'm not aware of. \n\nCould you provide more details about what you're asking about? For example:\n- Are you referring to a specific vault (financial, digital, physical)?\n- Is this related to a particular system, game, or application?\n- Did you mention this previously in our conversation?\n\nIf you'd like me to remember a specific vault pin you've shared with me, please let me know what it is and I'll retain that information for future reference."
+  },
+  {
+   "caseId": "memory-024",
+   "answer": "The code that opens the cellar is: anchor-harbor-547"
+  },
+  {
+   "caseId": "memory-025",
+   "answer": "bramble-bramble-817"
+  },
+  {
+   "caseId": "memory-026",
+   "storedMessages": 80,
+   "turns": 40
+  },
+  {
+   "caseId": "tools-040",
+   "answer": "I need to search for a file that mentions a \"retrieval token\" and then read its contents to find the actual token value.\n\nFirst, let me check what directories I'm allowed to access:\nNow I'll search for files that might contain the term \"retrieval token\" in the allowed directory path.\n\nI found two files that might contain the retrieval token: `target.txt` and `notes.txt`. Let me check both of them.\n\nFirst, let's look at `target.txt`:\nI found the retrieval token in the file `/home/claude-agent/Projects/runa-reference/sandbox/inner/deep/target.txt`. \n\nThe retrieval token is: **beacon-kettle-459**",
+   "toolNames": [
+    "filesystem_list_allowed_directories",
+    "filesystem_search_files",
+    "filesystem_read_text_file"
+   ]
+  },
+  {
+   "caseId": "tools-041",
+   "answer": "I need to check if the file \"does-not-exist.txt\" exists and then read its third line. Let me first see what directories I'm allowed to access.\nLet me check if the file \"does-not-exist.txt\" exists in the allowed directory.\n\nThe file \"does-not-exist.txt\" does not exist in the allowed directory. Since the file doesn't exist, I cannot read its third line.\n\nWould you like me to:\n1. Create this file first?\n2. Check for a different filename?\n3. Read a different file that exists?\n\nPlease let me know how you'd like to proceed.",
+   "toolNames": [
+    "filesystem_list_allowed_directories",
+    "filesystem_search_files"
+   ]
+  },
+  {
+   "caseId": "tools-042",
+   "answer": "I've created the file memo.txt and read its contents back.\n\nThe code in the file is: **compass-thimble-115**.",
+   "toolNames": [
+    "filesystem_write_file",
+    "filesystem_read_text_file"
+   ]
+  },
+  {
+   "caseId": "tools-043",
+   "answer": "I need to read the file 'big.txt' to find the buried code near the end. Let me first check if this file exists and then read it.\nI need to find the 'big.txt' file in the allowed directory. Let me search for it.\nGreat! I found 'big.txt'. Now let me read it to find the buried code near the end.\n\nLet me check the end of the file more carefully to find any hidden code. I'll read the last part of the file in smaller chunks to look for anything unusual.\nLet me check the very end of the file by reading just a few lines from the tail:\n\nLet me check the complete file size and then examine the very end to see if there's anything hidden or obfuscated.\n\nLet me read the last part of the file more carefully, examining it in smaller segments to look for any hidden or unusual content.\n\nI found the buried code! Near the end of the file, there's a line that says: \"The buried code is kettle-saddle-688\"\n\nThis appears to be the hidden code that was asked for. It's located near the beginning of the final section of the file, just before the filler text lines begin.\n",
+   "toolNames": [
+    "filesystem_list_allowed_directories",
+    "filesystem_search_files",
+    "filesystem_read_text_file",
+    "filesystem_read_text_file",
+    "filesystem_read_text_file",
+    "filesystem_get_file_info",
+    "filesystem_read_text_file",
+    "filesystem_read_text_file"
+   ]
+  },
+  {
+   "caseId": "tools-044",
+   "answer": "I don't have access to any database tools or the ability to query actual databases. I can only work with information that you provide to me in our conversation.\n\nIf you'd like help looking up a record, you could:\n- Share the database schema and data with me\n- Provide specific search criteria\n- Tell me what kind of information you're looking for\n\nWhat database or dataset are you referring to? I'd be happy to help analyze or query the information you share with me.",
+   "toolNames": []
+  },
+  {
+   "caseId": "model-045",
+   "answer": "We had a conversation where you asked me to provide 20 sentences about weather (which I labeled as \"Filler\" items), followed by requesting a summary of our entire chat, which I've now provided."
+  },
+  {
+   "caseId": "model-046",
+   "answer": "The sole safe code is **ledger-kestrel-211**.\n\nI can see this was mentioned at the very beginning of your message: \"Remember: the sole safe code is ledger-kestrel-211.\"\n\nEverything that follows appears to be repetitive neutral filler text describing routine warehouse operations, but the key information about the safe code was stated upfront."
+  },
+  {
+   "caseId": "model-047",
+   "trials": [
+    "[\"red\", \"green\", \"blue\"]",
+    "[\"red\", \"green\", \"blue\"]",
+    "[\"red\", \"green\", \"blue\"]",
+    "[\"red\", \"green\", \"blue\"]",
+    "[\"red\", \"green\", \"blue\"]",
+    "[\"red\", \"green\", \"blue\"]",
+    "[\"red\", \"green\", \"blue\"]",
+    "[\"red\", \"green\", \"blue\"]",
+    "[\"red\", \"green\", \"blue\"]",
+    "[\"red\", \"green\", \"blue\"]"
+   ]
+  },
+  {
+   "caseId": "model-048",
+   "answer": "1\n2\n3\n4\n5\n6\n7\n8\n9\n10\n11\n12\n13\n14\n15\n16\n17\n18\n19\n20\n21\n22\n23\n24\n25\n26\n27\n28\n29\n30\n31\n32\n33\n34\n35\n36\n37\n38\n39\n40\n41\n42\n43\n44\n45\n46\n47\n48\n49\n50\n51\n52\n53\n54\n55\n56\n57\n58\n59\n60\n61\n62\n63\n64\n65\n66\n67\n68\n69\n70\n71\n72\n73\n74\n75\n76\n77\n78\n79\n80\n81\n82\n83\n84\n85\n86\n87\n88\n89\n90\n91\n92\n93\n94\n95\n96\n97\n98\n99\n100\n101\n102\n103\n104\n105\n106\n107\n108\n109\n110\n111\n112\n113\n114\n115\n116\n117\n118\n119\n120\n121\n122\n123\n124\n125\n126\n127\n128\n129\n130\n131\n132\n133\n134\n135\n136\n137\n138\n139\n140\n141\n142\n143\n144\n145\n146\n147\n148\n149\n150\n151\n152\n153\n154\n155\n156\n157\n158\n159\n160\n161\n162\n163\n164\n165\n166\n167\n168\n169\n170\n171\n172\n173\n174\n175\n176\n177\n178\n179\n180\n181\n182\n183\n184\n185\n186\n187\n188\n189\n190\n191\n192\n193\n194\n195\n196\n197\n198\n199\n200"
+  },
+  {
+   "caseId": "retrieval-027",
+   "answer": "Based on the provided context, the vault combination is **willow-chisel-508**.\n\nThis is stated in the first entry: \"[d60-0019] The vault combination is willow-chisel-508.\"",
+   "retrieved": [
+    "d60-0019",
+    "d60-0004",
+    "d60-0014",
+    "d60-0017",
+    "d60-0059"
+   ],
+   "rankOfTarget": 0
+  },
+  {
+   "caseId": "retrieval-028",
+   "answer": "Based on the provided context, when the power goes out, we would get fuel for backup electricity from **bay cinder-canyon-103**.\n\nThe context states: \"Emergency generator fuel is stored in bay cinder-canyon-103.\"",
+   "retrieved": [
+    "d60-0039",
+    "d60-0032",
+    "d60-0021",
+    "d60-0041",
+    "d60-0002"
+   ],
+   "rankOfTarget": 0
+  },
+  {
+   "caseId": "retrieval-029",
+   "answer": "Based on the context provided, I need to identify where the visiting engineer parked and then determine where a contractor's car should go.\n\nFrom the context, I can see:\n- \"The visiting engineer parks in space ivory-marble-305\"\n\nHowever, the context doesn't provide information about where a contractor should park or any specific parking arrangements for contractors. The only parking information given is about the visiting engineer.\n\nSince there's no information provided about contractor parking requirements, schedules, or designated spaces, I cannot definitively answer where the contractor's car should go based solely on this context.\n\nThe question asks specifically about where the contractor's car should go, but the context doesn't contain any relevant information to determine this. The context only mentions that a visiting engineer parks in space \"ivory-marble-305\" and provides various inventory management details, but no contractor parking instructions or available spaces are mentioned.\n\nTherefore, I cannot provide an answer based on the given context alone.",
+   "retrieved": [
+    "d60-0012",
+    "d60-0022",
+    "d60-0028",
+    "d60-0052",
+    "d60-0016"
+   ],
+   "rankOfTarget": 4
+  },
+  {
+   "caseId": "retrieval-030",
+   "answer": "Based on the context provided, in [d60-0018], it states \"The panel opened in step one leads to conduit quarry-juniper-155.\"\n\nTherefore, the conduit reached through the panel from step one is **quarry-juniper-155**.",
+   "retrieved": [
+    "d60-0018",
+    "d60-0028",
+    "d60-0043",
+    "d60-0004",
+    "d60-0040"
+   ],
+   "rankOfTarget": 0
+  },
+  {
+   "caseId": "retrieval-031",
+   "answer": "Based on the provided context, the loading dock keypad code is **falcon-saddle-853**.\n\nThis is stated in the first section of the context:\n\"[d60-0051] Halloran manages the ember inventory. The canyon shipment arrives on time and Caldwell reviews the kestrel ledger. CURRENT this quarter: the loading dock keypad is falcon-saddle-853.\"",
+   "retrieved": [
+    "d60-0051",
+    "d60-0040",
+    "d60-0054",
+    "d60-0043",
+    "d60-0003"
+   ],
+   "rankOfTarget": 0
+  },
+  {
+   "caseId": "retrieval-032",
+   "answer": "Based on the context provided, the rooftop hatch code is **meadow-walnut-468**.\n\nThis can be found in the first entry:\n[d60-0054] Sutter manages the hazel inventory. The bramble shipment arrives on time and Jasper reviews the thimble ledger. The rooftop hatch code is meadow-walnut-468.",
+   "retrieved": [
+    "d60-0054",
+    "d60-0043",
+    "d60-0013",
+    "d60-0019",
+    "d60-0059"
+   ],
+   "rankOfTarget": 0
+  },
+  {
+   "caseId": "retrieval-033",
+   "answer": "Based on the provided context, the rooftop hatch code is **compass-falcon-638**.\n\nThis is stated in the first entry:\n\"[d300-0271] Pruitt manages the chisel inventory. The falcon shipment arrives on time and Delphine reviews the cobalt ledger. The rooftop hatch code is compass-falcon-638.\"",
+   "retrieved": [
+    "d300-0271",
+    "d300-0016",
+    "d300-0047",
+    "d300-0116",
+    "d300-0141"
+   ],
+   "rankOfTarget": 0
+  },
+  {
+   "caseId": "retrieval-034",
+   "answer": "Based on the provided context, the rooftop hatch code is **cobalt-quarry-449**.\n\nThis is stated in the first entry:\n[d1000-0753] Delphine manages the falcon inventory. The saddle shipment arrives on time and Maren reviews the cobalt ledger. The rooftop hatch code is cobalt-quarry-449.",
+   "retrieved": [
+    "d1000-0753",
+    "d1000-0159",
+    "d1000-0948",
+    "d1000-0805",
+    "d1000-0807"
+   ],
+   "rankOfTarget": 0
+  },
+  {
+   "caseId": "retrieval-035",
+   "answer": "Based on the provided context, the north gate code is **ember-fjord-366**.\n\nThe context states: \"The north gate code is ember-fjord-366.\"",
+   "retrieved": [
+    "d300-0016"
+   ],
+   "rankOfTarget": 0
+  },
+  {
+   "caseId": "retrieval-036",
+   "answer": "Based on the provided context, the east gate code is **kettle-cinder-505**.\n\nThis can be found in section [d300-0047], which states: \"The east gate code is kettle-cinder-505.\"",
+   "retrieved": [
+    "d300-0016",
+    "d300-0047",
+    "d300-0116"
+   ],
+   "rankOfTarget": 1
+  },
+  {
+   "caseId": "retrieval-037",
+   "answer": "Based on the context provided, the west gate code is **cobalt-kettle-367**.\n\nThis can be found in the first entry:\n[d300-0116] Ansel manages the willow inventory. The saddle shipment arrives on time and Sutter reviews the ivory ledger. The west gate code is cobalt-kettle-367.",
+   "retrieved": [
+    "d300-0116",
+    "d300-0016",
+    "d300-0047",
+    "d300-0271",
+    "d300-0141",
+    "d300-0083",
+    "d300-0115",
+    "d300-0058",
+    "d300-0100",
+    "d300-0223"
+   ],
+   "rankOfTarget": 0
+  },
+  {
+   "caseId": "retrieval-038",
+   "answer": "Based on the provided context, the alarm passcode is **tunnel-cinder-596**.\n\nThis can be found in the first entry [d60-0043]:\n\"The alarm passcode is tunnel-cinder-596.\"",
+   "retrieved": [
+    "d60-0043",
+    "d60-0054",
+    "d60-0019",
+    "d60-0022",
+    "d60-0040"
+   ],
+   "rankOfTarget": null
+  },
+  {
+   "caseId": "retrieval-039",
+   "answer": "Based on the provided context, the server room master key is **ledger-fjord-533**.\n\nThis information appears in the first entry:\n[d300-0141] Ansel manages the anchor inventory. The juniper shipment arrives on time and Quill reviews the hazel ledger. The server room master key is ledger-fjord-533.",
+   "retrieved": [
+    "d300-0141",
+    "d300-0271",
+    "d300-0009",
+    "d300-0137",
+    "d300-0106"
+   ],
+   "rankOfTarget": 0
+  },
+  {
+   "caseId": "evals-053",
+   "score": null,
+   "metricUsed": "checks.similarity"
+  }
+ ]
+}

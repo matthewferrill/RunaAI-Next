@@ -1,27 +1,27 @@
 {
  "observations": [
   {
-   "caseId": "workflow-047",
+   "caseId": "workflow-049",
    "start": "suspended",
    "resume": "success",
    "executions": 1
   },
   {
-   "caseId": "workflow-048",
+   "caseId": "workflow-050",
    "tampered": true,
    "resume": "success",
    "actedOnTampered": true,
    "resumeErr": false
   },
   {
-   "caseId": "workflow-049",
+   "caseId": "workflow-051",
    "firstResume": "success",
    "secondResume": null,
    "secondErr": "file:///home/claude-agent/Projects/runa-reference/node_modules/@mastra/core/dist",
    "executions": 1
   },
   {
-   "caseId": "workflow-050",
+   "caseId": "workflow-052",
    "killedSignal": "SIGTERM",
    "executionsAfterKill": 1,
    "resume": null,

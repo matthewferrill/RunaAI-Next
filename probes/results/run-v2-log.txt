@@ -1,3 +1,87 @@
 labels.json: seal intact
 questions.json: seal intact
-memory-001 memory-002 memory-003 memory-004 memory-005 memory-006 memory-007 memory-008 memory-009 memory-010 memory-011 memory-012 
+memory-001 memory-002 memory-003 memory-004 memory-005 memory-006 memory-007 memory-008 memory-009 memory-010 memory-011 memory-012 memory-013 memory-014 memory-015 memory-016 Upstream LLM API error {
+  error: APICallError [AI_APICallError]: Cannot connect to API: Headers Timeout Error
+      at handleFetchError (file:///home/claude-agent/Projects/runa-reference/node_modules/@ai-sdk/provider-utils/dist/index.js:1257:14)
+      at postToApi (file:///home/claude-agent/Projects/runa-reference/node_modules/@ai-sdk/provider-utils/dist/index.js:3299:11)
+      at async postJsonToApi (file:///home/claude-agent/Projects/runa-reference/node_modules/@ai-sdk/provider-utils/dist/index.js:3198:7)
+      at async _OpenAICompatibleChatLanguageModel.doGenerate (file:///home/claude-agent/Projects/runa-reference/node_modules/@ai-sdk/openai-compatible/dist/index.js:598:9)
+      at async AISDKV7LanguageModel.doGenerate (file:///home/claude-agent/Projects/runa-reference/node_modules/@mastra/core/dist/llm-CIrl--nz.js:276:18)
+      at async default.retries (file:///home/claude-agent/Projects/runa-reference/node_modules/@mastra/core/dist/agent-CKAVuxKN.js:22936:13)
+      at async Module.pRetry (file:///home/claude-agent/Projects/runa-reference/node_modules/p-retry/index.js:197:19)
+      at async createStream (file:///home/claude-agent/Projects/runa-reference/node_modules/@mastra/core/dist/agent-CKAVuxKN.js:22935:12)
+      at async Object.start (file:///home/claude-agent/Projects/runa-reference/node_modules/@mastra/core/dist/trip-wire-nmFrT3yU.js:2001:20) {
+    cause: HeadersTimeoutError: Headers Timeout Error
+        at FastTimer.onParserTimeout [as _onTimeout] (node:internal/deps/undici/undici:7470:32)
+        at Timeout.onTick [as _onTimeout] (node:internal/deps/undici/undici:689:17)
+        at listOnTimeout (node:internal/timers:585:17)
+        at process.processTimers (node:internal/timers:521:7) {
+      code: 'UND_ERR_HEADERS_TIMEOUT'
+    },
+    url: 'http://192.168.50.165:1234/v1/chat/completions',
+    requestBodyValues: {
+      model: 'qwen3-coder-30b-a3b-instruct',
+      user: undefined,
+      max_tokens: undefined,
+      temperature: undefined,
+      top_p: undefined,
+      frequency_penalty: undefined,
+      presence_penalty: undefined,
+      response_format: undefined,
+      stop: undefined,
+      seed: undefined,
+      reasoning_effort: undefined,
+      verbosity: undefined,
+      messages: [Array],
+      tools: [Array],
+      tool_choice: 'auto'
+    },
+    statusCode: undefined,
+    responseHeaders: undefined,
+    responseBody: undefined,
+    isRetryable: true,
+    data: undefined,
+    [Symbol(vercel.ai.error)]: true,
+    [Symbol(vercel.ai.error.AI_APICallError)]: true
+  },
+  runId: 'a9317bc6-76f6-4778-8c22-89752d9af043',
+  provider: 'lmstudio.chat',
+  modelId: 'qwen3-coder-30b-a3b-instruct'
+}
+memory-017 memory-018 memory-019 memory-020 memory-021 memory-022 memory-023 memory-024 memory-025 memory-026 embed:60 embed:300 embed:1000 retrieval-027 retrieval-028 retrieval-029 retrieval-030 retrieval-031 retrieval-032 retrieval-033 retrieval-034 retrieval-035 retrieval-036 retrieval-037 retrieval-038 retrieval-039 tools-040 Secure MCP Filesystem Server running on stdio
+Client does not support MCP Roots, using allowed directories set from server args: [ '/home/claude-agent/Projects/runa-reference/sandbox' ]
+tools-041 Secure MCP Filesystem Server running on stdio
+Client does not support MCP Roots, using allowed directories set from server args: [ '/home/claude-agent/Projects/runa-reference/sandbox' ]
+tools-042 Secure MCP Filesystem Server running on stdio
+Client does not support MCP Roots, using allowed directories set from server args: [ '/home/claude-agent/Projects/runa-reference/sandbox' ]
+tools-043 Secure MCP Filesystem Server running on stdio
+Client does not support MCP Roots, using allowed directories set from server args: [ '/home/claude-agent/Projects/runa-reference/sandbox' ]
+tools-044 [LLM] [database] SdkError: Connection closed
+    at Client._onclose (file:///home/claude-agent/Projects/runa-reference/node_modules/@modelcontextprotocol/client/dist/src-D_zzAWoS.mjs:5780:17)
+    at Client._onclose (file:///home/claude-agent/Projects/runa-reference/node_modules/@modelcontextprotocol/client/dist/index.mjs:4056:9)
+    at _transport.onclose (file:///home/claude-agent/Projects/runa-reference/node_modules/@modelcontextprotocol/client/dist/src-D_zzAWoS.mjs:5747:10)
+    at ChildProcess.<anonymous> (file:///home/claude-agent/Projects/runa-reference/node_modules/@modelcontextprotocol/client/dist/stdio.mjs:91:19)
+    at ChildProcess.emit (node:events:519:28)
+    at maybeClose (node:internal/child_process:1101:16)
+    at ChildProcess._handle.onexit (node:internal/child_process:304:5)
+    at Process.callbackTrampoline (node:internal/async_hooks:130:17) undefined
+MCPClient errored connecting to MCP server: {
+  error: '{"message":"Failed to connect to MCP server database: SdkError: Connection closed\\n    at Client._onclose (file:///home/claude-agent/Projects/runa-reference/node_modules/@modelcontextprotocol/client/dist/src-D_zzAWoS.mjs:5780:17)\\n    at Client._onclose (file:///home/claude-agent/Projects/runa-reference/node_modules/@modelcontextprotocol/client/dist/index.mjs:4056:9)\\n    at _transport.onclose (file:///home/claude-agent/Projects/runa-reference/node_modules/@modelcontextprotocol/client/dist/src-D_zzAWoS.mjs:5747:10)\\n    at ChildProcess.<anonymous> (file:///home/claude-agent/Projects/runa-reference/node_modules/@modelcontextprotocol/client/dist/stdio.mjs:91:19)\\n    at ChildProcess.emit (node:events:519:28)\\n    at maybeClose (node:internal/child_process:1101:16)\\n    at ChildProcess._handle.onexit (node:internal/child_process:304:5)\\n    at Process.callbackTrampoline (node:internal/async_hooks:130:17)","domain":"MCP","category":"THIRD_PARTY","code":"MCP_CLIENT_CONNECT_FAILED","details":{"name":"database"},"cause":{"message":"Connection closed","name":"SdkError","code":"CONNECTION_CLOSED"}}'
+}
+[LLM] [database] SdkError: Connection closed
+    at Client._onclose (file:///home/claude-agent/Projects/runa-reference/node_modules/@modelcontextprotocol/client/dist/src-D_zzAWoS.mjs:5780:17)
+    at Client._onclose (file:///home/claude-agent/Projects/runa-reference/node_modules/@modelcontextprotocol/client/dist/index.mjs:4056:9)
+    at _transport.onclose (file:///home/claude-agent/Projects/runa-reference/node_modules/@modelcontextprotocol/client/dist/src-D_zzAWoS.mjs:5747:10)
+    at ChildProcess.<anonymous> (file:///home/claude-agent/Projects/runa-reference/node_modules/@modelcontextprotocol/client/dist/stdio.mjs:91:19)
+    at ChildProcess.emit (node:events:519:28)
+    at maybeClose (node:internal/child_process:1101:16)
+    at ChildProcess._handle.onexit (node:internal/child_process:304:5)
+    at Process.callbackTrampoline (node:internal/async_hooks:130:17) undefined
+MCPClient errored connecting to MCP server: {
+  error: '{"message":"Failed to connect to MCP server database: SdkError: Connection closed\\n    at Client._onclose (file:///home/claude-agent/Projects/runa-reference/node_modules/@modelcontextprotocol/client/dist/src-D_zzAWoS.mjs:5780:17)\\n    at Client._onclose (file:///home/claude-agent/Projects/runa-reference/node_modules/@modelcontextprotocol/client/dist/index.mjs:4056:9)\\n    at _transport.onclose (file:///home/claude-agent/Projects/runa-reference/node_modules/@modelcontextprotocol/client/dist/src-D_zzAWoS.mjs:5747:10)\\n    at ChildProcess.<anonymous> (file:///home/claude-agent/Projects/runa-reference/node_modules/@modelcontextprotocol/client/dist/stdio.mjs:91:19)\\n    at ChildProcess.emit (node:events:519:28)\\n    at maybeClose (node:internal/child_process:1101:16)\\n    at ChildProcess._handle.onexit (node:internal/child_process:304:5)\\n    at Process.callbackTrampoline (node:internal/async_hooks:130:17)","domain":"MCP","category":"THIRD_PARTY","code":"MCP_CLIENT_CONNECT_FAILED","details":{"name":"database"},"cause":{"message":"Connection closed","name":"SdkError","code":"CONNECTION_CLOSED"}}'
+}
+Failed to list tools from server: {
+  error: '{"message":"Failed to connect to MCP server database: SdkError: Connection closed\\n    at Client._onclose (file:///home/claude-agent/Projects/runa-reference/node_modules/@modelcontextprotocol/client/dist/src-D_zzAWoS.mjs:5780:17)\\n    at Client._onclose (file:///home/claude-agent/Projects/runa-reference/node_modules/@modelcontextprotocol/client/dist/index.mjs:4056:9)\\n    at _transport.onclose (file:///home/claude-agent/Projects/runa-reference/node_modules/@modelcontextprotocol/client/dist/src-D_zzAWoS.mjs:5747:10)\\n    at ChildProcess.<anonymous> (file:///home/claude-agent/Projects/runa-reference/node_modules/@modelcontextprotocol/client/dist/stdio.mjs:91:19)\\n    at ChildProcess.emit (node:events:519:28)\\n    at maybeClose (node:internal/child_process:1101:16)\\n    at ChildProcess._handle.onexit (node:internal/child_process:304:5)\\n    at Process.callbackTrampoline (node:internal/async_hooks:130:17)","domain":"MCP","category":"THIRD_PARTY","code":"MCP_CLIENT_GET_TOOLS_FAILED","details":{"serverName":"database"},"cause":{"message":"Failed to connect to MCP server database: SdkError: Connection closed\\n    at Client._onclose (file:///home/claude-agent/Projects/runa-reference/node_modules/@modelcontextprotocol/client/dist/src-D_zzAWoS.mjs:5780:17)\\n    at Client._onclose (file:///home/claude-agent/Projects/runa-reference/node_modules/@modelcontextprotocol/client/dist/index.mjs:4056:9)\\n    at _transport.onclose (file:///home/claude-agent/Projects/runa-reference/node_modules/@modelcontextprotocol/client/dist/src-D_zzAWoS.mjs:5747:10)\\n    at ChildProcess.<anonymous> (file:///home/claude-agent/Projects/runa-reference/node_modules/@modelcontextprotocol/client/dist/stdio.mjs:91:19)\\n    at ChildProcess.emit (node:events:519:28)\\n    at maybeClose (node:internal/child_process:1101:16)\\n    at ChildProcess._handle.onexit (node:internal/child_process:304:5)\\n    at Process.callbackTrampoline (node:internal/async_hooks:130:17)","domain":"MCP","category":"THIRD_PARTY","code":"MCP_CLIENT_CONNECT_FAILED","details":{"name":"database"},"cause":{"message":"Connection closed","name":"SdkError","code":"CONNECTION_CLOSED"}}}'
+}
+model-045 model-046 model-047 model-048 evals-053 
+wrote 49 outputs

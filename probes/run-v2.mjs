@@ -60,8 +60,11 @@ const neededSizes = new Set(cases.filter(x=>x.probe==="retrieval" && !skip.has(x
 for (const { corpusSize, docs } of retrievalCorpora) {
   if (!neededSizes.has(corpusSize)) continue;
   log(`embed:${corpusSize}`);
-  try { // a failed index build must error this corpus's cases, not kill the sweep
-    const store = vectorStore(`v2-corpus-${corpusSize}`); rmSync(`storage/v2-corpus-${corpusSize}.db`, { force:true });
+  try { // a failed index build must error this corpus's cases, not kill the sweep (from the checkpoint work)
+    // Delete the db and its WAL sidecars BEFORE opening the connection, or the write lands on a deleted
+    // inode and every retrieval scores a false 0 (the bug that faked a 0/13 fray).
+    for (const sfx of ["","-wal","-shm"]) rmSync(`storage/v2-corpus-${corpusSize}.db${sfx}`, { force:true });
+    const store = vectorStore(`v2-corpus-${corpusSize}`);
     const { embeddings } = await embedMany({ model: embedder, values: docs.map(d=>d.text) });
     await store.createIndex({ indexName:"c", dimension: embeddings[0].length });
     await store.upsert({ indexName:"c", vectors: embeddings, metadata: docs.map(d=>({ docId:d.docId, text:d.text })) });
@@ -134,14 +137,11 @@ for (const c of cases.filter(x=>x.probe==="evals")) {
   if (skipCase(c)) continue;
   log(c.caseId);
   try {
-    const mod = await import("@mastra/evals/nlp");
-    const names = Object.keys(mod).join(",");
-    // Try a non-LLM NLP metric that returns a number without extra config.
-    let score = null, metricUsed = null;
-    for (const name of ["KeywordCoverageMetric","ContentSimilarityMetric","CompletenessMetric"]) {
-      if (mod[name]) { try { const m = new mod[name](); const res = await m.measure(c.scoreThis.query, c.scoreThis.response); score = res?.score ?? res; metricUsed = name; break; } catch {} }
-    }
-    out.push({ caseId:c.caseId, score, metricUsed, available: names.slice(0,200) });
+    const { similarity } = await import("@mastra/evals/checks");
+    // A non-LLM check: does the response overlap the context/expected. Returns a number in [0,1].
+    const res = similarity(c.scoreThis.response, c.scoreThis.context);
+    const score = typeof res === "number" ? res : (res?.score ?? res?.value ?? null);
+    out.push({ caseId:c.caseId, score, metricUsed:"checks.similarity" });
   } catch (e) { out.push({ caseId:c.caseId, answer:`(error: ${String(e.message).slice(0,140)})` }); }
 }
 

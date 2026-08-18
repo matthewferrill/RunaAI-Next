@@ -61,6 +61,12 @@ Installs first, across the board, so the base exists as one working system. Then
 assembled whole — a component probed in isolation hides the joins, and the estate's history says the
 joins are where everything breaks.
 
+## Scope (steward's direction, 2026-08-18, after the first sweep)
+
+The map must cover the entire base, not a committed slice. COVERAGE.md is the denominator: the full
+surface grid, where every probe so far lands on it, and the waves that close the rest. No coverage
+claim is made against any other baseline.
+
 ## Runbook: running the sweep (added after the 2026-08-18 session death)
 
 Launch the sweep detached from the agent session, so a session death does not kill the run:

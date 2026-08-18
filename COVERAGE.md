@@ -6,9 +6,23 @@ breaks, why it breaks, and what kind of break it is.
 
 **Status of this document, after the Codex review of 2026-08-18
 (`reviews/CODEX-REVIEW-2026-08-18-coverage-edges.md`, reconciled the same day): this is the initial
-human-reviewed risk-scenario inventory. The authoritative denominator will be `EDGE-REGISTER.json`,
-derived mechanically from the frozen installed surface and the runtime graph in Wave 0. Until that
-register exists, no statement in this file is a completeness claim.** The first version of this
+human-reviewed risk-scenario inventory. The authoritative denominator is `EDGE-REGISTER.json`,
+derived mechanically from the frozen installed surface and the runtime graph. No statement in this
+file is a completeness claim.**
+
+**Wave 0 status (started 2026-08-18, see `wave0/README.md`):** the public surface is machine-extracted
+— `MACHINE-SURFACE.json`, 21,831 entries across 105 entry points from the installed declaration
+files, 0 extraction failures. The runtime graph is drawn (`RUNTIME-GRAPH.json`, 21 nodes / 24 edges,
+each node marked exercised, installed-bypassed, or installed-unexercised). The first mechanical cut
+of the register is generated (`EDGE-REGISTER.json`, **345 candidate scenarios**: wave 2 → 104, wave 3
+→ 51, wave 4 → 78, wave 5 → 36, wave 6 → 55, wave 7 → 21; by completion rule: deterministic-branches
+176, crash-recovery 108, concurrency 36, security 25). `THREAT-MODEL.md` is drafted and awaits steward
+ratification — Wave 2 seals nothing before that. Two things Wave 0 has **not** finished, named rather
+than hidden: the register currently enumerates graph-edge scenarios only, so it under-counts until
+machine-surface operations without a graph edge are expanded into it; and `BASE-MANIFEST.json` must be
+generated on Control, because a manifest collected in a cloud clone records the wrong host and an
+unreachable endpoint (one was generated here to test the collector and discarded for exactly that
+reason). The first version of this
 document claimed to be "the denominator" and "the full surface of the installed base," and carried a
 "roughly 30% probed" figure; the review showed the percentage had no stable denominator (rows of one
 behaviour counted the same as rows hiding Cartesian products) and the surface list was missing

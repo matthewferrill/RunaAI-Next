@@ -1,0 +1,17 @@
+{
+  "name": "runa-reference-stack",
+  "version": "1.0.0",
+  "description": "The steward's method, 2026-08-18: build the industry-standard agent stack end to end, customizing nothing. Then migrate Runa into it one piece at a time, where every piece — governance and security included — proves it belongs against the standard before it replaces anything.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "private": "true",
+  "dependencies": {
+    "@mastra/core": "^1.59.0"
+  }
+}

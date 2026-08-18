@@ -1,0 +1,33 @@
+# Reference stack — the pure standard arm
+
+The steward's method, 2026-08-18: build the industry-standard agent stack end to end, customizing
+nothing. Then migrate Runa into it one piece at a time, where every piece — governance and security
+included — proves it belongs against the standard before it replaces anything.
+
+## The purity rule
+
+Nothing custom enters this directory. No estate modules are imported here. No ceremonies, no effect
+classifier, no Windows Hello — there is nothing here to protect at the start, and pre-installing the
+custom machinery would contaminate the baseline the whole method depends on. A governance piece enters
+the proving queue at the step where something worth protecting first migrates in, and it enters only
+where the standard mechanism fails a requirement scenario the steward defines.
+
+## Boundaries (about the builder, not the build)
+
+This lab does not touch production, the household, or machine-bound state. It talks to the LM Studio
+endpoint on RUNA-HOME over the standard OpenAI-compatible interface, which is the industry-standard
+surface for a served model.
+
+## What "standard" means here
+
+Leading, externally maintained components in their documented configuration:
+
+- framework/runtime: evaluated inside the assembly (candidate 1: Mastra, TypeScript-native; candidate 2:
+  LangGraph.js) — the governed-workflow test in the roadmap is the acceptance bar
+- model access: OpenAI-compatible endpoint (LM Studio, RUNA-HOME)
+- tools: MCP servers, stock
+- memory: the framework's own, in its documented default configuration
+- retrieval: BM25 + embeddings + vector store, stock implementations
+
+Own package.json on purpose: the estate's production dependency surface must not change because the lab
+installed something.

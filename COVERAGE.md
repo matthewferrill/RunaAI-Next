@@ -1,188 +1,184 @@
-# COVERAGE — the full surface of the base, and how much of it the map has seen
+# COVERAGE — the migration-relevant surface of the frozen base, and how much has been seen
 
 The steward's direction, 2026-08-18, restated after the session crash: the fray map must cover the
 entire base, not a committed slice of it. The deliverable is the full map — every fray, where it
-breaks, why it breaks, and what kind of break it is. A map is only a map if its edges are the base's
-edges.
+breaks, why it breaks, and what kind of break it is.
 
-This document is the denominator. It enumerates the surface of the installed base, places every
-existing probe on that surface, and commits the waves that close the rest. It is written before the
-new probes exist, so the coverage claim is judged against a grid fixed in advance rather than one
-drawn around whatever got probed. FRAY-MAP.md remains the record of what the first sweep found; this
-supersedes any reading of it as "the base is mapped."
+**Status of this document, after the Codex review of 2026-08-18
+(`reviews/CODEX-REVIEW-2026-08-18-coverage-edges.md`, reconciled the same day): this is the initial
+human-reviewed risk-scenario inventory. The authoritative denominator will be `EDGE-REGISTER.json`,
+derived mechanically from the frozen installed surface and the runtime graph in Wave 0. Until that
+register exists, no statement in this file is a completeness claim.** The first version of this
+document claimed to be "the denominator" and "the full surface of the installed base," and carried a
+"roughly 30% probed" figure; the review showed the percentage had no stable denominator (rows of one
+behaviour counted the same as rows hiding Cartesian products) and the surface list was missing
+first-class subsystems. Both claims are withdrawn, not softened.
 
-## Honest position after the v2 sweep
+## Reconciliation record
 
-- 53 cases covering ~30 axis-cells, nearly all at **n=1**. The map's own working-memory anomaly
-  (depth-50 lost, depth-100 kept) is the standing demonstration that n=1 cells cannot decide anything.
-- Two axes committed in PROVING.md were never built into corpus v2 and are unprobed: tool
-  **mid-chain failure** and tool **timeout behaviour**. Named here so the shrink is not silent.
-- "Retrieval 13/13" is a verdict on the vector-store + hand-assembled-context path. The installed
-  `@mastra/rag` document pipeline (chunking, document processing) has never been touched.
-- Whole subsystems at zero: processors/guardrails, streaming/abort, concurrency, storage failure
-  modes, most of the workflow feature set, the adversarial surface, `@mastra/evals` (harness gap,
-  marked open), multi-agent networking.
+Verified against this repository and the installed packages before acting on the review:
 
-By cell count the base is roughly **30% probed at n=1 and ~0% probed to the n≥3 standard**.
+- The quotes the review attributes to this document were accurate.
+- The two committed-but-never-built tool axes (mid-chain failure, timeout) are real: they appear in
+  PROVING.md's committed axis list and in no corpus.
+- The missing first-class surfaces are present in the installed `@mastra/core@1.59.0` export map
+  (`./server`, `./agent/durable`, `./observability`, `./telemetry`, `./network/vNext`, `./mastra`,
+  `./processors`, storage domains) — the omission was this document's, not the review inventing
+  surface.
+- The universal n≥3 wave-completion rule is replaced by evidence-specific completion rules (below).
+- The review's wave order is adopted; it corrects a real flaw here — repetition was scheduled last,
+  while the migration-critical findings (048 snapshot tamper, 050 mid-effect crash) are n=1 and must
+  be confirmed before anything is built on them.
+
+One caveat carried into the register build: some edges the review proposes reference capabilities
+whose presence in the pinned versions is unverified from here (model routing, several
+memory-lifecycle operations). The review's own Phase 2 resolves this — an edge enters the register
+only if the frozen installed surface actually carries the operation; a proposed edge with no
+installed surface is recorded as not-applicable-at-this-version, never silently dropped.
+
+## Honest position after the v2 sweep — reported without a percentage
+
+- 53 unique cases, 0 repeated runs, covering the grid rows marked below; nearly every verdict is n=1.
+- 2 committed axes never built (tool mid-chain failure, tool timeout) — named, not silently shrunk.
+- Cells with raw evidence: the v2 outputs and logs in `probes/results/` cover the 49 runner cases
+  and 4 workflow cases. Cells with held-out labels: the 53 sealed-corpus cases. Deterministic
+  contracts vs stochastic measurements: not yet classified — the register assigns this per scenario.
+- "Retrieval 13/13" is a verdict on the vector-store + hand-assembled-context path; the installed
+  `@mastra/rag` document pipeline has never been exercised.
+- Whole subsystems unprobed: processors/guardrails, streaming/abort, concurrency, storage failure
+  modes, most of the workflow feature set, the adversarial surface, `@mastra/evals` (open harness
+  gap), multi-agent networking — and, per the review, orchestration/configuration, server/transport,
+  observability, durable-agent stream/cache/pub-sub, model routing (existence to be verified), and
+  version/dependency evolution, which the first inventory missed entirely.
+
+Coverage will be reported as two measures once the register exists, and not before: **interface
+coverage** (installed public operations exercised / total inventoried) and **risk-scenario
+coverage** (preregistered scenarios executed / total preregistered), each with unique-case and
+repetition counts and links to raw evidence.
 
 ## Scope ruling
 
-In scope: every subsystem the assembled base runs or that Runa would rely on after migration.
-Out of scope, with the reason on the record: deployer/bundler/editor/browser (build-time tooling,
-not runtime behaviour), tts/voice (no voice in this base), a2a and agent-to-agent surfaces beyond
-`network/vNext` (no second estate), ee/license/auth-enterprise (not configured). A subsystem leaves
-this list only by steward decision, recorded here.
+In scope: every subsystem the assembled base runs or that Runa would rely on after migration —
+including the surfaces the review restored: central orchestration and configuration (`Mastra`
+object, DI, lifecycle), server and transport, observability/telemetry as its own governance surface,
+durable agent with stream cache and pub/sub, model routing if the pinned version performs it, and
+version/dependency evolution as a cross-cutting edge family. Out of scope, with the reason on the
+record: deployer/bundler/editor/browser (build-time tooling), tts/voice (no voice in this base), a2a
+beyond `network/vNext` (no second estate), ee/license enterprise surfaces (not configured). A
+subsystem leaves this list only by steward decision, recorded here.
 
-## The grid
+Coverage status must always distinguish, per the review's Phase 5: package installed / API exists /
+Runalab calls it directly / the real Runa migration path would call it / the scenario exercised that
+real path. An isolated unit call does not prove an assembled runtime edge.
 
-Status: PROBED (with n), PARTIAL (some axes at n=1), UNPROBED. Every future verdict must land in a
-cell of this grid; a finding with no cell means the grid was wrong and gets amended first.
+## The risk-scenario inventory
 
-### 1. Agent loop (`@mastra/core/agent`)
+The grids below stand as the human-readable inventory that seeded the register — real edges, not the
+complete set. Rows are not comparable units: some are single behaviours, some are scenario families
+that the register expands (depth × config, document type × chunking × size, load × concurrency ×
+failure timing). The full per-section edge lists from the review are in the review file and enter
+the register in Wave 0; they are not duplicated here.
 
-| axis | status |
+### Probed so far (all n=1 unless marked)
+
+| subsystem | probed rows |
 | --- | --- |
-| single generation | PROBED implicitly throughout (no dedicated cell) |
-| multi-step tool loop (short, ≤8 steps) | PARTIAL — tools:chained-read n=1 |
-| long-horizon loop (20+ steps), maxSteps exhaustion behaviour | UNPROBED |
-| mid-loop tool error: recovery vs derail | UNPROBED (missing-file honesty n=1 is the soft case only) |
-| tool hallucination: invented tool names/args, rate | UNPROBED |
-| parallel tool calls | UNPROBED |
-| streaming output; abort/cancel mid-generation | UNPROBED |
-| system-instruction adherence over long turns | PARTIAL — model:instruction-retention n=1 |
+| memory | recall depth × 4 configs × 5 depths (20 cells); contradiction; thread isolation; resource isolation; restart survival; temporal order; growth bound @40 turns |
+| retrieval (vector path) | verbatim; paraphrase; conceptual; multi-hop; hard-negative; scaling 60/300/1000; topK 1/3/10; staleness (finding: no freshness signal); reranked |
+| tools (MCP lower path) | chained read; missing-file honesty; write-then-read; truncation needle; unavailable server |
+| workflows | resume-no-reexecute (PASS); snapshot tamper (FAIL — fray 4); single-use approval (PASS); crash-during-effect (MIXED — fray 5) |
+| model | instruction retention; 40k-char saturation; structured validity (1 simple schema × 10); long output |
+| evals | one metric attempted — OPEN harness gap, no verdict |
 
-### 2. Memory (`@mastra/memory`)
+### Known-unprobed families (seed list; the register is the authority)
 
-| axis | status |
-| --- | --- |
-| recall depth × config matrix (2/10/25/50/100 × 4 configs) | PROBED n=1 per cell — needs n≥3 |
-| contradiction / revision | PROBED n=1, default+semantic only |
-| thread isolation; resource isolation | PROBED n=1 each |
-| restart survival | PROBED n=1 |
-| temporal ordering | PROBED n=1 |
-| growth bound | PROBED n=1 at 40 turns; thousands of turns UNPROBED |
-| semantic-recall interference: many near-identical facts colliding | UNPROBED |
-| working-memory template semantics: what fits the template, what falls out | PARTIAL — one anomaly, unexplained |
-| memory processors (`@mastra/memory/processors`) | UNPROBED |
-| concurrent writers to one store | UNPROBED |
-| injection persisted via memory (a poisoned "fact" recalled later as truth) | UNPROBED — adversarial, governance-critical |
+- **Agent loop:** long-horizon loops, maxSteps exhaustion, mid-loop error recovery, tool
+  hallucination, parallel calls, streaming, abort/cancel, retries duplicating effects, process death
+  between tool result and next turn.
+- **Memory lifecycle and governance:** deletion, retention, correction propagation, stale vectors
+  after correction, cross-resource semantic leakage, processors, concurrent writers, poisoned facts
+  recalled as truth.
+- **RAG as installed:** the actual `@mastra/rag` pipeline split into parsing/chunking, embedding/
+  indexing, retrieval/filtering/rerank, context assembly, and answer generation — each its own
+  surface, per the review.
+- **Native tools vs MCP, separated:** schema rejection and violation, executor throw before/after
+  effect, retry after effect, effect/record atomicity in both directions, timeout, cancellation,
+  name collisions, authority not reaching the executor; MCP transport/protocol edges, resources and
+  prompts, server identity substitution, success reported for a failed effect.
+- **Workflows:** versioning and schema drift across suspension, duplicate resume, resume by the
+  wrong actor, approval expiration, effect/checkpoint atomicity both directions, compensation
+  failure, nested cancellation, evented and durable variants.
+- **Model/provider:** throttling, retry and fallback behaviour, streamed partial tool calls,
+  malformed responses, silent truncation, endpoint restart mid-run, configured vs actual context,
+  concurrent request queueing.
+- **Storage:** transaction boundaries, partial commits, WAL behaviour (already a repeated harness
+  signal), lock contention, schema migration, disk full, corruption detection and recovery,
+  cross-store coordinated-write crashes.
+- **Orchestration/config, server/transport, observability, durable stream/cache/pub-sub, version
+  evolution:** the review's §2 lists, entering the register in Wave 0.
+- **Adversarial:** the injection family (retrieved docs, tool outputs, persisted memory, tool
+  descriptions, MCP prompt/resource substitution), exfiltration (system prompt, internal state),
+  authority confusion/replay/modified-arguments, traversal and TOCTOU, SSRF, encoding concealment,
+  evaluator and observability poisoning, cross-lane secret movement. **The adversarial wave requires
+  a written threat model first — assets, actors, trust zones, entry points, authority boundaries,
+  prohibited outcomes, expected mitigations — or it has no denominator either.**
 
-### 3. Retrieval and RAG (`@mastra/core/vector`, `@mastra/libsql`, `@mastra/rag`)
+## Completion rules — evidence-specific, preregistered per scenario
 
-| axis | status |
-| --- | --- |
-| verbatim / paraphrase / conceptual / multi-hop / hard-negative | PROBED n=1 each |
-| corpus scaling 60/300/1000 | PROBED n=1 each; 10k+ UNPROBED |
-| topK sensitivity (1/3/10) | PROBED n=1 each |
-| index staleness | PROBED n=1 — finding: no freshness signal exists |
-| reranked path | PROBED n=1 |
-| `@mastra/rag` document pipeline: chunking strategies, chunk size/overlap, document types | UNPROBED — package never exercised |
-| embedding limits: domain terms, code identifiers, near-duplicate discrimination | UNPROBED |
-| index rebuild consistency; concurrent upsert/query | UNPROBED |
-| injection via retrieved document (instructions inside a doc reaching the answer) | UNPROBED — adversarial, governance-critical |
+The universal n≥3 rule is withdrawn. A wave is complete when each of its scenarios satisfies its
+preregistered evidence-specific completion rule and has raw evidence linked to the exact frozen
+base:
 
-### 4. Tools / MCP (`@mastra/mcp`)
+- **Deterministic code paths:** every meaningful branch, invariant, and failure path exercised;
+  repetition earns nothing unless timing or concurrency is involved.
+- **Crash and recovery:** failure injected at every persistence/effect boundary, repeated enough to
+  exercise scheduling variation.
+- **Concurrency:** controlled interleavings plus sustained stress, not repetition alone.
+- **Model behaviour:** sample size chosen for a stated confidence/error target before the run; no
+  rate claimed from three generations.
+- **Retrieval:** many unique sealed held-out questions; repeating one question is not adding cases.
+- **Security:** explicit attack families with invariants; a severe bypass is never averaged away.
 
-| axis | status |
-| --- | --- |
-| chained read; missing-file honesty; write-then-read; truncation needle; unavailable server | PROBED n=1 each |
-| mid-chain server death | UNPROBED — committed in PROVING.md, never built |
-| tool timeout behaviour | UNPROBED — committed in PROVING.md, never built |
-| allowed-directory enforcement / path traversal attempts | UNPROBED — adversarial |
-| instructions inside tool output reaching the agent's behaviour | UNPROBED — adversarial, governance-critical |
-| MCP resources and prompts surfaces (beyond tools) | UNPROBED |
-| large results beyond the one truncation case; many servers at once | UNPROBED |
+Every pass states what was varied, what stayed fixed, unique cases, repetitions, the expected
+invariant, the raw evidence, and its confidence or completeness basis. An environment error is never
+a finding. A cell nobody could probe is NOT PROBED, never inferred from a neighbour.
 
-### 5. Workflows (`@mastra/core/workflows`, durable/evented)
+## The waves (per the review; regression is continuous, not a final wave)
 
-| axis | status |
-| --- | --- |
-| resume without re-execution | PROBED n=1 (PASS) |
-| snapshot tamper | PROBED n=1 (FAIL — fray 4) |
-| single-use approval | PROBED n=1 (PASS) |
-| crash during effect | PROBED n=1 (MIXED — fray 5) |
-| parallel branches; nested workflows | UNPROBED |
-| retries and step timeouts | UNPROBED |
-| suspend across process restart and across days | UNPROBED (restart n=1 was within one process lifetime pattern) |
-| workflow definition changed while a run is suspended (versioning) | UNPROBED |
-| concurrent runs of one workflow; storage failure mid-run | UNPROBED |
-| evented workflows; durable agent (`agent/durable`) | UNPROBED |
+- **Wave 0 — freeze and inventory.** Pin the base (BASE-MANIFEST.json: commit, lockfile digest, Node
+  version, OS, package versions, LM Studio version, model and embedding identifiers, storage schema,
+  enabled components, config digest, hardware profiles). Machine-extract the public surface
+  (MACHINE-SURFACE.json) from installed declarations and export maps. Draw the runtime graph
+  (RUNTIME-GRAPH.json). Write THREAT-MODEL.md. Generate EDGE-REGISTER.json. COVERAGE.md becomes a
+  summary mechanically checked against the register.
+- **Wave 1 — confirm current critical findings.** Repeat the migration-critical n=1 results (048,
+  050, the memory matrix), validate their raw evidence, resolve the working-memory anomaly, build
+  the two omitted tool tests.
+- **Wave 2 — governance and adversarial boundaries** (threat model first).
+- **Wave 3 — durable execution and approval** (crash boundaries, atomicity, versioning, durable
+  stream/cache/pub-sub).
+- **Wave 4 — tools, MCP, and processors** (native vs MCP separated; processor visibility and
+  bypass).
+- **Wave 5 — storage, concurrency, and operations.**
+- **Wave 6 — RAG and memory lifecycle** (the actual installed pipeline, staged).
+- **Wave 7 — model/provider ceilings** (statistically sized).
+- **Wave 8 — multi-agent**, only after Runa has a concrete need and the single-agent foundation
+  passes.
 
-### 6. Model surface (LM Studio, OpenAI-compatible)
+Corpus v2 is the standing regression suite from Wave 1 onward; every admission re-runs it, and a
+regression anywhere on the old map blocks the admission.
 
-| axis | status |
-| --- | --- |
-| instruction retention; context saturation (40k chars); structured validity (1 simple schema × 10); long output | PROBED n=1 each |
-| structured-output schema ladder: nesting, unions, arrays, constrained enums | UNPROBED |
-| context to the real ceiling (model max, not 40k chars) | UNPROBED |
-| tool-call format reliability at depth and under long context | UNPROBED |
-| determinism / temperature spread on identical inputs | UNPROBED |
-| embedding model quality axes (separate from retrieval behaviour) | UNPROBED |
+## Governing rules
 
-### 7. Storage (`@mastra/libsql`)
+No stock-framework limitation justifies custom Runa code unless the exact frozen surface, failing
+edge, raw evidence, and unmet Runa requirement are linked together. And the reverse: no framework
+pass justifies migration unless it was measured on the real assembled path Runa would use. Every
+custom component carries the reverse link — the exact stock failure that justified it — or it is
+not admitted.
 
-| axis | status |
-| --- | --- |
-| row growth per turn | PROBED n=1 |
-| concurrent writers; corruption recovery; disk full; process death mid-write | UNPROBED — the harness has already hit WAL-sidecar behaviour twice, which is a signal, not a nuisance |
-| backup/restore of live stores | UNPROBED |
+## Classification discipline (unchanged)
 
-### 8. Evals (`@mastra/evals`)
-
-| axis | status |
-| --- | --- |
-| any metric producing a score | OPEN — harness gap, not a framework finding; resolve before probing |
-| scorer quality: does an LLM-free metric distinguish a right answer from a wrong one on our cases | UNPROBED |
-
-### 9. Processors / guardrails (`@mastra/core/processors`)
-
-Entirely UNPROBED: input processors, output processors, what they can and cannot intercept, and
-whether a screening processor sees tool results and retrieved context or only user turns.
-
-### 10. Multi-agent (`network/vNext`)
-
-Entirely UNPROBED. In scope but last: no migration decision currently depends on it.
-
-### 11. Cross-cutting: adversarial
-
-The estate's own history says this is where governance lives, and none of it has been probed on the
-standard stack: injection via retrieved documents, via tool outputs, via persisted memory; path
-traversal through the filesystem server; a secret placed in one lane appearing in another (memory →
-retrieval, tool result → memory). Every case here is also a requirement scenario in waiting: where
-stock resists, nothing custom is justified; where it complies, that is a fray with a governance name.
-
-### 12. Cross-cutting: operations
-
-Latency distributions under load, concurrent sessions against one base, sustained long-horizon runs
-(thousands of turns, days of wall clock), endpoint outage mid-anything (partially seen: the embed
-build crash the checkpoint work fixed). UNPROBED.
-
-## The waves
-
-Ordered by what the migration decisions need first. Each wave gets its own sealed corpus (questions
-and labels with supporting spans, digests in a SEAL file, labels held away from the implementer),
-runs on Control against the live endpoint via the checkpointed runner, and reports per-cell n and raw
-outputs. A wave is complete when every one of its cells is PROBED at n≥3 or reclassified with a
-recorded reason.
-
-- **Wave A — adversarial surface** (grid §11 + the adversarial rows of §2–4). Highest value: these
-  cells decide where custom governance is justified, which is the whole question.
-- **Wave B — untouched subsystems**: `@mastra/rag` pipeline, processors/guardrails, streaming/abort,
-  agent-loop horizon and tool-hallucination, structured-output ladder, the two committed-but-unbuilt
-  tool axes.
-- **Wave C — scale, concurrency, ops**: storage failure modes, concurrent writers, 10k corpus,
-  thousands of turns, load.
-- **Wave D — workflow full map**: the eight unprobed workflow rows, evented and durable included.
-- **Wave E — model surface to its real ceilings.**
-- **Wave F — repetition**: n≥3 over every n=1 cell that produced a verdict, the memory matrix first.
-  Any cell that flips under repetition is reported as unstable, not averaged away.
-
-Corpus v2 is not retired: it becomes the standing regression suite. Every custom piece admitted later
-re-runs it, and a regression anywhere on the old map blocks the admission.
-
-## Classification discipline (unchanged, restated because the full map depends on it)
-
-Every fray is classified KNOB (a documented configuration recovers it), LIMIT (moves with resources),
-or WALL (structural), with the mechanism — why it breaks — and the location — where in the stack. A
-pass is only a pass with its n. An error entry from the environment is never a finding. A cell nobody
-could probe is reported NOT PROBED, never inferred from a neighbouring cell.
+Every fray is classified KNOB (a documented configuration recovers it), LIMIT (moves with
+resources), or WALL (structural), with the mechanism — why it breaks — and the location — where in
+the stack. A pass is only a pass with its stated evidence basis. FRAY-MAP.md remains the record of
+the first sweep, not a statement that the base is mapped.

@@ -34,6 +34,24 @@ if (endpoint) {
   } catch (e) { endpointLive = { reachable: false, reason: String(e.message).slice(0, 120) }; }
 }
 
+// LM Studio version, in order of authority: explicit env, the `lms` CLI, then the native REST API's
+// own report. Each records HOW it was learned, because a version nobody can source is not a fact.
+let lmVersion = process.env.LMSTUDIO_VERSION || null;
+let lmVersionSource = lmVersion ? "env LMSTUDIO_VERSION" : null;
+if (!lmVersion) {
+  const cli = sh("lms version");
+  if (cli) { lmVersion = cli.replace(/^.*?([0-9]+\.[0-9]+\.[0-9]+.*)$/s, "$1").trim(); lmVersionSource = "lms version (CLI on the probe host)"; }
+}
+if (!lmVersion && endpoint) {
+  // The native REST surface (/api/v0) sits beside the OpenAI-compatible /v1 on the same origin.
+  try {
+    const base = endpoint.replace(/\/v1\/?$/, "");
+    const raw = execSync(`curl -s -m 8 -i ${base}/api/v0/models`, { encoding: "utf8" });
+    const hdr = (raw.match(/^server:\s*(.+)$/im) || [])[1];
+    if (hdr && /lm ?studio/i.test(hdr)) { lmVersion = hdr.trim(); lmVersionSource = "Server header on /api/v0 (endpoint host)"; }
+  } catch { /* endpoint may not expose the native API; null stays honest */ }
+}
+
 const manifest = {
   schemaVersion: "runalab-base-manifest/v1",
   collectedAtHost: os.hostname(),
@@ -49,8 +67,8 @@ const manifest = {
     endpoint,
     modelId,
     embeddingId: embedId,
-    lmStudioVersion: process.env.LMSTUDIO_VERSION || null,
-    lmStudioVersionSource: process.env.LMSTUDIO_VERSION ? "env LMSTUDIO_VERSION" : "not provided — set LMSTUDIO_VERSION when known; null is honest, not a guess",
+    lmStudioVersion: lmVersion,
+    lmStudioVersionSource: lmVersionSource || "not observable from this host — set LMSTUDIO_VERSION when known; null is honest, not a guess",
     endpointAtFreeze: endpointLive,
   },
   configDigests: {

@@ -12,6 +12,8 @@
   "type": "module",
   "private": "true",
   "dependencies": {
-    "@mastra/core": "^1.59.0"
+    "@ai-sdk/openai-compatible": "^3.0.31",
+    "@mastra/core": "^1.59.0",
+    "ai": "^7.0.67"
   }
 }

@@ -21,6 +21,19 @@ const j = async (path, body) => {
 };
 
 const out = { label: LABEL, endpoint: BASE, model: MODEL, embed: EMBED };
+
+// Runtime state, added after finding a hole this file could not see. Just-in-time loading is enabled
+// and the coder carries a one-hour idle TTL, so a model that idles out and is reloaded by an ordinary
+// probe request returns at whatever JIT chooses rather than the configured value -- RunaAI's
+// model-residency notes record this exact model coming back at 16,384 after being set to 65,536.
+// Embedding digests and short generations are both insensitive to context length, so a wave could
+// have run partly at one context and partly at another and nothing here would have shown it.
+try {
+  const nat = await fetch(`${BASE.replace(/\/v1$/, "")}/api/v0/models`).then((r) => r.json());
+  out.runtime = (nat?.data ?? []).map((m) => ({ id: m.id, state: m.state, quantization: m.quantization ?? null,
+    loadedContext: m.loaded_context_length ?? null, maxContext: m.max_context_length ?? null }))
+    .sort((a, b) => a.id.localeCompare(b.id));
+} catch (e) { out.runtime = { error: String(e.message).slice(0, 120) }; }
 const models = await j("/models");
 out.models = (models.body?.data || []).map((m) => m.id).sort();
 out.modelsStatus = models.status;
@@ -56,3 +69,4 @@ console.log(`wrote ${path}`);
 console.log("models:", out.models.join(", "));
 for (const e of out.embeddings) console.log(`  embed "${e.text}" dim=${e.dim} digest=${e.digest} ${e.ms}ms`);
 for (const g of out.generations) console.log(`  gen[${g.rep}] "${g.prompt.slice(0, 34)}" -> "${g.text.replace(/\n/g, " ").slice(0, 40)}" ${g.ms}ms ${JSON.stringify(g.usage)}`);
+if (Array.isArray(out.runtime)) for (const r of out.runtime) console.log(`  runtime ${r.id.padEnd(40)} ${r.state} quant=${r.quantization} ctx=${r.loadedContext}/${r.maxContext}`);

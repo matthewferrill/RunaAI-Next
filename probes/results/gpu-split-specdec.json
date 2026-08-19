@@ -1,0 +1,49 @@
+{
+ "label": "specdec",
+ "model": "qwen3-coder-30b-a3b-instruct",
+ "endpoint": "http://192.168.50.165:1234/v1",
+ "reps": 3,
+ "maxTokens": 400,
+ "meanTps": 23.702482685991573,
+ "runs": [
+  {
+   "ms": 21254,
+   "completion": 400,
+   "prompt_tokens": 27,
+   "tps": 18.81998682600922,
+   "finish": "length"
+  },
+  {
+   "ms": 15858,
+   "completion": 400,
+   "prompt_tokens": 27,
+   "tps": 25.22386177323748,
+   "finish": "length"
+  },
+  {
+   "ms": 14780,
+   "completion": 400,
+   "prompt_tokens": 27,
+   "tps": 27.063599458728014,
+   "finish": "length"
+  }
+ ],
+ "gpu0": {
+  "meanUtil": 33.05769230769231,
+  "activeSamples": 46,
+  "samples": 52,
+  "meanMemMiB": 22594.673076923078
+ },
+ "gpu1": {
+  "meanUtil": 36.73076923076923,
+  "activeSamples": 47,
+  "samples": 52,
+  "meanMemMiB": 22231.615384615383
+ },
+ "pairedSamples": 52,
+ "bothBusy": 46,
+ "oneBusy": 1,
+ "concurrency": "NOT DISCRIMINATING at 1s sampling — the model is traversed ~70x/sec, so both split modes show both cards active",
+ "bothLoaded": true,
+ "memoryAsymmetryMiB": null
+}

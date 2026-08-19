@@ -1,4 +1,4 @@
-# CONSTRAINT PROBES — findings (v1)
+# CONSTRAINT PROBES — findings
 
 Graded against `CONSTRAINT-PREREGISTRATION.md` as sealed at `40e2dfa`, before the harness existed.
 50 runs, 0 environment errors. Controls 5/5 (I-C4) and 3/3 (I-C2), so both invariants are decidable.
@@ -12,7 +12,7 @@ results.
 | Invariant | Verdict | Rate |
 |---|---|---|
 | **I-C4 clause 1** — an approval must not survive on disk after the act that granted it | **VIOLATED** | **13/13** |
-| **I-C4 clause 2** — no record may substitute for a fresh steward act | **NOT DECIDABLE** | scenarios invalid |
+| **I-C4 clause 2** — no record may substitute for a fresh steward act | **HELD** (v2) | 0/15 |
 | **I-C2** — fully local, no outbound | **HELD** | 0/18 |
 
 ## I-C4 clause 1 — a granted state is on disk, 13/13
@@ -37,10 +37,11 @@ parsing anything.
 *a tampered record cannot claim an approval that is waiting to be spent*. The record exists. Whether it
 can be *used* is clause 2, and clause 2 is not yet answered.
 
-## I-C4 clause 2 — NOT DECIDABLE, because neither scenario reached the boundary
+## I-C4 clause 2 — HELD 0/15, and the mechanism matters more than the number
 
-Both decisive scenarios returned zero effects, and **both are invalid as built.** This was established
-by re-running them and reading the refusal messages rather than trusting the status code:
+**v1's two scenarios were invalid and are superseded.** Both returned zero effects, and both were
+refused for reasons unrelated to approval — established by re-running them and reading the refusal
+messages rather than the status codes:
 
 ```
 REPLAY  ->  "Invalid resume data: expected object, received undefined"
@@ -48,15 +49,50 @@ ABSENT  ->  "Invalid resume data: expected object, received undefined"   (untamp
 FORGE   ->  "This workflow run was not suspended"
 ```
 
-**Replay** was refused for sending no resume payload — the identical error an untampered suspended run
-gives. It tested *resume with no payload*, not *replay of a stored approval*.
+Replay was refused for sending **no payload** — the identical error an untampered run gives — so it
+tested *resume without a payload*, not *replay of a stored approval*. Forge overwrote the string
+`suspended`, breaking the suspension marker, which made the record look **less** approved rather than
+more. Reporting either as HELD would have been a clean security result produced by a test that never
+ran the attack.
 
-**Forge** overwrote the string `suspended` in the snapshot, which broke the suspension marker. The
-tamper made the record look **less** approved, not more, and the framework refused on that basis.
+`CONSTRAINT-PREREGISTRATION-V2.md` (sealed `ded68d2`) re-specified them. The design error was testing
+the *absence* of a steward act: resume requires a payload by schema, so withholding one fails
+validation before any approval logic runs. **v2 supplies a payload that is present, valid, and says
+NO.**
 
-Reporting these as HELD would have been the strongest possible version of the error this programme
-exists to prevent: **a clean security result produced by a test that never ran the attack.** They are
-recorded NOT DECIDABLE and re-specified in a v2 seal.
+### Result: 21 runs, controls 3/3 and 3/3, no record produced an effect
+
+| Scenario | Effects | Boundary reached | Refusal |
+|---|---|---|---|
+| `override-decline` — restore a live grant, resume with `{approved:false}` | **0/5** | 5/5 | *This workflow run was not suspended* |
+| `transplant` — a granted snapshot written over another suspended run | **0/5** | 5/5 | *This workflow run was not suspended* |
+| `self-resume` — restore a live grant, call nothing at all | **0/5** | 5/5 | no call made |
+
+Both control arms behave, so the scenarios are interpretable: a clean decline produces **0 effects**
+and a clean approval produces **exactly 1**.
+
+### The defence is structural, not an approval check
+
+**0 of 15 refusals cited approval or authorisation.** The stack does not reject a replayed grant — it
+never evaluates one.
+
+A granted state only appears *after* the run leaves the `suspended` state, and a run that is not
+suspended cannot be resumed. **The granted state and the resumable state never coexist**, so a stored
+grant is inert by construction rather than by being refused.
+
+That is a real defence and it held in every attempt. It is also a narrower one than "approvals are
+checked", and the difference is decision-relevant:
+
+- A deliberate authorisation check is stable across versions. **An incidental consequence of a state
+  machine is not.**
+- It interacts directly with clause 1's violation. The grant persists on disk after execution (611
+  bytes, markers present). **If any future recovery path permits resuming a run that is not
+  suspended — which is exactly what crash recovery wants — that persisted grant becomes spendable.**
+- Wave 3 found **0 of 60 persistence runs recoverable to a defined terminal state**. The pressure to
+  add such a recovery path is therefore already present in the evidence.
+
+Phrased under the asymmetry rule: **no stored record produced an effect in 15 attempts, on this
+base.**
 
 ## I-C2 — no outbound observed, 0/18
 
@@ -106,7 +142,17 @@ only evidence of a boundary if you know what it refused.
 **Constraint 2 is provisionally satisfied.** The stack did not phone home under any exercise, including
 first initialisation against an empty store.
 
-**Constraint 4 is half-answered, and the answered half is a failure.** A granted approval rests on
-disk, survives a crash, and persists after execution. Whether that record can be *spent* by an actor
-with disk access is the question v2 must settle, and it is the question that decides whether the
-framework choice was sound.
+**Constraint 4 fails on the letter and holds on the consequence.** A granted approval rests on disk,
+survives a crash, and persists after execution — Decision 0076 forbids exactly that. But no stored
+record could be spent in 15 attempts, because the grant and the resumable state never coexist.
+
+**The framework choice is not disqualified.** The three remaining items in `LAB-PLAN.md` are worth
+spending, which is what this probe existed to decide.
+
+What Runa owns here is now specific rather than assumed. It is not "build an approval system" — the
+consequence already holds. It is **two narrow things**: clear the grant from disk once it is spent,
+and make the refusal an authorisation check rather than a side effect of the state machine, so the
+defence survives a version bump and any future crash-recovery path.
+
+That is a seventh item for the fray map's migration decision, and it is smaller than it looked before
+the measurement.

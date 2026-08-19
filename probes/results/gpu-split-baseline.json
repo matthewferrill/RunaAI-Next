@@ -1,0 +1,47 @@
+{
+ "label": "baseline",
+ "model": "qwen3-coder-30b-a3b-instruct",
+ "endpoint": "http://192.168.50.165:1234/v1",
+ "reps": 3,
+ "maxTokens": 400,
+ "meanTps": 71.68244045043271,
+ "runs": [
+  {
+   "ms": 5608,
+   "completion": 400,
+   "prompt_tokens": 27,
+   "tps": 71.32667617689016,
+   "finish": "length"
+  },
+  {
+   "ms": 5595,
+   "completion": 400,
+   "prompt_tokens": 27,
+   "tps": 71.49240393208223,
+   "finish": "length"
+  },
+  {
+   "ms": 5538,
+   "completion": 400,
+   "prompt_tokens": 27,
+   "tps": 72.22824124232575,
+   "finish": "length"
+  }
+ ],
+ "gpu0": {
+  "meanUtil": 35.88235294117647,
+  "activeSamples": 16,
+  "samples": 17,
+  "meanMemMiB": 17589.29411764706
+ },
+ "gpu1": {
+  "meanUtil": 36.705882352941174,
+  "activeSamples": 16,
+  "samples": 17,
+  "meanMemMiB": 14980
+ },
+ "pairedSamples": 17,
+ "bothBusy": 16,
+ "oneBusy": 0,
+ "concurrency": "both GPUs busy together (tensor/row-like)"
+}

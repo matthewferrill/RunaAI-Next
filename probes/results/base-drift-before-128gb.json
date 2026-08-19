@@ -1,0 +1,145 @@
+{
+ "label": "before-128gb",
+ "endpoint": "http://192.168.50.165:1234/v1",
+ "model": "qwen3-coder-30b-a3b-instruct",
+ "embed": "text-embedding-nomic-embed-text-v1.5",
+ "models": [
+  "qwen/qwen3-4b",
+  "qwen3-coder-30b-a3b-instruct",
+  "text-embedding-nomic-embed-text-v1.5"
+ ],
+ "modelsStatus": 200,
+ "embeddings": [
+  {
+   "text": "the frozen base",
+   "ms": 42,
+   "dim": 768,
+   "digest": "70b9d9a8a4ac6b6729d5174a76b43a93",
+   "first3": [
+    0.04983615502715111,
+    0.07975609600543976,
+    -0.17944522202014923
+   ]
+  },
+  {
+   "text": "ORCHID-5501",
+   "ms": 47,
+   "dim": 768,
+   "digest": "d551811d457a934c89ec4ec77df28860",
+   "first3": [
+    -0.04668329656124115,
+    -0.006591316312551498,
+    -0.15741121768951416
+   ]
+  },
+  {
+   "text": "a partially built index",
+   "ms": 40,
+   "dim": 768,
+   "digest": "9e0ea779efe88fbbc02591a3724611e7",
+   "first3": [
+    -0.006708026397973299,
+    0.03314709663391113,
+    -0.16366656124591827
+   ]
+  }
+ ],
+ "generations": [
+  {
+   "prompt": "Reply with exactly: READY",
+   "rep": 1,
+   "ms": 106891,
+   "status": 200,
+   "text": "READY",
+   "finish": "stop",
+   "usage": {
+    "prompt_tokens": 13,
+    "completion_tokens": 2,
+    "total_tokens": 15,
+    "completion_tokens_details": {
+     "reasoning_tokens": 0
+    }
+   }
+  },
+  {
+   "prompt": "Reply with exactly: READY",
+   "rep": 2,
+   "ms": 100,
+   "status": 200,
+   "text": "READY",
+   "finish": "stop",
+   "usage": {
+    "prompt_tokens": 13,
+    "completion_tokens": 2,
+    "total_tokens": 15,
+    "completion_tokens_details": {
+     "reasoning_tokens": 0
+    }
+   }
+  },
+  {
+   "prompt": "Name the capital of France in one word.",
+   "rep": 1,
+   "ms": 239,
+   "status": 200,
+   "text": "Paris",
+   "finish": "stop",
+   "usage": {
+    "prompt_tokens": 17,
+    "completion_tokens": 2,
+    "total_tokens": 19,
+    "completion_tokens_details": {
+     "reasoning_tokens": 0
+    }
+   }
+  },
+  {
+   "prompt": "Name the capital of France in one word.",
+   "rep": 2,
+   "ms": 57,
+   "status": 200,
+   "text": "Paris",
+   "finish": "stop",
+   "usage": {
+    "prompt_tokens": 17,
+    "completion_tokens": 2,
+    "total_tokens": 19,
+    "completion_tokens_details": {
+     "reasoning_tokens": 0
+    }
+   }
+  },
+  {
+   "prompt": "Write the text 'abcdefghijklmnop' and nothing else.",
+   "rep": 1,
+   "ms": 222,
+   "status": 200,
+   "text": "abcdefghijklmnop",
+   "finish": "stop",
+   "usage": {
+    "prompt_tokens": 18,
+    "completion_tokens": 2,
+    "total_tokens": 20,
+    "completion_tokens_details": {
+     "reasoning_tokens": 0
+    }
+   }
+  },
+  {
+   "prompt": "Write the text 'abcdefghijklmnop' and nothing else.",
+   "rep": 2,
+   "ms": 64,
+   "status": 200,
+   "text": "abcdefghijklmnop",
+   "finish": "stop",
+   "usage": {
+    "prompt_tokens": 18,
+    "completion_tokens": 2,
+    "total_tokens": 20,
+    "completion_tokens_details": {
+     "reasoning_tokens": 0
+    }
+   }
+  }
+ ]
+}

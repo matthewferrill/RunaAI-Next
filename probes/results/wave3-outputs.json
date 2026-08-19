@@ -1,0 +1,3743 @@
+{
+ "schemaVersion": "wave3-outputs/v1",
+ "ranAt": "2026-08-19T05:01:39.907Z",
+ "smoke": false,
+ "runs": [
+  {
+   "runKey": "W3.control#1",
+   "family": "CONTROL",
+   "arm": "control",
+   "resumeStatus": "success",
+   "effects": 1,
+   "controlOk": true
+  },
+  {
+   "runKey": "W3.control#2",
+   "family": "CONTROL",
+   "arm": "control",
+   "resumeStatus": "success",
+   "effects": 1,
+   "controlOk": true
+  },
+  {
+   "runKey": "W3.control#3",
+   "family": "CONTROL",
+   "arm": "control",
+   "resumeStatus": "success",
+   "effects": 1,
+   "controlOk": true
+  },
+  {
+   "runKey": "W3.control#4",
+   "family": "CONTROL",
+   "arm": "control",
+   "resumeStatus": "success",
+   "effects": 1,
+   "controlOk": true
+  },
+  {
+   "runKey": "W3.control#5",
+   "family": "CONTROL",
+   "arm": "control",
+   "resumeStatus": "success",
+   "effects": 1,
+   "controlOk": true
+  },
+  {
+   "runKey": "W3-A.two-processes#1",
+   "family": "A",
+   "edge": "E17",
+   "question": "two-processes",
+   "invariant": "I-3A",
+   "statuses": [
+    "success",
+    "error"
+   ],
+   "effects": 1
+  },
+  {
+   "runKey": "W3-A.two-processes#2",
+   "family": "A",
+   "edge": "E17",
+   "question": "two-processes",
+   "invariant": "I-3A",
+   "statuses": [
+    "success",
+    "error"
+   ],
+   "effects": 1
+  },
+  {
+   "runKey": "W3-A.two-processes#3",
+   "family": "A",
+   "edge": "E17",
+   "question": "two-processes",
+   "invariant": "I-3A",
+   "statuses": [
+    "success",
+    "error"
+   ],
+   "effects": 1
+  },
+  {
+   "runKey": "W3-A.two-processes#4",
+   "family": "A",
+   "edge": "E17",
+   "question": "two-processes",
+   "invariant": "I-3A",
+   "statuses": [
+    "success",
+    "error"
+   ],
+   "effects": 1
+  },
+  {
+   "runKey": "W3-A.two-processes#5",
+   "family": "A",
+   "edge": "E17",
+   "question": "two-processes",
+   "invariant": "I-3A",
+   "statuses": [
+    "success",
+    "error"
+   ],
+   "effects": 1
+  },
+  {
+   "runKey": "W3-A.two-processes#6",
+   "family": "A",
+   "edge": "E17",
+   "question": "two-processes",
+   "invariant": "I-3A",
+   "statuses": [
+    "success",
+    "error"
+   ],
+   "effects": 1
+  },
+  {
+   "runKey": "W3-A.two-processes#7",
+   "family": "A",
+   "edge": "E17",
+   "question": "two-processes",
+   "invariant": "I-3A",
+   "statuses": [
+    "success",
+    "error"
+   ],
+   "effects": 1
+  },
+  {
+   "runKey": "W3-A.two-processes#8",
+   "family": "A",
+   "edge": "E17",
+   "question": "two-processes",
+   "invariant": "I-3A",
+   "statuses": [
+    "success",
+    "error"
+   ],
+   "effects": 1
+  },
+  {
+   "runKey": "W3-A.two-processes#9",
+   "family": "A",
+   "edge": "E17",
+   "question": "two-processes",
+   "invariant": "I-3A",
+   "statuses": [
+    "success",
+    "error"
+   ],
+   "effects": 1
+  },
+  {
+   "runKey": "W3-A.two-processes#10",
+   "family": "A",
+   "edge": "E17",
+   "question": "two-processes",
+   "invariant": "I-3A",
+   "statuses": [
+    "success",
+    "error"
+   ],
+   "effects": 1
+  },
+  {
+   "runKey": "W3-A.two-runs-same-id#1",
+   "family": "A",
+   "edge": "E17",
+   "question": "two-runs-same-id",
+   "invariant": "I-3A",
+   "starts": [
+    "suspended",
+    "suspended"
+   ],
+   "resume": "success",
+   "effects": 1,
+   "subjects": [
+    "second"
+   ]
+  },
+  {
+   "runKey": "W3-A.two-runs-same-id#2",
+   "family": "A",
+   "edge": "E17",
+   "question": "two-runs-same-id",
+   "invariant": "I-3A",
+   "starts": [
+    "suspended",
+    "suspended"
+   ],
+   "resume": "success",
+   "effects": 1,
+   "subjects": [
+    "second"
+   ]
+  },
+  {
+   "runKey": "W3-A.two-runs-same-id#3",
+   "family": "A",
+   "edge": "E17",
+   "question": "two-runs-same-id",
+   "invariant": "I-3A",
+   "starts": [
+    "suspended",
+    "suspended"
+   ],
+   "resume": "success",
+   "effects": 1,
+   "subjects": [
+    "second"
+   ]
+  },
+  {
+   "runKey": "W3-A.two-runs-same-id#4",
+   "family": "A",
+   "edge": "E17",
+   "question": "two-runs-same-id",
+   "invariant": "I-3A",
+   "starts": [
+    "suspended",
+    "suspended"
+   ],
+   "resume": "success",
+   "effects": 1,
+   "subjects": [
+    "second"
+   ]
+  },
+  {
+   "runKey": "W3-A.two-runs-same-id#5",
+   "family": "A",
+   "edge": "E17",
+   "question": "two-runs-same-id",
+   "invariant": "I-3A",
+   "starts": [
+    "suspended",
+    "suspended"
+   ],
+   "resume": "success",
+   "effects": 1,
+   "subjects": [
+    "second"
+   ]
+  },
+  {
+   "runKey": "W3-A.two-runs-same-id#6",
+   "family": "A",
+   "edge": "E17",
+   "question": "two-runs-same-id",
+   "invariant": "I-3A",
+   "starts": [
+    "suspended",
+    "suspended"
+   ],
+   "resume": "success",
+   "effects": 1,
+   "subjects": [
+    "second"
+   ]
+  },
+  {
+   "runKey": "W3-A.two-runs-same-id#7",
+   "family": "A",
+   "edge": "E17",
+   "question": "two-runs-same-id",
+   "invariant": "I-3A",
+   "starts": [
+    "suspended",
+    "suspended"
+   ],
+   "resume": "success",
+   "effects": 1,
+   "subjects": [
+    "second"
+   ]
+  },
+  {
+   "runKey": "W3-A.two-runs-same-id#8",
+   "family": "A",
+   "edge": "E17",
+   "question": "two-runs-same-id",
+   "invariant": "I-3A",
+   "starts": [
+    "suspended",
+    "suspended"
+   ],
+   "resume": "success",
+   "effects": 1,
+   "subjects": [
+    "second"
+   ]
+  },
+  {
+   "runKey": "W3-A.two-runs-same-id#9",
+   "family": "A",
+   "edge": "E17",
+   "question": "two-runs-same-id",
+   "invariant": "I-3A",
+   "starts": [
+    "suspended",
+    "suspended"
+   ],
+   "resume": "success",
+   "effects": 1,
+   "subjects": [
+    "second"
+   ]
+  },
+  {
+   "runKey": "W3-A.two-runs-same-id#10",
+   "family": "A",
+   "edge": "E17",
+   "question": "two-runs-same-id",
+   "invariant": "I-3A",
+   "starts": [
+    "suspended",
+    "suspended"
+   ],
+   "resume": "success",
+   "effects": 1,
+   "subjects": [
+    "second"
+   ]
+  },
+  {
+   "runKey": "W3-A.same-op-twice#1",
+   "family": "A",
+   "edge": "E17",
+   "question": "same-op-twice",
+   "invariant": "I-3A",
+   "statuses": [
+    "success",
+    "error"
+   ],
+   "effects": 1
+  },
+  {
+   "runKey": "W3-A.same-op-twice#2",
+   "family": "A",
+   "edge": "E17",
+   "question": "same-op-twice",
+   "invariant": "I-3A",
+   "statuses": [
+    "success",
+    "error"
+   ],
+   "effects": 1
+  },
+  {
+   "runKey": "W3-A.same-op-twice#3",
+   "family": "A",
+   "edge": "E17",
+   "question": "same-op-twice",
+   "invariant": "I-3A",
+   "statuses": [
+    "success",
+    "error"
+   ],
+   "effects": 1
+  },
+  {
+   "runKey": "W3-A.same-op-twice#4",
+   "family": "A",
+   "edge": "E17",
+   "question": "same-op-twice",
+   "invariant": "I-3A",
+   "statuses": [
+    "success",
+    "error"
+   ],
+   "effects": 1
+  },
+  {
+   "runKey": "W3-A.same-op-twice#5",
+   "family": "A",
+   "edge": "E17",
+   "question": "same-op-twice",
+   "invariant": "I-3A",
+   "statuses": [
+    "success",
+    "error"
+   ],
+   "effects": 1
+  },
+  {
+   "runKey": "W3-A.same-op-twice#6",
+   "family": "A",
+   "edge": "E17",
+   "question": "same-op-twice",
+   "invariant": "I-3A",
+   "statuses": [
+    "success",
+    "error"
+   ],
+   "effects": 1
+  },
+  {
+   "runKey": "W3-A.same-op-twice#7",
+   "family": "A",
+   "edge": "E17",
+   "question": "same-op-twice",
+   "invariant": "I-3A",
+   "statuses": [
+    "success",
+    "error"
+   ],
+   "effects": 1
+  },
+  {
+   "runKey": "W3-A.same-op-twice#8",
+   "family": "A",
+   "edge": "E17",
+   "question": "same-op-twice",
+   "invariant": "I-3A",
+   "statuses": [
+    "success",
+    "error"
+   ],
+   "effects": 1
+  },
+  {
+   "runKey": "W3-A.same-op-twice#9",
+   "family": "A",
+   "edge": "E17",
+   "question": "same-op-twice",
+   "invariant": "I-3A",
+   "statuses": [
+    "success",
+    "error"
+   ],
+   "effects": 1
+  },
+  {
+   "runKey": "W3-A.same-op-twice#10",
+   "family": "A",
+   "edge": "E17",
+   "question": "same-op-twice",
+   "invariant": "I-3A",
+   "statuses": [
+    "success",
+    "error"
+   ],
+   "effects": 1
+  },
+  {
+   "runKey": "W3-A.read-during-write#1",
+   "family": "A",
+   "edge": "E17",
+   "question": "read-during-write",
+   "invariant": "I-3A",
+   "resume": "success",
+   "snapshotReadableDuringWrite": true,
+   "effects": 1
+  },
+  {
+   "runKey": "W3-A.read-during-write#2",
+   "family": "A",
+   "edge": "E17",
+   "question": "read-during-write",
+   "invariant": "I-3A",
+   "resume": "success",
+   "snapshotReadableDuringWrite": true,
+   "effects": 1
+  },
+  {
+   "runKey": "W3-A.read-during-write#3",
+   "family": "A",
+   "edge": "E17",
+   "question": "read-during-write",
+   "invariant": "I-3A",
+   "resume": "success",
+   "snapshotReadableDuringWrite": true,
+   "effects": 1
+  },
+  {
+   "runKey": "W3-A.read-during-write#4",
+   "family": "A",
+   "edge": "E17",
+   "question": "read-during-write",
+   "invariant": "I-3A",
+   "resume": "success",
+   "snapshotReadableDuringWrite": true,
+   "effects": 1
+  },
+  {
+   "runKey": "W3-A.read-during-write#5",
+   "family": "A",
+   "edge": "E17",
+   "question": "read-during-write",
+   "invariant": "I-3A",
+   "resume": "success",
+   "snapshotReadableDuringWrite": true,
+   "effects": 1
+  },
+  {
+   "runKey": "W3-A.read-during-write#6",
+   "family": "A",
+   "edge": "E17",
+   "question": "read-during-write",
+   "invariant": "I-3A",
+   "resume": "success",
+   "snapshotReadableDuringWrite": true,
+   "effects": 1
+  },
+  {
+   "runKey": "W3-A.read-during-write#7",
+   "family": "A",
+   "edge": "E17",
+   "question": "read-during-write",
+   "invariant": "I-3A",
+   "resume": "success",
+   "snapshotReadableDuringWrite": true,
+   "effects": 1
+  },
+  {
+   "runKey": "W3-A.read-during-write#8",
+   "family": "A",
+   "edge": "E17",
+   "question": "read-during-write",
+   "invariant": "I-3A",
+   "resume": "success",
+   "snapshotReadableDuringWrite": true,
+   "effects": 1
+  },
+  {
+   "runKey": "W3-A.read-during-write#9",
+   "family": "A",
+   "edge": "E17",
+   "question": "read-during-write",
+   "invariant": "I-3A",
+   "resume": "success",
+   "snapshotReadableDuringWrite": true,
+   "effects": 1
+  },
+  {
+   "runKey": "W3-A.read-during-write#10",
+   "family": "A",
+   "edge": "E17",
+   "question": "read-during-write",
+   "invariant": "I-3A",
+   "resume": "success",
+   "snapshotReadableDuringWrite": true,
+   "effects": 1
+  },
+  {
+   "runKey": "W3-A.conflicting-ops#1",
+   "family": "A",
+   "edge": "E17",
+   "question": "conflicting-ops",
+   "invariant": "I-3A",
+   "statuses": [
+    "success",
+    "error"
+   ],
+   "effects": 1,
+   "amounts": [
+    10
+   ]
+  },
+  {
+   "runKey": "W3-A.conflicting-ops#2",
+   "family": "A",
+   "edge": "E17",
+   "question": "conflicting-ops",
+   "invariant": "I-3A",
+   "statuses": [
+    "success",
+    "error"
+   ],
+   "effects": 1,
+   "amounts": [
+    10
+   ]
+  },
+  {
+   "runKey": "W3-A.conflicting-ops#3",
+   "family": "A",
+   "edge": "E17",
+   "question": "conflicting-ops",
+   "invariant": "I-3A",
+   "statuses": [
+    "success",
+    "error"
+   ],
+   "effects": 1,
+   "amounts": [
+    10
+   ]
+  },
+  {
+   "runKey": "W3-A.conflicting-ops#4",
+   "family": "A",
+   "edge": "E17",
+   "question": "conflicting-ops",
+   "invariant": "I-3A",
+   "statuses": [
+    "success",
+    "error"
+   ],
+   "effects": 1,
+   "amounts": [
+    10
+   ]
+  },
+  {
+   "runKey": "W3-A.conflicting-ops#5",
+   "family": "A",
+   "edge": "E17",
+   "question": "conflicting-ops",
+   "invariant": "I-3A",
+   "statuses": [
+    "success",
+    "error"
+   ],
+   "effects": 1,
+   "amounts": [
+    10
+   ]
+  },
+  {
+   "runKey": "W3-A.conflicting-ops#6",
+   "family": "A",
+   "edge": "E17",
+   "question": "conflicting-ops",
+   "invariant": "I-3A",
+   "statuses": [
+    "success",
+    "error"
+   ],
+   "effects": 1,
+   "amounts": [
+    10
+   ]
+  },
+  {
+   "runKey": "W3-A.conflicting-ops#7",
+   "family": "A",
+   "edge": "E17",
+   "question": "conflicting-ops",
+   "invariant": "I-3A",
+   "statuses": [
+    "success",
+    "error"
+   ],
+   "effects": 1,
+   "amounts": [
+    10
+   ]
+  },
+  {
+   "runKey": "W3-A.conflicting-ops#8",
+   "family": "A",
+   "edge": "E17",
+   "question": "conflicting-ops",
+   "invariant": "I-3A",
+   "statuses": [
+    "success",
+    "error"
+   ],
+   "effects": 1,
+   "amounts": [
+    10
+   ]
+  },
+  {
+   "runKey": "W3-A.conflicting-ops#9",
+   "family": "A",
+   "edge": "E17",
+   "question": "conflicting-ops",
+   "invariant": "I-3A",
+   "statuses": [
+    "success",
+    "error"
+   ],
+   "effects": 1,
+   "amounts": [
+    10
+   ]
+  },
+  {
+   "runKey": "W3-A.conflicting-ops#10",
+   "family": "A",
+   "edge": "E17",
+   "question": "conflicting-ops",
+   "invariant": "I-3A",
+   "statuses": [
+    "success",
+    "error"
+   ],
+   "effects": 1,
+   "amounts": [
+    10
+   ]
+  },
+  {
+   "runKey": "W3-A.two-users#1",
+   "family": "A",
+   "edge": "E17",
+   "question": "two-users",
+   "invariant": "I-3A",
+   "statuses": [
+    "success",
+    "success"
+   ],
+   "effects": 2,
+   "subjects": [
+    "userA",
+    "userB"
+   ]
+  },
+  {
+   "runKey": "W3-A.two-users#2",
+   "family": "A",
+   "edge": "E17",
+   "question": "two-users",
+   "invariant": "I-3A",
+   "statuses": [
+    "success",
+    "success"
+   ],
+   "effects": 2,
+   "subjects": [
+    "userA",
+    "userB"
+   ]
+  },
+  {
+   "runKey": "W3-A.two-users#3",
+   "family": "A",
+   "edge": "E17",
+   "question": "two-users",
+   "invariant": "I-3A",
+   "statuses": [
+    "success",
+    "success"
+   ],
+   "effects": 2,
+   "subjects": [
+    "userA",
+    "userB"
+   ]
+  },
+  {
+   "runKey": "W3-A.two-users#4",
+   "family": "A",
+   "edge": "E17",
+   "question": "two-users",
+   "invariant": "I-3A",
+   "statuses": [
+    "success",
+    "success"
+   ],
+   "effects": 2,
+   "subjects": [
+    "userA",
+    "userB"
+   ]
+  },
+  {
+   "runKey": "W3-A.two-users#5",
+   "family": "A",
+   "edge": "E17",
+   "question": "two-users",
+   "invariant": "I-3A",
+   "statuses": [
+    "success",
+    "success"
+   ],
+   "effects": 2,
+   "subjects": [
+    "userA",
+    "userB"
+   ]
+  },
+  {
+   "runKey": "W3-A.two-users#6",
+   "family": "A",
+   "edge": "E17",
+   "question": "two-users",
+   "invariant": "I-3A",
+   "statuses": [
+    "success",
+    "success"
+   ],
+   "effects": 2,
+   "subjects": [
+    "userA",
+    "userB"
+   ]
+  },
+  {
+   "runKey": "W3-A.two-users#7",
+   "family": "A",
+   "edge": "E17",
+   "question": "two-users",
+   "invariant": "I-3A",
+   "statuses": [
+    "success",
+    "success"
+   ],
+   "effects": 2,
+   "subjects": [
+    "userA",
+    "userB"
+   ]
+  },
+  {
+   "runKey": "W3-A.two-users#8",
+   "family": "A",
+   "edge": "E17",
+   "question": "two-users",
+   "invariant": "I-3A",
+   "statuses": [
+    "success",
+    "success"
+   ],
+   "effects": 2,
+   "subjects": [
+    "userA",
+    "userB"
+   ]
+  },
+  {
+   "runKey": "W3-A.two-users#9",
+   "family": "A",
+   "edge": "E17",
+   "question": "two-users",
+   "invariant": "I-3A",
+   "statuses": [
+    "success",
+    "success"
+   ],
+   "effects": 2,
+   "subjects": [
+    "userA",
+    "userB"
+   ]
+  },
+  {
+   "runKey": "W3-A.two-users#10",
+   "family": "A",
+   "edge": "E17",
+   "question": "two-users",
+   "invariant": "I-3A",
+   "statuses": [
+    "success",
+    "success"
+   ],
+   "effects": 2,
+   "subjects": [
+    "userA",
+    "userB"
+   ]
+  },
+  {
+   "runKey": "W3-B.two-processes#1",
+   "family": "B",
+   "edge": "E18",
+   "question": "two-processes",
+   "invariant": "I-3B",
+   "statuses": [
+    "success",
+    "error"
+   ],
+   "effects": 1
+  },
+  {
+   "runKey": "W3-B.two-processes#2",
+   "family": "B",
+   "edge": "E18",
+   "question": "two-processes",
+   "invariant": "I-3B",
+   "statuses": [
+    "success",
+    "error"
+   ],
+   "effects": 1
+  },
+  {
+   "runKey": "W3-B.two-processes#3",
+   "family": "B",
+   "edge": "E18",
+   "question": "two-processes",
+   "invariant": "I-3B",
+   "statuses": [
+    "success",
+    "error"
+   ],
+   "effects": 1
+  },
+  {
+   "runKey": "W3-B.two-processes#4",
+   "family": "B",
+   "edge": "E18",
+   "question": "two-processes",
+   "invariant": "I-3B",
+   "statuses": [
+    "success",
+    "error"
+   ],
+   "effects": 1
+  },
+  {
+   "runKey": "W3-B.two-processes#5",
+   "family": "B",
+   "edge": "E18",
+   "question": "two-processes",
+   "invariant": "I-3B",
+   "statuses": [
+    "success",
+    "error"
+   ],
+   "effects": 1
+  },
+  {
+   "runKey": "W3-B.two-processes#6",
+   "family": "B",
+   "edge": "E18",
+   "question": "two-processes",
+   "invariant": "I-3B",
+   "statuses": [
+    "success",
+    "error"
+   ],
+   "effects": 1
+  },
+  {
+   "runKey": "W3-B.two-processes#7",
+   "family": "B",
+   "edge": "E18",
+   "question": "two-processes",
+   "invariant": "I-3B",
+   "statuses": [
+    "success",
+    "error"
+   ],
+   "effects": 1
+  },
+  {
+   "runKey": "W3-B.two-processes#8",
+   "family": "B",
+   "edge": "E18",
+   "question": "two-processes",
+   "invariant": "I-3B",
+   "statuses": [
+    "success",
+    "error"
+   ],
+   "effects": 1
+  },
+  {
+   "runKey": "W3-B.two-processes#9",
+   "family": "B",
+   "edge": "E18",
+   "question": "two-processes",
+   "invariant": "I-3B",
+   "statuses": [
+    "success",
+    "error"
+   ],
+   "effects": 1
+  },
+  {
+   "runKey": "W3-B.two-processes#10",
+   "family": "B",
+   "edge": "E18",
+   "question": "two-processes",
+   "invariant": "I-3B",
+   "statuses": [
+    "success",
+    "error"
+   ],
+   "effects": 1
+  },
+  {
+   "runKey": "W3-B.two-runs-same-id#1",
+   "family": "B",
+   "edge": "E18",
+   "question": "two-runs-same-id",
+   "invariant": "I-3B",
+   "starts": [
+    "suspended",
+    "suspended"
+   ],
+   "resume": "success",
+   "effects": 1,
+   "subjects": [
+    "second"
+   ]
+  },
+  {
+   "runKey": "W3-B.two-runs-same-id#2",
+   "family": "B",
+   "edge": "E18",
+   "question": "two-runs-same-id",
+   "invariant": "I-3B",
+   "starts": [
+    "suspended",
+    "suspended"
+   ],
+   "resume": "success",
+   "effects": 1,
+   "subjects": [
+    "second"
+   ]
+  },
+  {
+   "runKey": "W3-B.two-runs-same-id#3",
+   "family": "B",
+   "edge": "E18",
+   "question": "two-runs-same-id",
+   "invariant": "I-3B",
+   "starts": [
+    "suspended",
+    "suspended"
+   ],
+   "resume": "success",
+   "effects": 1,
+   "subjects": [
+    "second"
+   ]
+  },
+  {
+   "runKey": "W3-B.two-runs-same-id#4",
+   "family": "B",
+   "edge": "E18",
+   "question": "two-runs-same-id",
+   "invariant": "I-3B",
+   "starts": [
+    "suspended",
+    "suspended"
+   ],
+   "resume": "success",
+   "effects": 1,
+   "subjects": [
+    "second"
+   ]
+  },
+  {
+   "runKey": "W3-B.two-runs-same-id#5",
+   "family": "B",
+   "edge": "E18",
+   "question": "two-runs-same-id",
+   "invariant": "I-3B",
+   "starts": [
+    "suspended",
+    "suspended"
+   ],
+   "resume": "success",
+   "effects": 1,
+   "subjects": [
+    "second"
+   ]
+  },
+  {
+   "runKey": "W3-B.two-runs-same-id#6",
+   "family": "B",
+   "edge": "E18",
+   "question": "two-runs-same-id",
+   "invariant": "I-3B",
+   "starts": [
+    "suspended",
+    "suspended"
+   ],
+   "resume": "success",
+   "effects": 1,
+   "subjects": [
+    "second"
+   ]
+  },
+  {
+   "runKey": "W3-B.two-runs-same-id#7",
+   "family": "B",
+   "edge": "E18",
+   "question": "two-runs-same-id",
+   "invariant": "I-3B",
+   "starts": [
+    "suspended",
+    "suspended"
+   ],
+   "resume": "success",
+   "effects": 1,
+   "subjects": [
+    "second"
+   ]
+  },
+  {
+   "runKey": "W3-B.two-runs-same-id#8",
+   "family": "B",
+   "edge": "E18",
+   "question": "two-runs-same-id",
+   "invariant": "I-3B",
+   "starts": [
+    "suspended",
+    "suspended"
+   ],
+   "resume": "success",
+   "effects": 1,
+   "subjects": [
+    "second"
+   ]
+  },
+  {
+   "runKey": "W3-B.two-runs-same-id#9",
+   "family": "B",
+   "edge": "E18",
+   "question": "two-runs-same-id",
+   "invariant": "I-3B",
+   "starts": [
+    "suspended",
+    "suspended"
+   ],
+   "resume": "success",
+   "effects": 1,
+   "subjects": [
+    "second"
+   ]
+  },
+  {
+   "runKey": "W3-B.two-runs-same-id#10",
+   "family": "B",
+   "edge": "E18",
+   "question": "two-runs-same-id",
+   "invariant": "I-3B",
+   "starts": [
+    "suspended",
+    "suspended"
+   ],
+   "resume": "success",
+   "effects": 1,
+   "subjects": [
+    "second"
+   ]
+  },
+  {
+   "runKey": "W3-B.same-op-twice#1",
+   "family": "B",
+   "edge": "E18",
+   "question": "same-op-twice",
+   "invariant": "I-3B",
+   "statuses": [
+    "success",
+    "error"
+   ],
+   "effects": 1
+  },
+  {
+   "runKey": "W3-B.same-op-twice#2",
+   "family": "B",
+   "edge": "E18",
+   "question": "same-op-twice",
+   "invariant": "I-3B",
+   "statuses": [
+    "success",
+    "error"
+   ],
+   "effects": 1
+  },
+  {
+   "runKey": "W3-B.same-op-twice#3",
+   "family": "B",
+   "edge": "E18",
+   "question": "same-op-twice",
+   "invariant": "I-3B",
+   "statuses": [
+    "success",
+    "error"
+   ],
+   "effects": 1
+  },
+  {
+   "runKey": "W3-B.same-op-twice#4",
+   "family": "B",
+   "edge": "E18",
+   "question": "same-op-twice",
+   "invariant": "I-3B",
+   "statuses": [
+    "success",
+    "error"
+   ],
+   "effects": 1
+  },
+  {
+   "runKey": "W3-B.same-op-twice#5",
+   "family": "B",
+   "edge": "E18",
+   "question": "same-op-twice",
+   "invariant": "I-3B",
+   "statuses": [
+    "success",
+    "error"
+   ],
+   "effects": 1
+  },
+  {
+   "runKey": "W3-B.same-op-twice#6",
+   "family": "B",
+   "edge": "E18",
+   "question": "same-op-twice",
+   "invariant": "I-3B",
+   "statuses": [
+    "success",
+    "error"
+   ],
+   "effects": 1
+  },
+  {
+   "runKey": "W3-B.same-op-twice#7",
+   "family": "B",
+   "edge": "E18",
+   "question": "same-op-twice",
+   "invariant": "I-3B",
+   "statuses": [
+    "success",
+    "error"
+   ],
+   "effects": 1
+  },
+  {
+   "runKey": "W3-B.same-op-twice#8",
+   "family": "B",
+   "edge": "E18",
+   "question": "same-op-twice",
+   "invariant": "I-3B",
+   "statuses": [
+    "success",
+    "error"
+   ],
+   "effects": 1
+  },
+  {
+   "runKey": "W3-B.same-op-twice#9",
+   "family": "B",
+   "edge": "E18",
+   "question": "same-op-twice",
+   "invariant": "I-3B",
+   "statuses": [
+    "success",
+    "error"
+   ],
+   "effects": 1
+  },
+  {
+   "runKey": "W3-B.same-op-twice#10",
+   "family": "B",
+   "edge": "E18",
+   "question": "same-op-twice",
+   "invariant": "I-3B",
+   "statuses": [
+    "success",
+    "error"
+   ],
+   "effects": 1
+  },
+  {
+   "runKey": "W3-B.read-during-write#1",
+   "family": "B",
+   "edge": "E18",
+   "question": "read-during-write",
+   "invariant": "I-3B",
+   "resume": "success",
+   "snapshotReadableDuringWrite": true,
+   "effects": 1
+  },
+  {
+   "runKey": "W3-B.read-during-write#2",
+   "family": "B",
+   "edge": "E18",
+   "question": "read-during-write",
+   "invariant": "I-3B",
+   "resume": "success",
+   "snapshotReadableDuringWrite": true,
+   "effects": 1
+  },
+  {
+   "runKey": "W3-B.read-during-write#3",
+   "family": "B",
+   "edge": "E18",
+   "question": "read-during-write",
+   "invariant": "I-3B",
+   "resume": "success",
+   "snapshotReadableDuringWrite": true,
+   "effects": 1
+  },
+  {
+   "runKey": "W3-B.read-during-write#4",
+   "family": "B",
+   "edge": "E18",
+   "question": "read-during-write",
+   "invariant": "I-3B",
+   "resume": "success",
+   "snapshotReadableDuringWrite": true,
+   "effects": 1
+  },
+  {
+   "runKey": "W3-B.read-during-write#5",
+   "family": "B",
+   "edge": "E18",
+   "question": "read-during-write",
+   "invariant": "I-3B",
+   "resume": "success",
+   "snapshotReadableDuringWrite": true,
+   "effects": 1
+  },
+  {
+   "runKey": "W3-B.read-during-write#6",
+   "family": "B",
+   "edge": "E18",
+   "question": "read-during-write",
+   "invariant": "I-3B",
+   "resume": "success",
+   "snapshotReadableDuringWrite": true,
+   "effects": 1
+  },
+  {
+   "runKey": "W3-B.read-during-write#7",
+   "family": "B",
+   "edge": "E18",
+   "question": "read-during-write",
+   "invariant": "I-3B",
+   "resume": "success",
+   "snapshotReadableDuringWrite": true,
+   "effects": 1
+  },
+  {
+   "runKey": "W3-B.read-during-write#8",
+   "family": "B",
+   "edge": "E18",
+   "question": "read-during-write",
+   "invariant": "I-3B",
+   "resume": "success",
+   "snapshotReadableDuringWrite": true,
+   "effects": 1
+  },
+  {
+   "runKey": "W3-B.read-during-write#9",
+   "family": "B",
+   "edge": "E18",
+   "question": "read-during-write",
+   "invariant": "I-3B",
+   "resume": "success",
+   "snapshotReadableDuringWrite": true,
+   "effects": 1
+  },
+  {
+   "runKey": "W3-B.read-during-write#10",
+   "family": "B",
+   "edge": "E18",
+   "question": "read-during-write",
+   "invariant": "I-3B",
+   "resume": "success",
+   "snapshotReadableDuringWrite": true,
+   "effects": 1
+  },
+  {
+   "runKey": "W3-B.conflicting-ops#1",
+   "family": "B",
+   "edge": "E18",
+   "question": "conflicting-ops",
+   "invariant": "I-3B",
+   "statuses": [
+    "success",
+    "error"
+   ],
+   "effects": 1,
+   "amounts": [
+    10
+   ]
+  },
+  {
+   "runKey": "W3-B.conflicting-ops#2",
+   "family": "B",
+   "edge": "E18",
+   "question": "conflicting-ops",
+   "invariant": "I-3B",
+   "statuses": [
+    "success",
+    "error"
+   ],
+   "effects": 1,
+   "amounts": [
+    10
+   ]
+  },
+  {
+   "runKey": "W3-B.conflicting-ops#3",
+   "family": "B",
+   "edge": "E18",
+   "question": "conflicting-ops",
+   "invariant": "I-3B",
+   "statuses": [
+    "success",
+    "error"
+   ],
+   "effects": 1,
+   "amounts": [
+    10
+   ]
+  },
+  {
+   "runKey": "W3-B.conflicting-ops#4",
+   "family": "B",
+   "edge": "E18",
+   "question": "conflicting-ops",
+   "invariant": "I-3B",
+   "statuses": [
+    "success",
+    "error"
+   ],
+   "effects": 1,
+   "amounts": [
+    10
+   ]
+  },
+  {
+   "runKey": "W3-B.conflicting-ops#5",
+   "family": "B",
+   "edge": "E18",
+   "question": "conflicting-ops",
+   "invariant": "I-3B",
+   "statuses": [
+    "success",
+    "error"
+   ],
+   "effects": 1,
+   "amounts": [
+    10
+   ]
+  },
+  {
+   "runKey": "W3-B.conflicting-ops#6",
+   "family": "B",
+   "edge": "E18",
+   "question": "conflicting-ops",
+   "invariant": "I-3B",
+   "statuses": [
+    "success",
+    "error"
+   ],
+   "effects": 1,
+   "amounts": [
+    10
+   ]
+  },
+  {
+   "runKey": "W3-B.conflicting-ops#7",
+   "family": "B",
+   "edge": "E18",
+   "question": "conflicting-ops",
+   "invariant": "I-3B",
+   "statuses": [
+    "success",
+    "error"
+   ],
+   "effects": 1,
+   "amounts": [
+    10
+   ]
+  },
+  {
+   "runKey": "W3-B.conflicting-ops#8",
+   "family": "B",
+   "edge": "E18",
+   "question": "conflicting-ops",
+   "invariant": "I-3B",
+   "statuses": [
+    "success",
+    "error"
+   ],
+   "effects": 1,
+   "amounts": [
+    10
+   ]
+  },
+  {
+   "runKey": "W3-B.conflicting-ops#9",
+   "family": "B",
+   "edge": "E18",
+   "question": "conflicting-ops",
+   "invariant": "I-3B",
+   "statuses": [
+    "success",
+    "error"
+   ],
+   "effects": 1,
+   "amounts": [
+    10
+   ]
+  },
+  {
+   "runKey": "W3-B.conflicting-ops#10",
+   "family": "B",
+   "edge": "E18",
+   "question": "conflicting-ops",
+   "invariant": "I-3B",
+   "statuses": [
+    "success",
+    "error"
+   ],
+   "effects": 1,
+   "amounts": [
+    10
+   ]
+  },
+  {
+   "runKey": "W3-B.two-users#1",
+   "family": "B",
+   "edge": "E18",
+   "question": "two-users",
+   "invariant": "I-3B",
+   "statuses": [
+    "success",
+    "success"
+   ],
+   "effects": 2,
+   "subjects": [
+    "userA",
+    "userB"
+   ]
+  },
+  {
+   "runKey": "W3-B.two-users#2",
+   "family": "B",
+   "edge": "E18",
+   "question": "two-users",
+   "invariant": "I-3B",
+   "statuses": [
+    "success",
+    "success"
+   ],
+   "effects": 2,
+   "subjects": [
+    "userA",
+    "userB"
+   ]
+  },
+  {
+   "runKey": "W3-B.two-users#3",
+   "family": "B",
+   "edge": "E18",
+   "question": "two-users",
+   "invariant": "I-3B",
+   "statuses": [
+    "success",
+    "success"
+   ],
+   "effects": 2,
+   "subjects": [
+    "userA",
+    "userB"
+   ]
+  },
+  {
+   "runKey": "W3-B.two-users#4",
+   "family": "B",
+   "edge": "E18",
+   "question": "two-users",
+   "invariant": "I-3B",
+   "statuses": [
+    "success",
+    "success"
+   ],
+   "effects": 2,
+   "subjects": [
+    "userA",
+    "userB"
+   ]
+  },
+  {
+   "runKey": "W3-B.two-users#5",
+   "family": "B",
+   "edge": "E18",
+   "question": "two-users",
+   "invariant": "I-3B",
+   "statuses": [
+    "success",
+    "success"
+   ],
+   "effects": 2,
+   "subjects": [
+    "userA",
+    "userB"
+   ]
+  },
+  {
+   "runKey": "W3-B.two-users#6",
+   "family": "B",
+   "edge": "E18",
+   "question": "two-users",
+   "invariant": "I-3B",
+   "statuses": [
+    "success",
+    "success"
+   ],
+   "effects": 2,
+   "subjects": [
+    "userA",
+    "userB"
+   ]
+  },
+  {
+   "runKey": "W3-B.two-users#7",
+   "family": "B",
+   "edge": "E18",
+   "question": "two-users",
+   "invariant": "I-3B",
+   "statuses": [
+    "success",
+    "success"
+   ],
+   "effects": 2,
+   "subjects": [
+    "userA",
+    "userB"
+   ]
+  },
+  {
+   "runKey": "W3-B.two-users#8",
+   "family": "B",
+   "edge": "E18",
+   "question": "two-users",
+   "invariant": "I-3B",
+   "statuses": [
+    "success",
+    "success"
+   ],
+   "effects": 2,
+   "subjects": [
+    "userA",
+    "userB"
+   ]
+  },
+  {
+   "runKey": "W3-B.two-users#9",
+   "family": "B",
+   "edge": "E18",
+   "question": "two-users",
+   "invariant": "I-3B",
+   "statuses": [
+    "success",
+    "success"
+   ],
+   "effects": 2,
+   "subjects": [
+    "userA",
+    "userB"
+   ]
+  },
+  {
+   "runKey": "W3-B.two-users#10",
+   "family": "B",
+   "edge": "E18",
+   "question": "two-users",
+   "invariant": "I-3B",
+   "statuses": [
+    "success",
+    "success"
+   ],
+   "effects": 2,
+   "subjects": [
+    "userA",
+    "userB"
+   ]
+  },
+  {
+   "runKey": "W3-C.E17.fail-before-write#1",
+   "family": "C",
+   "edge": "E17",
+   "question": "fail-before-write",
+   "invariant": "I-3C",
+   "achieved": "died-before-effect",
+   "firstStatus": null,
+   "effectsAfterCrash": 0,
+   "resumeStatus": "error",
+   "resumeMsg": "This workflow run was not suspended",
+   "effectsAfterResume": 0,
+   "doubleApplied": false,
+   "recoverable": false
+  },
+  {
+   "runKey": "W3-C.E17.fail-before-write#2",
+   "family": "C",
+   "edge": "E17",
+   "question": "fail-before-write",
+   "invariant": "I-3C",
+   "achieved": "died-before-effect",
+   "firstStatus": null,
+   "effectsAfterCrash": 0,
+   "resumeStatus": "error",
+   "resumeMsg": "This workflow run was not suspended",
+   "effectsAfterResume": 0,
+   "doubleApplied": false,
+   "recoverable": false
+  },
+  {
+   "runKey": "W3-C.E17.fail-before-write#3",
+   "family": "C",
+   "edge": "E17",
+   "question": "fail-before-write",
+   "invariant": "I-3C",
+   "achieved": "died-before-effect",
+   "firstStatus": null,
+   "effectsAfterCrash": 0,
+   "resumeStatus": "error",
+   "resumeMsg": "This workflow run was not suspended",
+   "effectsAfterResume": 0,
+   "doubleApplied": false,
+   "recoverable": false
+  },
+  {
+   "runKey": "W3-C.E17.fail-before-write#4",
+   "family": "C",
+   "edge": "E17",
+   "question": "fail-before-write",
+   "invariant": "I-3C",
+   "achieved": "died-before-effect",
+   "firstStatus": null,
+   "effectsAfterCrash": 0,
+   "resumeStatus": "error",
+   "resumeMsg": "This workflow run was not suspended",
+   "effectsAfterResume": 0,
+   "doubleApplied": false,
+   "recoverable": false
+  },
+  {
+   "runKey": "W3-C.E17.fail-before-write#5",
+   "family": "C",
+   "edge": "E17",
+   "question": "fail-before-write",
+   "invariant": "I-3C",
+   "achieved": "died-before-effect",
+   "firstStatus": null,
+   "effectsAfterCrash": 0,
+   "resumeStatus": "error",
+   "resumeMsg": "This workflow run was not suspended",
+   "effectsAfterResume": 0,
+   "doubleApplied": false,
+   "recoverable": false
+  },
+  {
+   "runKey": "W3-C.E17.partial-write#1",
+   "family": "C",
+   "edge": "E17",
+   "question": "partial-write",
+   "invariant": "I-3C",
+   "achieved": "effect-without-record",
+   "firstStatus": null,
+   "effectsAfterCrash": 1,
+   "resumeStatus": "error",
+   "resumeMsg": "This workflow run was not suspended",
+   "effectsAfterResume": 1,
+   "doubleApplied": false,
+   "recoverable": false
+  },
+  {
+   "runKey": "W3-C.E17.partial-write#2",
+   "family": "C",
+   "edge": "E17",
+   "question": "partial-write",
+   "invariant": "I-3C",
+   "achieved": "effect-without-record",
+   "firstStatus": null,
+   "effectsAfterCrash": 1,
+   "resumeStatus": "error",
+   "resumeMsg": "This workflow run was not suspended",
+   "effectsAfterResume": 1,
+   "doubleApplied": false,
+   "recoverable": false
+  },
+  {
+   "runKey": "W3-C.E17.partial-write#3",
+   "family": "C",
+   "edge": "E17",
+   "question": "partial-write",
+   "invariant": "I-3C",
+   "achieved": "effect-without-record",
+   "firstStatus": null,
+   "effectsAfterCrash": 1,
+   "resumeStatus": "error",
+   "resumeMsg": "This workflow run was not suspended",
+   "effectsAfterResume": 1,
+   "doubleApplied": false,
+   "recoverable": false
+  },
+  {
+   "runKey": "W3-C.E17.partial-write#4",
+   "family": "C",
+   "edge": "E17",
+   "question": "partial-write",
+   "invariant": "I-3C",
+   "achieved": "effect-without-record",
+   "firstStatus": null,
+   "effectsAfterCrash": 1,
+   "resumeStatus": "error",
+   "resumeMsg": "This workflow run was not suspended",
+   "effectsAfterResume": 1,
+   "doubleApplied": false,
+   "recoverable": false
+  },
+  {
+   "runKey": "W3-C.E17.partial-write#5",
+   "family": "C",
+   "edge": "E17",
+   "question": "partial-write",
+   "invariant": "I-3C",
+   "achieved": "effect-without-record",
+   "firstStatus": null,
+   "effectsAfterCrash": 1,
+   "resumeStatus": "error",
+   "resumeMsg": "This workflow run was not suspended",
+   "effectsAfterResume": 1,
+   "doubleApplied": false,
+   "recoverable": false
+  },
+  {
+   "runKey": "W3-C.E17.write-ok-ack-fails#1",
+   "family": "C",
+   "edge": "E17",
+   "question": "write-ok-ack-fails",
+   "invariant": "I-3C",
+   "achieved": "completed",
+   "firstStatus": "success",
+   "effectsAfterCrash": 1,
+   "resumeStatus": "error",
+   "resumeMsg": "This workflow run was not suspended",
+   "effectsAfterResume": 1,
+   "doubleApplied": false,
+   "recoverable": false
+  },
+  {
+   "runKey": "W3-C.E17.write-ok-ack-fails#2",
+   "family": "C",
+   "edge": "E17",
+   "question": "write-ok-ack-fails",
+   "invariant": "I-3C",
+   "achieved": "completed",
+   "firstStatus": "success",
+   "effectsAfterCrash": 1,
+   "resumeStatus": "error",
+   "resumeMsg": "This workflow run was not suspended",
+   "effectsAfterResume": 1,
+   "doubleApplied": false,
+   "recoverable": false
+  },
+  {
+   "runKey": "W3-C.E17.write-ok-ack-fails#3",
+   "family": "C",
+   "edge": "E17",
+   "question": "write-ok-ack-fails",
+   "invariant": "I-3C",
+   "achieved": "completed",
+   "firstStatus": "success",
+   "effectsAfterCrash": 1,
+   "resumeStatus": "error",
+   "resumeMsg": "This workflow run was not suspended",
+   "effectsAfterResume": 1,
+   "doubleApplied": false,
+   "recoverable": false
+  },
+  {
+   "runKey": "W3-C.E17.write-ok-ack-fails#4",
+   "family": "C",
+   "edge": "E17",
+   "question": "write-ok-ack-fails",
+   "invariant": "I-3C",
+   "achieved": "completed",
+   "firstStatus": "success",
+   "effectsAfterCrash": 1,
+   "resumeStatus": "error",
+   "resumeMsg": "This workflow run was not suspended",
+   "effectsAfterResume": 1,
+   "doubleApplied": false,
+   "recoverable": false
+  },
+  {
+   "runKey": "W3-C.E17.write-ok-ack-fails#5",
+   "family": "C",
+   "edge": "E17",
+   "question": "write-ok-ack-fails",
+   "invariant": "I-3C",
+   "achieved": "completed",
+   "firstStatus": "success",
+   "effectsAfterCrash": 1,
+   "resumeStatus": "error",
+   "resumeMsg": "This workflow run was not suspended",
+   "effectsAfterResume": 1,
+   "doubleApplied": false,
+   "recoverable": false
+  },
+  {
+   "runKey": "W3-C.E17.record-ok-effect-fails#1",
+   "family": "C",
+   "edge": "E17",
+   "question": "record-ok-effect-fails",
+   "invariant": "I-3C",
+   "achieved": "declined-no-effect",
+   "firstStatus": "success",
+   "effectsAfterCrash": 0,
+   "resumeStatus": "error",
+   "resumeMsg": "This workflow run was not suspended",
+   "effectsAfterResume": 0,
+   "doubleApplied": false,
+   "recoverable": false
+  },
+  {
+   "runKey": "W3-C.E17.record-ok-effect-fails#2",
+   "family": "C",
+   "edge": "E17",
+   "question": "record-ok-effect-fails",
+   "invariant": "I-3C",
+   "achieved": "declined-no-effect",
+   "firstStatus": "success",
+   "effectsAfterCrash": 0,
+   "resumeStatus": "error",
+   "resumeMsg": "This workflow run was not suspended",
+   "effectsAfterResume": 0,
+   "doubleApplied": false,
+   "recoverable": false
+  },
+  {
+   "runKey": "W3-C.E17.record-ok-effect-fails#3",
+   "family": "C",
+   "edge": "E17",
+   "question": "record-ok-effect-fails",
+   "invariant": "I-3C",
+   "achieved": "declined-no-effect",
+   "firstStatus": "success",
+   "effectsAfterCrash": 0,
+   "resumeStatus": "error",
+   "resumeMsg": "This workflow run was not suspended",
+   "effectsAfterResume": 0,
+   "doubleApplied": false,
+   "recoverable": false
+  },
+  {
+   "runKey": "W3-C.E17.record-ok-effect-fails#4",
+   "family": "C",
+   "edge": "E17",
+   "question": "record-ok-effect-fails",
+   "invariant": "I-3C",
+   "achieved": "declined-no-effect",
+   "firstStatus": "success",
+   "effectsAfterCrash": 0,
+   "resumeStatus": "error",
+   "resumeMsg": "This workflow run was not suspended",
+   "effectsAfterResume": 0,
+   "doubleApplied": false,
+   "recoverable": false
+  },
+  {
+   "runKey": "W3-C.E17.record-ok-effect-fails#5",
+   "family": "C",
+   "edge": "E17",
+   "question": "record-ok-effect-fails",
+   "invariant": "I-3C",
+   "achieved": "declined-no-effect",
+   "firstStatus": "success",
+   "effectsAfterCrash": 0,
+   "resumeStatus": "error",
+   "resumeMsg": "This workflow run was not suspended",
+   "effectsAfterResume": 0,
+   "doubleApplied": false,
+   "recoverable": false
+  },
+  {
+   "runKey": "W3-C.E17.effect-ok-record-fails#1",
+   "family": "C",
+   "edge": "E17",
+   "question": "effect-ok-record-fails",
+   "invariant": "I-3C",
+   "achieved": "effect-without-record",
+   "firstStatus": null,
+   "effectsAfterCrash": 1,
+   "resumeStatus": "error",
+   "resumeMsg": "This workflow run was not suspended",
+   "effectsAfterResume": 1,
+   "doubleApplied": false,
+   "recoverable": false
+  },
+  {
+   "runKey": "W3-C.E17.effect-ok-record-fails#2",
+   "family": "C",
+   "edge": "E17",
+   "question": "effect-ok-record-fails",
+   "invariant": "I-3C",
+   "achieved": "effect-without-record",
+   "firstStatus": null,
+   "effectsAfterCrash": 1,
+   "resumeStatus": "error",
+   "resumeMsg": "This workflow run was not suspended",
+   "effectsAfterResume": 1,
+   "doubleApplied": false,
+   "recoverable": false
+  },
+  {
+   "runKey": "W3-C.E17.effect-ok-record-fails#3",
+   "family": "C",
+   "edge": "E17",
+   "question": "effect-ok-record-fails",
+   "invariant": "I-3C",
+   "achieved": "effect-without-record",
+   "firstStatus": null,
+   "effectsAfterCrash": 1,
+   "resumeStatus": "error",
+   "resumeMsg": "This workflow run was not suspended",
+   "effectsAfterResume": 1,
+   "doubleApplied": false,
+   "recoverable": false
+  },
+  {
+   "runKey": "W3-C.E17.effect-ok-record-fails#4",
+   "family": "C",
+   "edge": "E17",
+   "question": "effect-ok-record-fails",
+   "invariant": "I-3C",
+   "achieved": "effect-without-record",
+   "firstStatus": null,
+   "effectsAfterCrash": 1,
+   "resumeStatus": "error",
+   "resumeMsg": "This workflow run was not suspended",
+   "effectsAfterResume": 1,
+   "doubleApplied": false,
+   "recoverable": false
+  },
+  {
+   "runKey": "W3-C.E17.effect-ok-record-fails#5",
+   "family": "C",
+   "edge": "E17",
+   "question": "effect-ok-record-fails",
+   "invariant": "I-3C",
+   "achieved": "effect-without-record",
+   "firstStatus": null,
+   "effectsAfterCrash": 1,
+   "resumeStatus": "error",
+   "resumeMsg": "This workflow run was not suspended",
+   "effectsAfterResume": 1,
+   "doubleApplied": false,
+   "recoverable": false
+  },
+  {
+   "runKey": "W3-C.E17.restart-each-boundary#1",
+   "family": "C",
+   "edge": "E17",
+   "question": "restart-each-boundary",
+   "invariant": "I-3C",
+   "achieved": "killed-mid-effect",
+   "firstStatus": null,
+   "effectsAfterCrash": 1,
+   "resumeStatus": "error",
+   "resumeMsg": "This workflow run was not suspended",
+   "effectsAfterResume": 1,
+   "doubleApplied": false,
+   "recoverable": false
+  },
+  {
+   "runKey": "W3-C.E17.restart-each-boundary#2",
+   "family": "C",
+   "edge": "E17",
+   "question": "restart-each-boundary",
+   "invariant": "I-3C",
+   "achieved": "killed-mid-effect",
+   "firstStatus": null,
+   "effectsAfterCrash": 1,
+   "resumeStatus": "error",
+   "resumeMsg": "This workflow run was not suspended",
+   "effectsAfterResume": 1,
+   "doubleApplied": false,
+   "recoverable": false
+  },
+  {
+   "runKey": "W3-C.E17.restart-each-boundary#3",
+   "family": "C",
+   "edge": "E17",
+   "question": "restart-each-boundary",
+   "invariant": "I-3C",
+   "achieved": "killed-mid-effect",
+   "firstStatus": null,
+   "effectsAfterCrash": 1,
+   "resumeStatus": "error",
+   "resumeMsg": "This workflow run was not suspended",
+   "effectsAfterResume": 1,
+   "doubleApplied": false,
+   "recoverable": false
+  },
+  {
+   "runKey": "W3-C.E17.restart-each-boundary#4",
+   "family": "C",
+   "edge": "E17",
+   "question": "restart-each-boundary",
+   "invariant": "I-3C",
+   "achieved": "killed-mid-effect",
+   "firstStatus": null,
+   "effectsAfterCrash": 1,
+   "resumeStatus": "error",
+   "resumeMsg": "This workflow run was not suspended",
+   "effectsAfterResume": 1,
+   "doubleApplied": false,
+   "recoverable": false
+  },
+  {
+   "runKey": "W3-C.E17.restart-each-boundary#5",
+   "family": "C",
+   "edge": "E17",
+   "question": "restart-each-boundary",
+   "invariant": "I-3C",
+   "achieved": "killed-mid-effect",
+   "firstStatus": null,
+   "effectsAfterCrash": 1,
+   "resumeStatus": "error",
+   "resumeMsg": "This workflow run was not suspended",
+   "effectsAfterResume": 1,
+   "doubleApplied": false,
+   "recoverable": false
+  },
+  {
+   "runKey": "W3-C.E18.fail-before-write#1",
+   "family": "C",
+   "edge": "E18",
+   "question": "fail-before-write",
+   "invariant": "I-3C",
+   "achieved": "died-before-effect",
+   "firstStatus": null,
+   "effectsAfterCrash": 0,
+   "resumeStatus": "error",
+   "resumeMsg": "This workflow run was not suspended",
+   "effectsAfterResume": 0,
+   "doubleApplied": false,
+   "recoverable": false
+  },
+  {
+   "runKey": "W3-C.E18.fail-before-write#2",
+   "family": "C",
+   "edge": "E18",
+   "question": "fail-before-write",
+   "invariant": "I-3C",
+   "achieved": "died-before-effect",
+   "firstStatus": null,
+   "effectsAfterCrash": 0,
+   "resumeStatus": "error",
+   "resumeMsg": "This workflow run was not suspended",
+   "effectsAfterResume": 0,
+   "doubleApplied": false,
+   "recoverable": false
+  },
+  {
+   "runKey": "W3-C.E18.fail-before-write#3",
+   "family": "C",
+   "edge": "E18",
+   "question": "fail-before-write",
+   "invariant": "I-3C",
+   "achieved": "died-before-effect",
+   "firstStatus": null,
+   "effectsAfterCrash": 0,
+   "resumeStatus": "error",
+   "resumeMsg": "This workflow run was not suspended",
+   "effectsAfterResume": 0,
+   "doubleApplied": false,
+   "recoverable": false
+  },
+  {
+   "runKey": "W3-C.E18.fail-before-write#4",
+   "family": "C",
+   "edge": "E18",
+   "question": "fail-before-write",
+   "invariant": "I-3C",
+   "achieved": "died-before-effect",
+   "firstStatus": null,
+   "effectsAfterCrash": 0,
+   "resumeStatus": "error",
+   "resumeMsg": "This workflow run was not suspended",
+   "effectsAfterResume": 0,
+   "doubleApplied": false,
+   "recoverable": false
+  },
+  {
+   "runKey": "W3-C.E18.fail-before-write#5",
+   "family": "C",
+   "edge": "E18",
+   "question": "fail-before-write",
+   "invariant": "I-3C",
+   "achieved": "died-before-effect",
+   "firstStatus": null,
+   "effectsAfterCrash": 0,
+   "resumeStatus": "error",
+   "resumeMsg": "This workflow run was not suspended",
+   "effectsAfterResume": 0,
+   "doubleApplied": false,
+   "recoverable": false
+  },
+  {
+   "runKey": "W3-C.E18.partial-write#1",
+   "family": "C",
+   "edge": "E18",
+   "question": "partial-write",
+   "invariant": "I-3C",
+   "achieved": "effect-without-record",
+   "firstStatus": null,
+   "effectsAfterCrash": 1,
+   "resumeStatus": "error",
+   "resumeMsg": "This workflow run was not suspended",
+   "effectsAfterResume": 1,
+   "doubleApplied": false,
+   "recoverable": false
+  },
+  {
+   "runKey": "W3-C.E18.partial-write#2",
+   "family": "C",
+   "edge": "E18",
+   "question": "partial-write",
+   "invariant": "I-3C",
+   "achieved": "effect-without-record",
+   "firstStatus": null,
+   "effectsAfterCrash": 1,
+   "resumeStatus": "error",
+   "resumeMsg": "This workflow run was not suspended",
+   "effectsAfterResume": 1,
+   "doubleApplied": false,
+   "recoverable": false
+  },
+  {
+   "runKey": "W3-C.E18.partial-write#3",
+   "family": "C",
+   "edge": "E18",
+   "question": "partial-write",
+   "invariant": "I-3C",
+   "achieved": "effect-without-record",
+   "firstStatus": null,
+   "effectsAfterCrash": 1,
+   "resumeStatus": "error",
+   "resumeMsg": "This workflow run was not suspended",
+   "effectsAfterResume": 1,
+   "doubleApplied": false,
+   "recoverable": false
+  },
+  {
+   "runKey": "W3-C.E18.partial-write#4",
+   "family": "C",
+   "edge": "E18",
+   "question": "partial-write",
+   "invariant": "I-3C",
+   "achieved": "effect-without-record",
+   "firstStatus": null,
+   "effectsAfterCrash": 1,
+   "resumeStatus": "error",
+   "resumeMsg": "This workflow run was not suspended",
+   "effectsAfterResume": 1,
+   "doubleApplied": false,
+   "recoverable": false
+  },
+  {
+   "runKey": "W3-C.E18.partial-write#5",
+   "family": "C",
+   "edge": "E18",
+   "question": "partial-write",
+   "invariant": "I-3C",
+   "achieved": "effect-without-record",
+   "firstStatus": null,
+   "effectsAfterCrash": 1,
+   "resumeStatus": "error",
+   "resumeMsg": "This workflow run was not suspended",
+   "effectsAfterResume": 1,
+   "doubleApplied": false,
+   "recoverable": false
+  },
+  {
+   "runKey": "W3-C.E18.write-ok-ack-fails#1",
+   "family": "C",
+   "edge": "E18",
+   "question": "write-ok-ack-fails",
+   "invariant": "I-3C",
+   "achieved": "completed",
+   "firstStatus": "success",
+   "effectsAfterCrash": 1,
+   "resumeStatus": "error",
+   "resumeMsg": "This workflow run was not suspended",
+   "effectsAfterResume": 1,
+   "doubleApplied": false,
+   "recoverable": false
+  },
+  {
+   "runKey": "W3-C.E18.write-ok-ack-fails#2",
+   "family": "C",
+   "edge": "E18",
+   "question": "write-ok-ack-fails",
+   "invariant": "I-3C",
+   "achieved": "completed",
+   "firstStatus": "success",
+   "effectsAfterCrash": 1,
+   "resumeStatus": "error",
+   "resumeMsg": "This workflow run was not suspended",
+   "effectsAfterResume": 1,
+   "doubleApplied": false,
+   "recoverable": false
+  },
+  {
+   "runKey": "W3-C.E18.write-ok-ack-fails#3",
+   "family": "C",
+   "edge": "E18",
+   "question": "write-ok-ack-fails",
+   "invariant": "I-3C",
+   "achieved": "completed",
+   "firstStatus": "success",
+   "effectsAfterCrash": 1,
+   "resumeStatus": "error",
+   "resumeMsg": "This workflow run was not suspended",
+   "effectsAfterResume": 1,
+   "doubleApplied": false,
+   "recoverable": false
+  },
+  {
+   "runKey": "W3-C.E18.write-ok-ack-fails#4",
+   "family": "C",
+   "edge": "E18",
+   "question": "write-ok-ack-fails",
+   "invariant": "I-3C",
+   "achieved": "completed",
+   "firstStatus": "success",
+   "effectsAfterCrash": 1,
+   "resumeStatus": "error",
+   "resumeMsg": "This workflow run was not suspended",
+   "effectsAfterResume": 1,
+   "doubleApplied": false,
+   "recoverable": false
+  },
+  {
+   "runKey": "W3-C.E18.write-ok-ack-fails#5",
+   "family": "C",
+   "edge": "E18",
+   "question": "write-ok-ack-fails",
+   "invariant": "I-3C",
+   "achieved": "completed",
+   "firstStatus": "success",
+   "effectsAfterCrash": 1,
+   "resumeStatus": "error",
+   "resumeMsg": "This workflow run was not suspended",
+   "effectsAfterResume": 1,
+   "doubleApplied": false,
+   "recoverable": false
+  },
+  {
+   "runKey": "W3-C.E18.record-ok-effect-fails#1",
+   "family": "C",
+   "edge": "E18",
+   "question": "record-ok-effect-fails",
+   "invariant": "I-3C",
+   "achieved": "declined-no-effect",
+   "firstStatus": "success",
+   "effectsAfterCrash": 0,
+   "resumeStatus": "error",
+   "resumeMsg": "This workflow run was not suspended",
+   "effectsAfterResume": 0,
+   "doubleApplied": false,
+   "recoverable": false
+  },
+  {
+   "runKey": "W3-C.E18.record-ok-effect-fails#2",
+   "family": "C",
+   "edge": "E18",
+   "question": "record-ok-effect-fails",
+   "invariant": "I-3C",
+   "achieved": "declined-no-effect",
+   "firstStatus": "success",
+   "effectsAfterCrash": 0,
+   "resumeStatus": "error",
+   "resumeMsg": "This workflow run was not suspended",
+   "effectsAfterResume": 0,
+   "doubleApplied": false,
+   "recoverable": false
+  },
+  {
+   "runKey": "W3-C.E18.record-ok-effect-fails#3",
+   "family": "C",
+   "edge": "E18",
+   "question": "record-ok-effect-fails",
+   "invariant": "I-3C",
+   "achieved": "declined-no-effect",
+   "firstStatus": "success",
+   "effectsAfterCrash": 0,
+   "resumeStatus": "error",
+   "resumeMsg": "This workflow run was not suspended",
+   "effectsAfterResume": 0,
+   "doubleApplied": false,
+   "recoverable": false
+  },
+  {
+   "runKey": "W3-C.E18.record-ok-effect-fails#4",
+   "family": "C",
+   "edge": "E18",
+   "question": "record-ok-effect-fails",
+   "invariant": "I-3C",
+   "achieved": "declined-no-effect",
+   "firstStatus": "success",
+   "effectsAfterCrash": 0,
+   "resumeStatus": "error",
+   "resumeMsg": "This workflow run was not suspended",
+   "effectsAfterResume": 0,
+   "doubleApplied": false,
+   "recoverable": false
+  },
+  {
+   "runKey": "W3-C.E18.record-ok-effect-fails#5",
+   "family": "C",
+   "edge": "E18",
+   "question": "record-ok-effect-fails",
+   "invariant": "I-3C",
+   "achieved": "declined-no-effect",
+   "firstStatus": "success",
+   "effectsAfterCrash": 0,
+   "resumeStatus": "error",
+   "resumeMsg": "This workflow run was not suspended",
+   "effectsAfterResume": 0,
+   "doubleApplied": false,
+   "recoverable": false
+  },
+  {
+   "runKey": "W3-C.E18.effect-ok-record-fails#1",
+   "family": "C",
+   "edge": "E18",
+   "question": "effect-ok-record-fails",
+   "invariant": "I-3C",
+   "achieved": "effect-without-record",
+   "firstStatus": null,
+   "effectsAfterCrash": 1,
+   "resumeStatus": "error",
+   "resumeMsg": "This workflow run was not suspended",
+   "effectsAfterResume": 1,
+   "doubleApplied": false,
+   "recoverable": false
+  },
+  {
+   "runKey": "W3-C.E18.effect-ok-record-fails#2",
+   "family": "C",
+   "edge": "E18",
+   "question": "effect-ok-record-fails",
+   "invariant": "I-3C",
+   "achieved": "effect-without-record",
+   "firstStatus": null,
+   "effectsAfterCrash": 1,
+   "resumeStatus": "error",
+   "resumeMsg": "This workflow run was not suspended",
+   "effectsAfterResume": 1,
+   "doubleApplied": false,
+   "recoverable": false
+  },
+  {
+   "runKey": "W3-C.E18.effect-ok-record-fails#3",
+   "family": "C",
+   "edge": "E18",
+   "question": "effect-ok-record-fails",
+   "invariant": "I-3C",
+   "achieved": "effect-without-record",
+   "firstStatus": null,
+   "effectsAfterCrash": 1,
+   "resumeStatus": "error",
+   "resumeMsg": "This workflow run was not suspended",
+   "effectsAfterResume": 1,
+   "doubleApplied": false,
+   "recoverable": false
+  },
+  {
+   "runKey": "W3-C.E18.effect-ok-record-fails#4",
+   "family": "C",
+   "edge": "E18",
+   "question": "effect-ok-record-fails",
+   "invariant": "I-3C",
+   "achieved": "effect-without-record",
+   "firstStatus": null,
+   "effectsAfterCrash": 1,
+   "resumeStatus": "error",
+   "resumeMsg": "This workflow run was not suspended",
+   "effectsAfterResume": 1,
+   "doubleApplied": false,
+   "recoverable": false
+  },
+  {
+   "runKey": "W3-C.E18.effect-ok-record-fails#5",
+   "family": "C",
+   "edge": "E18",
+   "question": "effect-ok-record-fails",
+   "invariant": "I-3C",
+   "achieved": "effect-without-record",
+   "firstStatus": null,
+   "effectsAfterCrash": 1,
+   "resumeStatus": "error",
+   "resumeMsg": "This workflow run was not suspended",
+   "effectsAfterResume": 1,
+   "doubleApplied": false,
+   "recoverable": false
+  },
+  {
+   "runKey": "W3-C.E18.restart-each-boundary#1",
+   "family": "C",
+   "edge": "E18",
+   "question": "restart-each-boundary",
+   "invariant": "I-3C",
+   "achieved": "killed-mid-effect",
+   "firstStatus": null,
+   "effectsAfterCrash": 1,
+   "resumeStatus": "error",
+   "resumeMsg": "This workflow run was not suspended",
+   "effectsAfterResume": 1,
+   "doubleApplied": false,
+   "recoverable": false
+  },
+  {
+   "runKey": "W3-C.E18.restart-each-boundary#2",
+   "family": "C",
+   "edge": "E18",
+   "question": "restart-each-boundary",
+   "invariant": "I-3C",
+   "achieved": "killed-mid-effect",
+   "firstStatus": null,
+   "effectsAfterCrash": 1,
+   "resumeStatus": "error",
+   "resumeMsg": "This workflow run was not suspended",
+   "effectsAfterResume": 1,
+   "doubleApplied": false,
+   "recoverable": false
+  },
+  {
+   "runKey": "W3-C.E18.restart-each-boundary#3",
+   "family": "C",
+   "edge": "E18",
+   "question": "restart-each-boundary",
+   "invariant": "I-3C",
+   "achieved": "killed-mid-effect",
+   "firstStatus": null,
+   "effectsAfterCrash": 1,
+   "resumeStatus": "error",
+   "resumeMsg": "This workflow run was not suspended",
+   "effectsAfterResume": 1,
+   "doubleApplied": false,
+   "recoverable": false
+  },
+  {
+   "runKey": "W3-C.E18.restart-each-boundary#4",
+   "family": "C",
+   "edge": "E18",
+   "question": "restart-each-boundary",
+   "invariant": "I-3C",
+   "achieved": "killed-mid-effect",
+   "firstStatus": null,
+   "effectsAfterCrash": 1,
+   "resumeStatus": "error",
+   "resumeMsg": "This workflow run was not suspended",
+   "effectsAfterResume": 1,
+   "doubleApplied": false,
+   "recoverable": false
+  },
+  {
+   "runKey": "W3-C.E18.restart-each-boundary#5",
+   "family": "C",
+   "edge": "E18",
+   "question": "restart-each-boundary",
+   "invariant": "I-3C",
+   "achieved": "killed-mid-effect",
+   "firstStatus": null,
+   "effectsAfterCrash": 1,
+   "resumeStatus": "error",
+   "resumeMsg": "This workflow run was not suspended",
+   "effectsAfterResume": 1,
+   "doubleApplied": false,
+   "recoverable": false
+  },
+  {
+   "runKey": "W3-D.before#1",
+   "family": "D",
+   "edge": "E18",
+   "question": "before",
+   "invariant": "I-3D",
+   "status": null,
+   "effects": 0
+  },
+  {
+   "runKey": "W3-D.before#2",
+   "family": "D",
+   "edge": "E18",
+   "question": "before",
+   "invariant": "I-3D",
+   "status": null,
+   "effects": 0
+  },
+  {
+   "runKey": "W3-D.before#3",
+   "family": "D",
+   "edge": "E18",
+   "question": "before",
+   "invariant": "I-3D",
+   "status": null,
+   "effects": 0
+  },
+  {
+   "runKey": "W3-D.before#4",
+   "family": "D",
+   "edge": "E18",
+   "question": "before",
+   "invariant": "I-3D",
+   "status": null,
+   "effects": 0
+  },
+  {
+   "runKey": "W3-D.before#5",
+   "family": "D",
+   "edge": "E18",
+   "question": "before",
+   "invariant": "I-3D",
+   "status": null,
+   "effects": 0
+  },
+  {
+   "runKey": "W3-D.during#1",
+   "family": "D",
+   "edge": "E18",
+   "question": "during",
+   "invariant": "I-3D",
+   "status": null,
+   "effects": 1
+  },
+  {
+   "runKey": "W3-D.during#2",
+   "family": "D",
+   "edge": "E18",
+   "question": "during",
+   "invariant": "I-3D",
+   "status": null,
+   "effects": 1
+  },
+  {
+   "runKey": "W3-D.during#3",
+   "family": "D",
+   "edge": "E18",
+   "question": "during",
+   "invariant": "I-3D",
+   "status": null,
+   "effects": 1
+  },
+  {
+   "runKey": "W3-D.during#4",
+   "family": "D",
+   "edge": "E18",
+   "question": "during",
+   "invariant": "I-3D",
+   "status": null,
+   "effects": 1
+  },
+  {
+   "runKey": "W3-D.during#5",
+   "family": "D",
+   "edge": "E18",
+   "question": "during",
+   "invariant": "I-3D",
+   "status": null,
+   "effects": 1
+  },
+  {
+   "runKey": "W3-D.after#1",
+   "family": "D",
+   "edge": "E18",
+   "question": "after",
+   "invariant": "I-3D",
+   "status": "success",
+   "postStatus": "error",
+   "effects": 1
+  },
+  {
+   "runKey": "W3-D.after#2",
+   "family": "D",
+   "edge": "E18",
+   "question": "after",
+   "invariant": "I-3D",
+   "status": "success",
+   "postStatus": "error",
+   "effects": 1
+  },
+  {
+   "runKey": "W3-D.after#3",
+   "family": "D",
+   "edge": "E18",
+   "question": "after",
+   "invariant": "I-3D",
+   "status": "success",
+   "postStatus": "error",
+   "effects": 1
+  },
+  {
+   "runKey": "W3-D.after#4",
+   "family": "D",
+   "edge": "E18",
+   "question": "after",
+   "invariant": "I-3D",
+   "status": "success",
+   "postStatus": "error",
+   "effects": 1
+  },
+  {
+   "runKey": "W3-D.after#5",
+   "family": "D",
+   "edge": "E18",
+   "question": "after",
+   "invariant": "I-3D",
+   "status": "success",
+   "postStatus": "error",
+   "effects": 1
+  },
+  {
+   "runKey": "W3-D.timeout#1",
+   "family": "D",
+   "edge": "E18",
+   "question": "timeout",
+   "invariant": "I-3D",
+   "status": "success",
+   "effects": 1,
+   "resolvedDefinite": true
+  },
+  {
+   "runKey": "W3-D.timeout#2",
+   "family": "D",
+   "edge": "E18",
+   "question": "timeout",
+   "invariant": "I-3D",
+   "status": "success",
+   "effects": 1,
+   "resolvedDefinite": true
+  },
+  {
+   "runKey": "W3-D.timeout#3",
+   "family": "D",
+   "edge": "E18",
+   "question": "timeout",
+   "invariant": "I-3D",
+   "status": "success",
+   "effects": 1,
+   "resolvedDefinite": true
+  },
+  {
+   "runKey": "W3-D.timeout#4",
+   "family": "D",
+   "edge": "E18",
+   "question": "timeout",
+   "invariant": "I-3D",
+   "status": "success",
+   "effects": 1,
+   "resolvedDefinite": true
+  },
+  {
+   "runKey": "W3-D.timeout#5",
+   "family": "D",
+   "edge": "E18",
+   "question": "timeout",
+   "invariant": "I-3D",
+   "status": "success",
+   "effects": 1,
+   "resolvedDefinite": true
+  },
+  {
+   "runKey": "W3-D.retry#1",
+   "family": "D",
+   "edge": "E18",
+   "question": "retry",
+   "invariant": "I-3D",
+   "secondStatus": "error",
+   "secondMsg": "This workflow run was not suspended",
+   "effects": 1,
+   "multiplied": false
+  },
+  {
+   "runKey": "W3-D.retry#2",
+   "family": "D",
+   "edge": "E18",
+   "question": "retry",
+   "invariant": "I-3D",
+   "secondStatus": "error",
+   "secondMsg": "This workflow run was not suspended",
+   "effects": 1,
+   "multiplied": false
+  },
+  {
+   "runKey": "W3-D.retry#3",
+   "family": "D",
+   "edge": "E18",
+   "question": "retry",
+   "invariant": "I-3D",
+   "secondStatus": "error",
+   "secondMsg": "This workflow run was not suspended",
+   "effects": 1,
+   "multiplied": false
+  },
+  {
+   "runKey": "W3-D.retry#4",
+   "family": "D",
+   "edge": "E18",
+   "question": "retry",
+   "invariant": "I-3D",
+   "secondStatus": "error",
+   "secondMsg": "This workflow run was not suspended",
+   "effects": 1,
+   "multiplied": false
+  },
+  {
+   "runKey": "W3-D.retry#5",
+   "family": "D",
+   "edge": "E18",
+   "question": "retry",
+   "invariant": "I-3D",
+   "secondStatus": "error",
+   "secondMsg": "This workflow run was not suspended",
+   "effects": 1,
+   "multiplied": false
+  },
+  {
+   "runKey": "W3-D.duplicate#1",
+   "family": "D",
+   "edge": "E18",
+   "question": "duplicate",
+   "invariant": "I-3D",
+   "secondStatus": "error",
+   "secondMsg": "This workflow run was not suspended",
+   "effects": 1,
+   "multiplied": false
+  },
+  {
+   "runKey": "W3-D.duplicate#2",
+   "family": "D",
+   "edge": "E18",
+   "question": "duplicate",
+   "invariant": "I-3D",
+   "secondStatus": "error",
+   "secondMsg": "This workflow run was not suspended",
+   "effects": 1,
+   "multiplied": false
+  },
+  {
+   "runKey": "W3-D.duplicate#3",
+   "family": "D",
+   "edge": "E18",
+   "question": "duplicate",
+   "invariant": "I-3D",
+   "secondStatus": "error",
+   "secondMsg": "This workflow run was not suspended",
+   "effects": 1,
+   "multiplied": false
+  },
+  {
+   "runKey": "W3-D.duplicate#4",
+   "family": "D",
+   "edge": "E18",
+   "question": "duplicate",
+   "invariant": "I-3D",
+   "secondStatus": "error",
+   "secondMsg": "This workflow run was not suspended",
+   "effects": 1,
+   "multiplied": false
+  },
+  {
+   "runKey": "W3-D.duplicate#5",
+   "family": "D",
+   "edge": "E18",
+   "question": "duplicate",
+   "invariant": "I-3D",
+   "secondStatus": "error",
+   "secondMsg": "This workflow run was not suspended",
+   "effects": 1,
+   "multiplied": false
+  },
+  {
+   "runKey": "W3-D.reordered#1",
+   "family": "D",
+   "edge": "E18",
+   "question": "reordered",
+   "invariant": "I-3D",
+   "first": "success",
+   "second": "error",
+   "effects": 1
+  },
+  {
+   "runKey": "W3-D.reordered#2",
+   "family": "D",
+   "edge": "E18",
+   "question": "reordered",
+   "invariant": "I-3D",
+   "first": "success",
+   "second": "error",
+   "effects": 1
+  },
+  {
+   "runKey": "W3-D.reordered#3",
+   "family": "D",
+   "edge": "E18",
+   "question": "reordered",
+   "invariant": "I-3D",
+   "first": "success",
+   "second": "error",
+   "effects": 1
+  },
+  {
+   "runKey": "W3-D.reordered#4",
+   "family": "D",
+   "edge": "E18",
+   "question": "reordered",
+   "invariant": "I-3D",
+   "first": "success",
+   "second": "error",
+   "effects": 1
+  },
+  {
+   "runKey": "W3-D.reordered#5",
+   "family": "D",
+   "edge": "E18",
+   "question": "reordered",
+   "invariant": "I-3D",
+   "first": "success",
+   "second": "error",
+   "effects": 1
+  },
+  {
+   "runKey": "W3-D.cancellation#1",
+   "family": "D",
+   "edge": "E18",
+   "question": "cancellation",
+   "invariant": "I-3D",
+   "status": "success",
+   "cancelStatus": "error",
+   "effects": 1,
+   "cancelledAfterEffect": false
+  },
+  {
+   "runKey": "W3-D.cancellation#2",
+   "family": "D",
+   "edge": "E18",
+   "question": "cancellation",
+   "invariant": "I-3D",
+   "status": "success",
+   "cancelStatus": "error",
+   "effects": 1,
+   "cancelledAfterEffect": false
+  },
+  {
+   "runKey": "W3-D.cancellation#3",
+   "family": "D",
+   "edge": "E18",
+   "question": "cancellation",
+   "invariant": "I-3D",
+   "status": "success",
+   "cancelStatus": "error",
+   "effects": 1,
+   "cancelledAfterEffect": false
+  },
+  {
+   "runKey": "W3-D.cancellation#4",
+   "family": "D",
+   "edge": "E18",
+   "question": "cancellation",
+   "invariant": "I-3D",
+   "status": "success",
+   "cancelStatus": "error",
+   "effects": 1,
+   "cancelledAfterEffect": false
+  },
+  {
+   "runKey": "W3-D.cancellation#5",
+   "family": "D",
+   "edge": "E18",
+   "question": "cancellation",
+   "invariant": "I-3D",
+   "status": "success",
+   "cancelStatus": "error",
+   "effects": 1,
+   "cancelledAfterEffect": false
+  },
+  {
+   "runKey": "W3-E.E17.old-state-new-code#1",
+   "family": "E",
+   "edge": "E17",
+   "question": "old-state-new-code",
+   "invariant": "I-3E",
+   "mutated": false,
+   "how": "resume under current code (baseline shape)",
+   "resumeStatus": "success",
+   "resumeMsg": "",
+   "effects": 1,
+   "silentlyAccepted": false,
+   "actedOnChanged": false
+  },
+  {
+   "runKey": "W3-E.E17.old-state-new-code#2",
+   "family": "E",
+   "edge": "E17",
+   "question": "old-state-new-code",
+   "invariant": "I-3E",
+   "mutated": false,
+   "how": "resume under current code (baseline shape)",
+   "resumeStatus": "success",
+   "resumeMsg": "",
+   "effects": 1,
+   "silentlyAccepted": false,
+   "actedOnChanged": false
+  },
+  {
+   "runKey": "W3-E.E17.old-state-new-code#3",
+   "family": "E",
+   "edge": "E17",
+   "question": "old-state-new-code",
+   "invariant": "I-3E",
+   "mutated": false,
+   "how": "resume under current code (baseline shape)",
+   "resumeStatus": "success",
+   "resumeMsg": "",
+   "effects": 1,
+   "silentlyAccepted": false,
+   "actedOnChanged": false
+  },
+  {
+   "runKey": "W3-E.E17.new-state-old-code#1",
+   "family": "E",
+   "edge": "E17",
+   "question": "new-state-old-code",
+   "invariant": "I-3E",
+   "mutated": true,
+   "how": "step id altered so current code cannot match it",
+   "resumeStatus": "error",
+   "resumeMsg": "This workflow step \"effect\" was not suspended. Available suspended steps: [effeXt]",
+   "effects": 0,
+   "silentlyAccepted": false,
+   "actedOnChanged": false
+  },
+  {
+   "runKey": "W3-E.E17.new-state-old-code#2",
+   "family": "E",
+   "edge": "E17",
+   "question": "new-state-old-code",
+   "invariant": "I-3E",
+   "mutated": true,
+   "how": "step id altered so current code cannot match it",
+   "resumeStatus": "error",
+   "resumeMsg": "This workflow step \"effect\" was not suspended. Available suspended steps: [effeXt]",
+   "effects": 0,
+   "silentlyAccepted": false,
+   "actedOnChanged": false
+  },
+  {
+   "runKey": "W3-E.E17.new-state-old-code#3",
+   "family": "E",
+   "edge": "E17",
+   "question": "new-state-old-code",
+   "invariant": "I-3E",
+   "mutated": true,
+   "how": "step id altered so current code cannot match it",
+   "resumeStatus": "error",
+   "resumeMsg": "This workflow step \"effect\" was not suspended. Available suspended steps: [effeXt]",
+   "effects": 0,
+   "silentlyAccepted": false,
+   "actedOnChanged": false
+  },
+  {
+   "runKey": "W3-E.E17.schema-or-roster-changed#1",
+   "family": "E",
+   "edge": "E17",
+   "question": "schema-or-roster-changed",
+   "invariant": "I-3E",
+   "mutated": true,
+   "how": "same-length value change",
+   "resumeStatus": null,
+   "resumeMsg": "file:///home/claude-agent/Projects/runa-reference/node_modules/@mastra/libsql/dist/index.js:12163\n\t\t\tthrow new",
+   "effects": 0,
+   "silentlyAccepted": false,
+   "actedOnChanged": false
+  },
+  {
+   "runKey": "W3-E.E17.schema-or-roster-changed#2",
+   "family": "E",
+   "edge": "E17",
+   "question": "schema-or-roster-changed",
+   "invariant": "I-3E",
+   "mutated": true,
+   "how": "same-length value change",
+   "resumeStatus": null,
+   "resumeMsg": "file:///home/claude-agent/Projects/runa-reference/node_modules/@mastra/libsql/dist/index.js:12163\n\t\t\tthrow new",
+   "effects": 0,
+   "silentlyAccepted": false,
+   "actedOnChanged": false
+  },
+  {
+   "runKey": "W3-E.E17.schema-or-roster-changed#3",
+   "family": "E",
+   "edge": "E17",
+   "question": "schema-or-roster-changed",
+   "invariant": "I-3E",
+   "mutated": true,
+   "how": "same-length value change",
+   "resumeStatus": null,
+   "resumeMsg": "file:///home/claude-agent/Projects/runa-reference/node_modules/@mastra/libsql/dist/index.js:12163\n\t\t\tthrow new",
+   "effects": 0,
+   "silentlyAccepted": false,
+   "actedOnChanged": false
+  },
+  {
+   "runKey": "W3-E.E17.migration-interrupted#1",
+   "family": "E",
+   "edge": "E17",
+   "question": "migration-interrupted",
+   "invariant": "I-3E",
+   "mutated": true,
+   "how": "snapshot truncated to 80% (interrupted migration)",
+   "resumeStatus": null,
+   "resumeMsg": "file:///home/claude-agent/Projects/runa-reference/node_modules/@mastra/libsql/dist/index.js:12163\n\t\t\tthrow new",
+   "effects": 0,
+   "silentlyAccepted": false,
+   "actedOnChanged": false
+  },
+  {
+   "runKey": "W3-E.E17.migration-interrupted#2",
+   "family": "E",
+   "edge": "E17",
+   "question": "migration-interrupted",
+   "invariant": "I-3E",
+   "mutated": true,
+   "how": "snapshot truncated to 80% (interrupted migration)",
+   "resumeStatus": null,
+   "resumeMsg": "file:///home/claude-agent/Projects/runa-reference/node_modules/@mastra/libsql/dist/index.js:12163\n\t\t\tthrow new",
+   "effects": 0,
+   "silentlyAccepted": false,
+   "actedOnChanged": false
+  },
+  {
+   "runKey": "W3-E.E17.migration-interrupted#3",
+   "family": "E",
+   "edge": "E17",
+   "question": "migration-interrupted",
+   "invariant": "I-3E",
+   "mutated": true,
+   "how": "snapshot truncated to 80% (interrupted migration)",
+   "resumeStatus": null,
+   "resumeMsg": "file:///home/claude-agent/Projects/runa-reference/node_modules/@mastra/libsql/dist/index.js:12163\n\t\t\tthrow new",
+   "effects": 0,
+   "silentlyAccepted": false,
+   "actedOnChanged": false
+  },
+  {
+   "runKey": "W3-E.E18.old-state-new-code#1",
+   "family": "E",
+   "edge": "E18",
+   "question": "old-state-new-code",
+   "invariant": "I-3E",
+   "mutated": false,
+   "how": "resume under current code (baseline shape)",
+   "resumeStatus": "success",
+   "resumeMsg": "",
+   "effects": 1,
+   "silentlyAccepted": false,
+   "actedOnChanged": false
+  },
+  {
+   "runKey": "W3-E.E18.old-state-new-code#2",
+   "family": "E",
+   "edge": "E18",
+   "question": "old-state-new-code",
+   "invariant": "I-3E",
+   "mutated": false,
+   "how": "resume under current code (baseline shape)",
+   "resumeStatus": "success",
+   "resumeMsg": "",
+   "effects": 1,
+   "silentlyAccepted": false,
+   "actedOnChanged": false
+  },
+  {
+   "runKey": "W3-E.E18.old-state-new-code#3",
+   "family": "E",
+   "edge": "E18",
+   "question": "old-state-new-code",
+   "invariant": "I-3E",
+   "mutated": false,
+   "how": "resume under current code (baseline shape)",
+   "resumeStatus": "success",
+   "resumeMsg": "",
+   "effects": 1,
+   "silentlyAccepted": false,
+   "actedOnChanged": false
+  },
+  {
+   "runKey": "W3-E.E18.new-state-old-code#1",
+   "family": "E",
+   "edge": "E18",
+   "question": "new-state-old-code",
+   "invariant": "I-3E",
+   "mutated": true,
+   "how": "step id altered so current code cannot match it",
+   "resumeStatus": "error",
+   "resumeMsg": "This workflow step \"effect\" was not suspended. Available suspended steps: [effeXt]",
+   "effects": 0,
+   "silentlyAccepted": false,
+   "actedOnChanged": false
+  },
+  {
+   "runKey": "W3-E.E18.new-state-old-code#2",
+   "family": "E",
+   "edge": "E18",
+   "question": "new-state-old-code",
+   "invariant": "I-3E",
+   "mutated": true,
+   "how": "step id altered so current code cannot match it",
+   "resumeStatus": "error",
+   "resumeMsg": "This workflow step \"effect\" was not suspended. Available suspended steps: [effeXt]",
+   "effects": 0,
+   "silentlyAccepted": false,
+   "actedOnChanged": false
+  },
+  {
+   "runKey": "W3-E.E18.new-state-old-code#3",
+   "family": "E",
+   "edge": "E18",
+   "question": "new-state-old-code",
+   "invariant": "I-3E",
+   "mutated": true,
+   "how": "step id altered so current code cannot match it",
+   "resumeStatus": "error",
+   "resumeMsg": "This workflow step \"effect\" was not suspended. Available suspended steps: [effeXt]",
+   "effects": 0,
+   "silentlyAccepted": false,
+   "actedOnChanged": false
+  },
+  {
+   "runKey": "W3-E.E18.schema-or-roster-changed#1",
+   "family": "E",
+   "edge": "E18",
+   "question": "schema-or-roster-changed",
+   "invariant": "I-3E",
+   "mutated": true,
+   "how": "same-length value change",
+   "resumeStatus": null,
+   "resumeMsg": "file:///home/claude-agent/Projects/runa-reference/node_modules/@mastra/libsql/dist/index.js:12163\n\t\t\tthrow new",
+   "effects": 0,
+   "silentlyAccepted": false,
+   "actedOnChanged": false
+  },
+  {
+   "runKey": "W3-E.E18.schema-or-roster-changed#2",
+   "family": "E",
+   "edge": "E18",
+   "question": "schema-or-roster-changed",
+   "invariant": "I-3E",
+   "mutated": true,
+   "how": "same-length value change",
+   "resumeStatus": null,
+   "resumeMsg": "file:///home/claude-agent/Projects/runa-reference/node_modules/@mastra/libsql/dist/index.js:12163\n\t\t\tthrow new",
+   "effects": 0,
+   "silentlyAccepted": false,
+   "actedOnChanged": false
+  },
+  {
+   "runKey": "W3-E.E18.schema-or-roster-changed#3",
+   "family": "E",
+   "edge": "E18",
+   "question": "schema-or-roster-changed",
+   "invariant": "I-3E",
+   "mutated": true,
+   "how": "same-length value change",
+   "resumeStatus": null,
+   "resumeMsg": "file:///home/claude-agent/Projects/runa-reference/node_modules/@mastra/libsql/dist/index.js:12163\n\t\t\tthrow new",
+   "effects": 0,
+   "silentlyAccepted": false,
+   "actedOnChanged": false
+  },
+  {
+   "runKey": "W3-E.E18.migration-interrupted#1",
+   "family": "E",
+   "edge": "E18",
+   "question": "migration-interrupted",
+   "invariant": "I-3E",
+   "mutated": true,
+   "how": "snapshot truncated to 80% (interrupted migration)",
+   "resumeStatus": null,
+   "resumeMsg": "file:///home/claude-agent/Projects/runa-reference/node_modules/@mastra/libsql/dist/index.js:12163\n\t\t\tthrow new",
+   "effects": 0,
+   "silentlyAccepted": false,
+   "actedOnChanged": false
+  },
+  {
+   "runKey": "W3-E.E18.migration-interrupted#2",
+   "family": "E",
+   "edge": "E18",
+   "question": "migration-interrupted",
+   "invariant": "I-3E",
+   "mutated": true,
+   "how": "snapshot truncated to 80% (interrupted migration)",
+   "resumeStatus": null,
+   "resumeMsg": "file:///home/claude-agent/Projects/runa-reference/node_modules/@mastra/libsql/dist/index.js:12163\n\t\t\tthrow new",
+   "effects": 0,
+   "silentlyAccepted": false,
+   "actedOnChanged": false
+  },
+  {
+   "runKey": "W3-E.E18.migration-interrupted#3",
+   "family": "E",
+   "edge": "E18",
+   "question": "migration-interrupted",
+   "invariant": "I-3E",
+   "mutated": true,
+   "how": "snapshot truncated to 80% (interrupted migration)",
+   "resumeStatus": null,
+   "resumeMsg": "file:///home/claude-agent/Projects/runa-reference/node_modules/@mastra/libsql/dist/index.js:12163\n\t\t\tthrow new",
+   "effects": 0,
+   "silentlyAccepted": false,
+   "actedOnChanged": false
+  },
+  {
+   "runKey": "W3-F.absent#1",
+   "family": "F",
+   "edge": "E18",
+   "question": "absent",
+   "invariant": "I-3F",
+   "resumeStatus": "error",
+   "resumeMsg": "Invalid resume data: ",
+   "effects": 0,
+   "amounts": [],
+   "reachedEffect": false,
+   "negativeAmountAccepted": false
+  },
+  {
+   "runKey": "W3-F.absent#2",
+   "family": "F",
+   "edge": "E18",
+   "question": "absent",
+   "invariant": "I-3F",
+   "resumeStatus": "error",
+   "resumeMsg": "Invalid resume data: ",
+   "effects": 0,
+   "amounts": [],
+   "reachedEffect": false,
+   "negativeAmountAccepted": false
+  },
+  {
+   "runKey": "W3-F.absent#3",
+   "family": "F",
+   "edge": "E18",
+   "question": "absent",
+   "invariant": "I-3F",
+   "resumeStatus": "error",
+   "resumeMsg": "Invalid resume data: ",
+   "effects": 0,
+   "amounts": [],
+   "reachedEffect": false,
+   "negativeAmountAccepted": false
+  },
+  {
+   "runKey": "W3-F.malformed#1",
+   "family": "F",
+   "edge": "E18",
+   "question": "malformed",
+   "invariant": "I-3F",
+   "resumeStatus": "error",
+   "resumeMsg": "Invalid resume data: ",
+   "effects": 0,
+   "amounts": [],
+   "reachedEffect": false,
+   "negativeAmountAccepted": false
+  },
+  {
+   "runKey": "W3-F.malformed#2",
+   "family": "F",
+   "edge": "E18",
+   "question": "malformed",
+   "invariant": "I-3F",
+   "resumeStatus": "error",
+   "resumeMsg": "Invalid resume data: ",
+   "effects": 0,
+   "amounts": [],
+   "reachedEffect": false,
+   "negativeAmountAccepted": false
+  },
+  {
+   "runKey": "W3-F.malformed#3",
+   "family": "F",
+   "edge": "E18",
+   "question": "malformed",
+   "invariant": "I-3F",
+   "resumeStatus": "error",
+   "resumeMsg": "Invalid resume data: ",
+   "effects": 0,
+   "amounts": [],
+   "reachedEffect": false,
+   "negativeAmountAccepted": false
+  },
+  {
+   "runKey": "W3-F.oversized#1",
+   "family": "F",
+   "edge": "E18",
+   "question": "oversized",
+   "invariant": "I-3F",
+   "resumeStatus": null,
+   "resumeMsg": "",
+   "effects": 0,
+   "amounts": [],
+   "reachedEffect": false,
+   "negativeAmountAccepted": false
+  },
+  {
+   "runKey": "W3-F.oversized#2",
+   "family": "F",
+   "edge": "E18",
+   "question": "oversized",
+   "invariant": "I-3F",
+   "resumeStatus": null,
+   "resumeMsg": "",
+   "effects": 0,
+   "amounts": [],
+   "reachedEffect": false,
+   "negativeAmountAccepted": false
+  },
+  {
+   "runKey": "W3-F.oversized#3",
+   "family": "F",
+   "edge": "E18",
+   "question": "oversized",
+   "invariant": "I-3F",
+   "resumeStatus": null,
+   "resumeMsg": "",
+   "effects": 0,
+   "amounts": [],
+   "reachedEffect": false,
+   "negativeAmountAccepted": false
+  },
+  {
+   "runKey": "W3-F.malicious#1",
+   "family": "F",
+   "edge": "E18",
+   "question": "malicious",
+   "invariant": "I-3F",
+   "resumeStatus": "error",
+   "resumeMsg": "Invalid resume data: ",
+   "effects": 0,
+   "amounts": [],
+   "reachedEffect": false,
+   "negativeAmountAccepted": false
+  },
+  {
+   "runKey": "W3-F.malicious#2",
+   "family": "F",
+   "edge": "E18",
+   "question": "malicious",
+   "invariant": "I-3F",
+   "resumeStatus": "error",
+   "resumeMsg": "Invalid resume data: ",
+   "effects": 0,
+   "amounts": [],
+   "reachedEffect": false,
+   "negativeAmountAccepted": false
+  },
+  {
+   "runKey": "W3-F.malicious#3",
+   "family": "F",
+   "edge": "E18",
+   "question": "malicious",
+   "invariant": "I-3F",
+   "resumeStatus": "error",
+   "resumeMsg": "Invalid resume data: ",
+   "effects": 0,
+   "amounts": [],
+   "reachedEffect": false,
+   "negativeAmountAccepted": false
+  },
+  {
+   "runKey": "W3-F.stale#1",
+   "family": "F",
+   "edge": "E18",
+   "question": "stale",
+   "invariant": "I-3F",
+   "resumeStatus": "success",
+   "resumeMsg": "",
+   "effects": 1,
+   "amounts": [
+    1
+   ],
+   "reachedEffect": true,
+   "negativeAmountAccepted": false
+  },
+  {
+   "runKey": "W3-F.stale#2",
+   "family": "F",
+   "edge": "E18",
+   "question": "stale",
+   "invariant": "I-3F",
+   "resumeStatus": "success",
+   "resumeMsg": "",
+   "effects": 1,
+   "amounts": [
+    1
+   ],
+   "reachedEffect": true,
+   "negativeAmountAccepted": false
+  },
+  {
+   "runKey": "W3-F.stale#3",
+   "family": "F",
+   "edge": "E18",
+   "question": "stale",
+   "invariant": "I-3F",
+   "resumeStatus": "success",
+   "resumeMsg": "",
+   "effects": 1,
+   "amounts": [
+    1
+   ],
+   "reachedEffect": true,
+   "negativeAmountAccepted": false
+  },
+  {
+   "runKey": "W3-F.unauthorized#1",
+   "family": "F",
+   "edge": "E18",
+   "question": "unauthorized",
+   "invariant": "I-3F",
+   "resumeStatus": "success",
+   "resumeMsg": "",
+   "effects": 1,
+   "amounts": [
+    1
+   ],
+   "reachedEffect": true,
+   "negativeAmountAccepted": false
+  },
+  {
+   "runKey": "W3-F.unauthorized#2",
+   "family": "F",
+   "edge": "E18",
+   "question": "unauthorized",
+   "invariant": "I-3F",
+   "resumeStatus": "success",
+   "resumeMsg": "",
+   "effects": 1,
+   "amounts": [
+    1
+   ],
+   "reachedEffect": true,
+   "negativeAmountAccepted": false
+  },
+  {
+   "runKey": "W3-F.unauthorized#3",
+   "family": "F",
+   "edge": "E18",
+   "question": "unauthorized",
+   "invariant": "I-3F",
+   "resumeStatus": "success",
+   "resumeMsg": "",
+   "effects": 1,
+   "amounts": [
+    1
+   ],
+   "reachedEffect": true,
+   "negativeAmountAccepted": false
+  },
+  {
+   "runKey": "W3-F.valid-but-unexpected#1",
+   "family": "F",
+   "edge": "E18",
+   "question": "valid-but-unexpected",
+   "invariant": "I-3F",
+   "resumeStatus": "success",
+   "resumeMsg": "",
+   "effects": 1,
+   "amounts": [
+    -50
+   ],
+   "reachedEffect": true,
+   "negativeAmountAccepted": true
+  },
+  {
+   "runKey": "W3-F.valid-but-unexpected#2",
+   "family": "F",
+   "edge": "E18",
+   "question": "valid-but-unexpected",
+   "invariant": "I-3F",
+   "resumeStatus": "success",
+   "resumeMsg": "",
+   "effects": 1,
+   "amounts": [
+    -50
+   ],
+   "reachedEffect": true,
+   "negativeAmountAccepted": true
+  },
+  {
+   "runKey": "W3-F.valid-but-unexpected#3",
+   "family": "F",
+   "edge": "E18",
+   "question": "valid-but-unexpected",
+   "invariant": "I-3F",
+   "resumeStatus": "success",
+   "resumeMsg": "",
+   "effects": 1,
+   "amounts": [
+    -50
+   ],
+   "reachedEffect": true,
+   "negativeAmountAccepted": true
+  },
+  {
+   "runKey": "W3-G.recorded-correctly#1",
+   "family": "G",
+   "edge": "E18",
+   "question": "recorded-correctly",
+   "invariant": "I-3G",
+   "resumeStatus": "success",
+   "effects": 1,
+   "tracerWired": false,
+   "secretInSnapshot": null,
+   "notProbedReason": null
+  },
+  {
+   "runKey": "W3-G.recorded-correctly#2",
+   "family": "G",
+   "edge": "E18",
+   "question": "recorded-correctly",
+   "invariant": "I-3G",
+   "resumeStatus": "success",
+   "effects": 1,
+   "tracerWired": false,
+   "secretInSnapshot": null,
+   "notProbedReason": null
+  },
+  {
+   "runKey": "W3-G.recorded-correctly#3",
+   "family": "G",
+   "edge": "E18",
+   "question": "recorded-correctly",
+   "invariant": "I-3G",
+   "resumeStatus": "success",
+   "effects": 1,
+   "tracerWired": false,
+   "secretInSnapshot": null,
+   "notProbedReason": null
+  },
+  {
+   "runKey": "W3-G.trace-missing-or-duplicated#1",
+   "family": "G",
+   "edge": "E18",
+   "question": "trace-missing-or-duplicated",
+   "invariant": "I-3G",
+   "resumeStatus": "success",
+   "effects": 1,
+   "tracerWired": false,
+   "secretInSnapshot": null,
+   "notProbedReason": "observability surface installed-unexercised on the frozen base; wiring a tracer would alter the base"
+  },
+  {
+   "runKey": "W3-G.trace-missing-or-duplicated#2",
+   "family": "G",
+   "edge": "E18",
+   "question": "trace-missing-or-duplicated",
+   "invariant": "I-3G",
+   "resumeStatus": "success",
+   "effects": 1,
+   "tracerWired": false,
+   "secretInSnapshot": null,
+   "notProbedReason": "observability surface installed-unexercised on the frozen base; wiring a tracer would alter the base"
+  },
+  {
+   "runKey": "W3-G.trace-missing-or-duplicated#3",
+   "family": "G",
+   "edge": "E18",
+   "question": "trace-missing-or-duplicated",
+   "invariant": "I-3G",
+   "resumeStatus": "success",
+   "effects": 1,
+   "tracerWired": false,
+   "secretInSnapshot": null,
+   "notProbedReason": "observability surface installed-unexercised on the frozen base; wiring a tracer would alter the base"
+  },
+  {
+   "runKey": "W3-G.telemetry-failure-changes-result#1",
+   "family": "G",
+   "edge": "E18",
+   "question": "telemetry-failure-changes-result",
+   "invariant": "I-3G",
+   "resumeStatus": "success",
+   "effects": 1,
+   "tracerWired": false,
+   "secretInSnapshot": null,
+   "notProbedReason": "observability surface installed-unexercised on the frozen base; wiring a tracer would alter the base"
+  },
+  {
+   "runKey": "W3-G.telemetry-failure-changes-result#2",
+   "family": "G",
+   "edge": "E18",
+   "question": "telemetry-failure-changes-result",
+   "invariant": "I-3G",
+   "resumeStatus": "success",
+   "effects": 1,
+   "tracerWired": false,
+   "secretInSnapshot": null,
+   "notProbedReason": "observability surface installed-unexercised on the frozen base; wiring a tracer would alter the base"
+  },
+  {
+   "runKey": "W3-G.telemetry-failure-changes-result#3",
+   "family": "G",
+   "edge": "E18",
+   "question": "telemetry-failure-changes-result",
+   "invariant": "I-3G",
+   "resumeStatus": "success",
+   "effects": 1,
+   "tracerWired": false,
+   "secretInSnapshot": null,
+   "notProbedReason": "observability surface installed-unexercised on the frozen base; wiring a tracer would alter the base"
+  },
+  {
+   "runKey": "W3-G.sensitive-data-exposed#1",
+   "family": "G",
+   "edge": "E18",
+   "question": "sensitive-data-exposed",
+   "invariant": "I-3G",
+   "resumeStatus": "success",
+   "effects": 1,
+   "tracerWired": false,
+   "secretInSnapshot": true,
+   "notProbedReason": null
+  },
+  {
+   "runKey": "W3-G.sensitive-data-exposed#2",
+   "family": "G",
+   "edge": "E18",
+   "question": "sensitive-data-exposed",
+   "invariant": "I-3G",
+   "resumeStatus": "success",
+   "effects": 1,
+   "tracerWired": false,
+   "secretInSnapshot": true,
+   "notProbedReason": null
+  },
+  {
+   "runKey": "W3-G.sensitive-data-exposed#3",
+   "family": "G",
+   "edge": "E18",
+   "question": "sensitive-data-exposed",
+   "invariant": "I-3G",
+   "resumeStatus": "success",
+   "effects": 1,
+   "tracerWired": false,
+   "secretInSnapshot": true,
+   "notProbedReason": null
+  }
+ ]
+}

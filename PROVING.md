@@ -78,3 +78,16 @@ starts. A restarted runner skips cases with a non-error result, re-attempts case
 errored (at most 3 attempts), and consolidates `outputs-v2.json` from the checkpoint file at the
 end. Error entries caused by an unreachable endpoint are harness environment failures, never
 framework findings; the green criteria and their evidence are in `probes/GREEN-resume.md`.
+
+## One measurement at a time, per host (steward's question, 2026-08-18)
+
+No second probe run starts on a host while a wave is measuring there. The reason is not politeness
+about CPU: contention falls hardest on the longest runs, and in a tiered design the longest runs are
+the expensive high-n cells. Timeouts under load would be recorded as environment errors and correctly
+excluded — leaving a matrix whose cheap cells completed and whose expensive cells were
+disproportionately dropped. That is a biased sample that passes its own audit, which is worse than
+obvious noise. The frozen base also records the host, runtime and endpoint but not "and another
+workload was running", so a wave measured under contention is not reproducible from its own manifest.
+
+Building the next wave is unaffected and should continue in parallel: preregistration is writing, and
+harness validation runs in the agent clone off the frozen base. Only EXECUTION serialises.

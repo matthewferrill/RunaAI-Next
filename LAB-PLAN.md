@@ -102,9 +102,9 @@ territory.
 
 | # | Item | Build | Runs | Total | Status |
 |---|---|---|---|---|---|
-| **0** | Instrument library + self-tests | ~4h | — | ~½ day | **done** |
-| **1** | Constraint 4 + constraint 2 probes | ~4h | ~30 min | ~¾ day | next |
-| **2** | Deterministic stub provider | ~3h | ~20 min | ~⅓ day | |
+| **0** | Instrument library + self-tests | ~50 min | — | **done** | **done** |
+| **1** | Constraint 4 + constraint 2 probes | ~21 min | incl. | **done** | **done** |
+| **2** | Deterministic stub provider | ~10 min | — | **done** | **done** |
 | **3** | Model comparison arm | ~2h + downloads | ~1.5h | ~¾ day | |
 | **4** | Tracer / observability | ~5h | ~30 min | ~1 day | |
 | **5** | RAG + re-ranker | ~4h | ~1h | ~¾ day | |
@@ -123,13 +123,33 @@ effort. This is the shortest path to knowing whether the remaining three days ar
 Mostly non-model, so it runs at Wave 3 speed. Constraint 2 needs an egress-capturing proxy; the Wave 7
 proxy already provides most of the pattern.
 
-### 2. Deterministic stub provider — *the thing that makes everything after it cheaper*
+### 2. Deterministic stub provider — *built, 10/10 self-tests*
 
-An OpenAI-compatible HTTP server returning scripted responses, ~60 lines, no new dependency. It
-isolates the framework completely: no model variance, no LM Studio, runs at memory speed.
+`probes/stub-provider.mjs`. An OpenAI-compatible endpoint with no model behind it: chat completions,
+embeddings and a model list, all derived from a hash of the request, so the same input always gives
+the same output on any machine with no endpoint at all. Rules let a scenario script a reply, a tool
+call, or a truncated `finish_reason` without editing the stub.
 
-Every stack-only question — timeout, recovery, completeness, versioning, concurrency — should run
-against it. Real models appear **only** where model behaviour is the question, which is Frays 1 and 4.
+Measured rather than claimed: **1.78ms per completion**, against ~55ms warm and 72–107s cold on the
+real endpoint. And the decisive check — a real Mastra agent runs against it unchanged, so a framework
+result measured here describes the framework rather than the stub.
+
+**What may migrate to it.** Anything whose verdict is read from disk or the wire rather than from an
+answer:
+
+| Measurement | Why it can migrate |
+|---|---|
+| W3 durable state (already 0 model calls) | no change, but embeddings for W5-style setup become free |
+| W5 concurrency and persistence | verdicts read from SQLite; the agent is only a way to cause a write |
+| W4 tool-chain timing, versioning, concurrency | verdicts read from the filesystem and the call log |
+| W6 versioning on the three stores | verdicts read from the store |
+| Constraint probes | verdicts read from the snapshot store and the egress log |
+
+**What must never migrate.** Fray 1 (fabrication) and Fray 4 (injection) are model-mediated by
+definition. Running them against a scripted string would answer a question about the model with a
+value the harness chose. The stub cannot recall a planted fact and cannot follow an injected
+instruction, and that inability is the guardrail rather than a limitation — a scenario that needs
+either will visibly fail against it instead of quietly passing.
 
 ### 3. Model comparison arm — *the only way to attribute Frays 1 and 4*
 
@@ -177,6 +197,15 @@ thing that changes this.
 
 **345 is a floor.** The register enumerates graph-edge scenarios only. Resource exhaustion, clock
 skew, and multi-agent delegation are outside it. Wave 8 exists for delegation and has not been run.
+
+**The build estimates in the table above were wrong, and the correction is recorded rather than
+quietly applied.** Items 0, 1 and 2 were estimated at half a day, three quarters of a day and a third
+of a day. They took roughly fifty minutes, twenty-one minutes and ten minutes, measured from the git
+log. The estimates were framed in human working hours, which is the wrong unit for this work. What is
+actually irreducible is measurement runtime — model latency, n=5 repetitions, the 120s timeout arms —
+and download time, neither of which building speed affects. Items 3 to 5 are re-estimated on that
+basis: roughly twenty to thirty minutes of build each, with item 3 dominated by ~30GB of model
+downloads and ~1.5h of latency-bound runs.
 
 **Estimates carry residual instrument risk.** The library should take defect overhead from 30–50% to
 roughly 10–15%. It does not take it to zero, and the two new-territory items (4 and 5) carry the most.

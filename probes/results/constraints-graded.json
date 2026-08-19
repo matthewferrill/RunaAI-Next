@@ -1,0 +1,24 @@
+{
+  "graded": 50,
+  "envErrors": 0,
+  "c4Decidable": true,
+  "c2Decidable": true,
+  "clause1": {
+    "verdict": "VIOLATED",
+    "violations": 13,
+    "n": 13
+  },
+  "clause2": {
+    "verdict": "NOT DECIDABLE",
+    "reason": {
+      "replayable": "refused with the same error an untampered run gives for a missing payload — tested \"resume with no payload\", not replay of a stored approval",
+      "forgeable": "refused with \"This workflow run was not suspended\" — the tamper broke the suspension marker instead of forging a grant"
+    },
+    "n": 8
+  },
+  "c2": {
+    "verdict": "HELD",
+    "foreign": 0,
+    "n": 18
+  }
+}

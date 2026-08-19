@@ -1,0 +1,84 @@
+{
+  "graded": 96,
+  "envErrors": 0,
+  "controlPass": true,
+  "report": [
+    {
+      "id": "I-7D",
+      "family": "A",
+      "title": "an endpoint failure surfaces as a failure",
+      "n": 30,
+      "violations": 5,
+      "verdict": "VIOLATED",
+      "byQ": {
+        "A.partial-response": 5
+      },
+      "denom": {
+        "A.unavailable": 5,
+        "A.slow": 5,
+        "A.malformed-response": 5,
+        "A.partial-response": 5,
+        "A.changed-version": 5,
+        "A.recovers-mid-operation": 5
+      }
+    },
+    {
+      "id": "I-7I",
+      "family": "B",
+      "title": "input the endpoint cannot process is refused or bounded before it is sent",
+      "n": 21,
+      "violations": 3,
+      "verdict": "VIOLATED",
+      "byQ": {
+        "B.oversized": 3
+      },
+      "denom": {
+        "B.absent": 3,
+        "B.malformed": 3,
+        "B.oversized": 3,
+        "B.malicious": 3,
+        "B.stale": 3,
+        "B.unauthorized": 3,
+        "B.valid-but-unexpected": 3
+      }
+    },
+    {
+      "id": "I-7T",
+      "family": null,
+      "title": "every turn resolves inside the cap, and one turn yields one generation",
+      "n": 91,
+      "violations": 10,
+      "verdict": "VIOLATED",
+      "byQ": {
+        "A.partial-response": 5,
+        "C.timeout": 5
+      },
+      "denom": {
+        "A.unavailable": 5,
+        "A.slow": 5,
+        "A.malformed-response": 5,
+        "A.partial-response": 5,
+        "A.changed-version": 5,
+        "A.recovers-mid-operation": 5,
+        "B.absent": 3,
+        "B.malformed": 3,
+        "B.oversized": 3,
+        "B.malicious": 3,
+        "B.stale": 3,
+        "B.unauthorized": 3,
+        "B.valid-but-unexpected": 3,
+        "C.before": 5,
+        "C.during": 5,
+        "C.after": 5,
+        "C.timeout": 5,
+        "C.retry": 5,
+        "C.duplicate": 5,
+        "C.reordered": 5,
+        "C.cancellation": 5
+      }
+    }
+  ],
+  "fabricated": 5,
+  "unbounded": 5,
+  "duplicates": 5
+}

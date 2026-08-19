@@ -30,7 +30,13 @@ async function once(mode, { prompt = null, extra = {}, kill = null, timeout = CA
   const log = freshWire(`probes/results/w7-${mode}-${P}.wire`);
   const proxy = spawn(process.execPath, ["probes/wave7/w7-proxy.mjs"],
     { env: { ...process.env, W7_MODE: mode, W7_PORT: String(P), W7_WIRELOG: log, ...extra }, stdio: ["ignore", "ignore", "ignore"] });
-  await new Promise((r) => setTimeout(r, 900));
+  // Wait for the proxy to actually accept connections rather than trusting a fixed sleep, and
+  // record it. Without this a proxy that failed to bind is indistinguishable from one that is up.
+  let proxyReady = false;
+  for (let i = 0; i < 40 && !proxyReady; i++) {
+    try { await fetch(`http://127.0.0.1:${P}/v1/models`, { signal: AbortSignal.timeout(400) }); proxyReady = true; }
+    catch { await new Promise((r) => setTimeout(r, 150)); }
+  }
   const coldStart = !warmed; warmed = true;
   if (kill === "before") { try { proxy.kill("SIGKILL"); } catch {} }
   let killTimer = null;
@@ -49,7 +55,8 @@ async function once(mode, { prompt = null, extra = {}, kill = null, timeout = CA
   // If the child never produced either marker it did not run, which is an environment error and not
   // evidence about the base. Waves are graded on runs that happened.
   const childRan = /ANSWERED::/.test(out);
-  return { log, out, ms, coldStart, childRan, spawnErr: child.error ? String(child.error.message).slice(0, 160) : null,
+  return { log, out, ms, coldStart, childRan, proxyReady,
+    spawnErr: child.error ? String(child.error.message).slice(0, 160) : null,
     proxyMode: mode, proxyKill: kill ?? null,
     answered: answered(out), answer: answerText(out), finish: parse(out, "FINISH"),
     err: parse(out, "ERR"), calls: chatCalls(log).length,

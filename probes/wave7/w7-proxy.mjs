@@ -104,4 +104,8 @@ async function passThrough(req, res, bodyRaw, n, isChat, t0, note = "passthrough
     res.writeHead(502, { "content-type": "application/json" }); res.end(JSON.stringify({ error: String(e.message) }));
   }
 }
+// A proxy that cannot bind must die loudly. Silently losing the bind leaves the port served by
+// whatever is already there, so the child talks to a stale proxy in a different mode and the run
+// looks like a finding rather than a collision. That happened once, and it is why this exists.
+server.on("error", (e) => { console.error(`w7-proxy: FATAL ${e.code} on port ${PORT}`); process.exit(9); });
 server.listen(PORT, () => console.log(`w7-proxy: mode=${MODE} port=${PORT} upstream=${UPSTREAM}`));

@@ -105,7 +105,8 @@ territory.
 | **0** | Instrument library + self-tests | ~50 min | — | **done** | **done** |
 | **1** | Constraint 4 + constraint 2 probes | ~21 min | incl. | **done** | **done** |
 | **2** | Deterministic stub provider | ~10 min | — | **done** | **done** |
-| **3** | Model comparison arm | ~2h + downloads | ~1.5h | ~¾ day | |
+| **3** | Model comparison arm — four arms, era-spread | ~20 min | ~2h + downloads | | |
+| **6** | Runtime comparison — row-split, then vLLM | ~20 min | ~1h | | **next** |
 | **4** | Tracer / observability | ~5h | ~30 min | ~1 day | |
 | **5** | RAG + re-ranker | ~4h | ~1h | ~¾ day | |
 
@@ -153,27 +154,72 @@ either will visibly fail against it instead of quietly passing.
 
 ### 3. Model comparison arm — *the only way to attribute Frays 1 and 4*
 
-Not a general re-run. ~55 runs per model, on the two model-mediated frays only:
+Not a general re-run. ~55 runs per arm, on the two model-mediated frays only:
 
 - Wave 4's six fabrication scenarios at n=5 → 30 runs
 - Wave 6's `E.malicious` and `F.malicious`, both arms, at n=5 → 20 runs
 - Wave 7's `A.partial-response` at n=5 → 5 runs
 
-**Candidates for 48 GB VRAM** (2× Quadro RTX 6000, Turing, compute 7.5):
+**The candidate list was revised after researching what this hardware actually is.** The first list —
+Qwen 3.6 27B, gpt-oss-20b, qwen3-4b — was wrong in two ways: every one fits on a single card and
+leaves the second GPU idle, and gpt-oss **cannot load at all**, because MXFP4 requires compute ≥ 9.0
+and Turing is 7.5.
 
-| Model | Q4_K_M | Why |
-|---|---|---|
-| Qwen 3.6 27B dense | ~16.8 GB | Controlled comparison — same family, changes *coder→general* and *MoE→dense* |
-| gpt-oss-20b (GGUF requant) | ~12 GB | Sharpest test of Fray 4 — explicit instruction-hierarchy training |
-| qwen3-4b | ~3 GB | Already installed; establishes whether these are scale effects |
+**Newer is not better on this hardware, and the exclusions are at the hardware level:**
 
-The 2026 frontier — Kimi K3 at 2.8T, DeepSeek V4 Pro at 1.6T, GLM-5.2 at 744B, MiniMax M3 at 428B —
-does not fit this hardware. **Turing cannot load MXFP4 at all** (requires compute ≥ 9.0), so gpt-oss
-needs a GGUF requantisation.
+| What | Turing (SM 7.5) status |
+|---|---|
+| FlashAttention 1 / 2 / 3 | **requires Ampere or Hopper** — excluded, every version |
+| MXFP4 (`gpt-oss`) | will not load, needs compute ≥ 9.0 |
+| NVFP4 | runs, but tensor-core acceleration is Blackwell-only |
+| Gemma 4 | **cannot run on Turing via any vLLM attention backend** |
+| BF16 | unsupported — Turing is FP16 only |
 
-**Each model is a new base.** `BASE-MANIFEST.json`'s `boundsClaim` names `modelId` as invalidating, so
-each arm needs its own manifest and `base-drift` fingerprint, and results are reported per-arm, never
-pooled.
+What Turing *is* first-in-class at: **it was the first architecture with INT4 tensor cores**, so GPTQ
+and AWQ — both INT4, both from the 2023 era — map onto silicon these cards have and newer formats do
+not use. And llama.cpp carries its own attention kernels rather than depending on FlashAttention,
+which is an accidental virtue of the current stack on this hardware.
+
+**Four arms, spanning 2023 to 2026 and 4B to 70B, with two of them across both GPUs:**
+
+| Model | Era | Size | GPUs | Role |
+|---|---|---|---|---|
+| Mixtral 8x7B Instruct (AWQ/GPTQ INT4) | Dec 2023 | 47B total / 13B active, ~24 GB | **both** | the dual-24GB workhorse of its era; MoE, INT4 on Turing's tensor cores |
+| Llama 3.3 70B Instruct Q4 | Dec 2024 | ~40 GB | **both** | the scale arm; genuinely uses 48 GB |
+| Qwen 3.6 27B Q4_K_M | Apr 2026 | ~17 GB | one | current-gen general, controlled against the incumbent coder MoE |
+| qwen3-4b | installed | ~3 GB | one | free gradient point |
+
+A tension worth naming rather than hiding: newer models carry better instruction-hierarchy training,
+which is exactly what Fray 4 tests — and the sharpest candidate for that, `gpt-oss-20b`, will not load
+on this hardware. The era spread is the honest substitute, not an equivalent.
+
+**Each arm is a new base.** `BASE-MANIFEST.json`'s `boundsClaim` names `modelId`, so each needs its own
+manifest and `base-drift` fingerprint, and results are reported per-arm and never pooled.
+
+### 6. Runtime comparison — *because a fray might close without Runa building anything*
+
+Fray 2 is *nothing ever gives up* — no client-side timeout, found on three independent edges. A
+serving runtime with real request-level timeouts and queueing could close it outright. That is the
+standing principle applied to a layer never questioned: prove the standard cannot do it before writing
+custom code.
+
+**6a. `--split-mode row`, in-base and cheapest.** Both GPUs are already loaded (~32.6 GB across the
+pair) and **NVLink is installed and active** — 2 links per GPU at 25.78 GB/s, ~51.6 GB/s aggregate
+against ~16 GB/s for PCIe 3.0 x16. But layer-split runs one card at a time, so decode sees one card's
+672 GB/s. Row-split runs both. Since decode is memory-bandwidth-bound rather than compute-bound, that
+is a potential ~2× throughput change from a configuration, not hardware.
+
+The discriminating evidence is GPU utilisation sampled during generation: layer-split alternates
+between the cards, row-split keeps both busy at once. Measured, not assumed.
+
+**6b. Native-Windows vLLM.** An earlier note here said vLLM would need WSL2. That was wrong: a native
+Windows build exists with explicit SM 7.5 support (CUDA 12.8, RTX 20-series listed, no WSL or Docker),
+and vLLM's Turing support is being extended rather than dropped, with documented workarounds —
+`TRITON_ATTN`, float16 KV cache, 32-token blocks, eager mode.
+
+**This changes the base.** `lmStudioVersion` is a sealing field, so a runtime swap invalidates
+cross-comparison with all seven waves and needs its own manifest. 6a does not: split mode changes
+throughput and device placement, not weights, lockfile or model id.
 
 ### 4. Tracer / observability — *note that this changes the base*
 

@@ -3,3 +3,5 @@ storage/
 *.db
 probes/results/*.partial.jsonl
 sandbox/
+artifacts/runs/
+storage/

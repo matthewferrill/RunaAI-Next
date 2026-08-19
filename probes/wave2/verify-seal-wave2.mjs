@@ -1,0 +1,8 @@
+import { readFileSync } from "node:fs";
+import { createHash } from "node:crypto";
+const SEAL = "probes/SEAL-WAVE2.md", FILE = "WAVE2-PREREGISTRATION.md";
+const seal = readFileSync(SEAL, "utf8");
+const want = seal.match(/sha256:\s*([0-9a-f]{64})/)?.[1];
+const got = createHash("sha256").update(readFileSync(FILE)).digest("hex");
+if (got !== want) { console.error(`SEAL BROKEN — ${FILE} sha ${got.slice(0,12)}… != sealed ${String(want).slice(0,12)}…\nRefusing: a runner built against an edited preregistration measures the edit.`); process.exit(1); }
+console.log(`${FILE}: seal intact`);

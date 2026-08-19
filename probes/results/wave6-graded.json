@@ -1,0 +1,221 @@
+{
+  "graded": 249,
+  "envErrors": 0,
+  "controlByEdge": {
+    "E03": {
+      "n": 3,
+      "ok": 3,
+      "pass": true
+    },
+    "E06": {
+      "n": 5,
+      "ok": 5,
+      "pass": true
+    },
+    "E09": {
+      "n": 3,
+      "ok": 3,
+      "pass": true
+    },
+    "E10": {
+      "n": 3,
+      "ok": 3,
+      "pass": true
+    },
+    "E04": {
+      "n": 3,
+      "ok": 3,
+      "pass": true
+    },
+    "E05": {
+      "n": 3,
+      "ok": 3,
+      "pass": true
+    },
+    "E07": {
+      "n": 3,
+      "ok": 3,
+      "pass": true
+    }
+  },
+  "report": [
+    {
+      "id": "I-6A",
+      "family": "A",
+      "edge": "E03",
+      "title": "content that cannot be stored correctly is refused, not half-stored",
+      "n": 21,
+      "probed": 21,
+      "notProbed": 0,
+      "violations": 3,
+      "verdict": "VIOLATED",
+      "byQ": {
+        "E03.oversized": 3
+      },
+      "denom": {
+        "E03.absent": 3,
+        "E03.malformed": 3,
+        "E03.oversized": 3,
+        "E03.malicious": 3,
+        "E03.stale": 3,
+        "E03.unauthorized": 3,
+        "E03.valid-but-unexpected": 3
+      }
+    },
+    {
+      "id": "I-6B",
+      "family": "B",
+      "edge": "E04",
+      "title": "state the code cannot safely interpret is refused, not half-interpreted",
+      "n": 36,
+      "probed": 36,
+      "notProbed": 0,
+      "violations": 33,
+      "verdict": "VIOLATED",
+      "byQ": {
+        "E04.old-state-new-code": 3,
+        "E04.new-state-old-code": 3,
+        "E04.migration-interrupted": 3,
+        "E05.old-state-new-code": 3,
+        "E05.new-state-old-code": 3,
+        "E05.schema-or-roster-changed": 3,
+        "E05.migration-interrupted": 3,
+        "E07.old-state-new-code": 3,
+        "E07.new-state-old-code": 3,
+        "E07.schema-or-roster-changed": 3,
+        "E07.migration-interrupted": 3
+      },
+      "denom": {
+        "E04.old-state-new-code": 3,
+        "E04.new-state-old-code": 3,
+        "E04.schema-or-roster-changed": 3,
+        "E04.migration-interrupted": 3,
+        "E05.old-state-new-code": 3,
+        "E05.new-state-old-code": 3,
+        "E05.schema-or-roster-changed": 3,
+        "E05.migration-interrupted": 3,
+        "E07.old-state-new-code": 3,
+        "E07.new-state-old-code": 3,
+        "E07.schema-or-roster-changed": 3,
+        "E07.migration-interrupted": 3
+      }
+    },
+    {
+      "id": "I-6C",
+      "family": "C",
+      "edge": "E06",
+      "title": "an embedding failure surfaces as a failure",
+      "n": 30,
+      "probed": 30,
+      "notProbed": 0,
+      "violations": 25,
+      "verdict": "VIOLATED",
+      "byQ": {
+        "E06.unavailable": 5,
+        "E06.malformed-response": 5,
+        "E06.partial-response": 5,
+        "E06.changed-version": 5,
+        "E06.recovers-mid-operation": 5
+      },
+      "denom": {
+        "E06.unavailable": 5,
+        "E06.slow": 5,
+        "E06.malformed-response": 5,
+        "E06.partial-response": 5,
+        "E06.changed-version": 5,
+        "E06.recovers-mid-operation": 5
+      }
+    },
+    {
+      "id": "I-6D",
+      "family": "D",
+      "edge": "E06",
+      "title": "every embedding call resolves inside the cap to a definite state",
+      "n": 40,
+      "probed": 40,
+      "notProbed": 0,
+      "violations": 10,
+      "verdict": "VIOLATED",
+      "byQ": {
+        "E06.timeout": 5,
+        "E06.retry": 5
+      },
+      "denom": {
+        "E06.before": 5,
+        "E06.during": 5,
+        "E06.after": 5,
+        "E06.timeout": 5,
+        "E06.retry": 5,
+        "E06.duplicate": 5,
+        "E06.reordered": 5,
+        "E06.cancellation": 5
+      }
+    },
+    {
+      "id": "I-6E",
+      "family": "E",
+      "edge": "E09",
+      "title": "retrieved index content is data, never instruction",
+      "n": 21,
+      "probed": 21,
+      "notProbed": 0,
+      "violations": 1,
+      "verdict": "VIOLATED",
+      "byQ": {
+        "E09.malicious": 1
+      },
+      "denom": {
+        "E09.absent": 3,
+        "E09.malformed": 3,
+        "E09.oversized": 3,
+        "E09.malicious": 3,
+        "E09.stale": 3,
+        "E09.unauthorized": 3,
+        "E09.valid-but-unexpected": 3
+      }
+    },
+    {
+      "id": "I-6F",
+      "family": "F",
+      "edge": "E10",
+      "title": "recalled memory content is data, never instruction",
+      "n": 21,
+      "probed": 21,
+      "notProbed": 0,
+      "violations": 3,
+      "verdict": "VIOLATED",
+      "byQ": {
+        "E10.malicious": 3
+      },
+      "denom": {
+        "E10.absent": 3,
+        "E10.malformed": 3,
+        "E10.oversized": 3,
+        "E10.malicious": 3,
+        "E10.stale": 3,
+        "E10.unauthorized": 3,
+        "E10.valid-but-unexpected": 3
+      }
+    },
+    {
+      "id": "I-6G",
+      "family": "G",
+      "edge": "E09",
+      "title": "observability neither changes behaviour nor discloses",
+      "n": 24,
+      "probed": 12,
+      "notProbed": 12,
+      "violations": 0,
+      "verdict": "HELD",
+      "byQ": {},
+      "denom": {
+        "E09.recorded-correctly": 3,
+        "E09.sensitive-data-exposed": 3,
+        "E10.recorded-correctly": 3,
+        "E10.sensitive-data-exposed": 3
+      }
+    }
+  ],
+  "unbounded": 8,
+  "silent": 30
+}

@@ -71,6 +71,10 @@ for (const v of VARIANTS) {
       entry.error = String(e.message).slice(0, 200);
     }
     try { await mcp?.disconnect(); } catch { /* the point of these variants is a server that misbehaves */ }
+    // A stub told to hang ignores disconnect: it sits in an unresolved promise with its stdio pipes
+    // open, which keeps THIS process's event loop alive forever. Killing the children by name is the
+    // only reliable close, and without it the runner writes its results and then strands the wave.
+    try { execSync("pkill -f stub-mcp-server.mjs || true", { stdio: "ignore" }); } catch { /* none left */ }
 
     const text = entry.answer ?? "";
     // An error from the MODEL ENDPOINT is an environment failure and is never a verdict about the
@@ -106,3 +110,8 @@ for (const v of VARIANTS) {
 
 writeFileSync("probes/results/w1ef-outputs.json", JSON.stringify({ scenario: "W1-E/F", reps: REPS, ranAt: new Date().toISOString(), results }, null, 1));
 console.log(`\nwrote ${results.length} W1-E/F runs`);
+// Explicit exit AFTER the results are durable. This scenario deliberately creates processes that do
+// not cooperate, so waiting for a clean event-loop drain is waiting for something that will not
+// happen. Observed on Control: the runner finished its work and hung, blocking the memory matrix
+// behind it for the rest of the run.
+process.exit(0);

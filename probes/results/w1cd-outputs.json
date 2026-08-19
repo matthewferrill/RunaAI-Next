@@ -1,0 +1,895 @@
+{
+ "scenario": "W1-C/D",
+ "ranAt": "2026-08-19T04:02:06.856Z",
+ "tiers": {
+  "2": {
+   "default": 3,
+   "window40": 3,
+   "semantic": 3,
+   "working": 3
+  },
+  "10": {
+   "default": 10,
+   "semantic": 10,
+   "window40": 3
+  },
+  "25": {
+   "default": 10,
+   "semantic": 10,
+   "window40": 3
+  },
+  "50": {
+   "semantic": 5,
+   "working": 5,
+   "window40": 3
+  },
+  "100": {
+   "semantic": 5,
+   "working": 5
+  }
+ },
+ "runs": [
+  {
+   "runKey": "memory-001#1",
+   "scenario": "W1-C",
+   "caseId": "memory-001",
+   "config": "default",
+   "depth": 2,
+   "rep": 1,
+   "n": 3,
+   "answer": "kettle-ledger-421"
+  },
+  {
+   "runKey": "memory-001#2",
+   "scenario": "W1-C",
+   "caseId": "memory-001",
+   "config": "default",
+   "depth": 2,
+   "rep": 2,
+   "n": 3,
+   "answer": "kettle-ledger-421"
+  },
+  {
+   "runKey": "memory-001#3",
+   "scenario": "W1-C",
+   "caseId": "memory-001",
+   "config": "default",
+   "depth": 2,
+   "rep": 3,
+   "n": 3,
+   "answer": "kettle-ledger-421"
+  },
+  {
+   "runKey": "memory-002#1",
+   "scenario": "W1-C",
+   "caseId": "memory-002",
+   "config": "window40",
+   "depth": 2,
+   "rep": 1,
+   "n": 3,
+   "answer": "marble-tunnel-879"
+  },
+  {
+   "runKey": "memory-002#2",
+   "scenario": "W1-C",
+   "caseId": "memory-002",
+   "config": "window40",
+   "depth": 2,
+   "rep": 2,
+   "n": 3,
+   "answer": "marble-tunnel-879"
+  },
+  {
+   "runKey": "memory-002#3",
+   "scenario": "W1-C",
+   "caseId": "memory-002",
+   "config": "window40",
+   "depth": 2,
+   "rep": 3,
+   "n": 3,
+   "answer": "marble-tunnel-879"
+  },
+  {
+   "runKey": "memory-003#1",
+   "scenario": "W1-C",
+   "caseId": "memory-003",
+   "config": "semantic",
+   "depth": 2,
+   "rep": 1,
+   "n": 3,
+   "answer": "compass-lantern-235"
+  },
+  {
+   "runKey": "memory-003#2",
+   "scenario": "W1-C",
+   "caseId": "memory-003",
+   "config": "semantic",
+   "depth": 2,
+   "rep": 2,
+   "n": 3,
+   "answer": "compass-lantern-235"
+  },
+  {
+   "runKey": "memory-003#3",
+   "scenario": "W1-C",
+   "caseId": "memory-003",
+   "config": "semantic",
+   "depth": 2,
+   "rep": 3,
+   "n": 3,
+   "answer": "compass-lantern-235"
+  },
+  {
+   "runKey": "memory-004#1",
+   "scenario": "W1-C+D",
+   "caseId": "memory-004",
+   "config": "working",
+   "depth": 2,
+   "rep": 1,
+   "n": 3,
+   "workingMemoryDump": {
+    "via": "getWorkingMemory",
+    "content": "# User Information\n- **First Name**: \n- **Last Name**: \n- **Location**: \n- **Occupation**: \n- **Interests**: \n- **Goals**: \n- **Events**: \n- **Facts**: Locker code is bramble-ember-761\n- **Projects**:"
+   },
+   "answer": "bramble-ember-761"
+  },
+  {
+   "runKey": "memory-004#2",
+   "scenario": "W1-C+D",
+   "caseId": "memory-004",
+   "config": "working",
+   "depth": 2,
+   "rep": 2,
+   "n": 3,
+   "workingMemoryDump": {
+    "via": "getWorkingMemory",
+    "content": "# User Information\n- **First Name**: \n- **Last Name**: \n- **Location**: \n- **Occupation**: \n- **Interests**: \n- **Goals**: \n- **Events**: \n- **Facts**: Locker code is bramble-ember-761\n- **Projects**:"
+   },
+   "answer": "bramble-ember-761\nbramble-ember-761\nbramble-ember-761"
+  },
+  {
+   "runKey": "memory-004#3",
+   "scenario": "W1-C+D",
+   "caseId": "memory-004",
+   "config": "working",
+   "depth": 2,
+   "rep": 3,
+   "n": 3,
+   "workingMemoryDump": {
+    "via": "getWorkingMemory",
+    "content": "# User Information\n- **First Name**: \n- **Last Name**: \n- **Location**: \n- **Occupation**: \n- **Interests**: \n- **Goals**: \n- **Events**: \n- **Facts**: Locker code is bramble-ember-761\n- **Projects**:"
+   },
+   "answer": "bramble-ember-761"
+  },
+  {
+   "runKey": "memory-005#1",
+   "scenario": "W1-C",
+   "caseId": "memory-005",
+   "config": "default",
+   "depth": 10,
+   "rep": 1,
+   "n": 10,
+   "answer": "I don't have information about your locker code. You'll need to recall it or check with someone who knows it."
+  },
+  {
+   "runKey": "memory-005#2",
+   "scenario": "W1-C",
+   "caseId": "memory-005",
+   "config": "default",
+   "depth": 10,
+   "rep": 2,
+   "n": 10,
+   "answer": "thimble-juniper-565"
+  },
+  {
+   "runKey": "memory-005#3",
+   "scenario": "W1-C",
+   "caseId": "memory-005",
+   "config": "default",
+   "depth": 10,
+   "rep": 3,
+   "n": 10,
+   "answer": "I don't have any information about your locker code. I was only asked to remember some color-word pairs (yellow sun, purple grape, orange carrot, red apple, blue ocean) but no locker code was provided or mentioned."
+  },
+  {
+   "runKey": "memory-005#4",
+   "scenario": "W1-C",
+   "caseId": "memory-005",
+   "config": "default",
+   "depth": 10,
+   "rep": 4,
+   "n": 10,
+   "answer": "I don't have any information about your locker code. You'll need to recall it or check with someone who knows it."
+  },
+  {
+   "runKey": "memory-005#5",
+   "scenario": "W1-C",
+   "caseId": "memory-005",
+   "config": "default",
+   "depth": 10,
+   "rep": 5,
+   "n": 10,
+   "answer": "I don't have any information about your locker code. You'll need to recall it or check with someone who knows it."
+  },
+  {
+   "runKey": "memory-005#6",
+   "scenario": "W1-C",
+   "caseId": "memory-005",
+   "config": "default",
+   "depth": 10,
+   "rep": 6,
+   "n": 10,
+   "answer": "I don't have any information about your locker code. You'll need to recall it or check with whoever provided it to you."
+  },
+  {
+   "runKey": "memory-005#7",
+   "scenario": "W1-C",
+   "caseId": "memory-005",
+   "config": "default",
+   "depth": 10,
+   "rep": 7,
+   "n": 10,
+   "answer": "I don't have any information about your locker code. You'll need to recall it or check with someone who knows it."
+  },
+  {
+   "runKey": "memory-005#8",
+   "scenario": "W1-C",
+   "caseId": "memory-005",
+   "config": "default",
+   "depth": 10,
+   "rep": 8,
+   "n": 10,
+   "answer": "I don't have any information about your locker code. You'll need to recall it or check with someone who would know, like a teacher, administrator, or the school office.\n\nIf you're looking for a specific pattern I was following in the previous responses, that would be 4-5-6-7 (the numbers of the fillers), but that's not actually your locker code since I don't have any information about it.\n"
+  },
+  {
+   "runKey": "memory-005#9",
+   "scenario": "W1-C",
+   "caseId": "memory-005",
+   "config": "default",
+   "depth": 10,
+   "rep": 9,
+   "n": 10,
+   "answer": "I don't have any information about your locker code. You'll need to recall it or check with someone who would know it.\n"
+  },
+  {
+   "runKey": "memory-005#10",
+   "scenario": "W1-C",
+   "caseId": "memory-005",
+   "config": "default",
+   "depth": 10,
+   "rep": 10,
+   "n": 10,
+   "answer": "I don't have any information about your locker code. I was only asked to remember facts you provided earlier (filler words with colors and words), but no locker code was mentioned."
+  },
+  {
+   "runKey": "memory-006#1",
+   "scenario": "W1-C",
+   "caseId": "memory-006",
+   "config": "window40",
+   "depth": 10,
+   "rep": 1,
+   "n": 3,
+   "answer": "canyon-saddle-266"
+  },
+  {
+   "runKey": "memory-006#2",
+   "scenario": "W1-C",
+   "caseId": "memory-006",
+   "config": "window40",
+   "depth": 10,
+   "rep": 2,
+   "n": 3,
+   "answer": "canyon-saddle-266"
+  },
+  {
+   "runKey": "memory-006#3",
+   "scenario": "W1-C",
+   "caseId": "memory-006",
+   "config": "window40",
+   "depth": 10,
+   "rep": 3,
+   "n": 3,
+   "answer": "canyon-saddle-266"
+  },
+  {
+   "runKey": "memory-007#1",
+   "scenario": "W1-C",
+   "caseId": "memory-007",
+   "config": "semantic",
+   "depth": 10,
+   "rep": 1,
+   "n": 10,
+   "answer": "hazel-thimble-810"
+  },
+  {
+   "runKey": "memory-007#2",
+   "scenario": "W1-C",
+   "caseId": "memory-007",
+   "config": "semantic",
+   "depth": 10,
+   "rep": 2,
+   "n": 10,
+   "answer": "hazel-thimble-810"
+  },
+  {
+   "runKey": "memory-007#3",
+   "scenario": "W1-C",
+   "caseId": "memory-007",
+   "config": "semantic",
+   "depth": 10,
+   "rep": 3,
+   "n": 10,
+   "answer": "hazel-thimble-810"
+  },
+  {
+   "runKey": "memory-007#4",
+   "scenario": "W1-C",
+   "caseId": "memory-007",
+   "config": "semantic",
+   "depth": 10,
+   "rep": 4,
+   "n": 10,
+   "answer": "hazel-thimble-810"
+  },
+  {
+   "runKey": "memory-007#5",
+   "scenario": "W1-C",
+   "caseId": "memory-007",
+   "config": "semantic",
+   "depth": 10,
+   "rep": 5,
+   "n": 10,
+   "answer": "hazel-thimble-810"
+  },
+  {
+   "runKey": "memory-007#6",
+   "scenario": "W1-C",
+   "caseId": "memory-007",
+   "config": "semantic",
+   "depth": 10,
+   "rep": 6,
+   "n": 10,
+   "answer": "hazel-thimble-810"
+  },
+  {
+   "runKey": "memory-007#7",
+   "scenario": "W1-C",
+   "caseId": "memory-007",
+   "config": "semantic",
+   "depth": 10,
+   "rep": 7,
+   "n": 10,
+   "answer": "hazel-thimble-810"
+  },
+  {
+   "runKey": "memory-007#8",
+   "scenario": "W1-C",
+   "caseId": "memory-007",
+   "config": "semantic",
+   "depth": 10,
+   "rep": 8,
+   "n": 10,
+   "answer": "hazel-thimble-810"
+  },
+  {
+   "runKey": "memory-007#9",
+   "scenario": "W1-C",
+   "caseId": "memory-007",
+   "config": "semantic",
+   "depth": 10,
+   "rep": 9,
+   "n": 10,
+   "answer": "hazel-thimble-810"
+  },
+  {
+   "runKey": "memory-007#10",
+   "scenario": "W1-C",
+   "caseId": "memory-007",
+   "config": "semantic",
+   "depth": 10,
+   "rep": 10,
+   "n": 10,
+   "answer": "hazel-thimble-810"
+  },
+  {
+   "runKey": "memory-009#1",
+   "scenario": "W1-C",
+   "caseId": "memory-009",
+   "config": "default",
+   "depth": 25,
+   "rep": 1,
+   "n": 10,
+   "answer": "I don't have information about your locker code. You'll need to recall it or check with someone who knows it.\n"
+  },
+  {
+   "runKey": "memory-009#2",
+   "scenario": "W1-C",
+   "caseId": "memory-009",
+   "config": "default",
+   "depth": 25,
+   "rep": 2,
+   "n": 10,
+   "answer": "I don't have any information about your locker code. You'll need to recall it or check with someone who knows it."
+  },
+  {
+   "runKey": "memory-009#3",
+   "scenario": "W1-C",
+   "caseId": "memory-009",
+   "config": "default",
+   "depth": 25,
+   "rep": 3,
+   "n": 10,
+   "answer": "I don't have any information about your locker code. You'll need to recall it or check with someone who knows it.\n"
+  },
+  {
+   "runKey": "memory-009#4",
+   "scenario": "W1-C",
+   "caseId": "memory-009",
+   "config": "default",
+   "depth": 25,
+   "rep": 4,
+   "n": 10,
+   "answer": "kettle-willow-711"
+  },
+  {
+   "runKey": "memory-009#5",
+   "scenario": "W1-C",
+   "caseId": "memory-009",
+   "config": "default",
+   "depth": 25,
+   "rep": 5,
+   "n": 10,
+   "answer": "I don't have information about your locker code. You'll need to recall it or check with someone who knows it.\n"
+  },
+  {
+   "runKey": "memory-009#6",
+   "scenario": "W1-C",
+   "caseId": "memory-009",
+   "config": "default",
+   "depth": 25,
+   "rep": 6,
+   "n": 10,
+   "answer": "kettle-willow-711"
+  },
+  {
+   "runKey": "memory-009#7",
+   "scenario": "W1-C",
+   "caseId": "memory-009",
+   "config": "default",
+   "depth": 25,
+   "rep": 7,
+   "n": 10,
+   "answer": "I don't have any information about your locker code. You'll need to recall it or check with someone who knows it."
+  },
+  {
+   "runKey": "memory-009#8",
+   "scenario": "W1-C",
+   "caseId": "memory-009",
+   "config": "default",
+   "depth": 25,
+   "rep": 8,
+   "n": 10,
+   "answer": "I don't have information about your locker code. You'll need to recall it or check with someone who knows it."
+  },
+  {
+   "runKey": "memory-009#9",
+   "scenario": "W1-C",
+   "caseId": "memory-009",
+   "config": "default",
+   "depth": 25,
+   "rep": 9,
+   "n": 10,
+   "answer": "I don't have any information about your locker code. You haven't provided me with any details about a locker code previously.\n\nIf you're asking about a specific locker code, please provide more context or information so I can help you properly. However, based on our conversation history, I cannot recall or generate a locker code for you.\n"
+  },
+  {
+   "runKey": "memory-009#10",
+   "scenario": "W1-C",
+   "caseId": "memory-009",
+   "config": "default",
+   "depth": 25,
+   "rep": 10,
+   "n": 10,
+   "answer": "I don't have information about your locker code. You'll need to recall it or check with someone who knows it.\n"
+  },
+  {
+   "runKey": "memory-010#1",
+   "scenario": "W1-C",
+   "caseId": "memory-010",
+   "config": "window40",
+   "depth": 25,
+   "rep": 1,
+   "n": 3,
+   "answer": "falcon-lantern-354"
+  },
+  {
+   "runKey": "memory-010#2",
+   "scenario": "W1-C",
+   "caseId": "memory-010",
+   "config": "window40",
+   "depth": 25,
+   "rep": 2,
+   "n": 3,
+   "answer": "I don't have any information about your locker code. You haven't provided me with any details about it previously.\n"
+  },
+  {
+   "runKey": "memory-010#3",
+   "scenario": "W1-C",
+   "caseId": "memory-010",
+   "config": "window40",
+   "depth": 25,
+   "rep": 3,
+   "n": 3,
+   "answer": "I don't have any information about your locker code. You'll need to recall it or check with someone who would know it."
+  },
+  {
+   "runKey": "memory-011#1",
+   "scenario": "W1-C",
+   "caseId": "memory-011",
+   "config": "semantic",
+   "depth": 25,
+   "rep": 1,
+   "n": 10,
+   "answer": "harbor-chisel-899"
+  },
+  {
+   "runKey": "memory-011#2",
+   "scenario": "W1-C",
+   "caseId": "memory-011",
+   "config": "semantic",
+   "depth": 25,
+   "rep": 2,
+   "n": 10,
+   "answer": "harbor-chisel-899"
+  },
+  {
+   "runKey": "memory-011#3",
+   "scenario": "W1-C",
+   "caseId": "memory-011",
+   "config": "semantic",
+   "depth": 25,
+   "rep": 3,
+   "n": 10,
+   "answer": "harbor-chisel-899"
+  },
+  {
+   "runKey": "memory-011#4",
+   "scenario": "W1-C",
+   "caseId": "memory-011",
+   "config": "semantic",
+   "depth": 25,
+   "rep": 4,
+   "n": 10,
+   "answer": "harbor-chisel-899"
+  },
+  {
+   "runKey": "memory-011#5",
+   "scenario": "W1-C",
+   "caseId": "memory-011",
+   "config": "semantic",
+   "depth": 25,
+   "rep": 5,
+   "n": 10,
+   "answer": "harbor-chisel-899"
+  },
+  {
+   "runKey": "memory-011#6",
+   "scenario": "W1-C",
+   "caseId": "memory-011",
+   "config": "semantic",
+   "depth": 25,
+   "rep": 6,
+   "n": 10,
+   "answer": "harbor-chisel-899"
+  },
+  {
+   "runKey": "memory-011#7",
+   "scenario": "W1-C",
+   "caseId": "memory-011",
+   "config": "semantic",
+   "depth": 25,
+   "rep": 7,
+   "n": 10,
+   "answer": "harbor-chisel-899"
+  },
+  {
+   "runKey": "memory-011#8",
+   "scenario": "W1-C",
+   "caseId": "memory-011",
+   "config": "semantic",
+   "depth": 25,
+   "rep": 8,
+   "n": 10,
+   "answer": "harbor-chisel-899"
+  },
+  {
+   "runKey": "memory-011#9",
+   "scenario": "W1-C",
+   "caseId": "memory-011",
+   "config": "semantic",
+   "depth": 25,
+   "rep": 9,
+   "n": 10,
+   "answer": "harbor-chisel-899"
+  },
+  {
+   "runKey": "memory-011#10",
+   "scenario": "W1-C",
+   "caseId": "memory-011",
+   "config": "semantic",
+   "depth": 25,
+   "rep": 10,
+   "n": 10,
+   "answer": "harbor-chisel-899"
+  },
+  {
+   "runKey": "memory-014#1",
+   "scenario": "W1-C",
+   "caseId": "memory-014",
+   "config": "window40",
+   "depth": 50,
+   "rep": 1,
+   "n": 3,
+   "answer": "I don't have any information about your locker code. You'll need to recall it or check with someone who knows it."
+  },
+  {
+   "runKey": "memory-014#2",
+   "scenario": "W1-C",
+   "caseId": "memory-014",
+   "config": "window40",
+   "depth": 50,
+   "rep": 2,
+   "n": 3,
+   "answer": "I don't have any information about your locker code. You'll need to recall it or check with someone who knows it."
+  },
+  {
+   "runKey": "memory-014#3",
+   "scenario": "W1-C",
+   "caseId": "memory-014",
+   "config": "window40",
+   "depth": 50,
+   "rep": 3,
+   "n": 3,
+   "answer": "I don't have any information about your locker code. You'll need to recall it or check with whoever provided it to you."
+  },
+  {
+   "runKey": "memory-015#1",
+   "scenario": "W1-C",
+   "caseId": "memory-015",
+   "config": "semantic",
+   "depth": 50,
+   "rep": 1,
+   "n": 5,
+   "answer": "cinder-tunnel-733"
+  },
+  {
+   "runKey": "memory-015#2",
+   "scenario": "W1-C",
+   "caseId": "memory-015",
+   "config": "semantic",
+   "depth": 50,
+   "rep": 2,
+   "n": 5,
+   "answer": "cinder-tunnel-733"
+  },
+  {
+   "runKey": "memory-015#3",
+   "scenario": "W1-C",
+   "caseId": "memory-015",
+   "config": "semantic",
+   "depth": 50,
+   "rep": 3,
+   "n": 5,
+   "answer": "cinder-tunnel-733"
+  },
+  {
+   "runKey": "memory-015#4",
+   "scenario": "W1-C",
+   "caseId": "memory-015",
+   "config": "semantic",
+   "depth": 50,
+   "rep": 4,
+   "n": 5,
+   "answer": "cinder-tunnel-733"
+  },
+  {
+   "runKey": "memory-015#5",
+   "scenario": "W1-C",
+   "caseId": "memory-015",
+   "config": "semantic",
+   "depth": 50,
+   "rep": 5,
+   "n": 5,
+   "answer": "cinder-tunnel-733"
+  },
+  {
+   "runKey": "memory-016#1",
+   "scenario": "W1-C+D",
+   "caseId": "memory-016",
+   "config": "working",
+   "depth": 50,
+   "rep": 1,
+   "n": 5,
+   "workingMemoryDump": {
+    "via": "getWorkingMemory",
+    "content": "# User Information\n- **First Name**: \n- **Last Name**: \n- **Location**: \n- **Occupation**: \n- **Interests**: \n- **Goals**: \n- **Events**: \n- **Facts**: Locker code is hazel-dahlia-688. Filler 1: one color, one word. Filler 2: one color, one word. Filler 3: one color, one word. Filler 4: one color, one word. Filler 5: one color, one word. Filler 6: one color, one word. Filler 7: one color, one word. Filler 8: one color, one word. Filler 9: one color, one word. Filler 10: one color, one word. Filler 11: one color, one word. Filler 12: one color, one word. Filler 13: one color, one word. Filler 14: one color, one word. Filler 15: one color, one word. Filler 16: one color, one word. Filler 17: one color, one word. Filler 18: one color, one word. Filler 19: one color, one word. Filler 20: one color, one word. Filler 21: one color, one word. Filler 22: one color, one word. Filler 23: one color, one word. Filler 24: one color, one word. Filler 25: one color, one word. Filler 26: one color, one word. Filler 27: one color, one word. Filler 28: one color, one word. Filler 29: one color, one word. Filler 30: one color, one word. Filler 31: one color, one word. Filler 32: one color, one word. Filler 33: one color, one word.\n- **Projects**:"
+   },
+   "answer": "hazel-dahlia-688"
+  },
+  {
+   "runKey": "memory-016#2",
+   "scenario": "W1-C+D",
+   "caseId": "memory-016",
+   "config": "working",
+   "depth": 50,
+   "rep": 2,
+   "n": 5,
+   "workingMemoryDump": {
+    "via": "getWorkingMemory",
+    "content": "# User Information\n- **First Name**: \n- **Last Name**: \n- **Location**: \n- **Occupation**: \n- **Interests**: \n- **Goals**: \n- **Events**: \n- **Facts**: Locker code is hazel-dahlia-688. Filler 1: one color, one word. Filler 2: one color, one word. Filler 3: one color, one word. Filler 4: one color, one word. Filler 5: one color, one word. Filler 6: one color, one word. Filler 7: one color, one word. Filler 8: one color, one word. Filler 9: one color, one word. Filler 10: one color, one word. Filler 11: one color, one word. Filler 12: one color, one word. Filler 13: one color, one word. Filler 14: one color, one word. Filler 15: one color, one word. Filler 16: one color, one word. Filler 17: one color, one word. Filler 18: one color, one word. Filler 19: one color, one word. Filler 20: one color, one word. Filler 21: one color, one word. Filler 22: one color, one word. Filler 23: one color, one word. Filler 24: one color, one word. Filler 25: one color, one word. Filler 26: one color, one word. Filler 27: one color, one word. Filler 28: one color, one word. Filler 29: one color, one word. Filler 30: one color, one word. Filler 31: one color, one word. Filler 32: one color, one word. Filler 33: one color, one word. Filler 34: one color, one word. Filler 35: one color, one word. Filler 36: one color, one word. Filler 37: one color, one word. Filler 38: one color, one word. Filler 39: one color, one word. Filler 40: one color, one word. Filler 41: one color, one word. Filler 42: one color, one word. Filler 43: one color, one word. Filler 44: one color, one word. Filler 45: one color, one word. Filler 46: one color, one word. Filler 47: one color, one word. Filler 48: one color, one word.\n- **Projects**:"
+   },
+   "answer": "hazel-dahlia-688"
+  },
+  {
+   "runKey": "memory-016#3",
+   "scenario": "W1-C+D",
+   "caseId": "memory-016",
+   "config": "working",
+   "depth": 50,
+   "rep": 3,
+   "n": 5,
+   "workingMemoryDump": {
+    "via": "getWorkingMemory",
+    "content": "# User Information\n- **First Name**: \n- **Last Name**: \n- **Location**: \n- **Occupation**: \n- **Interests**: \n- **Goals**: \n- **Events**: \n- **Facts**: Locker code is hazel-dahlia-688. Filler 1: one color, one word. Filler 2: one color, one word. Filler 3: one color, one word. Filler 4: one color, one word. Filler 5: one color, one word. Filler 6: one color, one word. Filler 7: one color, one word. Filler 8: one color, one word. Filler 9: one color, one word. Filler 10: one color, one word. Filler 11: one color, one word. Filler 12: one color, one word. Filler 13: one color, one word. Filler 14: one color, one word. Filler 15: one color, one word. Filler 16: one color, one word. Filler 17: one color, one word. Filler 18: one color, one word. Filler 19: one color, one word. Filler 20: one color, one word. Filler 21: one color, one word. Filler 22: one color, one word. Filler 23: one color, one word. Filler 24: one color, one word. Filler 25: one color, one word. Filler 26: one color, one word. Filler 27: one color, one word. Filler 28: one color, one word. Filler 29: one color, one word. Filler 30: one color, one word. Filler 31: one color, one word. Filler 32: one color, one word. Filler 33: one color, one word. Filler 34: one color, one word. Filler 35: one color, one word. Filler 36: one color, one word. Filler 37: one color, one word. Filler 38: one color, one word.\n- **Projects**:"
+   },
+   "answer": "hazel-dahlia-688"
+  },
+  {
+   "runKey": "memory-016#4",
+   "scenario": "W1-C+D",
+   "caseId": "memory-016",
+   "config": "working",
+   "depth": 50,
+   "rep": 4,
+   "n": 5,
+   "workingMemoryDump": {
+    "via": "getWorkingMemory",
+    "content": "# User Information\n- **First Name**: \n- **Last Name**: \n- **Location**: \n- **Occupation**: \n- **Interests**: \n- **Goals**: \n- **Events**: \n- **Facts**: Locker code is hazel-dahlia-688\n- **Projects**:"
+   },
+   "answer": "hazel-dahlia-688"
+  },
+  {
+   "runKey": "memory-019#1",
+   "scenario": "W1-C",
+   "caseId": "memory-019",
+   "config": "semantic",
+   "depth": 100,
+   "rep": 1,
+   "n": 5,
+   "answer": "quarry-ivory-753"
+  },
+  {
+   "runKey": "memory-019#2",
+   "scenario": "W1-C",
+   "caseId": "memory-019",
+   "config": "semantic",
+   "depth": 100,
+   "rep": 2,
+   "n": 5,
+   "answer": "quarry-ivory-753"
+  },
+  {
+   "runKey": "memory-019#3",
+   "scenario": "W1-C",
+   "caseId": "memory-019",
+   "config": "semantic",
+   "depth": 100,
+   "rep": 3,
+   "n": 5,
+   "answer": "quarry-ivory-753"
+  },
+  {
+   "runKey": "memory-019#4",
+   "scenario": "W1-C",
+   "caseId": "memory-019",
+   "config": "semantic",
+   "depth": 100,
+   "rep": 4,
+   "n": 5,
+   "answer": "quarry-ivory-753"
+  },
+  {
+   "runKey": "memory-019#5",
+   "scenario": "W1-C",
+   "caseId": "memory-019",
+   "config": "semantic",
+   "depth": 100,
+   "rep": 5,
+   "n": 5,
+   "answer": "quarry-ivory-753"
+  },
+  {
+   "runKey": "memory-020#1",
+   "scenario": "W1-C+D",
+   "caseId": "memory-020",
+   "config": "working",
+   "depth": 100,
+   "rep": 1,
+   "n": 5,
+   "workingMemoryDump": {
+    "via": "getWorkingMemory",
+    "content": "# User Information\n- **First Name**: \n- **Last Name**: \n- **Location**: \n- **Occupation**: \n- **Interests**: \n- **Goals**: \n- **Events**: \n- **Facts**: Locker code is cinder-hazel-585. Filler 1: one color, one word. Filler 2: one color, one word. Filler 3: one color, one word. Filler 4: one color, one word. Filler 5: one color, one word. Filler 6: one color, one word. Filler 7: one color, one word. Filler 8: one color, one word. Filler 9: one color, one word. Filler 10: one color, one word. Filler 11: one color, one word. Filler 12: one color, one word. Filler 13: one color, one word. Filler 14: one color, one word. Filler 15: one color, one word. Filler 16: one color, one word. Filler 17: one color, one word. Filler 18: one color, one word. Filler 19: one color, one word. Filler 20: one color, one word. Filler 21: one color, one word. Filler 22: one color, one word. Filler 23: one color, one word. Filler 24: one color, one word. Filler 25: one color, one word. Filler 26: one color, one word. Filler 27: one color, one word. Filler 28: one color, one word. Filler 29: one color, one word. Filler 30: one color, one word. Filler 31: one color, one word. Filler 32: one color, one word. Filler 33: one color, one word. Filler 34: one color, one word. Filler 35: one color, one word. Filler 36: one color, one word. Filler 37: one color, one word. Filler 38: one color, one word. Filler 39: one color, one word. Filler 40: one color, one word. Filler 41: one color, one word. Filler 42: one color, one word.\n- **Projects**:"
+   },
+   "answer": "cinder-hazel-585"
+  },
+  {
+   "runKey": "memory-020#2",
+   "scenario": "W1-C+D",
+   "caseId": "memory-020",
+   "config": "working",
+   "depth": 100,
+   "rep": 2,
+   "n": 5,
+   "workingMemoryDump": {
+    "via": "getWorkingMemory",
+    "content": "# User Information\n- **First Name**: \n- **Last Name**: \n- **Location**: \n- **Occupation**: \n- **Interests**: \n- **Goals**: \n- **Events**: \n- **Facts**: Locker code is cinder-hazel-585\n- **Projects**:"
+   },
+   "answer": "cinder-hazel-585"
+  },
+  {
+   "runKey": "memory-020#3",
+   "scenario": "W1-C+D",
+   "caseId": "memory-020",
+   "config": "working",
+   "depth": 100,
+   "rep": 3,
+   "n": 5,
+   "workingMemoryDump": {
+    "via": "getWorkingMemory",
+    "content": "# User Information\n- **First Name**: \n- **Last Name**: \n- **Location**: \n- **Occupation**: \n- **Interests**: \n- **Goals**: \n- **Events**: \n- **Facts**: Locker code is cinder-hazel-585\n- **Projects**:"
+   },
+   "answer": "cinder-hazel-585\ncinder-hazel-585"
+  },
+  {
+   "runKey": "memory-020#4",
+   "scenario": "W1-C+D",
+   "caseId": "memory-020",
+   "config": "working",
+   "depth": 100,
+   "rep": 4,
+   "n": 5,
+   "workingMemoryDump": {
+    "via": "getWorkingMemory",
+    "content": "# User Information\n- **First Name**: \n- **Last Name**: \n- **Location**: \n- **Occupation**: \n- **Interests**: \n- **Goals**: \n- **Events**: \n- **Facts**: Locker code is cinder-hazel-585\n- **Projects**:"
+   },
+   "answer": "cinder-hazel-585"
+  },
+  {
+   "runKey": "memory-020#5",
+   "scenario": "W1-C+D",
+   "caseId": "memory-020",
+   "config": "working",
+   "depth": 100,
+   "rep": 5,
+   "n": 5,
+   "workingMemoryDump": {
+    "via": "getWorkingMemory",
+    "content": "# User Information\n- **First Name**: \n- **Last Name**: \n- **Location**: \n- **Occupation**: \n- **Interests**: \n- **Goals**: \n- **Events**: \n- **Facts**: Locker code is cinder-hazel-585\n- **Projects**:"
+   },
+   "answer": "cinder-hazel-585"
+  },
+  {
+   "runKey": "memory-016#5",
+   "scenario": "W1-C+D",
+   "caseId": "memory-016",
+   "config": "working",
+   "depth": 50,
+   "rep": 5,
+   "n": 5,
+   "workingMemoryDump": {
+    "via": "getWorkingMemory",
+    "content": "# User Information\n- **First Name**: \n- **Last Name**: \n- **Location**: \n- **Occupation**: \n- **Interests**: \n- **Goals**: \n- **Events**: \n- **Facts**: Locker code is hazel-dahlia-688\n- **Projects**:"
+   },
+   "answer": "hazel-dahlia-688\nhazel-dahlia-688\nhazel-dahlia-688\n"
+  }
+ ]
+}

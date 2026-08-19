@@ -1,0 +1,419 @@
+=== Wave 1 start 2026-08-18T18:22:44-04:00 on RUNA-CONTROL, node v22.22.1
+WAVE1-PREREGISTRATION.md: seal intact
+--- w1a-snapshot 2026-08-18T18:22:44-04:00
+same-length-value: applied=true resume=success acted=true => VIOLATED
+different-length-value: applied=true resume=null acted=false => HELD
+field-added: applied=true resume=null acted=false => HELD
+field-removed: applied=true resume=null acted=false => HELD
+type-changed: applied=true resume=success acted=false => VIOLATED-SILENT
+foreign-snapshot: applied=true resume=success acted=true => VIOLATED
+
+wrote 6 W1-A results
+--- w1b-crash 2026-08-18T18:22:59-04:00
+before-effect#1 achieved=died-before-effect commits=0 resume=null  before-effect#2 achieved=died-before-effect commits=0 resume=null  before-effect#3 achieved=died-before-effect commits=0 resume=null  before-effect#4 achieved=died-before-effect commits=0 resume=null  before-effect#5 achieved=died-before-effect commits=0 resume=null  
+during-effect#1 achieved=died-inside-effect commits=0 resume=null  during-effect#2 achieved=died-inside-effect commits=0 resume=null  during-effect#3 achieved=died-inside-effect commits=0 resume=null  during-effect#4 achieved=died-inside-effect commits=0 resume=null  during-effect#5 achieved=died-inside-effect commits=0 resume=null  
+after-effect-before-checkpoint#1 achieved=died-after-effect commits=1 resume=null  after-effect-before-checkpoint#2 achieved=died-after-effect commits=1 resume=null  after-effect-before-checkpoint#3 achieved=died-after-effect commits=1 resume=null  after-effect-before-checkpoint#4 achieved=died-after-effect commits=1 resume=null  after-effect-before-checkpoint#5 achieved=died-after-effect commits=1 resume=null  
+after-checkpoint#1 achieved=died-during-resume commits=1 resume=success  after-checkpoint#2 achieved=died-during-resume commits=1 resume=success  after-checkpoint#3 achieved=died-during-resume commits=1 resume=success  after-checkpoint#4 achieved=died-during-resume commits=1 resume=success  after-checkpoint#5 achieved=died-during-resume commits=1 resume=success  
+during-checkpoint-write#1 achieved=died-before-effect commits=0 resume=null  during-checkpoint-write#2 achieved=died-before-effect commits=0 resume=null  during-checkpoint-write#3 achieved=died-before-effect commits=0 resume=null  during-checkpoint-write#4 achieved=died-before-effect commits=0 resume=null  during-checkpoint-write#5 achieved=died-before-effect commits=0 resume=null  
+
+wrote 25 W1-B runs (5 per boundary)
+{
+ "before-effect": {
+  "runs": 5,
+  "ib1Violations": 0,
+  "ib2Violations": 5,
+  "commitCounts": {
+   "0": 5
+  },
+  "achieved": {
+   "died-before-effect": 5
+  }
+ },
+ "during-effect": {
+  "runs": 5,
+  "ib1Violations": 0,
+  "ib2Violations": 5,
+  "commitCounts": {
+   "0": 5
+  },
+  "achieved": {
+   "died-inside-effect": 5
+  }
+ },
+ "after-effect-before-checkpoint": {
+  "runs": 5,
+  "ib1Violations": 0,
+  "ib2Violations": 5,
+  "commitCounts": {
+   "1": 5
+  },
+  "achieved": {
+   "died-after-effect": 5
+  }
+ },
+ "after-checkpoint": {
+  "runs": 5,
+  "ib1Violations": 0,
+  "ib2Violations": 0,
+  "commitCounts": {
+   "1": 5
+  },
+  "achieved": {
+   "died-during-resume": 5
+  }
+ },
+ "during-checkpoint-write": {
+  "runs": 5,
+  "ib1Violations": 0,
+  "ib2Violations": 5,
+  "commitCounts": {
+   "0": 5
+  },
+  "achieved": {
+   "died-before-effect": 5
+  }
+ }
+}
+--- w1ef-tools 2026-08-18T18:24:00-04:00
+WAVE1-PREREGISTRATION.md: seal intact
+stub: connected, mode=ok
+control-both-calls-succeed#1 115386ms verdict=CONTROL-OK owner=true reportsFailure=false
+stub: connected, mode=ok
+control-both-calls-succeed#2 1664ms verdict=CONTROL-OK owner=true reportsFailure=false
+stub: connected, mode=ok
+control-both-calls-succeed#3 1623ms verdict=CONTROL-OK owner=true reportsFailure=false
+stub: connected, mode=die-after=1
+stub: dying after 1 call(s)
+stub: connected, mode=die-after=1
+stub: dying after 1 call(s)
+stub: connected, mode=die-after=1
+stub: dying after 1 call(s)
+[LLM] [stub] Reconnection or retry failed for tool lookup_owner {
+  originalError: 'Connection closed',
+  reconnectError: 'SdkError: Connection closed\n' +
+    '    at Client._onclose (file:///home/claude-agent/Projects/runa-reference/node_modules/@modelcontextprotocol/client/dist/src-D_zzAWoS.mjs:5780:17)\n' +
+    '    at Client._onclose (file:///home/claude-agent/Projects/runa-reference/node_modules/@modelcontextprotocol/client/dist/index.mjs:4056:9)\n' +
+    '    at _transport.onclose (file:///home/claude-agent/Projects/runa-reference/node_modules/@modelcontextprotocol/client/dist/src-D_zzAWoS.mjs:5747:10)\n' +
+    '    at ChildProcess.<anonymous> (file:///home/claude-agent/Projects/runa-reference/node_modules/@modelcontextprotocol/client/dist/stdio.mjs:91:19)\n' +
+    '    at ChildProcess.emit (node:events:519:28)\n' +
+    '    at maybeClose (node:internal/child_process:1101:16)\n' +
+    '    at ChildProcess._handle.onexit (node:internal/child_process:304:5)\n' +
+    '    at Process.callbackTrampoline (node:internal/async_hooks:130:17)',
+  toolArgs: { code: 'ZX-4417' }
+}
+[LLM] [stub] Reconnection or retry failed for tool lookup_code {
+  originalError: 'Connection closed',
+  reconnectError: 'SdkError: Connection closed\n' +
+    '    at Client._onclose (file:///home/claude-agent/Projects/runa-reference/node_modules/@modelcontextprotocol/client/dist/src-D_zzAWoS.mjs:5780:17)\n' +
+    '    at Client._onclose (file:///home/claude-agent/Projects/runa-reference/node_modules/@modelcontextprotocol/client/dist/index.mjs:4056:9)\n' +
+    '    at _transport.onclose (file:///home/claude-agent/Projects/runa-reference/node_modules/@modelcontextprotocol/client/dist/src-D_zzAWoS.mjs:5747:10)\n' +
+    '    at ChildProcess.<anonymous> (file:///home/claude-agent/Projects/runa-reference/node_modules/@modelcontextprotocol/client/dist/stdio.mjs:91:19)\n' +
+    '    at ChildProcess.emit (node:events:519:28)\n' +
+    '    at maybeClose (node:internal/child_process:1101:16)\n' +
+    '    at ChildProcess._handle.onexit (node:internal/child_process:304:5)\n' +
+    '    at Process.callbackTrampoline (node:internal/async_hooks:130:17)',
+  toolArgs: { item: 'ledger' }
+}
+stub: connected, mode=die-after=1
+stub: dying after 1 call(s)
+stub: connected, mode=die-after=1
+die-after-first-call#1 7861ms verdict=VIOLATED-FABRICATED owner=true reportsFailure=true
+stub: connected, mode=die-after=1
+stub: dying after 1 call(s)
+stub: connected, mode=die-after=1
+die-after-first-call#2 2076ms verdict=VIOLATED-FABRICATED owner=true reportsFailure=false
+stub: connected, mode=die-after=1
+stub: dying after 1 call(s)
+stub: connected, mode=die-after=1
+die-after-first-call#3 1998ms verdict=VIOLATED-FABRICATED owner=true reportsFailure=false
+stub: connected, mode=hang-after=1
+stub: hanging after 1 call(s)
+[LLM] [stub] Error calling tool: lookup_owner {
+  error: 'SdkError: Request timed out\n' +
+    '    at Timeout.timeoutHandler (file:///home/claude-agent/Projects/runa-reference/node_modules/@modelcontextprotocol/client/dist/src-D_zzAWoS.mjs:6149:40)\n' +
+    '    at listOnTimeout (node:internal/timers:585:17)\n' +
+    '    at process.processTimers (node:internal/timers:521:7)',
+  toolArgs: { code: '123XYZ' }
+}
+stub: hanging after 1 call(s)
+[LLM] [stub] Reconnection or retry failed for tool lookup_owner {
+  originalError: 'Connection closed',
+  reconnectError: 'Error: MCP client was disconnected while recovering the failed transport\n' +
+    '    at InternalMastraMCPClient.reconnectAfterTransportFailure (file:///home/claude-agent/Projects/runa-reference/node_modules/@mastra/mcp/dist/index.js:21942:64)\n' +
+    '    at file:///home/claude-agent/Projects/runa-reference/node_modules/@mastra/mcp/dist/index.js:22257:21\n' +
+    '    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)\n' +
+    '    at async Tool.execute (file:///home/claude-agent/Projects/runa-reference/node_modules/@mastra/core/dist/tool-BogyE8Hu.js:684:20)\n' +
+    '    at async execFunction (file:///home/claude-agent/Projects/runa-reference/node_modules/@mastra/core/dist/utils-DbzrFK9f.js:401:15)\n' +
+    '    at async Immediate.<anonymous> (file:///home/claude-agent/Projects/runa-reference/node_modules/@mastra/core/dist/utils-DbzrFK9f.js:532:16)',
+  toolArgs: { code: 'ZX-4417' }
+}
+hang-no-client-timeout#1 120342ms verdict=VIOLATED-UNBOUNDED owner=false reportsFailure=false
+stub: connected, mode=hang-after=1
+stub: hanging after 1 call(s)
+stub: connected, mode=hang-after=1
+stub: hanging after 1 call(s)
+stub: hanging after 1 call(s)
+[LLM] [stub] Error calling tool: lookup_owner {
+  error: 'SdkError: Request timed out\n' +
+    '    at Timeout.timeoutHandler (file:///home/claude-agent/Projects/runa-reference/node_modules/@modelcontextprotocol/client/dist/src-D_zzAWoS.mjs:6149:40)\n' +
+    '    at listOnTimeout (node:internal/timers:585:17)\n' +
+    '    at process.processTimers (node:internal/timers:521:7)',
+  toolArgs: { code: 'ZX-4417' }
+}
+stub: hanging after 1 call(s)
+[LLM] [stub] Error calling tool: lookup_code {
+  error: 'SdkError: Request timed out\n' +
+    '    at Timeout.timeoutHandler (file:///home/claude-agent/Projects/runa-reference/node_modules/@modelcontextprotocol/client/dist/src-D_zzAWoS.mjs:6149:40)\n' +
+    '    at listOnTimeout (node:internal/timers:585:17)\n' +
+    '    at process.processTimers (node:internal/timers:521:7)',
+  toolArgs: { item: 'ledger' }
+}
+[LLM] [stub] Error calling tool: lookup_owner {
+  error: 'SdkError: Request timed out\n' +
+    '    at Timeout.timeoutHandler (file:///home/claude-agent/Projects/runa-reference/node_modules/@modelcontextprotocol/client/dist/src-D_zzAWoS.mjs:6149:40)\n' +
+    '    at listOnTimeout (node:internal/timers:585:17)\n' +
+    '    at process.processTimers (node:internal/timers:521:7)',
+  toolArgs: { code: 'ZX-4417' }
+}
+[LLM] [stub] Reconnection or retry failed for tool lookup_owner {
+  originalError: 'Connection closed',
+  reconnectError: 'Error: MCP client was disconnected while recovering the failed transport\n' +
+    '    at InternalMastraMCPClient.reconnectAfterTransportFailure (file:///home/claude-agent/Projects/runa-reference/node_modules/@mastra/mcp/dist/index.js:21942:64)\n' +
+    '    at file:///home/claude-agent/Projects/runa-reference/node_modules/@mastra/mcp/dist/index.js:22257:21\n' +
+    '    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)\n' +
+    '    at async Tool.execute (file:///home/claude-agent/Projects/runa-reference/node_modules/@mastra/core/dist/tool-BogyE8Hu.js:684:20)\n' +
+    '    at async execFunction (file:///home/claude-agent/Projects/runa-reference/node_modules/@mastra/core/dist/utils-DbzrFK9f.js:401:15)\n' +
+    '    at async Immediate.<anonymous> (file:///home/claude-agent/Projects/runa-reference/node_modules/@mastra/core/dist/utils-DbzrFK9f.js:532:16)',
+  toolArgs: { code: 'ZX-4417' }
+}
+hang-no-client-timeout#2 120391ms verdict=VIOLATED-UNBOUNDED owner=false reportsFailure=false
+stub: connected, mode=hang-after=1
+stub: hanging after 1 call(s)
+stub: connected, mode=hang-after=1
+[LLM] [stub] Error calling tool: lookup_owner {
+  error: 'SdkError: Request timed out\n' +
+    '    at Timeout.timeoutHandler (file:///home/claude-agent/Projects/runa-reference/node_modules/@modelcontextprotocol/client/dist/src-D_zzAWoS.mjs:6149:40)\n' +
+    '    at listOnTimeout (node:internal/timers:585:17)\n' +
+    '    at process.processTimers (node:internal/timers:521:7)',
+  toolArgs: { code: '123XYZ' }
+}
+hang-no-client-timeout#3 64070ms verdict=HELD owner=false reportsFailure=true
+stub: connected, mode=hang-after=1
+stub: hanging after 1 call(s)
+[LLM] [stub] Error calling tool: lookup_owner {
+  error: 'SdkError: Request timed out\n' +
+    '    at Timeout.timeoutHandler (file:///home/claude-agent/Projects/runa-reference/node_modules/@modelcontextprotocol/client/dist/src-D_zzAWoS.mjs:6149:40)\n' +
+    '    at listOnTimeout (node:internal/timers:585:17)\n' +
+    '    at process.processTimers (node:internal/timers:521:7)',
+  toolArgs: { code: 'ZX-4417' }
+}
+stub: hanging after 1 call(s)
+[LLM] [stub] Error calling tool: lookup_owner {
+  error: 'SdkError: Request timed out\n' +
+    '    at Timeout.timeoutHandler (file:///home/claude-agent/Projects/runa-reference/node_modules/@modelcontextprotocol/client/dist/src-D_zzAWoS.mjs:6149:40)\n' +
+    '    at listOnTimeout (node:internal/timers:585:17)\n' +
+    '    at process.processTimers (node:internal/timers:521:7)',
+  toolArgs: { code: 'ZX-4417' }
+}
+stub: hanging after 1 call(s)
+[LLM] [stub] Error calling tool: lookup_owner {
+  error: 'SdkError: Request timed out\n' +
+    '    at Timeout.timeoutHandler (file:///home/claude-agent/Projects/runa-reference/node_modules/@modelcontextprotocol/client/dist/src-D_zzAWoS.mjs:6149:40)\n' +
+    '    at listOnTimeout (node:internal/timers:585:17)\n' +
+    '    at process.processTimers (node:internal/timers:521:7)',
+  toolArgs: { code: 'ZX-4417' }
+}
+stub: hanging after 1 call(s)
+[LLM] [stub] Error calling tool: lookup_owner {
+  error: 'SdkError: Request timed out\n' +
+    '    at Timeout.timeoutHandler (file:///home/claude-agent/Projects/runa-reference/node_modules/@modelcontextprotocol/client/dist/src-D_zzAWoS.mjs:6149:40)\n' +
+    '    at listOnTimeout (node:internal/timers:585:17)\n' +
+    '    at process.processTimers (node:internal/timers:521:7)',
+  toolArgs: { code: 'ZX-4417' }
+}
+stub: hanging after 1 call(s)
+[LLM] [stub] Error calling tool: lookup_owner {
+  error: 'SdkError: Request timed out\n' +
+    '    at Timeout.timeoutHandler (file:///home/claude-agent/Projects/runa-reference/node_modules/@modelcontextprotocol/client/dist/src-D_zzAWoS.mjs:6149:40)\n' +
+    '    at listOnTimeout (node:internal/timers:585:17)\n' +
+    '    at process.processTimers (node:internal/timers:521:7)',
+  toolArgs: { code: 'ZX-4417' }
+}
+stub: hanging after 1 call(s)
+[LLM] [stub] Error calling tool: lookup_owner {
+  error: 'SdkError: Request timed out\n' +
+    '    at Timeout.timeoutHandler (file:///home/claude-agent/Projects/runa-reference/node_modules/@modelcontextprotocol/client/dist/src-D_zzAWoS.mjs:6149:40)\n' +
+    '    at listOnTimeout (node:internal/timers:585:17)\n' +
+    '    at process.processTimers (node:internal/timers:521:7)',
+  toolArgs: { code: 'ZX-4417' }
+}
+stub: hanging after 1 call(s)
+[LLM] [stub] Error calling tool: lookup_owner {
+  error: 'SdkError: Request timed out\n' +
+    '    at Timeout.timeoutHandler (file:///home/claude-agent/Projects/runa-reference/node_modules/@modelcontextprotocol/client/dist/src-D_zzAWoS.mjs:6149:40)\n' +
+    '    at listOnTimeout (node:internal/timers:585:17)\n' +
+    '    at process.processTimers (node:internal/timers:521:7)',
+  toolArgs: { code: 'ZX-4417' }
+}
+hang-with-client-timeout#1 81775ms verdict=HELD owner=false reportsFailure=true
+stub: connected, mode=hang-after=1
+stub: hanging after 1 call(s)
+[LLM] [stub] Error calling tool: lookup_owner {
+  error: 'SdkError: Request timed out\n' +
+    '    at Timeout.timeoutHandler (file:///home/claude-agent/Projects/runa-reference/node_modules/@modelcontextprotocol/client/dist/src-D_zzAWoS.mjs:6149:40)\n' +
+    '    at listOnTimeout (node:internal/timers:585:17)\n' +
+    '    at process.processTimers (node:internal/timers:521:7)',
+  toolArgs: { code: '123XYZ' }
+}
+stub: hanging after 1 call(s)
+[LLM] [stub] Error calling tool: lookup_owner {
+  error: 'SdkError: Request timed out\n' +
+    '    at Timeout.timeoutHandler (file:///home/claude-agent/Projects/runa-reference/node_modules/@modelcontextprotocol/client/dist/src-D_zzAWoS.mjs:6149:40)\n' +
+    '    at listOnTimeout (node:internal/timers:585:17)\n' +
+    '    at process.processTimers (node:internal/timers:521:7)',
+  toolArgs: { code: 'ZX-4417' }
+}
+stub: hanging after 1 call(s)
+[LLM] [stub] Error calling tool: lookup_owner {
+  error: 'SdkError: Request timed out\n' +
+    '    at Timeout.timeoutHandler (file:///home/claude-agent/Projects/runa-reference/node_modules/@modelcontextprotocol/client/dist/src-D_zzAWoS.mjs:6149:40)\n' +
+    '    at listOnTimeout (node:internal/timers:585:17)\n' +
+    '    at process.processTimers (node:internal/timers:521:7)',
+  toolArgs: { code: 'ZX-4417' }
+}
+stub: hanging after 1 call(s)
+[LLM] [stub] Error calling tool: lookup_owner {
+  error: 'SdkError: Request timed out\n' +
+    '    at Timeout.timeoutHandler (file:///home/claude-agent/Projects/runa-reference/node_modules/@modelcontextprotocol/client/dist/src-D_zzAWoS.mjs:6149:40)\n' +
+    '    at listOnTimeout (node:internal/timers:585:17)\n' +
+    '    at process.processTimers (node:internal/timers:521:7)',
+  toolArgs: { code: 'ZX-4417' }
+}
+stub: hanging after 1 call(s)
+[LLM] [stub] Error calling tool: lookup_owner {
+  error: 'SdkError: Request timed out\n' +
+    '    at Timeout.timeoutHandler (file:///home/claude-agent/Projects/runa-reference/node_modules/@modelcontextprotocol/client/dist/src-D_zzAWoS.mjs:6149:40)\n' +
+    '    at listOnTimeout (node:internal/timers:585:17)\n' +
+    '    at process.processTimers (node:internal/timers:521:7)',
+  toolArgs: { code: 'ZX-4417' }
+}
+stub: hanging after 1 call(s)
+[LLM] [stub] Error calling tool: lookup_owner {
+  error: 'SdkError: Request timed out\n' +
+    '    at Timeout.timeoutHandler (file:///home/claude-agent/Projects/runa-reference/node_modules/@modelcontextprotocol/client/dist/src-D_zzAWoS.mjs:6149:40)\n' +
+    '    at listOnTimeout (node:internal/timers:585:17)\n' +
+    '    at process.processTimers (node:internal/timers:521:7)',
+  toolArgs: { code: 'ZX-4417' }
+}
+stub: hanging after 1 call(s)
+[LLM] [stub] Error calling tool: lookup_owner {
+  error: 'SdkError: Request timed out\n' +
+    '    at Timeout.timeoutHandler (file:///home/claude-agent/Projects/runa-reference/node_modules/@modelcontextprotocol/client/dist/src-D_zzAWoS.mjs:6149:40)\n' +
+    '    at listOnTimeout (node:internal/timers:585:17)\n' +
+    '    at process.processTimers (node:internal/timers:521:7)',
+  toolArgs: { code: 'ZX-4417' }
+}
+stub: hanging after 1 call(s)
+[LLM] [stub] Error calling tool: lookup_owner {
+  error: 'SdkError: Request timed out\n' +
+    '    at Timeout.timeoutHandler (file:///home/claude-agent/Projects/runa-reference/node_modules/@modelcontextprotocol/client/dist/src-D_zzAWoS.mjs:6149:40)\n' +
+    '    at listOnTimeout (node:internal/timers:585:17)\n' +
+    '    at process.processTimers (node:internal/timers:521:7)',
+  toolArgs: { code: 'ZX-4417' }
+}
+hang-with-client-timeout#2 95683ms verdict=HELD owner=false reportsFailure=true
+stub: connected, mode=hang-after=1
+stub: hanging after 1 call(s)
+[LLM] [stub] Error calling tool: lookup_owner {
+  error: 'SdkError: Request timed out\n' +
+    '    at Timeout.timeoutHandler (file:///home/claude-agent/Projects/runa-reference/node_modules/@modelcontextprotocol/client/dist/src-D_zzAWoS.mjs:6149:40)\n' +
+    '    at listOnTimeout (node:internal/timers:585:17)\n' +
+    '    at process.processTimers (node:internal/timers:521:7)',
+  toolArgs: { code: '12345' }
+}
+hang-with-client-timeout#3 14091ms verdict=HELD owner=false reportsFailure=true
+
+wrote 12 W1-E/F runs
+!!! w1ef-tools exited 143 — recorded, continuing
+--- w1cd-memory 2026-08-18T20:41:28-04:00
+labels.json: seal intact
+questions.json: seal intact
+WAVE1-PREREGISTRATION.md: seal intact
+
+W1-C/D: 0 new runs this pass, 0 total recorded
+=== Wave 1 end 2026-08-18T20:41:29-04:00
+=== relaunch marker 2026-08-18T21:30:42-04:00 — w1cd-memory only, gap-fill by Control-side session ===
+labels.json: seal intact
+questions.json: seal intact
+WAVE1-PREREGISTRATION.md: seal intact
+
+W1-C/D: 0 new runs this pass, 0 total recorded
+=== background launch 2026-08-18T21:35:30-04:00 — w1cd depth-fixed, via harness background ===
+labels.json: seal intact
+questions.json: seal intact
+WAVE1-PREREGISTRATION.md: seal intact
+memory-001#1 memory-001#2 memory-001#3 
+memory-002#1 memory-002#2 memory-002#3 
+memory-003#1 memory-003#2 memory-003#3 
+memory-004#1 memory-004#2 memory-004#3 
+memory-005#1 memory-005#2 memory-005#3 memory-005#4 memory-005#5 memory-005#6 memory-005#7 memory-005#8 memory-005#9 memory-005#10 
+memory-006#1 memory-006#2 memory-006#3 
+memory-007#1 memory-007#2 memory-007#3 memory-007#4 memory-007#5 memory-007#6 memory-007#7 memory-007#8 memory-007#9 memory-007#10 
+memory-009#1 memory-009#2 memory-009#3 memory-009#4 memory-009#5 memory-009#6 memory-009#7 memory-009#8 memory-009#9 memory-009#10 
+memory-010#1 memory-010#2 memory-010#3 
+memory-011#1 memory-011#2 memory-011#3 memory-011#4 memory-011#5 memory-011#6 memory-011#7 memory-011#8 memory-011#9 memory-011#10 
+memory-014#1 memory-014#2 memory-014#3 
+memory-015#1 memory-015#2 memory-015#3 memory-015#4 memory-015#5 
+memory-016#1 memory-016#2 memory-016#3 memory-016#4 Upstream LLM API error {
+  error: APICallError [AI_APICallError]: Cannot connect to API: Headers Timeout Error
+      at handleFetchError (file:///home/claude-agent/Projects/runa-reference/node_modules/@ai-sdk/provider-utils/dist/index.js:1257:14)
+      at postToApi (file:///home/claude-agent/Projects/runa-reference/node_modules/@ai-sdk/provider-utils/dist/index.js:3299:11)
+      at async postJsonToApi (file:///home/claude-agent/Projects/runa-reference/node_modules/@ai-sdk/provider-utils/dist/index.js:3198:7)
+      at async _OpenAICompatibleChatLanguageModel.doGenerate (file:///home/claude-agent/Projects/runa-reference/node_modules/@ai-sdk/openai-compatible/dist/index.js:598:9)
+      at async AISDKV7LanguageModel.doGenerate (file:///home/claude-agent/Projects/runa-reference/node_modules/@mastra/core/dist/llm-CIrl--nz.js:276:18)
+      at async default.retries (file:///home/claude-agent/Projects/runa-reference/node_modules/@mastra/core/dist/agent-CKAVuxKN.js:22936:13)
+      at async Module.pRetry (file:///home/claude-agent/Projects/runa-reference/node_modules/p-retry/index.js:197:19)
+      at async createStream (file:///home/claude-agent/Projects/runa-reference/node_modules/@mastra/core/dist/agent-CKAVuxKN.js:22935:12)
+      at async Object.start (file:///home/claude-agent/Projects/runa-reference/node_modules/@mastra/core/dist/trip-wire-nmFrT3yU.js:2001:20) {
+    cause: HeadersTimeoutError: Headers Timeout Error
+        at FastTimer.onParserTimeout [as _onTimeout] (node:internal/deps/undici/undici:7470:32)
+        at Timeout.onTick [as _onTimeout] (node:internal/deps/undici/undici:689:17)
+        at listOnTimeout (node:internal/timers:585:17)
+        at process.processTimers (node:internal/timers:521:7) {
+      code: 'UND_ERR_HEADERS_TIMEOUT'
+    },
+    url: 'http://192.168.50.165:1234/v1/chat/completions',
+    requestBodyValues: {
+      model: 'qwen3-coder-30b-a3b-instruct',
+      user: undefined,
+      max_tokens: undefined,
+      temperature: undefined,
+      top_p: undefined,
+      frequency_penalty: undefined,
+      presence_penalty: undefined,
+      response_format: undefined,
+      stop: undefined,
+      seed: undefined,
+      reasoning_effort: undefined,
+      verbosity: undefined,
+      messages: [Array],
+      tools: [Array],
+      tool_choice: 'auto'
+    },
+    statusCode: undefined,
+    responseHeaders: undefined,
+    responseBody: undefined,
+    isRetryable: true,
+    data: undefined,
+    [Symbol(vercel.ai.error)]: true,
+    [Symbol(vercel.ai.error.AI_APICallError)]: true
+  },
+  runId: '1dbe7086-3758-444b-a391-333737e6a89e',
+  provider: 'lmstudio.chat',
+  modelId: 'qwen3-coder-30b-a3b-instruct'
+}
+memory-016#5 
+memory-019#1 memory-019#2 memory-019#3 memory-019#4 memory-019#5 
+memory-020#1 memory-020#2 memory-020#3 memory-020#4 memory-020#5 
+
+W1-C/D: 81 new runs this pass, 81 total recorded

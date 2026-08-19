@@ -50,9 +50,10 @@ const dumpWorkingMemory = async (memory, threadId) => {
 
 let ran = 0;
 for (const c of recall) {
-  const depth = c.fillerTurns ?? 0;
-  const tier = TIERS[depth];
-  const n = tier?.[c.config];
+  const depth = c.fillerTurns ?? 0;          // number of filler turns to send
+  const trueDepth = c.tier;                  // the recall depth the tier table and grader are keyed by
+  const tier = TIERS[trueDepth];             // BUG FIX: was TIERS[depth], and depth here is fillerTurns
+  const n = tier?.[c.config];                //   (0/8/23/48/98), so every cell was skipped and 0 ran
   if (!n) continue;
 
   for (let rep = 1; rep <= n; rep++) {
@@ -62,7 +63,7 @@ for (const c of recall) {
     rmSync(dbPath, { force: true });
     const db = `file:${dbPath}`;
     const thread = `${c.caseId}-${rep}`;
-    const entry = { runKey, scenario: "W1-C", caseId: c.caseId, config: c.config, depth, rep, n };
+    const entry = { runKey, scenario: "W1-C", caseId: c.caseId, config: c.config, depth: trueDepth, rep, n };
     try {
       const memory = memoryFor(c.config, db);
       const a = agentFor(c.config, db);

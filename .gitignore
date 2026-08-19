@@ -5,3 +5,4 @@ probes/results/*.partial.jsonl
 sandbox/
 artifacts/runs/
 storage/
+sandbox4/

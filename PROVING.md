@@ -30,6 +30,24 @@ piece is admitted only if it fixes the fracture without regressing the rest of t
 same probes. Proof, not preference — and this applies to everything, governance and security machinery
 included.
 
+**6. The instrument must be proven before the finding is trusted, in code rather than in prose.**
+Nineteen instrument defects across seven waves were five recurring patterns, and they recurred because
+the lessons lived in findings documents and were re-derived from memory each time. Every harness now
+uses `probes/instrument.mjs` and must pass its gate before a full run is permitted:
+
+- every field constant across a smoke run is justified in an allowlist, or the instrument is fixed;
+- every detector is shown to fire true *and* false, because a test of the negative alone cannot
+  distinguish *correctly false* from *always false*;
+- every injected fault is shown to have landed on the instrument before its outcome is graded;
+- payloads travel through files, never the environment, and every record says whether the instrument
+  actually ran;
+- synchronisation waits on observed readiness or observed progress, never on a timer;
+- a grader may not filter more narrowly than its sealed invariant is written;
+- a measurement whose target appears in its own input is a tautology and is recorded NOT PROBED.
+
+The library is itself an instrument and carries its own self-tests, each fixture drawn from a defect
+that actually happened.
+
 ## Probe axes per component (to be run after the installs complete)
 
 - **Memory**: recall depth (how many turns), cross-thread isolation, contradictory updates ("my dog is

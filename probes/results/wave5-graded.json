@@ -1,0 +1,164 @@
+{
+  "graded": 285,
+  "envErrors": 0,
+  "controlByEdge": {
+    "E04": {
+      "n": 5,
+      "ok": 5,
+      "pass": true
+    },
+    "E05": {
+      "n": 5,
+      "ok": 5,
+      "pass": true
+    },
+    "E07": {
+      "n": 5,
+      "ok": 5,
+      "pass": true
+    }
+  },
+  "report": [
+    {
+      "id": "I-5A",
+      "family": "A",
+      "edge": "E04",
+      "title": "concurrent access does not corrupt the store or lose a message",
+      "n": 60,
+      "violations": 0,
+      "verdict": "HELD",
+      "byQ": {},
+      "denom": {
+        "two-processes": 10,
+        "two-runs-same-id": 10,
+        "same-op-twice": 10,
+        "read-during-write": 10,
+        "conflicting-ops": 10,
+        "two-users": 10
+      }
+    },
+    {
+      "id": "I-5B",
+      "family": "B",
+      "edge": "E05",
+      "title": "concurrent writes leave no stored message without its embedding",
+      "n": 60,
+      "violations": 0,
+      "verdict": "HELD",
+      "byQ": {},
+      "denom": {
+        "two-processes": 10,
+        "two-runs-same-id": 10,
+        "same-op-twice": 10,
+        "read-during-write": 10,
+        "conflicting-ops": 10,
+        "two-users": 10
+      }
+    },
+    {
+      "id": "I-5C",
+      "family": "C",
+      "edge": "E07",
+      "title": "concurrent upsert and query do not corrupt the index",
+      "n": 60,
+      "violations": 1,
+      "verdict": "VIOLATED",
+      "byQ": {
+        "two-processes": 1
+      },
+      "denom": {
+        "two-processes": 10,
+        "two-runs-same-id": 10,
+        "same-op-twice": 10,
+        "read-during-write": 10,
+        "conflicting-ops": 10,
+        "two-users": 10
+      }
+    },
+    {
+      "id": "I-5D",
+      "family": "D",
+      "edge": "E04",
+      "title": "after a crash the store agrees with what the caller was told",
+      "n": 30,
+      "violations": 5,
+      "verdict": "VIOLATED",
+      "byQ": {
+        "effect-ok-record-fails": 5
+      },
+      "denom": {
+        "fail-before-write": 5,
+        "partial-write": 5,
+        "write-ok-ack-fails": 5,
+        "record-ok-effect-fails": 5,
+        "effect-ok-record-fails": 5,
+        "restart-each-boundary": 5
+      }
+    },
+    {
+      "id": "I-5E",
+      "family": "E",
+      "edge": "E05",
+      "title": "a message and its embedding agree, or the divergence is visible",
+      "n": 30,
+      "violations": 5,
+      "verdict": "VIOLATED",
+      "byQ": {
+        "record-ok-effect-fails": 5
+      },
+      "denom": {
+        "fail-before-write": 5,
+        "partial-write": 5,
+        "write-ok-ack-fails": 5,
+        "record-ok-effect-fails": 5,
+        "effect-ok-record-fails": 5,
+        "restart-each-boundary": 5
+      }
+    },
+    {
+      "id": "I-5F",
+      "family": "F",
+      "edge": "E07",
+      "title": "an index interrupted mid-build does not present itself as complete",
+      "n": 30,
+      "violations": 25,
+      "verdict": "VIOLATED",
+      "byQ": {
+        "partial-write": 5,
+        "write-ok-ack-fails": 5,
+        "record-ok-effect-fails": 5,
+        "effect-ok-record-fails": 5,
+        "restart-each-boundary": 5
+      },
+      "denom": {
+        "fail-before-write": 5,
+        "partial-write": 5,
+        "write-ok-ack-fails": 5,
+        "record-ok-effect-fails": 5,
+        "effect-ok-record-fails": 5,
+        "restart-each-boundary": 5
+      }
+    }
+  ],
+  "unrecallable": 10,
+  "achieved": {
+    "D.fail-before-write -> killed-at-startup": 5,
+    "D.partial-write -> partial-index": 5,
+    "D.write-ok-ack-fails -> killed-after-ack": 5,
+    "D.record-ok-effect-fails -> message-written-embedding-skipped": 5,
+    "D.effect-ok-record-fails -> call-reported-failure": 5,
+    "D.restart-each-boundary -> partial-index": 5,
+    "E.fail-before-write -> killed-at-startup": 5,
+    "E.partial-write -> partial-index": 5,
+    "E.write-ok-ack-fails -> killed-after-ack": 5,
+    "E.record-ok-effect-fails -> message-written-embedding-skipped": 5,
+    "E.effect-ok-record-fails -> call-reported-failure": 5,
+    "E.restart-each-boundary -> partial-index": 5,
+    "F.fail-before-write -> no-index": 5,
+    "F.partial-write -> partial-index": 5,
+    "F.write-ok-ack-fails -> partial-index": 5,
+    "F.record-ok-effect-fails -> partial-index": 5,
+    "F.effect-ok-record-fails -> partial-index": 5,
+    "F.restart-each-boundary -> partial-index": 5
+  }
+}

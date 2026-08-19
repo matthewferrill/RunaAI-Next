@@ -5,11 +5,6 @@ modelled, and the severity classification below is adopted as written. Wave 2's 
 their severity from this document and may now be sealed against it. Amendments go into a new
 ratified version; this one stands as committed.
 
-Scope note carried from the draft: modelling threats against the STANDARD stack is how we learn where
-stock resists an attack (adopt) and where it complies (a fray with a governance name, and a Runa
-requirement). Where this model names an estate concern, it is to make the lab representative of what
-migration would face — never to move estate secrets into the lab.
-
 Scope is the assembled reference stack as RUNTIME-GRAPH.json describes it — not the RunaAI production
 estate. The point of modelling threats against the *standard* stack is to find where stock resists an
 attack (adopt) and where it complies (a fray with a governance name, and a Runa requirement). Where

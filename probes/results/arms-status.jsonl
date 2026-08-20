@@ -1,3 +1,5 @@
 {"arm":"A","model":"qwen3-coder-30b-a3b-instruct","exit":0,"driftExit":0}
 {"arm":"B","model":"qwen3.6-27b","exit":137,"driftExit":0}
 {"note":"arm B exit=137 is SIGKILL issued by the operator to release a hung process AFTER it had recorded all 61 runs and printed its completion line. Its data is complete and its drift check passed. Not a failed arm."}
+{"arm":"C","model":"qwen/qwen3-4b","exit":0,"driftExit":0}
+{"arm":"D","model":"llama-3.3-70b-instruct","exit":0,"driftExit":0}

@@ -1,0 +1,192 @@
+{
+ "label": "arm-B-before",
+ "endpoint": "http://192.168.50.165:1234/v1",
+ "model": "qwen3.6-27b",
+ "embed": "text-embedding-nomic-embed-text-v1.5",
+ "runtime": [
+  {
+   "id": "llama-3.3-70b-instruct",
+   "state": "not-loaded",
+   "quantization": "Q4_K_M",
+   "loadedContext": null,
+   "maxContext": 131072
+  },
+  {
+   "id": "qwen/qwen3-4b",
+   "state": "not-loaded",
+   "quantization": "Q4_K_M",
+   "loadedContext": null,
+   "maxContext": 32768
+  },
+  {
+   "id": "qwen3-coder-30b-a3b-instruct",
+   "state": "loaded",
+   "quantization": "Q6_K",
+   "loadedContext": 65536,
+   "maxContext": 262144
+  },
+  {
+   "id": "qwen3.6-27b",
+   "state": "loaded",
+   "quantization": "Q4_K_M",
+   "loadedContext": 65536,
+   "maxContext": 262144
+  },
+  {
+   "id": "qwen3.6-27b-mtp",
+   "state": "not-loaded",
+   "quantization": "Q4_K_M",
+   "loadedContext": null,
+   "maxContext": 262144
+  },
+  {
+   "id": "text-embedding-nomic-embed-text-v1.5",
+   "state": "loaded",
+   "quantization": "Q4_K_M",
+   "loadedContext": 2048,
+   "maxContext": 2048
+  }
+ ],
+ "models": [
+  "llama-3.3-70b-instruct",
+  "qwen/qwen3-4b",
+  "qwen3-coder-30b-a3b-instruct",
+  "qwen3.6-27b",
+  "qwen3.6-27b-mtp",
+  "text-embedding-nomic-embed-text-v1.5"
+ ],
+ "modelsStatus": 200,
+ "embeddings": [
+  {
+   "text": "the frozen base",
+   "ms": 30,
+   "dim": 768,
+   "digest": "70b9d9a8a4ac6b6729d5174a76b43a93",
+   "first3": [
+    0.04983615502715111,
+    0.07975609600543976,
+    -0.17944522202014923
+   ]
+  },
+  {
+   "text": "ORCHID-5501",
+   "ms": 29,
+   "dim": 768,
+   "digest": "d551811d457a934c89ec4ec77df28860",
+   "first3": [
+    -0.04668329656124115,
+    -0.006591316312551498,
+    -0.15741121768951416
+   ]
+  },
+  {
+   "text": "a partially built index",
+   "ms": 24,
+   "dim": 768,
+   "digest": "9e0ea779efe88fbbc02591a3724611e7",
+   "first3": [
+    -0.006708026397973299,
+    0.03314709663391113,
+    -0.16366656124591827
+   ]
+  }
+ ],
+ "generations": [
+  {
+   "prompt": "Reply with exactly: READY",
+   "rep": 1,
+   "ms": 3138,
+   "status": 200,
+   "text": "",
+   "finish": "length",
+   "usage": {
+    "prompt_tokens": 15,
+    "completion_tokens": 40,
+    "total_tokens": 55,
+    "completion_tokens_details": {
+     "reasoning_tokens": 40
+    }
+   }
+  },
+  {
+   "prompt": "Reply with exactly: READY",
+   "rep": 2,
+   "ms": 2256,
+   "status": 200,
+   "text": "",
+   "finish": "length",
+   "usage": {
+    "prompt_tokens": 15,
+    "completion_tokens": 40,
+    "total_tokens": 55,
+    "completion_tokens_details": {
+     "reasoning_tokens": 40
+    }
+   }
+  },
+  {
+   "prompt": "Name the capital of France in one word.",
+   "rep": 1,
+   "ms": 2204,
+   "status": 200,
+   "text": "",
+   "finish": "length",
+   "usage": {
+    "prompt_tokens": 19,
+    "completion_tokens": 40,
+    "total_tokens": 59,
+    "completion_tokens_details": {
+     "reasoning_tokens": 40
+    }
+   }
+  },
+  {
+   "prompt": "Name the capital of France in one word.",
+   "rep": 2,
+   "ms": 2224,
+   "status": 200,
+   "text": "",
+   "finish": "length",
+   "usage": {
+    "prompt_tokens": 19,
+    "completion_tokens": 40,
+    "total_tokens": 59,
+    "completion_tokens_details": {
+     "reasoning_tokens": 40
+    }
+   }
+  },
+  {
+   "prompt": "Write the text 'abcdefghijklmnop' and nothing else.",
+   "rep": 1,
+   "ms": 2210,
+   "status": 200,
+   "text": "",
+   "finish": "length",
+   "usage": {
+    "prompt_tokens": 20,
+    "completion_tokens": 40,
+    "total_tokens": 60,
+    "completion_tokens_details": {
+     "reasoning_tokens": 40
+    }
+   }
+  },
+  {
+   "prompt": "Write the text 'abcdefghijklmnop' and nothing else.",
+   "rep": 2,
+   "ms": 2230,
+   "status": 200,
+   "text": "",
+   "finish": "length",
+   "usage": {
+    "prompt_tokens": 20,
+    "completion_tokens": 40,
+    "total_tokens": 60,
+    "completion_tokens_details": {
+     "reasoning_tokens": 40
+    }
+   }
+  }
+ ]
+}

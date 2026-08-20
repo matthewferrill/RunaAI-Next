@@ -1,4 +1,24 @@
-# Reference stack — the pure standard arm
+# RunaAI-Next
+
+This is the isolated migration and eventual product repository for **RunaAI**. `Next` is a temporary
+repository label only; the product, application, schemas, services, and user experience are named
+RunaAI.
+
+The repository was seeded from the completed RunaLab stack-selection history at commit `ec5e346`,
+preserved by tag `runalab-stack-baseline-2026-08-20`. Legacy RunaAI remains the current production and
+behavioral authority until an explicitly approved final cutover. No migration implementation or
+protected-data conversion is authorized merely because this repository exists.
+
+Start with:
+
+- `MIGRATION-STATUS.md` for current authority, branches, gates, and next decision;
+- `AGENTS.md` for mandatory working and safety rules;
+- `RUNA-2-ARCHITECTURE-ASSESSMENT-2026-08-20.md` for subsystem dispositions and migration gates; and
+- `LAB-COMPLETION-REPORT-2026-08-20.md` for the inherited stack evidence.
+
+## Inherited RunaLab baseline
+
+### Reference stack — the pure standard arm
 
 The steward's method, 2026-08-18: build the industry-standard agent stack end to end, customizing
 nothing. Then migrate Runa into it one piece at a time, where every piece — governance and security

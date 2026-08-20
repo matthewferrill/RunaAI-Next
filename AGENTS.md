@@ -1,0 +1,62 @@
+# RunaAI-Next repository instructions
+
+This repository is the isolated RunaAI migration and eventual product repository. Its product name is
+RunaAI; `Next` is only a temporary repository and checkout label during migration.
+
+## Repository authority
+
+- `main` begins at the immutable RunaLab stack-selection baseline tagged
+  `runalab-stack-baseline-2026-08-20`.
+- `runa2/integration` is the migration integration branch.
+- `runalab/main` is fetch-only laboratory evidence.
+- `runaai-legacy/main` is fetch-only current-behavior reference.
+- Legacy RunaAI remains the production and behavioral authority until an explicitly approved cutover.
+- Do not merge the unrelated RunaAI history into this repository. Port verified behavior and governed
+  data contracts deliberately and record their disposition.
+
+## Working method
+
+1. Use a separate worktree or clone per agent. Never run Codex and Claude in the same checkout.
+2. Create a short-lived branch from `runa2/integration` for one approved migration gate.
+3. Baseline the behavior before implementing it and commit the green criteria before the implementation.
+4. Keep old and new adapters side by side until parity, restart, duplicate, dependency-loss, and rollback
+   checks pass.
+5. Merge a gate branch into `runa2/integration` only after verification and steward approval.
+6. Merge `runa2/integration` into `main` only after the selected migration, protected-data ceremonies,
+   release security, cutover rehearsal, and rollback proof are accepted.
+
+## Safety boundaries
+
+- Documentation or lab evidence is not authorization to implement a migration stage.
+- Do not copy DPAPI, Windows Hello, credential, protected-store, or machine-local ciphertext.
+- Do not download models, start persistent services, expose networking, spend money, or change production
+  without separate approval.
+- PostgreSQL owns authoritative product records; LangGraph owns durable workflow checkpoints; Qdrant is a
+  rebuildable derived index. Mastra memory or snapshots must not become a second authority.
+- Preserve Runa's constitution, authority rules, consent-first learning, typed knowledge, project and
+  participant scope, provenance, honest uncertainty, and propose-preview-approve-execute-record pathway.
+- A behavior change affecting answers is incomplete until every applicable lane is wired and executed:
+  general chat, guarded/local chat, and workspace comprehension.
+
+## Required migration references
+
+Read these before proposing a gate:
+
+- `RUNA-2-ARCHITECTURE-ASSESSMENT-2026-08-20.md`
+- `RUNA-PORT-ESTIMATE-2026-08-20.md`
+- `LAB-COMPLETION-REPORT-2026-08-20.md`
+- `STACK-BAKEOFF.md`
+- `MODEL-ROLE-MATRIX-FINDINGS.md`
+
+For behavior being ported, read the corresponding legacy RunaAI documentation, source, tests, decisions,
+and current handoff directly from the fetch-only legacy remote or its preserved checkout. Previous status
+is orientation only; verify branch, commit, working tree, and implementation claims live.
+
+## Git discipline
+
+- Inspect status and fetch before work. Preserve all existing changes.
+- Stage explicit paths; never use broad staging for a mixed worktree.
+- Never force-push, reset, clean, stash, rebase, or discard work unless the steward explicitly authorizes
+  that exact operation.
+- Before pushing, fetch and confirm the branch is not behind or diverged.
+- Record verification commands and results in the gate handoff.

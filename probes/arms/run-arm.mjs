@@ -231,3 +231,9 @@ for (const [k, fn] of Object.entries(parts)) {
   try { await fn(); } catch (e) { console.log(`\n!!! ${k} threw: ${String(e.message).slice(0, 200)}`); }
 }
 console.log(`\n\narm ${ARM} (${MODEL}): ${loadEntries(CKPT).length} runs recorded${SMOKE ? " (SMOKE)" : ""}`);
+
+// Exit explicitly. Arm B recorded all 61 runs, printed this line, and then never exited: an MCP
+// client connection or a spawned child kept the event loop alive, and the orchestrator sat blocked on
+// a process that had finished its work. An unattended run that stalls silently after completing is
+// worse than one that crashes, because the checkpoint looks healthy the whole time.
+process.exit(0);

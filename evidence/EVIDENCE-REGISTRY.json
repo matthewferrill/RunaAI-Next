@@ -1,0 +1,152 @@
+{
+  "schemaVersion": 1,
+  "registryStatus": "OFF_MACHINE_PRIVATE_DRAFT_RELEASE_VERIFIED",
+  "recordedAtUtc": "2026-08-20T17:44:00Z",
+  "repository": {
+    "name": "matthewferrill/Runalab",
+    "commitUnderTest": "2dfa5a1633898150c5659ca3b806383f572e1f2d",
+    "branchAtPreservation": "main"
+  },
+  "supplementalReleases": [
+    {
+      "purpose": "corrected Wave 7 v3 with retained and hash-bound wire evidence",
+      "provider": "GitHub Releases",
+      "repositoryVisibility": "PRIVATE",
+      "releaseId": 373883512,
+      "tag": "evidence-wave7-v3-20260820",
+      "draft": true,
+      "targetCommitish": "2dfa5a1633898150c5659ca3b806383f572e1f2d",
+      "workingTreeSnapshot": true,
+      "url": "https://github.com/matthewferrill/Runalab/releases/tag/untagged-fd0aa463949bee5fc87c",
+      "assets": 6,
+      "serverDigestVerification": "6/6 GitHub-reported SHA-256 digests matched local assets",
+      "archiveSha256": "b90e1313b44cd6ab502944f950e79b5238c908340b6e712ca0a7f2b2bbf3e474",
+      "freshExtractionVerified": true,
+      "verifiedFiles": 219
+    },
+    {
+      "purpose": "stack component bake-offs and opt-in security phase",
+      "provider": "GitHub Releases",
+      "repositoryVisibility": "PRIVATE",
+      "releaseId": 373918099,
+      "tag": "evidence-stack-bakeoff-20260820",
+      "draft": true,
+      "targetCommitish": "2dfa5a1633898150c5659ca3b806383f572e1f2d",
+      "workingTreeSnapshot": true,
+      "url": "https://github.com/matthewferrill/Runalab/releases/tag/untagged-efe489484e669ff188bb",
+      "assets": 12,
+      "serverDigestVerification": "12/12 GitHub-reported SHA-256 digests matched local assets",
+      "archiveSha256": "6b4e8b6212bcda09bf604f27c2a4b9dcc4e39597a5049464eb3c76fbd9702f67",
+      "manifestSha256": "3f8d7d57bdf675cb77bc2bfd17f0619f1137e58c5c598cb975686087b4a6a0f4",
+      "freshExtractionVerified": true,
+      "verifiedFiles": 783,
+      "serviceStateArchiveSha256": "6238a0ff5616a5f09fd2db90cf3c64614d44626424c04de389251f22d9b149fc",
+      "serviceStateManifestSha256": "cd0802804132c54e476db9ebf66e5967cb3d3ae1396f3a87d3805c221599f7ef",
+      "serviceStateVerifiedFiles": 1137,
+      "serviceStateSourceBytes": 663657128,
+      "serviceStateSyntheticLabDataOnly": true
+    }
+  ],
+  "preservationPackage": {
+    "authoritativeSet": "current four-archive SET-A through SET-D package",
+    "localDirectory": "artifacts/runs/.handoff/2dfa5a1",
+    "localDirectoryGitState": "ignored; not transported by Git",
+    "sourcePackage": "RUNA-CONTROL preservation directory; exact host path was not recorded in the handoff",
+    "durability": "preserved off-machine in a private GitHub draft release; local ignored copy retained",
+    "offMachineRelease": {
+      "provider": "GitHub Releases",
+      "repositoryVisibility": "PRIVATE",
+      "releaseId": 373862904,
+      "tag": "evidence-2dfa5a1",
+      "draft": true,
+      "targetCommitish": "2dfa5a1633898150c5659ca3b806383f572e1f2d",
+      "url": "https://github.com/matthewferrill/Runalab/releases/tag/untagged-ecef71148ae8617619e8",
+      "assets": 20,
+      "assetStates": "20/20 uploaded",
+      "serverDigestVerification": "20/20 GitHub-reported SHA-256 digests matched local assets; authoritative four archive digests matched this registry",
+      "verifiedAtUtc": "2026-08-20T16:06:30Z"
+    },
+    "totals": {
+      "files": 2455,
+      "sourceBytes": 1261432914
+    },
+    "manifest": {
+      "file": "RunaLab-raw-evidence-2dfa5a1-files.tsv",
+      "rows": 2455,
+      "sha256": "2b030c094b188ca6ba85ee02f6041d553a0278ca31c860291f4d6fb785af4b0d"
+    },
+    "archives": [
+      {
+        "set": "SET-A",
+        "file": "RunaLab-raw-evidence-2dfa5a1.tar.gz",
+        "scope": "artifacts/runs/**",
+        "files": 1877,
+        "sourceBytes": 710289,
+        "archiveBytes": 114430,
+        "sha256": "2c88b414da5e3fdfaff3bfd04725ace8e6de3ac3e0d7d4473bba2fd2314ed7b8"
+      },
+      {
+        "set": "SET-B",
+        "file": "RunaLab-probe-results-2dfa5a1.tar.gz",
+        "scope": "probes/results/** non-Git files",
+        "files": 41,
+        "sourceBytes": 1626495,
+        "archiveBytes": 45005,
+        "sha256": "66e3a3f49a8c9885421e90a3ed0e142d06c6acd53cf351d01a3bfaba918a79a4"
+      },
+      {
+        "set": "SET-C",
+        "file": "RunaLab-run-databases-2dfa5a1.tar.gz",
+        "scope": "storage/**",
+        "files": 531,
+        "sourceBytes": 1258932064,
+        "archiveBytes": 359027609,
+        "sha256": "16dad2da5ddf6fe47e0d88492dd87496c9d1b64bb5aeadae5de8817a2480c0c3"
+      },
+      {
+        "set": "SET-D",
+        "file": "RunaLab-residual-sandbox-2dfa5a1.tar.gz",
+        "scope": "sandbox/** and sandbox4/**",
+        "files": 6,
+        "sourceBytes": 164066,
+        "archiveBytes": 12648,
+        "sha256": "f044a6894d316cc53deaa622adae1a26b5da355ba63d237b872c88919cca22f1"
+      }
+    ],
+    "companionFiles": [
+      {
+        "file": "RunaLab-raw-evidence-2dfa5a1-metadata.json",
+        "sha256": "520447001261dff32431fb07d61787da4afd4adc561904f3075dad98613c98a9"
+      },
+      {
+        "file": "RunaLab-raw-evidence-2dfa5a1-HANDOFF.txt",
+        "sha256": "968ec0b0b610b0a2dcde0fec7a529ce4b175601f86a9c1eba1bc6be17529231f"
+      },
+      {
+        "file": "RunaLab-raw-evidence-2dfa5a1-ADDENDUM-01.txt",
+        "sha256": "fbee138abe8fa88c993999e72098085fffe221c9b5c0d3854ec6d5a086d0b962"
+      }
+    ],
+    "verification": {
+      "archivesOpened": 4,
+      "extractedFiles": 2455,
+      "extractedBytes": 1261432914,
+      "perFileSha256Matches": 2455,
+      "missing": 0,
+      "extra": 0,
+      "independentlyValidatedLocally": true
+    }
+  },
+  "knownEvidenceLimits": [
+    "Recorded model answers are truncated to 1200 characters.",
+    "The lexical write-claim detector used by the arm, Phase A, and Phase A2 harnesses is invalid in both directions; all rates derived from it are withdrawn.",
+    "Ninety-seven Wave 7 wire logs referenced by run records were absent at the source before preservation; existing Wave 7 wire-level conclusions are NOT_DECIDABLE from this package.",
+    "Three C-C2 run records reference sandbox directories whose end-state files were already absent.",
+    "SET-D residual sandbox files are terminal end-state only and have no per-run attribution."
+  ],
+  "supersededHashesNeverUse": [
+    "1f3cf6ac097034252040b2fffa4ea43327caaa23e966f79c9498cb56b9ec36f7",
+    "89401d954319f29f2c8820b0ed04ead40a5b3688aec188c291d7f0a8c3028a45",
+    "082725ce4a8278a945a398053438190c0a793468242606e790fd5241a043f05a"
+  ]
+}

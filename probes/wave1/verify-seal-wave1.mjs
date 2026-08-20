@@ -2,13 +2,13 @@
 // seal: the scenarios, invariants, sample sizes and completion rules were fixed before the
 // implementation existed, and a preregistration edited afterwards preregisters nothing.
 import { readFileSync } from "node:fs";
-import { createHash } from "node:crypto";
+import { sha256CanonicalText } from "../seal-file.mjs";
 
 const SEAL = "probes/SEAL-WAVE1.md";
 const FILE = "WAVE1-PREREGISTRATION.md";
 const seal = readFileSync(SEAL, "utf8");
 const sealed = seal.match(/sha256:\s*([0-9a-f]{64})/)?.[1];
-const actual = createHash("sha256").update(readFileSync(FILE)).digest("hex");
+const actual = sha256CanonicalText(FILE);
 
 if (sealed === actual) {
   console.log(`${FILE}: seal intact`);

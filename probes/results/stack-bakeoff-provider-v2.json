@@ -1,0 +1,724 @@
+{
+  "schemaVersion": 1,
+  "preregistration": "STACK-BAKEOFF-PREREGISTRATION.md",
+  "modelId": "qwen3-coder-30b-a3b-instruct",
+  "upstream": "http://192.168.50.165:1234/v1",
+  "timeoutMs": 5000,
+  "runs": [
+    {
+      "runKey": "provider.ok#1",
+      "mode": "ok",
+      "repetition": 1,
+      "port": 9100,
+      "proxyPid": 29356,
+      "nonce": "provider.ok#1-10912-1787242328614",
+      "childCode": 0,
+      "childSignal": null,
+      "outcome": {
+        "ok": true,
+        "elapsedMs": 430,
+        "finishReason": "stop",
+        "rawFinishReason": "stop",
+        "modelId": "qwen3-coder-30b-a3b-instruct",
+        "text": "READY"
+      },
+      "stderr": "",
+      "wirePath": "artifacts/runs/stack-bakeoff-provider-v2/provider.ok#1.wire",
+      "wireSha256": "d08f221330caea3bbafe626e467858697762f942cde5643a09d0639d3f069df8",
+      "chatCalls": 1,
+      "declaredModels": [
+        "qwen3-coder-30b-a3b-instruct"
+      ],
+      "finishes": [
+        "stop"
+      ]
+    },
+    {
+      "runKey": "provider.ok#2",
+      "mode": "ok",
+      "repetition": 2,
+      "port": 9101,
+      "proxyPid": 28864,
+      "nonce": "provider.ok#2-10912-1787242329384",
+      "childCode": 0,
+      "childSignal": null,
+      "outcome": {
+        "ok": true,
+        "elapsedMs": 409,
+        "finishReason": "stop",
+        "rawFinishReason": "stop",
+        "modelId": "qwen3-coder-30b-a3b-instruct",
+        "text": "READY"
+      },
+      "stderr": "",
+      "wirePath": "artifacts/runs/stack-bakeoff-provider-v2/provider.ok#2.wire",
+      "wireSha256": "11c910130ebde317d4df6a5b240e479977ad057a6ff88fbd7e0da98669ef6295",
+      "chatCalls": 1,
+      "declaredModels": [
+        "qwen3-coder-30b-a3b-instruct"
+      ],
+      "finishes": [
+        "stop"
+      ]
+    },
+    {
+      "runKey": "provider.ok#3",
+      "mode": "ok",
+      "repetition": 3,
+      "port": 9102,
+      "proxyPid": 19804,
+      "nonce": "provider.ok#3-10912-1787242330074",
+      "childCode": 0,
+      "childSignal": null,
+      "outcome": {
+        "ok": true,
+        "elapsedMs": 416,
+        "finishReason": "stop",
+        "rawFinishReason": "stop",
+        "modelId": "qwen3-coder-30b-a3b-instruct",
+        "text": "READY"
+      },
+      "stderr": "",
+      "wirePath": "artifacts/runs/stack-bakeoff-provider-v2/provider.ok#3.wire",
+      "wireSha256": "147105a0cf177c69d67d35f3cceac78e009fe723f10872bece46941593f40951",
+      "chatCalls": 1,
+      "declaredModels": [
+        "qwen3-coder-30b-a3b-instruct"
+      ],
+      "finishes": [
+        "stop"
+      ]
+    },
+    {
+      "runKey": "provider.ok#4",
+      "mode": "ok",
+      "repetition": 4,
+      "port": 9103,
+      "proxyPid": 13336,
+      "nonce": "provider.ok#4-10912-1787242330838",
+      "childCode": 0,
+      "childSignal": null,
+      "outcome": {
+        "ok": true,
+        "elapsedMs": 394,
+        "finishReason": "stop",
+        "rawFinishReason": "stop",
+        "modelId": "qwen3-coder-30b-a3b-instruct",
+        "text": "READY"
+      },
+      "stderr": "",
+      "wirePath": "artifacts/runs/stack-bakeoff-provider-v2/provider.ok#4.wire",
+      "wireSha256": "e9bff5267e9df71d0c90054ec8dcdf0305a73c678f587111bc90421862e0b029",
+      "chatCalls": 1,
+      "declaredModels": [
+        "qwen3-coder-30b-a3b-instruct"
+      ],
+      "finishes": [
+        "stop"
+      ]
+    },
+    {
+      "runKey": "provider.ok#5",
+      "mode": "ok",
+      "repetition": 5,
+      "port": 9104,
+      "proxyPid": 15336,
+      "nonce": "provider.ok#5-10912-1787242331572",
+      "childCode": 0,
+      "childSignal": null,
+      "outcome": {
+        "ok": true,
+        "elapsedMs": 321,
+        "finishReason": "stop",
+        "rawFinishReason": "stop",
+        "modelId": "qwen3-coder-30b-a3b-instruct",
+        "text": "READY"
+      },
+      "stderr": "",
+      "wirePath": "artifacts/runs/stack-bakeoff-provider-v2/provider.ok#5.wire",
+      "wireSha256": "5873dc37b89c1e1fa92056ee74bdc73c27b3e5996cc7cd50f29639f083a574e0",
+      "chatCalls": 1,
+      "declaredModels": [
+        "qwen3-coder-30b-a3b-instruct"
+      ],
+      "finishes": [
+        "stop"
+      ]
+    },
+    {
+      "runKey": "provider.partial-response#1",
+      "mode": "partial-response",
+      "repetition": 1,
+      "port": 9105,
+      "proxyPid": 3408,
+      "nonce": "provider.partial-response#1-10912-1787242332204",
+      "childCode": 3,
+      "childSignal": null,
+      "outcome": {
+        "ok": false,
+        "elapsedMs": 239,
+        "error": "INCOMPLETE_RESPONSE finish=other raw=null",
+        "name": "Error"
+      },
+      "stderr": "",
+      "wirePath": "artifacts/runs/stack-bakeoff-provider-v2/provider.partial-response#1.wire",
+      "wireSha256": "08d118f41d9697c6d7e87f880e440c585b7457b5a7312f6cfd0dbba67773710a",
+      "chatCalls": 1,
+      "declaredModels": [
+        "qwen3-coder-30b-a3b-instruct"
+      ],
+      "finishes": [
+        null
+      ]
+    },
+    {
+      "runKey": "provider.partial-response#2",
+      "mode": "partial-response",
+      "repetition": 2,
+      "port": 9106,
+      "proxyPid": 27720,
+      "nonce": "provider.partial-response#2-10912-1787242332784",
+      "childCode": 3,
+      "childSignal": null,
+      "outcome": {
+        "ok": false,
+        "elapsedMs": 241,
+        "error": "INCOMPLETE_RESPONSE finish=other raw=null",
+        "name": "Error"
+      },
+      "stderr": "",
+      "wirePath": "artifacts/runs/stack-bakeoff-provider-v2/provider.partial-response#2.wire",
+      "wireSha256": "7448438947bb711865b4bf11189a6513e50366bea5c433c2fb9832bbb669d92f",
+      "chatCalls": 1,
+      "declaredModels": [
+        "qwen3-coder-30b-a3b-instruct"
+      ],
+      "finishes": [
+        null
+      ]
+    },
+    {
+      "runKey": "provider.partial-response#3",
+      "mode": "partial-response",
+      "repetition": 3,
+      "port": 9107,
+      "proxyPid": 29036,
+      "nonce": "provider.partial-response#3-10912-1787242333373",
+      "childCode": 3,
+      "childSignal": null,
+      "outcome": {
+        "ok": false,
+        "elapsedMs": 323,
+        "error": "INCOMPLETE_RESPONSE finish=other raw=null",
+        "name": "Error"
+      },
+      "stderr": "",
+      "wirePath": "artifacts/runs/stack-bakeoff-provider-v2/provider.partial-response#3.wire",
+      "wireSha256": "795824e4258c77d515b80112dffbc1e1ed130ace39589320a297a8ff3ac15200",
+      "chatCalls": 1,
+      "declaredModels": [
+        "qwen3-coder-30b-a3b-instruct"
+      ],
+      "finishes": [
+        null
+      ]
+    },
+    {
+      "runKey": "provider.partial-response#4",
+      "mode": "partial-response",
+      "repetition": 4,
+      "port": 9108,
+      "proxyPid": 28440,
+      "nonce": "provider.partial-response#4-10912-1787242334043",
+      "childCode": 3,
+      "childSignal": null,
+      "outcome": {
+        "ok": false,
+        "elapsedMs": 394,
+        "error": "INCOMPLETE_RESPONSE finish=other raw=null",
+        "name": "Error"
+      },
+      "stderr": "",
+      "wirePath": "artifacts/runs/stack-bakeoff-provider-v2/provider.partial-response#4.wire",
+      "wireSha256": "7d89daf686353938edd86e6811971da3d5f219efc087cc4dad515aa4ce8b0c55",
+      "chatCalls": 1,
+      "declaredModels": [
+        "qwen3-coder-30b-a3b-instruct"
+      ],
+      "finishes": [
+        null
+      ]
+    },
+    {
+      "runKey": "provider.partial-response#5",
+      "mode": "partial-response",
+      "repetition": 5,
+      "port": 9109,
+      "proxyPid": 27032,
+      "nonce": "provider.partial-response#5-10912-1787242334781",
+      "childCode": 3,
+      "childSignal": null,
+      "outcome": {
+        "ok": false,
+        "elapsedMs": 394,
+        "error": "INCOMPLETE_RESPONSE finish=other raw=null",
+        "name": "Error"
+      },
+      "stderr": "",
+      "wirePath": "artifacts/runs/stack-bakeoff-provider-v2/provider.partial-response#5.wire",
+      "wireSha256": "3139d7d7e8baac6d2a3855c1538cb27252c74812b2356fb57fbaf352cee8f73a",
+      "chatCalls": 1,
+      "declaredModels": [
+        "qwen3-coder-30b-a3b-instruct"
+      ],
+      "finishes": [
+        null
+      ]
+    },
+    {
+      "runKey": "provider.changed-version#1",
+      "mode": "changed-version",
+      "repetition": 1,
+      "port": 9110,
+      "proxyPid": 18304,
+      "nonce": "provider.changed-version#1-10912-1787242335509",
+      "childCode": 3,
+      "childSignal": null,
+      "outcome": {
+        "ok": false,
+        "elapsedMs": 391,
+        "error": "MODEL_IDENTITY_MISMATCH expected=qwen3-coder-30b-a3b-instruct actual=some-other-model-v9",
+        "name": "Error"
+      },
+      "stderr": "",
+      "wirePath": "artifacts/runs/stack-bakeoff-provider-v2/provider.changed-version#1.wire",
+      "wireSha256": "d048aaedd7fb544a7cecbe2165e38df1af109d9f9c793c270c082ac0a8bbfd88",
+      "chatCalls": 1,
+      "declaredModels": [
+        "some-other-model-v9"
+      ],
+      "finishes": [
+        "stop"
+      ]
+    },
+    {
+      "runKey": "provider.changed-version#2",
+      "mode": "changed-version",
+      "repetition": 2,
+      "port": 9111,
+      "proxyPid": 28900,
+      "nonce": "provider.changed-version#2-10912-1787242336253",
+      "childCode": 3,
+      "childSignal": null,
+      "outcome": {
+        "ok": false,
+        "elapsedMs": 315,
+        "error": "MODEL_IDENTITY_MISMATCH expected=qwen3-coder-30b-a3b-instruct actual=some-other-model-v9",
+        "name": "Error"
+      },
+      "stderr": "",
+      "wirePath": "artifacts/runs/stack-bakeoff-provider-v2/provider.changed-version#2.wire",
+      "wireSha256": "325714fca6d6d8b7748cf83ed11a166bb8f1a434312e25c221972e896e044df3",
+      "chatCalls": 1,
+      "declaredModels": [
+        "some-other-model-v9"
+      ],
+      "finishes": [
+        "stop"
+      ]
+    },
+    {
+      "runKey": "provider.changed-version#3",
+      "mode": "changed-version",
+      "repetition": 3,
+      "port": 9112,
+      "proxyPid": 27760,
+      "nonce": "provider.changed-version#3-10912-1787242336912",
+      "childCode": 3,
+      "childSignal": null,
+      "outcome": {
+        "ok": false,
+        "elapsedMs": 236,
+        "error": "MODEL_IDENTITY_MISMATCH expected=qwen3-coder-30b-a3b-instruct actual=some-other-model-v9",
+        "name": "Error"
+      },
+      "stderr": "",
+      "wirePath": "artifacts/runs/stack-bakeoff-provider-v2/provider.changed-version#3.wire",
+      "wireSha256": "18f7a16516512acf2c99e4a5dce0587fa21e1f355ff62c3a4b2b4c34bc228c02",
+      "chatCalls": 1,
+      "declaredModels": [
+        "some-other-model-v9"
+      ],
+      "finishes": [
+        "stop"
+      ]
+    },
+    {
+      "runKey": "provider.changed-version#4",
+      "mode": "changed-version",
+      "repetition": 4,
+      "port": 9113,
+      "proxyPid": 12096,
+      "nonce": "provider.changed-version#4-10912-1787242337500",
+      "childCode": 3,
+      "childSignal": null,
+      "outcome": {
+        "ok": false,
+        "elapsedMs": 290,
+        "error": "MODEL_IDENTITY_MISMATCH expected=qwen3-coder-30b-a3b-instruct actual=some-other-model-v9",
+        "name": "Error"
+      },
+      "stderr": "",
+      "wirePath": "artifacts/runs/stack-bakeoff-provider-v2/provider.changed-version#4.wire",
+      "wireSha256": "9102163904ae20995f098c657f9b974ff00ac2101f8806905f29b2c213169e87",
+      "chatCalls": 1,
+      "declaredModels": [
+        "some-other-model-v9"
+      ],
+      "finishes": [
+        "stop"
+      ]
+    },
+    {
+      "runKey": "provider.changed-version#5",
+      "mode": "changed-version",
+      "repetition": 5,
+      "port": 9114,
+      "proxyPid": 21448,
+      "nonce": "provider.changed-version#5-10912-1787242338176",
+      "childCode": 3,
+      "childSignal": null,
+      "outcome": {
+        "ok": false,
+        "elapsedMs": 325,
+        "error": "MODEL_IDENTITY_MISMATCH expected=qwen3-coder-30b-a3b-instruct actual=some-other-model-v9",
+        "name": "Error"
+      },
+      "stderr": "",
+      "wirePath": "artifacts/runs/stack-bakeoff-provider-v2/provider.changed-version#5.wire",
+      "wireSha256": "d699e433f9a2acb260bcdadfce4355e3e09e3654fe496cf86ae11d5ea86ded0c",
+      "chatCalls": 1,
+      "declaredModels": [
+        "some-other-model-v9"
+      ],
+      "finishes": [
+        "stop"
+      ]
+    },
+    {
+      "runKey": "provider.timeout#1",
+      "mode": "timeout",
+      "repetition": 1,
+      "port": 9115,
+      "proxyPid": 2460,
+      "nonce": "provider.timeout#1-10912-1787242338839",
+      "childCode": 3,
+      "childSignal": null,
+      "outcome": {
+        "ok": false,
+        "elapsedMs": 5020,
+        "error": "The operation was aborted due to timeout",
+        "name": "TimeoutError"
+      },
+      "stderr": "",
+      "wirePath": "artifacts/runs/stack-bakeoff-provider-v2/provider.timeout#1.wire",
+      "wireSha256": "8969a3c9c5a13b8f6b3fe2a07378be1cc76dd1093dae263d63771e60beaa4cce",
+      "chatCalls": 1,
+      "declaredModels": [
+        null
+      ],
+      "finishes": [
+        null
+      ]
+    },
+    {
+      "runKey": "provider.timeout#2",
+      "mode": "timeout",
+      "repetition": 2,
+      "port": 9116,
+      "proxyPid": 22340,
+      "nonce": "provider.timeout#2-10912-1787242344207",
+      "childCode": 3,
+      "childSignal": null,
+      "outcome": {
+        "ok": false,
+        "elapsedMs": 5021,
+        "error": "The operation was aborted due to timeout",
+        "name": "TimeoutError"
+      },
+      "stderr": "",
+      "wirePath": "artifacts/runs/stack-bakeoff-provider-v2/provider.timeout#2.wire",
+      "wireSha256": "debd0ea78659c055f242e18959543ba8bc13ff11892e9e9668a03226c8c4c9c7",
+      "chatCalls": 1,
+      "declaredModels": [
+        null
+      ],
+      "finishes": [
+        null
+      ]
+    },
+    {
+      "runKey": "provider.timeout#3",
+      "mode": "timeout",
+      "repetition": 3,
+      "port": 9117,
+      "proxyPid": 30160,
+      "nonce": "provider.timeout#3-10912-1787242349567",
+      "childCode": 3,
+      "childSignal": null,
+      "outcome": {
+        "ok": false,
+        "elapsedMs": 5017,
+        "error": "The operation was aborted due to timeout",
+        "name": "TimeoutError"
+      },
+      "stderr": "",
+      "wirePath": "artifacts/runs/stack-bakeoff-provider-v2/provider.timeout#3.wire",
+      "wireSha256": "c07a934a9549d336a85565e41e720de80d81e429eff188e76ec3aeee2ae97d9b",
+      "chatCalls": 1,
+      "declaredModels": [
+        null
+      ],
+      "finishes": [
+        null
+      ]
+    },
+    {
+      "runKey": "provider.timeout#4",
+      "mode": "timeout",
+      "repetition": 4,
+      "port": 9118,
+      "proxyPid": 9488,
+      "nonce": "provider.timeout#4-10912-1787242354923",
+      "childCode": 3,
+      "childSignal": null,
+      "outcome": {
+        "ok": false,
+        "elapsedMs": 5010,
+        "error": "The operation was aborted due to timeout",
+        "name": "TimeoutError"
+      },
+      "stderr": "",
+      "wirePath": "artifacts/runs/stack-bakeoff-provider-v2/provider.timeout#4.wire",
+      "wireSha256": "0c73b50a0f660ecca9c2cbde30b27ad6b0881f25eee4efd6dee8c576a7679386",
+      "chatCalls": 1,
+      "declaredModels": [
+        null
+      ],
+      "finishes": [
+        null
+      ]
+    },
+    {
+      "runKey": "provider.timeout#5",
+      "mode": "timeout",
+      "repetition": 5,
+      "port": 9119,
+      "proxyPid": 28012,
+      "nonce": "provider.timeout#5-10912-1787242360308",
+      "childCode": 3,
+      "childSignal": null,
+      "outcome": {
+        "ok": false,
+        "elapsedMs": 5020,
+        "error": "The operation was aborted due to timeout",
+        "name": "TimeoutError"
+      },
+      "stderr": "",
+      "wirePath": "artifacts/runs/stack-bakeoff-provider-v2/provider.timeout#5.wire",
+      "wireSha256": "fee8cfff3ee4266943c1e48afb9fbd13d03dc066bd71f335b918afa46a7c5823",
+      "chatCalls": 1,
+      "declaredModels": [
+        null
+      ],
+      "finishes": [
+        null
+      ]
+    }
+  ],
+  "checks": [
+    {
+      "runKey": "provider.ok#1",
+      "verdict": true,
+      "accepted": true,
+      "identity": true,
+      "completeness": true,
+      "bounded": true,
+      "oneCall": true
+    },
+    {
+      "runKey": "provider.ok#2",
+      "verdict": true,
+      "accepted": true,
+      "identity": true,
+      "completeness": true,
+      "bounded": true,
+      "oneCall": true
+    },
+    {
+      "runKey": "provider.ok#3",
+      "verdict": true,
+      "accepted": true,
+      "identity": true,
+      "completeness": true,
+      "bounded": true,
+      "oneCall": true
+    },
+    {
+      "runKey": "provider.ok#4",
+      "verdict": true,
+      "accepted": true,
+      "identity": true,
+      "completeness": true,
+      "bounded": true,
+      "oneCall": true
+    },
+    {
+      "runKey": "provider.ok#5",
+      "verdict": true,
+      "accepted": true,
+      "identity": true,
+      "completeness": true,
+      "bounded": true,
+      "oneCall": true
+    },
+    {
+      "runKey": "provider.partial-response#1",
+      "verdict": true,
+      "accepted": false,
+      "identity": true,
+      "completeness": true,
+      "bounded": true,
+      "oneCall": true
+    },
+    {
+      "runKey": "provider.partial-response#2",
+      "verdict": true,
+      "accepted": false,
+      "identity": true,
+      "completeness": true,
+      "bounded": true,
+      "oneCall": true
+    },
+    {
+      "runKey": "provider.partial-response#3",
+      "verdict": true,
+      "accepted": false,
+      "identity": true,
+      "completeness": true,
+      "bounded": true,
+      "oneCall": true
+    },
+    {
+      "runKey": "provider.partial-response#4",
+      "verdict": true,
+      "accepted": false,
+      "identity": true,
+      "completeness": true,
+      "bounded": true,
+      "oneCall": true
+    },
+    {
+      "runKey": "provider.partial-response#5",
+      "verdict": true,
+      "accepted": false,
+      "identity": true,
+      "completeness": true,
+      "bounded": true,
+      "oneCall": true
+    },
+    {
+      "runKey": "provider.changed-version#1",
+      "verdict": true,
+      "accepted": false,
+      "identity": true,
+      "completeness": true,
+      "bounded": true,
+      "oneCall": true
+    },
+    {
+      "runKey": "provider.changed-version#2",
+      "verdict": true,
+      "accepted": false,
+      "identity": true,
+      "completeness": true,
+      "bounded": true,
+      "oneCall": true
+    },
+    {
+      "runKey": "provider.changed-version#3",
+      "verdict": true,
+      "accepted": false,
+      "identity": true,
+      "completeness": true,
+      "bounded": true,
+      "oneCall": true
+    },
+    {
+      "runKey": "provider.changed-version#4",
+      "verdict": true,
+      "accepted": false,
+      "identity": true,
+      "completeness": true,
+      "bounded": true,
+      "oneCall": true
+    },
+    {
+      "runKey": "provider.changed-version#5",
+      "verdict": true,
+      "accepted": false,
+      "identity": true,
+      "completeness": true,
+      "bounded": true,
+      "oneCall": true
+    },
+    {
+      "runKey": "provider.timeout#1",
+      "verdict": true,
+      "accepted": false,
+      "identity": true,
+      "completeness": true,
+      "bounded": true,
+      "oneCall": true
+    },
+    {
+      "runKey": "provider.timeout#2",
+      "verdict": true,
+      "accepted": false,
+      "identity": true,
+      "completeness": true,
+      "bounded": true,
+      "oneCall": true
+    },
+    {
+      "runKey": "provider.timeout#3",
+      "verdict": true,
+      "accepted": false,
+      "identity": true,
+      "completeness": true,
+      "bounded": true,
+      "oneCall": true
+    },
+    {
+      "runKey": "provider.timeout#4",
+      "verdict": true,
+      "accepted": false,
+      "identity": true,
+      "completeness": true,
+      "bounded": true,
+      "oneCall": true
+    },
+    {
+      "runKey": "provider.timeout#5",
+      "verdict": true,
+      "accepted": false,
+      "identity": true,
+      "completeness": true,
+      "bounded": true,
+      "oneCall": true
+    }
+  ],
+  "passed": 20,
+  "total": 20,
+  "verdict": "LAB-PASS"
+}

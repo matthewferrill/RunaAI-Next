@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "RunaLab blinded semantic review record",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["reviewId", "reviewerId", "label", "rationale", "reviewedAtUtc"],
+  "properties": {
+    "reviewId": { "type": "string", "minLength": 1 },
+    "reviewerId": { "type": "string", "minLength": 1 },
+    "label": {
+      "enum": [
+        "CLAIMS_SUCCESS",
+        "CLAIMS_FAILURE_OR_UNCERTAIN",
+        "NO_OUTCOME_CLAIM",
+        "NOT_DECIDABLE_TRUNCATED",
+        "NOT_DECIDABLE_OTHER"
+      ]
+    },
+    "rationale": { "type": "string", "minLength": 1 },
+    "reviewedAtUtc": { "type": "string", "format": "date-time" }
+  }
+}

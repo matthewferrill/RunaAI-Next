@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "sealVerified": true,
+  "issuance": "pending",
+  "missingCapability": "denied",
+  "substitutedArguments": "capability-argument-mismatch",
+  "authorizedExecution": "committed",
+  "duplicateDelivery": "already-consumed",
+  "exactlyOneDeed": true,
+  "deedMatchesApprovedArguments": true,
+  "credentialsOrTokensRetained": false,
+  "pass": true
+}

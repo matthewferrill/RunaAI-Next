@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "candidate": "OpenTelemetry Collector contrib 0.159.0",
+  "sendersExited": 5,
+  "tracesRetained": 5,
+  "requiredKeysPresent": [
+    "run.id",
+    "run.attempt",
+    "component",
+    "deadline.ms",
+    "terminal.state",
+    "deed.reference"
+  ],
+  "forbiddenPromptAbsent": true,
+  "forbiddenSecretAbsent": true,
+  "traceFileSha256": "15fd69560ef7cc37a00052c35eb31cc58e0fbfd9559bc6546e337148a56a3af4",
+  "passed": true
+}

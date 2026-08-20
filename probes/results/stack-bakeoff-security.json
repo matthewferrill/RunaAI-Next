@@ -1,0 +1,113 @@
+{
+  "schemaVersion": 1,
+  "startedAt": "2026-08-20T20:44:30.705Z",
+  "endedAt": "2026-08-20T20:44:51.420Z",
+  "profile": "integration-security",
+  "defaultDevelopmentModified": false,
+  "keycloak": {
+    "component": "Keycloak 26.7.2 OIDC",
+    "matrixPass": true,
+    "cases": [
+      {
+        "name": "valid",
+        "expectedAccepted": true,
+        "accepted": true,
+        "reason": "accepted"
+      },
+      {
+        "name": "forged-signature",
+        "expectedAccepted": false,
+        "accepted": false,
+        "reason": "signature"
+      },
+      {
+        "name": "wrong-issuer",
+        "expectedAccepted": false,
+        "accepted": false,
+        "reason": "issuer"
+      },
+      {
+        "name": "wrong-audience",
+        "expectedAccepted": false,
+        "accepted": false,
+        "reason": "audience"
+      },
+      {
+        "name": "wrong-actor",
+        "expectedAccepted": false,
+        "accepted": false,
+        "reason": "subject"
+      },
+      {
+        "name": "missing",
+        "expectedAccepted": false,
+        "accepted": false,
+        "reason": "missing"
+      },
+      {
+        "name": "expired",
+        "expectedAccepted": false,
+        "accepted": false,
+        "reason": "expired"
+      }
+    ],
+    "revocation": {
+      "activeBeforeLogout": true,
+      "activeAfterLogout": false,
+      "offlineSignatureStillAcceptedAfterLogout": true,
+      "pass": true,
+      "contract": "online introspection required for immediately revocable destructive operations"
+    },
+    "evidence": {
+      "issuerHash": "27c4bb04daea527609177ec974a28f830fbb93127457926fc91deebd2acf12cf",
+      "subjectHash": "c8b95428f2d69dde03b494be9d703157d9aefc9992e4a8e5e48428e63bdeffca",
+      "keyIdHash": "cbb0b34bc9aef9297b14ddeea59460b21e0c13ede653137949c077c4dbc5dffe",
+      "credentialsOrTokensRetained": false
+    }
+  },
+  "openfga": {
+    "component": "OpenFGA 1.18.3",
+    "matrixPass": true,
+    "cases": [
+      {
+        "name": "intended-tuple",
+        "expected": true,
+        "allowed": true
+      },
+      {
+        "name": "wrong-actor",
+        "expected": false,
+        "allowed": false
+      },
+      {
+        "name": "wrong-object",
+        "expected": false,
+        "allowed": false
+      },
+      {
+        "name": "wrong-relation",
+        "expected": false,
+        "allowed": false
+      },
+      {
+        "name": "revoked-tuple",
+        "expected": false,
+        "allowed": false
+      },
+      {
+        "name": "service-unavailable",
+        "expected": false,
+        "allowed": false,
+        "reason": "transport-deny"
+      }
+    ],
+    "evidence": {
+      "storeIdHash": "d566822aa723320dc461c8f12e88fbef9d0bc5347c723af9717ec8ac2ad64833",
+      "authorizationModelIdHash": "7025ca34216f18d1db2bdefbe47a14c4ffcd36b23ee89c8de1aa96d4575e6821",
+      "datastore": "memory (lab only)",
+      "bind": "loopback"
+    }
+  },
+  "error": null,
+  "pass": true
+}

@@ -1,0 +1,8 @@
+{
+  "name": "runalab-security-bakeoff",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "bakeoff": "node run-security.mjs"
+  }
+}

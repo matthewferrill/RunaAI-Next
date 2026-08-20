@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "candidate": "Qdrant 1.19.0 portable",
+  "createStatus": true,
+  "upsertStatus": "completed",
+  "before": {
+    "status": "green",
+    "optimizerStatus": "ok",
+    "pointsCount": 2000,
+    "indexedVectorsCount": 0
+  },
+  "afterRestart": {
+    "status": "green",
+    "optimizerStatus": "ok",
+    "pointsCount": 2000,
+    "indexedVectorsCount": 0
+  },
+  "exactCountBefore": 2000,
+  "exactCountAfter": 2000,
+  "queryResultsBefore": 3,
+  "queryResultsAfter": 3,
+  "readinessRule": "upsert completed + collection green + exact count + postcondition retrieval/query; indexed_vectors_count is diagnostic because full-scan is valid",
+  "postconditions": [
+    {
+      "id": 1,
+      "vectorPresent": true,
+      "payloadHashValid": true,
+      "storageState": "stored"
+    },
+    {
+      "id": 1000,
+      "vectorPresent": true,
+      "payloadHashValid": true,
+      "storageState": "stored"
+    },
+    {
+      "id": 2000,
+      "vectorPresent": true,
+      "payloadHashValid": true,
+      "storageState": "stored"
+    }
+  ],
+  "passed": true
+}

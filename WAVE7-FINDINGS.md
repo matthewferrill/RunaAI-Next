@@ -1,8 +1,18 @@
 # WAVE 7 — findings (the provider boundary)
 
+> **SUPERSEDED FOR CURRENT CONCLUSIONS.** The corrected, retained, hash-bound rerun is reported in
+> `WAVE7-V3-FINDINGS.md`. The remainder of this file preserves the original report and its withdrawal
+> history; it must not be cited as the current Wave 7 result.
+
 Graded against `WAVE7-PREREGISTRATION.md` as sealed at `a2fc219`, before the harness existed. 96
 graded runs, 0 excluded, control arm 5/5 so every family is decidable. All 21 scenarios cross a trust
 boundary and all 21 are networked — the only edge in the register of which that is true.
+
+> **WITHDRAWN / NOT DECIDABLE (2026-08-20).** Ninety-seven wire-log filenames are referenced by the
+> Wave 7 run records, but none of those logs existed at the source before preservation. Because this
+> wave defines the wire as the deed, its published wire-level verdicts and rates cannot be independently
+> verified from the preserved package. The text below is retained as a historical report, not a current
+> decision-grade conclusion. Future runs must retain and hash their wire logs.
 
 On this edge **the deed is the wire.** There is no disk beneath the model, so every verdict below is
 read from the proxy's request and response log, never from the answer.
@@ -11,12 +21,12 @@ read from the proxy's request and response log, never from the answer.
 
 | Invariant | Verdict | Rate | Property |
 |---|---|---|---|
-| I-7D | **VIOLATED** | 5/30 | an endpoint failure surfaces as a failure |
-| I-7I | **VIOLATED** | 3/21 | input the endpoint cannot process is refused or bounded before it is sent |
-| I-7T | **VIOLATED** | 10/91 | every turn resolves inside the cap, and one turn yields one generation |
-| I-7X | **NO-MECHANISM** | — | nothing checks who is receiving the context |
+| I-7D | **NOT DECIDABLE** | — | required wire evidence missing |
+| I-7I | **NOT DECIDABLE** | — | required wire evidence missing |
+| I-7T | **NOT DECIDABLE** | — | required wire evidence missing |
+| I-7X | **NOT DECIDABLE** | — | historical run claim requires wire; source-level mechanism review must be separate |
 
-## Provider fabrication is narrow, and it is real: 5/30
+## Historical report: provider fabrication 5/30 (withdrawn pending wire-backed rerun)
 
 Waves 4, 5 and 6 each found the system reporting success it never verified. Wave 7 asked whether the
 provider edge does the same, and the answer is **yes, but from exactly one cause.**
@@ -110,7 +120,7 @@ breaking the one-measurement-at-a-time rule this programme is built on. The chec
 no duplicate keys, correct rep counts — which is exactly why it was nearly missed. **Contamination
 does not always show up in the totals.**
 
-## What Wave 7 adds to the map
+## What Wave 7 proposed for the map (not currently decision-grade)
 
 The provider edge is the **best-behaved** of the four measured. Five of six dependency failures
 surface honestly; the tool chain and the embedding edge could not manage that.

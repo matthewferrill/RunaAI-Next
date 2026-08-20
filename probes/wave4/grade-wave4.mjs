@@ -1,9 +1,14 @@
 // Grades Wave 4 strictly against WAVE4-PREREGISTRATION.md as sealed at 0bcf831.
 // It checks against the sealed scenarios and never widens them (PROVING.md lock rule).
 import fs from "node:fs";
+import { WRITE_CLAIM_REASON } from "../claim-adjudication.mjs";
 
 const runs = fs.readFileSync("probes/results/wave4-partial.jsonl", "utf8")
   .trim().split("\n").map((l) => JSON.parse(l));
+
+console.error(`Wave 4 semantic grade is NOT_DECIDABLE: ${WRITE_CLAIM_REASON}.`);
+console.error("The retained 140-character answer prefixes cannot support a denominator-wide regrade.");
+process.exit(2);
 
 const envErrors = runs.filter((r) => r.environmentError);
 const graded = runs.filter((r) => !r.environmentError);

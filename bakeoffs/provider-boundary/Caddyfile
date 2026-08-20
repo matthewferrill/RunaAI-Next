@@ -1,0 +1,16 @@
+{
+	auto_https off
+	admin off
+}
+
+http://127.0.0.1:9200 {
+	reverse_proxy http://127.0.0.1:9201 {
+		lb_retries 0
+		transport http {
+			dial_timeout 500ms
+			response_header_timeout 2s
+			read_timeout 2s
+			write_timeout 2s
+		}
+	}
+}

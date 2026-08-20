@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "candidate": "Qdrant 1.19.0 portable",
+  "createStatus": true,
+  "upsertStatus": "completed",
+  "before": {
+    "status": "green",
+    "optimizerStatus": "ok",
+    "pointsCount": 100,
+    "indexedVectorsCount": 0
+  },
+  "afterRestart": {
+    "status": "green",
+    "optimizerStatus": "ok",
+    "pointsCount": 100,
+    "indexedVectorsCount": 0
+  },
+  "postconditions": [
+    {
+      "id": 1,
+      "vectorPresent": true,
+      "payloadHashValid": true,
+      "embeddingState": "indexed"
+    },
+    {
+      "id": 50,
+      "vectorPresent": true,
+      "payloadHashValid": true,
+      "embeddingState": "indexed"
+    },
+    {
+      "id": 100,
+      "vectorPresent": true,
+      "payloadHashValid": true,
+      "embeddingState": "indexed"
+    }
+  ],
+  "passed": true
+}

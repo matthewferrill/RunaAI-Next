@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "candidate": "PostgreSQL 18.6 portable",
+  "stopMode": "immediate",
+  "before": {
+    "rows": 15,
+    "sha256": "40bae17e4007ecf313e1f0fb3e3fc5aad8a3cbedd633da187a789cb43308be67"
+  },
+  "after": {
+    "rows": 15,
+    "sha256": "40bae17e4007ecf313e1f0fb3e3fc5aad8a3cbedd633da187a789cb43308be67"
+  },
+  "passed": true
+}

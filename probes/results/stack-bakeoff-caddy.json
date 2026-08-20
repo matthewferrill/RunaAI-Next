@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "candidate": "Caddy 2.11.4",
+  "config": "bakeoffs/provider-boundary/Caddyfile",
+  "outcome": {
+    "ok": false,
+    "elapsedMs": 1817,
+    "error": "Gateway Timeout",
+    "name": "AI_APICallError"
+  },
+  "chatCalls": 1,
+  "wirePath": "artifacts/runs/stack-bakeoff-caddy/timeout.wire",
+  "wireSha256": "4dfd28fe9a4e2d8af67b57150b88379eed5b1bb7d3a169c756fbd412aa998abe",
+  "passed": true
+}

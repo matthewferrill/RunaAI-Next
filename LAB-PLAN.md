@@ -3,6 +3,10 @@
 Revised 2026-08-20, replacing the plan written 2026-08-19. The diagnosis sections stand; the plan
 section was rewritten after a finding that changes what most of the remaining work is.
 
+> **Evidence correction.** The 1,501 run records are preserved, but lexical write-claim rates and
+> conclusions requiring the missing Wave 7 wire logs are `NOT_DECIDABLE`. Any threshold or stack
+> decision below that cites those rates is suspended until a corrected, sealed measurement exists.
+
 **Sequence, fixed:** decide the stack → fix the stack → fix the frays → *then* assess residual gaps.
 Nothing beyond that is designed here. An escalation path, a delegation model, or anything else that
 solves a residual is out of scope until the residual is measured, because sizing a solution to an
@@ -76,9 +80,27 @@ amount of typing speed affects. Sequential throughout — one measurement at a t
 |---|---|---|---|
 | **A** — frays with the stack's defences enabled | ~20 min | ~200 runs, ~1.5 h | **~2 h** |
 | **B** — the dark components | ~80 min | ~300 runs, ~1.5 h | **~3 h** |
-| **C** — model and role matrix | ~30 min | ~500 runs, ~3 h | **~3.5 h** |
+| **C** — hardware-qualified model research and role matrix | ~60–90 min research/harness | ~500 runs plus swaps, ~3–5 h | **~4–6.5 h** |
 | **D** — build the remainder | unknown until A and B report | | |
 | **E** — constraint-5 estimate | analysis only | none | **~30 min** |
+
+### Completion record — 2026-08-20
+
+- **Phase A complete:** all six frays were rerun against configured boundaries; retained evidence and
+  corrected seals verify.
+- **Phase B complete:** retrieval, formal evals, auth surface, observability, and the corrected hard
+  reranker corpus were exercised. Windowed use of the installed BGE reranker was selected.
+- **Phase C complete:** live Control/Home hardware and NVLink were inventoried; current model
+  documentation and alternatives were re-screened; five existing models plus one justified new
+  candidate were run through the sealed role matrix. A taxonomy-correct routing supplement selected
+  deterministic application routing because no model passed 8/8.
+- **Phase D complete:** the selected Mastra/LangGraph/PostgreSQL/Qdrant/OpenTelemetry boundaries passed
+  a restart/replay vertical slice, and Caddy passed combined header/body/application budgets.
+- **Phase E complete:** the current RunaAI verifier and 169-module migration surface were inventoried
+  read-only and assessed in `RUNA-2-ARCHITECTURE-ASSESSMENT-2026-08-20.md`. The companion
+  `RUNA-PORT-ESTIMATE-2026-08-20.md` separates the 46–75 one-developer effort-day model from the
+  2–4 day minimum-slice and 6–12 day selected-core elapsed estimates for a Codex-plus-Claude workflow.
+  The final opt-in Keycloak/OpenFGA component gate was rerun after development testing and passed.
 
 **A and B are one unattended run of roughly five hours.** C is a separate session and must not start
 before A and B report, because the matrix would otherwise measure models against a configuration
@@ -131,7 +153,72 @@ piece), and `@mastra/core/auth`.
 **The `:8412` service is outside the frozen base.** If it becomes load-bearing it must be pinned in
 `BASE-MANIFEST.json` like the model and embedder, and its 24.7 s cold start accounted for.
 
-### Phase C — model and role matrix
+### Phase C — hardware-qualified model research and role matrix
+
+Phase C begins from the machines themselves, not from an old handoff or a generic model leaderboard.
+The live read-only inventory captured 2026-08-20 is the current baseline:
+
+| Host | Live hardware relevant to the decision | Assigned boundary |
+|---|---|---|
+| RUNA-CONTROL | Dell OptiPlex 7060; i5-8500T, 6C/6T; 16 GB RAM; Intel UHD 630; 256 GB SSD; Windows 11 Pro | Application, governance, scheduling, records, and UI. No resident LLM or heavy reranker is assumed here. |
+| RUNA-HOME | Dell Precision T7910; 2x Xeon E5-2699 v3, 36C/72T total; 128 GB ECC RDIMM at 2133 MHz, balanced four DIMMs per socket; 512 GB SSD plus 2 TB HDD; Windows 10 Pro | Model, embedding, reranking, and measured accelerator workloads only. |
+| RUNA-HOME accelerators | 2x Quadro RTX 6000, 23,040 MiB usable VRAM each, ECC enabled, Turing generation; two live NVLink links per GPU reporting 25.781 GB/s each | Treat as two 24 GB devices joined by a measured interconnect until a specific backend proves placement and transfer behavior. |
+
+The inventory is a dated measurement, not a permanent truth. Re-capture CPU, DIMM population and
+NUMA placement, GPU identity/driver/ECC/link state, VRAM use, storage free space, OS, and firmware
+immediately before the model campaign. A changed driver, runtime, model artifact, quantization,
+context, or placement creates a new arm rather than silently updating an old one.
+
+#### C0 — candidate discovery and documentation qualification
+
+Redo candidate discovery before freezing the model set. Search current official model cards,
+runtime documentation, licenses, release notes, and published architecture details for both the
+existing candidates and plausible newer alternatives. For every candidate record:
+
+1. exact model/revision, architecture, active/total parameters, license, and commercial-use terms;
+2. native and supported context, tokenizer/template, tool-call and structured-output support;
+3. published precision/quantization options and the exact artifact proposed for the lab;
+4. weight size plus estimated KV-cache, scratch, and runtime overhead at each tested context;
+5. backend and operating-system support on Windows, CUDA, Turing, and dual-GPU placement;
+6. any dependency on BF16, FP8, FlashAttention, newer compute capability, or Linux-only kernels;
+7. expected single-GPU, dual-GPU/NVLink, RAM-offload, load/unload, and cold-start behavior; and
+8. intended role and the capability claim the later lab task can falsify.
+
+Documentation makes a model `DOC-ELIGIBLE`; it never selects it. Community benchmarks may nominate
+a candidate but cannot replace an official artifact record or a run on RUNA-HOME. Models that require
+native BF16/FP8 acceleration, unsupported kernels, more storage than the active library can safely
+hold, or an unobservable split/offload path are rejected before the long matrix.
+
+#### C1 — hardware-fit and placement gate
+
+Before capability scoring, prove that each candidate runs honestly on this estate:
+
+1. hash and record the exact model artifact, runtime, driver, prompt template, quantization, and
+   requested context;
+2. capture per-GPU weight/KV/scratch allocation and system-RAM use before load, after load, during
+   prompt ingestion, and during generation;
+3. record cold load, time to first token, prompt-processing speed, generation speed, peak memory,
+   CPU use, temperatures, clocks, power, and unload/recovery;
+4. reject any arm whose claimed context cannot be exercised with a near-limit prompt and complete
+   response;
+5. reject any arm that silently spills to CPU/RAM or falls below the fixed throughput floor without
+   exposing that placement in evidence; and
+6. preserve Control responsiveness while Home loads, runs, cancels, unloads, and recovers the model.
+
+NVLink is its own measured factor. The bridge being present does **not** turn the cards into one
+automatic 48 GB allocator. For any model spanning both GPUs, the selected backend must expose the
+tensor/KV split and show both devices in telemetry. Where the model also fits on one GPU, compare a
+single-GPU arm with the dual-GPU arm. Where it does not, compare the dual-GPU result against its
+declared no-peer/ordinary multi-GPU behavior if the backend exposes a safe switch. Record peer-access
+status and transfer counters where available. Credit NVLink only when the runtime demonstrably uses
+the link and the resulting latency/throughput or feasible context improves; otherwise record it as
+installed but irrelevant to that backend.
+
+The 128 GB ECC installation raises the candidate ceiling but does not erase latency. RAM offload is
+permitted as an explicit arm, never hidden inside a GPU result. A model that technically loads but
+generates too slowly for its assigned role fails that role even if its answer quality is strong.
+
+#### C2 — capability and role matrix
 
 Roles carry different fray exposure, so a single ranking would be the wrong shape:
 
@@ -157,28 +244,36 @@ Roles carry different fray exposure, so a single ranking would be the wrong shap
 measured throughput was **81.7 / 3.1 / 1.6 tok/s** against **71.7 tok/s** for the coder alone. A
 20–45× collapse with nothing in the API reporting it.
 
-**Arm D's results are void and must be re-run solo.** Llama-3.3-70B's 3/30 fabrication — the best in
-the set — was measured while starved, and it only called a tool in 15/25 runs. A model that cannot
-complete a chain cannot falsely claim it did, so that score is likely **abstention rather than
-honesty**. It gets a fair test alone, against a bar fixed in advance: fabrication below 9/30,
-tool-calling ≥ 24/25, solo throughput ≥ 10 tok/s, injection resistance comparable.
+**Arm D's write-claim result is void, as are the other three arms' rates.** The retired lexical grader
+cannot support a model comparison, and Arm D also ran while resource-starved. A future solo test needs
+a new sealed semantic adjudication protocol and a bar calibrated from validated labels; the old 3/30
+and 9/30 figures must not be reused. Tool-calling ≥ 24/25, solo throughput ≥ 10 tok/s and injection
+resistance remain independently measurable criteria.
 
 **The injection result also needs confirming.** Qwen3.6-27B's 0/10 is one arm at n=10. It wants n ≥ 20
 before a production routing policy rests on it — and it costs 2× the incumbent's latency and missed
 3/25 tool calls, which was invisible when only steering was measured.
 
-### Phase D — build only what survives A and B
+### Phase D — build only what survived A and B
 
-Deliberately unspecified. The seven owned items were derived from a stack running without its
-defences; Phase A may close several outright and shrink others. **Specifying the build now would be
-sizing a solution to an unmeasured gap.**
+Completed after A and B reduced the residual. The lab added only the narrow integration pieces the
+selected standard components cannot know: domain effect/idempotency keys, accepted provider completion
+policy, PostgreSQL-to-Qdrant reconciliation, explicit reranker windows, and typed grounding contracts.
+The resulting vertical slice passed fresh-worker recovery and exactly-once replay with one provider
+call and one deed. Caddy's slow-header, slow-body, and application-budget composition cases also
+failed closed with one upstream call each.
 
 ### Phase E — constraint-5 estimate
 
-*"Verifier survives migration — unknown, dominant cost, unestimated."* Still unestimated, and now
-urgent: the decision has been taken to build off the stack. RunaAI is **169 modules with four verifier
-entry points**. This is an estimate, not a migration — but an unpriced dominant cost should not stay
-unpriced once it is on the critical path.
+Completed as a read-only estimate. RunaAI is **169 source modules / 34,899 source lines**, with **123
+test files / 20,309 test lines** and **128 command checks** in the shared verifier. The three CLI
+profiles, API route, guarded-chat cache, and command surface consume one verifier rather than being
+independent suites. The staged baseline is **46–75 implementation days of one-primary-developer
+effort**, not an elapsed two-agent schedule. With Codex and Claude implementing in separate checkouts
+and the steward reviewing material gates, the conditional elapsed ranges are **2–4 days** for the
+minimum useful slice and **6–12 days** for selected core. See
+`RUNA-2-ARCHITECTURE-ASSESSMENT-2026-08-20.md` and `RUNA-PORT-ESTIMATE-2026-08-20.md` for dispositions,
+approval gates, assumptions, and stop rules.
 
 ---
 
@@ -200,7 +295,10 @@ error this programme exists to prevent.
 **345 is a floor.** The register enumerates graph-edge scenarios only. It also never asked what the
 framework offered to defend those edges, which is how the processors were missed.
 
-**Model results rest on four arms**, one of which is void pending a solo re-run.
+**Model conclusions are role-limited.** The sealed campaign now covers six runnable arms (including
+the MTP runtime arm) and a taxonomy-correct routing supplement. The coding cases prove bounded code
+and tool smoke behavior, not whole-repository software-engineering quality; the first Runa port slice
+is the acceptance test for that broader claim.
 
 **Residual instrument risk is ~10–15%**, not zero. Phases B and C are new territory and carry the
 most; the library takes the old patterns out of play but cannot anticipate novel ones.

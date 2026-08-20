@@ -1,0 +1,92 @@
+{
+  "schemaVersion": 1,
+  "candidate": "selected vertical RunaLab stack",
+  "initial": {
+    "phase": "initial",
+    "attempt": 1,
+    "terminal": "paused-before-governed-effect",
+    "result": {
+      "requestId": "vertical-request",
+      "agentText": "{\"intent\":\"transfer\",\"amount\":11,\"destination\":\"vault\"}",
+      "retrievedId": 1,
+      "retrievedDigest": "06edc8f4f903f0572f0b77457d411aa833b9e749afb5cf5222743a3b594e7b5a",
+      "terminal": "retrieval-complete",
+      "__interrupt__": []
+    },
+    "next": [
+      "governed_effect"
+    ],
+    "historyStates": 4,
+    "counts": {
+      "capabilities": 0,
+      "outbox": 0,
+      "deeds": 0,
+      "decisions": 0
+    },
+    "deedRef": "none"
+  },
+  "resumed": {
+    "phase": "resume",
+    "attempt": 2,
+    "terminal": "committed",
+    "result": {
+      "requestId": "vertical-request",
+      "agentText": "{\"intent\":\"transfer\",\"amount\":11,\"destination\":\"vault\"}",
+      "retrievedId": 1,
+      "retrievedDigest": "06edc8f4f903f0572f0b77457d411aa833b9e749afb5cf5222743a3b594e7b5a",
+      "terminal": "committed",
+      "deedRef": "vertical-effect"
+    },
+    "next": [],
+    "historyStates": 5,
+    "counts": {
+      "capabilities": 1,
+      "outbox": 1,
+      "deeds": 1,
+      "decisions": 2
+    },
+    "deedRef": "vertical-effect"
+  },
+  "replay": {
+    "phase": "replay",
+    "attempt": 3,
+    "terminal": "committed",
+    "result": {
+      "requestId": "vertical-request",
+      "agentText": "{\"intent\":\"transfer\",\"amount\":11,\"destination\":\"vault\"}",
+      "retrievedId": 1,
+      "retrievedDigest": "06edc8f4f903f0572f0b77457d411aa833b9e749afb5cf5222743a3b594e7b5a",
+      "terminal": "committed",
+      "deedRef": "vertical-effect"
+    },
+    "next": [],
+    "historyStates": 5,
+    "counts": {
+      "capabilities": 1,
+      "outbox": 1,
+      "deeds": 1,
+      "decisions": 2
+    },
+    "deedRef": "vertical-effect"
+  },
+  "database": {
+    "capabilities": 1,
+    "outbox": 1,
+    "deeds": 1,
+    "mastraTables": 0,
+    "checkpointRows": 5
+  },
+  "providerChatCalls": 1,
+  "traceSha256": "43955af4c1217581dfd2398b9ff52dccf0d9246bcd4cb13efaa398db0d4b1a1b",
+  "checks": {
+    "initialPaused": true,
+    "resumedCommitted": true,
+    "replayExactlyOnce": true,
+    "providerOnce": true,
+    "typedAgentAndRetrieval": true,
+    "postgresOnlyDurability": true,
+    "tracesRetained": true,
+    "tracesRedacted": true
+  },
+  "passed": true
+}

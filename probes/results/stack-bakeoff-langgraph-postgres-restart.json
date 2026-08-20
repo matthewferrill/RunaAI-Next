@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "candidate": "LangGraph PostgreSQL checkpointer after PostgreSQL immediate restart",
+  "runId": "langgraph-postgres-p4-5",
+  "before": {
+    "checkpoints": 7,
+    "effects": 5,
+    "deduplicatedAttempts": 1
+  },
+  "after": {
+    "checkpoints": 7,
+    "effects": 5,
+    "deduplicatedAttempts": 1
+  },
+  "outcome": {
+    "status": "committed",
+    "completed": [
+      {
+        "step": 0,
+        "effect": "created"
+      },
+      {
+        "step": 1,
+        "effect": "created"
+      },
+      {
+        "step": 2,
+        "effect": "created"
+      },
+      {
+        "step": 3,
+        "effect": "created"
+      },
+      {
+        "step": 4,
+        "effect": "already-created"
+      }
+    ],
+    "historyStates": 7,
+    "pid": 15420
+  },
+  "passed": true
+}

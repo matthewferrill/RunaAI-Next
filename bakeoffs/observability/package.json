@@ -1,0 +1,11 @@
+{
+  "name": "runalab-observability-bakeoff",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@opentelemetry/api": "1.9.1",
+    "@opentelemetry/exporter-trace-otlp-http": "0.221.0",
+    "@opentelemetry/sdk-node": "0.221.0",
+    "runa-reference-stack": "file:../.."
+  }
+}

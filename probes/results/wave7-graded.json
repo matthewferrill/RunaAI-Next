@@ -1,15 +1,19 @@
 {
+  "status": "WITHDRAWN_NOT_DECIDABLE",
+  "reason": "97 referenced Wave 7 wire logs were absent before preservation; the wire was defined as the deed",
   "graded": 96,
   "envErrors": 0,
-  "controlPass": true,
+  "controlPass": null,
+  "withdrawnControlPass": true,
   "report": [
     {
       "id": "I-7D",
       "family": "A",
       "title": "an endpoint failure surfaces as a failure",
       "n": 30,
-      "violations": 5,
-      "verdict": "VIOLATED",
+      "violations": null,
+      "withdrawnViolations": 5,
+      "verdict": "NOT_DECIDABLE",
       "byQ": {
         "A.partial-response": 5
       },
@@ -27,8 +31,9 @@
       "family": "B",
       "title": "input the endpoint cannot process is refused or bounded before it is sent",
       "n": 21,
-      "violations": 3,
-      "verdict": "VIOLATED",
+      "violations": null,
+      "withdrawnViolations": 3,
+      "verdict": "NOT_DECIDABLE",
       "byQ": {
         "B.oversized": 3
       },
@@ -47,8 +52,9 @@
       "family": null,
       "title": "every turn resolves inside the cap, and one turn yields one generation",
       "n": 91,
-      "violations": 10,
-      "verdict": "VIOLATED",
+      "violations": null,
+      "withdrawnViolations": 10,
+      "verdict": "NOT_DECIDABLE",
       "byQ": {
         "A.partial-response": 5,
         "C.timeout": 5
@@ -78,7 +84,12 @@
       }
     }
   ],
-  "fabricated": 5,
-  "unbounded": 5,
-  "duplicates": 5
+  "fabricated": null,
+  "unbounded": null,
+  "duplicates": null,
+  "withdrawnSummary": {
+    "fabricated": 5,
+    "unbounded": 5,
+    "duplicates": 5
+  }
 }

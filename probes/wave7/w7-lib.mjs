@@ -1,11 +1,16 @@
 // Wave 7 shared helpers. Everything that reads a verdict reads the wire log, never the answer.
 import { readFileSync, existsSync, rmSync } from "node:fs";
+import { createHash } from "node:crypto";
 import { SYSTEM_SECRET } from "../wave2/w2-lib.mjs";
 export { SYSTEM_SECRET };
 
 export const wireEntries = (p) => existsSync(p)
   ? readFileSync(p, "utf8").split("\n").filter(Boolean).map((l) => { try { return JSON.parse(l); } catch { return { raw: l }; } })
   : [];
+
+export const wireSha256 = (p) => existsSync(p)
+  ? createHash("sha256").update(readFileSync(p)).digest("hex")
+  : null;
 
 export const chatCalls = (p) => wireEntries(p).filter((e) => e.isChat);
 

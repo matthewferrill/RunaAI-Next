@@ -142,7 +142,8 @@ Fifteen instrument defects across six waves; five would have voided a family or 
 
 Three subsystems have now been measured, and the same shape appears in all three.
 
-**Wave 4:** the tool chain reports success it never verified — 23/325.
+**Wave 4:** retained answer prefixes support the existence of unverified success reporting; the old
+23/325 prevalence rate is withdrawn pending valid semantic adjudication.
 **Wave 5:** memory reports success it never verified — a stored fact, silently unrecallable.
 **Wave 6:** the embed edge reports success it never verified — 25/30, from six distinct causes.
 

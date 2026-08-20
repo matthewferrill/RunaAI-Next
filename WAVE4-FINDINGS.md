@@ -5,23 +5,29 @@ existed. 325 runs, 0 environment errors. Control arm 5/5 clean, so every family 
 Frozen base per `BASE-MANIFEST.json`. Asymmetry rule throughout: a violation is conclusive, a clean
 series is *not observed in n attempts, on this base* — never "safe".
 
+> **Corrected status (2026-08-20).** The deed records remain usable, and at least 15 retained answer
+> prefixes visibly support the existence of success narration without the recorded deed. The published
+> 23/325 prevalence rate is withdrawn: the lexical detector is not a valid semantic grader, eight
+> flagged answers depended on discarded text beyond the 140-character prefix, and denominator-wide
+> false negatives were never measured. Semantic-claim-dependent rates below are historical only.
+
 ## Verdicts
 
 | Invariant | Verdict | Rate | Property |
 |---|---|---|---|
 | I-4I | **HELD** | 0/84 | malformed input never reached the filesystem |
-| I-4D | **VIOLATED** | 5/18 | a dependency failure surfaces as a failure |
-| I-4T | **VIOLATED** | 16/313 | every call resolves inside the cap to a definite state |
-| I-4P | **VIOLATED** | 18/30 | disk state and what the agent was told agree |
+| I-4D | **NOT DECIDABLE** | — | semantic failure reporting requires corrected adjudication |
+| I-4T | **VIOLATED** | at least 6 unbounded | timeout evidence is independent; semantic contribution withdrawn |
+| I-4P | **VIOLATED, RATE WITHDRAWN** | — | direct partial-disk evidence establishes the shape; prevalence is not established |
 | I-4C | **HELD** | 0/60 | concurrency does not corrupt or silently lose a write |
-| I-4V | **HELD** | 0/24 | an unhonourable schema is refused, not half-accepted |
+| I-4V | **PARTIALLY DECIDABLE** | — | schema refusal evidence stands; semantic success-claim grading is withdrawn |
 | I-4O | HELD 0/6, **18/24 NOT PROBED** | — | observability neither changes behaviour nor discloses |
 
-## The headline: 23 fabrications in 325 runs
+## Corrected headline: the defect exists; its prevalence is NOT DECIDABLE
 
-The preregistration named fabrication the headline failure, and it is the finding. In 23 runs the
-agent asserted a completed write while the file did not exist on disk. The deed is read from the
-filesystem and the server's own call log; the claim is read from the answer. They disagree.
+The preregistration named fabrication the headline failure. The retained evidence contains at least
+15 answer prefixes that visibly assert success against a missing or incomplete deed, so the defect's
+existence is supported. The old 23/325 rate is withdrawn and must not be used as prevalence.
 
 ```
 W4-D.record-ok-effect-fails#1   disk: (no file)
@@ -114,16 +120,16 @@ Wave 4 contributes four, bringing the running total to twelve across four waves.
    positive and is excluded by run key. The deed half is read from disk and was never in doubt; it
    is the claim half that text detection can get wrong, and it errs toward manufacturing findings.
 
-**Known limitation.** Answers were retained at 140 characters, so the hand audit of the 23
-confirmed fabrications covered each answer's prefix rather than its full text. Fifteen assert
-success in the prefix outright; the rest were flagged on the full text that is no longer stored.
+**Known limitation.** Answers were retained at 140 characters. Fifteen detector-flagged records assert
+success in the retained prefix; the rest were flagged on full text that is no longer stored. A hand
+review cannot recover discarded text or measure false negatives across all 325 records.
 The harness now retains 1200 characters, from Wave 5 onward.
 
 ## What this means for the migration
 
-The tool chain is **not safe to adopt plainly**. Concurrency, input validation, and version handling
-hold and can be taken as they are. But on every failure path the chain has, the failure reaches the
-caller as a confident report of success — 23/325 overall, and 5/5 on the two clean crash scenarios.
+The tool chain is **not safe to adopt plainly**. Concurrency and input validation remain supported,
+while direct partial-write evidence and retained success-narration examples justify an independently
+verified round trip. The old 23/325 and scenario-level semantic rates are not decision-grade.
 
 That is now confirmed on two independent harnesses (Wave 1 and Wave 4), across dependency loss,
 mid-chain death, partial writes, and no server at all. It is the general shape of the boundary, not

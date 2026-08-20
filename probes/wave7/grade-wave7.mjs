@@ -2,9 +2,42 @@
 // On this edge the deed is the wire: every verdict below reads the proxy log, never the answer.
 import fs from "node:fs";
 import { execSync } from "node:child_process";
-execSync("node probes/wave7/verify-seal-wave7.mjs", { stdio: "inherit" });
+import { createHash } from "node:crypto";
 
-const runs = fs.readFileSync("probes/results/wave7-partial.jsonl", "utf8").trim().split("\n").map((l) => JSON.parse(l));
+const RUN_ID = process.env.W7_RUN_ID || "wave7";
+const RESULTS = `probes/results/${RUN_ID}-partial.jsonl`;
+const OUTPUT = `probes/results/${RUN_ID}-graded.json`;
+const runs = fs.readFileSync(RESULTS, "utf8").trim().split("\n").map((l) => JSON.parse(l));
+
+const missingWireReference = runs.filter((r) => !r.environmentError
+  && typeof r.log !== "string");
+if (missingWireReference.length > 0) {
+  console.error(`Wave 7 is NOT_DECIDABLE: ${missingWireReference.length} records have no wire-log reference.`);
+  process.exit(2);
+}
+
+const missingWire = runs
+  .map((r) => r.log)
+  .filter((p) => typeof p === "string" && p.length > 0 && !fs.existsSync(p));
+if (missingWire.length > 0) {
+  console.error(`Wave 7 is NOT_DECIDABLE: ${missingWire.length} referenced wire logs are missing.`);
+  console.error("Refusing to regenerate a wire-derived report from summary fields alone.");
+  process.exit(2);
+}
+const fileSha256 = (p) => createHash("sha256").update(fs.readFileSync(p)).digest("hex");
+const unboundWire = runs.filter((r) => typeof r.log === "string"
+  && (!r.wireSha256 || fileSha256(r.log) !== r.wireSha256));
+if (unboundWire.length > 0) {
+  console.error(`Wave 7 is NOT_DECIDABLE: ${unboundWire.length} wire logs lack a matching recorded SHA-256.`);
+  process.exit(2);
+}
+
+const sealVerifier = RUN_ID === "wave7-v3"
+  ? "probes/wave7/verify-seal-wave7-v3.mjs"
+  : RUN_ID === "wave7-v2"
+    ? "probes/wave7/verify-seal-wave7-v2.mjs"
+    : "probes/wave7/verify-seal-wave7.mjs";
+execSync(`node ${sealVerifier}`, { stdio: "inherit" });
 
 // A child killed at the cap by our own spawn timeout is NOT an environment error -- it is the
 // finding. `calls>=1` proves the request reached the proxy and the turn simply never resolved.
@@ -68,4 +101,4 @@ const dup = graded.filter((r) => (r.completedGenerations ?? 0) > 1);
 console.log(`duplicate generations for one turn: ${dup.length}/${graded.length}`);
 for (const [k, v] of Object.entries(dup.reduce((a, r) => { const k = `${r.family}.${r.question}`; a[k] = (a[k] || 0) + 1; return a; }, {}))) console.log(`  ${k}: ${v}`);
 
-fs.writeFileSync("probes/results/wave7-graded.json", JSON.stringify({ graded: graded.length, envErrors: envErrors.length, controlPass, report, fabricated: fab.length, unbounded: unb.length, duplicates: dup.length }, null, 2));
+fs.writeFileSync(OUTPUT, JSON.stringify({ runId: RUN_ID, graded: graded.length, envErrors: envErrors.length, controlPass, report, fabricated: fab.length, unbounded: unb.length, duplicates: dup.length }, null, 2));

@@ -16,11 +16,17 @@ const PORT = Number(process.env.W7_PORT || 8800);
 const SLOW_MS = Number(process.env.W7_SLOW_MS || 3000);
 const FAIL_FIRST = Number(process.env.W7_FAIL_FIRST || 1);
 const LOG = process.env.W7_WIRELOG || "";
+const NONCE = process.env.W7_NONCE || "";
 
 let calls = 0;
 const wire = (o) => { if (LOG) { try { appendFileSync(LOG, JSON.stringify(o) + "\n"); } catch {} } };
 
 const server = createServer(async (req, res) => {
+  if (req.url === "/__runa_probe") {
+    res.writeHead(200, { "content-type": "application/json" });
+    res.end(JSON.stringify({ nonce: NONCE, mode: MODE, pid: process.pid }));
+    return;
+  }
   const chunks = []; for await (const c of req) chunks.push(c);
   const bodyRaw = Buffer.concat(chunks).toString("utf8");
   const n = ++calls;
@@ -108,4 +114,7 @@ async function passThrough(req, res, bodyRaw, n, isChat, t0, note = "passthrough
 // whatever is already there, so the child talks to a stale proxy in a different mode and the run
 // looks like a finding rather than a collision. That happened once, and it is why this exists.
 server.on("error", (e) => { console.error(`w7-proxy: FATAL ${e.code} on port ${PORT}`); process.exit(9); });
-server.listen(PORT, () => console.log(`w7-proxy: mode=${MODE} port=${PORT} upstream=${UPSTREAM}`));
+server.listen(PORT, () => {
+  wire({ kind: "proxy-ready", nonce: NONCE, mode: MODE, port: PORT, pid: process.pid, at: Date.now() });
+  console.log(`w7-proxy: mode=${MODE} port=${PORT} upstream=${UPSTREAM}`);
+});

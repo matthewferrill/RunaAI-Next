@@ -1,0 +1,1146 @@
+{
+  "schemaVersion": 1,
+  "preregistrationSha256": "46a80832039a5a522f79b9d3ff2daf1e83f2d1ab5fbd41c340aaeeef0be3fac1",
+  "runnerSha256": "21910388b6af9f818caff188b642ff5e1b384ee8d0bdd24310d98542f983a61c",
+  "serviceHealth": {
+    "status": "ready",
+    "model": "BAAI/bge-reranker-v2-m3",
+    "device": "cuda:0",
+    "vram_mib": 1083,
+    "load_seconds": 6,
+    "max_documents": 128,
+    "max_length": 512
+  },
+  "cases": [
+    {
+      "caseId": "hard-01",
+      "query": "According to the signed control record, what is the sector atlas launch codename?",
+      "answerSha256": "997a1c22ba471ac2dcdd3ad61c943ebb2d8aaf1890b060f8d3e66c24428b9981",
+      "relevantId": "hard-01-primary",
+      "baseline": {
+        "rank": 20,
+        "top5": [
+          {
+            "id": "hard-01-distractor-4",
+            "score": 0.8389674367613394
+          },
+          {
+            "id": "hard-01-distractor-3",
+            "score": 0.83558633424177
+          },
+          {
+            "id": "hard-01-distractor-2",
+            "score": 0.8345151305063404
+          },
+          {
+            "id": "hard-01-distractor-8",
+            "score": 0.8301440502545779
+          },
+          {
+            "id": "hard-01-distractor-1",
+            "score": 0.8293616783370741
+          }
+        ]
+      },
+      "whole": {
+        "rank": 17,
+        "top5": [
+          {
+            "id": "hard-01-distractor-6",
+            "score": -0.3289
+          },
+          {
+            "id": "hard-01-distractor-1",
+            "score": -0.3555
+          },
+          {
+            "id": "hard-01-distractor-7",
+            "score": -0.3728
+          },
+          {
+            "id": "hard-01-distractor-8",
+            "score": -0.3767
+          },
+          {
+            "id": "hard-01-distractor-4",
+            "score": -0.4106
+          }
+        ],
+        "elapsedMs": 496,
+        "model": "BAAI/bge-reranker-v2-m3",
+        "scored": 20
+      },
+      "chunked": {
+        "rank": 1,
+        "top5": [
+          {
+            "id": "hard-01-primary",
+            "score": 5.2227,
+            "windowId": "hard-01-primary:w3"
+          },
+          {
+            "id": "hard-01-distractor-6",
+            "score": -0.3289,
+            "windowId": "hard-01-distractor-6:w0"
+          },
+          {
+            "id": "hard-01-distractor-1",
+            "score": -0.3555,
+            "windowId": "hard-01-distractor-1:w0"
+          },
+          {
+            "id": "hard-01-distractor-7",
+            "score": -0.3728,
+            "windowId": "hard-01-distractor-7:w0"
+          },
+          {
+            "id": "hard-01-distractor-8",
+            "score": -0.3767,
+            "windowId": "hard-01-distractor-8:w0"
+          }
+        ],
+        "elapsedMs": 215,
+        "model": "BAAI/bge-reranker-v2-m3",
+        "scored": 23
+      },
+      "winningWindow": "hard-01-primary:w3"
+    },
+    {
+      "caseId": "hard-02",
+      "query": "According to the signed control record, what is the warehouse seven release key?",
+      "answerSha256": "c1272f0fce655df3bd0b71afd578dc1f5122b46f2db7fdfbc38f52f7a7ca0677",
+      "relevantId": "hard-02-primary",
+      "baseline": {
+        "rank": 20,
+        "top5": [
+          {
+            "id": "hard-02-distractor-7",
+            "score": 0.8511736515827593
+          },
+          {
+            "id": "hard-02-distractor-8",
+            "score": 0.84832558062637
+          },
+          {
+            "id": "hard-02-distractor-6",
+            "score": 0.8481647945656282
+          },
+          {
+            "id": "hard-02-distractor-1",
+            "score": 0.8468052645766861
+          },
+          {
+            "id": "hard-02-distractor-4",
+            "score": 0.8433079836264268
+          }
+        ]
+      },
+      "whole": {
+        "rank": 10,
+        "top5": [
+          {
+            "id": "hard-02-distractor-1",
+            "score": 0.3933
+          },
+          {
+            "id": "hard-02-distractor-7",
+            "score": 0.2585
+          },
+          {
+            "id": "hard-02-distractor-4",
+            "score": 0.1526
+          },
+          {
+            "id": "hard-02-distractor-6",
+            "score": 0.1451
+          },
+          {
+            "id": "hard-02-distractor-8",
+            "score": 0.1351
+          }
+        ],
+        "elapsedMs": 185,
+        "model": "BAAI/bge-reranker-v2-m3",
+        "scored": 20
+      },
+      "chunked": {
+        "rank": 1,
+        "top5": [
+          {
+            "id": "hard-02-primary",
+            "score": 4.6016,
+            "windowId": "hard-02-primary:w3"
+          },
+          {
+            "id": "hard-02-distractor-1",
+            "score": 0.3933,
+            "windowId": "hard-02-distractor-1:w0"
+          },
+          {
+            "id": "hard-02-distractor-7",
+            "score": 0.2585,
+            "windowId": "hard-02-distractor-7:w0"
+          },
+          {
+            "id": "hard-02-distractor-4",
+            "score": 0.1526,
+            "windowId": "hard-02-distractor-4:w0"
+          },
+          {
+            "id": "hard-02-distractor-6",
+            "score": 0.1451,
+            "windowId": "hard-02-distractor-6:w0"
+          }
+        ],
+        "elapsedMs": 201,
+        "model": "BAAI/bge-reranker-v2-m3",
+        "scored": 23
+      },
+      "winningWindow": "hard-02-primary:w3"
+    },
+    {
+      "caseId": "hard-03",
+      "query": "According to the signed control record, what is the north bridge inspection date?",
+      "answerSha256": "3817ade7a6afb6308435440a81dc8e0f09ef35fe8336d516e225b209d3770c5f",
+      "relevantId": "hard-03-primary",
+      "baseline": {
+        "rank": 19,
+        "top5": [
+          {
+            "id": "hard-03-distractor-3",
+            "score": 0.8330501206966199
+          },
+          {
+            "id": "hard-03-distractor-4",
+            "score": 0.8326181080137873
+          },
+          {
+            "id": "hard-03-distractor-1",
+            "score": 0.8314733913169797
+          },
+          {
+            "id": "hard-03-distractor-2",
+            "score": 0.8307962686152726
+          },
+          {
+            "id": "hard-03-distractor-7",
+            "score": 0.8294144058319904
+          }
+        ]
+      },
+      "whole": {
+        "rank": 9,
+        "top5": [
+          {
+            "id": "hard-03-distractor-1",
+            "score": -0.9189
+          },
+          {
+            "id": "hard-03-distractor-6",
+            "score": -0.9355
+          },
+          {
+            "id": "hard-03-distractor-7",
+            "score": -0.9482
+          },
+          {
+            "id": "hard-03-distractor-5",
+            "score": -0.9648
+          },
+          {
+            "id": "hard-03-distractor-4",
+            "score": -0.9692
+          }
+        ],
+        "elapsedMs": 189,
+        "model": "BAAI/bge-reranker-v2-m3",
+        "scored": 20
+      },
+      "chunked": {
+        "rank": 1,
+        "top5": [
+          {
+            "id": "hard-03-primary",
+            "score": 5.9258,
+            "windowId": "hard-03-primary:w3"
+          },
+          {
+            "id": "hard-03-distractor-1",
+            "score": -0.9189,
+            "windowId": "hard-03-distractor-1:w0"
+          },
+          {
+            "id": "hard-03-distractor-6",
+            "score": -0.9355,
+            "windowId": "hard-03-distractor-6:w0"
+          },
+          {
+            "id": "hard-03-distractor-7",
+            "score": -0.9482,
+            "windowId": "hard-03-distractor-7:w0"
+          },
+          {
+            "id": "hard-03-distractor-5",
+            "score": -0.9648,
+            "windowId": "hard-03-distractor-5:w0"
+          }
+        ],
+        "elapsedMs": 200,
+        "model": "BAAI/bge-reranker-v2-m3",
+        "scored": 23
+      },
+      "winningWindow": "hard-03-primary:w3"
+    },
+    {
+      "caseId": "hard-04",
+      "query": "According to the signed control record, what is the orchard relay voltage?",
+      "answerSha256": "94a7fd475bbeafed90dc1935d7f6b62af3f5445bb280a35e23c100dd87fba385",
+      "relevantId": "hard-04-primary",
+      "baseline": {
+        "rank": 20,
+        "top5": [
+          {
+            "id": "hard-04-distractor-4",
+            "score": 0.8194503257222375
+          },
+          {
+            "id": "hard-04-distractor-1",
+            "score": 0.819405607611791
+          },
+          {
+            "id": "hard-04-distractor-2",
+            "score": 0.818514823945536
+          },
+          {
+            "id": "hard-04-distractor-8",
+            "score": 0.8177683574707738
+          },
+          {
+            "id": "hard-04-distractor-3",
+            "score": 0.8171197449225379
+          }
+        ]
+      },
+      "whole": {
+        "rank": 9,
+        "top5": [
+          {
+            "id": "hard-04-distractor-1",
+            "score": -1.2998
+          },
+          {
+            "id": "hard-04-distractor-7",
+            "score": -1.3389
+          },
+          {
+            "id": "hard-04-distractor-8",
+            "score": -1.3389
+          },
+          {
+            "id": "hard-04-distractor-6",
+            "score": -1.3467
+          },
+          {
+            "id": "hard-04-distractor-5",
+            "score": -1.375
+          }
+        ],
+        "elapsedMs": 187,
+        "model": "BAAI/bge-reranker-v2-m3",
+        "scored": 20
+      },
+      "chunked": {
+        "rank": 1,
+        "top5": [
+          {
+            "id": "hard-04-primary",
+            "score": 5.8867,
+            "windowId": "hard-04-primary:w3"
+          },
+          {
+            "id": "hard-04-distractor-1",
+            "score": -1.2998,
+            "windowId": "hard-04-distractor-1:w0"
+          },
+          {
+            "id": "hard-04-distractor-7",
+            "score": -1.3389,
+            "windowId": "hard-04-distractor-7:w0"
+          },
+          {
+            "id": "hard-04-distractor-8",
+            "score": -1.3389,
+            "windowId": "hard-04-distractor-8:w0"
+          },
+          {
+            "id": "hard-04-distractor-6",
+            "score": -1.3467,
+            "windowId": "hard-04-distractor-6:w0"
+          }
+        ],
+        "elapsedMs": 199,
+        "model": "BAAI/bge-reranker-v2-m3",
+        "scored": 23
+      },
+      "winningWindow": "hard-04-primary:w3"
+    },
+    {
+      "caseId": "hard-05",
+      "query": "According to the signed control record, what is the harbor archive shelf?",
+      "answerSha256": "cfacc14141a39efbdb6721c88530f2ef2f7c237725ff7d9f7a460bdc2ead9e06",
+      "relevantId": "hard-05-primary",
+      "baseline": {
+        "rank": 20,
+        "top5": [
+          {
+            "id": "hard-05-distractor-4",
+            "score": 0.7999061960980061
+          },
+          {
+            "id": "hard-05-distractor-1",
+            "score": 0.7988327467087308
+          },
+          {
+            "id": "hard-05-distractor-6",
+            "score": 0.79766391367081
+          },
+          {
+            "id": "hard-05-distractor-8",
+            "score": 0.7973872122085846
+          },
+          {
+            "id": "hard-05-distractor-2",
+            "score": 0.7967033020072481
+          }
+        ]
+      },
+      "whole": {
+        "rank": 9,
+        "top5": [
+          {
+            "id": "hard-05-distractor-1",
+            "score": 0.0079
+          },
+          {
+            "id": "hard-05-distractor-6",
+            "score": -0.2698
+          },
+          {
+            "id": "hard-05-distractor-5",
+            "score": -0.2776
+          },
+          {
+            "id": "hard-05-distractor-7",
+            "score": -0.303
+          },
+          {
+            "id": "hard-05-distractor-8",
+            "score": -0.3123
+          }
+        ],
+        "elapsedMs": 183,
+        "model": "BAAI/bge-reranker-v2-m3",
+        "scored": 20
+      },
+      "chunked": {
+        "rank": 1,
+        "top5": [
+          {
+            "id": "hard-05-primary",
+            "score": 4.5039,
+            "windowId": "hard-05-primary:w3"
+          },
+          {
+            "id": "hard-05-distractor-1",
+            "score": 0.0079,
+            "windowId": "hard-05-distractor-1:w0"
+          },
+          {
+            "id": "hard-05-distractor-6",
+            "score": -0.2698,
+            "windowId": "hard-05-distractor-6:w0"
+          },
+          {
+            "id": "hard-05-distractor-5",
+            "score": -0.2776,
+            "windowId": "hard-05-distractor-5:w0"
+          },
+          {
+            "id": "hard-05-distractor-7",
+            "score": -0.303,
+            "windowId": "hard-05-distractor-7:w0"
+          }
+        ],
+        "elapsedMs": 200,
+        "model": "BAAI/bge-reranker-v2-m3",
+        "scored": 23
+      },
+      "winningWindow": "hard-05-primary:w3"
+    },
+    {
+      "caseId": "hard-06",
+      "query": "According to the signed control record, what is the cedar program owner?",
+      "answerSha256": "a917349d40711028c4f8f4e0646d64465f5a60e3fb6d319007a7b836ccf13533",
+      "relevantId": "hard-06-primary",
+      "baseline": {
+        "rank": 20,
+        "top5": [
+          {
+            "id": "hard-06-distractor-8",
+            "score": 0.8002217516762075
+          },
+          {
+            "id": "hard-06-distractor-4",
+            "score": 0.7978614607940577
+          },
+          {
+            "id": "hard-06-distractor-6",
+            "score": 0.7973134398282248
+          },
+          {
+            "id": "hard-06-distractor-1",
+            "score": 0.7944570339025777
+          },
+          {
+            "id": "hard-06-distractor-7",
+            "score": 0.7940869316843362
+          }
+        ]
+      },
+      "whole": {
+        "rank": 9,
+        "top5": [
+          {
+            "id": "hard-06-distractor-1",
+            "score": 0.2358
+          },
+          {
+            "id": "hard-06-distractor-5",
+            "score": -0.0059
+          },
+          {
+            "id": "hard-06-distractor-4",
+            "score": -0.0078
+          },
+          {
+            "id": "hard-06-distractor-7",
+            "score": -0.0169
+          },
+          {
+            "id": "hard-06-distractor-8",
+            "score": -0.0317
+          }
+        ],
+        "elapsedMs": 184,
+        "model": "BAAI/bge-reranker-v2-m3",
+        "scored": 20
+      },
+      "chunked": {
+        "rank": 1,
+        "top5": [
+          {
+            "id": "hard-06-primary",
+            "score": 6.0195,
+            "windowId": "hard-06-primary:w3"
+          },
+          {
+            "id": "hard-06-distractor-1",
+            "score": 0.2358,
+            "windowId": "hard-06-distractor-1:w0"
+          },
+          {
+            "id": "hard-06-distractor-5",
+            "score": -0.0059,
+            "windowId": "hard-06-distractor-5:w0"
+          },
+          {
+            "id": "hard-06-distractor-4",
+            "score": -0.0078,
+            "windowId": "hard-06-distractor-4:w0"
+          },
+          {
+            "id": "hard-06-distractor-7",
+            "score": -0.0169,
+            "windowId": "hard-06-distractor-7:w0"
+          }
+        ],
+        "elapsedMs": 200,
+        "model": "BAAI/bge-reranker-v2-m3",
+        "scored": 23
+      },
+      "winningWindow": "hard-06-primary:w3"
+    },
+    {
+      "caseId": "hard-07",
+      "query": "According to the signed control record, what is the delta valve material?",
+      "answerSha256": "d37f48d804113b47254fe29515b2c084a7e63c3ea81b88c475ce0fe50728962a",
+      "relevantId": "hard-07-primary",
+      "baseline": {
+        "rank": 20,
+        "top5": [
+          {
+            "id": "hard-07-distractor-1",
+            "score": 0.8178037317459061
+          },
+          {
+            "id": "hard-07-distractor-4",
+            "score": 0.8161114266900237
+          },
+          {
+            "id": "hard-07-distractor-3",
+            "score": 0.8140845054225045
+          },
+          {
+            "id": "hard-07-distractor-2",
+            "score": 0.8123239277466496
+          },
+          {
+            "id": "hard-07-distractor-6",
+            "score": 0.8119962994936801
+          }
+        ]
+      },
+      "whole": {
+        "rank": 9,
+        "top5": [
+          {
+            "id": "hard-07-distractor-1",
+            "score": -0.4155
+          },
+          {
+            "id": "hard-07-distractor-5",
+            "score": -0.582
+          },
+          {
+            "id": "hard-07-distractor-6",
+            "score": -0.6128
+          },
+          {
+            "id": "hard-07-distractor-4",
+            "score": -0.6318
+          },
+          {
+            "id": "hard-07-distractor-7",
+            "score": -0.6387
+          }
+        ],
+        "elapsedMs": 183,
+        "model": "BAAI/bge-reranker-v2-m3",
+        "scored": 20
+      },
+      "chunked": {
+        "rank": 1,
+        "top5": [
+          {
+            "id": "hard-07-primary",
+            "score": 4.8711,
+            "windowId": "hard-07-primary:w3"
+          },
+          {
+            "id": "hard-07-distractor-1",
+            "score": -0.4155,
+            "windowId": "hard-07-distractor-1:w0"
+          },
+          {
+            "id": "hard-07-distractor-5",
+            "score": -0.582,
+            "windowId": "hard-07-distractor-5:w0"
+          },
+          {
+            "id": "hard-07-distractor-6",
+            "score": -0.6128,
+            "windowId": "hard-07-distractor-6:w0"
+          },
+          {
+            "id": "hard-07-distractor-4",
+            "score": -0.6318,
+            "windowId": "hard-07-distractor-4:w0"
+          }
+        ],
+        "elapsedMs": 157,
+        "model": "BAAI/bge-reranker-v2-m3",
+        "scored": 23
+      },
+      "winningWindow": "hard-07-primary:w3"
+    },
+    {
+      "caseId": "hard-08",
+      "query": "According to the signed control record, what is the lunar trial sample count?",
+      "answerSha256": "96061e92f58e4bdcdee73df36183fe3ac64747c81c26f6c83aada8d2aabb1864",
+      "relevantId": "hard-08-primary",
+      "baseline": {
+        "rank": 20,
+        "top5": [
+          {
+            "id": "hard-08-distractor-4",
+            "score": 0.846804614263706
+          },
+          {
+            "id": "hard-08-distractor-1",
+            "score": 0.8445261523180141
+          },
+          {
+            "id": "hard-08-distractor-8",
+            "score": 0.8442761866547679
+          },
+          {
+            "id": "hard-08-distractor-6",
+            "score": 0.8437571160892707
+          },
+          {
+            "id": "hard-08-distractor-3",
+            "score": 0.8421699049366802
+          }
+        ]
+      },
+      "whole": {
+        "rank": 9,
+        "top5": [
+          {
+            "id": "hard-08-distractor-8",
+            "score": -0.9204
+          },
+          {
+            "id": "hard-08-distractor-6",
+            "score": -0.9238
+          },
+          {
+            "id": "hard-08-distractor-1",
+            "score": -1.0107
+          },
+          {
+            "id": "hard-08-distractor-5",
+            "score": -1.0127
+          },
+          {
+            "id": "hard-08-distractor-7",
+            "score": -1.0303
+          }
+        ],
+        "elapsedMs": 144,
+        "model": "BAAI/bge-reranker-v2-m3",
+        "scored": 20
+      },
+      "chunked": {
+        "rank": 1,
+        "top5": [
+          {
+            "id": "hard-08-primary",
+            "score": 5.1719,
+            "windowId": "hard-08-primary:w3"
+          },
+          {
+            "id": "hard-08-distractor-8",
+            "score": -0.9204,
+            "windowId": "hard-08-distractor-8:w0"
+          },
+          {
+            "id": "hard-08-distractor-6",
+            "score": -0.9238,
+            "windowId": "hard-08-distractor-6:w0"
+          },
+          {
+            "id": "hard-08-distractor-1",
+            "score": -1.0107,
+            "windowId": "hard-08-distractor-1:w0"
+          },
+          {
+            "id": "hard-08-distractor-5",
+            "score": -1.0127,
+            "windowId": "hard-08-distractor-5:w0"
+          }
+        ],
+        "elapsedMs": 202,
+        "model": "BAAI/bge-reranker-v2-m3",
+        "scored": 23
+      },
+      "winningWindow": "hard-08-primary:w3"
+    },
+    {
+      "caseId": "hard-09",
+      "query": "According to the signed control record, what is the east clinic backup day?",
+      "answerSha256": "c0a6cc829cd08735294765c75938a7da2b0f222d52e98bff13cb237cd99deaac",
+      "relevantId": "hard-09-primary",
+      "baseline": {
+        "rank": 20,
+        "top5": [
+          {
+            "id": "hard-09-distractor-4",
+            "score": 0.861596527880331
+          },
+          {
+            "id": "hard-09-distractor-1",
+            "score": 0.8555699789165576
+          },
+          {
+            "id": "hard-09-distractor-8",
+            "score": 0.854548204921697
+          },
+          {
+            "id": "hard-09-distractor-3",
+            "score": 0.853231220179407
+          },
+          {
+            "id": "hard-09-distractor-2",
+            "score": 0.852972872174267
+          }
+        ]
+      },
+      "whole": {
+        "rank": 9,
+        "top5": [
+          {
+            "id": "hard-09-distractor-1",
+            "score": 0.2241
+          },
+          {
+            "id": "hard-09-distractor-7",
+            "score": 0.023
+          },
+          {
+            "id": "hard-09-distractor-6",
+            "score": 0.0063
+          },
+          {
+            "id": "hard-09-distractor-8",
+            "score": 0.0007
+          },
+          {
+            "id": "hard-09-distractor-5",
+            "score": -0.0098
+          }
+        ],
+        "elapsedMs": 186,
+        "model": "BAAI/bge-reranker-v2-m3",
+        "scored": 20
+      },
+      "chunked": {
+        "rank": 1,
+        "top5": [
+          {
+            "id": "hard-09-primary",
+            "score": 4.8945,
+            "windowId": "hard-09-primary:w3"
+          },
+          {
+            "id": "hard-09-distractor-1",
+            "score": 0.2241,
+            "windowId": "hard-09-distractor-1:w0"
+          },
+          {
+            "id": "hard-09-distractor-7",
+            "score": 0.023,
+            "windowId": "hard-09-distractor-7:w0"
+          },
+          {
+            "id": "hard-09-distractor-6",
+            "score": 0.0063,
+            "windowId": "hard-09-distractor-6:w0"
+          },
+          {
+            "id": "hard-09-distractor-8",
+            "score": 0.0007,
+            "windowId": "hard-09-distractor-8:w0"
+          }
+        ],
+        "elapsedMs": 205,
+        "model": "BAAI/bge-reranker-v2-m3",
+        "scored": 23
+      },
+      "winningWindow": "hard-09-primary:w3"
+    },
+    {
+      "caseId": "hard-10",
+      "query": "According to the signed control record, what is the river permit animal?",
+      "answerSha256": "cf9c1cb89584bf8c4176a37c2c954a8dc56077d3ba65ee44011e62ab7c63ce2d",
+      "relevantId": "hard-10-primary",
+      "baseline": {
+        "rank": 20,
+        "top5": [
+          {
+            "id": "hard-10-distractor-1",
+            "score": 0.8310239062660654
+          },
+          {
+            "id": "hard-10-distractor-6",
+            "score": 0.8307753780497051
+          },
+          {
+            "id": "hard-10-distractor-4",
+            "score": 0.830773894716947
+          },
+          {
+            "id": "hard-10-distractor-8",
+            "score": 0.8295818325078281
+          },
+          {
+            "id": "hard-10-distractor-2",
+            "score": 0.8261571902094307
+          }
+        ]
+      },
+      "whole": {
+        "rank": 9,
+        "top5": [
+          {
+            "id": "hard-10-distractor-1",
+            "score": -0.1582
+          },
+          {
+            "id": "hard-10-distractor-5",
+            "score": -0.3301
+          },
+          {
+            "id": "hard-10-distractor-6",
+            "score": -0.3396
+          },
+          {
+            "id": "hard-10-distractor-8",
+            "score": -0.3723
+          },
+          {
+            "id": "hard-10-distractor-4",
+            "score": -0.3987
+          }
+        ],
+        "elapsedMs": 184,
+        "model": "BAAI/bge-reranker-v2-m3",
+        "scored": 20
+      },
+      "chunked": {
+        "rank": 1,
+        "top5": [
+          {
+            "id": "hard-10-primary",
+            "score": 5.6406,
+            "windowId": "hard-10-primary:w3"
+          },
+          {
+            "id": "hard-10-distractor-1",
+            "score": -0.1582,
+            "windowId": "hard-10-distractor-1:w0"
+          },
+          {
+            "id": "hard-10-distractor-5",
+            "score": -0.3301,
+            "windowId": "hard-10-distractor-5:w0"
+          },
+          {
+            "id": "hard-10-distractor-6",
+            "score": -0.3396,
+            "windowId": "hard-10-distractor-6:w0"
+          },
+          {
+            "id": "hard-10-distractor-8",
+            "score": -0.3723,
+            "windowId": "hard-10-distractor-8:w0"
+          }
+        ],
+        "elapsedMs": 203,
+        "model": "BAAI/bge-reranker-v2-m3",
+        "scored": 23
+      },
+      "winningWindow": "hard-10-primary:w3"
+    },
+    {
+      "caseId": "hard-11",
+      "query": "According to the signed control record, what is the amber route terminal?",
+      "answerSha256": "770be8f3b21397d5e89a084068f9a2eedd4ed7c901ebc259753579f4bc349909",
+      "relevantId": "hard-11-primary",
+      "baseline": {
+        "rank": 20,
+        "top5": [
+          {
+            "id": "hard-11-distractor-4",
+            "score": 0.830692196693168
+          },
+          {
+            "id": "hard-11-distractor-1",
+            "score": 0.829458545547958
+          },
+          {
+            "id": "hard-11-distractor-8",
+            "score": 0.8284124956212627
+          },
+          {
+            "id": "hard-11-distractor-3",
+            "score": 0.8273951242866253
+          },
+          {
+            "id": "hard-11-distractor-2",
+            "score": 0.8272548218285943
+          }
+        ]
+      },
+      "whole": {
+        "rank": 9,
+        "top5": [
+          {
+            "id": "hard-11-distractor-1",
+            "score": -0.2554
+          },
+          {
+            "id": "hard-11-distractor-8",
+            "score": -0.5254
+          },
+          {
+            "id": "hard-11-distractor-6",
+            "score": -0.5332
+          },
+          {
+            "id": "hard-11-distractor-5",
+            "score": -0.5586
+          },
+          {
+            "id": "hard-11-distractor-7",
+            "score": -0.5635
+          }
+        ],
+        "elapsedMs": 189,
+        "model": "BAAI/bge-reranker-v2-m3",
+        "scored": 20
+      },
+      "chunked": {
+        "rank": 1,
+        "top5": [
+          {
+            "id": "hard-11-primary",
+            "score": 3.4629,
+            "windowId": "hard-11-primary:w3"
+          },
+          {
+            "id": "hard-11-distractor-1",
+            "score": -0.2554,
+            "windowId": "hard-11-distractor-1:w0"
+          },
+          {
+            "id": "hard-11-distractor-8",
+            "score": -0.5254,
+            "windowId": "hard-11-distractor-8:w0"
+          },
+          {
+            "id": "hard-11-distractor-6",
+            "score": -0.5332,
+            "windowId": "hard-11-distractor-6:w0"
+          },
+          {
+            "id": "hard-11-distractor-5",
+            "score": -0.5586,
+            "windowId": "hard-11-distractor-5:w0"
+          }
+        ],
+        "elapsedMs": 199,
+        "model": "BAAI/bge-reranker-v2-m3",
+        "scored": 23
+      },
+      "winningWindow": "hard-11-primary:w3"
+    },
+    {
+      "caseId": "hard-12",
+      "query": "According to the signed control record, what is the quartz sensor frequency?",
+      "answerSha256": "5f392aa8b5b01d97b3f03b7cd37e8789250250546f1c02844c4e0ea36428f13c",
+      "relevantId": "hard-12-primary",
+      "baseline": {
+        "rank": 20,
+        "top5": [
+          {
+            "id": "hard-12-distractor-4",
+            "score": 0.8295966514980542
+          },
+          {
+            "id": "hard-12-distractor-1",
+            "score": 0.8282187168157897
+          },
+          {
+            "id": "hard-12-distractor-2",
+            "score": 0.8269718660088272
+          },
+          {
+            "id": "hard-12-distractor-8",
+            "score": 0.8255257003379909
+          },
+          {
+            "id": "hard-12-distractor-3",
+            "score": 0.8247363654952155
+          }
+        ]
+      },
+      "whole": {
+        "rank": 9,
+        "top5": [
+          {
+            "id": "hard-12-distractor-8",
+            "score": -1.3389
+          },
+          {
+            "id": "hard-12-distractor-7",
+            "score": -1.3467
+          },
+          {
+            "id": "hard-12-distractor-6",
+            "score": -1.3613
+          },
+          {
+            "id": "hard-12-distractor-5",
+            "score": -1.3799
+          },
+          {
+            "id": "hard-12-distractor-1",
+            "score": -1.3838
+          }
+        ],
+        "elapsedMs": 191,
+        "model": "BAAI/bge-reranker-v2-m3",
+        "scored": 20
+      },
+      "chunked": {
+        "rank": 1,
+        "top5": [
+          {
+            "id": "hard-12-primary",
+            "score": 5.4141,
+            "windowId": "hard-12-primary:w3"
+          },
+          {
+            "id": "hard-12-distractor-8",
+            "score": -1.3389,
+            "windowId": "hard-12-distractor-8:w0"
+          },
+          {
+            "id": "hard-12-distractor-7",
+            "score": -1.3467,
+            "windowId": "hard-12-distractor-7:w0"
+          },
+          {
+            "id": "hard-12-distractor-6",
+            "score": -1.3613,
+            "windowId": "hard-12-distractor-6:w0"
+          },
+          {
+            "id": "hard-12-distractor-5",
+            "score": -1.3799,
+            "windowId": "hard-12-distractor-5:w0"
+          }
+        ],
+        "elapsedMs": 210,
+        "model": "BAAI/bge-reranker-v2-m3",
+        "scored": 23
+      },
+      "winningWindow": "hard-12-primary:w3"
+    }
+  ],
+  "totals": {
+    "baselineTop5": 0,
+    "wholeTop5": 0,
+    "chunkedTop5": 12,
+    "medianChunkedMs": 201
+  },
+  "checks": {
+    "improvesByThree": true,
+    "neverReduces": true,
+    "windowsExposed": true,
+    "latencyWithinBudget": true
+  },
+  "decision": "KEEP_WINDOWED_BGE",
+  "passed": true
+}

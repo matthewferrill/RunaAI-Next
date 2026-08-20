@@ -1,0 +1,115 @@
+{
+  "schema": "runa-lab-evals-coverage-v1",
+  "capturedAt": "2026-08-20T19:11:42.630Z",
+  "package": "@mastra/evals@1.7.0",
+  "scorerId": "content-similarity-scorer",
+  "rows": [
+    {
+      "arm": "identical",
+      "repetition": 1,
+      "score": 1
+    },
+    {
+      "arm": "identical",
+      "repetition": 2,
+      "score": 1
+    },
+    {
+      "arm": "identical",
+      "repetition": 3,
+      "score": 1
+    },
+    {
+      "arm": "identical",
+      "repetition": 4,
+      "score": 1
+    },
+    {
+      "arm": "identical",
+      "repetition": 5,
+      "score": 1
+    },
+    {
+      "arm": "normalized",
+      "repetition": 1,
+      "score": 1
+    },
+    {
+      "arm": "normalized",
+      "repetition": 2,
+      "score": 1
+    },
+    {
+      "arm": "normalized",
+      "repetition": 3,
+      "score": 1
+    },
+    {
+      "arm": "normalized",
+      "repetition": 4,
+      "score": 1
+    },
+    {
+      "arm": "normalized",
+      "repetition": 5,
+      "score": 1
+    },
+    {
+      "arm": "related",
+      "repetition": 1,
+      "score": 0.6808510638297872
+    },
+    {
+      "arm": "related",
+      "repetition": 2,
+      "score": 0.6808510638297872
+    },
+    {
+      "arm": "related",
+      "repetition": 3,
+      "score": 0.6808510638297872
+    },
+    {
+      "arm": "related",
+      "repetition": 4,
+      "score": 0.6808510638297872
+    },
+    {
+      "arm": "related",
+      "repetition": 5,
+      "score": 0.6808510638297872
+    },
+    {
+      "arm": "unrelated",
+      "repetition": 1,
+      "score": 0.09302325581395349
+    },
+    {
+      "arm": "unrelated",
+      "repetition": 2,
+      "score": 0.09302325581395349
+    },
+    {
+      "arm": "unrelated",
+      "repetition": 3,
+      "score": 0.09302325581395349
+    },
+    {
+      "arm": "unrelated",
+      "repetition": 4,
+      "score": 0.09302325581395349
+    },
+    {
+      "arm": "unrelated",
+      "repetition": 5,
+      "score": 0.09302325581395349
+    }
+  ],
+  "controls": {
+    "numeric": true,
+    "deterministic": true,
+    "thresholds": true,
+    "ordering": true
+  },
+  "decision": "selected-for-deterministic-evaluation-plumbing"
+}

@@ -6,20 +6,28 @@ import { mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { loadEntries, appendEntry } from "../checkpoint.mjs";
 import { writeRun } from "../wave5/w5-lib.mjs";
 import { chatCalls, endpointGaveUsable, secretOnWire, completedGenerations, declaredModels,
-         answered, answerText, parse, freshWire, SYSTEM_SECRET } from "./w7-lib.mjs";
+         answered, answerText, parse, freshWire, wireSha256, SYSTEM_SECRET } from "./w7-lib.mjs";
 
-execSync("node probes/wave7/verify-seal-wave7.mjs", { stdio: "inherit" });
+const RUN_ID = process.env.W7_RUN_ID || "wave7";
+if (RUN_ID === "wave7-v2" || RUN_ID === "wave7-v3") {
+  const version = RUN_ID.endsWith("v3") ? "v3" : "v2";
+  execSync(`node probes/wave7/verify-seal-wave7-${version}.mjs`, { stdio: "inherit" });
+  execSync("node probes/wave7/verify-base.mjs", { stdio: "inherit" });
+} else {
+  execSync("node probes/wave7/verify-seal-wave7.mjs", { stdio: "inherit" });
+}
 
 const SMOKE = process.env.SMOKE === "1";
 const nDet = SMOKE ? 1 : 3;     // INPUT
 const nCrash = SMOKE ? 1 : 5;   // DEPENDENCY, TIMING
 const CAP_MS = 120000;
 
-const CKPT = "probes/results/wave7-partial.jsonl";
-mkdirSync("probes/results", { recursive: true });
+const CKPT = `probes/results/${RUN_ID}-partial.jsonl`;
+const WIRE_ROOT = process.env.W7_WIRE_ROOT || `artifacts/runs/${RUN_ID}-wire`;
+mkdirSync("probes/results", { recursive: true }); mkdirSync(WIRE_ROOT, { recursive: true });
 const done = new Set(loadEntries(CKPT).map((e) => e.runKey));
 const skip = (k) => { if (done.has(k)) { process.stdout.write(`${k}(skip) `); return true; } return false; };
-const record = (runKey, rec) => { writeRun(`W7-${rec.family}`, runKey.replace(/[^\w.-]/g, "_"), rec); appendEntry(CKPT, { runKey, ...rec }); process.stdout.write(`${runKey} `); };
+const record = (runKey, rec) => { writeRun(`${RUN_ID.toUpperCase()}-${rec.family}`, runKey.replace(/[^\w.-]/g, "_"), rec); appendEntry(CKPT, { runId: RUN_ID, runKey, ...rec }); process.stdout.write(`${runKey} `); };
 
 let port = 8900;
 let warmed = false;
@@ -27,16 +35,19 @@ let warmed = false;
 // One scenario run: start the proxy in a mode, ask one question through it, read the wire.
 async function once(mode, { prompt = null, extra = {}, kill = null, timeout = CAP_MS + 20000 } = {}) {
   const P = ++port;
-  const log = freshWire(`probes/results/w7-${mode}-${P}.wire`);
+  const log = freshWire(`${WIRE_ROOT}/${mode}-${P}.wire`);
+  const nonce = `${RUN_ID}-${process.pid}-${P}-${Date.now()}`;
   const proxy = spawn(process.execPath, ["probes/wave7/w7-proxy.mjs"],
-    { env: { ...process.env, W7_MODE: mode, W7_PORT: String(P), W7_WIRELOG: log, ...extra }, stdio: ["ignore", "ignore", "ignore"] });
+    { env: { ...process.env, W7_MODE: mode, W7_PORT: String(P), W7_WIRELOG: log, W7_NONCE: nonce, ...extra }, stdio: ["ignore", "ignore", "ignore"] });
   // Wait for the proxy to actually accept connections rather than trusting a fixed sleep, and
   // record it. Without this a proxy that failed to bind is indistinguishable from one that is up.
   let proxyReady = false;
   for (let i = 0; i < 40 && !proxyReady; i++) {
-    try { await fetch(`http://127.0.0.1:${P}/v1/models`, { signal: AbortSignal.timeout(400) }); proxyReady = true; }
+    try { const r = await fetch(`http://127.0.0.1:${P}/__runa_probe`, { signal: AbortSignal.timeout(400) });
+      const j = await r.json(); proxyReady = r.ok && j.nonce === nonce && j.mode === mode; }
     catch { await new Promise((r) => setTimeout(r, 150)); }
   }
+  if (!proxyReady) { try { proxy.kill("SIGKILL"); } catch {} throw new Error(`proxy readiness failed: mode=${mode} port=${P}`); }
   const coldStart = !warmed; warmed = true;
   if (kill === "before") { try { proxy.kill("SIGKILL"); } catch {} }
   let killTimer = null;
@@ -55,7 +66,7 @@ async function once(mode, { prompt = null, extra = {}, kill = null, timeout = CA
   // If the child never produced either marker it did not run, which is an environment error and not
   // evidence about the base. Waves are graded on runs that happened.
   const childRan = /ANSWERED::/.test(out);
-  return { log, out, ms, coldStart, childRan, proxyReady,
+  return { log, wireSha256: wireSha256(log), out, ms, coldStart, childRan, proxyReady,
     spawnErr: child.error ? String(child.error.message).slice(0, 160) : null,
     proxyMode: mode, proxyKill: kill ?? null,
     answered: answered(out), answer: answerText(out), finish: parse(out, "FINISH"),

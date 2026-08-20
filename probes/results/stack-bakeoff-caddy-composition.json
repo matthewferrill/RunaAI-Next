@@ -1,0 +1,55 @@
+{
+  "schemaVersion": 1,
+  "candidate": "Caddy 2.11.4 plus AI SDK total budget",
+  "results": [
+    {
+      "id": "slow-header-proxy-budget",
+      "mode": "slow-header",
+      "appMs": 5000,
+      "minMs": 1500,
+      "maxMs": 3200,
+      "outcome": {
+        "ok": false,
+        "elapsedMs": 1810,
+        "error": "Gateway Timeout",
+        "name": "AI_APICallError"
+      },
+      "callDelta": 1,
+      "pass": true,
+      "stderr": ""
+    },
+    {
+      "id": "slow-body-proxy-budget",
+      "mode": "slow-body",
+      "appMs": 5000,
+      "minMs": 1500,
+      "maxMs": 3200,
+      "outcome": {
+        "ok": false,
+        "elapsedMs": 2048,
+        "error": "Failed to process successful response",
+        "name": "AI_APICallError"
+      },
+      "callDelta": 1,
+      "pass": true,
+      "stderr": ""
+    },
+    {
+      "id": "application-budget-precedes-proxy",
+      "mode": "never",
+      "appMs": 1000,
+      "minMs": 700,
+      "maxMs": 2100,
+      "outcome": {
+        "ok": false,
+        "elapsedMs": 1008,
+        "error": "The operation was aborted due to timeout",
+        "name": "TimeoutError"
+      },
+      "callDelta": 1,
+      "pass": true,
+      "stderr": ""
+    }
+  ],
+  "passed": true
+}

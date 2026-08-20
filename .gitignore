@@ -1,9 +1,12 @@
 node_modules/
+.npm-cache/
+.qdrant-initialized
 storage/
 *.db
 probes/results/*.partial.jsonl
 sandbox/
 artifacts/runs/
+artifacts/tools/
 storage/
 sandbox4/
 sandbox-c2/

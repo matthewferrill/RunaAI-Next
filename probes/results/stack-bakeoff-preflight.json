@@ -1,0 +1,149 @@
+{
+  "schemaVersion": 1,
+  "candidate": "application UTF-8 byte preflight + AI SDK",
+  "healthyAccepted": 5,
+  "oversizedRejectedBeforeWire": 5,
+  "runs": [
+    {
+      "family": "healthy",
+      "repetition": 1,
+      "outcome": {
+        "ok": true,
+        "inputBytes": 25,
+        "maxInputBytes": 65536,
+        "transmitted": true,
+        "finishReason": "stop"
+      },
+      "cumulativeChatCalls": 1,
+      "wirePath": "artifacts/runs/stack-bakeoff-preflight/preflight-1.wire",
+      "wireSha256": "a63bc8e6fb05f8ac3914a1994a0a4df4c6b4a2224d2ec4c62d7e20665778b0ba"
+    },
+    {
+      "family": "oversized",
+      "repetition": 1,
+      "outcome": {
+        "ok": false,
+        "error": "INPUT_BYTES_EXCEEDED",
+        "inputBytes": 1080016,
+        "maxInputBytes": 65536,
+        "transmitted": false
+      },
+      "cumulativeChatCalls": 1,
+      "wirePath": "artifacts/runs/stack-bakeoff-preflight/preflight-1.wire",
+      "wireSha256": "a63bc8e6fb05f8ac3914a1994a0a4df4c6b4a2224d2ec4c62d7e20665778b0ba"
+    },
+    {
+      "family": "healthy",
+      "repetition": 2,
+      "outcome": {
+        "ok": true,
+        "inputBytes": 25,
+        "maxInputBytes": 65536,
+        "transmitted": true,
+        "finishReason": "stop"
+      },
+      "cumulativeChatCalls": 1,
+      "wirePath": "artifacts/runs/stack-bakeoff-preflight/preflight-2.wire",
+      "wireSha256": "efe7d6af3e7630809ead5e76c0e0eeba26cffbabf155ec2c1b4187c41c82fca8"
+    },
+    {
+      "family": "oversized",
+      "repetition": 2,
+      "outcome": {
+        "ok": false,
+        "error": "INPUT_BYTES_EXCEEDED",
+        "inputBytes": 1080016,
+        "maxInputBytes": 65536,
+        "transmitted": false
+      },
+      "cumulativeChatCalls": 1,
+      "wirePath": "artifacts/runs/stack-bakeoff-preflight/preflight-2.wire",
+      "wireSha256": "efe7d6af3e7630809ead5e76c0e0eeba26cffbabf155ec2c1b4187c41c82fca8"
+    },
+    {
+      "family": "healthy",
+      "repetition": 3,
+      "outcome": {
+        "ok": true,
+        "inputBytes": 25,
+        "maxInputBytes": 65536,
+        "transmitted": true,
+        "finishReason": "stop"
+      },
+      "cumulativeChatCalls": 1,
+      "wirePath": "artifacts/runs/stack-bakeoff-preflight/preflight-3.wire",
+      "wireSha256": "aae7e1dacc760b36b550bd5e6212a2730c028c3b0655b76dfd641c8929c5ac58"
+    },
+    {
+      "family": "oversized",
+      "repetition": 3,
+      "outcome": {
+        "ok": false,
+        "error": "INPUT_BYTES_EXCEEDED",
+        "inputBytes": 1080016,
+        "maxInputBytes": 65536,
+        "transmitted": false
+      },
+      "cumulativeChatCalls": 1,
+      "wirePath": "artifacts/runs/stack-bakeoff-preflight/preflight-3.wire",
+      "wireSha256": "aae7e1dacc760b36b550bd5e6212a2730c028c3b0655b76dfd641c8929c5ac58"
+    },
+    {
+      "family": "healthy",
+      "repetition": 4,
+      "outcome": {
+        "ok": true,
+        "inputBytes": 25,
+        "maxInputBytes": 65536,
+        "transmitted": true,
+        "finishReason": "stop"
+      },
+      "cumulativeChatCalls": 1,
+      "wirePath": "artifacts/runs/stack-bakeoff-preflight/preflight-4.wire",
+      "wireSha256": "d705c1d05d7242c43cdc9ebb2c9fbbcb05826208c46ac5b6f6e733a9805e012a"
+    },
+    {
+      "family": "oversized",
+      "repetition": 4,
+      "outcome": {
+        "ok": false,
+        "error": "INPUT_BYTES_EXCEEDED",
+        "inputBytes": 1080016,
+        "maxInputBytes": 65536,
+        "transmitted": false
+      },
+      "cumulativeChatCalls": 1,
+      "wirePath": "artifacts/runs/stack-bakeoff-preflight/preflight-4.wire",
+      "wireSha256": "d705c1d05d7242c43cdc9ebb2c9fbbcb05826208c46ac5b6f6e733a9805e012a"
+    },
+    {
+      "family": "healthy",
+      "repetition": 5,
+      "outcome": {
+        "ok": true,
+        "inputBytes": 25,
+        "maxInputBytes": 65536,
+        "transmitted": true,
+        "finishReason": "stop"
+      },
+      "cumulativeChatCalls": 1,
+      "wirePath": "artifacts/runs/stack-bakeoff-preflight/preflight-5.wire",
+      "wireSha256": "0b165d85c23e5c91f0b1f0a021c4985108894e93893c667478ef934595c5d5a3"
+    },
+    {
+      "family": "oversized",
+      "repetition": 5,
+      "outcome": {
+        "ok": false,
+        "error": "INPUT_BYTES_EXCEEDED",
+        "inputBytes": 1080016,
+        "maxInputBytes": 65536,
+        "transmitted": false
+      },
+      "cumulativeChatCalls": 1,
+      "wirePath": "artifacts/runs/stack-bakeoff-preflight/preflight-5.wire",
+      "wireSha256": "0b165d85c23e5c91f0b1f0a021c4985108894e93893c667478ef934595c5d5a3"
+    }
+  ],
+  "passed": true
+}

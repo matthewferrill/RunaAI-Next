@@ -1,0 +1,18 @@
+{
+  "name": "runalab-durable-bakeoff",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@langchain/langgraph": "1.4.12",
+    "@langchain/langgraph-checkpoint-postgres": "1.0.5",
+    "@langchain/langgraph-checkpoint-sqlite": "1.0.4",
+    "@opentelemetry/api": "1.9.1",
+    "@opentelemetry/exporter-trace-otlp-http": "0.221.0",
+    "@opentelemetry/sdk-node": "0.221.0",
+    "@temporalio/client": "1.22.0",
+    "@temporalio/testing": "1.22.0",
+    "@temporalio/worker": "1.22.0",
+    "@temporalio/workflow": "1.22.0",
+    "runa-reference-stack": "file:../.."
+  }
+}

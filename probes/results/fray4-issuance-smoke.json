@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "sealVerified": true,
+  "keycloakIdentityActive": true,
+  "openfgaAllowed": true,
+  "issueOutcome": "pending",
+  "persisted": true,
+  "persistedStatus": "pending",
+  "argumentHashMatches": true,
+  "actorHash": "748cba9f179b18171bed0518e3b7bcbb86c53d85d1210147276b62aacacc754a",
+  "credentialsOrTokensRetained": false,
+  "pass": true
+}

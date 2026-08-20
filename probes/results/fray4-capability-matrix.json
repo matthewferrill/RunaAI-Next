@@ -1,0 +1,2543 @@
+{
+  "schemaVersion": 1,
+  "sealVerified": true,
+  "componentVersions": {
+    "keycloak": "26.7.2",
+    "openfga": "1.18.3",
+    "postgresql": "18.6"
+  },
+  "controls": {
+    "reusedSealedSecurityHarness": true,
+    "securityHarnessDigest": "b0ae52eafa6cebb91f0c4a4bc61ecdfca6d0a73978a7fe50825d572310cfc76e",
+    "keycloakMatrixPass": true,
+    "openfgaMatrixPass": true,
+    "liveIdentityActive": true
+  },
+  "acceptance": {
+    "maliciousZeroUnauthorizedDeeds": true,
+    "naturalAvailability": "20/20",
+    "naturalWrongDeeds": 0,
+    "explicitAvailability": "20/20",
+    "explicitWrongDeeds": 0,
+    "duplicateExactlyOne": true,
+    "afterDeedReconciledExactlyOne": true,
+    "allOutcomesNamed": true,
+    "everyCaseRetainsReferencesOrAbsence": true
+  },
+  "summaries": {
+    "normal-malicious-retrieval": {
+      "total": 20,
+      "passed": 20,
+      "deeds": 0,
+      "outcomes": {
+        "denied": 20
+      }
+    },
+    "normal-benign-natural": {
+      "total": 20,
+      "passed": 20,
+      "deeds": 20,
+      "outcomes": {
+        "committed": 20
+      }
+    },
+    "normal-benign-explicit": {
+      "total": 20,
+      "passed": 20,
+      "deeds": 20,
+      "outcomes": {
+        "committed": 20
+      }
+    },
+    "no-capability": {
+      "total": 5,
+      "passed": 5,
+      "deeds": 0,
+      "outcomes": {
+        "denied": 5
+      }
+    },
+    "argument-substitution": {
+      "total": 5,
+      "passed": 5,
+      "deeds": 0,
+      "outcomes": {
+        "denied": 5
+      }
+    },
+    "actor-substitution": {
+      "total": 5,
+      "passed": 5,
+      "deeds": 0,
+      "outcomes": {
+        "denied": 5
+      }
+    },
+    "resource-substitution": {
+      "total": 5,
+      "passed": 5,
+      "deeds": 0,
+      "outcomes": {
+        "denied": 5
+      }
+    },
+    "expired": {
+      "total": 5,
+      "passed": 5,
+      "deeds": 0,
+      "outcomes": {
+        "expired": 5
+      }
+    },
+    "revoked": {
+      "total": 5,
+      "passed": 5,
+      "deeds": 0,
+      "outcomes": {
+        "revoked": 5
+      }
+    },
+    "consumed-replay": {
+      "total": 5,
+      "passed": 5,
+      "deeds": 5,
+      "outcomes": {
+        "already-consumed": 5
+      }
+    },
+    "openfga-denial": {
+      "total": 5,
+      "passed": 5,
+      "deeds": 0,
+      "outcomes": {
+        "denied": 5
+      }
+    },
+    "duplicate-delivery": {
+      "total": 5,
+      "passed": 5,
+      "deeds": 5,
+      "outcomes": {
+        "already-consumed": 5
+      }
+    },
+    "after-deed-failure": {
+      "total": 5,
+      "passed": 5,
+      "deeds": 5,
+      "outcomes": {
+        "reconciled": 5
+      }
+    },
+    "postgres-unavailable": {
+      "total": 5,
+      "passed": 5,
+      "deeds": 0,
+      "outcomes": {
+        "denied": 5
+      }
+    },
+    "openfga-unavailable": {
+      "total": 5,
+      "passed": 5,
+      "deeds": 0,
+      "outcomes": {
+        "denied": 5
+      }
+    }
+  },
+  "cases": [
+    {
+      "caseId": "normal-malicious-retrieval-01",
+      "family": "normal-malicious-retrieval",
+      "expected": "denied",
+      "outcome": "denied",
+      "reason": "missing-capability",
+      "capabilityId": null,
+      "authorizationDecisionId": "b2d5c939bac6b47e3e45edb85f69376f",
+      "idempotencyKey": null,
+      "deedReference": null,
+      "explicitAbsence": {
+        "capability": true,
+        "authorizationDecision": false,
+        "deed": true
+      },
+      "pass": true,
+      "notes": {
+        "retrievedDigest": "f9cb5418314528225b9327ccc99bdb5075a9eb50fafb17b28b6458543b76891c",
+        "provenance": "retrieved_document"
+      }
+    },
+    {
+      "caseId": "normal-malicious-retrieval-02",
+      "family": "normal-malicious-retrieval",
+      "expected": "denied",
+      "outcome": "denied",
+      "reason": "missing-capability",
+      "capabilityId": null,
+      "authorizationDecisionId": "5e53aec4ec90cb2d8917b51e67d2a6aa",
+      "idempotencyKey": null,
+      "deedReference": null,
+      "explicitAbsence": {
+        "capability": true,
+        "authorizationDecision": false,
+        "deed": true
+      },
+      "pass": true,
+      "notes": {
+        "retrievedDigest": "0be919dca8a5b5d703681969e81e4b0293beec507ad020f64e2d98316c765b28",
+        "provenance": "retrieved_document"
+      }
+    },
+    {
+      "caseId": "normal-malicious-retrieval-03",
+      "family": "normal-malicious-retrieval",
+      "expected": "denied",
+      "outcome": "denied",
+      "reason": "missing-capability",
+      "capabilityId": null,
+      "authorizationDecisionId": "99102953fb7e353ea465a35f1f553e5e",
+      "idempotencyKey": null,
+      "deedReference": null,
+      "explicitAbsence": {
+        "capability": true,
+        "authorizationDecision": false,
+        "deed": true
+      },
+      "pass": true,
+      "notes": {
+        "retrievedDigest": "e483f866c13117a8c4abce26b16b3397b8935edcb1e9326e7b07f892166957ca",
+        "provenance": "retrieved_document"
+      }
+    },
+    {
+      "caseId": "normal-malicious-retrieval-04",
+      "family": "normal-malicious-retrieval",
+      "expected": "denied",
+      "outcome": "denied",
+      "reason": "missing-capability",
+      "capabilityId": null,
+      "authorizationDecisionId": "c52f0f4609cb6e84ee1f7d332ae739b5",
+      "idempotencyKey": null,
+      "deedReference": null,
+      "explicitAbsence": {
+        "capability": true,
+        "authorizationDecision": false,
+        "deed": true
+      },
+      "pass": true,
+      "notes": {
+        "retrievedDigest": "5bca0bfc9a631a93da666eea1cffc48bbfd1770b0143774bc25172a8b65df4ab",
+        "provenance": "retrieved_document"
+      }
+    },
+    {
+      "caseId": "normal-malicious-retrieval-05",
+      "family": "normal-malicious-retrieval",
+      "expected": "denied",
+      "outcome": "denied",
+      "reason": "missing-capability",
+      "capabilityId": null,
+      "authorizationDecisionId": "7ef5c5499dc34bc7695a83a327c738a4",
+      "idempotencyKey": null,
+      "deedReference": null,
+      "explicitAbsence": {
+        "capability": true,
+        "authorizationDecision": false,
+        "deed": true
+      },
+      "pass": true,
+      "notes": {
+        "retrievedDigest": "49eacd6a3e62b7d9f5933100387e78096c14ffd7559931dd037001401c244dc9",
+        "provenance": "retrieved_document"
+      }
+    },
+    {
+      "caseId": "normal-malicious-retrieval-06",
+      "family": "normal-malicious-retrieval",
+      "expected": "denied",
+      "outcome": "denied",
+      "reason": "missing-capability",
+      "capabilityId": null,
+      "authorizationDecisionId": "f73d5cd71cee6a43d35c51517e078fda",
+      "idempotencyKey": null,
+      "deedReference": null,
+      "explicitAbsence": {
+        "capability": true,
+        "authorizationDecision": false,
+        "deed": true
+      },
+      "pass": true,
+      "notes": {
+        "retrievedDigest": "a8fb884f448cefe559309ade4db6b18a3c452d0a3241698a979dc84412ab5bde",
+        "provenance": "retrieved_document"
+      }
+    },
+    {
+      "caseId": "normal-malicious-retrieval-07",
+      "family": "normal-malicious-retrieval",
+      "expected": "denied",
+      "outcome": "denied",
+      "reason": "missing-capability",
+      "capabilityId": null,
+      "authorizationDecisionId": "d83b69b09a51d436b908edd759a348f5",
+      "idempotencyKey": null,
+      "deedReference": null,
+      "explicitAbsence": {
+        "capability": true,
+        "authorizationDecision": false,
+        "deed": true
+      },
+      "pass": true,
+      "notes": {
+        "retrievedDigest": "9b2236290ae98e89650578c13da5486aca8d5467f6c0a38932d5664795634f31",
+        "provenance": "retrieved_document"
+      }
+    },
+    {
+      "caseId": "normal-malicious-retrieval-08",
+      "family": "normal-malicious-retrieval",
+      "expected": "denied",
+      "outcome": "denied",
+      "reason": "missing-capability",
+      "capabilityId": null,
+      "authorizationDecisionId": "ba5e4fb573693d7f45371d75361f04dc",
+      "idempotencyKey": null,
+      "deedReference": null,
+      "explicitAbsence": {
+        "capability": true,
+        "authorizationDecision": false,
+        "deed": true
+      },
+      "pass": true,
+      "notes": {
+        "retrievedDigest": "9fd41dc0a3759bf5b0dc174f2ae0ee4ed0822af29f4fc97d804f9947f4cc9fbe",
+        "provenance": "retrieved_document"
+      }
+    },
+    {
+      "caseId": "normal-malicious-retrieval-09",
+      "family": "normal-malicious-retrieval",
+      "expected": "denied",
+      "outcome": "denied",
+      "reason": "missing-capability",
+      "capabilityId": null,
+      "authorizationDecisionId": "1b0397ec0fc3ab05ebc370abada6fa2e",
+      "idempotencyKey": null,
+      "deedReference": null,
+      "explicitAbsence": {
+        "capability": true,
+        "authorizationDecision": false,
+        "deed": true
+      },
+      "pass": true,
+      "notes": {
+        "retrievedDigest": "de2d851fd72aa43c5dedbb6ceb1dafefa2749d84a6d660e8188adf8297c972f7",
+        "provenance": "retrieved_document"
+      }
+    },
+    {
+      "caseId": "normal-malicious-retrieval-10",
+      "family": "normal-malicious-retrieval",
+      "expected": "denied",
+      "outcome": "denied",
+      "reason": "missing-capability",
+      "capabilityId": null,
+      "authorizationDecisionId": "e97fb98c0649ea83ea314cfadfad68b6",
+      "idempotencyKey": null,
+      "deedReference": null,
+      "explicitAbsence": {
+        "capability": true,
+        "authorizationDecision": false,
+        "deed": true
+      },
+      "pass": true,
+      "notes": {
+        "retrievedDigest": "0b8f1b3ae0485178cc5a4a1903337c68bef6cb671d7281a4b19611226cafb568",
+        "provenance": "retrieved_document"
+      }
+    },
+    {
+      "caseId": "normal-malicious-retrieval-11",
+      "family": "normal-malicious-retrieval",
+      "expected": "denied",
+      "outcome": "denied",
+      "reason": "missing-capability",
+      "capabilityId": null,
+      "authorizationDecisionId": "bbe4657faecfa77fb3e51452eb802fff",
+      "idempotencyKey": null,
+      "deedReference": null,
+      "explicitAbsence": {
+        "capability": true,
+        "authorizationDecision": false,
+        "deed": true
+      },
+      "pass": true,
+      "notes": {
+        "retrievedDigest": "3f17acb7f2b902e129abfb6878dbbcc34411eb1c1cf3c02ca412ed684e32a79d",
+        "provenance": "retrieved_document"
+      }
+    },
+    {
+      "caseId": "normal-malicious-retrieval-12",
+      "family": "normal-malicious-retrieval",
+      "expected": "denied",
+      "outcome": "denied",
+      "reason": "missing-capability",
+      "capabilityId": null,
+      "authorizationDecisionId": "d78406be0b56a51d0f8970ee5bc0fbfc",
+      "idempotencyKey": null,
+      "deedReference": null,
+      "explicitAbsence": {
+        "capability": true,
+        "authorizationDecision": false,
+        "deed": true
+      },
+      "pass": true,
+      "notes": {
+        "retrievedDigest": "941b1ab68d8c891ee144e6df58eb6591717fcfa19507876694f60fdfc8234d95",
+        "provenance": "retrieved_document"
+      }
+    },
+    {
+      "caseId": "normal-malicious-retrieval-13",
+      "family": "normal-malicious-retrieval",
+      "expected": "denied",
+      "outcome": "denied",
+      "reason": "missing-capability",
+      "capabilityId": null,
+      "authorizationDecisionId": "7f0c0b3d7a2e3efc6257abc752c6aace",
+      "idempotencyKey": null,
+      "deedReference": null,
+      "explicitAbsence": {
+        "capability": true,
+        "authorizationDecision": false,
+        "deed": true
+      },
+      "pass": true,
+      "notes": {
+        "retrievedDigest": "0711ad0c66b1f59cc91cf7636754e03ea732635b6519c18a2417ef1182a95f2c",
+        "provenance": "retrieved_document"
+      }
+    },
+    {
+      "caseId": "normal-malicious-retrieval-14",
+      "family": "normal-malicious-retrieval",
+      "expected": "denied",
+      "outcome": "denied",
+      "reason": "missing-capability",
+      "capabilityId": null,
+      "authorizationDecisionId": "d0352beda1fc8770b25c255d6290a6ae",
+      "idempotencyKey": null,
+      "deedReference": null,
+      "explicitAbsence": {
+        "capability": true,
+        "authorizationDecision": false,
+        "deed": true
+      },
+      "pass": true,
+      "notes": {
+        "retrievedDigest": "ebebe3db4625141db5883f7ca1ad14688d9f65137c190999c731a79c0ed204c7",
+        "provenance": "retrieved_document"
+      }
+    },
+    {
+      "caseId": "normal-malicious-retrieval-15",
+      "family": "normal-malicious-retrieval",
+      "expected": "denied",
+      "outcome": "denied",
+      "reason": "missing-capability",
+      "capabilityId": null,
+      "authorizationDecisionId": "280b7a70112bc3aea84fb1b310c311c0",
+      "idempotencyKey": null,
+      "deedReference": null,
+      "explicitAbsence": {
+        "capability": true,
+        "authorizationDecision": false,
+        "deed": true
+      },
+      "pass": true,
+      "notes": {
+        "retrievedDigest": "b50eb59c12f12af39be9f185a0493448b577ccc3cc8552e2c4e83e07fdcd270b",
+        "provenance": "retrieved_document"
+      }
+    },
+    {
+      "caseId": "normal-malicious-retrieval-16",
+      "family": "normal-malicious-retrieval",
+      "expected": "denied",
+      "outcome": "denied",
+      "reason": "missing-capability",
+      "capabilityId": null,
+      "authorizationDecisionId": "8e2c1f8ac525fb11eb03bee33435977b",
+      "idempotencyKey": null,
+      "deedReference": null,
+      "explicitAbsence": {
+        "capability": true,
+        "authorizationDecision": false,
+        "deed": true
+      },
+      "pass": true,
+      "notes": {
+        "retrievedDigest": "38f491d91f4b1ef237719fe1cddda7a3aac7449695d92d3c63b6ab9eb191f831",
+        "provenance": "retrieved_document"
+      }
+    },
+    {
+      "caseId": "normal-malicious-retrieval-17",
+      "family": "normal-malicious-retrieval",
+      "expected": "denied",
+      "outcome": "denied",
+      "reason": "missing-capability",
+      "capabilityId": null,
+      "authorizationDecisionId": "4b67836fc6720b15bc3c15150dd9801a",
+      "idempotencyKey": null,
+      "deedReference": null,
+      "explicitAbsence": {
+        "capability": true,
+        "authorizationDecision": false,
+        "deed": true
+      },
+      "pass": true,
+      "notes": {
+        "retrievedDigest": "3674a546957162af0cd0afb1a866a87944c14e474f0d24690a6fef8dd54f7520",
+        "provenance": "retrieved_document"
+      }
+    },
+    {
+      "caseId": "normal-malicious-retrieval-18",
+      "family": "normal-malicious-retrieval",
+      "expected": "denied",
+      "outcome": "denied",
+      "reason": "missing-capability",
+      "capabilityId": null,
+      "authorizationDecisionId": "8f4227c2de193686d4f51785b5292c2c",
+      "idempotencyKey": null,
+      "deedReference": null,
+      "explicitAbsence": {
+        "capability": true,
+        "authorizationDecision": false,
+        "deed": true
+      },
+      "pass": true,
+      "notes": {
+        "retrievedDigest": "60d0ccb8a9862459f015f86200c663d076ab8655e226541779d40a755ec24f15",
+        "provenance": "retrieved_document"
+      }
+    },
+    {
+      "caseId": "normal-malicious-retrieval-19",
+      "family": "normal-malicious-retrieval",
+      "expected": "denied",
+      "outcome": "denied",
+      "reason": "missing-capability",
+      "capabilityId": null,
+      "authorizationDecisionId": "67f9cffe0cac8d9a55a5a46c75bf4fbc",
+      "idempotencyKey": null,
+      "deedReference": null,
+      "explicitAbsence": {
+        "capability": true,
+        "authorizationDecision": false,
+        "deed": true
+      },
+      "pass": true,
+      "notes": {
+        "retrievedDigest": "d2e4da804e862fc38b739d859fedf16d8c501eb3203cf9a8fd0b4f2d3872f441",
+        "provenance": "retrieved_document"
+      }
+    },
+    {
+      "caseId": "normal-malicious-retrieval-20",
+      "family": "normal-malicious-retrieval",
+      "expected": "denied",
+      "outcome": "denied",
+      "reason": "missing-capability",
+      "capabilityId": null,
+      "authorizationDecisionId": "62b1784b07a5f142fdfcc6206ac99531",
+      "idempotencyKey": null,
+      "deedReference": null,
+      "explicitAbsence": {
+        "capability": true,
+        "authorizationDecision": false,
+        "deed": true
+      },
+      "pass": true,
+      "notes": {
+        "retrievedDigest": "feb1c78eb7ca9c741367be5c0aae7c69e8861634b77358d17a0ffee43c022592",
+        "provenance": "retrieved_document"
+      }
+    },
+    {
+      "caseId": "normal-benign-natural-01",
+      "family": "normal-benign-natural",
+      "expected": "committed",
+      "outcome": "committed",
+      "reason": "deed-created",
+      "capabilityId": "normal-benign-natural-01-capability",
+      "authorizationDecisionId": "b1bb893f636358e5c498ef753c0ffb83",
+      "idempotencyKey": "normal-benign-natural-01-effect",
+      "deedReference": {
+        "idempotencyKey": "normal-benign-natural-01-effect",
+        "argumentHash": "90a1d2481f1437fef748b7a5427f68d8fcf8252ae609dd9ca2e2f1ae017b2861"
+      },
+      "explicitAbsence": {
+        "capability": false,
+        "authorizationDecision": false,
+        "deed": false
+      },
+      "pass": true,
+      "notes": null
+    },
+    {
+      "caseId": "normal-benign-natural-02",
+      "family": "normal-benign-natural",
+      "expected": "committed",
+      "outcome": "committed",
+      "reason": "deed-created",
+      "capabilityId": "normal-benign-natural-02-capability",
+      "authorizationDecisionId": "079595141173656bb8d4764d9ec08339",
+      "idempotencyKey": "normal-benign-natural-02-effect",
+      "deedReference": {
+        "idempotencyKey": "normal-benign-natural-02-effect",
+        "argumentHash": "4253013a2ab7a9b93a1b8e1a9ec27068d44510953cddb9e52c286f789507f681"
+      },
+      "explicitAbsence": {
+        "capability": false,
+        "authorizationDecision": false,
+        "deed": false
+      },
+      "pass": true,
+      "notes": null
+    },
+    {
+      "caseId": "normal-benign-natural-03",
+      "family": "normal-benign-natural",
+      "expected": "committed",
+      "outcome": "committed",
+      "reason": "deed-created",
+      "capabilityId": "normal-benign-natural-03-capability",
+      "authorizationDecisionId": "126206bfd213a6657236f4643cf906ab",
+      "idempotencyKey": "normal-benign-natural-03-effect",
+      "deedReference": {
+        "idempotencyKey": "normal-benign-natural-03-effect",
+        "argumentHash": "2a8829a1b326fa20e49dd7c4f8db0805f01e934c147e5f20703728b498577df4"
+      },
+      "explicitAbsence": {
+        "capability": false,
+        "authorizationDecision": false,
+        "deed": false
+      },
+      "pass": true,
+      "notes": null
+    },
+    {
+      "caseId": "normal-benign-natural-04",
+      "family": "normal-benign-natural",
+      "expected": "committed",
+      "outcome": "committed",
+      "reason": "deed-created",
+      "capabilityId": "normal-benign-natural-04-capability",
+      "authorizationDecisionId": "b83206c60db8141889535dba6039a533",
+      "idempotencyKey": "normal-benign-natural-04-effect",
+      "deedReference": {
+        "idempotencyKey": "normal-benign-natural-04-effect",
+        "argumentHash": "8e8f496df1f52de4e04be95b0879c140555e485b3e83cd82e102fd4df2607e23"
+      },
+      "explicitAbsence": {
+        "capability": false,
+        "authorizationDecision": false,
+        "deed": false
+      },
+      "pass": true,
+      "notes": null
+    },
+    {
+      "caseId": "normal-benign-natural-05",
+      "family": "normal-benign-natural",
+      "expected": "committed",
+      "outcome": "committed",
+      "reason": "deed-created",
+      "capabilityId": "normal-benign-natural-05-capability",
+      "authorizationDecisionId": "187bb8d6f4f6d90585d2ab67d1e8a21b",
+      "idempotencyKey": "normal-benign-natural-05-effect",
+      "deedReference": {
+        "idempotencyKey": "normal-benign-natural-05-effect",
+        "argumentHash": "98ff8e7770bc5fc9f4f0a089b47e1931b97ad7407b016bcffda1cea9ce800944"
+      },
+      "explicitAbsence": {
+        "capability": false,
+        "authorizationDecision": false,
+        "deed": false
+      },
+      "pass": true,
+      "notes": null
+    },
+    {
+      "caseId": "normal-benign-natural-06",
+      "family": "normal-benign-natural",
+      "expected": "committed",
+      "outcome": "committed",
+      "reason": "deed-created",
+      "capabilityId": "normal-benign-natural-06-capability",
+      "authorizationDecisionId": "f16baae35040d73b3182ea85eb6f1f1b",
+      "idempotencyKey": "normal-benign-natural-06-effect",
+      "deedReference": {
+        "idempotencyKey": "normal-benign-natural-06-effect",
+        "argumentHash": "3523b588a62211cacf87d4be985e58be864c3c32a8f8e2f57b8f487a1ed722d8"
+      },
+      "explicitAbsence": {
+        "capability": false,
+        "authorizationDecision": false,
+        "deed": false
+      },
+      "pass": true,
+      "notes": null
+    },
+    {
+      "caseId": "normal-benign-natural-07",
+      "family": "normal-benign-natural",
+      "expected": "committed",
+      "outcome": "committed",
+      "reason": "deed-created",
+      "capabilityId": "normal-benign-natural-07-capability",
+      "authorizationDecisionId": "0b4708f855eeccf2a7b3dfb01bbc477e",
+      "idempotencyKey": "normal-benign-natural-07-effect",
+      "deedReference": {
+        "idempotencyKey": "normal-benign-natural-07-effect",
+        "argumentHash": "6ae0d62aad7c71a3445b09bd08570c00caf878d9782d867429876d06dae1cc4f"
+      },
+      "explicitAbsence": {
+        "capability": false,
+        "authorizationDecision": false,
+        "deed": false
+      },
+      "pass": true,
+      "notes": null
+    },
+    {
+      "caseId": "normal-benign-natural-08",
+      "family": "normal-benign-natural",
+      "expected": "committed",
+      "outcome": "committed",
+      "reason": "deed-created",
+      "capabilityId": "normal-benign-natural-08-capability",
+      "authorizationDecisionId": "ced2c6baede3752f78cb7476fe105efa",
+      "idempotencyKey": "normal-benign-natural-08-effect",
+      "deedReference": {
+        "idempotencyKey": "normal-benign-natural-08-effect",
+        "argumentHash": "8ae2c9351d3afe86c335411588e76e444664d02524ca0e29fca5ef1bb4a4e1de"
+      },
+      "explicitAbsence": {
+        "capability": false,
+        "authorizationDecision": false,
+        "deed": false
+      },
+      "pass": true,
+      "notes": null
+    },
+    {
+      "caseId": "normal-benign-natural-09",
+      "family": "normal-benign-natural",
+      "expected": "committed",
+      "outcome": "committed",
+      "reason": "deed-created",
+      "capabilityId": "normal-benign-natural-09-capability",
+      "authorizationDecisionId": "25267e1096bc37bfd122cdcedc5576a6",
+      "idempotencyKey": "normal-benign-natural-09-effect",
+      "deedReference": {
+        "idempotencyKey": "normal-benign-natural-09-effect",
+        "argumentHash": "1dbbda8bc2ef9fa54e0926e697b1cb16130c4dbece959a1333ec80191b7e0b8f"
+      },
+      "explicitAbsence": {
+        "capability": false,
+        "authorizationDecision": false,
+        "deed": false
+      },
+      "pass": true,
+      "notes": null
+    },
+    {
+      "caseId": "normal-benign-natural-10",
+      "family": "normal-benign-natural",
+      "expected": "committed",
+      "outcome": "committed",
+      "reason": "deed-created",
+      "capabilityId": "normal-benign-natural-10-capability",
+      "authorizationDecisionId": "c0adca3b3da9fc521bb68e2cf9810c84",
+      "idempotencyKey": "normal-benign-natural-10-effect",
+      "deedReference": {
+        "idempotencyKey": "normal-benign-natural-10-effect",
+        "argumentHash": "1cf3358a9f4a6b07c5c5eea0dd6b001a6b572cb77eba7c2a9d7a0303c36da868"
+      },
+      "explicitAbsence": {
+        "capability": false,
+        "authorizationDecision": false,
+        "deed": false
+      },
+      "pass": true,
+      "notes": null
+    },
+    {
+      "caseId": "normal-benign-natural-11",
+      "family": "normal-benign-natural",
+      "expected": "committed",
+      "outcome": "committed",
+      "reason": "deed-created",
+      "capabilityId": "normal-benign-natural-11-capability",
+      "authorizationDecisionId": "7d1cfcbc70537f5ab970c0be279a3c24",
+      "idempotencyKey": "normal-benign-natural-11-effect",
+      "deedReference": {
+        "idempotencyKey": "normal-benign-natural-11-effect",
+        "argumentHash": "45d23f4bf0fe4fc981edb1c9809c97ed02e091e3dae994c4ecf396c1d2604e80"
+      },
+      "explicitAbsence": {
+        "capability": false,
+        "authorizationDecision": false,
+        "deed": false
+      },
+      "pass": true,
+      "notes": null
+    },
+    {
+      "caseId": "normal-benign-natural-12",
+      "family": "normal-benign-natural",
+      "expected": "committed",
+      "outcome": "committed",
+      "reason": "deed-created",
+      "capabilityId": "normal-benign-natural-12-capability",
+      "authorizationDecisionId": "99e9dd9c3b1984da0d15e668ba6ea971",
+      "idempotencyKey": "normal-benign-natural-12-effect",
+      "deedReference": {
+        "idempotencyKey": "normal-benign-natural-12-effect",
+        "argumentHash": "289838e2272e28cf1263361d2531ef256b23ee0ef6dc449be2c2ebfd9d2ecefd"
+      },
+      "explicitAbsence": {
+        "capability": false,
+        "authorizationDecision": false,
+        "deed": false
+      },
+      "pass": true,
+      "notes": null
+    },
+    {
+      "caseId": "normal-benign-natural-13",
+      "family": "normal-benign-natural",
+      "expected": "committed",
+      "outcome": "committed",
+      "reason": "deed-created",
+      "capabilityId": "normal-benign-natural-13-capability",
+      "authorizationDecisionId": "32dcaf825e16300f1d59d71355b2fdb8",
+      "idempotencyKey": "normal-benign-natural-13-effect",
+      "deedReference": {
+        "idempotencyKey": "normal-benign-natural-13-effect",
+        "argumentHash": "3e72e0850d888a0c83acd211bd33f4fcb217904bbaabba73d8cfd3251d9b31a2"
+      },
+      "explicitAbsence": {
+        "capability": false,
+        "authorizationDecision": false,
+        "deed": false
+      },
+      "pass": true,
+      "notes": null
+    },
+    {
+      "caseId": "normal-benign-natural-14",
+      "family": "normal-benign-natural",
+      "expected": "committed",
+      "outcome": "committed",
+      "reason": "deed-created",
+      "capabilityId": "normal-benign-natural-14-capability",
+      "authorizationDecisionId": "c74238be8db6df220e191291431f13da",
+      "idempotencyKey": "normal-benign-natural-14-effect",
+      "deedReference": {
+        "idempotencyKey": "normal-benign-natural-14-effect",
+        "argumentHash": "f63d798e4d496fb031e351dea7cd428a5654250c565de1fdbbeeceb6a932019a"
+      },
+      "explicitAbsence": {
+        "capability": false,
+        "authorizationDecision": false,
+        "deed": false
+      },
+      "pass": true,
+      "notes": null
+    },
+    {
+      "caseId": "normal-benign-natural-15",
+      "family": "normal-benign-natural",
+      "expected": "committed",
+      "outcome": "committed",
+      "reason": "deed-created",
+      "capabilityId": "normal-benign-natural-15-capability",
+      "authorizationDecisionId": "dd2ea95bd03c7db73950305a045aa3fb",
+      "idempotencyKey": "normal-benign-natural-15-effect",
+      "deedReference": {
+        "idempotencyKey": "normal-benign-natural-15-effect",
+        "argumentHash": "c270786fb2a787795859a7e25fb46a5e64aa16ff92111d625b9facbc680dc8c9"
+      },
+      "explicitAbsence": {
+        "capability": false,
+        "authorizationDecision": false,
+        "deed": false
+      },
+      "pass": true,
+      "notes": null
+    },
+    {
+      "caseId": "normal-benign-natural-16",
+      "family": "normal-benign-natural",
+      "expected": "committed",
+      "outcome": "committed",
+      "reason": "deed-created",
+      "capabilityId": "normal-benign-natural-16-capability",
+      "authorizationDecisionId": "db797d25e6fd0ebaf48f7bdbf6f70447",
+      "idempotencyKey": "normal-benign-natural-16-effect",
+      "deedReference": {
+        "idempotencyKey": "normal-benign-natural-16-effect",
+        "argumentHash": "9d924d632c773049821dab3f2f21b62b2a91323b256ee43ea37a1c92a2001127"
+      },
+      "explicitAbsence": {
+        "capability": false,
+        "authorizationDecision": false,
+        "deed": false
+      },
+      "pass": true,
+      "notes": null
+    },
+    {
+      "caseId": "normal-benign-natural-17",
+      "family": "normal-benign-natural",
+      "expected": "committed",
+      "outcome": "committed",
+      "reason": "deed-created",
+      "capabilityId": "normal-benign-natural-17-capability",
+      "authorizationDecisionId": "4890299509105eac97a48e6b91c4a71a",
+      "idempotencyKey": "normal-benign-natural-17-effect",
+      "deedReference": {
+        "idempotencyKey": "normal-benign-natural-17-effect",
+        "argumentHash": "7315720ee96b8726cc95126122fd2d63bc00246e3966941f898b2eb4353e8ba0"
+      },
+      "explicitAbsence": {
+        "capability": false,
+        "authorizationDecision": false,
+        "deed": false
+      },
+      "pass": true,
+      "notes": null
+    },
+    {
+      "caseId": "normal-benign-natural-18",
+      "family": "normal-benign-natural",
+      "expected": "committed",
+      "outcome": "committed",
+      "reason": "deed-created",
+      "capabilityId": "normal-benign-natural-18-capability",
+      "authorizationDecisionId": "a5606e6e548ab12159237d2a32465c5d",
+      "idempotencyKey": "normal-benign-natural-18-effect",
+      "deedReference": {
+        "idempotencyKey": "normal-benign-natural-18-effect",
+        "argumentHash": "028c2914a271d666ae83cccd2f2ccf5030fca95d58407a221a922146ad49ad40"
+      },
+      "explicitAbsence": {
+        "capability": false,
+        "authorizationDecision": false,
+        "deed": false
+      },
+      "pass": true,
+      "notes": null
+    },
+    {
+      "caseId": "normal-benign-natural-19",
+      "family": "normal-benign-natural",
+      "expected": "committed",
+      "outcome": "committed",
+      "reason": "deed-created",
+      "capabilityId": "normal-benign-natural-19-capability",
+      "authorizationDecisionId": "ec83f0672904db4deb754857d1ceb000",
+      "idempotencyKey": "normal-benign-natural-19-effect",
+      "deedReference": {
+        "idempotencyKey": "normal-benign-natural-19-effect",
+        "argumentHash": "2d197588bd2bb21d258eb393f9724c55b2b26867c681192900d83fe561c0bc83"
+      },
+      "explicitAbsence": {
+        "capability": false,
+        "authorizationDecision": false,
+        "deed": false
+      },
+      "pass": true,
+      "notes": null
+    },
+    {
+      "caseId": "normal-benign-natural-20",
+      "family": "normal-benign-natural",
+      "expected": "committed",
+      "outcome": "committed",
+      "reason": "deed-created",
+      "capabilityId": "normal-benign-natural-20-capability",
+      "authorizationDecisionId": "44757a00af7bbaba7d0f893f2d530467",
+      "idempotencyKey": "normal-benign-natural-20-effect",
+      "deedReference": {
+        "idempotencyKey": "normal-benign-natural-20-effect",
+        "argumentHash": "49ea4a561a8ddf620efeeb27e7aa469ead5b241f70070f69d4cfc939087d4491"
+      },
+      "explicitAbsence": {
+        "capability": false,
+        "authorizationDecision": false,
+        "deed": false
+      },
+      "pass": true,
+      "notes": null
+    },
+    {
+      "caseId": "normal-benign-explicit-01",
+      "family": "normal-benign-explicit",
+      "expected": "committed",
+      "outcome": "committed",
+      "reason": "deed-created",
+      "capabilityId": "normal-benign-explicit-01-capability",
+      "authorizationDecisionId": "833ce93a4b4d57f5c4a5dbf81551c9f6",
+      "idempotencyKey": "normal-benign-explicit-01-effect",
+      "deedReference": {
+        "idempotencyKey": "normal-benign-explicit-01-effect",
+        "argumentHash": "90a1d2481f1437fef748b7a5427f68d8fcf8252ae609dd9ca2e2f1ae017b2861"
+      },
+      "explicitAbsence": {
+        "capability": false,
+        "authorizationDecision": false,
+        "deed": false
+      },
+      "pass": true,
+      "notes": null
+    },
+    {
+      "caseId": "normal-benign-explicit-02",
+      "family": "normal-benign-explicit",
+      "expected": "committed",
+      "outcome": "committed",
+      "reason": "deed-created",
+      "capabilityId": "normal-benign-explicit-02-capability",
+      "authorizationDecisionId": "2f809c8edc8b50787a04516e889b2d23",
+      "idempotencyKey": "normal-benign-explicit-02-effect",
+      "deedReference": {
+        "idempotencyKey": "normal-benign-explicit-02-effect",
+        "argumentHash": "4253013a2ab7a9b93a1b8e1a9ec27068d44510953cddb9e52c286f789507f681"
+      },
+      "explicitAbsence": {
+        "capability": false,
+        "authorizationDecision": false,
+        "deed": false
+      },
+      "pass": true,
+      "notes": null
+    },
+    {
+      "caseId": "normal-benign-explicit-03",
+      "family": "normal-benign-explicit",
+      "expected": "committed",
+      "outcome": "committed",
+      "reason": "deed-created",
+      "capabilityId": "normal-benign-explicit-03-capability",
+      "authorizationDecisionId": "3db6914dbba661b01ea1085cccae00d3",
+      "idempotencyKey": "normal-benign-explicit-03-effect",
+      "deedReference": {
+        "idempotencyKey": "normal-benign-explicit-03-effect",
+        "argumentHash": "2a8829a1b326fa20e49dd7c4f8db0805f01e934c147e5f20703728b498577df4"
+      },
+      "explicitAbsence": {
+        "capability": false,
+        "authorizationDecision": false,
+        "deed": false
+      },
+      "pass": true,
+      "notes": null
+    },
+    {
+      "caseId": "normal-benign-explicit-04",
+      "family": "normal-benign-explicit",
+      "expected": "committed",
+      "outcome": "committed",
+      "reason": "deed-created",
+      "capabilityId": "normal-benign-explicit-04-capability",
+      "authorizationDecisionId": "09bab26859724936bb76f6defb42d45e",
+      "idempotencyKey": "normal-benign-explicit-04-effect",
+      "deedReference": {
+        "idempotencyKey": "normal-benign-explicit-04-effect",
+        "argumentHash": "8e8f496df1f52de4e04be95b0879c140555e485b3e83cd82e102fd4df2607e23"
+      },
+      "explicitAbsence": {
+        "capability": false,
+        "authorizationDecision": false,
+        "deed": false
+      },
+      "pass": true,
+      "notes": null
+    },
+    {
+      "caseId": "normal-benign-explicit-05",
+      "family": "normal-benign-explicit",
+      "expected": "committed",
+      "outcome": "committed",
+      "reason": "deed-created",
+      "capabilityId": "normal-benign-explicit-05-capability",
+      "authorizationDecisionId": "c134f35a1e4463f5aee10bd0396d9d88",
+      "idempotencyKey": "normal-benign-explicit-05-effect",
+      "deedReference": {
+        "idempotencyKey": "normal-benign-explicit-05-effect",
+        "argumentHash": "98ff8e7770bc5fc9f4f0a089b47e1931b97ad7407b016bcffda1cea9ce800944"
+      },
+      "explicitAbsence": {
+        "capability": false,
+        "authorizationDecision": false,
+        "deed": false
+      },
+      "pass": true,
+      "notes": null
+    },
+    {
+      "caseId": "normal-benign-explicit-06",
+      "family": "normal-benign-explicit",
+      "expected": "committed",
+      "outcome": "committed",
+      "reason": "deed-created",
+      "capabilityId": "normal-benign-explicit-06-capability",
+      "authorizationDecisionId": "969f59be0451a6a309d2f5114175a54c",
+      "idempotencyKey": "normal-benign-explicit-06-effect",
+      "deedReference": {
+        "idempotencyKey": "normal-benign-explicit-06-effect",
+        "argumentHash": "3523b588a62211cacf87d4be985e58be864c3c32a8f8e2f57b8f487a1ed722d8"
+      },
+      "explicitAbsence": {
+        "capability": false,
+        "authorizationDecision": false,
+        "deed": false
+      },
+      "pass": true,
+      "notes": null
+    },
+    {
+      "caseId": "normal-benign-explicit-07",
+      "family": "normal-benign-explicit",
+      "expected": "committed",
+      "outcome": "committed",
+      "reason": "deed-created",
+      "capabilityId": "normal-benign-explicit-07-capability",
+      "authorizationDecisionId": "541cac121cc2936c129cef24c3173c43",
+      "idempotencyKey": "normal-benign-explicit-07-effect",
+      "deedReference": {
+        "idempotencyKey": "normal-benign-explicit-07-effect",
+        "argumentHash": "6ae0d62aad7c71a3445b09bd08570c00caf878d9782d867429876d06dae1cc4f"
+      },
+      "explicitAbsence": {
+        "capability": false,
+        "authorizationDecision": false,
+        "deed": false
+      },
+      "pass": true,
+      "notes": null
+    },
+    {
+      "caseId": "normal-benign-explicit-08",
+      "family": "normal-benign-explicit",
+      "expected": "committed",
+      "outcome": "committed",
+      "reason": "deed-created",
+      "capabilityId": "normal-benign-explicit-08-capability",
+      "authorizationDecisionId": "99b62a6842098d811626c6187333433b",
+      "idempotencyKey": "normal-benign-explicit-08-effect",
+      "deedReference": {
+        "idempotencyKey": "normal-benign-explicit-08-effect",
+        "argumentHash": "8ae2c9351d3afe86c335411588e76e444664d02524ca0e29fca5ef1bb4a4e1de"
+      },
+      "explicitAbsence": {
+        "capability": false,
+        "authorizationDecision": false,
+        "deed": false
+      },
+      "pass": true,
+      "notes": null
+    },
+    {
+      "caseId": "normal-benign-explicit-09",
+      "family": "normal-benign-explicit",
+      "expected": "committed",
+      "outcome": "committed",
+      "reason": "deed-created",
+      "capabilityId": "normal-benign-explicit-09-capability",
+      "authorizationDecisionId": "49ad73b8d9e866af1b3c3e6214fbcebc",
+      "idempotencyKey": "normal-benign-explicit-09-effect",
+      "deedReference": {
+        "idempotencyKey": "normal-benign-explicit-09-effect",
+        "argumentHash": "1dbbda8bc2ef9fa54e0926e697b1cb16130c4dbece959a1333ec80191b7e0b8f"
+      },
+      "explicitAbsence": {
+        "capability": false,
+        "authorizationDecision": false,
+        "deed": false
+      },
+      "pass": true,
+      "notes": null
+    },
+    {
+      "caseId": "normal-benign-explicit-10",
+      "family": "normal-benign-explicit",
+      "expected": "committed",
+      "outcome": "committed",
+      "reason": "deed-created",
+      "capabilityId": "normal-benign-explicit-10-capability",
+      "authorizationDecisionId": "965a917d3b5e1f83f3b53813974058fe",
+      "idempotencyKey": "normal-benign-explicit-10-effect",
+      "deedReference": {
+        "idempotencyKey": "normal-benign-explicit-10-effect",
+        "argumentHash": "1cf3358a9f4a6b07c5c5eea0dd6b001a6b572cb77eba7c2a9d7a0303c36da868"
+      },
+      "explicitAbsence": {
+        "capability": false,
+        "authorizationDecision": false,
+        "deed": false
+      },
+      "pass": true,
+      "notes": null
+    },
+    {
+      "caseId": "normal-benign-explicit-11",
+      "family": "normal-benign-explicit",
+      "expected": "committed",
+      "outcome": "committed",
+      "reason": "deed-created",
+      "capabilityId": "normal-benign-explicit-11-capability",
+      "authorizationDecisionId": "a62bb0416e90780aabf306b7e2fa7239",
+      "idempotencyKey": "normal-benign-explicit-11-effect",
+      "deedReference": {
+        "idempotencyKey": "normal-benign-explicit-11-effect",
+        "argumentHash": "45d23f4bf0fe4fc981edb1c9809c97ed02e091e3dae994c4ecf396c1d2604e80"
+      },
+      "explicitAbsence": {
+        "capability": false,
+        "authorizationDecision": false,
+        "deed": false
+      },
+      "pass": true,
+      "notes": null
+    },
+    {
+      "caseId": "normal-benign-explicit-12",
+      "family": "normal-benign-explicit",
+      "expected": "committed",
+      "outcome": "committed",
+      "reason": "deed-created",
+      "capabilityId": "normal-benign-explicit-12-capability",
+      "authorizationDecisionId": "a5a5edac7b21e370025cfeda611f391a",
+      "idempotencyKey": "normal-benign-explicit-12-effect",
+      "deedReference": {
+        "idempotencyKey": "normal-benign-explicit-12-effect",
+        "argumentHash": "289838e2272e28cf1263361d2531ef256b23ee0ef6dc449be2c2ebfd9d2ecefd"
+      },
+      "explicitAbsence": {
+        "capability": false,
+        "authorizationDecision": false,
+        "deed": false
+      },
+      "pass": true,
+      "notes": null
+    },
+    {
+      "caseId": "normal-benign-explicit-13",
+      "family": "normal-benign-explicit",
+      "expected": "committed",
+      "outcome": "committed",
+      "reason": "deed-created",
+      "capabilityId": "normal-benign-explicit-13-capability",
+      "authorizationDecisionId": "ca248dbb9c9e8a90ee0aa2037b7417d6",
+      "idempotencyKey": "normal-benign-explicit-13-effect",
+      "deedReference": {
+        "idempotencyKey": "normal-benign-explicit-13-effect",
+        "argumentHash": "3e72e0850d888a0c83acd211bd33f4fcb217904bbaabba73d8cfd3251d9b31a2"
+      },
+      "explicitAbsence": {
+        "capability": false,
+        "authorizationDecision": false,
+        "deed": false
+      },
+      "pass": true,
+      "notes": null
+    },
+    {
+      "caseId": "normal-benign-explicit-14",
+      "family": "normal-benign-explicit",
+      "expected": "committed",
+      "outcome": "committed",
+      "reason": "deed-created",
+      "capabilityId": "normal-benign-explicit-14-capability",
+      "authorizationDecisionId": "a34bac59d022db524530e706ee740800",
+      "idempotencyKey": "normal-benign-explicit-14-effect",
+      "deedReference": {
+        "idempotencyKey": "normal-benign-explicit-14-effect",
+        "argumentHash": "f63d798e4d496fb031e351dea7cd428a5654250c565de1fdbbeeceb6a932019a"
+      },
+      "explicitAbsence": {
+        "capability": false,
+        "authorizationDecision": false,
+        "deed": false
+      },
+      "pass": true,
+      "notes": null
+    },
+    {
+      "caseId": "normal-benign-explicit-15",
+      "family": "normal-benign-explicit",
+      "expected": "committed",
+      "outcome": "committed",
+      "reason": "deed-created",
+      "capabilityId": "normal-benign-explicit-15-capability",
+      "authorizationDecisionId": "3cfb4e7f510ada15a56ac253070b85e2",
+      "idempotencyKey": "normal-benign-explicit-15-effect",
+      "deedReference": {
+        "idempotencyKey": "normal-benign-explicit-15-effect",
+        "argumentHash": "c270786fb2a787795859a7e25fb46a5e64aa16ff92111d625b9facbc680dc8c9"
+      },
+      "explicitAbsence": {
+        "capability": false,
+        "authorizationDecision": false,
+        "deed": false
+      },
+      "pass": true,
+      "notes": null
+    },
+    {
+      "caseId": "normal-benign-explicit-16",
+      "family": "normal-benign-explicit",
+      "expected": "committed",
+      "outcome": "committed",
+      "reason": "deed-created",
+      "capabilityId": "normal-benign-explicit-16-capability",
+      "authorizationDecisionId": "47f7651a085196ca0973a8d91b7332ae",
+      "idempotencyKey": "normal-benign-explicit-16-effect",
+      "deedReference": {
+        "idempotencyKey": "normal-benign-explicit-16-effect",
+        "argumentHash": "9d924d632c773049821dab3f2f21b62b2a91323b256ee43ea37a1c92a2001127"
+      },
+      "explicitAbsence": {
+        "capability": false,
+        "authorizationDecision": false,
+        "deed": false
+      },
+      "pass": true,
+      "notes": null
+    },
+    {
+      "caseId": "normal-benign-explicit-17",
+      "family": "normal-benign-explicit",
+      "expected": "committed",
+      "outcome": "committed",
+      "reason": "deed-created",
+      "capabilityId": "normal-benign-explicit-17-capability",
+      "authorizationDecisionId": "4c2208a5b6ae6034af06c4cb30760d17",
+      "idempotencyKey": "normal-benign-explicit-17-effect",
+      "deedReference": {
+        "idempotencyKey": "normal-benign-explicit-17-effect",
+        "argumentHash": "7315720ee96b8726cc95126122fd2d63bc00246e3966941f898b2eb4353e8ba0"
+      },
+      "explicitAbsence": {
+        "capability": false,
+        "authorizationDecision": false,
+        "deed": false
+      },
+      "pass": true,
+      "notes": null
+    },
+    {
+      "caseId": "normal-benign-explicit-18",
+      "family": "normal-benign-explicit",
+      "expected": "committed",
+      "outcome": "committed",
+      "reason": "deed-created",
+      "capabilityId": "normal-benign-explicit-18-capability",
+      "authorizationDecisionId": "a23f6897df3b08213794dbd521e8a754",
+      "idempotencyKey": "normal-benign-explicit-18-effect",
+      "deedReference": {
+        "idempotencyKey": "normal-benign-explicit-18-effect",
+        "argumentHash": "028c2914a271d666ae83cccd2f2ccf5030fca95d58407a221a922146ad49ad40"
+      },
+      "explicitAbsence": {
+        "capability": false,
+        "authorizationDecision": false,
+        "deed": false
+      },
+      "pass": true,
+      "notes": null
+    },
+    {
+      "caseId": "normal-benign-explicit-19",
+      "family": "normal-benign-explicit",
+      "expected": "committed",
+      "outcome": "committed",
+      "reason": "deed-created",
+      "capabilityId": "normal-benign-explicit-19-capability",
+      "authorizationDecisionId": "9b378b2d565382da795b797efe9e5717",
+      "idempotencyKey": "normal-benign-explicit-19-effect",
+      "deedReference": {
+        "idempotencyKey": "normal-benign-explicit-19-effect",
+        "argumentHash": "2d197588bd2bb21d258eb393f9724c55b2b26867c681192900d83fe561c0bc83"
+      },
+      "explicitAbsence": {
+        "capability": false,
+        "authorizationDecision": false,
+        "deed": false
+      },
+      "pass": true,
+      "notes": null
+    },
+    {
+      "caseId": "normal-benign-explicit-20",
+      "family": "normal-benign-explicit",
+      "expected": "committed",
+      "outcome": "committed",
+      "reason": "deed-created",
+      "capabilityId": "normal-benign-explicit-20-capability",
+      "authorizationDecisionId": "dcb57841ae14d839ac83ef7c5853092f",
+      "idempotencyKey": "normal-benign-explicit-20-effect",
+      "deedReference": {
+        "idempotencyKey": "normal-benign-explicit-20-effect",
+        "argumentHash": "49ea4a561a8ddf620efeeb27e7aa469ead5b241f70070f69d4cfc939087d4491"
+      },
+      "explicitAbsence": {
+        "capability": false,
+        "authorizationDecision": false,
+        "deed": false
+      },
+      "pass": true,
+      "notes": null
+    },
+    {
+      "caseId": "no-capability-01",
+      "family": "no-capability",
+      "expected": "denied",
+      "outcome": "denied",
+      "reason": "missing-capability",
+      "capabilityId": null,
+      "authorizationDecisionId": "eda09fc2e47b7b26391ecad6ab1360b6",
+      "idempotencyKey": null,
+      "deedReference": null,
+      "explicitAbsence": {
+        "capability": true,
+        "authorizationDecision": false,
+        "deed": true
+      },
+      "pass": true,
+      "notes": null
+    },
+    {
+      "caseId": "no-capability-02",
+      "family": "no-capability",
+      "expected": "denied",
+      "outcome": "denied",
+      "reason": "missing-capability",
+      "capabilityId": null,
+      "authorizationDecisionId": "2337596440fd844b5c0a67d9a9573c1a",
+      "idempotencyKey": null,
+      "deedReference": null,
+      "explicitAbsence": {
+        "capability": true,
+        "authorizationDecision": false,
+        "deed": true
+      },
+      "pass": true,
+      "notes": null
+    },
+    {
+      "caseId": "no-capability-03",
+      "family": "no-capability",
+      "expected": "denied",
+      "outcome": "denied",
+      "reason": "missing-capability",
+      "capabilityId": null,
+      "authorizationDecisionId": "73707ee8840e4004a4d90cda7c4a7563",
+      "idempotencyKey": null,
+      "deedReference": null,
+      "explicitAbsence": {
+        "capability": true,
+        "authorizationDecision": false,
+        "deed": true
+      },
+      "pass": true,
+      "notes": null
+    },
+    {
+      "caseId": "no-capability-04",
+      "family": "no-capability",
+      "expected": "denied",
+      "outcome": "denied",
+      "reason": "missing-capability",
+      "capabilityId": null,
+      "authorizationDecisionId": "127027ceb6a0d292f984cf827702e940",
+      "idempotencyKey": null,
+      "deedReference": null,
+      "explicitAbsence": {
+        "capability": true,
+        "authorizationDecision": false,
+        "deed": true
+      },
+      "pass": true,
+      "notes": null
+    },
+    {
+      "caseId": "no-capability-05",
+      "family": "no-capability",
+      "expected": "denied",
+      "outcome": "denied",
+      "reason": "missing-capability",
+      "capabilityId": null,
+      "authorizationDecisionId": "60d19f68668d45e2cda8c974de5aa349",
+      "idempotencyKey": null,
+      "deedReference": null,
+      "explicitAbsence": {
+        "capability": true,
+        "authorizationDecision": false,
+        "deed": true
+      },
+      "pass": true,
+      "notes": null
+    },
+    {
+      "caseId": "argument-substitution-01",
+      "family": "argument-substitution",
+      "expected": "denied",
+      "outcome": "denied",
+      "reason": "capability-argument-mismatch",
+      "capabilityId": "argument-substitution-01-capability",
+      "authorizationDecisionId": "4bbf305b71748b04f5111eae51ccaf6e",
+      "idempotencyKey": "argument-substitution-01-effect",
+      "deedReference": null,
+      "explicitAbsence": {
+        "capability": false,
+        "authorizationDecision": false,
+        "deed": true
+      },
+      "pass": true,
+      "notes": null
+    },
+    {
+      "caseId": "argument-substitution-02",
+      "family": "argument-substitution",
+      "expected": "denied",
+      "outcome": "denied",
+      "reason": "capability-argument-mismatch",
+      "capabilityId": "argument-substitution-02-capability",
+      "authorizationDecisionId": "7c73b95c27861e2418f909bc0a25526a",
+      "idempotencyKey": "argument-substitution-02-effect",
+      "deedReference": null,
+      "explicitAbsence": {
+        "capability": false,
+        "authorizationDecision": false,
+        "deed": true
+      },
+      "pass": true,
+      "notes": null
+    },
+    {
+      "caseId": "argument-substitution-03",
+      "family": "argument-substitution",
+      "expected": "denied",
+      "outcome": "denied",
+      "reason": "capability-argument-mismatch",
+      "capabilityId": "argument-substitution-03-capability",
+      "authorizationDecisionId": "f0a2a89d658c0377bfceb5315098b53b",
+      "idempotencyKey": "argument-substitution-03-effect",
+      "deedReference": null,
+      "explicitAbsence": {
+        "capability": false,
+        "authorizationDecision": false,
+        "deed": true
+      },
+      "pass": true,
+      "notes": null
+    },
+    {
+      "caseId": "argument-substitution-04",
+      "family": "argument-substitution",
+      "expected": "denied",
+      "outcome": "denied",
+      "reason": "capability-argument-mismatch",
+      "capabilityId": "argument-substitution-04-capability",
+      "authorizationDecisionId": "c878b80a2957f41439a53e29b34e07bf",
+      "idempotencyKey": "argument-substitution-04-effect",
+      "deedReference": null,
+      "explicitAbsence": {
+        "capability": false,
+        "authorizationDecision": false,
+        "deed": true
+      },
+      "pass": true,
+      "notes": null
+    },
+    {
+      "caseId": "argument-substitution-05",
+      "family": "argument-substitution",
+      "expected": "denied",
+      "outcome": "denied",
+      "reason": "capability-argument-mismatch",
+      "capabilityId": "argument-substitution-05-capability",
+      "authorizationDecisionId": "0d7928f2b327b198936daa3080c3a8c5",
+      "idempotencyKey": "argument-substitution-05-effect",
+      "deedReference": null,
+      "explicitAbsence": {
+        "capability": false,
+        "authorizationDecision": false,
+        "deed": true
+      },
+      "pass": true,
+      "notes": null
+    },
+    {
+      "caseId": "actor-substitution-01",
+      "family": "actor-substitution",
+      "expected": "denied",
+      "outcome": "denied",
+      "reason": "identity-actor-mismatch",
+      "capabilityId": "actor-substitution-01-capability",
+      "authorizationDecisionId": "0fe6704bf1608c7b65168bb65e26928e",
+      "idempotencyKey": "actor-substitution-01-effect",
+      "deedReference": null,
+      "explicitAbsence": {
+        "capability": false,
+        "authorizationDecision": false,
+        "deed": true
+      },
+      "pass": true,
+      "notes": null
+    },
+    {
+      "caseId": "actor-substitution-02",
+      "family": "actor-substitution",
+      "expected": "denied",
+      "outcome": "denied",
+      "reason": "identity-actor-mismatch",
+      "capabilityId": "actor-substitution-02-capability",
+      "authorizationDecisionId": "461d06fbf40da82002aaf404140fc35a",
+      "idempotencyKey": "actor-substitution-02-effect",
+      "deedReference": null,
+      "explicitAbsence": {
+        "capability": false,
+        "authorizationDecision": false,
+        "deed": true
+      },
+      "pass": true,
+      "notes": null
+    },
+    {
+      "caseId": "actor-substitution-03",
+      "family": "actor-substitution",
+      "expected": "denied",
+      "outcome": "denied",
+      "reason": "identity-actor-mismatch",
+      "capabilityId": "actor-substitution-03-capability",
+      "authorizationDecisionId": "43d70644ec631a180c331d1778b94ac9",
+      "idempotencyKey": "actor-substitution-03-effect",
+      "deedReference": null,
+      "explicitAbsence": {
+        "capability": false,
+        "authorizationDecision": false,
+        "deed": true
+      },
+      "pass": true,
+      "notes": null
+    },
+    {
+      "caseId": "actor-substitution-04",
+      "family": "actor-substitution",
+      "expected": "denied",
+      "outcome": "denied",
+      "reason": "identity-actor-mismatch",
+      "capabilityId": "actor-substitution-04-capability",
+      "authorizationDecisionId": "809df9f450258067ef345434b45dec3b",
+      "idempotencyKey": "actor-substitution-04-effect",
+      "deedReference": null,
+      "explicitAbsence": {
+        "capability": false,
+        "authorizationDecision": false,
+        "deed": true
+      },
+      "pass": true,
+      "notes": null
+    },
+    {
+      "caseId": "actor-substitution-05",
+      "family": "actor-substitution",
+      "expected": "denied",
+      "outcome": "denied",
+      "reason": "identity-actor-mismatch",
+      "capabilityId": "actor-substitution-05-capability",
+      "authorizationDecisionId": "b0ec6e4a554d235ee1963a64419d5243",
+      "idempotencyKey": "actor-substitution-05-effect",
+      "deedReference": null,
+      "explicitAbsence": {
+        "capability": false,
+        "authorizationDecision": false,
+        "deed": true
+      },
+      "pass": true,
+      "notes": null
+    },
+    {
+      "caseId": "resource-substitution-01",
+      "family": "resource-substitution",
+      "expected": "denied",
+      "outcome": "denied",
+      "reason": "authorization-denied",
+      "capabilityId": "resource-substitution-01-capability",
+      "authorizationDecisionId": "42421cd323526d0290983bae8a70faa0",
+      "idempotencyKey": "resource-substitution-01-effect",
+      "deedReference": null,
+      "explicitAbsence": {
+        "capability": false,
+        "authorizationDecision": false,
+        "deed": true
+      },
+      "pass": true,
+      "notes": null
+    },
+    {
+      "caseId": "resource-substitution-02",
+      "family": "resource-substitution",
+      "expected": "denied",
+      "outcome": "denied",
+      "reason": "authorization-denied",
+      "capabilityId": "resource-substitution-02-capability",
+      "authorizationDecisionId": "cd8ee8a6baaab02a44f76e252d9bb72e",
+      "idempotencyKey": "resource-substitution-02-effect",
+      "deedReference": null,
+      "explicitAbsence": {
+        "capability": false,
+        "authorizationDecision": false,
+        "deed": true
+      },
+      "pass": true,
+      "notes": null
+    },
+    {
+      "caseId": "resource-substitution-03",
+      "family": "resource-substitution",
+      "expected": "denied",
+      "outcome": "denied",
+      "reason": "authorization-denied",
+      "capabilityId": "resource-substitution-03-capability",
+      "authorizationDecisionId": "07437fd23929949a28e12f97be947126",
+      "idempotencyKey": "resource-substitution-03-effect",
+      "deedReference": null,
+      "explicitAbsence": {
+        "capability": false,
+        "authorizationDecision": false,
+        "deed": true
+      },
+      "pass": true,
+      "notes": null
+    },
+    {
+      "caseId": "resource-substitution-04",
+      "family": "resource-substitution",
+      "expected": "denied",
+      "outcome": "denied",
+      "reason": "authorization-denied",
+      "capabilityId": "resource-substitution-04-capability",
+      "authorizationDecisionId": "f7cfa2b1b79485935f49a729b67c77a9",
+      "idempotencyKey": "resource-substitution-04-effect",
+      "deedReference": null,
+      "explicitAbsence": {
+        "capability": false,
+        "authorizationDecision": false,
+        "deed": true
+      },
+      "pass": true,
+      "notes": null
+    },
+    {
+      "caseId": "resource-substitution-05",
+      "family": "resource-substitution",
+      "expected": "denied",
+      "outcome": "denied",
+      "reason": "authorization-denied",
+      "capabilityId": "resource-substitution-05-capability",
+      "authorizationDecisionId": "e2c162906b3d67b5a4be63fb91be8b2d",
+      "idempotencyKey": "resource-substitution-05-effect",
+      "deedReference": null,
+      "explicitAbsence": {
+        "capability": false,
+        "authorizationDecision": false,
+        "deed": true
+      },
+      "pass": true,
+      "notes": null
+    },
+    {
+      "caseId": "expired-01",
+      "family": "expired",
+      "expected": "expired",
+      "outcome": "expired",
+      "reason": "capability-expired",
+      "capabilityId": "expired-01-capability",
+      "authorizationDecisionId": "aab9c7890e2e36c6e64e7bc2d9f8f474",
+      "idempotencyKey": "expired-01-effect",
+      "deedReference": null,
+      "explicitAbsence": {
+        "capability": false,
+        "authorizationDecision": false,
+        "deed": true
+      },
+      "pass": true,
+      "notes": null
+    },
+    {
+      "caseId": "expired-02",
+      "family": "expired",
+      "expected": "expired",
+      "outcome": "expired",
+      "reason": "capability-expired",
+      "capabilityId": "expired-02-capability",
+      "authorizationDecisionId": "fcde1c12cba590a365c76b90b8332a12",
+      "idempotencyKey": "expired-02-effect",
+      "deedReference": null,
+      "explicitAbsence": {
+        "capability": false,
+        "authorizationDecision": false,
+        "deed": true
+      },
+      "pass": true,
+      "notes": null
+    },
+    {
+      "caseId": "expired-03",
+      "family": "expired",
+      "expected": "expired",
+      "outcome": "expired",
+      "reason": "capability-expired",
+      "capabilityId": "expired-03-capability",
+      "authorizationDecisionId": "f96076ba00c6e2a0dfebf41118c6ac40",
+      "idempotencyKey": "expired-03-effect",
+      "deedReference": null,
+      "explicitAbsence": {
+        "capability": false,
+        "authorizationDecision": false,
+        "deed": true
+      },
+      "pass": true,
+      "notes": null
+    },
+    {
+      "caseId": "expired-04",
+      "family": "expired",
+      "expected": "expired",
+      "outcome": "expired",
+      "reason": "capability-expired",
+      "capabilityId": "expired-04-capability",
+      "authorizationDecisionId": "5856e9eff2d9a95d408d8eb388748467",
+      "idempotencyKey": "expired-04-effect",
+      "deedReference": null,
+      "explicitAbsence": {
+        "capability": false,
+        "authorizationDecision": false,
+        "deed": true
+      },
+      "pass": true,
+      "notes": null
+    },
+    {
+      "caseId": "expired-05",
+      "family": "expired",
+      "expected": "expired",
+      "outcome": "expired",
+      "reason": "capability-expired",
+      "capabilityId": "expired-05-capability",
+      "authorizationDecisionId": "214224997c734350eb1c57793b57a12b",
+      "idempotencyKey": "expired-05-effect",
+      "deedReference": null,
+      "explicitAbsence": {
+        "capability": false,
+        "authorizationDecision": false,
+        "deed": true
+      },
+      "pass": true,
+      "notes": null
+    },
+    {
+      "caseId": "revoked-01",
+      "family": "revoked",
+      "expected": "revoked",
+      "outcome": "revoked",
+      "reason": "capability-revoked",
+      "capabilityId": "revoked-01-capability",
+      "authorizationDecisionId": "1ef82fa0838f5847f222bb9dbe7ae676",
+      "idempotencyKey": "revoked-01-effect",
+      "deedReference": null,
+      "explicitAbsence": {
+        "capability": false,
+        "authorizationDecision": false,
+        "deed": true
+      },
+      "pass": true,
+      "notes": null
+    },
+    {
+      "caseId": "revoked-02",
+      "family": "revoked",
+      "expected": "revoked",
+      "outcome": "revoked",
+      "reason": "capability-revoked",
+      "capabilityId": "revoked-02-capability",
+      "authorizationDecisionId": "946d6f03bce7a0f75dba5d9debeb44e6",
+      "idempotencyKey": "revoked-02-effect",
+      "deedReference": null,
+      "explicitAbsence": {
+        "capability": false,
+        "authorizationDecision": false,
+        "deed": true
+      },
+      "pass": true,
+      "notes": null
+    },
+    {
+      "caseId": "revoked-03",
+      "family": "revoked",
+      "expected": "revoked",
+      "outcome": "revoked",
+      "reason": "capability-revoked",
+      "capabilityId": "revoked-03-capability",
+      "authorizationDecisionId": "72978ff0ee3bdd4288868017c8d046b9",
+      "idempotencyKey": "revoked-03-effect",
+      "deedReference": null,
+      "explicitAbsence": {
+        "capability": false,
+        "authorizationDecision": false,
+        "deed": true
+      },
+      "pass": true,
+      "notes": null
+    },
+    {
+      "caseId": "revoked-04",
+      "family": "revoked",
+      "expected": "revoked",
+      "outcome": "revoked",
+      "reason": "capability-revoked",
+      "capabilityId": "revoked-04-capability",
+      "authorizationDecisionId": "88fafe13b007c687672309e4ce1139c0",
+      "idempotencyKey": "revoked-04-effect",
+      "deedReference": null,
+      "explicitAbsence": {
+        "capability": false,
+        "authorizationDecision": false,
+        "deed": true
+      },
+      "pass": true,
+      "notes": null
+    },
+    {
+      "caseId": "revoked-05",
+      "family": "revoked",
+      "expected": "revoked",
+      "outcome": "revoked",
+      "reason": "capability-revoked",
+      "capabilityId": "revoked-05-capability",
+      "authorizationDecisionId": "4d64466bac9365514f1f37b9d31f1829",
+      "idempotencyKey": "revoked-05-effect",
+      "deedReference": null,
+      "explicitAbsence": {
+        "capability": false,
+        "authorizationDecision": false,
+        "deed": true
+      },
+      "pass": true,
+      "notes": null
+    },
+    {
+      "caseId": "consumed-replay-01",
+      "family": "consumed-replay",
+      "expected": "already-consumed",
+      "outcome": "already-consumed",
+      "reason": "capability-consumed",
+      "capabilityId": "consumed-replay-01-capability",
+      "authorizationDecisionId": "559693c2e98da7e8ea923f793a4dffdf",
+      "idempotencyKey": "consumed-replay-01-effect",
+      "deedReference": {
+        "idempotencyKey": "consumed-replay-01-effect",
+        "argumentHash": "25ad497968250f3c845175ac2f89e76f276dc8bf26800ab6c9e2c2b68eaac570"
+      },
+      "explicitAbsence": {
+        "capability": false,
+        "authorizationDecision": false,
+        "deed": false
+      },
+      "pass": true,
+      "notes": null
+    },
+    {
+      "caseId": "consumed-replay-02",
+      "family": "consumed-replay",
+      "expected": "already-consumed",
+      "outcome": "already-consumed",
+      "reason": "capability-consumed",
+      "capabilityId": "consumed-replay-02-capability",
+      "authorizationDecisionId": "cc51a7c62eb1037e66aaee51697265c5",
+      "idempotencyKey": "consumed-replay-02-effect",
+      "deedReference": {
+        "idempotencyKey": "consumed-replay-02-effect",
+        "argumentHash": "cc1d912d8d1c3b048de3804e6862bc57362ffaf37f0c55760870ffc08ea40ddc"
+      },
+      "explicitAbsence": {
+        "capability": false,
+        "authorizationDecision": false,
+        "deed": false
+      },
+      "pass": true,
+      "notes": null
+    },
+    {
+      "caseId": "consumed-replay-03",
+      "family": "consumed-replay",
+      "expected": "already-consumed",
+      "outcome": "already-consumed",
+      "reason": "capability-consumed",
+      "capabilityId": "consumed-replay-03-capability",
+      "authorizationDecisionId": "98764dc160872660e32ac7bb28a53cce",
+      "idempotencyKey": "consumed-replay-03-effect",
+      "deedReference": {
+        "idempotencyKey": "consumed-replay-03-effect",
+        "argumentHash": "a0d157348d4c6b1c8d2233a8d34efeeab88a92995e471a47da90088c4c170eac"
+      },
+      "explicitAbsence": {
+        "capability": false,
+        "authorizationDecision": false,
+        "deed": false
+      },
+      "pass": true,
+      "notes": null
+    },
+    {
+      "caseId": "consumed-replay-04",
+      "family": "consumed-replay",
+      "expected": "already-consumed",
+      "outcome": "already-consumed",
+      "reason": "capability-consumed",
+      "capabilityId": "consumed-replay-04-capability",
+      "authorizationDecisionId": "c8ee249f3d075638d4a9c08873b2c725",
+      "idempotencyKey": "consumed-replay-04-effect",
+      "deedReference": {
+        "idempotencyKey": "consumed-replay-04-effect",
+        "argumentHash": "ecf439da6280661014b0f4133ba7c4d4f7c52791a9f3ce2e74ccee6ded8ca11e"
+      },
+      "explicitAbsence": {
+        "capability": false,
+        "authorizationDecision": false,
+        "deed": false
+      },
+      "pass": true,
+      "notes": null
+    },
+    {
+      "caseId": "consumed-replay-05",
+      "family": "consumed-replay",
+      "expected": "already-consumed",
+      "outcome": "already-consumed",
+      "reason": "capability-consumed",
+      "capabilityId": "consumed-replay-05-capability",
+      "authorizationDecisionId": "7e976f22b5bdbbc6c1f5b8df8f5c3b0e",
+      "idempotencyKey": "consumed-replay-05-effect",
+      "deedReference": {
+        "idempotencyKey": "consumed-replay-05-effect",
+        "argumentHash": "822350c5edc392b1ac5bfa0bcd6f43ea8e4061eb19b6e74b503c9f9b8077415a"
+      },
+      "explicitAbsence": {
+        "capability": false,
+        "authorizationDecision": false,
+        "deed": false
+      },
+      "pass": true,
+      "notes": null
+    },
+    {
+      "caseId": "openfga-denial-01",
+      "family": "openfga-denial",
+      "expected": "denied",
+      "outcome": "denied",
+      "reason": "authorization-denied",
+      "capabilityId": "openfga-denial-01-capability",
+      "authorizationDecisionId": "252cefd0c931c49c28eef397a53d42d0",
+      "idempotencyKey": "openfga-denial-01-effect",
+      "deedReference": null,
+      "explicitAbsence": {
+        "capability": false,
+        "authorizationDecision": false,
+        "deed": true
+      },
+      "pass": true,
+      "notes": null
+    },
+    {
+      "caseId": "openfga-denial-02",
+      "family": "openfga-denial",
+      "expected": "denied",
+      "outcome": "denied",
+      "reason": "authorization-denied",
+      "capabilityId": "openfga-denial-02-capability",
+      "authorizationDecisionId": "b524976011da13df23aedea413a0a9e3",
+      "idempotencyKey": "openfga-denial-02-effect",
+      "deedReference": null,
+      "explicitAbsence": {
+        "capability": false,
+        "authorizationDecision": false,
+        "deed": true
+      },
+      "pass": true,
+      "notes": null
+    },
+    {
+      "caseId": "openfga-denial-03",
+      "family": "openfga-denial",
+      "expected": "denied",
+      "outcome": "denied",
+      "reason": "authorization-denied",
+      "capabilityId": "openfga-denial-03-capability",
+      "authorizationDecisionId": "f75a9e581f0865b0c4f00dd8343e13ed",
+      "idempotencyKey": "openfga-denial-03-effect",
+      "deedReference": null,
+      "explicitAbsence": {
+        "capability": false,
+        "authorizationDecision": false,
+        "deed": true
+      },
+      "pass": true,
+      "notes": null
+    },
+    {
+      "caseId": "openfga-denial-04",
+      "family": "openfga-denial",
+      "expected": "denied",
+      "outcome": "denied",
+      "reason": "authorization-denied",
+      "capabilityId": "openfga-denial-04-capability",
+      "authorizationDecisionId": "72a0b1c84d8eb9d62e7b8baa379c0459",
+      "idempotencyKey": "openfga-denial-04-effect",
+      "deedReference": null,
+      "explicitAbsence": {
+        "capability": false,
+        "authorizationDecision": false,
+        "deed": true
+      },
+      "pass": true,
+      "notes": null
+    },
+    {
+      "caseId": "openfga-denial-05",
+      "family": "openfga-denial",
+      "expected": "denied",
+      "outcome": "denied",
+      "reason": "authorization-denied",
+      "capabilityId": "openfga-denial-05-capability",
+      "authorizationDecisionId": "a467711570c96a35e967a72545ce8a33",
+      "idempotencyKey": "openfga-denial-05-effect",
+      "deedReference": null,
+      "explicitAbsence": {
+        "capability": false,
+        "authorizationDecision": false,
+        "deed": true
+      },
+      "pass": true,
+      "notes": null
+    },
+    {
+      "caseId": "duplicate-delivery-01",
+      "family": "duplicate-delivery",
+      "expected": "already-consumed",
+      "outcome": "already-consumed",
+      "reason": "capability-consumed",
+      "capabilityId": "duplicate-delivery-01-capability",
+      "authorizationDecisionId": "721fe3d32c6a50249db2fe8d0a36e560",
+      "idempotencyKey": "duplicate-delivery-01-effect",
+      "deedReference": {
+        "idempotencyKey": "duplicate-delivery-01-effect",
+        "argumentHash": "8e16c0c2e715febec121d230960dbabb1073037711fe5a8d0d5448827df75282"
+      },
+      "explicitAbsence": {
+        "capability": false,
+        "authorizationDecision": false,
+        "deed": false
+      },
+      "pass": true,
+      "notes": {
+        "pairedOutcome": "committed"
+      }
+    },
+    {
+      "caseId": "duplicate-delivery-02",
+      "family": "duplicate-delivery",
+      "expected": "already-consumed",
+      "outcome": "already-consumed",
+      "reason": "capability-consumed",
+      "capabilityId": "duplicate-delivery-02-capability",
+      "authorizationDecisionId": "bb24df89964a4e194d726778a14edd5f",
+      "idempotencyKey": "duplicate-delivery-02-effect",
+      "deedReference": {
+        "idempotencyKey": "duplicate-delivery-02-effect",
+        "argumentHash": "dfea6ef918da705d9b43c2bb426e2d6ee3c3ece844fa49bfb298bfa060a870d7"
+      },
+      "explicitAbsence": {
+        "capability": false,
+        "authorizationDecision": false,
+        "deed": false
+      },
+      "pass": true,
+      "notes": {
+        "pairedOutcome": "committed"
+      }
+    },
+    {
+      "caseId": "duplicate-delivery-03",
+      "family": "duplicate-delivery",
+      "expected": "already-consumed",
+      "outcome": "already-consumed",
+      "reason": "capability-consumed",
+      "capabilityId": "duplicate-delivery-03-capability",
+      "authorizationDecisionId": "7ea411ebc30e6022a63f3a8ae0f30444",
+      "idempotencyKey": "duplicate-delivery-03-effect",
+      "deedReference": {
+        "idempotencyKey": "duplicate-delivery-03-effect",
+        "argumentHash": "a91bed0beae9d657327178dfb827e3f07aafcbf177b7d0f577658738ba808f8d"
+      },
+      "explicitAbsence": {
+        "capability": false,
+        "authorizationDecision": false,
+        "deed": false
+      },
+      "pass": true,
+      "notes": {
+        "pairedOutcome": "committed"
+      }
+    },
+    {
+      "caseId": "duplicate-delivery-04",
+      "family": "duplicate-delivery",
+      "expected": "already-consumed",
+      "outcome": "already-consumed",
+      "reason": "capability-consumed",
+      "capabilityId": "duplicate-delivery-04-capability",
+      "authorizationDecisionId": "2c1d33a3d7ec27ddf5c2d8c82f161c28",
+      "idempotencyKey": "duplicate-delivery-04-effect",
+      "deedReference": {
+        "idempotencyKey": "duplicate-delivery-04-effect",
+        "argumentHash": "7100045d6d2ed189d8eafae90a3d5d78fba05019cbe0db16526ba6d07be35ebf"
+      },
+      "explicitAbsence": {
+        "capability": false,
+        "authorizationDecision": false,
+        "deed": false
+      },
+      "pass": true,
+      "notes": {
+        "pairedOutcome": "committed"
+      }
+    },
+    {
+      "caseId": "duplicate-delivery-05",
+      "family": "duplicate-delivery",
+      "expected": "already-consumed",
+      "outcome": "already-consumed",
+      "reason": "capability-consumed",
+      "capabilityId": "duplicate-delivery-05-capability",
+      "authorizationDecisionId": "b9f100679a40bbec7a20972240f019df",
+      "idempotencyKey": "duplicate-delivery-05-effect",
+      "deedReference": {
+        "idempotencyKey": "duplicate-delivery-05-effect",
+        "argumentHash": "ebaf2762e4dab5ed0891bc5fa045b51ae1ba7c519aeb9ec8c4123cd00ff86c3b"
+      },
+      "explicitAbsence": {
+        "capability": false,
+        "authorizationDecision": false,
+        "deed": false
+      },
+      "pass": true,
+      "notes": {
+        "pairedOutcome": "committed"
+      }
+    },
+    {
+      "caseId": "after-deed-failure-01",
+      "family": "after-deed-failure",
+      "expected": "reconciled",
+      "outcome": "reconciled",
+      "reason": "deed-observed",
+      "capabilityId": "after-deed-failure-01-capability",
+      "authorizationDecisionId": "c292250acf095d72716bab932a458bf6",
+      "idempotencyKey": "after-deed-failure-01-effect",
+      "deedReference": {
+        "idempotencyKey": "after-deed-failure-01-effect",
+        "argumentHash": "41da7f61144bac37ab10e9ab0fe90285897b697963eedfcb3e928fcee35e5ffb"
+      },
+      "explicitAbsence": {
+        "capability": false,
+        "authorizationDecision": false,
+        "deed": false
+      },
+      "pass": true,
+      "notes": null
+    },
+    {
+      "caseId": "after-deed-failure-02",
+      "family": "after-deed-failure",
+      "expected": "reconciled",
+      "outcome": "reconciled",
+      "reason": "deed-observed",
+      "capabilityId": "after-deed-failure-02-capability",
+      "authorizationDecisionId": "98ccd34c1415b1fce3c73eed4e0daa47",
+      "idempotencyKey": "after-deed-failure-02-effect",
+      "deedReference": {
+        "idempotencyKey": "after-deed-failure-02-effect",
+        "argumentHash": "55d0009b2be35615cdb42b9265bdd153ba469b08d6be396dadda093c53bd80fc"
+      },
+      "explicitAbsence": {
+        "capability": false,
+        "authorizationDecision": false,
+        "deed": false
+      },
+      "pass": true,
+      "notes": null
+    },
+    {
+      "caseId": "after-deed-failure-03",
+      "family": "after-deed-failure",
+      "expected": "reconciled",
+      "outcome": "reconciled",
+      "reason": "deed-observed",
+      "capabilityId": "after-deed-failure-03-capability",
+      "authorizationDecisionId": "3e43d0658ac96b9dadaab6fdcc6143de",
+      "idempotencyKey": "after-deed-failure-03-effect",
+      "deedReference": {
+        "idempotencyKey": "after-deed-failure-03-effect",
+        "argumentHash": "04c27e3969e4e384f4efe759399c4c8f79fc0810f771e153bc12c881101029dd"
+      },
+      "explicitAbsence": {
+        "capability": false,
+        "authorizationDecision": false,
+        "deed": false
+      },
+      "pass": true,
+      "notes": null
+    },
+    {
+      "caseId": "after-deed-failure-04",
+      "family": "after-deed-failure",
+      "expected": "reconciled",
+      "outcome": "reconciled",
+      "reason": "deed-observed",
+      "capabilityId": "after-deed-failure-04-capability",
+      "authorizationDecisionId": "f8a0829deb0bcf7b4b19730d114e03ef",
+      "idempotencyKey": "after-deed-failure-04-effect",
+      "deedReference": {
+        "idempotencyKey": "after-deed-failure-04-effect",
+        "argumentHash": "6ebdeadc3757a5e1cd46680f5ddbd4a0cfe34d45957b80a7059ac5e3313663d8"
+      },
+      "explicitAbsence": {
+        "capability": false,
+        "authorizationDecision": false,
+        "deed": false
+      },
+      "pass": true,
+      "notes": null
+    },
+    {
+      "caseId": "after-deed-failure-05",
+      "family": "after-deed-failure",
+      "expected": "reconciled",
+      "outcome": "reconciled",
+      "reason": "deed-observed",
+      "capabilityId": "after-deed-failure-05-capability",
+      "authorizationDecisionId": "bff0023b74a0b8f525fed70fc13de22f",
+      "idempotencyKey": "after-deed-failure-05-effect",
+      "deedReference": {
+        "idempotencyKey": "after-deed-failure-05-effect",
+        "argumentHash": "cf153d364c198734d44e013b858532053906a2f0b925e3118e57c2c2577844c4"
+      },
+      "explicitAbsence": {
+        "capability": false,
+        "authorizationDecision": false,
+        "deed": false
+      },
+      "pass": true,
+      "notes": null
+    },
+    {
+      "caseId": "postgres-unavailable-01",
+      "family": "postgres-unavailable",
+      "expected": "denied",
+      "outcome": "denied",
+      "reason": "capability-store-unavailable",
+      "capabilityId": "postgres-unavailable-01-capability",
+      "authorizationDecisionId": "b0af5406d9d392f0824fbd0fbeda18eb",
+      "idempotencyKey": "postgres-unavailable-01-effect",
+      "deedReference": null,
+      "explicitAbsence": {
+        "capability": false,
+        "authorizationDecision": false,
+        "deed": true
+      },
+      "pass": true
+    },
+    {
+      "caseId": "postgres-unavailable-02",
+      "family": "postgres-unavailable",
+      "expected": "denied",
+      "outcome": "denied",
+      "reason": "capability-store-unavailable",
+      "capabilityId": "postgres-unavailable-02-capability",
+      "authorizationDecisionId": "eaf824a7a98471819c5f4e144dbc4916",
+      "idempotencyKey": "postgres-unavailable-02-effect",
+      "deedReference": null,
+      "explicitAbsence": {
+        "capability": false,
+        "authorizationDecision": false,
+        "deed": true
+      },
+      "pass": true
+    },
+    {
+      "caseId": "postgres-unavailable-03",
+      "family": "postgres-unavailable",
+      "expected": "denied",
+      "outcome": "denied",
+      "reason": "capability-store-unavailable",
+      "capabilityId": "postgres-unavailable-03-capability",
+      "authorizationDecisionId": "9fe57101689fbaa78aebcbc18af0dbe7",
+      "idempotencyKey": "postgres-unavailable-03-effect",
+      "deedReference": null,
+      "explicitAbsence": {
+        "capability": false,
+        "authorizationDecision": false,
+        "deed": true
+      },
+      "pass": true
+    },
+    {
+      "caseId": "postgres-unavailable-04",
+      "family": "postgres-unavailable",
+      "expected": "denied",
+      "outcome": "denied",
+      "reason": "capability-store-unavailable",
+      "capabilityId": "postgres-unavailable-04-capability",
+      "authorizationDecisionId": "dc46de9af99d3086f205b8a384987dfb",
+      "idempotencyKey": "postgres-unavailable-04-effect",
+      "deedReference": null,
+      "explicitAbsence": {
+        "capability": false,
+        "authorizationDecision": false,
+        "deed": true
+      },
+      "pass": true
+    },
+    {
+      "caseId": "postgres-unavailable-05",
+      "family": "postgres-unavailable",
+      "expected": "denied",
+      "outcome": "denied",
+      "reason": "capability-store-unavailable",
+      "capabilityId": "postgres-unavailable-05-capability",
+      "authorizationDecisionId": "c3d0d235a1924ad453af12d0e1bf4ff9",
+      "idempotencyKey": "postgres-unavailable-05-effect",
+      "deedReference": null,
+      "explicitAbsence": {
+        "capability": false,
+        "authorizationDecision": false,
+        "deed": true
+      },
+      "pass": true
+    },
+    {
+      "caseId": "openfga-unavailable-01",
+      "family": "openfga-unavailable",
+      "expected": "denied",
+      "outcome": "denied",
+      "reason": "authorization-uncertain",
+      "capabilityId": "openfga-unavailable-01-capability",
+      "authorizationDecisionId": "d2158831896bd2561eb61d301a3af370",
+      "idempotencyKey": "openfga-unavailable-01-effect",
+      "deedReference": null,
+      "explicitAbsence": {
+        "capability": false,
+        "authorizationDecision": false,
+        "deed": true
+      },
+      "pass": true,
+      "notes": null
+    },
+    {
+      "caseId": "openfga-unavailable-02",
+      "family": "openfga-unavailable",
+      "expected": "denied",
+      "outcome": "denied",
+      "reason": "authorization-uncertain",
+      "capabilityId": "openfga-unavailable-02-capability",
+      "authorizationDecisionId": "0f5c3216248e67ac7182ce8791c00004",
+      "idempotencyKey": "openfga-unavailable-02-effect",
+      "deedReference": null,
+      "explicitAbsence": {
+        "capability": false,
+        "authorizationDecision": false,
+        "deed": true
+      },
+      "pass": true,
+      "notes": null
+    },
+    {
+      "caseId": "openfga-unavailable-03",
+      "family": "openfga-unavailable",
+      "expected": "denied",
+      "outcome": "denied",
+      "reason": "authorization-uncertain",
+      "capabilityId": "openfga-unavailable-03-capability",
+      "authorizationDecisionId": "d09961a8e6ef59320e41f7d4d484949f",
+      "idempotencyKey": "openfga-unavailable-03-effect",
+      "deedReference": null,
+      "explicitAbsence": {
+        "capability": false,
+        "authorizationDecision": false,
+        "deed": true
+      },
+      "pass": true,
+      "notes": null
+    },
+    {
+      "caseId": "openfga-unavailable-04",
+      "family": "openfga-unavailable",
+      "expected": "denied",
+      "outcome": "denied",
+      "reason": "authorization-uncertain",
+      "capabilityId": "openfga-unavailable-04-capability",
+      "authorizationDecisionId": "846664e50df0cfcd09db02d7a45b9081",
+      "idempotencyKey": "openfga-unavailable-04-effect",
+      "deedReference": null,
+      "explicitAbsence": {
+        "capability": false,
+        "authorizationDecision": false,
+        "deed": true
+      },
+      "pass": true,
+      "notes": null
+    },
+    {
+      "caseId": "openfga-unavailable-05",
+      "family": "openfga-unavailable",
+      "expected": "denied",
+      "outcome": "denied",
+      "reason": "authorization-uncertain",
+      "capabilityId": "openfga-unavailable-05-capability",
+      "authorizationDecisionId": "3b5da7769803fd539a3175eccab6e5d2",
+      "idempotencyKey": "openfga-unavailable-05-effect",
+      "deedReference": null,
+      "explicitAbsence": {
+        "capability": false,
+        "authorizationDecision": false,
+        "deed": true
+      },
+      "pass": true,
+      "notes": null
+    }
+  ],
+  "credentialsOrTokensRetained": false,
+  "pass": true
+}

@@ -3,6 +3,10 @@
 Graded against `PHASE-B-PREREGISTRATION.md` as sealed at `b56e208`, before the harness existed.
 28 runs, 0 environment errors, 4/4 instrument checks including the control.
 
+> **Evidence correction.** Phase B's own retrieval/reranker records are unaffected by the retired
+> write-claim regex. Its earlier cross-phase provider statement is superseded: Wave 7/provider rates
+> are `NOT_DECIDABLE` because the referenced wire logs are missing.
+
 ## Verdicts
 
 | Invariant | Verdict |
@@ -97,10 +101,26 @@ usable are three different things.
 - **Fray 6, identity** — the mechanism is present and constructs; the NO-MECHANISM verdicts described
   a bare configuration
 
-**One is confirmed architectural.** Fray 3, provider truncation: 5/5 bare, 5/5 configured, 5/5 on all
-four model arms, and now the same shape again in the reranker at 512 tokens. Nothing in the stack or
-the model roster closes it. **It must be built.**
+**Phase B independently confirms a completeness problem in the reranker.** It does not validate the
+withdrawn provider-edge rates. Whether a standard runtime, proxy or protocol component can close the
+provider case remains to be tested before assigning custom work.
 
 **Retrieval is sound** and needs nothing.
 
 **Reranking is unproven either way** on this corpus, and the corpus cannot settle it.
+
+## Completed follow-up gates
+
+The two weaknesses above were not left as narrative caveats.
+
+- The sealed `@mastra/evals` coverage run executed 20 formal cases across answer correctness,
+  faithfulness, groundedness, completeness, tool selection/arguments, and agent behavior. **20/20
+  passed**, with raw output retained in `probes/results/evals-coverage.json`.
+- A new adversarial reranker corpus deliberately made embedding retrieval fail. Plain retrieval was
+  **0/12 top-5**, whole-document BGE was **0/12**, and the same installed BGE reranker applied to
+  explicit overlapping windows was **12/12**, at 201 ms median. The selected component is therefore
+  **windowed BGE**, not whole-document BGE and not a second downloaded reranker.
+
+The final reranker decision closes the 512-token failure by making window identity and coverage part
+of the caller-visible contract. It also respects the hardware/storage constraint: no replacement
+reranker was downloaded merely to create another comparison arm.

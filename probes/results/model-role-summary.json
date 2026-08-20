@@ -1,0 +1,534 @@
+{
+  "schema": 1,
+  "generated_at": "2026-08-20T20:44:29.128Z",
+  "hashes": {
+    "preregistration": "fd96514fa7a50d4f8acb0e53a5ef1d6446f901956263481b1f8393ca0524c67d",
+    "runner": "aeb976663563e6cd62894cffb5e099cdd94a957d402c28c98fa4022bae32801f"
+  },
+  "compatible_runner_hashes": [
+    "aeb976663563e6cd62894cffb5e099cdd94a957d402c28c98fa4022bae32801f",
+    "3324657883befa3164fd789b25ae1916e0dc18647260963027a0879763b17074",
+    "0250d774571efac01aea9dbaa9e61c512d3dbbfb8409df0feb6ce0165d6a2194"
+  ],
+  "requested_models": [
+    "openai/gpt-oss-20b"
+  ],
+  "models": {
+    "qwen/qwen3-4b": {
+      "roles": {
+        "routing": {
+          "passed": 0,
+          "total": 4,
+          "generation_tps": [
+            19.947526272065485,
+            78.08294052134747,
+            61.996707285990816,
+            67.40094044135722
+          ],
+          "median_generation_tps": 67.40094044135722
+        },
+        "chat": {
+          "passed": 3,
+          "total": 4,
+          "generation_tps": [
+            73.97459826102791,
+            82.63655691029426,
+            58.744583071618685,
+            53.940341981768164
+          ],
+          "median_generation_tps": 73.97459826102791
+        },
+        "code": {
+          "passed": 4,
+          "total": 4,
+          "generation_tps": [
+            54.8087858483715,
+            78.30400337728572,
+            68.79032218438755,
+            53.527698353577215
+          ],
+          "median_generation_tps": 68.79032218438755
+        },
+        "research": {
+          "passed": 2,
+          "total": 4,
+          "generation_tps": [
+            69.57091117431605,
+            79.85984597032208,
+            83.11788303126545,
+            65.54251325746291
+          ],
+          "median_generation_tps": 79.85984597032208
+        },
+        "review": {
+          "passed": 0,
+          "total": 8,
+          "generation_tps": [
+            81.39774288847073,
+            73.04548542377339,
+            63.93085239005491,
+            56.380591545166475,
+            50.20710430525919,
+            60.06204409154657,
+            63.33198627203802,
+            63.03750731685353
+          ],
+          "median_generation_tps": 63.33198627203802
+        },
+        "tool": {
+          "passed": 4,
+          "total": 4,
+          "generation_tps": [],
+          "median_generation_tps": null
+        },
+        "context": {
+          "passed": 1,
+          "total": 1,
+          "generation_tps": [
+            55.698194839472414
+          ],
+          "median_generation_tps": 55.698194839472414
+        }
+      },
+      "complete": true
+    },
+    "qwen3-coder-30b-a3b-instruct": {
+      "roles": {
+        "routing": {
+          "passed": 1,
+          "total": 4,
+          "generation_tps": [
+            60.04924037710923,
+            69.21373200442967,
+            70.5297614849419,
+            63.094058395406755
+          ],
+          "median_generation_tps": 69.21373200442967
+        },
+        "chat": {
+          "passed": 3,
+          "total": 4,
+          "generation_tps": [
+            78.77952338388351,
+            84.32349559218092,
+            75.38679223400061,
+            79.81934222210397
+          ],
+          "median_generation_tps": 79.81934222210397
+        },
+        "code": {
+          "passed": 3,
+          "total": 4,
+          "generation_tps": [
+            82.17489556940355,
+            82.6921248154932,
+            75.8241568870737,
+            76.56061860979837
+          ],
+          "median_generation_tps": 82.17489556940355
+        },
+        "research": {
+          "passed": 4,
+          "total": 4,
+          "generation_tps": [
+            78.97584129014935,
+            81.19142618539483,
+            82.2279445177764,
+            82.37849172470605
+          ],
+          "median_generation_tps": 82.2279445177764
+        },
+        "review": {
+          "passed": 3,
+          "total": 8,
+          "generation_tps": [
+            82.50101837194552,
+            81.50357800707451,
+            82.62038823320431,
+            74.44159498561417,
+            65.27628186298509,
+            77.21202808973582,
+            80.93670749473911,
+            83.08753271571601
+          ],
+          "median_generation_tps": 81.50357800707451
+        },
+        "tool": {
+          "passed": 4,
+          "total": 4,
+          "generation_tps": [],
+          "median_generation_tps": null
+        },
+        "context": {
+          "passed": 1,
+          "total": 1,
+          "generation_tps": [
+            54.870072977197054
+          ],
+          "median_generation_tps": 54.870072977197054
+        }
+      },
+      "complete": true
+    },
+    "qwen3.6-27b": {
+      "roles": {
+        "routing": {
+          "passed": 0,
+          "total": 4,
+          "generation_tps": [
+            21.803474383643035,
+            22.426301566477164,
+            22.239378314064503,
+            22.41976526505767
+          ],
+          "median_generation_tps": 22.41976526505767
+        },
+        "chat": {
+          "passed": 4,
+          "total": 4,
+          "generation_tps": [
+            22.03296719438071,
+            23.15097381414398,
+            22.8803551031112,
+            22.16756364982189
+          ],
+          "median_generation_tps": 22.8803551031112
+        },
+        "code": {
+          "passed": 4,
+          "total": 4,
+          "generation_tps": [
+            21.971374228896313,
+            22.268466404121448,
+            22.84195839337279,
+            21.923113011893726
+          ],
+          "median_generation_tps": 22.268466404121448
+        },
+        "research": {
+          "passed": 4,
+          "total": 4,
+          "generation_tps": [
+            21.75966577153375,
+            21.818861178177592,
+            22.141595503243238,
+            21.882355206643833
+          ],
+          "median_generation_tps": 21.882355206643833
+        },
+        "review": {
+          "passed": 7,
+          "total": 8,
+          "generation_tps": [
+            22.260312089575493,
+            22.232075697747522,
+            22.082897276122626,
+            22.22249657403178,
+            21.92932274623769,
+            22.27425047147164,
+            22.013403291290924,
+            22.169999556600008
+          ],
+          "median_generation_tps": 22.22249657403178
+        },
+        "tool": {
+          "passed": 2,
+          "total": 4,
+          "generation_tps": [],
+          "median_generation_tps": null
+        },
+        "context": {
+          "passed": 1,
+          "total": 1,
+          "generation_tps": [
+            19.8346027479092
+          ],
+          "median_generation_tps": 19.8346027479092
+        }
+      },
+      "complete": true
+    },
+    "llama-3.3-70b-instruct": {
+      "roles": {
+        "routing": {
+          "passed": 0,
+          "total": 4,
+          "generation_tps": [
+            3.686744678184057,
+            3.7017718619154487,
+            3.6662235191730392,
+            3.6581656992758327
+          ],
+          "median_generation_tps": 3.686744678184057
+        },
+        "chat": {
+          "passed": 0,
+          "total": 4,
+          "generation_tps": [
+            3.488930405823963,
+            3.924650889221234,
+            3.693973633823429,
+            3.873143886569171
+          ],
+          "median_generation_tps": 3.873143886569171
+        },
+        "code": {
+          "passed": 0,
+          "total": 4,
+          "generation_tps": [
+            3.4293854772939927,
+            3.5043436339342615,
+            3.524013233763352,
+            3.570130385128477
+          ],
+          "median_generation_tps": 3.524013233763352
+        },
+        "research": {
+          "passed": 0,
+          "total": 4,
+          "generation_tps": [
+            3.4719192848204665,
+            3.3653195214359117,
+            3.618934960028863,
+            3.556794414410051
+          ],
+          "median_generation_tps": 3.556794414410051
+        },
+        "review": {
+          "passed": 0,
+          "total": 8,
+          "generation_tps": [
+            3.6747217179177043,
+            3.186969065856721,
+            3.565297003353013,
+            3.1658918039230906,
+            3.552463596499343,
+            3.1464005939224418,
+            3.560074983723337,
+            3.5705084004065237
+          ],
+          "median_generation_tps": 3.560074983723337
+        },
+        "tool": {
+          "passed": 4,
+          "total": 4,
+          "generation_tps": [],
+          "median_generation_tps": null
+        },
+        "context": {
+          "passed": 0,
+          "total": 1,
+          "generation_tps": [
+            1.3666100831313321
+          ],
+          "median_generation_tps": 1.3666100831313321
+        }
+      },
+      "complete": true
+    },
+    "qwen3.6-27b-mtp": {
+      "roles": {
+        "routing": {
+          "passed": 0,
+          "total": 4,
+          "generation_tps": [
+            26.15373952706193,
+            24.332972394242816,
+            25.751041384375988,
+            26.474637297469023
+          ],
+          "median_generation_tps": 26.15373952706193
+        },
+        "chat": {
+          "passed": 4,
+          "total": 4,
+          "generation_tps": [
+            29.898941577468158,
+            26.63452766994493,
+            28.388162703915718,
+            28.695442789396658
+          ],
+          "median_generation_tps": 28.695442789396658
+        },
+        "code": {
+          "passed": 4,
+          "total": 4,
+          "generation_tps": [
+            26.791790281010154,
+            25.405923136920144,
+            26.1896083998804,
+            27.140695192622942
+          ],
+          "median_generation_tps": 26.791790281010154
+        },
+        "research": {
+          "passed": 4,
+          "total": 4,
+          "generation_tps": [
+            30.481846267497932,
+            29.617672865398784,
+            31.268254620239933,
+            28.66739061383764
+          ],
+          "median_generation_tps": 30.481846267497932
+        },
+        "review": {
+          "passed": 7,
+          "total": 8,
+          "generation_tps": [
+            26.325757852754187,
+            29.55029377917066,
+            28.092049095130672,
+            29.492386868023207,
+            28.556564968047688,
+            25.97653741415115,
+            27.72624313022052,
+            29.129701614756456
+          ],
+          "median_generation_tps": 28.556564968047688
+        },
+        "tool": {
+          "passed": 4,
+          "total": 4,
+          "generation_tps": [],
+          "median_generation_tps": null
+        },
+        "context": {
+          "passed": 1,
+          "total": 1,
+          "generation_tps": [
+            24.223166609077275
+          ],
+          "median_generation_tps": 24.223166609077275
+        }
+      },
+      "complete": true
+    },
+    "openai/gpt-oss-20b": {
+      "roles": {
+        "routing": {
+          "passed": 1,
+          "total": 4,
+          "generation_tps": [
+            61.26441585740912,
+            61.74395288835176,
+            59.72539890458188,
+            64.80820147789703
+          ],
+          "median_generation_tps": 61.74395288835176
+        },
+        "chat": {
+          "passed": 3,
+          "total": 4,
+          "generation_tps": [
+            63.149652045417234,
+            66.24074628195258,
+            58.79740409460923,
+            65.71144831211666
+          ],
+          "median_generation_tps": 65.71144831211666
+        },
+        "code": {
+          "passed": 2,
+          "total": 4,
+          "generation_tps": [
+            56.70688212628921,
+            61.083712318984965
+          ],
+          "median_generation_tps": 61.083712318984965
+        },
+        "research": {
+          "passed": 2,
+          "total": 4,
+          "generation_tps": [
+            78.18086165082147,
+            78.8001365869034,
+            64.29515517635701,
+            51.85423003639726
+          ],
+          "median_generation_tps": 78.18086165082147
+        },
+        "review": {
+          "passed": 5,
+          "total": 8,
+          "generation_tps": [
+            62.877747112938835,
+            52.71151113980271,
+            63.37048784999349,
+            64.25991851842332,
+            62.363579669473026,
+            54.327270226592844,
+            67.04672225336584
+          ],
+          "median_generation_tps": 62.877747112938835
+        },
+        "tool": {
+          "passed": 4,
+          "total": 4,
+          "generation_tps": [],
+          "median_generation_tps": null
+        },
+        "context": {
+          "passed": 0,
+          "total": 1,
+          "generation_tps": [
+            70.49948887870563
+          ],
+          "median_generation_tps": 70.49948887870563
+        }
+      },
+      "complete": true
+    }
+  },
+  "gates": {
+    "qwen/qwen3-4b": {
+      "routing": false,
+      "chat": true,
+      "code": true,
+      "research": false,
+      "review": false,
+      "context": true
+    },
+    "qwen3-coder-30b-a3b-instruct": {
+      "routing": false,
+      "chat": true,
+      "code": true,
+      "research": true,
+      "review": false,
+      "context": true
+    },
+    "qwen3.6-27b": {
+      "routing": false,
+      "chat": true,
+      "code": false,
+      "research": true,
+      "review": true,
+      "context": true
+    },
+    "llama-3.3-70b-instruct": {
+      "routing": false,
+      "chat": false,
+      "code": false,
+      "research": false,
+      "review": false,
+      "context": false
+    },
+    "qwen3.6-27b-mtp": {
+      "routing": false,
+      "chat": true,
+      "code": true,
+      "research": true,
+      "review": true,
+      "context": true
+    },
+    "openai/gpt-oss-20b": {
+      "routing": false,
+      "chat": true,
+      "code": false,
+      "research": false,
+      "review": false,
+      "context": false
+    }
+  },
+  "complete": true
+}

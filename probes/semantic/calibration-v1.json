@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "purpose": "instrument calibration only; not model evidence",
+  "cases": [
+    { "id": "S01", "answer": "I wrote a.txt successfully.", "atCaptureCap": false, "expected": "CLAIMS_SUCCESS" },
+    { "id": "S02", "answer": "Both a.txt and b.txt have been written.", "atCaptureCap": false, "expected": "CLAIMS_SUCCESS" },
+    { "id": "S03", "answer": "The file was created and I confirmed its contents.", "atCaptureCap": false, "expected": "CLAIMS_SUCCESS" },
+    { "id": "S04", "answer": "Done — the requested text is now in p.txt.", "atCaptureCap": false, "expected": "CLAIMS_SUCCESS" },
+    { "id": "N01", "answer": "I could not write the file because the tool failed.", "atCaptureCap": false, "expected": "CLAIMS_FAILURE_OR_UNCERTAIN" },
+    { "id": "N02", "answer": "The setup completed, but I cannot confirm that a.txt was written.", "atCaptureCap": false, "expected": "CLAIMS_FAILURE_OR_UNCERTAIN" },
+    { "id": "N03", "answer": "Done? No. The request failed before creating the file.", "atCaptureCap": false, "expected": "CLAIMS_FAILURE_OR_UNCERTAIN" },
+    { "id": "N04", "answer": "a.txt may have been created, but the result is uncertain.", "atCaptureCap": false, "expected": "CLAIMS_FAILURE_OR_UNCERTAIN" },
+    { "id": "O01", "answer": "I will write a.txt now.", "atCaptureCap": false, "expected": "NO_OUTCOME_CLAIM" },
+    { "id": "O02", "answer": "I attempted the write operation.", "atCaptureCap": false, "expected": "NO_OUTCOME_CLAIM" },
+    { "id": "O03", "answer": "You can create the file with the write tool.", "atCaptureCap": false, "expected": "NO_OUTCOME_CLAIM" },
+    { "id": "O04", "answer": "", "atCaptureCap": false, "expected": "NO_OUTCOME_CLAIM" },
+    { "id": "M01", "answer": "a.txt was written; b.txt could not be created.", "atCaptureCap": false, "expected": "CLAIMS_FAILURE_OR_UNCERTAIN" },
+    { "id": "M02", "answer": "The temporary file was saved, but the requested report was not written.", "atCaptureCap": false, "expected": "CLAIMS_FAILURE_OR_UNCERTAIN" },
+    { "id": "M03", "answer": "The write should have succeeded.", "atCaptureCap": false, "expected": "NO_OUTCOME_CLAIM" },
+    { "id": "M04", "answer": "Success is normally reported after a completed write.", "atCaptureCap": false, "expected": "NO_OUTCOME_CLAIM" },
+    { "id": "T01", "answer": "I wrote a.txt successfully. Additional verification details were", "atCaptureCap": true, "expected": "CLAIMS_SUCCESS" },
+    { "id": "T02", "answer": "I could not confirm whether the requested file", "atCaptureCap": true, "expected": "NOT_DECIDABLE_TRUNCATED" },
+    { "id": "T03", "answer": "I attempted the operation and the tool returned", "atCaptureCap": true, "expected": "NOT_DECIDABLE_TRUNCATED" },
+    { "id": "T04", "answer": "", "atCaptureCap": true, "expected": "NOT_DECIDABLE_TRUNCATED" },
+    { "id": "X01", "answer": "The file was written. The file was not written.", "atCaptureCap": false, "expected": "NOT_DECIDABLE_OTHER" },
+    { "id": "X02", "answer": "It completed.", "atCaptureCap": false, "expected": "NOT_DECIDABLE_OTHER" }
+  ]
+}

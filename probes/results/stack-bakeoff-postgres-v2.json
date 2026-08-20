@@ -1,0 +1,529 @@
+{
+  "schemaVersion": 1,
+  "candidate": "PostgreSQL 18.6",
+  "connection": "127.0.0.1:9432 local portable lab cluster",
+  "runs": [
+    {
+      "family": "healthy",
+      "repetition": 1,
+      "effectId": "healthy-1",
+      "result": {
+        "state": "committed",
+        "deed": {
+          "payload": "payload-1",
+          "payload_sha256": "2e6709af8dbfe7cd5abb2f716924848e527b4486c30c4509b0e4aa8171987335",
+          "state": "committed"
+        }
+      }
+    },
+    {
+      "family": "healthy",
+      "repetition": 2,
+      "effectId": "healthy-2",
+      "result": {
+        "state": "committed",
+        "deed": {
+          "payload": "payload-2",
+          "payload_sha256": "bddd3a6e5dab59fa05fa8fb0d789a3c2ad3c9982dcc4a368f3d5719f421ffda8",
+          "state": "committed"
+        }
+      }
+    },
+    {
+      "family": "healthy",
+      "repetition": 3,
+      "effectId": "healthy-3",
+      "result": {
+        "state": "committed",
+        "deed": {
+          "payload": "payload-3",
+          "payload_sha256": "c97811e4375fda6eb4b46693d20752e6d584a4ec8a7910a25c52f09988c2d4cb",
+          "state": "committed"
+        }
+      }
+    },
+    {
+      "family": "healthy",
+      "repetition": 4,
+      "effectId": "healthy-4",
+      "result": {
+        "state": "committed",
+        "deed": {
+          "payload": "payload-4",
+          "payload_sha256": "85261d40c625814f4e9eae3aac7948691fbcd76d4e19d85a71e30a665add4d3b",
+          "state": "committed"
+        }
+      }
+    },
+    {
+      "family": "healthy",
+      "repetition": 5,
+      "effectId": "healthy-5",
+      "result": {
+        "state": "committed",
+        "deed": {
+          "payload": "payload-5",
+          "payload_sha256": "ed8a2d8e007008d5582cc9fc8f72c361f32b698dc426c70691072aa18e5be1c8",
+          "state": "committed"
+        }
+      }
+    },
+    {
+      "family": "ack-without-deed",
+      "repetition": 1,
+      "effectId": "ack-without-deed-1",
+      "result": {
+        "state": "not-committed",
+        "deed": null
+      }
+    },
+    {
+      "family": "ack-without-deed",
+      "repetition": 2,
+      "effectId": "ack-without-deed-2",
+      "result": {
+        "state": "not-committed",
+        "deed": null
+      }
+    },
+    {
+      "family": "ack-without-deed",
+      "repetition": 3,
+      "effectId": "ack-without-deed-3",
+      "result": {
+        "state": "not-committed",
+        "deed": null
+      }
+    },
+    {
+      "family": "ack-without-deed",
+      "repetition": 4,
+      "effectId": "ack-without-deed-4",
+      "result": {
+        "state": "not-committed",
+        "deed": null
+      }
+    },
+    {
+      "family": "ack-without-deed",
+      "repetition": 5,
+      "effectId": "ack-without-deed-5",
+      "result": {
+        "state": "not-committed",
+        "deed": null
+      }
+    },
+    {
+      "family": "failure-after-deed",
+      "repetition": 1,
+      "effectId": "failure-after-deed-1",
+      "result": {
+        "state": "committed",
+        "deed": {
+          "payload": "payload-1",
+          "payload_sha256": "2e6709af8dbfe7cd5abb2f716924848e527b4486c30c4509b0e4aa8171987335",
+          "state": "committed"
+        },
+        "injectedError": "injected dependency failure after commit"
+      }
+    },
+    {
+      "family": "failure-after-deed",
+      "repetition": 2,
+      "effectId": "failure-after-deed-2",
+      "result": {
+        "state": "committed",
+        "deed": {
+          "payload": "payload-2",
+          "payload_sha256": "bddd3a6e5dab59fa05fa8fb0d789a3c2ad3c9982dcc4a368f3d5719f421ffda8",
+          "state": "committed"
+        },
+        "injectedError": "injected dependency failure after commit"
+      }
+    },
+    {
+      "family": "failure-after-deed",
+      "repetition": 3,
+      "effectId": "failure-after-deed-3",
+      "result": {
+        "state": "committed",
+        "deed": {
+          "payload": "payload-3",
+          "payload_sha256": "c97811e4375fda6eb4b46693d20752e6d584a4ec8a7910a25c52f09988c2d4cb",
+          "state": "committed"
+        },
+        "injectedError": "injected dependency failure after commit"
+      }
+    },
+    {
+      "family": "failure-after-deed",
+      "repetition": 4,
+      "effectId": "failure-after-deed-4",
+      "result": {
+        "state": "committed",
+        "deed": {
+          "payload": "payload-4",
+          "payload_sha256": "85261d40c625814f4e9eae3aac7948691fbcd76d4e19d85a71e30a665add4d3b",
+          "state": "committed"
+        },
+        "injectedError": "injected dependency failure after commit"
+      }
+    },
+    {
+      "family": "failure-after-deed",
+      "repetition": 5,
+      "effectId": "failure-after-deed-5",
+      "result": {
+        "state": "committed",
+        "deed": {
+          "payload": "payload-5",
+          "payload_sha256": "ed8a2d8e007008d5582cc9fc8f72c361f32b698dc426c70691072aa18e5be1c8",
+          "state": "committed"
+        },
+        "injectedError": "injected dependency failure after commit"
+      }
+    },
+    {
+      "family": "duplicate",
+      "repetition": 1,
+      "effectId": "duplicate-1",
+      "attempts": [
+        {
+          "state": "committed",
+          "deed": {
+            "payload": "payload-1",
+            "payload_sha256": "2e6709af8dbfe7cd5abb2f716924848e527b4486c30c4509b0e4aa8171987335",
+            "state": "committed"
+          }
+        },
+        {
+          "state": "committed",
+          "deed": {
+            "payload": "payload-1",
+            "payload_sha256": "2e6709af8dbfe7cd5abb2f716924848e527b4486c30c4509b0e4aa8171987335",
+            "state": "committed"
+          },
+          "injectedError": "could not serialize access due to concurrent update"
+        },
+        {
+          "state": "committed",
+          "deed": {
+            "payload": "payload-1",
+            "payload_sha256": "2e6709af8dbfe7cd5abb2f716924848e527b4486c30c4509b0e4aa8171987335",
+            "state": "committed"
+          }
+        },
+        {
+          "state": "committed",
+          "deed": {
+            "payload": "payload-1",
+            "payload_sha256": "2e6709af8dbfe7cd5abb2f716924848e527b4486c30c4509b0e4aa8171987335",
+            "state": "committed"
+          }
+        },
+        {
+          "state": "committed",
+          "deed": {
+            "payload": "payload-1",
+            "payload_sha256": "2e6709af8dbfe7cd5abb2f716924848e527b4486c30c4509b0e4aa8171987335",
+            "state": "committed"
+          }
+        }
+      ],
+      "deedCount": 1
+    },
+    {
+      "family": "duplicate",
+      "repetition": 2,
+      "effectId": "duplicate-2",
+      "attempts": [
+        {
+          "state": "committed",
+          "deed": {
+            "payload": "payload-2",
+            "payload_sha256": "bddd3a6e5dab59fa05fa8fb0d789a3c2ad3c9982dcc4a368f3d5719f421ffda8",
+            "state": "committed"
+          }
+        },
+        {
+          "state": "committed",
+          "deed": {
+            "payload": "payload-2",
+            "payload_sha256": "bddd3a6e5dab59fa05fa8fb0d789a3c2ad3c9982dcc4a368f3d5719f421ffda8",
+            "state": "committed"
+          },
+          "injectedError": "could not serialize access due to concurrent update"
+        },
+        {
+          "state": "committed",
+          "deed": {
+            "payload": "payload-2",
+            "payload_sha256": "bddd3a6e5dab59fa05fa8fb0d789a3c2ad3c9982dcc4a368f3d5719f421ffda8",
+            "state": "committed"
+          },
+          "injectedError": "could not serialize access due to concurrent update"
+        },
+        {
+          "state": "committed",
+          "deed": {
+            "payload": "payload-2",
+            "payload_sha256": "bddd3a6e5dab59fa05fa8fb0d789a3c2ad3c9982dcc4a368f3d5719f421ffda8",
+            "state": "committed"
+          },
+          "injectedError": "could not serialize access due to concurrent update"
+        },
+        {
+          "state": "committed",
+          "deed": {
+            "payload": "payload-2",
+            "payload_sha256": "bddd3a6e5dab59fa05fa8fb0d789a3c2ad3c9982dcc4a368f3d5719f421ffda8",
+            "state": "committed"
+          },
+          "injectedError": "could not serialize access due to concurrent update"
+        }
+      ],
+      "deedCount": 1
+    },
+    {
+      "family": "duplicate",
+      "repetition": 3,
+      "effectId": "duplicate-3",
+      "attempts": [
+        {
+          "state": "committed",
+          "deed": {
+            "payload": "payload-3",
+            "payload_sha256": "c97811e4375fda6eb4b46693d20752e6d584a4ec8a7910a25c52f09988c2d4cb",
+            "state": "committed"
+          }
+        },
+        {
+          "state": "committed",
+          "deed": {
+            "payload": "payload-3",
+            "payload_sha256": "c97811e4375fda6eb4b46693d20752e6d584a4ec8a7910a25c52f09988c2d4cb",
+            "state": "committed"
+          },
+          "injectedError": "could not serialize access due to concurrent update"
+        },
+        {
+          "state": "committed",
+          "deed": {
+            "payload": "payload-3",
+            "payload_sha256": "c97811e4375fda6eb4b46693d20752e6d584a4ec8a7910a25c52f09988c2d4cb",
+            "state": "committed"
+          },
+          "injectedError": "could not serialize access due to concurrent update"
+        },
+        {
+          "state": "committed",
+          "deed": {
+            "payload": "payload-3",
+            "payload_sha256": "c97811e4375fda6eb4b46693d20752e6d584a4ec8a7910a25c52f09988c2d4cb",
+            "state": "committed"
+          },
+          "injectedError": "could not serialize access due to concurrent update"
+        },
+        {
+          "state": "committed",
+          "deed": {
+            "payload": "payload-3",
+            "payload_sha256": "c97811e4375fda6eb4b46693d20752e6d584a4ec8a7910a25c52f09988c2d4cb",
+            "state": "committed"
+          },
+          "injectedError": "could not serialize access due to concurrent update"
+        }
+      ],
+      "deedCount": 1
+    },
+    {
+      "family": "duplicate",
+      "repetition": 4,
+      "effectId": "duplicate-4",
+      "attempts": [
+        {
+          "state": "committed",
+          "deed": {
+            "payload": "payload-4",
+            "payload_sha256": "85261d40c625814f4e9eae3aac7948691fbcd76d4e19d85a71e30a665add4d3b",
+            "state": "committed"
+          }
+        },
+        {
+          "state": "committed",
+          "deed": {
+            "payload": "payload-4",
+            "payload_sha256": "85261d40c625814f4e9eae3aac7948691fbcd76d4e19d85a71e30a665add4d3b",
+            "state": "committed"
+          },
+          "injectedError": "could not serialize access due to concurrent update"
+        },
+        {
+          "state": "committed",
+          "deed": {
+            "payload": "payload-4",
+            "payload_sha256": "85261d40c625814f4e9eae3aac7948691fbcd76d4e19d85a71e30a665add4d3b",
+            "state": "committed"
+          },
+          "injectedError": "could not serialize access due to concurrent update"
+        },
+        {
+          "state": "committed",
+          "deed": {
+            "payload": "payload-4",
+            "payload_sha256": "85261d40c625814f4e9eae3aac7948691fbcd76d4e19d85a71e30a665add4d3b",
+            "state": "committed"
+          },
+          "injectedError": "could not serialize access due to concurrent update"
+        },
+        {
+          "state": "committed",
+          "deed": {
+            "payload": "payload-4",
+            "payload_sha256": "85261d40c625814f4e9eae3aac7948691fbcd76d4e19d85a71e30a665add4d3b",
+            "state": "committed"
+          },
+          "injectedError": "could not serialize access due to concurrent update"
+        }
+      ],
+      "deedCount": 1
+    },
+    {
+      "family": "duplicate",
+      "repetition": 5,
+      "effectId": "duplicate-5",
+      "attempts": [
+        {
+          "state": "committed",
+          "deed": {
+            "payload": "payload-5",
+            "payload_sha256": "ed8a2d8e007008d5582cc9fc8f72c361f32b698dc426c70691072aa18e5be1c8",
+            "state": "committed"
+          }
+        },
+        {
+          "state": "committed",
+          "deed": {
+            "payload": "payload-5",
+            "payload_sha256": "ed8a2d8e007008d5582cc9fc8f72c361f32b698dc426c70691072aa18e5be1c8",
+            "state": "committed"
+          },
+          "injectedError": "could not serialize access due to concurrent update"
+        },
+        {
+          "state": "committed",
+          "deed": {
+            "payload": "payload-5",
+            "payload_sha256": "ed8a2d8e007008d5582cc9fc8f72c361f32b698dc426c70691072aa18e5be1c8",
+            "state": "committed"
+          },
+          "injectedError": "could not serialize access due to concurrent update"
+        },
+        {
+          "state": "committed",
+          "deed": {
+            "payload": "payload-5",
+            "payload_sha256": "ed8a2d8e007008d5582cc9fc8f72c361f32b698dc426c70691072aa18e5be1c8",
+            "state": "committed"
+          },
+          "injectedError": "could not serialize access due to concurrent update"
+        },
+        {
+          "state": "committed",
+          "deed": {
+            "payload": "payload-5",
+            "payload_sha256": "ed8a2d8e007008d5582cc9fc8f72c361f32b698dc426c70691072aa18e5be1c8",
+            "state": "committed"
+          },
+          "injectedError": "could not serialize access due to concurrent update"
+        }
+      ],
+      "deedCount": 1
+    }
+  ],
+  "checks": [
+    {
+      "key": "healthy-1",
+      "pass": true
+    },
+    {
+      "key": "healthy-2",
+      "pass": true
+    },
+    {
+      "key": "healthy-3",
+      "pass": true
+    },
+    {
+      "key": "healthy-4",
+      "pass": true
+    },
+    {
+      "key": "healthy-5",
+      "pass": true
+    },
+    {
+      "key": "ack-without-deed-1",
+      "pass": true
+    },
+    {
+      "key": "ack-without-deed-2",
+      "pass": true
+    },
+    {
+      "key": "ack-without-deed-3",
+      "pass": true
+    },
+    {
+      "key": "ack-without-deed-4",
+      "pass": true
+    },
+    {
+      "key": "ack-without-deed-5",
+      "pass": true
+    },
+    {
+      "key": "failure-after-deed-1",
+      "pass": true
+    },
+    {
+      "key": "failure-after-deed-2",
+      "pass": true
+    },
+    {
+      "key": "failure-after-deed-3",
+      "pass": true
+    },
+    {
+      "key": "failure-after-deed-4",
+      "pass": true
+    },
+    {
+      "key": "failure-after-deed-5",
+      "pass": true
+    },
+    {
+      "key": "duplicate-1",
+      "pass": true
+    },
+    {
+      "key": "duplicate-2",
+      "pass": true
+    },
+    {
+      "key": "duplicate-3",
+      "pass": true
+    },
+    {
+      "key": "duplicate-4",
+      "pass": true
+    },
+    {
+      "key": "duplicate-5",
+      "pass": true
+    }
+  ],
+  "passed": 20,
+  "total": 20,
+  "verdict": "LAB-PASS_DATABASE_EFFECTS"
+}

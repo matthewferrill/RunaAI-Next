@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-08-20T18:44:44.144Z",
+  "profile": "isolated-loopback-lab",
+  "ports": {
+    "postgresql9470Active": false,
+    "keycloak9471Active": false,
+    "openfga9473Active": false
+  },
+  "servicesStoppedAfterHarness": true,
+  "windowsServicesInstalled": false,
+  "lanPortsOpened": false,
+  "defaultDevelopmentModified": false,
+  "productionActivated": false,
+  "runaAiTouched": false,
+  "credentialsOrTokensRetained": false
+}

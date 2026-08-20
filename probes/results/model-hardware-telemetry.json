@@ -1,0 +1,1555 @@
+{
+  "schema": 1,
+  "hashes": {
+    "preregistration": "fd96514fa7a50d4f8acb0e53a5ef1d6446f901956263481b1f8393ca0524c67d",
+    "runner": "aeb976663563e6cd62894cffb5e099cdd94a957d402c28c98fa4022bae32801f"
+  },
+  "arms": [
+    {
+      "type": "arm-start",
+      "model": "qwen/qwen3-4b",
+      "identity": {
+        "type": "llm",
+        "publisher": "qwen",
+        "key": "qwen/qwen3-4b",
+        "display_name": "Qwen3 4B",
+        "architecture": "qwen3",
+        "quantization": {
+          "name": "Q4_K_M",
+          "bits_per_weight": 4
+        },
+        "size_bytes": 2497458879,
+        "params_string": "4B",
+        "loaded_instances": [],
+        "max_context_length": 32768,
+        "format": "gguf",
+        "capabilities": {
+          "vision": false,
+          "trained_for_tool_use": true,
+          "reasoning": {
+            "allowed_options": [
+              "off",
+              "on"
+            ],
+            "default": "on"
+          }
+        },
+        "description": null,
+        "variants": [
+          "qwen/qwen3-4b@q4_k_m"
+        ],
+        "selected_variant": "qwen/qwen3-4b@q4_k_m"
+      },
+      "hashes": {
+        "preregistration": "fd96514fa7a50d4f8acb0e53a5ef1d6446f901956263481b1f8393ca0524c67d",
+        "runner": "0250d774571efac01aea9dbaa9e61c512d3dbbfb8409df0feb6ce0165d6a2194"
+      },
+      "requested_context": 32768,
+      "started_at": "2026-08-20T19:37:02.940Z",
+      "telemetry": [
+        {
+          "label": "before-load",
+          "nvlink": [
+            "GPU 0: Quadro RTX 6000 (UUID: GPU-15ea3e34-292b-3333-5e43-e5b133f9a30c)",
+            "\t Link 0: 25.781 GB/s",
+            "\t Link 1: 25.781 GB/s",
+            "GPU 1: Quadro RTX 6000 (UUID: GPU-1f2f6459-b688-3466-5b49-a65c538be843)",
+            "\t Link 0: 25.781 GB/s",
+            "\t Link 1: 25.781 GB/s"
+          ],
+          "free_physical_kib": 125249204,
+          "gpus": [
+            "0, Quadro RTX 6000, 23040, 366, 0, 55, P8, 36.23, 260.00, 300",
+            "1, Quadro RTX 6000, 23040, 31, 0, 47, P8, 23.97, 260.00, 300"
+          ],
+          "model": "qwen/qwen3-4b",
+          "time": "2026-08-20T19:37:06.1486921Z"
+        }
+      ],
+      "load_wall_ms": 6163,
+      "load": {
+        "ok": true,
+        "data": {
+          "type": "llm",
+          "instance_id": "qwen/qwen3-4b",
+          "load_time_seconds": 5.208,
+          "status": "loaded",
+          "load_config": {
+            "context_length": 32768,
+            "eval_batch_size": 2048,
+            "physical_batch_size": 512,
+            "parallel": 4,
+            "flash_attention": true,
+            "context_checkpoints": 32,
+            "reasoning_budget_message": "",
+            "speculative_draft_mtp": false,
+            "speculative_draft_simple": false,
+            "speculative_draft_model": "",
+            "speculative_draft_max_tokens": 16,
+            "speculative_draft_min_tokens": 0,
+            "speculative_draft_min_continue_probability": 0.75,
+            "offload_kv_cache_to_gpu": true,
+            "prompt_template": {
+              "type": "jinja",
+              "template": "{%- if tools %}\n    {{- '<|im_start|>system\\n' }}\n    {%- if messages[0].role == 'system' %}\n        {{- messages[0].content + '\\n\\n' }}\n    {%- endif %}\n    {{- \"# Tools\\n\\nYou may call one or more functions to assist with the user query.\\n\\nYou are provided with function signatures within <tools></tools> XML tags:\\n<tools>\" }}\n    {%- for tool in tools %}\n        {{- \"\\n\" }}\n        {{- tool | tojson }}\n    {%- endfor %}\n    {{- \"\\n</tools>\\n\\nFor each function call, return a json object with function name and arguments within <tool_call></tool_call> XML tags:\\n<tool_call>\\n{\\\"name\\\": <function-name>, \\\"arguments\\\": <args-json-object>}\\n</tool_call><|im_end|>\\n\" }}\n{%- else %}\n    {%- if messages[0].role == 'system' %}\n        {{- '<|im_start|>system\\n' + messages[0].content + '<|im_end|>\\n' }}\n    {%- endif %}\n{%- endif %}\n{%- set ns = namespace(multi_step_tool=true, last_query_index=messages|length - 1) %}\n{%- for message in messages[::-1] %}\n    {%- set index = (messages|length - 1) - loop.index0 %}\n    {%- set tool_start = \"<tool_response>\" %}\n    {%- set tool_start_length = tool_start|length %}\n    {%- set start_of_message = message.content[:tool_start_length] %}\n    {%- set tool_end = \"</tool_response>\" %}\n    {%- set tool_end_length = tool_end|length %}\n    {%- set start_pos = (message.content|length) - tool_end_length %}\n    {%- if start_pos < 0 %}\n        {%- set start_pos = 0 %}\n    {%- endif %}\n    {%- set end_of_message = message.content[start_pos:] %}\n    {%- if ns.multi_step_tool and message.role == \"user\" and not(start_of_message == tool_start and end_of_message == tool_end) %}\n        {%- set ns.multi_step_tool = false %}\n        {%- set ns.last_query_index = index %}\n    {%- endif %}\n{%- endfor %}\n{%- for message in messages %}\n    {%- if (message.role == \"user\") or (message.role == \"system\" and not loop.first) %}\n        {{- '<|im_start|>' + message.role + '\\n' + message.content + '<|im_end|>' + '\\n' }}\n    {%- elif message.role == \"assistant\" %}\n        {%- set content = message.content %}\n        {%- set reasoning_content = '' %}\n        {%- if message.reasoning_content is defined and message.reasoning_content is not none %}\n            {%- set reasoning_content = message.reasoning_content %}\n        {%- else %}\n            {%- if '</think>' in message.content %}\n                {%- set content = (message.content.split('</think>')|last).lstrip('\\n') %}\n        {%- set reasoning_content = (message.content.split('</think>')|first).rstrip('\\n') %}\n        {%- set reasoning_content = (reasoning_content.split('<think>')|last).lstrip('\\n') %}\n            {%- endif %}\n        {%- endif %}\n        {%- if loop.index0 > ns.last_query_index %}\n            {%- if loop.last or (not loop.last and reasoning_content) %}\n                {{- '<|im_start|>' + message.role + '\\n<think>\\n' + reasoning_content.strip('\\n') + '\\n</think>\\n\\n' + content.lstrip('\\n') }}\n            {%- else %}\n                {{- '<|im_start|>' + message.role + '\\n' + content }}\n            {%- endif %}\n        {%- else %}\n            {{- '<|im_start|>' + message.role + '\\n' + content }}\n        {%- endif %}\n        {%- if message.tool_calls %}\n            {%- for tool_call in message.tool_calls %}\n                {%- if (loop.first and content) or (not loop.first) %}\n                    {{- '\\n' }}\n                {%- endif %}\n                {%- if tool_call.function %}\n                    {%- set tool_call = tool_call.function %}\n                {%- endif %}\n                {{- '<tool_call>\\n{\"name\": \"' }}\n                {{- tool_call.name }}\n                {{- '\", \"arguments\": ' }}\n                {%- if tool_call.arguments is string %}\n                    {{- tool_call.arguments }}\n                {%- else %}\n                    {{- tool_call.arguments | tojson }}\n                {%- endif %}\n                {{- '}\\n</tool_call>' }}\n            {%- endfor %}\n        {%- endif %}\n        {{- '<|im_end|>\\n' }}\n    {%- elif message.role == \"tool\" %}\n        {%- if loop.first or (messages[loop.index0 - 1].role != \"tool\") %}\n            {{- '<|im_start|>user' }}\n        {%- endif %}\n        {{- '\\n<tool_response>\\n' }}\n        {{- message.content }}\n        {{- '\\n</tool_response>' }}\n        {%- if loop.last or (messages[loop.index0 + 1].role != \"tool\") %}\n            {{- '<|im_end|>\\n' }}\n        {%- endif %}\n    {%- endif %}\n{%- endfor %}\n{%- if add_generation_prompt %}\n    {{- '<|im_start|>assistant\\n' }}\n    {%- if enable_thinking is defined and enable_thinking is false %}\n        {{- '<think>\\n\\n</think>\\n\\n' }}\n    {%- endif %}\n{%- endif %}",
+              "stop_strings": []
+            }
+          }
+        }
+      }
+    },
+    {
+      "type": "arm-end",
+      "model": "qwen/qwen3-4b",
+      "unload": {
+        "ok": true,
+        "data": {
+          "instance_id": "qwen/qwen3-4b"
+        }
+      },
+      "telemetry": [
+        {
+          "label": "before-load",
+          "nvlink": [
+            "GPU 0: Quadro RTX 6000 (UUID: GPU-15ea3e34-292b-3333-5e43-e5b133f9a30c)",
+            "\t Link 0: 25.781 GB/s",
+            "\t Link 1: 25.781 GB/s",
+            "GPU 1: Quadro RTX 6000 (UUID: GPU-1f2f6459-b688-3466-5b49-a65c538be843)",
+            "\t Link 0: 25.781 GB/s",
+            "\t Link 1: 25.781 GB/s"
+          ],
+          "free_physical_kib": 125249204,
+          "gpus": [
+            "0, Quadro RTX 6000, 23040, 366, 0, 55, P8, 36.23, 260.00, 300",
+            "1, Quadro RTX 6000, 23040, 31, 0, 47, P8, 23.97, 260.00, 300"
+          ],
+          "model": "qwen/qwen3-4b",
+          "time": "2026-08-20T19:37:06.1486921Z"
+        },
+        {
+          "label": "after-load",
+          "nvlink": [
+            "GPU 0: Quadro RTX 6000 (UUID: GPU-15ea3e34-292b-3333-5e43-e5b133f9a30c)",
+            "\t Link 0: 25.781 GB/s",
+            "\t Link 1: 25.781 GB/s",
+            "GPU 1: Quadro RTX 6000 (UUID: GPU-1f2f6459-b688-3466-5b49-a65c538be843)",
+            "\t Link 0: 25.781 GB/s",
+            "\t Link 1: 25.781 GB/s"
+          ],
+          "free_physical_kib": 122163952,
+          "gpus": [
+            "0, Quadro RTX 6000, 23040, 4125, 0, 60, P3, 79.56, 260.00, 540",
+            "1, Quadro RTX 6000, 23040, 3732, 0, 53, P3, 85.55, 260.00, 540"
+          ],
+          "model": "qwen/qwen3-4b",
+          "time": "2026-08-20T19:37:13.9365182Z"
+        },
+        {
+          "label": "after-role-suite",
+          "nvlink": [
+            "GPU 0: Quadro RTX 6000 (UUID: GPU-15ea3e34-292b-3333-5e43-e5b133f9a30c)",
+            "\t Link 0: 25.781 GB/s",
+            "\t Link 1: 25.781 GB/s",
+            "GPU 1: Quadro RTX 6000 (UUID: GPU-1f2f6459-b688-3466-5b49-a65c538be843)",
+            "\t Link 0: 25.781 GB/s",
+            "\t Link 1: 25.781 GB/s"
+          ],
+          "free_physical_kib": 121937064,
+          "gpus": [
+            "0, Quadro RTX 6000, 23040, 4128, 0, 60, P3, 66.86, 260.00, 435",
+            "1, Quadro RTX 6000, 23040, 3734, 0, 53, P3, 63.07, 260.00, 450"
+          ],
+          "model": "qwen/qwen3-4b",
+          "time": "2026-08-20T19:37:51.7359692Z"
+        },
+        {
+          "label": "after-context",
+          "nvlink": [
+            "GPU 0: Quadro RTX 6000 (UUID: GPU-15ea3e34-292b-3333-5e43-e5b133f9a30c)",
+            "\t Link 0: 25.781 GB/s",
+            "\t Link 1: 25.781 GB/s",
+            "GPU 1: Quadro RTX 6000 (UUID: GPU-1f2f6459-b688-3466-5b49-a65c538be843)",
+            "\t Link 0: 25.781 GB/s",
+            "\t Link 1: 25.781 GB/s"
+          ],
+          "free_physical_kib": 121763044,
+          "gpus": [
+            "0, Quadro RTX 6000, 23040, 4132, 0, 81, P2, 111.44, 260.00, 1695",
+            "1, Quadro RTX 6000, 23040, 3762, 0, 77, P3, 80.36, 260.00, 660"
+          ],
+          "model": "qwen/qwen3-4b",
+          "time": "2026-08-20T19:38:18.9454595Z"
+        },
+        {
+          "label": "after-unload",
+          "nvlink": [
+            "GPU 0: Quadro RTX 6000 (UUID: GPU-15ea3e34-292b-3333-5e43-e5b133f9a30c)",
+            "\t Link 0: 25.781 GB/s",
+            "\t Link 1: 25.781 GB/s",
+            "GPU 1: Quadro RTX 6000 (UUID: GPU-1f2f6459-b688-3466-5b49-a65c538be843)",
+            "\t Link 0: 25.781 GB/s",
+            "\t Link 1: 25.781 GB/s"
+          ],
+          "free_physical_kib": 125174752,
+          "gpus": [
+            "0, Quadro RTX 6000, 23040, 365, 0, 73, P3, 74.54, 260.00, 300",
+            "1, Quadro RTX 6000, 23040, 31, 0, 67, P5, 65.78, 260.00, 300"
+          ],
+          "model": "qwen/qwen3-4b",
+          "time": "2026-08-20T19:38:22.1506530Z"
+        }
+      ],
+      "hashes": {
+        "preregistration": "fd96514fa7a50d4f8acb0e53a5ef1d6446f901956263481b1f8393ca0524c67d",
+        "runner": "0250d774571efac01aea9dbaa9e61c512d3dbbfb8409df0feb6ce0165d6a2194"
+      },
+      "recorded_at": "2026-08-20T19:38:20.255Z"
+    },
+    {
+      "type": "arm-start",
+      "model": "qwen3-coder-30b-a3b-instruct",
+      "identity": {
+        "type": "llm",
+        "publisher": "lmstudio-community",
+        "key": "qwen3-coder-30b-a3b-instruct",
+        "display_name": "Qwen3 Coder 30B A3B Instruct",
+        "architecture": "qwen3moe",
+        "quantization": {
+          "name": "Q6_K",
+          "bits_per_weight": 6
+        },
+        "size_bytes": 25104724288,
+        "params_string": "30B-A3B",
+        "loaded_instances": [],
+        "max_context_length": 262144,
+        "format": "gguf",
+        "capabilities": {
+          "vision": false,
+          "trained_for_tool_use": true
+        },
+        "description": null
+      },
+      "hashes": {
+        "preregistration": "fd96514fa7a50d4f8acb0e53a5ef1d6446f901956263481b1f8393ca0524c67d",
+        "runner": "0250d774571efac01aea9dbaa9e61c512d3dbbfb8409df0feb6ce0165d6a2194"
+      },
+      "requested_context": 32768,
+      "started_at": "2026-08-20T19:38:29.752Z",
+      "telemetry": [
+        {
+          "label": "before-load",
+          "nvlink": [
+            "GPU 0: Quadro RTX 6000 (UUID: GPU-15ea3e34-292b-3333-5e43-e5b133f9a30c)",
+            "\t Link 0: 25.781 GB/s",
+            "\t Link 1: 25.781 GB/s",
+            "GPU 1: Quadro RTX 6000 (UUID: GPU-1f2f6459-b688-3466-5b49-a65c538be843)",
+            "\t Link 0: 25.781 GB/s",
+            "\t Link 1: 25.781 GB/s"
+          ],
+          "free_physical_kib": 125190052,
+          "gpus": [
+            "0, Quadro RTX 6000, 23040, 369, 0, 63, P8, 36.56, 260.00, 300",
+            "1, Quadro RTX 6000, 23040, 31, 0, 54, P8, 23.81, 260.00, 300"
+          ],
+          "model": "qwen3-coder-30b-a3b-instruct",
+          "time": "2026-08-20T19:38:32.9103967Z"
+        }
+      ],
+      "load_wall_ms": 27952,
+      "load": {
+        "ok": true,
+        "data": {
+          "type": "llm",
+          "instance_id": "qwen3-coder-30b-a3b-instruct",
+          "load_time_seconds": 27.021,
+          "status": "loaded",
+          "load_config": {
+            "context_length": 32768,
+            "eval_batch_size": 2048,
+            "physical_batch_size": 512,
+            "parallel": 4,
+            "flash_attention": true,
+            "context_checkpoints": 32,
+            "reasoning_budget_message": "",
+            "speculative_draft_mtp": false,
+            "speculative_draft_simple": false,
+            "speculative_draft_model": "",
+            "speculative_draft_max_tokens": 16,
+            "speculative_draft_min_tokens": 0,
+            "speculative_draft_min_continue_probability": 0.75,
+            "num_experts": 8,
+            "offload_kv_cache_to_gpu": true,
+            "prompt_template": {
+              "type": "jinja",
+              "template": "{% macro render_item_list(item_list, tag_name='required') %}\n    {%- if item_list is defined and item_list is iterable and item_list | length > 0 %}\n        {%- if tag_name %}{{- '\\n<' ~ tag_name ~ '>' -}}{% endif %}\n            {{- '[' }}\n                {%- for item in item_list -%}\n                    {%- if loop.index > 1 %}{{- \", \"}}{% endif -%}\n                    {%- if item is string -%}\n                        {{ \"`\" ~ item ~ \"`\" }}\n                    {%- else -%}\n                        {{ item }}\n                    {%- endif -%}\n                {%- endfor -%}\n            {{- ']' }}\n        {%- if tag_name %}{{- '</' ~ tag_name ~ '>' -}}{% endif %}\n    {%- endif %}\n{% endmacro %}\n\n{%- if messages[0][\"role\"] == \"system\" %}\n    {%- set system_message = messages[0][\"content\"] %}\n    {%- set loop_messages = messages[1:] %}\n{%- else %}\n    {%- set loop_messages = messages %}\n{%- endif %}\n\n{%- if not tools is defined %}\n    {%- set tools = [] %}\n{%- endif %}\n\n{%- if system_message is defined %}\n    {{- \"<|im_start|>system\\n\" + system_message }}\n{%- else %}\n    {%- if tools is iterable and tools | length > 0 %}\n        {{- \"<|im_start|>system\\nYou are Qwen, a helpful AI assistant that can interact with a computer to solve tasks.\" }}\n    {%- endif %}\n{%- endif %}\n{%- if tools is iterable and tools | length > 0 %}\n    {{- \"\\n\\nYou have access to the following functions:\\n\\n\" }}\n    {{- \"<tools>\" }}\n    {%- for tool in tools %}\n        {%- if tool.function is defined %}\n            {%- set tool = tool.function %}\n        {%- endif %}\n        {{- \"\\n<function>\\n<name>\" ~ tool.name ~ \"</name>\" }}\n        {{- '\\n<description>' ~ (tool.description | trim) ~ '</description>' }}\n        {{- '\\n<parameters>' }}\n        {%- for param_name, param_fields in tool.parameters.properties|items %}\n            {{- '\\n<parameter>' }}\n            {{- '\\n<name>' ~ param_name ~ '</name>' }}\n            {%- if param_fields.type is defined %}\n                {{- '\\n<type>' ~ (param_fields.type | string) ~ '</type>' }}\n            {%- endif %}\n            {%- if param_fields.description is defined %}\n                {{- '\\n<description>' ~ (param_fields.description | trim) ~ '</description>' }}\n            {%- endif %}\n            {{- render_item_list(param_fields.enum, 'enum') }}\n            {%- set handled_keys = ['type', 'description', 'enum', 'required'] %}\n            {%- for json_key in param_fields.keys() | reject(\"in\", handled_keys) %}\n                {%- set normed_json_key = json_key | replace(\"-\", \"_\") | replace(\" \", \"_\") | replace(\"$\", \"\") %}\n                {%- if param_fields[json_key] is mapping %}\n                    {{- '\\n<' ~ normed_json_key ~ '>' ~ (param_fields[json_key] | tojson | safe) ~ '</' ~ normed_json_key ~ '>' }}\n                {%- else %}\n                    {{-'\\n<' ~ normed_json_key ~ '>' ~ (param_fields[json_key] | string) ~ '</' ~ normed_json_key ~ '>' }}\n                {%- endif %}\n            {%- endfor %}\n            {{- render_item_list(param_fields.required, 'required') }}\n            {{- '\\n</parameter>' }}\n        {%- endfor %}\n        {{- render_item_list(tool.parameters.required, 'required') }}\n        {{- '\\n</parameters>' }}\n        {%- if tool.return is defined %}\n            {%- if tool.return is mapping %}\n                {{- '\\n<return>' ~ (tool.return | tojson | safe) ~ '</return>' }}\n            {%- else %}\n                {{- '\\n<return>' ~ (tool.return | string) ~ '</return>' }}\n            {%- endif %}\n        {%- endif %}\n        {{- '\\n</function>' }}\n    {%- endfor %}\n    {{- \"\\n</tools>\" }}\n    {{- '\\n\\nIf you choose to call a function ONLY reply in the following format with NO suffix:\\n\\n<tool_call>\\n<function=example_function_name>\\n<parameter=example_parameter_1>\\nvalue_1\\n</parameter>\\n<parameter=example_parameter_2>\\nThis is the value for the second parameter\\nthat can span\\nmultiple lines\\n</parameter>\\n</function>\\n</tool_call>\\n\\n<IMPORTANT>\\nReminder:\\n- Function calls MUST follow the specified format: an inner <function=...></function> block must be nested within <tool_call></tool_call> XML tags\\n- Required parameters MUST be specified\\n- You may provide optional reasoning for your function call in natural language BEFORE the function call, but NOT after\\n- If there is no function call available, answer the question like normal with your current knowledge and do not tell the user about function calls\\n</IMPORTANT>' }}\n{%- endif %}\n{%- if system_message is defined %}\n    {{- '<|im_end|>\\n' }}\n{%- else %}\n    {%- if tools is iterable and tools | length > 0 %}\n        {{- '<|im_end|>\\n' }}\n    {%- endif %}\n{%- endif %}\n{%- for message in loop_messages %}\n    {%- if message.role == \"assistant\" and message.tool_calls is defined and message.tool_calls is iterable and message.tool_calls | length > 0 %}\n        {{- '<|im_start|>' + message.role }}\n        {%- if message.content is defined and message.content is string and message.content | trim | length > 0 %}\n            {{- '\\n' + message.content | trim + '\\n' }}\n        {%- endif %}\n        {%- for tool_call in message.tool_calls %}\n            {%- if tool_call.function is defined %}\n                {%- set tool_call = tool_call.function %}\n            {%- endif %}\n            {{- '\\n<tool_call>\\n<function=' + tool_call.name + '>\\n' }}\n            {%- if tool_call.arguments is defined %}\n                {%- for args_name, args_value in tool_call.arguments|items %}\n                    {{- '<parameter=' + args_name + '>\\n' }}\n                    {%- set args_value = args_value if args_value is string else args_value | string %}\n                    {{- args_value }}\n                    {{- '\\n</parameter>\\n' }}\n                {%- endfor %}\n            {%- endif %}\n            {{- '</function>\\n</tool_call>' }}\n        {%- endfor %}\n        {{- '<|im_end|>\\n' }}\n    {%- elif message.role == \"user\" or message.role == \"system\" or message.role == \"assistant\" %}\n        {{- '<|im_start|>' + message.role + '\\n' + message.content + '<|im_end|>' + '\\n' }}\n    {%- elif message.role == \"tool\" %}\n        {%- if loop.previtem and loop.previtem.role != \"tool\" %}\n            {{- '<|im_start|>user\\n' }}\n        {%- endif %}\n        {{- '<tool_response>\\n' }}\n        {{- message.content }}\n        {{- '\\n</tool_response>\\n' }}\n        {%- if not loop.last and loop.nextitem.role != \"tool\" %}\n            {{- '<|im_end|>\\n' }}\n        {%- elif loop.last %}\n            {{- '<|im_end|>\\n' }}\n        {%- endif %}\n    {%- else %}\n        {{- '<|im_start|>' + message.role + '\\n' + message.content + '<|im_end|>\\n' }}\n    {%- endif %}\n{%- endfor %}\n{%- if add_generation_prompt %}\n    {{- '<|im_start|>assistant\\n' }}\n{%- endif %}\n",
+              "stop_strings": []
+            }
+          }
+        }
+      }
+    },
+    {
+      "type": "arm-end",
+      "model": "qwen3-coder-30b-a3b-instruct",
+      "unload": {
+        "ok": true,
+        "data": {
+          "instance_id": "qwen3-coder-30b-a3b-instruct"
+        }
+      },
+      "telemetry": [
+        {
+          "label": "before-load",
+          "nvlink": [
+            "GPU 0: Quadro RTX 6000 (UUID: GPU-15ea3e34-292b-3333-5e43-e5b133f9a30c)",
+            "\t Link 0: 25.781 GB/s",
+            "\t Link 1: 25.781 GB/s",
+            "GPU 1: Quadro RTX 6000 (UUID: GPU-1f2f6459-b688-3466-5b49-a65c538be843)",
+            "\t Link 0: 25.781 GB/s",
+            "\t Link 1: 25.781 GB/s"
+          ],
+          "free_physical_kib": 125190052,
+          "gpus": [
+            "0, Quadro RTX 6000, 23040, 369, 0, 63, P8, 36.56, 260.00, 300",
+            "1, Quadro RTX 6000, 23040, 31, 0, 54, P8, 23.81, 260.00, 300"
+          ],
+          "model": "qwen3-coder-30b-a3b-instruct",
+          "time": "2026-08-20T19:38:32.9103967Z"
+        },
+        {
+          "label": "after-load",
+          "nvlink": [
+            "GPU 0: Quadro RTX 6000 (UUID: GPU-15ea3e34-292b-3333-5e43-e5b133f9a30c)",
+            "\t Link 0: 25.781 GB/s",
+            "\t Link 1: 25.781 GB/s",
+            "GPU 1: Quadro RTX 6000 (UUID: GPU-1f2f6459-b688-3466-5b49-a65c538be843)",
+            "\t Link 0: 25.781 GB/s",
+            "\t Link 1: 25.781 GB/s"
+          ],
+          "free_physical_kib": 99972664,
+          "gpus": [
+            "0, Quadro RTX 6000, 23040, 14423, 0, 61, P2, 90.30, 260.00, 1650",
+            "1, Quadro RTX 6000, 23040, 13227, 0, 53, P2, 79.84, 260.00, 1530"
+          ],
+          "model": "qwen3-coder-30b-a3b-instruct",
+          "time": "2026-08-20T19:39:02.1900422Z"
+        },
+        {
+          "label": "after-role-suite",
+          "nvlink": [
+            "GPU 0: Quadro RTX 6000 (UUID: GPU-15ea3e34-292b-3333-5e43-e5b133f9a30c)",
+            "\t Link 0: 25.781 GB/s",
+            "\t Link 1: 25.781 GB/s",
+            "GPU 1: Quadro RTX 6000 (UUID: GPU-1f2f6459-b688-3466-5b49-a65c538be843)",
+            "\t Link 0: 25.781 GB/s",
+            "\t Link 1: 25.781 GB/s"
+          ],
+          "free_physical_kib": 99710716,
+          "gpus": [
+            "0, Quadro RTX 6000, 23040, 14424, 0, 72, P2, 117.43, 260.00, 1875",
+            "1, Quadro RTX 6000, 23040, 13229, 0, 66, P2, 74.81, 260.00, 1005"
+          ],
+          "model": "qwen3-coder-30b-a3b-instruct",
+          "time": "2026-08-20T19:39:38.0826452Z"
+        },
+        {
+          "label": "after-context",
+          "nvlink": [
+            "GPU 0: Quadro RTX 6000 (UUID: GPU-15ea3e34-292b-3333-5e43-e5b133f9a30c)",
+            "\t Link 0: 25.781 GB/s",
+            "\t Link 1: 25.781 GB/s",
+            "GPU 1: Quadro RTX 6000 (UUID: GPU-1f2f6459-b688-3466-5b49-a65c538be843)",
+            "\t Link 0: 25.781 GB/s",
+            "\t Link 1: 25.781 GB/s"
+          ],
+          "free_physical_kib": 99628836,
+          "gpus": [
+            "0, Quadro RTX 6000, 23040, 14432, 0, 83, P2, 113.35, 260.00, 1695",
+            "1, Quadro RTX 6000, 23040, 13296, 0, 80, P3, 131.85, 260.00, 780"
+          ],
+          "model": "qwen3-coder-30b-a3b-instruct",
+          "time": "2026-08-20T19:40:13.6563327Z"
+        },
+        {
+          "label": "after-unload",
+          "nvlink": [
+            "GPU 0: Quadro RTX 6000 (UUID: GPU-15ea3e34-292b-3333-5e43-e5b133f9a30c)",
+            "\t Link 0: 25.781 GB/s",
+            "\t Link 1: 25.781 GB/s",
+            "GPU 1: Quadro RTX 6000 (UUID: GPU-1f2f6459-b688-3466-5b49-a65c538be843)",
+            "\t Link 0: 25.781 GB/s",
+            "\t Link 1: 25.781 GB/s"
+          ],
+          "free_physical_kib": 125298476,
+          "gpus": [
+            "0, Quadro RTX 6000, 23040, 366, 0, 72, P5, 44.75, 260.00, 300",
+            "1, Quadro RTX 6000, 23040, 31, 0, 66, P5, 31.67, 260.00, 300"
+          ],
+          "model": "qwen3-coder-30b-a3b-instruct",
+          "time": "2026-08-20T19:40:18.1942030Z"
+        }
+      ],
+      "hashes": {
+        "preregistration": "fd96514fa7a50d4f8acb0e53a5ef1d6446f901956263481b1f8393ca0524c67d",
+        "runner": "0250d774571efac01aea9dbaa9e61c512d3dbbfb8409df0feb6ce0165d6a2194"
+      },
+      "recorded_at": "2026-08-20T19:40:16.299Z"
+    },
+    {
+      "type": "arm-start",
+      "model": "qwen3.6-27b",
+      "identity": {
+        "type": "llm",
+        "publisher": "unsloth",
+        "key": "qwen3.6-27b",
+        "display_name": "Qwen3.6 27B",
+        "architecture": "qwen35",
+        "quantization": {
+          "name": "Q4_K_M",
+          "bits_per_weight": 4
+        },
+        "size_bytes": 16817244384,
+        "params_string": "27B",
+        "loaded_instances": [],
+        "max_context_length": 262144,
+        "format": "gguf",
+        "capabilities": {
+          "vision": false,
+          "trained_for_tool_use": true,
+          "reasoning": {
+            "allowed_options": [
+              "off",
+              "on"
+            ],
+            "default": "on"
+          }
+        },
+        "description": null
+      },
+      "hashes": {
+        "preregistration": "fd96514fa7a50d4f8acb0e53a5ef1d6446f901956263481b1f8393ca0524c67d",
+        "runner": "0250d774571efac01aea9dbaa9e61c512d3dbbfb8409df0feb6ce0165d6a2194"
+      },
+      "requested_context": 32768,
+      "started_at": "2026-08-20T19:40:17.262Z",
+      "telemetry": [
+        {
+          "label": "before-load",
+          "nvlink": [
+            "GPU 0: Quadro RTX 6000 (UUID: GPU-15ea3e34-292b-3333-5e43-e5b133f9a30c)",
+            "\t Link 0: 25.781 GB/s",
+            "\t Link 1: 25.781 GB/s",
+            "GPU 1: Quadro RTX 6000 (UUID: GPU-1f2f6459-b688-3466-5b49-a65c538be843)",
+            "\t Link 0: 25.781 GB/s",
+            "\t Link 1: 25.781 GB/s"
+          ],
+          "free_physical_kib": 125278944,
+          "gpus": [
+            "0, Quadro RTX 6000, 23040, 367, 0, 69, P8, 37.80, 260.00, 300",
+            "1, Quadro RTX 6000, 23040, 31, 0, 62, P8, 24.43, 260.00, 300"
+          ],
+          "model": "qwen3.6-27b",
+          "time": "2026-08-20T19:40:20.7693918Z"
+        }
+      ],
+      "load_wall_ms": 22189,
+      "load": {
+        "ok": true,
+        "data": {
+          "type": "llm",
+          "instance_id": "qwen3.6-27b",
+          "load_time_seconds": 21.262,
+          "status": "loaded",
+          "load_config": {
+            "context_length": 32768,
+            "eval_batch_size": 2048,
+            "physical_batch_size": 512,
+            "parallel": 4,
+            "flash_attention": true,
+            "context_checkpoints": 32,
+            "reasoning_budget_message": "",
+            "speculative_draft_mtp": false,
+            "speculative_draft_simple": false,
+            "speculative_draft_model": "",
+            "speculative_draft_max_tokens": 16,
+            "speculative_draft_min_tokens": 0,
+            "speculative_draft_min_continue_probability": 0.75,
+            "offload_kv_cache_to_gpu": true,
+            "prompt_template": {
+              "type": "jinja",
+              "template": "{%- set image_count = namespace(value=0) %}\n{%- set video_count = namespace(value=0) %}\n{%- macro render_content(content, do_vision_count, is_system_content=false) %}\n    {%- if content is string %}\n        {{- content }}\n    {%- elif content is iterable and content is not mapping %}\n        {%- for item in content %}\n            {%- if 'image' in item or 'image_url' in item or item.type == 'image' %}\n                {%- if is_system_content %}\n                    {{- raise_exception('System message cannot contain images.') }}\n                {%- endif %}\n                {%- if do_vision_count %}\n                    {%- set image_count.value = image_count.value + 1 %}\n                {%- endif %}\n                {%- if add_vision_id %}\n                    {{- 'Picture ' ~ image_count.value ~ ': ' }}\n                {%- endif %}\n                {{- '<|vision_start|><|image_pad|><|vision_end|>' }}\n            {%- elif 'video' in item or item.type == 'video' %}\n                {%- if is_system_content %}\n                    {{- raise_exception('System message cannot contain videos.') }}\n                {%- endif %}\n                {%- if do_vision_count %}\n                    {%- set video_count.value = video_count.value + 1 %}\n                {%- endif %}\n                {%- if add_vision_id %}\n                    {{- 'Video ' ~ video_count.value ~ ': ' }}\n                {%- endif %}\n                {{- '<|vision_start|><|video_pad|><|vision_end|>' }}\n            {%- elif 'text' in item %}\n                {{- item.text }}\n            {%- else %}\n                {{- raise_exception('Unexpected item type in content.') }}\n            {%- endif %}\n        {%- endfor %}\n    {%- elif content is none or content is undefined %}\n        {{- '' }}\n    {%- else %}\n        {{- raise_exception('Unexpected content type.') }}\n    {%- endif %}\n{%- endmacro %}\n{%- if not messages %}\n    {{- raise_exception('No messages provided.') }}\n{%- endif %}\n{%- set num_sys = 0 %}\n{%- set merged_system = '' %}\n{%- if messages[0].role == 'system' or messages[0].role == 'developer' %}\n    {%- set first = render_content(messages[0].content, false, true)|trim %}\n    {%- if messages|length > 1 and (messages[1].role == 'system' or messages[1].role == 'developer') %}\n        {%- set second = render_content(messages[1].content, false, true)|trim %}\n        {%- set merged_system = first + '\\n' + second %}\n        {%- set num_sys = 2 %}\n    {%- else %}\n        {%- set merged_system = first %}\n        {%- set num_sys = 1 %}\n    {%- endif %}\n{%- endif %}\n{%- if tools and tools is iterable and tools is not mapping %}\n    {{- '<|im_start|>system\\n' }}\n    {{- \"# Tools\\n\\nYou have access to the following functions:\\n\\n<tools>\" }}\n    {%- for tool in tools %}\n        {{- \"\\n\" }}\n        {{- tool | tojson }}\n    {%- endfor %}\n    {{- \"\\n</tools>\" }}\n    {{- '\\n\\nIf you choose to call a function ONLY reply in the following format with NO suffix:\\n\\n<tool_call>\\n<function=example_function_name>\\n<parameter=example_parameter_1>\\nvalue_1\\n</parameter>\\n<parameter=example_parameter_2>\\nThis is the value for the second parameter\\nthat can span\\nmultiple lines\\n</parameter>\\n</function>\\n</tool_call>\\n\\n<IMPORTANT>\\nReminder:\\n- Function calls MUST follow the specified format: an inner <function=...></function> block must be nested within <tool_call></tool_call> XML tags\\n- Required parameters MUST be specified\\n- You may provide optional reasoning for your function call in natural language BEFORE the function call, but NOT after\\n- If there is no function call available, answer the question like normal with your current knowledge and do not tell the user about function calls\\n</IMPORTANT>' }}\n    {%- if merged_system %}\n        {{- '\\n\\n' + merged_system }}\n    {%- endif %}\n    {{- '<|im_end|>\\n' }}\n{%- else %}\n    {%- if merged_system %}\n        {{- '<|im_start|>system\\n' + merged_system + '<|im_end|>\\n' }}\n    {%- endif %}\n{%- endif %}\n{%- set ns = namespace(multi_step_tool=true, last_query_index=messages|length - 1) %}\n{%- for message in messages[::-1] %}\n    {%- set index = (messages|length - 1) - loop.index0 %}\n    {%- if ns.multi_step_tool and message.role == \"user\" %}\n        {%- set content = render_content(message.content, false)|trim %}\n        {%- if not(content.startswith('<tool_response>') and content.endswith('</tool_response>')) %}\n            {%- set ns.multi_step_tool = false %}\n            {%- set ns.last_query_index = index %}\n        {%- endif %}\n    {%- endif %}\n{%- endfor %}\n{%- for message in messages %}\n    {%- if loop.index0 >= num_sys and message.role != \"system\" and message.role != \"developer\" %}\n    {%- set content = render_content(message.content, true)|trim %}\n    {%- if message.role == \"user\" %}\n        {{- '<|im_start|>' + message.role + '\\n' + content + '<|im_end|>' + '\\n' }}\n    {%- elif message.role == \"assistant\" %}\n        {%- set reasoning_content = '' %}\n        {%- if message.reasoning_content is string %}\n            {%- set reasoning_content = message.reasoning_content %}\n        {%- else %}\n            {%- if '</think>' in content %}\n                {%- set reasoning_content = content.split('</think>')[0].rstrip('\\n').split('<think>')[-1].lstrip('\\n') %}\n                {%- set content = content.split('</think>')[-1].lstrip('\\n') %}\n            {%- endif %}\n        {%- endif %}\n        {%- set reasoning_content = reasoning_content|trim %}\n        {%- if (preserve_thinking is defined and preserve_thinking is true) or (loop.index0 > ns.last_query_index) %}\n            {{- '<|im_start|>' + message.role + '\\n<think>\\n' + reasoning_content + '\\n</think>\\n\\n' + content }}\n        {%- else %}\n            {{- '<|im_start|>' + message.role + '\\n' + content }}\n        {%- endif %}\n        {%- if message.tool_calls and message.tool_calls is iterable and message.tool_calls is not mapping %}\n            {%- for tool_call in message.tool_calls %}\n                {%- if tool_call.function is defined %}\n                    {%- set tool_call = tool_call.function %}\n                {%- endif %}\n                {%- if loop.first %}\n                    {%- if content|trim %}\n                        {{- '\\n\\n<tool_call>\\n<function=' + tool_call.name + '>\\n' }}\n                    {%- else %}\n                        {{- '<tool_call>\\n<function=' + tool_call.name + '>\\n' }}\n                    {%- endif %}\n                {%- else %}\n                    {{- '\\n<tool_call>\\n<function=' + tool_call.name + '>\\n' }}\n                {%- endif %}\n                {%- if tool_call.arguments is mapping %}\n                    {%- for args_name in tool_call.arguments %}\n                        {%- set args_value = tool_call.arguments[args_name] %}\n                        {{- '<parameter=' + args_name + '>\\n' }}\n                        {%- set args_value = args_value | tojson | safe if args_value is mapping or (args_value is sequence and args_value is not string) else args_value | string %}\n                        {{- args_value }}\n                        {{- '\\n</parameter>\\n' }}\n                    {%- endfor %}\n                {%- endif %}\n                {{- '</function>\\n</tool_call>' }}\n            {%- endfor %}\n        {%- endif %}\n        {{- '<|im_end|>\\n' }}\n    {%- elif message.role == \"tool\" %}\n        {%- if loop.previtem and loop.previtem.role != \"tool\" %}\n            {{- '<|im_start|>user' }}\n        {%- endif %}\n        {{- '\\n<tool_response>\\n' }}\n        {{- content }}\n        {{- '\\n</tool_response>' }}\n        {%- if not loop.last and loop.nextitem.role != \"tool\" %}\n            {{- '<|im_end|>\\n' }}\n        {%- elif loop.last %}\n            {{- '<|im_end|>\\n' }}\n        {%- endif %}\n    {%- endif %}\n    {%- endif %}\n{%- endfor %}\n{%- if add_generation_prompt %}\n    {{- '<|im_start|>assistant\\n' }}\n    {%- if enable_thinking is defined and enable_thinking is false %}\n        {{- '<think>\\n\\n</think>\\n\\n' }}\n    {%- else %}\n        {{- '<think>\\n' }}\n    {%- endif %}\n{%- endif %}\n{#- Unsloth fixes - developer role, tool calling #}",
+              "stop_strings": []
+            }
+          }
+        }
+      }
+    },
+    {
+      "type": "arm-end",
+      "model": "qwen3.6-27b",
+      "unload": {
+        "ok": true,
+        "data": {
+          "instance_id": "qwen3.6-27b"
+        }
+      },
+      "telemetry": [
+        {
+          "label": "before-load",
+          "nvlink": [
+            "GPU 0: Quadro RTX 6000 (UUID: GPU-15ea3e34-292b-3333-5e43-e5b133f9a30c)",
+            "\t Link 0: 25.781 GB/s",
+            "\t Link 1: 25.781 GB/s",
+            "GPU 1: Quadro RTX 6000 (UUID: GPU-1f2f6459-b688-3466-5b49-a65c538be843)",
+            "\t Link 0: 25.781 GB/s",
+            "\t Link 1: 25.781 GB/s"
+          ],
+          "free_physical_kib": 125278944,
+          "gpus": [
+            "0, Quadro RTX 6000, 23040, 367, 0, 69, P8, 37.80, 260.00, 300",
+            "1, Quadro RTX 6000, 23040, 31, 0, 62, P8, 24.43, 260.00, 300"
+          ],
+          "model": "qwen3.6-27b",
+          "time": "2026-08-20T19:40:20.7693918Z"
+        },
+        {
+          "label": "after-load",
+          "nvlink": [
+            "GPU 0: Quadro RTX 6000 (UUID: GPU-15ea3e34-292b-3333-5e43-e5b133f9a30c)",
+            "\t Link 0: 25.781 GB/s",
+            "\t Link 1: 25.781 GB/s",
+            "GPU 1: Quadro RTX 6000 (UUID: GPU-1f2f6459-b688-3466-5b49-a65c538be843)",
+            "\t Link 0: 25.781 GB/s",
+            "\t Link 1: 25.781 GB/s"
+          ],
+          "free_physical_kib": 107188068,
+          "gpus": [
+            "0, Quadro RTX 6000, 23040, 9409, 0, 63, P3, 69.68, 260.00, 690",
+            "1, Quadro RTX 6000, 23040, 9620, 0, 59, P2, 96.02, 260.00, 1815"
+          ],
+          "model": "qwen3.6-27b",
+          "time": "2026-08-20T19:40:44.2078639Z"
+        },
+        {
+          "label": "after-role-suite",
+          "nvlink": [
+            "GPU 0: Quadro RTX 6000 (UUID: GPU-15ea3e34-292b-3333-5e43-e5b133f9a30c)",
+            "\t Link 0: 25.781 GB/s",
+            "\t Link 1: 25.781 GB/s",
+            "GPU 1: Quadro RTX 6000 (UUID: GPU-1f2f6459-b688-3466-5b49-a65c538be843)",
+            "\t Link 0: 25.781 GB/s",
+            "\t Link 1: 25.781 GB/s"
+          ],
+          "free_physical_kib": 102077168,
+          "gpus": [
+            "0, Quadro RTX 6000, 23040, 9417, 0, 83, P2, 121.21, 260.00, 1800",
+            "1, Quadro RTX 6000, 23040, 9627, 0, 81, P2, 129.70, 260.00, 1860"
+          ],
+          "model": "qwen3.6-27b",
+          "time": "2026-08-20T19:41:46.6823694Z"
+        },
+        {
+          "label": "after-context",
+          "nvlink": [
+            "GPU 0: Quadro RTX 6000 (UUID: GPU-15ea3e34-292b-3333-5e43-e5b133f9a30c)",
+            "\t Link 0: 25.781 GB/s",
+            "\t Link 1: 25.781 GB/s",
+            "GPU 1: Quadro RTX 6000 (UUID: GPU-1f2f6459-b688-3466-5b49-a65c538be843)",
+            "\t Link 0: 25.781 GB/s",
+            "\t Link 1: 25.781 GB/s"
+          ],
+          "free_physical_kib": 100848924,
+          "gpus": [
+            "0, Quadro RTX 6000, 23040, 9417, 0, 85, P2, 121.28, 260.00, 1740",
+            "1, Quadro RTX 6000, 23040, 9702, 0, 81, P2, 135.39, 260.00, 1845"
+          ],
+          "model": "qwen3.6-27b",
+          "time": "2026-08-20T19:43:14.7021032Z"
+        },
+        {
+          "label": "after-unload",
+          "nvlink": [
+            "GPU 0: Quadro RTX 6000 (UUID: GPU-15ea3e34-292b-3333-5e43-e5b133f9a30c)",
+            "\t Link 0: 25.781 GB/s",
+            "\t Link 1: 25.781 GB/s",
+            "GPU 1: Quadro RTX 6000 (UUID: GPU-1f2f6459-b688-3466-5b49-a65c538be843)",
+            "\t Link 0: 25.781 GB/s",
+            "\t Link 1: 25.781 GB/s"
+          ],
+          "free_physical_kib": 125255072,
+          "gpus": [
+            "0, Quadro RTX 6000, 23040, 366, 0, 74, P5, 45.16, 260.00, 300",
+            "1, Quadro RTX 6000, 23040, 31, 0, 66, P5, 31.89, 260.00, 300"
+          ],
+          "model": "qwen3.6-27b",
+          "time": "2026-08-20T19:43:19.6398861Z"
+        }
+      ],
+      "hashes": {
+        "preregistration": "fd96514fa7a50d4f8acb0e53a5ef1d6446f901956263481b1f8393ca0524c67d",
+        "runner": "0250d774571efac01aea9dbaa9e61c512d3dbbfb8409df0feb6ce0165d6a2194"
+      },
+      "recorded_at": "2026-08-20T19:43:17.747Z"
+    },
+    {
+      "type": "arm-start",
+      "model": "llama-3.3-70b-instruct",
+      "identity": {
+        "type": "llm",
+        "publisher": "lmstudio-community",
+        "key": "llama-3.3-70b-instruct",
+        "display_name": "Llama 3.3 70B Instruct",
+        "architecture": "llama",
+        "quantization": {
+          "name": "Q4_K_M",
+          "bits_per_weight": 4
+        },
+        "size_bytes": 42520398528,
+        "params_string": "70B",
+        "loaded_instances": [],
+        "max_context_length": 131072,
+        "format": "gguf",
+        "capabilities": {
+          "vision": false,
+          "trained_for_tool_use": true
+        },
+        "description": null
+      },
+      "hashes": {
+        "preregistration": "fd96514fa7a50d4f8acb0e53a5ef1d6446f901956263481b1f8393ca0524c67d",
+        "runner": "0250d774571efac01aea9dbaa9e61c512d3dbbfb8409df0feb6ce0165d6a2194"
+      },
+      "requested_context": 32768,
+      "started_at": "2026-08-20T19:43:18.723Z",
+      "telemetry": [
+        {
+          "label": "before-load",
+          "nvlink": [
+            "GPU 0: Quadro RTX 6000 (UUID: GPU-15ea3e34-292b-3333-5e43-e5b133f9a30c)",
+            "\t Link 0: 25.781 GB/s",
+            "\t Link 1: 25.781 GB/s",
+            "GPU 1: Quadro RTX 6000 (UUID: GPU-1f2f6459-b688-3466-5b49-a65c538be843)",
+            "\t Link 0: 25.781 GB/s",
+            "\t Link 1: 25.781 GB/s"
+          ],
+          "free_physical_kib": 125273916,
+          "gpus": [
+            "0, Quadro RTX 6000, 23040, 364, 0, 71, P8, 39.29, 260.00, 300",
+            "1, Quadro RTX 6000, 23040, 31, 0, 62, P8, 24.67, 260.00, 300"
+          ],
+          "model": "llama-3.3-70b-instruct",
+          "time": "2026-08-20T19:43:21.8744947Z"
+        }
+      ],
+      "load_wall_ms": 49883,
+      "load": {
+        "ok": true,
+        "data": {
+          "type": "llm",
+          "instance_id": "llama-3.3-70b-instruct",
+          "load_time_seconds": 48.938,
+          "status": "loaded",
+          "load_config": {
+            "context_length": 32768,
+            "eval_batch_size": 2048,
+            "physical_batch_size": 512,
+            "parallel": 4,
+            "flash_attention": true,
+            "context_checkpoints": 32,
+            "reasoning_budget_message": "",
+            "speculative_draft_mtp": false,
+            "speculative_draft_simple": false,
+            "speculative_draft_model": "",
+            "speculative_draft_max_tokens": 16,
+            "speculative_draft_min_tokens": 0,
+            "speculative_draft_min_continue_probability": 0.75,
+            "offload_kv_cache_to_gpu": true,
+            "prompt_template": {
+              "type": "jinja",
+              "template": "{{- bos_token }}\n{%- if custom_tools is defined %}\n    {%- set tools = custom_tools %}\n{%- endif %}\n{%- if not tools_in_user_message is defined %}\n    {%- set tools_in_user_message = true %}\n{%- endif %}\n{%- if not date_string is defined %}\n    {%- set date_string = \"26 Jul 2024\" %}\n{%- endif %}\n{%- if not tools is defined %}\n    {%- set tools = none %}\n{%- endif %}\n\n{#- This block extracts the system message, so we can slot it into the right place. #}\n{%- if messages[0]['role'] == 'system' %}\n    {%- set system_message = messages[0]['content']|trim %}\n    {%- set messages = messages[1:] %}\n{%- else %}\n    {%- set system_message = \"\" %}\n{%- endif %}\n\n{#- System message + builtin tools #}\n{{- \"<|start_header_id|>system<|end_header_id|>\\n\\n\" }}\n{%- if builtin_tools is defined or tools is not none %}\n    {{- \"Environment: ipython\\n\" }}\n{%- endif %}\n{%- if builtin_tools is defined %}\n    {{- \"Tools: \" + builtin_tools | reject('equalto', 'code_interpreter') | join(\", \") + \"\\n\\n\"}}\n{%- endif %}\n{{- \"Cutting Knowledge Date: December 2023\\n\" }}\n{{- \"Today Date: \" + date_string + \"\\n\\n\" }}\n{%- if tools is not none and not tools_in_user_message %}\n    {{- \"You have access to the following functions. To call a function, please respond with JSON for a function call.\" }}\n    {{- 'Respond in the format {\"name\": function name, \"parameters\": dictionary of argument name and its value}.' }}\n    {{- \"Do not use variables.\\n\\n\" }}\n    {%- for t in tools %}\n        {{- t | tojson(indent=4) }}\n        {{- \"\\n\\n\" }}\n    {%- endfor %}\n{%- endif %}\n{{- system_message }}\n{{- \"<|eot_id|>\" }}\n\n{#- Custom tools are passed in a user message with some extra guidance #}\n{%- if tools_in_user_message and not tools is none %}\n    {#- Extract the first user message so we can plug it in here #}\n    {%- if messages | length != 0 %}\n        {%- set first_user_message = messages[0]['content']|trim %}\n        {%- set messages = messages[1:] %}\n    {%- else %}\n        {{- raise_exception(\"Cannot put tools in the first user message when there's no first user message!\") }}\n{%- endif %}\n    {{- '<|start_header_id|>user<|end_header_id|>\\n\\n' -}}\n    {{- \"Given the following functions, please respond with a JSON for a function call \" }}\n    {{- \"with its proper arguments that best answers the given prompt.\\n\\n\" }}\n    {{- 'Respond in the format {\"name\": function name, \"parameters\": dictionary of argument name and its value}.' }}\n    {{- \"Do not use variables.\\n\\n\" }}\n    {%- for t in tools %}\n        {{- t | tojson(indent=4) }}\n        {{- \"\\n\\n\" }}\n    {%- endfor %}\n    {{- first_user_message + \"<|eot_id|>\"}}\n{%- endif %}\n\n{%- for message in messages %}\n    {%- if not (message.role == 'ipython' or message.role == 'tool' or 'tool_calls' in message) %}\n        {{- '<|start_header_id|>' + message['role'] + '<|end_header_id|>\\n\\n'+ message['content'] | trim + '<|eot_id|>' }}\n    {%- elif 'tool_calls' in message %}\n        {%- if not message.tool_calls|length == 1 %}\n            {{- raise_exception(\"This model only supports single tool-calls at once!\") }}\n        {%- endif %}\n        {%- set tool_call = message.tool_calls[0].function %}\n        {%- if builtin_tools is defined and tool_call.name in builtin_tools %}\n            {{- '<|start_header_id|>assistant<|end_header_id|>\\n\\n' -}}\n            {{- \"<|python_tag|>\" + tool_call.name + \".call(\" }}\n            {%- for arg_name, arg_val in tool_call.arguments | items %}\n                {{- arg_name + '=\"' + arg_val + '\"' }}\n                {%- if not loop.last %}\n                    {{- \", \" }}\n                {%- endif %}\n                {%- endfor %}\n            {{- \")\" }}\n        {%- else  %}\n            {{- '<|start_header_id|>assistant<|end_header_id|>\\n\\n' -}}\n            {{- '{\"name\": \"' + tool_call.name + '\", ' }}\n            {{- '\"parameters\": ' }}\n            {{- tool_call.arguments | tojson }}\n            {{- \"}\" }}\n        {%- endif %}\n        {%- if builtin_tools is defined %}\n            {#- This means we're in ipython mode #}\n            {{- \"<|eom_id|>\" }}\n        {%- else %}\n            {{- \"<|eot_id|>\" }}\n        {%- endif %}\n    {%- elif message.role == \"tool\" or message.role == \"ipython\" %}\n        {{- \"<|start_header_id|>ipython<|end_header_id|>\\n\\n\" }}\n        {%- if message.content is mapping or message.content is iterable %}\n            {{- message.content | tojson }}\n        {%- else %}\n            {{- message.content }}\n        {%- endif %}\n        {{- \"<|eot_id|>\" }}\n    {%- endif %}\n{%- endfor %}\n{%- if add_generation_prompt %}\n    {{- '<|start_header_id|>assistant<|end_header_id|>\\n\\n' }}\n{%- endif %}\n",
+              "stop_strings": []
+            }
+          }
+        }
+      }
+    },
+    {
+      "type": "arm-end",
+      "model": "llama-3.3-70b-instruct",
+      "unload": {
+        "ok": true,
+        "data": {
+          "instance_id": "llama-3.3-70b-instruct"
+        }
+      },
+      "telemetry": [
+        {
+          "label": "before-load",
+          "nvlink": [
+            "GPU 0: Quadro RTX 6000 (UUID: GPU-15ea3e34-292b-3333-5e43-e5b133f9a30c)",
+            "\t Link 0: 25.781 GB/s",
+            "\t Link 1: 25.781 GB/s",
+            "GPU 1: Quadro RTX 6000 (UUID: GPU-1f2f6459-b688-3466-5b49-a65c538be843)",
+            "\t Link 0: 25.781 GB/s",
+            "\t Link 1: 25.781 GB/s"
+          ],
+          "free_physical_kib": 125273916,
+          "gpus": [
+            "0, Quadro RTX 6000, 23040, 364, 0, 71, P8, 39.29, 260.00, 300",
+            "1, Quadro RTX 6000, 23040, 31, 0, 62, P8, 24.67, 260.00, 300"
+          ],
+          "model": "llama-3.3-70b-instruct",
+          "time": "2026-08-20T19:43:21.8744947Z"
+        },
+        {
+          "label": "after-load",
+          "nvlink": [
+            "GPU 0: Quadro RTX 6000 (UUID: GPU-15ea3e34-292b-3333-5e43-e5b133f9a30c)",
+            "\t Link 0: 25.781 GB/s",
+            "\t Link 1: 25.781 GB/s",
+            "GPU 1: Quadro RTX 6000 (UUID: GPU-1f2f6459-b688-3466-5b49-a65c538be843)",
+            "\t Link 0: 25.781 GB/s",
+            "\t Link 1: 25.781 GB/s"
+          ],
+          "free_physical_kib": 80265296,
+          "gpus": [
+            "0, Quadro RTX 6000, 23040, 20884, 0, 66, P3, 99.55, 260.00, 540",
+            "1, Quadro RTX 6000, 23040, 20331, 0, 60, P2, 96.25, 260.00, 1815"
+          ],
+          "model": "llama-3.3-70b-instruct",
+          "time": "2026-08-20T19:44:13.4007525Z"
+        },
+        {
+          "label": "after-role-suite",
+          "nvlink": [
+            "GPU 0: Quadro RTX 6000 (UUID: GPU-15ea3e34-292b-3333-5e43-e5b133f9a30c)",
+            "\t Link 0: 25.781 GB/s",
+            "\t Link 1: 25.781 GB/s",
+            "GPU 1: Quadro RTX 6000 (UUID: GPU-1f2f6459-b688-3466-5b49-a65c538be843)",
+            "\t Link 0: 25.781 GB/s",
+            "\t Link 1: 25.781 GB/s"
+          ],
+          "free_physical_kib": 79467848,
+          "gpus": [
+            "0, Quadro RTX 6000, 23040, 20884, 0, 67, P3, 70.70, 260.00, 375",
+            "1, Quadro RTX 6000, 23040, 20333, 0, 62, P3, 67.55, 260.00, 390"
+          ],
+          "model": "llama-3.3-70b-instruct",
+          "time": "2026-08-20T19:51:41.8034273Z"
+        },
+        {
+          "label": "after-unload",
+          "nvlink": [
+            "GPU 0: Quadro RTX 6000 (UUID: GPU-15ea3e34-292b-3333-5e43-e5b133f9a30c)",
+            "\t Link 0: 25.781 GB/s",
+            "\t Link 1: 25.781 GB/s",
+            "GPU 1: Quadro RTX 6000 (UUID: GPU-1f2f6459-b688-3466-5b49-a65c538be843)",
+            "\t Link 0: 25.781 GB/s",
+            "\t Link 1: 25.781 GB/s"
+          ],
+          "free_physical_kib": 125353280,
+          "gpus": [
+            "0, Quadro RTX 6000, 23040, 368, 0, 60, P8, 36.32, 260.00, 300",
+            "1, Quadro RTX 6000, 23040, 31, 0, 51, P8, 23.97, 260.00, 300"
+          ],
+          "model": "llama-3.3-70b-instruct",
+          "time": "2026-08-20T19:57:40.0556350Z"
+        }
+      ],
+      "hashes": {
+        "preregistration": "fd96514fa7a50d4f8acb0e53a5ef1d6446f901956263481b1f8393ca0524c67d",
+        "runner": "0250d774571efac01aea9dbaa9e61c512d3dbbfb8409df0feb6ce0165d6a2194"
+      },
+      "recorded_at": "2026-08-20T19:57:38.167Z"
+    },
+    {
+      "type": "arm-start",
+      "model": "llama-3.3-70b-instruct",
+      "identity": {
+        "type": "llm",
+        "publisher": "lmstudio-community",
+        "key": "llama-3.3-70b-instruct",
+        "display_name": "Llama 3.3 70B Instruct",
+        "architecture": "llama",
+        "quantization": {
+          "name": "Q4_K_M",
+          "bits_per_weight": 4
+        },
+        "size_bytes": 42520398528,
+        "params_string": "70B",
+        "loaded_instances": [],
+        "max_context_length": 131072,
+        "format": "gguf",
+        "capabilities": {
+          "vision": false,
+          "trained_for_tool_use": true
+        },
+        "description": null
+      },
+      "hashes": {
+        "preregistration": "fd96514fa7a50d4f8acb0e53a5ef1d6446f901956263481b1f8393ca0524c67d",
+        "runner": "3324657883befa3164fd789b25ae1916e0dc18647260963027a0879763b17074"
+      },
+      "requested_context": 32768,
+      "started_at": "2026-08-20T19:58:49.906Z",
+      "telemetry": [
+        {
+          "label": "before-load",
+          "nvlink": [
+            "GPU 0: Quadro RTX 6000 (UUID: GPU-15ea3e34-292b-3333-5e43-e5b133f9a30c)",
+            "\t Link 0: 25.781 GB/s",
+            "\t Link 1: 25.781 GB/s",
+            "GPU 1: Quadro RTX 6000 (UUID: GPU-1f2f6459-b688-3466-5b49-a65c538be843)",
+            "\t Link 0: 25.781 GB/s",
+            "\t Link 1: 25.781 GB/s"
+          ],
+          "free_physical_kib": 125355000,
+          "gpus": [
+            "0, Quadro RTX 6000, 23040, 369, 0, 55, P8, 36.20, 260.00, 300",
+            "1, Quadro RTX 6000, 23040, 31, 0, 46, P8, 23.52, 260.00, 300"
+          ],
+          "model": "llama-3.3-70b-instruct",
+          "time": "2026-08-20T19:58:53.0868711Z"
+        }
+      ],
+      "load_wall_ms": 48889,
+      "load": {
+        "ok": true,
+        "data": {
+          "type": "llm",
+          "instance_id": "llama-3.3-70b-instruct",
+          "load_time_seconds": 47.92,
+          "status": "loaded",
+          "load_config": {
+            "context_length": 32768,
+            "eval_batch_size": 2048,
+            "physical_batch_size": 512,
+            "parallel": 4,
+            "flash_attention": true,
+            "context_checkpoints": 32,
+            "reasoning_budget_message": "",
+            "speculative_draft_mtp": false,
+            "speculative_draft_simple": false,
+            "speculative_draft_model": "",
+            "speculative_draft_max_tokens": 16,
+            "speculative_draft_min_tokens": 0,
+            "speculative_draft_min_continue_probability": 0.75,
+            "offload_kv_cache_to_gpu": true,
+            "prompt_template": {
+              "type": "jinja",
+              "template": "{{- bos_token }}\n{%- if custom_tools is defined %}\n    {%- set tools = custom_tools %}\n{%- endif %}\n{%- if not tools_in_user_message is defined %}\n    {%- set tools_in_user_message = true %}\n{%- endif %}\n{%- if not date_string is defined %}\n    {%- set date_string = \"26 Jul 2024\" %}\n{%- endif %}\n{%- if not tools is defined %}\n    {%- set tools = none %}\n{%- endif %}\n\n{#- This block extracts the system message, so we can slot it into the right place. #}\n{%- if messages[0]['role'] == 'system' %}\n    {%- set system_message = messages[0]['content']|trim %}\n    {%- set messages = messages[1:] %}\n{%- else %}\n    {%- set system_message = \"\" %}\n{%- endif %}\n\n{#- System message + builtin tools #}\n{{- \"<|start_header_id|>system<|end_header_id|>\\n\\n\" }}\n{%- if builtin_tools is defined or tools is not none %}\n    {{- \"Environment: ipython\\n\" }}\n{%- endif %}\n{%- if builtin_tools is defined %}\n    {{- \"Tools: \" + builtin_tools | reject('equalto', 'code_interpreter') | join(\", \") + \"\\n\\n\"}}\n{%- endif %}\n{{- \"Cutting Knowledge Date: December 2023\\n\" }}\n{{- \"Today Date: \" + date_string + \"\\n\\n\" }}\n{%- if tools is not none and not tools_in_user_message %}\n    {{- \"You have access to the following functions. To call a function, please respond with JSON for a function call.\" }}\n    {{- 'Respond in the format {\"name\": function name, \"parameters\": dictionary of argument name and its value}.' }}\n    {{- \"Do not use variables.\\n\\n\" }}\n    {%- for t in tools %}\n        {{- t | tojson(indent=4) }}\n        {{- \"\\n\\n\" }}\n    {%- endfor %}\n{%- endif %}\n{{- system_message }}\n{{- \"<|eot_id|>\" }}\n\n{#- Custom tools are passed in a user message with some extra guidance #}\n{%- if tools_in_user_message and not tools is none %}\n    {#- Extract the first user message so we can plug it in here #}\n    {%- if messages | length != 0 %}\n        {%- set first_user_message = messages[0]['content']|trim %}\n        {%- set messages = messages[1:] %}\n    {%- else %}\n        {{- raise_exception(\"Cannot put tools in the first user message when there's no first user message!\") }}\n{%- endif %}\n    {{- '<|start_header_id|>user<|end_header_id|>\\n\\n' -}}\n    {{- \"Given the following functions, please respond with a JSON for a function call \" }}\n    {{- \"with its proper arguments that best answers the given prompt.\\n\\n\" }}\n    {{- 'Respond in the format {\"name\": function name, \"parameters\": dictionary of argument name and its value}.' }}\n    {{- \"Do not use variables.\\n\\n\" }}\n    {%- for t in tools %}\n        {{- t | tojson(indent=4) }}\n        {{- \"\\n\\n\" }}\n    {%- endfor %}\n    {{- first_user_message + \"<|eot_id|>\"}}\n{%- endif %}\n\n{%- for message in messages %}\n    {%- if not (message.role == 'ipython' or message.role == 'tool' or 'tool_calls' in message) %}\n        {{- '<|start_header_id|>' + message['role'] + '<|end_header_id|>\\n\\n'+ message['content'] | trim + '<|eot_id|>' }}\n    {%- elif 'tool_calls' in message %}\n        {%- if not message.tool_calls|length == 1 %}\n            {{- raise_exception(\"This model only supports single tool-calls at once!\") }}\n        {%- endif %}\n        {%- set tool_call = message.tool_calls[0].function %}\n        {%- if builtin_tools is defined and tool_call.name in builtin_tools %}\n            {{- '<|start_header_id|>assistant<|end_header_id|>\\n\\n' -}}\n            {{- \"<|python_tag|>\" + tool_call.name + \".call(\" }}\n            {%- for arg_name, arg_val in tool_call.arguments | items %}\n                {{- arg_name + '=\"' + arg_val + '\"' }}\n                {%- if not loop.last %}\n                    {{- \", \" }}\n                {%- endif %}\n                {%- endfor %}\n            {{- \")\" }}\n        {%- else  %}\n            {{- '<|start_header_id|>assistant<|end_header_id|>\\n\\n' -}}\n            {{- '{\"name\": \"' + tool_call.name + '\", ' }}\n            {{- '\"parameters\": ' }}\n            {{- tool_call.arguments | tojson }}\n            {{- \"}\" }}\n        {%- endif %}\n        {%- if builtin_tools is defined %}\n            {#- This means we're in ipython mode #}\n            {{- \"<|eom_id|>\" }}\n        {%- else %}\n            {{- \"<|eot_id|>\" }}\n        {%- endif %}\n    {%- elif message.role == \"tool\" or message.role == \"ipython\" %}\n        {{- \"<|start_header_id|>ipython<|end_header_id|>\\n\\n\" }}\n        {%- if message.content is mapping or message.content is iterable %}\n            {{- message.content | tojson }}\n        {%- else %}\n            {{- message.content }}\n        {%- endif %}\n        {{- \"<|eot_id|>\" }}\n    {%- endif %}\n{%- endfor %}\n{%- if add_generation_prompt %}\n    {{- '<|start_header_id|>assistant<|end_header_id|>\\n\\n' }}\n{%- endif %}\n",
+              "stop_strings": []
+            }
+          }
+        }
+      }
+    },
+    {
+      "type": "arm-end",
+      "model": "llama-3.3-70b-instruct",
+      "unload": {
+        "ok": true,
+        "data": {
+          "instance_id": "llama-3.3-70b-instruct"
+        }
+      },
+      "telemetry": [
+        {
+          "label": "before-load",
+          "nvlink": [
+            "GPU 0: Quadro RTX 6000 (UUID: GPU-15ea3e34-292b-3333-5e43-e5b133f9a30c)",
+            "\t Link 0: 25.781 GB/s",
+            "\t Link 1: 25.781 GB/s",
+            "GPU 1: Quadro RTX 6000 (UUID: GPU-1f2f6459-b688-3466-5b49-a65c538be843)",
+            "\t Link 0: 25.781 GB/s",
+            "\t Link 1: 25.781 GB/s"
+          ],
+          "free_physical_kib": 125355000,
+          "gpus": [
+            "0, Quadro RTX 6000, 23040, 369, 0, 55, P8, 36.20, 260.00, 300",
+            "1, Quadro RTX 6000, 23040, 31, 0, 46, P8, 23.52, 260.00, 300"
+          ],
+          "model": "llama-3.3-70b-instruct",
+          "time": "2026-08-20T19:58:53.0868711Z"
+        },
+        {
+          "label": "after-load",
+          "nvlink": [
+            "GPU 0: Quadro RTX 6000 (UUID: GPU-15ea3e34-292b-3333-5e43-e5b133f9a30c)",
+            "\t Link 0: 25.781 GB/s",
+            "\t Link 1: 25.781 GB/s",
+            "GPU 1: Quadro RTX 6000 (UUID: GPU-1f2f6459-b688-3466-5b49-a65c538be843)",
+            "\t Link 0: 25.781 GB/s",
+            "\t Link 1: 25.781 GB/s"
+          ],
+          "free_physical_kib": 80295912,
+          "gpus": [
+            "0, Quadro RTX 6000, 23040, 20882, 0, 60, P3, 67.19, 260.00, 825",
+            "1, Quadro RTX 6000, 23040, 20331, 0, 53, P2, 91.67, 260.00, 1830"
+          ],
+          "model": "llama-3.3-70b-instruct",
+          "time": "2026-08-20T19:59:43.3000499Z"
+        },
+        {
+          "label": "after-role-suite",
+          "nvlink": [
+            "GPU 0: Quadro RTX 6000 (UUID: GPU-15ea3e34-292b-3333-5e43-e5b133f9a30c)",
+            "\t Link 0: 25.781 GB/s",
+            "\t Link 1: 25.781 GB/s",
+            "GPU 1: Quadro RTX 6000 (UUID: GPU-1f2f6459-b688-3466-5b49-a65c538be843)",
+            "\t Link 0: 25.781 GB/s",
+            "\t Link 1: 25.781 GB/s"
+          ],
+          "free_physical_kib": 80300908,
+          "gpus": [
+            "0, Quadro RTX 6000, 23040, 20881, 0, 59, P5, 42.71, 260.00, 465",
+            "1, Quadro RTX 6000, 23040, 20331, 0, 50, P5, 27.38, 260.00, 390"
+          ],
+          "model": "llama-3.3-70b-instruct",
+          "time": "2026-08-20T19:59:44.6452935Z"
+        },
+        {
+          "label": "after-context",
+          "nvlink": [
+            "GPU 0: Quadro RTX 6000 (UUID: GPU-15ea3e34-292b-3333-5e43-e5b133f9a30c)",
+            "\t Link 0: 25.781 GB/s",
+            "\t Link 1: 25.781 GB/s",
+            "GPU 1: Quadro RTX 6000 (UUID: GPU-1f2f6459-b688-3466-5b49-a65c538be843)",
+            "\t Link 0: 25.781 GB/s",
+            "\t Link 1: 25.781 GB/s"
+          ],
+          "free_physical_kib": 80272720,
+          "gpus": [
+            "0, Quadro RTX 6000, 23040, 20887, 0, 69, P2, 79.44, 260.00, 1035",
+            "1, Quadro RTX 6000, 23040, 20336, 0, 60, P3, 67.20, 260.00, 705"
+          ],
+          "model": "llama-3.3-70b-instruct",
+          "time": "2026-08-20T20:04:25.9849829Z"
+        },
+        {
+          "label": "after-unload",
+          "nvlink": [
+            "GPU 0: Quadro RTX 6000 (UUID: GPU-15ea3e34-292b-3333-5e43-e5b133f9a30c)",
+            "\t Link 0: 25.781 GB/s",
+            "\t Link 1: 25.781 GB/s",
+            "GPU 1: Quadro RTX 6000 (UUID: GPU-1f2f6459-b688-3466-5b49-a65c538be843)",
+            "\t Link 0: 25.781 GB/s",
+            "\t Link 1: 25.781 GB/s"
+          ],
+          "free_physical_kib": 125349788,
+          "gpus": [
+            "0, Quadro RTX 6000, 23040, 370, 0, 63, P8, 36.70, 260.00, 300",
+            "1, Quadro RTX 6000, 23040, 31, 0, 54, P8, 24.56, 260.00, 300"
+          ],
+          "model": "llama-3.3-70b-instruct",
+          "time": "2026-08-20T20:04:35.4774285Z"
+        }
+      ],
+      "hashes": {
+        "preregistration": "fd96514fa7a50d4f8acb0e53a5ef1d6446f901956263481b1f8393ca0524c67d",
+        "runner": "3324657883befa3164fd789b25ae1916e0dc18647260963027a0879763b17074"
+      },
+      "recorded_at": "2026-08-20T20:04:33.600Z"
+    },
+    {
+      "type": "arm-start",
+      "model": "qwen3.6-27b-mtp",
+      "identity": {
+        "type": "llm",
+        "publisher": "unsloth",
+        "key": "qwen3.6-27b-mtp",
+        "display_name": "Qwen3.6 27B",
+        "architecture": "qwen35",
+        "quantization": {
+          "name": "Q4_K_M",
+          "bits_per_weight": 4
+        },
+        "size_bytes": 17106773120,
+        "params_string": "27B",
+        "loaded_instances": [],
+        "max_context_length": 262144,
+        "format": "gguf",
+        "capabilities": {
+          "vision": false,
+          "trained_for_tool_use": true,
+          "reasoning": {
+            "allowed_options": [
+              "off",
+              "on"
+            ],
+            "default": "on"
+          }
+        },
+        "description": null
+      },
+      "hashes": {
+        "preregistration": "fd96514fa7a50d4f8acb0e53a5ef1d6446f901956263481b1f8393ca0524c67d",
+        "runner": "3324657883befa3164fd789b25ae1916e0dc18647260963027a0879763b17074"
+      },
+      "requested_context": 32768,
+      "started_at": "2026-08-20T20:06:16.741Z",
+      "telemetry": [
+        {
+          "label": "before-load",
+          "nvlink": [
+            "GPU 0: Quadro RTX 6000 (UUID: GPU-15ea3e34-292b-3333-5e43-e5b133f9a30c)",
+            "\t Link 0: 25.781 GB/s",
+            "\t Link 1: 25.781 GB/s",
+            "GPU 1: Quadro RTX 6000 (UUID: GPU-1f2f6459-b688-3466-5b49-a65c538be843)",
+            "\t Link 0: 25.781 GB/s",
+            "\t Link 1: 25.781 GB/s"
+          ],
+          "free_physical_kib": 125296236,
+          "gpus": [
+            "0, Quadro RTX 6000, 23040, 365, 0, 56, P8, 36.25, 260.00, 300",
+            "1, Quadro RTX 6000, 23040, 31, 0, 47, P8, 23.48, 260.00, 300"
+          ],
+          "model": "qwen3.6-27b-mtp",
+          "time": "2026-08-20T20:06:19.9607261Z"
+        }
+      ],
+      "load_wall_ms": 22488,
+      "load": {
+        "ok": true,
+        "data": {
+          "type": "llm",
+          "instance_id": "qwen3.6-27b-mtp",
+          "load_time_seconds": 21.512,
+          "status": "loaded",
+          "load_config": {
+            "context_length": 32768,
+            "eval_batch_size": 2048,
+            "physical_batch_size": 512,
+            "parallel": 4,
+            "flash_attention": true,
+            "context_checkpoints": 32,
+            "reasoning_budget_message": "",
+            "speculative_draft_mtp": true,
+            "speculative_draft_simple": false,
+            "speculative_draft_model": "",
+            "speculative_draft_max_tokens": 2,
+            "speculative_draft_min_tokens": 0,
+            "speculative_draft_min_continue_probability": 0.75,
+            "offload_kv_cache_to_gpu": true,
+            "prompt_template": {
+              "type": "jinja",
+              "template": "{%- set image_count = namespace(value=0) %}\n{%- set video_count = namespace(value=0) %}\n{%- macro render_content(content, do_vision_count, is_system_content=false) %}\n    {%- if content is string %}\n        {{- content }}\n    {%- elif content is iterable and content is not mapping %}\n        {%- for item in content %}\n            {%- if 'image' in item or 'image_url' in item or item.type == 'image' %}\n                {%- if is_system_content %}\n                    {{- raise_exception('System message cannot contain images.') }}\n                {%- endif %}\n                {%- if do_vision_count %}\n                    {%- set image_count.value = image_count.value + 1 %}\n                {%- endif %}\n                {%- if add_vision_id %}\n                    {{- 'Picture ' ~ image_count.value ~ ': ' }}\n                {%- endif %}\n                {{- '<|vision_start|><|image_pad|><|vision_end|>' }}\n            {%- elif 'video' in item or item.type == 'video' %}\n                {%- if is_system_content %}\n                    {{- raise_exception('System message cannot contain videos.') }}\n                {%- endif %}\n                {%- if do_vision_count %}\n                    {%- set video_count.value = video_count.value + 1 %}\n                {%- endif %}\n                {%- if add_vision_id %}\n                    {{- 'Video ' ~ video_count.value ~ ': ' }}\n                {%- endif %}\n                {{- '<|vision_start|><|video_pad|><|vision_end|>' }}\n            {%- elif 'text' in item %}\n                {{- item.text }}\n            {%- else %}\n                {{- raise_exception('Unexpected item type in content.') }}\n            {%- endif %}\n        {%- endfor %}\n    {%- elif content is none or content is undefined %}\n        {{- '' }}\n    {%- else %}\n        {{- raise_exception('Unexpected content type.') }}\n    {%- endif %}\n{%- endmacro %}\n{%- if not messages %}\n    {{- raise_exception('No messages provided.') }}\n{%- endif %}\n{%- set num_sys = 0 %}\n{%- set merged_system = '' %}\n{%- if messages[0].role == 'system' or messages[0].role == 'developer' %}\n    {%- set first = render_content(messages[0].content, false, true)|trim %}\n    {%- if messages|length > 1 and (messages[1].role == 'system' or messages[1].role == 'developer') %}\n        {%- set second = render_content(messages[1].content, false, true)|trim %}\n        {%- set merged_system = first + '\\n' + second %}\n        {%- set num_sys = 2 %}\n    {%- else %}\n        {%- set merged_system = first %}\n        {%- set num_sys = 1 %}\n    {%- endif %}\n{%- endif %}\n{%- if tools and tools is iterable and tools is not mapping %}\n    {{- '<|im_start|>system\\n' }}\n    {{- \"# Tools\\n\\nYou have access to the following functions:\\n\\n<tools>\" }}\n    {%- for tool in tools %}\n        {{- \"\\n\" }}\n        {{- tool | tojson }}\n    {%- endfor %}\n    {{- \"\\n</tools>\" }}\n    {{- '\\n\\nIf you choose to call a function ONLY reply in the following format with NO suffix:\\n\\n<tool_call>\\n<function=example_function_name>\\n<parameter=example_parameter_1>\\nvalue_1\\n</parameter>\\n<parameter=example_parameter_2>\\nThis is the value for the second parameter\\nthat can span\\nmultiple lines\\n</parameter>\\n</function>\\n</tool_call>\\n\\n<IMPORTANT>\\nReminder:\\n- Function calls MUST follow the specified format: an inner <function=...></function> block must be nested within <tool_call></tool_call> XML tags\\n- Required parameters MUST be specified\\n- You may provide optional reasoning for your function call in natural language BEFORE the function call, but NOT after\\n- If there is no function call available, answer the question like normal with your current knowledge and do not tell the user about function calls\\n</IMPORTANT>' }}\n    {%- if merged_system %}\n        {{- '\\n\\n' + merged_system }}\n    {%- endif %}\n    {{- '<|im_end|>\\n' }}\n{%- else %}\n    {%- if merged_system %}\n        {{- '<|im_start|>system\\n' + merged_system + '<|im_end|>\\n' }}\n    {%- endif %}\n{%- endif %}\n{%- set ns = namespace(multi_step_tool=true, last_query_index=messages|length - 1) %}\n{%- for message in messages[::-1] %}\n    {%- set index = (messages|length - 1) - loop.index0 %}\n    {%- if ns.multi_step_tool and message.role == \"user\" %}\n        {%- set content = render_content(message.content, false)|trim %}\n        {%- if not(content.startswith('<tool_response>') and content.endswith('</tool_response>')) %}\n            {%- set ns.multi_step_tool = false %}\n            {%- set ns.last_query_index = index %}\n        {%- endif %}\n    {%- endif %}\n{%- endfor %}\n{%- for message in messages %}\n    {%- if loop.index0 >= num_sys and message.role != \"system\" and message.role != \"developer\" %}\n    {%- set content = render_content(message.content, true)|trim %}\n    {%- if message.role == \"user\" %}\n        {{- '<|im_start|>' + message.role + '\\n' + content + '<|im_end|>' + '\\n' }}\n    {%- elif message.role == \"assistant\" %}\n        {%- set reasoning_content = '' %}\n        {%- if message.reasoning_content is string %}\n            {%- set reasoning_content = message.reasoning_content %}\n        {%- else %}\n            {%- if '</think>' in content %}\n                {%- set reasoning_content = content.split('</think>')[0].rstrip('\\n').split('<think>')[-1].lstrip('\\n') %}\n                {%- set content = content.split('</think>')[-1].lstrip('\\n') %}\n            {%- endif %}\n        {%- endif %}\n        {%- set reasoning_content = reasoning_content|trim %}\n        {%- if (preserve_thinking is defined and preserve_thinking is true) or (loop.index0 > ns.last_query_index) %}\n            {{- '<|im_start|>' + message.role + '\\n<think>\\n' + reasoning_content + '\\n</think>\\n\\n' + content }}\n        {%- else %}\n            {{- '<|im_start|>' + message.role + '\\n' + content }}\n        {%- endif %}\n        {%- if message.tool_calls and message.tool_calls is iterable and message.tool_calls is not mapping %}\n            {%- for tool_call in message.tool_calls %}\n                {%- if tool_call.function is defined %}\n                    {%- set tool_call = tool_call.function %}\n                {%- endif %}\n                {%- if loop.first %}\n                    {%- if content|trim %}\n                        {{- '\\n\\n<tool_call>\\n<function=' + tool_call.name + '>\\n' }}\n                    {%- else %}\n                        {{- '<tool_call>\\n<function=' + tool_call.name + '>\\n' }}\n                    {%- endif %}\n                {%- else %}\n                    {{- '\\n<tool_call>\\n<function=' + tool_call.name + '>\\n' }}\n                {%- endif %}\n                {%- if tool_call.arguments is mapping %}\n                    {%- for args_name in tool_call.arguments %}\n                        {%- set args_value = tool_call.arguments[args_name] %}\n                        {{- '<parameter=' + args_name + '>\\n' }}\n                        {%- set args_value = args_value | tojson | safe if args_value is mapping or (args_value is sequence and args_value is not string) else args_value | string %}\n                        {{- args_value }}\n                        {{- '\\n</parameter>\\n' }}\n                    {%- endfor %}\n                {%- endif %}\n                {{- '</function>\\n</tool_call>' }}\n            {%- endfor %}\n        {%- endif %}\n        {{- '<|im_end|>\\n' }}\n    {%- elif message.role == \"tool\" %}\n        {%- if loop.previtem and loop.previtem.role != \"tool\" %}\n            {{- '<|im_start|>user' }}\n        {%- endif %}\n        {{- '\\n<tool_response>\\n' }}\n        {{- content }}\n        {{- '\\n</tool_response>' }}\n        {%- if not loop.last and loop.nextitem.role != \"tool\" %}\n            {{- '<|im_end|>\\n' }}\n        {%- elif loop.last %}\n            {{- '<|im_end|>\\n' }}\n        {%- endif %}\n    {%- endif %}\n    {%- endif %}\n{%- endfor %}\n{%- if add_generation_prompt %}\n    {{- '<|im_start|>assistant\\n' }}\n    {%- if enable_thinking is defined and enable_thinking is false %}\n        {{- '<think>\\n\\n</think>\\n\\n' }}\n    {%- else %}\n        {{- '<think>\\n' }}\n    {%- endif %}\n{%- endif %}\n{#- Unsloth fixes - developer role, tool calling #}",
+              "stop_strings": []
+            }
+          }
+        }
+      }
+    },
+    {
+      "type": "arm-end",
+      "model": "qwen3.6-27b-mtp",
+      "unload": {
+        "ok": true,
+        "data": {
+          "instance_id": "qwen3.6-27b-mtp"
+        }
+      },
+      "telemetry": [
+        {
+          "label": "before-load",
+          "nvlink": [
+            "GPU 0: Quadro RTX 6000 (UUID: GPU-15ea3e34-292b-3333-5e43-e5b133f9a30c)",
+            "\t Link 0: 25.781 GB/s",
+            "\t Link 1: 25.781 GB/s",
+            "GPU 1: Quadro RTX 6000 (UUID: GPU-1f2f6459-b688-3466-5b49-a65c538be843)",
+            "\t Link 0: 25.781 GB/s",
+            "\t Link 1: 25.781 GB/s"
+          ],
+          "free_physical_kib": 125296236,
+          "gpus": [
+            "0, Quadro RTX 6000, 23040, 365, 0, 56, P8, 36.25, 260.00, 300",
+            "1, Quadro RTX 6000, 23040, 31, 0, 47, P8, 23.48, 260.00, 300"
+          ],
+          "model": "qwen3.6-27b-mtp",
+          "time": "2026-08-20T20:06:19.9607261Z"
+        },
+        {
+          "label": "after-load",
+          "nvlink": [
+            "GPU 0: Quadro RTX 6000 (UUID: GPU-15ea3e34-292b-3333-5e43-e5b133f9a30c)",
+            "\t Link 0: 25.781 GB/s",
+            "\t Link 1: 25.781 GB/s",
+            "GPU 1: Quadro RTX 6000 (UUID: GPU-1f2f6459-b688-3466-5b49-a65c538be843)",
+            "\t Link 0: 25.781 GB/s",
+            "\t Link 1: 25.781 GB/s"
+          ],
+          "free_physical_kib": 106837348,
+          "gpus": [
+            "0, Quadro RTX 6000, 23040, 10036, 0, 60, P2, 84.04, 260.00, 1530",
+            "1, Quadro RTX 6000, 23040, 10935, 0, 52, P2, 80.45, 260.00, 1605"
+          ],
+          "model": "qwen3.6-27b-mtp",
+          "time": "2026-08-20T20:06:43.7556006Z"
+        },
+        {
+          "label": "after-role-suite",
+          "nvlink": [
+            "GPU 0: Quadro RTX 6000 (UUID: GPU-15ea3e34-292b-3333-5e43-e5b133f9a30c)",
+            "\t Link 0: 25.781 GB/s",
+            "\t Link 1: 25.781 GB/s",
+            "GPU 1: Quadro RTX 6000 (UUID: GPU-1f2f6459-b688-3466-5b49-a65c538be843)",
+            "\t Link 0: 25.781 GB/s",
+            "\t Link 1: 25.781 GB/s"
+          ],
+          "free_physical_kib": 101605756,
+          "gpus": [
+            "0, Quadro RTX 6000, 23040, 10047, 0, 80, P2, 111.67, 260.00, 1725",
+            "1, Quadro RTX 6000, 23040, 10945, 0, 78, P2, 125.23, 260.00, 1875"
+          ],
+          "model": "qwen3.6-27b-mtp",
+          "time": "2026-08-20T20:07:45.3403505Z"
+        },
+        {
+          "label": "after-context",
+          "nvlink": [
+            "GPU 0: Quadro RTX 6000 (UUID: GPU-15ea3e34-292b-3333-5e43-e5b133f9a30c)",
+            "\t Link 0: 25.781 GB/s",
+            "\t Link 1: 25.781 GB/s",
+            "GPU 1: Quadro RTX 6000 (UUID: GPU-1f2f6459-b688-3466-5b49-a65c538be843)",
+            "\t Link 0: 25.781 GB/s",
+            "\t Link 1: 25.781 GB/s"
+          ],
+          "free_physical_kib": 100182276,
+          "gpus": [
+            "0, Quadro RTX 6000, 23040, 10049, 0, 81, P3, 77.56, 260.00, 375",
+            "1, Quadro RTX 6000, 23040, 10959, 0, 78, P3, 75.46, 260.00, 375"
+          ],
+          "model": "qwen3.6-27b-mtp",
+          "time": "2026-08-20T20:09:28.9703334Z"
+        },
+        {
+          "label": "after-unload",
+          "nvlink": [
+            "GPU 0: Quadro RTX 6000 (UUID: GPU-15ea3e34-292b-3333-5e43-e5b133f9a30c)",
+            "\t Link 0: 25.781 GB/s",
+            "\t Link 1: 25.781 GB/s",
+            "GPU 1: Quadro RTX 6000 (UUID: GPU-1f2f6459-b688-3466-5b49-a65c538be843)",
+            "\t Link 0: 25.781 GB/s",
+            "\t Link 1: 25.781 GB/s"
+          ],
+          "free_physical_kib": 125327500,
+          "gpus": [
+            "0, Quadro RTX 6000, 23040, 367, 0, 72, P8, 39.04, 260.00, 300",
+            "1, Quadro RTX 6000, 23040, 31, 0, 66, P8, 25.52, 260.00, 300"
+          ],
+          "model": "qwen3.6-27b-mtp",
+          "time": "2026-08-20T20:09:34.3146539Z"
+        }
+      ],
+      "hashes": {
+        "preregistration": "fd96514fa7a50d4f8acb0e53a5ef1d6446f901956263481b1f8393ca0524c67d",
+        "runner": "3324657883befa3164fd789b25ae1916e0dc18647260963027a0879763b17074"
+      },
+      "recorded_at": "2026-08-20T20:09:32.441Z"
+    },
+    {
+      "type": "arm-start",
+      "model": "openai/gpt-oss-20b",
+      "identity": {
+        "type": "llm",
+        "publisher": "openai",
+        "key": "openai/gpt-oss-20b",
+        "display_name": "GPT-OSS 20B",
+        "architecture": "gpt-oss",
+        "quantization": {
+          "name": "MXFP4",
+          "bits_per_weight": 4
+        },
+        "size_bytes": 12109664217,
+        "params_string": "20B",
+        "loaded_instances": [],
+        "max_context_length": 131072,
+        "format": "gguf",
+        "capabilities": {
+          "vision": false,
+          "trained_for_tool_use": true,
+          "reasoning": {
+            "allowed_options": [
+              "low",
+              "medium",
+              "high"
+            ],
+            "default": "low"
+          }
+        },
+        "description": null,
+        "variants": [
+          "openai/gpt-oss-20b@mxfp4"
+        ],
+        "selected_variant": "openai/gpt-oss-20b@mxfp4"
+      },
+      "hashes": {
+        "preregistration": "fd96514fa7a50d4f8acb0e53a5ef1d6446f901956263481b1f8393ca0524c67d",
+        "runner": "3324657883befa3164fd789b25ae1916e0dc18647260963027a0879763b17074"
+      },
+      "requested_context": 32768,
+      "started_at": "2026-08-20T20:38:51.277Z",
+      "telemetry": [
+        {
+          "label": "before-load",
+          "nvlink": [
+            "GPU 0: Quadro RTX 6000 (UUID: GPU-15ea3e34-292b-3333-5e43-e5b133f9a30c)",
+            "\t Link 0: 25.781 GB/s",
+            "\t Link 1: 25.781 GB/s",
+            "GPU 1: Quadro RTX 6000 (UUID: GPU-1f2f6459-b688-3466-5b49-a65c538be843)",
+            "\t Link 0: 25.781 GB/s",
+            "\t Link 1: 25.781 GB/s"
+          ],
+          "free_physical_kib": 124670220,
+          "gpus": [
+            "0, Quadro RTX 6000, 23040, 625, 0, 46, P8, 35.94, 260.00, 300",
+            "1, Quadro RTX 6000, 23040, 204, 0, 37, P8, 22.80, 260.00, 300"
+          ],
+          "model": "openai/gpt-oss-20b",
+          "time": "2026-08-20T20:38:54.4021892Z"
+        }
+      ],
+      "load_wall_ms": 19150,
+      "load": {
+        "ok": true,
+        "data": {
+          "type": "llm",
+          "instance_id": "openai/gpt-oss-20b",
+          "load_time_seconds": 18.138,
+          "status": "loaded",
+          "load_config": {
+            "context_length": 32768,
+            "eval_batch_size": 2048,
+            "physical_batch_size": 512,
+            "parallel": 4,
+            "flash_attention": true,
+            "context_checkpoints": 32,
+            "reasoning_budget_message": "",
+            "speculative_draft_mtp": false,
+            "speculative_draft_simple": false,
+            "speculative_draft_model": "",
+            "speculative_draft_max_tokens": 16,
+            "speculative_draft_min_tokens": 0,
+            "speculative_draft_min_continue_probability": 0.75,
+            "num_experts": 4,
+            "offload_kv_cache_to_gpu": true,
+            "prompt_template": {
+              "type": "jinja",
+              "template": "{#-\n  In addition to the normal inputs of `messages` and `tools`, this template also accepts the\n  following kwargs:\n  - \"builtin_tools\": A list, can contain \"browser\" and/or \"python\".\n  - \"model_identity\": A string that optionally describes the model identity.\n  - \"reasoning_effort\": A string that describes the reasoning effort, defaults to \"medium\".\n #}\n\n{#- Tool Definition Rendering ============================================== #}\n{%- macro render_typescript_type(param_spec, required_params, is_nullable=false) -%}\n    {%- if param_spec.type == \"array\" -%}\n        {%- if param_spec['items'] -%}\n            {%- if param_spec['items']['type'] == \"string\" -%}\n                {{- \"string[]\" }}\n            {%- elif param_spec['items']['type'] == \"number\" -%}\n                {{- \"number[]\" }}\n            {%- elif param_spec['items']['type'] == \"integer\" -%}\n                {{- \"number[]\" }}\n            {%- elif param_spec['items']['type'] == \"boolean\" -%}\n                {{- \"boolean[]\" }}\n            {%- else -%}\n                {%- set inner_type = render_typescript_type(param_spec['items'], required_params) -%}\n                {%- if inner_type == \"object | object\" or inner_type|length > 50 -%}\n                    {{- \"any[]\" }}\n                {%- else -%}\n                    {{- inner_type + \"[]\" }}\n                {%- endif -%}\n            {%- endif -%}\n            {%- if param_spec.nullable -%}\n                {{- \" | null\" }}\n            {%- endif -%}\n        {%- else -%}\n            {{- \"any[]\" }}\n            {%- if param_spec.nullable -%}\n                {{- \" | null\" }}\n            {%- endif -%}\n        {%- endif -%}\n    {%- elif param_spec.type is defined and param_spec.type is iterable and param_spec.type is not string and param_spec.type is not mapping and param_spec.type[0] is defined -%}\n        {#- Handle array of types like [\"object\", \"object\"] from Union[dict, list] #}\n        {%- if param_spec.type | length > 1 -%}\n            {{- param_spec.type | join(\" | \") }}\n        {%- else -%}\n            {{- param_spec.type[0] }}\n        {%- endif -%}\n    {%- elif param_spec.oneOf -%}\n        {#- Handle oneOf schemas - check for complex unions and fallback to any #}\n        {%- set has_object_variants = false -%}\n        {%- for variant in param_spec.oneOf -%}\n            {%- if variant.type == \"object\" -%}\n                {%- set has_object_variants = true -%}\n            {%- endif -%}\n        {%- endfor -%}\n        {%- if has_object_variants and param_spec.oneOf|length > 1 -%}\n            {{- \"any\" }}\n        {%- else -%}\n            {%- for variant in param_spec.oneOf -%}\n                {{- render_typescript_type(variant, required_params) -}}\n                {%- if variant.description %}\n                    {{- \"// \" + variant.description }}\n                {%- endif -%}\n                {%- if variant.default is defined %}\n                    {{ \"// default: \" + variant.default|tojson }}\n                {%- endif -%}\n                {%- if not loop.last %}\n                    {{- \" | \" }}\n                {% endif -%}\n            {%- endfor -%}\n        {%- endif -%}\n    {%- elif param_spec.type == \"string\" -%}\n        {%- if param_spec.enum -%}\n            {{- '\"' + param_spec.enum|join('\" | \"') + '\"' -}}\n        {%- else -%}\n            {{- \"string\" }}\n            {%- if param_spec.nullable %}\n                {{- \" | null\" }}\n            {%- endif -%}\n        {%- endif -%}\n    {%- elif param_spec.type == \"number\" -%}\n        {{- \"number\" }}\n    {%- elif param_spec.type == \"integer\" -%}\n        {{- \"number\" }}\n    {%- elif param_spec.type == \"boolean\" -%}\n        {{- \"boolean\" }}\n\n    {%- elif param_spec.type == \"object\" -%}\n        {%- if param_spec.properties -%}\n            {{- \"{\n\" }}\n            {%- for prop_name, prop_spec in param_spec.properties.items() -%}\n                {{- prop_name -}}\n                {%- if prop_name not in (param_spec.required or []) -%}\n                    {{- \"?\" }}\n                {%- endif -%}\n                {{- \": \" }}\n                {{ render_typescript_type(prop_spec, param_spec.required or []) }}\n                {%- if not loop.last -%}\n                    {{-\", \" }}\n                {%- endif -%}\n            {%- endfor -%}\n            {{- \"}\" }}\n        {%- else -%}\n            {{- \"object\" }}\n        {%- endif -%}\n    {%- else -%}\n        {{- \"any\" }}\n    {%- endif -%}\n{%- endmacro -%}\n\n{%- macro render_tool_namespace(namespace_name, tools) -%}\n    {{- \"## \" + namespace_name + \"\n\n\" }}\n    {{- \"namespace \" + namespace_name + \" {\n\n\" }}\n    {%- for tool in tools %}\n        {%- set tool = tool.function %}\n        {{- \"// \" + tool.description + \"\n\" }}\n        {{- \"type \"+ tool.name + \" = \" }}\n        {%- if tool.parameters and tool.parameters.properties %}\n            {{- \"(_: {\n\" }}\n            {%- for param_name, param_spec in tool.parameters.properties.items() %}\n                {%- if param_spec.description %}\n                    {{- \"// \" + param_spec.description + \"\n\" }}\n                {%- endif %}\n                {{- param_name }}\n                {%- if param_name not in (tool.parameters.required or []) -%}\n                    {{- \"?\" }}\n                {%- endif -%}\n                {{- \": \" }}\n                {{- render_typescript_type(param_spec, tool.parameters.required or []) }}\n                {%- if param_spec.default is defined -%}\n                    {%- if param_spec.enum %}\n                        {{- \", // default: \" + param_spec.default }}\n                    {%- elif param_spec.oneOf %}\n                        {{- \"// default: \" + param_spec.default }}\n                    {%- else %}\n                        {{- \", // default: \" + param_spec.default|tojson }}\n                    {%- endif -%}\n                {%- endif -%}\n                {%- if not loop.last %}\n                    {{- \",\n\" }}\n                {%- else %}\n                    {{- \"\n\" }}\n                {%- endif -%}\n            {%- endfor %}\n            {{- \"}) => any;\n\n\" }}\n        {%- else -%}\n            {{- \"() => any;\n\n\" }}\n        {%- endif -%}\n    {%- endfor %}\n    {{- \"} // namespace \" + namespace_name }}\n{%- endmacro -%}\n\n{%- macro render_builtin_tools(browser_tool, python_tool) -%}\n    {%- if browser_tool %}\n        {{- \"## browser\n\n\" }}\n        {{- \"// Tool for browsing.\n\" }}\n        {{- \"// The `cursor` appears in brackets before each browsing display: `[{cursor}]`.\n\" }}\n        {{- \"// Cite information from the tool using the following format:\n\" }}\n        {{- \"// `?{cursor}+L{line_start}(-L{line_end})??`, for example: `?6+L9-L11?` or `?8+L3?`.\n\" }}\n        {{- \"// Do not quote more than 10 words directly from the tool output.\n\" }}\n        {{- \"// sources=web (default: web)\n\" }}\n        {{- \"namespace browser {\n\n\" }}\n        {{- \"// Searches for information related to `query` and displays `topn` results.\n\" }}\n        {{- \"type search = (_: {\n\" }}\n        {{- \"query: string,\n\" }}\n        {{- \"topn?: number, // default: 10\n\" }}\n        {{- \"source?: string,\n\" }}\n        {{- \"}) => any;\n\n\" }}\n        {{- \"// Opens the link `id` from the page indicated by `cursor` starting at line number `loc`, showing `num_lines` lines.\n\" }}\n        {{- \"// Valid link ids are displayed with the formatting: `?{id}+.*?`.\n\" }}\n        {{- \"// If `cursor` is not provided, the most recent page is implied.\n\" }}\n        {{- \"// If `id` is a string, it is treated as a fully qualified URL associated with `source`.\n\" }}\n        {{- \"// If `loc` is not provided, the viewport will be positioned at the beginning of the document or centered on the most relevant passage, if available.\n\" }}\n        {{- \"// Use this function without `id` to scroll to a new location of an opened page.\n\" }}\n        {{- \"type open = (_: {\n\" }}\n        {{- \"id?: number | string, // default: -1\n\" }}\n        {{- \"cursor?: number, // default: -1\n\" }}\n        {{- \"loc?: number, // default: -1\n\" }}\n        {{- \"num_lines?: number, // default: -1\n\" }}\n        {{- \"view_source?: boolean, // default: false\n\" }}\n        {{- \"source?: string,\n\" }}\n        {{- \"}) => any;\n\n\" }}\n        {{- \"// Finds exact matches of `pattern` in the current page, or the page given by `cursor`.\n\" }}\n        {{- \"type find = (_: {\n\" }}\n        {{- \"pattern: string,\n\" }}\n        {{- \"cursor?: number, // default: -1\n\" }}\n        {{- \"}) => any;\n\n\" }}\n        {{- \"} // namespace browser\n\n\" }}\n    {%- endif -%}\n\n    {%- if python_tool %}\n        {{- \"## python\n\n\" }}\n        {{- \"Use this tool to execute Python code in your chain of thought. The code will not be shown to the user. This tool should be used for internal reasoning, but not for code that is intended to be visible to the user (e.g. when creating plots, tables, or files).\n\n\" }}\n        {{- \"When you send a message containing Python code to python, it will be executed in a stateful Jupyter notebook environment. python will respond with the output of the execution or time out after 120.0 seconds. The drive at '/mnt/data' can be used to save and persist user files. Internet access for this session is UNKNOWN. Depends on the cluster.\n\n\" }}\n    {%- endif -%}\n{%- endmacro -%}\n\n{#- System Message Construction ============================================ #}\n{%- macro build_system_message() -%}\n    {%- if model_identity is not defined %}\n        {%- set model_identity = \"You are ChatGPT, a large language model trained by OpenAI.\" %}\n    {%- endif %}\n    {{- model_identity + \"\n\" }}\n    {{- \"Knowledge cutoff: 2024-06\n\" }}\n    {{- \"Current date: \" + strftime_now(\"%Y-%m-%d\") + \"\n\n\" }}\n    {%- if reasoning_effort is not defined %}\n        {%- set reasoning_effort = \"medium\" %}\n    {%- endif %}\n    {{- \"Reasoning: \" + reasoning_effort + \"\n\n\" }}\n    {%- if builtin_tools %}\n        {{- \"# Tools\n\n\" }}\n        {%- set available_builtin_tools = namespace(browser=false, python=false) %}\n        {%- for tool in builtin_tools %}\n            {%- if tool == \"browser\" %}\n                {%- set available_builtin_tools.browser = true %}\n            {%- elif tool == \"python\" %}\n                {%- set available_builtin_tools.python = true %}\n            {%- endif %}\n        {%- endfor %}\n        {{- render_builtin_tools(available_builtin_tools.browser, available_builtin_tools.python) }}\n    {%- endif -%}\n    {{- \"# Valid channels: analysis, commentary, final. Channel must be included for every message.\" }}\n    {%- if tools -%}\n        {{- \"\nCalls to these tools must go to the commentary channel: 'functions'.\" }}\n    {%- endif -%}\n{%- endmacro -%}\n\n{#- Main Template Logic ================================================= #}\n{#- Set defaults #}\n\n{#- Render system message #}\n{{- \"<|start|>system<|message|>\" }}\n{{- build_system_message() }}\n{{- \"<|end|>\" }}\n\n{#- Extract developer message #}\n{%- if messages[0].role == \"developer\" or messages[0].role == \"system\" %}\n    {%- set developer_message = messages[0].content %}\n    {%- set loop_messages = messages[1:] %}\n{%- else %}\n    {%- set developer_message = \"\" %}\n    {%- set loop_messages = messages %}\n{%- endif %}\n\n{#- Render developer message #}\n{%- if developer_message or tools %}\n    {{- \"<|start|>developer<|message|>\" }}\n    {%- if developer_message %}\n        {{- \"# Instructions\n\n\" }}\n        {{- developer_message }}\n    {%- endif %}\n    {%- if tools -%}\n        {{- \"\n\n\" }}\n        {{- \"# Tools\n\n\" }}\n        {{- render_tool_namespace(\"functions\", tools) }}\n    {%- endif -%}\n    {{- \"<|end|>\" }}\n{%- endif %}\n\n{#- Render messages #}\n{%- set last_tool_call = namespace(name=none) %}\n{%- for message in loop_messages -%}\n    {#- At this point only assistant/user/tool messages should remain #}\n    {%- if message.role == 'assistant' -%}\n        {#- Checks to ensure the messages are being passed in the format we expect #}\n        {%- if \"content\" in message %}\n            {%- if \"<|channel|>analysis<|message|>\" in message.content or \"<|channel|>final<|message|>\" in message.content %}\n                {{- raise_exception(\"You have passed a message containing <|channel|> tags in the content field. Instead of doing this, you should pass analysis messages (the string between '<|message|>' and '<|end|>') in the 'thinking' field, and final messages (the string between '<|message|>' and '<|end|>') in the 'content' field.\") }}\n            {%- endif %}\n        {%- endif %}\n        {%- if \"thinking\" in message %}\n            {%- if \"<|channel|>analysis<|message|>\" in message.thinking or \"<|channel|>final<|message|>\" in message.thinking %}\n                {{- raise_exception(\"You have passed a message containing <|channel|> tags in the thinking field. Instead of doing this, you should pass analysis messages (the string between '<|message|>' and '<|end|>') in the 'thinking' field, and final messages (the string between '<|message|>' and '<|end|>') in the 'content' field.\") }}\n            {%- endif %}\n        {%- endif %}\n        {%- if \"tool_calls\" in message %}\n            {#- We assume max 1 tool call per message, and so we infer the tool call name #}\n            {#- in \"tool\" messages from the most recent assistant tool call name #}\n            {%- set tool_call = message.tool_calls[0] %}\n            {%- if tool_call.function %}\n                {%- set tool_call = tool_call.function %}\n            {%- endif %}\n            {%- if message.content and message.thinking %}\n                {{- raise_exception(\"Cannot pass both content and thinking in an assistant message with tool calls! Put the analysis message in one or the other, but not both.\") }}\n            {%- elif message.content %}\n                {{- \"<|start|>assistant<|channel|>analysis<|message|>\" + message.content + \"<|end|>\" }}\n            {%- elif message.thinking %}\n                {{- \"<|start|>assistant<|channel|>analysis<|message|>\" + message.thinking + \"<|end|>\" }}\n            {%- endif %}\n            {{- \"<|start|>assistant to=\" }}\n            {{- \"functions.\" + tool_call.name + \"<|channel|>commentary \" }}\n            {{- (tool_call.content_type if tool_call.content_type is defined else \"json\") + \"<|message|>\" }}\n            {{- tool_call.arguments|tojson }}\n            {{- \"<|call|>\" }}\n            {%- set last_tool_call.name = tool_call.name %}\n        {%- elif loop.last and not add_generation_prompt %}\n            {#- Only render the CoT if the final turn is an assistant turn and add_generation_prompt is false #}\n            {#- This is a situation that should only occur in training, never in inference. #}\n            {%- if \"thinking\" in message %}\n                {{- \"<|start|>assistant<|channel|>analysis<|message|>\" + message.thinking + \"<|end|>\" }}\n            {%- endif %}\n            {#- <|return|> indicates the end of generation, but <|end|> does not #}\n            {#- <|return|> should never be an input to the model, but we include it as the final token #}\n            {#- when training, so the model learns to emit it. #}\n            {{- \"<|start|>assistant<|channel|>final<|message|>\" + message.content + \"<|return|>\" }}\n        {%- else %}\n            {#- CoT is dropped during all previous turns, so we never render it for inference #}\n            {{- \"<|start|>assistant<|channel|>final<|message|>\" + message.content + \"<|end|>\" }}\n            {%- set last_tool_call.name = none %}\n        {%- endif %}\n    {%- elif message.role == 'tool' -%}\n        {%- if last_tool_call.name is none %}\n            {{- raise_exception(\"Message has tool role, but there was no previous assistant message with a tool call!\") }}\n        {%- endif %}\n        {{- \"<|start|>functions.\" + last_tool_call.name }}\n        {{- \" to=assistant<|channel|>commentary<|message|>\" + message.content|tojson + \"<|end|>\" }}\n    {%- elif message.role == 'user' -%}\n        {{- \"<|start|>user<|message|>\" + message.content + \"<|end|>\" }}\n    {%- endif -%}\n{%- endfor -%}\n\n{#- Generation prompt #}\n{%- if add_generation_prompt -%}\n<|start|>assistant\n{%- endif -%}",
+              "stop_strings": []
+            }
+          }
+        }
+      }
+    },
+    {
+      "type": "arm-end",
+      "model": "openai/gpt-oss-20b",
+      "unload": {
+        "ok": true,
+        "data": {
+          "instance_id": "openai/gpt-oss-20b"
+        }
+      },
+      "telemetry": [
+        {
+          "label": "before-load",
+          "nvlink": [
+            "GPU 0: Quadro RTX 6000 (UUID: GPU-15ea3e34-292b-3333-5e43-e5b133f9a30c)",
+            "\t Link 0: 25.781 GB/s",
+            "\t Link 1: 25.781 GB/s",
+            "GPU 1: Quadro RTX 6000 (UUID: GPU-1f2f6459-b688-3466-5b49-a65c538be843)",
+            "\t Link 0: 25.781 GB/s",
+            "\t Link 1: 25.781 GB/s"
+          ],
+          "free_physical_kib": 124670220,
+          "gpus": [
+            "0, Quadro RTX 6000, 23040, 625, 0, 46, P8, 35.94, 260.00, 300",
+            "1, Quadro RTX 6000, 23040, 204, 0, 37, P8, 22.80, 260.00, 300"
+          ],
+          "model": "openai/gpt-oss-20b",
+          "time": "2026-08-20T20:38:54.4021892Z"
+        },
+        {
+          "label": "after-load",
+          "nvlink": [
+            "GPU 0: Quadro RTX 6000 (UUID: GPU-15ea3e34-292b-3333-5e43-e5b133f9a30c)",
+            "\t Link 0: 25.781 GB/s",
+            "\t Link 1: 25.781 GB/s",
+            "GPU 1: Quadro RTX 6000 (UUID: GPU-1f2f6459-b688-3466-5b49-a65c538be843)",
+            "\t Link 0: 25.781 GB/s",
+            "\t Link 1: 25.781 GB/s"
+          ],
+          "free_physical_kib": 111851452,
+          "gpus": [
+            "0, Quadro RTX 6000, 23040, 6902, 0, 49, P2, 76.61, 260.00, 1440",
+            "1, Quadro RTX 6000, 23040, 6192, 0, 38, P5, 26.82, 260.00, 660"
+          ],
+          "model": "openai/gpt-oss-20b",
+          "time": "2026-08-20T20:39:14.7486238Z"
+        },
+        {
+          "label": "after-role-suite",
+          "nvlink": [
+            "GPU 0: Quadro RTX 6000 (UUID: GPU-15ea3e34-292b-3333-5e43-e5b133f9a30c)",
+            "\t Link 0: 25.781 GB/s",
+            "\t Link 1: 25.781 GB/s",
+            "GPU 1: Quadro RTX 6000 (UUID: GPU-1f2f6459-b688-3466-5b49-a65c538be843)",
+            "\t Link 0: 25.781 GB/s",
+            "\t Link 1: 25.781 GB/s"
+          ],
+          "free_physical_kib": 111534608,
+          "gpus": [
+            "0, Quadro RTX 6000, 23040, 6905, 0, 61, P2, 77.02, 260.00, 1230",
+            "1, Quadro RTX 6000, 23040, 6195, 0, 55, P2, 79.07, 260.00, 1485"
+          ],
+          "model": "openai/gpt-oss-20b",
+          "time": "2026-08-20T20:40:19.1591355Z"
+        },
+        {
+          "label": "after-context",
+          "nvlink": [
+            "GPU 0: Quadro RTX 6000 (UUID: GPU-15ea3e34-292b-3333-5e43-e5b133f9a30c)",
+            "\t Link 0: 25.781 GB/s",
+            "\t Link 1: 25.781 GB/s",
+            "GPU 1: Quadro RTX 6000 (UUID: GPU-1f2f6459-b688-3466-5b49-a65c538be843)",
+            "\t Link 0: 25.781 GB/s",
+            "\t Link 1: 25.781 GB/s"
+          ],
+          "free_physical_kib": 111452952,
+          "gpus": [
+            "0, Quadro RTX 6000, 23040, 6907, 0, 76, P2, 82.43, 260.00, 960",
+            "1, Quadro RTX 6000, 23040, 6222, 0, 69, P2, 78.18, 260.00, 1005"
+          ],
+          "model": "openai/gpt-oss-20b",
+          "time": "2026-08-20T20:40:43.0665781Z"
+        },
+        {
+          "label": "after-unload",
+          "nvlink": [
+            "GPU 0: Quadro RTX 6000 (UUID: GPU-15ea3e34-292b-3333-5e43-e5b133f9a30c)",
+            "\t Link 0: 25.781 GB/s",
+            "\t Link 1: 25.781 GB/s",
+            "GPU 1: Quadro RTX 6000 (UUID: GPU-1f2f6459-b688-3466-5b49-a65c538be843)",
+            "\t Link 0: 25.781 GB/s",
+            "\t Link 1: 25.781 GB/s"
+          ],
+          "free_physical_kib": 124844008,
+          "gpus": [
+            "0, Quadro RTX 6000, 23040, 637, 0, 66, P8, 36.67, 260.00, 300",
+            "1, Quadro RTX 6000, 23040, 204, 0, 58, P8, 31.65, 260.00, 300"
+          ],
+          "model": "openai/gpt-oss-20b",
+          "time": "2026-08-20T20:40:48.1137261Z"
+        }
+      ],
+      "hashes": {
+        "preregistration": "fd96514fa7a50d4f8acb0e53a5ef1d6446f901956263481b1f8393ca0524c67d",
+        "runner": "3324657883befa3164fd789b25ae1916e0dc18647260963027a0879763b17074"
+      },
+      "recorded_at": "2026-08-20T20:40:46.243Z"
+    },
+    {
+      "type": "arm-start",
+      "model": "openai/gpt-oss-20b",
+      "identity": {
+        "type": "llm",
+        "publisher": "openai",
+        "key": "openai/gpt-oss-20b",
+        "display_name": "GPT-OSS 20B",
+        "architecture": "gpt-oss",
+        "quantization": {
+          "name": "MXFP4",
+          "bits_per_weight": 4
+        },
+        "size_bytes": 12109664217,
+        "params_string": "20B",
+        "loaded_instances": [],
+        "max_context_length": 131072,
+        "format": "gguf",
+        "capabilities": {
+          "vision": false,
+          "trained_for_tool_use": true,
+          "reasoning": {
+            "allowed_options": [
+              "low",
+              "medium",
+              "high"
+            ],
+            "default": "low"
+          }
+        },
+        "description": null,
+        "variants": [
+          "openai/gpt-oss-20b@mxfp4"
+        ],
+        "selected_variant": "openai/gpt-oss-20b@mxfp4"
+      },
+      "hashes": {
+        "preregistration": "fd96514fa7a50d4f8acb0e53a5ef1d6446f901956263481b1f8393ca0524c67d",
+        "runner": "aeb976663563e6cd62894cffb5e099cdd94a957d402c28c98fa4022bae32801f"
+      },
+      "requested_context": 32768,
+      "started_at": "2026-08-20T20:42:41.736Z",
+      "telemetry": [
+        {
+          "label": "before-load",
+          "nvlink": [
+            "GPU 0: Quadro RTX 6000 (UUID: GPU-15ea3e34-292b-3333-5e43-e5b133f9a30c)",
+            "\t Link 0: 25.781 GB/s",
+            "\t Link 1: 25.781 GB/s",
+            "GPU 1: Quadro RTX 6000 (UUID: GPU-1f2f6459-b688-3466-5b49-a65c538be843)",
+            "\t Link 0: 25.781 GB/s",
+            "\t Link 1: 25.781 GB/s"
+          ],
+          "free_physical_kib": 124867504,
+          "gpus": [
+            "0, Quadro RTX 6000, 23040, 634, 0, 51, P8, 36.04, 260.00, 300",
+            "1, Quadro RTX 6000, 23040, 204, 0, 41, P8, 22.94, 260.00, 300"
+          ],
+          "model": "openai/gpt-oss-20b",
+          "time": "2026-08-20T20:42:44.7971653Z"
+        }
+      ],
+      "load_wall_ms": 17108,
+      "load": {
+        "ok": true,
+        "data": {
+          "type": "llm",
+          "instance_id": "openai/gpt-oss-20b",
+          "load_time_seconds": 16.086,
+          "status": "loaded",
+          "load_config": {
+            "context_length": 32768,
+            "eval_batch_size": 2048,
+            "physical_batch_size": 512,
+            "parallel": 4,
+            "flash_attention": true,
+            "context_checkpoints": 32,
+            "reasoning_budget_message": "",
+            "speculative_draft_mtp": false,
+            "speculative_draft_simple": false,
+            "speculative_draft_model": "",
+            "speculative_draft_max_tokens": 16,
+            "speculative_draft_min_tokens": 0,
+            "speculative_draft_min_continue_probability": 0.75,
+            "num_experts": 4,
+            "offload_kv_cache_to_gpu": true,
+            "prompt_template": {
+              "type": "jinja",
+              "template": "{#-\n  In addition to the normal inputs of `messages` and `tools`, this template also accepts the\n  following kwargs:\n  - \"builtin_tools\": A list, can contain \"browser\" and/or \"python\".\n  - \"model_identity\": A string that optionally describes the model identity.\n  - \"reasoning_effort\": A string that describes the reasoning effort, defaults to \"medium\".\n #}\n\n{#- Tool Definition Rendering ============================================== #}\n{%- macro render_typescript_type(param_spec, required_params, is_nullable=false) -%}\n    {%- if param_spec.type == \"array\" -%}\n        {%- if param_spec['items'] -%}\n            {%- if param_spec['items']['type'] == \"string\" -%}\n                {{- \"string[]\" }}\n            {%- elif param_spec['items']['type'] == \"number\" -%}\n                {{- \"number[]\" }}\n            {%- elif param_spec['items']['type'] == \"integer\" -%}\n                {{- \"number[]\" }}\n            {%- elif param_spec['items']['type'] == \"boolean\" -%}\n                {{- \"boolean[]\" }}\n            {%- else -%}\n                {%- set inner_type = render_typescript_type(param_spec['items'], required_params) -%}\n                {%- if inner_type == \"object | object\" or inner_type|length > 50 -%}\n                    {{- \"any[]\" }}\n                {%- else -%}\n                    {{- inner_type + \"[]\" }}\n                {%- endif -%}\n            {%- endif -%}\n            {%- if param_spec.nullable -%}\n                {{- \" | null\" }}\n            {%- endif -%}\n        {%- else -%}\n            {{- \"any[]\" }}\n            {%- if param_spec.nullable -%}\n                {{- \" | null\" }}\n            {%- endif -%}\n        {%- endif -%}\n    {%- elif param_spec.type is defined and param_spec.type is iterable and param_spec.type is not string and param_spec.type is not mapping and param_spec.type[0] is defined -%}\n        {#- Handle array of types like [\"object\", \"object\"] from Union[dict, list] #}\n        {%- if param_spec.type | length > 1 -%}\n            {{- param_spec.type | join(\" | \") }}\n        {%- else -%}\n            {{- param_spec.type[0] }}\n        {%- endif -%}\n    {%- elif param_spec.oneOf -%}\n        {#- Handle oneOf schemas - check for complex unions and fallback to any #}\n        {%- set has_object_variants = false -%}\n        {%- for variant in param_spec.oneOf -%}\n            {%- if variant.type == \"object\" -%}\n                {%- set has_object_variants = true -%}\n            {%- endif -%}\n        {%- endfor -%}\n        {%- if has_object_variants and param_spec.oneOf|length > 1 -%}\n            {{- \"any\" }}\n        {%- else -%}\n            {%- for variant in param_spec.oneOf -%}\n                {{- render_typescript_type(variant, required_params) -}}\n                {%- if variant.description %}\n                    {{- \"// \" + variant.description }}\n                {%- endif -%}\n                {%- if variant.default is defined %}\n                    {{ \"// default: \" + variant.default|tojson }}\n                {%- endif -%}\n                {%- if not loop.last %}\n                    {{- \" | \" }}\n                {% endif -%}\n            {%- endfor -%}\n        {%- endif -%}\n    {%- elif param_spec.type == \"string\" -%}\n        {%- if param_spec.enum -%}\n            {{- '\"' + param_spec.enum|join('\" | \"') + '\"' -}}\n        {%- else -%}\n            {{- \"string\" }}\n            {%- if param_spec.nullable %}\n                {{- \" | null\" }}\n            {%- endif -%}\n        {%- endif -%}\n    {%- elif param_spec.type == \"number\" -%}\n        {{- \"number\" }}\n    {%- elif param_spec.type == \"integer\" -%}\n        {{- \"number\" }}\n    {%- elif param_spec.type == \"boolean\" -%}\n        {{- \"boolean\" }}\n\n    {%- elif param_spec.type == \"object\" -%}\n        {%- if param_spec.properties -%}\n            {{- \"{\n\" }}\n            {%- for prop_name, prop_spec in param_spec.properties.items() -%}\n                {{- prop_name -}}\n                {%- if prop_name not in (param_spec.required or []) -%}\n                    {{- \"?\" }}\n                {%- endif -%}\n                {{- \": \" }}\n                {{ render_typescript_type(prop_spec, param_spec.required or []) }}\n                {%- if not loop.last -%}\n                    {{-\", \" }}\n                {%- endif -%}\n            {%- endfor -%}\n            {{- \"}\" }}\n        {%- else -%}\n            {{- \"object\" }}\n        {%- endif -%}\n    {%- else -%}\n        {{- \"any\" }}\n    {%- endif -%}\n{%- endmacro -%}\n\n{%- macro render_tool_namespace(namespace_name, tools) -%}\n    {{- \"## \" + namespace_name + \"\n\n\" }}\n    {{- \"namespace \" + namespace_name + \" {\n\n\" }}\n    {%- for tool in tools %}\n        {%- set tool = tool.function %}\n        {{- \"// \" + tool.description + \"\n\" }}\n        {{- \"type \"+ tool.name + \" = \" }}\n        {%- if tool.parameters and tool.parameters.properties %}\n            {{- \"(_: {\n\" }}\n            {%- for param_name, param_spec in tool.parameters.properties.items() %}\n                {%- if param_spec.description %}\n                    {{- \"// \" + param_spec.description + \"\n\" }}\n                {%- endif %}\n                {{- param_name }}\n                {%- if param_name not in (tool.parameters.required or []) -%}\n                    {{- \"?\" }}\n                {%- endif -%}\n                {{- \": \" }}\n                {{- render_typescript_type(param_spec, tool.parameters.required or []) }}\n                {%- if param_spec.default is defined -%}\n                    {%- if param_spec.enum %}\n                        {{- \", // default: \" + param_spec.default }}\n                    {%- elif param_spec.oneOf %}\n                        {{- \"// default: \" + param_spec.default }}\n                    {%- else %}\n                        {{- \", // default: \" + param_spec.default|tojson }}\n                    {%- endif -%}\n                {%- endif -%}\n                {%- if not loop.last %}\n                    {{- \",\n\" }}\n                {%- else %}\n                    {{- \"\n\" }}\n                {%- endif -%}\n            {%- endfor %}\n            {{- \"}) => any;\n\n\" }}\n        {%- else -%}\n            {{- \"() => any;\n\n\" }}\n        {%- endif -%}\n    {%- endfor %}\n    {{- \"} // namespace \" + namespace_name }}\n{%- endmacro -%}\n\n{%- macro render_builtin_tools(browser_tool, python_tool) -%}\n    {%- if browser_tool %}\n        {{- \"## browser\n\n\" }}\n        {{- \"// Tool for browsing.\n\" }}\n        {{- \"// The `cursor` appears in brackets before each browsing display: `[{cursor}]`.\n\" }}\n        {{- \"// Cite information from the tool using the following format:\n\" }}\n        {{- \"// `?{cursor}+L{line_start}(-L{line_end})??`, for example: `?6+L9-L11?` or `?8+L3?`.\n\" }}\n        {{- \"// Do not quote more than 10 words directly from the tool output.\n\" }}\n        {{- \"// sources=web (default: web)\n\" }}\n        {{- \"namespace browser {\n\n\" }}\n        {{- \"// Searches for information related to `query` and displays `topn` results.\n\" }}\n        {{- \"type search = (_: {\n\" }}\n        {{- \"query: string,\n\" }}\n        {{- \"topn?: number, // default: 10\n\" }}\n        {{- \"source?: string,\n\" }}\n        {{- \"}) => any;\n\n\" }}\n        {{- \"// Opens the link `id` from the page indicated by `cursor` starting at line number `loc`, showing `num_lines` lines.\n\" }}\n        {{- \"// Valid link ids are displayed with the formatting: `?{id}+.*?`.\n\" }}\n        {{- \"// If `cursor` is not provided, the most recent page is implied.\n\" }}\n        {{- \"// If `id` is a string, it is treated as a fully qualified URL associated with `source`.\n\" }}\n        {{- \"// If `loc` is not provided, the viewport will be positioned at the beginning of the document or centered on the most relevant passage, if available.\n\" }}\n        {{- \"// Use this function without `id` to scroll to a new location of an opened page.\n\" }}\n        {{- \"type open = (_: {\n\" }}\n        {{- \"id?: number | string, // default: -1\n\" }}\n        {{- \"cursor?: number, // default: -1\n\" }}\n        {{- \"loc?: number, // default: -1\n\" }}\n        {{- \"num_lines?: number, // default: -1\n\" }}\n        {{- \"view_source?: boolean, // default: false\n\" }}\n        {{- \"source?: string,\n\" }}\n        {{- \"}) => any;\n\n\" }}\n        {{- \"// Finds exact matches of `pattern` in the current page, or the page given by `cursor`.\n\" }}\n        {{- \"type find = (_: {\n\" }}\n        {{- \"pattern: string,\n\" }}\n        {{- \"cursor?: number, // default: -1\n\" }}\n        {{- \"}) => any;\n\n\" }}\n        {{- \"} // namespace browser\n\n\" }}\n    {%- endif -%}\n\n    {%- if python_tool %}\n        {{- \"## python\n\n\" }}\n        {{- \"Use this tool to execute Python code in your chain of thought. The code will not be shown to the user. This tool should be used for internal reasoning, but not for code that is intended to be visible to the user (e.g. when creating plots, tables, or files).\n\n\" }}\n        {{- \"When you send a message containing Python code to python, it will be executed in a stateful Jupyter notebook environment. python will respond with the output of the execution or time out after 120.0 seconds. The drive at '/mnt/data' can be used to save and persist user files. Internet access for this session is UNKNOWN. Depends on the cluster.\n\n\" }}\n    {%- endif -%}\n{%- endmacro -%}\n\n{#- System Message Construction ============================================ #}\n{%- macro build_system_message() -%}\n    {%- if model_identity is not defined %}\n        {%- set model_identity = \"You are ChatGPT, a large language model trained by OpenAI.\" %}\n    {%- endif %}\n    {{- model_identity + \"\n\" }}\n    {{- \"Knowledge cutoff: 2024-06\n\" }}\n    {{- \"Current date: \" + strftime_now(\"%Y-%m-%d\") + \"\n\n\" }}\n    {%- if reasoning_effort is not defined %}\n        {%- set reasoning_effort = \"medium\" %}\n    {%- endif %}\n    {{- \"Reasoning: \" + reasoning_effort + \"\n\n\" }}\n    {%- if builtin_tools %}\n        {{- \"# Tools\n\n\" }}\n        {%- set available_builtin_tools = namespace(browser=false, python=false) %}\n        {%- for tool in builtin_tools %}\n            {%- if tool == \"browser\" %}\n                {%- set available_builtin_tools.browser = true %}\n            {%- elif tool == \"python\" %}\n                {%- set available_builtin_tools.python = true %}\n            {%- endif %}\n        {%- endfor %}\n        {{- render_builtin_tools(available_builtin_tools.browser, available_builtin_tools.python) }}\n    {%- endif -%}\n    {{- \"# Valid channels: analysis, commentary, final. Channel must be included for every message.\" }}\n    {%- if tools -%}\n        {{- \"\nCalls to these tools must go to the commentary channel: 'functions'.\" }}\n    {%- endif -%}\n{%- endmacro -%}\n\n{#- Main Template Logic ================================================= #}\n{#- Set defaults #}\n\n{#- Render system message #}\n{{- \"<|start|>system<|message|>\" }}\n{{- build_system_message() }}\n{{- \"<|end|>\" }}\n\n{#- Extract developer message #}\n{%- if messages[0].role == \"developer\" or messages[0].role == \"system\" %}\n    {%- set developer_message = messages[0].content %}\n    {%- set loop_messages = messages[1:] %}\n{%- else %}\n    {%- set developer_message = \"\" %}\n    {%- set loop_messages = messages %}\n{%- endif %}\n\n{#- Render developer message #}\n{%- if developer_message or tools %}\n    {{- \"<|start|>developer<|message|>\" }}\n    {%- if developer_message %}\n        {{- \"# Instructions\n\n\" }}\n        {{- developer_message }}\n    {%- endif %}\n    {%- if tools -%}\n        {{- \"\n\n\" }}\n        {{- \"# Tools\n\n\" }}\n        {{- render_tool_namespace(\"functions\", tools) }}\n    {%- endif -%}\n    {{- \"<|end|>\" }}\n{%- endif %}\n\n{#- Render messages #}\n{%- set last_tool_call = namespace(name=none) %}\n{%- for message in loop_messages -%}\n    {#- At this point only assistant/user/tool messages should remain #}\n    {%- if message.role == 'assistant' -%}\n        {#- Checks to ensure the messages are being passed in the format we expect #}\n        {%- if \"content\" in message %}\n            {%- if \"<|channel|>analysis<|message|>\" in message.content or \"<|channel|>final<|message|>\" in message.content %}\n                {{- raise_exception(\"You have passed a message containing <|channel|> tags in the content field. Instead of doing this, you should pass analysis messages (the string between '<|message|>' and '<|end|>') in the 'thinking' field, and final messages (the string between '<|message|>' and '<|end|>') in the 'content' field.\") }}\n            {%- endif %}\n        {%- endif %}\n        {%- if \"thinking\" in message %}\n            {%- if \"<|channel|>analysis<|message|>\" in message.thinking or \"<|channel|>final<|message|>\" in message.thinking %}\n                {{- raise_exception(\"You have passed a message containing <|channel|> tags in the thinking field. Instead of doing this, you should pass analysis messages (the string between '<|message|>' and '<|end|>') in the 'thinking' field, and final messages (the string between '<|message|>' and '<|end|>') in the 'content' field.\") }}\n            {%- endif %}\n        {%- endif %}\n        {%- if \"tool_calls\" in message %}\n            {#- We assume max 1 tool call per message, and so we infer the tool call name #}\n            {#- in \"tool\" messages from the most recent assistant tool call name #}\n            {%- set tool_call = message.tool_calls[0] %}\n            {%- if tool_call.function %}\n                {%- set tool_call = tool_call.function %}\n            {%- endif %}\n            {%- if message.content and message.thinking %}\n                {{- raise_exception(\"Cannot pass both content and thinking in an assistant message with tool calls! Put the analysis message in one or the other, but not both.\") }}\n            {%- elif message.content %}\n                {{- \"<|start|>assistant<|channel|>analysis<|message|>\" + message.content + \"<|end|>\" }}\n            {%- elif message.thinking %}\n                {{- \"<|start|>assistant<|channel|>analysis<|message|>\" + message.thinking + \"<|end|>\" }}\n            {%- endif %}\n            {{- \"<|start|>assistant to=\" }}\n            {{- \"functions.\" + tool_call.name + \"<|channel|>commentary \" }}\n            {{- (tool_call.content_type if tool_call.content_type is defined else \"json\") + \"<|message|>\" }}\n            {{- tool_call.arguments|tojson }}\n            {{- \"<|call|>\" }}\n            {%- set last_tool_call.name = tool_call.name %}\n        {%- elif loop.last and not add_generation_prompt %}\n            {#- Only render the CoT if the final turn is an assistant turn and add_generation_prompt is false #}\n            {#- This is a situation that should only occur in training, never in inference. #}\n            {%- if \"thinking\" in message %}\n                {{- \"<|start|>assistant<|channel|>analysis<|message|>\" + message.thinking + \"<|end|>\" }}\n            {%- endif %}\n            {#- <|return|> indicates the end of generation, but <|end|> does not #}\n            {#- <|return|> should never be an input to the model, but we include it as the final token #}\n            {#- when training, so the model learns to emit it. #}\n            {{- \"<|start|>assistant<|channel|>final<|message|>\" + message.content + \"<|return|>\" }}\n        {%- else %}\n            {#- CoT is dropped during all previous turns, so we never render it for inference #}\n            {{- \"<|start|>assistant<|channel|>final<|message|>\" + message.content + \"<|end|>\" }}\n            {%- set last_tool_call.name = none %}\n        {%- endif %}\n    {%- elif message.role == 'tool' -%}\n        {%- if last_tool_call.name is none %}\n            {{- raise_exception(\"Message has tool role, but there was no previous assistant message with a tool call!\") }}\n        {%- endif %}\n        {{- \"<|start|>functions.\" + last_tool_call.name }}\n        {{- \" to=assistant<|channel|>commentary<|message|>\" + message.content|tojson + \"<|end|>\" }}\n    {%- elif message.role == 'user' -%}\n        {{- \"<|start|>user<|message|>\" + message.content + \"<|end|>\" }}\n    {%- endif -%}\n{%- endfor -%}\n\n{#- Generation prompt #}\n{%- if add_generation_prompt -%}\n<|start|>assistant\n{%- endif -%}",
+              "stop_strings": []
+            }
+          }
+        }
+      }
+    },
+    {
+      "type": "arm-end",
+      "model": "openai/gpt-oss-20b",
+      "unload": {
+        "ok": true,
+        "data": {
+          "instance_id": "openai/gpt-oss-20b"
+        }
+      },
+      "telemetry": [
+        {
+          "label": "before-load",
+          "nvlink": [
+            "GPU 0: Quadro RTX 6000 (UUID: GPU-15ea3e34-292b-3333-5e43-e5b133f9a30c)",
+            "\t Link 0: 25.781 GB/s",
+            "\t Link 1: 25.781 GB/s",
+            "GPU 1: Quadro RTX 6000 (UUID: GPU-1f2f6459-b688-3466-5b49-a65c538be843)",
+            "\t Link 0: 25.781 GB/s",
+            "\t Link 1: 25.781 GB/s"
+          ],
+          "free_physical_kib": 124867504,
+          "gpus": [
+            "0, Quadro RTX 6000, 23040, 634, 0, 51, P8, 36.04, 260.00, 300",
+            "1, Quadro RTX 6000, 23040, 204, 0, 41, P8, 22.94, 260.00, 300"
+          ],
+          "model": "openai/gpt-oss-20b",
+          "time": "2026-08-20T20:42:44.7971653Z"
+        },
+        {
+          "label": "after-load",
+          "nvlink": [
+            "GPU 0: Quadro RTX 6000 (UUID: GPU-15ea3e34-292b-3333-5e43-e5b133f9a30c)",
+            "\t Link 0: 25.781 GB/s",
+            "\t Link 1: 25.781 GB/s",
+            "GPU 1: Quadro RTX 6000 (UUID: GPU-1f2f6459-b688-3466-5b49-a65c538be843)",
+            "\t Link 0: 25.781 GB/s",
+            "\t Link 1: 25.781 GB/s"
+          ],
+          "free_physical_kib": 111916696,
+          "gpus": [
+            "0, Quadro RTX 6000, 23040, 6899, 0, 54, P2, 78.52, 260.00, 1440",
+            "1, Quadro RTX 6000, 23040, 6192, 0, 45, P2, 73.14, 260.00, 1440"
+          ],
+          "model": "openai/gpt-oss-20b",
+          "time": "2026-08-20T20:43:03.0955234Z"
+        },
+        {
+          "label": "after-role-suite",
+          "nvlink": [
+            "GPU 0: Quadro RTX 6000 (UUID: GPU-15ea3e34-292b-3333-5e43-e5b133f9a30c)",
+            "\t Link 0: 25.781 GB/s",
+            "\t Link 1: 25.781 GB/s",
+            "GPU 1: Quadro RTX 6000 (UUID: GPU-1f2f6459-b688-3466-5b49-a65c538be843)",
+            "\t Link 0: 25.781 GB/s",
+            "\t Link 1: 25.781 GB/s"
+          ],
+          "free_physical_kib": 111602028,
+          "gpus": [
+            "0, Quadro RTX 6000, 23040, 6905, 0, 64, P2, 84.11, 260.00, 1440",
+            "1, Quadro RTX 6000, 23040, 6195, 0, 58, P2, 79.19, 260.00, 1440"
+          ],
+          "model": "openai/gpt-oss-20b",
+          "time": "2026-08-20T20:44:04.4394892Z"
+        },
+        {
+          "label": "after-context",
+          "nvlink": [
+            "GPU 0: Quadro RTX 6000 (UUID: GPU-15ea3e34-292b-3333-5e43-e5b133f9a30c)",
+            "\t Link 0: 25.781 GB/s",
+            "\t Link 1: 25.781 GB/s",
+            "GPU 1: Quadro RTX 6000 (UUID: GPU-1f2f6459-b688-3466-5b49-a65c538be843)",
+            "\t Link 0: 25.781 GB/s",
+            "\t Link 1: 25.781 GB/s"
+          ],
+          "free_physical_kib": 111504596,
+          "gpus": [
+            "0, Quadro RTX 6000, 23040, 6893, 0, 79, P3, 75.97, 260.00, 855",
+            "1, Quadro RTX 6000, 23040, 6222, 0, 76, P2, 121.67, 260.00, 1860"
+          ],
+          "model": "openai/gpt-oss-20b",
+          "time": "2026-08-20T20:44:26.2081638Z"
+        },
+        {
+          "label": "after-unload",
+          "nvlink": [
+            "GPU 0: Quadro RTX 6000 (UUID: GPU-15ea3e34-292b-3333-5e43-e5b133f9a30c)",
+            "\t Link 0: 25.781 GB/s",
+            "\t Link 1: 25.781 GB/s",
+            "GPU 1: Quadro RTX 6000 (UUID: GPU-1f2f6459-b688-3466-5b49-a65c538be843)",
+            "\t Link 0: 25.781 GB/s",
+            "\t Link 1: 25.781 GB/s"
+          ],
+          "free_physical_kib": 124832060,
+          "gpus": [
+            "0, Quadro RTX 6000, 23040, 570, 0, 68, P8, 37.10, 260.00, 300",
+            "1, Quadro RTX 6000, 23040, 204, 0, 61, P8, 31.73, 260.00, 300"
+          ],
+          "model": "openai/gpt-oss-20b",
+          "time": "2026-08-20T20:44:30.9825480Z"
+        }
+      ],
+      "hashes": {
+        "preregistration": "fd96514fa7a50d4f8acb0e53a5ef1d6446f901956263481b1f8393ca0524c67d",
+        "runner": "aeb976663563e6cd62894cffb5e099cdd94a957d402c28c98fa4022bae32801f"
+      },
+      "recorded_at": "2026-08-20T20:44:29.113Z"
+    }
+  ]
+}

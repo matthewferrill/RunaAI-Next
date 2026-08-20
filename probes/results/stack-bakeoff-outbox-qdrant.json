@@ -1,0 +1,406 @@
+{
+  "schemaVersion": 1,
+  "candidate": "PostgreSQL outbox + Qdrant postcondition adapter",
+  "baselineCount": 2000,
+  "afterCount": 2020,
+  "runs": [
+    {
+      "family": "healthy",
+      "id": 10001,
+      "delivered": {
+        "state": "indexed",
+        "deedHash": "2b0d4ac2aad0ee0bf4f666baccd086a9eceddcf1f0bcd3587adba4d030286860"
+      }
+    },
+    {
+      "family": "healthy",
+      "id": 10002,
+      "delivered": {
+        "state": "indexed",
+        "deedHash": "7ecf0191d6db3b28271cbf66e754830cedd616e0d7561c7b32169e6fcb038934"
+      }
+    },
+    {
+      "family": "healthy",
+      "id": 10003,
+      "delivered": {
+        "state": "indexed",
+        "deedHash": "0e0390aa56a5f99137a1675dedfb9ac8740b47a5d6d1980086c3b29b04f079a0"
+      }
+    },
+    {
+      "family": "healthy",
+      "id": 10004,
+      "delivered": {
+        "state": "indexed",
+        "deedHash": "1d175842a2367538042f074c50d1f0cc439ca6ba90361dedef59eaf090bf442f"
+      }
+    },
+    {
+      "family": "healthy",
+      "id": 10005,
+      "delivered": {
+        "state": "indexed",
+        "deedHash": "02ce75921ede9b639e1bdaa8c46580baba36cf27ccdce0c2d1e04f4b5510fdca"
+      }
+    },
+    {
+      "family": "unavailable",
+      "id": 10006,
+      "failed": {
+        "state": "pending",
+        "error": "fetch failed"
+      },
+      "reconciled": {
+        "state": "indexed",
+        "deedHash": "be95302a13b4c8a9ade0ef9eb082064a526c7cb150c797ca31ca4d45b0d0b02e",
+        "action": "redelivered"
+      }
+    },
+    {
+      "family": "unavailable",
+      "id": 10007,
+      "failed": {
+        "state": "pending",
+        "error": "fetch failed"
+      },
+      "reconciled": {
+        "state": "indexed",
+        "deedHash": "da1fc92ea8149773299be0a8390fb3a2c6eafb913aa09439fec9a4c9afd9247b",
+        "action": "redelivered"
+      }
+    },
+    {
+      "family": "unavailable",
+      "id": 10008,
+      "failed": {
+        "state": "pending",
+        "error": "fetch failed"
+      },
+      "reconciled": {
+        "state": "indexed",
+        "deedHash": "34750d9c531d20ad0eb41f5c3690e1650d1eef7af3411ecea2c79bcf6ea67714",
+        "action": "redelivered"
+      }
+    },
+    {
+      "family": "unavailable",
+      "id": 10009,
+      "failed": {
+        "state": "pending",
+        "error": "fetch failed"
+      },
+      "reconciled": {
+        "state": "indexed",
+        "deedHash": "39ed0d9a19ef638c1eb15ed1c8af8904edb72b83ead0ed3f93ae8ad695ebd687",
+        "action": "redelivered"
+      }
+    },
+    {
+      "family": "unavailable",
+      "id": 10010,
+      "failed": {
+        "state": "pending",
+        "error": "fetch failed"
+      },
+      "reconciled": {
+        "state": "indexed",
+        "deedHash": "0439de27e7a21ccd3000b2ef0ceae398ed2781b682d76d0adb15f6651e44f924",
+        "action": "redelivered"
+      }
+    },
+    {
+      "family": "duplicate",
+      "id": 10011,
+      "deliveries": [
+        {
+          "state": "indexed",
+          "deedHash": "9d2978fb6347ccffa0f2167bece18f008d3a97edc31a5945e2f40d7732b5f2c1"
+        },
+        {
+          "state": "indexed",
+          "deedHash": "9d2978fb6347ccffa0f2167bece18f008d3a97edc31a5945e2f40d7732b5f2c1"
+        }
+      ]
+    },
+    {
+      "family": "duplicate",
+      "id": 10012,
+      "deliveries": [
+        {
+          "state": "indexed",
+          "deedHash": "aaa50e1fb809c4db70cca928b699b081cc799ac49b47154b676d4e0fc7a57978"
+        },
+        {
+          "state": "indexed",
+          "deedHash": "aaa50e1fb809c4db70cca928b699b081cc799ac49b47154b676d4e0fc7a57978"
+        }
+      ]
+    },
+    {
+      "family": "duplicate",
+      "id": 10013,
+      "deliveries": [
+        {
+          "state": "indexed",
+          "deedHash": "97f81c15c6716c970789241f65d47046b1a567fed989b60e890ff826a3c1f5b8"
+        },
+        {
+          "state": "indexed",
+          "deedHash": "97f81c15c6716c970789241f65d47046b1a567fed989b60e890ff826a3c1f5b8"
+        }
+      ]
+    },
+    {
+      "family": "duplicate",
+      "id": 10014,
+      "deliveries": [
+        {
+          "state": "indexed",
+          "deedHash": "af81d9f2b3165d60bb564feb960fcfbc4cf0b99bbd2de814342e581221c121ca"
+        },
+        {
+          "state": "indexed",
+          "deedHash": "af81d9f2b3165d60bb564feb960fcfbc4cf0b99bbd2de814342e581221c121ca"
+        }
+      ]
+    },
+    {
+      "family": "duplicate",
+      "id": 10015,
+      "deliveries": [
+        {
+          "state": "indexed",
+          "deedHash": "af090201708ad52f269a911f2561eb6cd0765d2c013599a493aba8d3ffaa3e50"
+        },
+        {
+          "state": "indexed",
+          "deedHash": "af090201708ad52f269a911f2561eb6cd0765d2c013599a493aba8d3ffaa3e50"
+        }
+      ]
+    },
+    {
+      "family": "after-deed",
+      "id": 10016,
+      "failed": {
+        "state": "pending",
+        "error": "injected failure after Qdrant deed"
+      },
+      "reconciled": {
+        "state": "indexed",
+        "action": "observed-existing-deed"
+      }
+    },
+    {
+      "family": "after-deed",
+      "id": 10017,
+      "failed": {
+        "state": "pending",
+        "error": "injected failure after Qdrant deed"
+      },
+      "reconciled": {
+        "state": "indexed",
+        "action": "observed-existing-deed"
+      }
+    },
+    {
+      "family": "after-deed",
+      "id": 10018,
+      "failed": {
+        "state": "pending",
+        "error": "injected failure after Qdrant deed"
+      },
+      "reconciled": {
+        "state": "indexed",
+        "action": "observed-existing-deed"
+      }
+    },
+    {
+      "family": "after-deed",
+      "id": 10019,
+      "failed": {
+        "state": "pending",
+        "error": "injected failure after Qdrant deed"
+      },
+      "reconciled": {
+        "state": "indexed",
+        "action": "observed-existing-deed"
+      }
+    },
+    {
+      "family": "after-deed",
+      "id": 10020,
+      "failed": {
+        "state": "pending",
+        "error": "injected failure after Qdrant deed"
+      },
+      "reconciled": {
+        "state": "indexed",
+        "action": "observed-existing-deed"
+      }
+    }
+  ],
+  "rows": [
+    {
+      "message_id": 10001,
+      "vector_state": "indexed",
+      "vector_deed_sha256": "2b0d4ac2aad0ee0bf4f666baccd086a9eceddcf1f0bcd3587adba4d030286860",
+      "outbox_state": "done",
+      "attempts": 1,
+      "last_error": null
+    },
+    {
+      "message_id": 10002,
+      "vector_state": "indexed",
+      "vector_deed_sha256": "7ecf0191d6db3b28271cbf66e754830cedd616e0d7561c7b32169e6fcb038934",
+      "outbox_state": "done",
+      "attempts": 1,
+      "last_error": null
+    },
+    {
+      "message_id": 10003,
+      "vector_state": "indexed",
+      "vector_deed_sha256": "0e0390aa56a5f99137a1675dedfb9ac8740b47a5d6d1980086c3b29b04f079a0",
+      "outbox_state": "done",
+      "attempts": 1,
+      "last_error": null
+    },
+    {
+      "message_id": 10004,
+      "vector_state": "indexed",
+      "vector_deed_sha256": "1d175842a2367538042f074c50d1f0cc439ca6ba90361dedef59eaf090bf442f",
+      "outbox_state": "done",
+      "attempts": 1,
+      "last_error": null
+    },
+    {
+      "message_id": 10005,
+      "vector_state": "indexed",
+      "vector_deed_sha256": "02ce75921ede9b639e1bdaa8c46580baba36cf27ccdce0c2d1e04f4b5510fdca",
+      "outbox_state": "done",
+      "attempts": 1,
+      "last_error": null
+    },
+    {
+      "message_id": 10006,
+      "vector_state": "indexed",
+      "vector_deed_sha256": "be95302a13b4c8a9ade0ef9eb082064a526c7cb150c797ca31ca4d45b0d0b02e",
+      "outbox_state": "done",
+      "attempts": 2,
+      "last_error": null
+    },
+    {
+      "message_id": 10007,
+      "vector_state": "indexed",
+      "vector_deed_sha256": "da1fc92ea8149773299be0a8390fb3a2c6eafb913aa09439fec9a4c9afd9247b",
+      "outbox_state": "done",
+      "attempts": 2,
+      "last_error": null
+    },
+    {
+      "message_id": 10008,
+      "vector_state": "indexed",
+      "vector_deed_sha256": "34750d9c531d20ad0eb41f5c3690e1650d1eef7af3411ecea2c79bcf6ea67714",
+      "outbox_state": "done",
+      "attempts": 2,
+      "last_error": null
+    },
+    {
+      "message_id": 10009,
+      "vector_state": "indexed",
+      "vector_deed_sha256": "39ed0d9a19ef638c1eb15ed1c8af8904edb72b83ead0ed3f93ae8ad695ebd687",
+      "outbox_state": "done",
+      "attempts": 2,
+      "last_error": null
+    },
+    {
+      "message_id": 10010,
+      "vector_state": "indexed",
+      "vector_deed_sha256": "0439de27e7a21ccd3000b2ef0ceae398ed2781b682d76d0adb15f6651e44f924",
+      "outbox_state": "done",
+      "attempts": 2,
+      "last_error": null
+    },
+    {
+      "message_id": 10011,
+      "vector_state": "indexed",
+      "vector_deed_sha256": "9d2978fb6347ccffa0f2167bece18f008d3a97edc31a5945e2f40d7732b5f2c1",
+      "outbox_state": "done",
+      "attempts": 2,
+      "last_error": null
+    },
+    {
+      "message_id": 10012,
+      "vector_state": "indexed",
+      "vector_deed_sha256": "aaa50e1fb809c4db70cca928b699b081cc799ac49b47154b676d4e0fc7a57978",
+      "outbox_state": "done",
+      "attempts": 2,
+      "last_error": null
+    },
+    {
+      "message_id": 10013,
+      "vector_state": "indexed",
+      "vector_deed_sha256": "97f81c15c6716c970789241f65d47046b1a567fed989b60e890ff826a3c1f5b8",
+      "outbox_state": "done",
+      "attempts": 2,
+      "last_error": null
+    },
+    {
+      "message_id": 10014,
+      "vector_state": "indexed",
+      "vector_deed_sha256": "af81d9f2b3165d60bb564feb960fcfbc4cf0b99bbd2de814342e581221c121ca",
+      "outbox_state": "done",
+      "attempts": 2,
+      "last_error": null
+    },
+    {
+      "message_id": 10015,
+      "vector_state": "indexed",
+      "vector_deed_sha256": "af090201708ad52f269a911f2561eb6cd0765d2c013599a493aba8d3ffaa3e50",
+      "outbox_state": "done",
+      "attempts": 2,
+      "last_error": null
+    },
+    {
+      "message_id": 10016,
+      "vector_state": "indexed",
+      "vector_deed_sha256": "a22194d2b8ebfa63eb5ccab16214ecafbf93857b3a4e886b2dd7eb27b064c4e4",
+      "outbox_state": "done",
+      "attempts": 1,
+      "last_error": null
+    },
+    {
+      "message_id": 10017,
+      "vector_state": "indexed",
+      "vector_deed_sha256": "6cefbab28db32ff0a1b03bc0a67928b173c552fa1cb42b99da9120d182fa90f0",
+      "outbox_state": "done",
+      "attempts": 1,
+      "last_error": null
+    },
+    {
+      "message_id": 10018,
+      "vector_state": "indexed",
+      "vector_deed_sha256": "85681faa96022d3cad2991706b07bc0772a45bc0dac41e53be3d0b8308a175c3",
+      "outbox_state": "done",
+      "attempts": 1,
+      "last_error": null
+    },
+    {
+      "message_id": 10019,
+      "vector_state": "indexed",
+      "vector_deed_sha256": "a8dbf81d82042c39467c8b51e88facc39a375cbc2bfcb46add10c1fd2c486192",
+      "outbox_state": "done",
+      "attempts": 1,
+      "last_error": null
+    },
+    {
+      "message_id": 10020,
+      "vector_state": "indexed",
+      "vector_deed_sha256": "fc34a8f17b5bea5fa78b9c421d89233ef5056caf983e94fd8fe53eea3e2cbd15",
+      "outbox_state": "done",
+      "attempts": 1,
+      "last_error": null
+    }
+  ],
+  "passed": true
+}

@@ -1,0 +1,14 @@
+{
+  "name": "runalab-fray4-capability-bakeoff",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test *.test.mjs",
+    "capability": "node run-capability-matrix.mjs",
+    "classifiers": "node run-classifier-bakeoff.mjs",
+    "non-tool": "node run-non-tool-boundary.mjs"
+  },
+  "dependencies": {
+    "pg": "8.23.0"
+  }
+}

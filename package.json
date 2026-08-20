@@ -4,11 +4,15 @@
   "description": "The steward's method, 2026-08-18: build the industry-standard agent stack end to end, customizing nothing. Then migrate Runa into it one piece at a time, where every piece — governance and security included — proves it belongs against the standard before it replaces anything.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node --test",
+    "verify:gate0": "node gate0/verify-gate0.mjs"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
+  "engines": {
+    "node": ">=22.22.0 <23"
+  },
   "type": "module",
   "private": "true",
   "dependencies": {

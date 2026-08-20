@@ -1,0 +1,69 @@
+{
+  "schemaVersion": "runa2-gate0-baseline-results/v1",
+  "observedAt": "2026-08-20T23:29:27.589Z",
+  "repositories": {
+    "runaaiNext": {
+      "baseCommit": "94ba860d43cef496f989ee816ec93b44ca097034",
+      "baseBranch": "runa2/integration",
+      "branchProtections": ["main", "runa2/integration"]
+    },
+    "runalab": {
+      "commit": "ec5e3466f6f937c8c610bdecf62a09c2491c7137",
+      "branch": "main",
+      "trackedTreeClean": true
+    },
+    "legacy": {
+      "commit": "71ce985e4272895bbd4c3cf38ed8fbcb6090c2a2",
+      "branch": "main",
+      "tracking": "origin/main",
+      "ahead": 0,
+      "behind": 0,
+      "preservedUntracked": [".claude/settings.local.json"]
+    }
+  },
+  "focusedLegacy": {
+    "result": "pass",
+    "passed": 12,
+    "total": 12,
+    "protectedDataOpened": false,
+    "persistentServiceStarted": false
+  },
+  "gate0Verifier": {
+    "result": "pass-owner-context",
+    "inheritedNodeTests": "14/14",
+    "sealVerifiers": "10/10",
+    "legacyFocusedSuites": "12/12",
+    "parityCases": 18,
+    "deterministicSampleOutputs": 7,
+    "sandboxOnlyObservation": "13/14 inherited tests before EPERM writing the existing probes/results/_payloads test directory; exact owner-context rerun passed 14/14"
+  },
+  "legacyPortable": {
+    "result": "fail-environment-specific",
+    "profile": "portable",
+    "applicableChecks": 128,
+    "passed": 127,
+    "failed": 1,
+    "skipped": ["Windows DPAPI owner-context probe", "RunaAI configured provider health check"],
+    "failure": {
+      "check": "Action executor and service tests",
+      "cause": "Sandbox identity cannot read C:/Users/matth/.config/git/ignore; Git warning text is treated as a changed path by one assertion.",
+      "classification": "environment limitation, not answer-lane regression"
+    },
+    "notChecked": [
+      "Artifact provenance against the live approved-knowledge library because no application service was started"
+    ]
+  },
+  "inheritedBaselineBeforeGate0": {
+    "nodeTests": "14/14 pass",
+    "sealVerifiers": "10/10 pass"
+  },
+  "runtime": {
+    "observedNode": "22.21.0",
+    "selectedNode": ">=22.22.0 <23",
+    "status": "Gate 1 blocker until the selected patch is installed and the full Gate 0 verifier is rerun"
+  },
+  "dependencyAdvisory": {
+    "bootstrapObservation": "one low-severity npm audit advisory",
+    "gate0Disposition": "temporarily accepted for documentation-only Gate 0; Gate 1 is blocked until current audit output identifies the package/path and the steward accepts or resolves it without npm audit fix"
+  }
+}

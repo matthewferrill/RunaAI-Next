@@ -33,6 +33,9 @@ repository and never push migration work into either source repository.
 ## Current status
 
 - Repository lineage and source remotes are established.
+- GitHub branch protection is active on `main` and `runa2/integration`: pull requests and resolved
+  conversations are required; stale reviews are dismissed; admins are included; force-pushes and
+  deletion are blocked. Required status checks remain unset until a real CI check exists.
 - `main` and `runa2/integration` begin at the exact RunaLab completion commit.
 - The completed laboratory evidence, seals, probes, stack bakeoff, model findings, architecture
   assessment, and conditional estimates are inherited.
@@ -42,8 +45,10 @@ repository and never push migration work into either source repository.
 - No persistent service, network listener, provider credential, production path, or spending has been
   activated.
 - No migration gate is approved merely by this bootstrap.
-- Bootstrap documentation and clean-clone validation are complete on `runa2/bootstrap` and ready for
-  steward review before integration.
+- Bootstrap documentation and clean-clone validation were reviewed and merged into
+  `runa2/integration` as `94ba860`.
+- Gate 0 contract/evidence freeze is in progress on `runa2/gate-0-contract-freeze`. No Gate 1
+  implementation has started.
 
 ## Bootstrap findings
 
@@ -78,8 +83,8 @@ plain-language steward experience, or governed action pathway.
 
 | Gate | Scope | Status | Approval required to start |
 |---|---|---|---|
-| Bootstrap | Establish repository lineage, remotes, branches, instructions, and status | In progress | Repository creation and bootstrap direction received |
-| 0 | Freeze contracts, parity corpus, data inventory, redaction policy, and green thresholds | Not started | Explicit steward approval |
+| Bootstrap | Establish repository lineage, remotes, branches, instructions, and status | Complete | Reviewed and merged as `94ba860` |
+| 0 | Freeze contracts, parity corpus, data inventory, redaction policy, and green thresholds | In progress | Explicit steward approval received 2026-08-20 |
 | 1 | Smallest disposable read-only chat/research slice | Not started | Gate 0 evidence accepted |
 | 2 | All three read-only answer lanes plus chat/project/settings continuity | Not started | Gate 1 evidence accepted |
 | 3 | One reversible governed idempotent action | Not started | Gate 2 parity accepted |
@@ -100,11 +105,29 @@ Before closing bootstrap:
 6. Stage explicit paths, commit on `runa2/bootstrap`, and push only to RunaAI-Next origin.
 7. Review the bootstrap branch before merging it into `runa2/integration`.
 
+## Gate 0 evidence
+
+`gate0/` freezes the proposed Gate 1 request/response contract, 18-case synthetic parity corpus,
+seven exact deterministic sample outputs, legacy source/test hashes, 12-suite focused profile,
+data-inventory command contract, trace allowlist, 24-hour synthetic retention, and hard green
+thresholds. The Gate 0 verifier passes 14/14 inherited Node tests, 10/10 seal verifiers, and 12/12
+focused legacy suites in the repository-owner context.
+
+The full legacy portable verifier ran 128 applicable checks: 127 passed and one action-executor test
+failed because the sandbox identity cannot read `C:\Users\matth\.config\git\ignore`; Git's warning
+text entered an assertion that expected an empty change list. Owner DPAPI and configured-provider checks
+were correctly skipped, and live approved-library provenance was explicitly not checked because no
+application service was started. This is recorded as an environment limitation, not as guarded-lane
+or Gate 1 parity evidence.
+
+Gate 0 selects Node `>=22.22.0 <23`; Omen currently has `22.21.0`. The bootstrap's one low npm advisory
+is accepted only for documentation-only Gate 0. Installing the selected Node patch and recording a
+fresh, exact advisory disposition are Gate 1 entry criteria; no runtime or dependency was changed here.
+
 ## Next decision
 
-After bootstrap is reviewed, decide whether to authorize Gate 0 only. Gate 0 is contract and evidence
-freeze work; it is not permission to build Gate 1, touch protected data, start persistent services, or
-change production.
+Review Gate 0 only. Acceptance freezes the proposed minimum-slice contract and thresholds; it is not
+permission to build Gate 1, touch protected data, start persistent services, or change production.
 
 The recommended first implementation decision remains Gate 1's smallest read-only chat/research slice,
 but only after Gate 0 establishes its baseline, exact green thresholds, rollback, and representative

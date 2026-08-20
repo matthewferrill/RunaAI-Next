@@ -47,8 +47,8 @@ repository and never push migration work into either source repository.
 - No migration gate is approved merely by this bootstrap.
 - Bootstrap documentation and clean-clone validation were reviewed and merged into
   `runa2/integration` as `94ba860`.
-- Gate 0 contract/evidence freeze is in progress on `runa2/gate-0-contract-freeze`. No Gate 1
-  implementation has started.
+- Gate 0 contract/evidence freeze was approved by the steward on 2026-08-20 for integration through
+  PR #2. No Gate 1 implementation has started.
 
 ## Bootstrap findings
 
@@ -84,7 +84,7 @@ plain-language steward experience, or governed action pathway.
 | Gate | Scope | Status | Approval required to start |
 |---|---|---|---|
 | Bootstrap | Establish repository lineage, remotes, branches, instructions, and status | Complete | Reviewed and merged as `94ba860` |
-| 0 | Freeze contracts, parity corpus, data inventory, redaction policy, and green thresholds | In progress | Explicit steward approval received 2026-08-20 |
+| 0 | Freeze contracts, parity corpus, data inventory, redaction policy, and green thresholds | Complete | Approved by steward 2026-08-20; PR #2 accepted for integration |
 | 1 | Smallest disposable read-only chat/research slice | Not started | Gate 0 evidence accepted |
 | 2 | All three read-only answer lanes plus chat/project/settings continuity | Not started | Gate 1 evidence accepted |
 | 3 | One reversible governed idempotent action | Not started | Gate 2 parity accepted |
@@ -126,8 +126,11 @@ fresh, exact advisory disposition are Gate 1 entry criteria; no runtime or depen
 
 ## Next decision
 
-Review Gate 0 only. Acceptance freezes the proposed minimum-slice contract and thresholds; it is not
-permission to build Gate 1, touch protected data, start persistent services, or change production.
+Satisfy the two Gate 1 prerequisites without beginning Gate 1 implementation: install the selected
+Node 22 patch in a separately approved runtime-maintenance batch, then capture and explicitly
+disposition the exact low npm advisory. After both are recorded, request explicit approval to start
+Gate 1's isolated disposable implementation branch. Gate 0 acceptance is not permission to touch
+protected data, start persistent services, activate networking, or change production.
 
 The recommended first implementation decision remains Gate 1's smallest read-only chat/research slice,
 but only after Gate 0 establishes its baseline, exact green thresholds, rollback, and representative

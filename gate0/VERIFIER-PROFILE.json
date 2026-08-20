@@ -1,0 +1,50 @@
+{
+  "schemaVersion": "runa2-gate0-verifier-profile/v1",
+  "node": {
+    "selected": ">=22.22.0 <23",
+    "gate0EvidenceMayRunOlder": true,
+    "gate1ImplementationRequiresSelectedRuntime": true
+  },
+  "requiredDocuments": [
+    "gate0/README.md",
+    "gate0/MINIMUM-SLICE-CONTRACT.md",
+    "gate0/PARITY-CORPUS.json",
+    "gate0/SAMPLE-OUTPUTS.json",
+    "gate0/SOURCE-PINS.json",
+    "gate0/VERIFIER-PROFILE.json",
+    "gate0/BASELINE-RESULTS.json",
+    "gate0/DATA-INVENTORY.md",
+    "gate0/TRACE-REDACTION-POLICY.md",
+    "gate0/GREEN-THRESHOLDS.md"
+  ],
+  "inherited": {
+    "nodeCommand": ["node", "--test"],
+    "expectedTests": 14,
+    "sealCommands": [
+      ["node", "probes/verify-seal.mjs"],
+      ["node", "probes/verify-seal-content-boundary.mjs"],
+      ["node", "probes/verify-seal-evals-coverage.mjs"],
+      ["node", "probes/verify-seal-fray4-capability.mjs"],
+      ["node", "probes/verify-seal-model-role-matrix.mjs"],
+      ["node", "probes/verify-seal-reranker-hard-corpus.mjs"],
+      ["node", "probes/verify-seal-routing-contract.mjs"],
+      ["node", "probes/verify-seal-security-bakeoff.mjs"],
+      ["node", "probes/verify-seal-stack-bakeoff.mjs"],
+      ["node", "probes/verify-seal-vertical-integration.mjs"]
+    ]
+  },
+  "legacyFocusedTests": [
+    "scripts/runa-chat-lane-smoke-tests.mjs",
+    "scripts/runa-workspace-comprehension-tests.mjs",
+    "scripts/runa-answer-ground-tests.mjs",
+    "scripts/runa-retrieval-projection-tests.mjs",
+    "scripts/runa-citation-enforcement-tests.mjs",
+    "scripts/runa-research-mode-tests.mjs",
+    "scripts/runa-answer-gates-tests.mjs",
+    "scripts/runa-injection-screening-tests.mjs",
+    "scripts/runa-retrieval-fusion-tests.mjs",
+    "scripts/runa-answer-record-tests.mjs",
+    "scripts/runa-deterministic-answer-scope-tests.mjs",
+    "scripts/runa-reranker-tests.mjs"
+  ]
+}

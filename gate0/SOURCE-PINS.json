@@ -1,0 +1,28 @@
+{
+  "schemaVersion": "runa2-gate0-source-pins/v1",
+  "repository": "https://github.com/matthewferrill/runaai.git",
+  "commit": "71ce985e4272895bbd4c3cf38ed8fbcb6090c2a2",
+  "hashMode": "sha256-checkout-bytes",
+  "files": {
+    "src/runa/general-chat.mjs": "f78930f743fdaf0a0017e3f326e02ae342a05597361911be98440beb1a813e27",
+    "src/runa/local-chat.mjs": "de6e273506ece1bc18ceca4de4f3fa6358182494e1749f594aba1e4211968b9f",
+    "src/runa/workspace-comprehension.mjs": "cd5c4f6f4b8356af2883914d52d8ba5764a06ef7c19df3d14676bf16b5828947",
+    "src/runa/answer-ground.mjs": "a42473ace39a0165ca188fab00586294d7178e7c3d0bcf4c4fe4bf8c6eb56a6c",
+    "src/runa/answer-record.mjs": "0fc79b6bcd2efe32e04609addc448a5281a3da8c188045cb446df5e90507bcac",
+    "src/runa/retrieval-projection.mjs": "591d58c3a2d36b8b36f15c0de88f8f3a92e569b352ff74683fdc8e59c50e0618",
+    "src/runa/citation-enforcement.mjs": "63392cfa6b41b5afeba0ca69af2a17ed16bf340a3186a9b218e7836769bf16a8",
+    "src/runa/research-mode.mjs": "a906c3f872b0bbd84b232935391106bf2254d2d1953cf91dd2662c156cc87ecc",
+    "scripts/runa-chat-lane-smoke-tests.mjs": "66e824ccf16a634fe2dd9a51e6b243ec78fa20082c3d5f441896f8aae24bcd7e",
+    "scripts/runa-workspace-comprehension-tests.mjs": "94fc2ec80b0cc0eaf181a2a4ab574a1bdfc24791ee0b468658eb4fea0b545445",
+    "scripts/runa-answer-ground-tests.mjs": "553f2c82e52eef2c3ea94c3e019e7a747c4805f5fde6513f1ce3fb685876d366",
+    "scripts/runa-retrieval-projection-tests.mjs": "15932d6e3c033c32eb177bae5f7423610e337edb54b0a72d6d37561b4d8629d7",
+    "scripts/runa-citation-enforcement-tests.mjs": "36a9d545997a235e3aed097156d2b90846e7a118f1a4e9b412b4f574c80de2f3",
+    "scripts/runa-research-mode-tests.mjs": "2ea8cdce2eb9e4334341c093195b9aa936e750f31d42dd1fb9aa8d2ab7a5fb5b",
+    "scripts/runa-answer-gates-tests.mjs": "85e7705091c13ec0d5ac02c75b0ed1e3353b9ecfdcf84b55256a2aea6232f18c",
+    "scripts/runa-injection-screening-tests.mjs": "bbb5f0ac08e68ae5a650147b8fd769e0e6998273ed7bb4ce92a10456e6af8a4b",
+    "scripts/runa-retrieval-fusion-tests.mjs": "b68a7861d3d722f3612cea2902b1a47c726d9dcbed88329e8781e5f0f8d9f7eb",
+    "scripts/runa-answer-record-tests.mjs": "03c8dcc155b5c3b2bcbb98bea6dd909e40fb59edc611a6890717350364afa1fa",
+    "scripts/runa-deterministic-answer-scope-tests.mjs": "44495a7aa594aab0a7f3df86323fd16b32991146052e1edf34fb26b59a4b6b60",
+    "scripts/runa-reranker-tests.mjs": "0f4655f3873836c790daabeb30492034ac55b31b17327ff27f7ef8c24b9afc72"
+  }
+}

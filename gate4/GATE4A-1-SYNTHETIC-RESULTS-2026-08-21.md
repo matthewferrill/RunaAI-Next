@@ -1,8 +1,7 @@
 # Gate 4A-1 synthetic results
 
-Status: synthetic implementation and rehearsal green on 2026-08-21. The approved aggregate-only
-owner inventory has not yet run on RUNA-CONTROL, so Gate 4A-1 evidence is not complete and Gate 4A-2
-is not requested.
+Status: synthetic implementation, rehearsal, and the approved aggregate-only owner inventory are
+green on 2026-08-21. Gate 4A-1 evidence is complete. Gate 4A-2 remains separately decision-gated.
 
 ## What was built
 
@@ -60,21 +59,31 @@ run sequentially. A concurrent verification attempt produced that expected harne
 the sequential Gate 2 rerun passed and every disposable child service stopped. This did not affect
 product state or Gate 4 evidence.
 
-## Remaining owner action
+## Owner-context inventory result
 
-From a reviewed checkout of this branch in Matthew's interactive Windows owner session on
-RUNA-CONTROL, first discover and verify the actual legacy production checkout path. Then run:
+The established `runa-control` SSH profile was verified as `RUNA-CONTROL\Matthew` and used with
+forwarding disabled. Before each owner-bound attempt, both checkouts were verified clean on their
+expected branches and commits.
 
-```powershell
-node gate4/run-owner-inventory.mjs --legacy-repo <verified-legacy-checkout> --expected-commit b4db04090d8f0df87234fab573b396e7824c5354
-```
+The first attempt at RunaAI-Next `fe09e00` failed closed with `inventory-source-pin-mismatch` before
+opening a protected root. RCA found that four manifest entries retained raw CRLF hashes when the
+verifier changed to `utf8-lf`; direct source comparison showed no content difference. Commit
+`6612d60` corrected only those canonical pins and recorded the Control access workflow.
 
-Do not substitute a different commit or run from Omen. DPAPI owner binding is part of the safety
-boundary. Retain only the one-line aggregate JSON after checking that it contains no protected value.
-No export, copy, conversion, re-encryption, import, repair, or production change is authorized.
+The rerun at RunaAI-Next `6612d60` against clean legacy production commit `b4db040` passed:
+
+- 25 readable chats and 75 turns;
+- all 25 chats are unassigned; 56 turns are `general-chat` and 19 are `guarded-chat`;
+- zero projects, project-memory records, unreadable records, or relationship/integrity findings;
+- ten verified source pins, successful owner-key unseal, and identical second-pass manifest; and
+- `disallowedFieldsEmitted: false`.
+
+Only the allowlisted one-line aggregate JSON was retained in
+`evidence/OWNER-CONTEXT-INVENTORY-2026-08-21.json`. No protected value, export, copy, conversion,
+re-encryption, import, repair, or production change occurred.
 
 ## Review gate
 
-The steward reviews the inventory's authority fields, zero unreadable/invalid counts, relationship
-counts, deterministic second pass, manifest digest, and `disallowedFieldsEmitted: false`. Any failure
-stops Gate 4A. A green inventory permits discussion of Gate 4A-2; it does not approve it.
+The inventory satisfies the frozen green criteria. Its empty project and project-memory populations
+mean the next protected rehearsal can be narrowed to chat records rather than pretending there is
+project data to migrate. This evidence permits discussion of Gate 4A-2; it does not approve it.

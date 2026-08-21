@@ -44,7 +44,9 @@ repository and never push migration work into either source repository.
   chat/research path. Its approved code-review remediation and refreshed evidence were accepted by the
   steward on 2026-08-21 and merged into `runa2/integration` as `7107ead`. It is development evidence,
   not an authority for production behavior.
-- No protected RunaAI data has been opened, copied, converted, or migrated.
+- The one approved Gate 4A aggregate inventory opened only the named project/chat roots and decrypted
+  chat records in memory under Matthew's Control identity. It emitted no protected value and copied,
+  converted, imported, or migrated no record.
 - No model has been downloaded.
 - No persistent service, non-loopback listener, provider credential, production path, or spending has
   been activated. Gate 1 verification used only bounded disposable loopback child processes.
@@ -97,8 +99,10 @@ repository and never push migration work into either source repository.
   authority mismatch. RUNA-CONTROL's clean production checkout is at `b4db040`, while live GitHub
   `main` was observed at the rewritten `71ce985` history. All ten Gate 4A legacy source selections are
   content-equivalent after `utf8-lf` canonicalization; the inventory now verifies those pins, bound
-  to `b4db040`, before protected roots can open. Its one approved owner-context execution on
-  RUNA-CONTROL is still pending. No protected store was opened by RunaAI-Next.
+  to `b4db040`, before protected roots can open. The approved owner-context execution passed on
+  RUNA-CONTROL: 25 readable unassigned chats, 75 turns, zero projects or project-memory records, zero
+  unreadable/relationship findings, deterministic second pass, and no disallowed output. No record
+  was exported, copied, converted, imported, repaired, or migrated.
 
 ## Bootstrap findings
 
@@ -139,7 +143,7 @@ plain-language steward experience, or governed action pathway.
 | 1 | Smallest disposable read-only chat/research slice | Complete; accepted and merged as `7107ead` | Complete |
 | 2 | All three read-only answer lanes plus chat/project/settings continuity | Complete; evidence accepted and merged as `4c4767f` | Complete |
 | 3 | One reversible governed idempotent action | Complete; accepted and merged as `0680cfb` | Complete |
-| 4 | Governed data migration, one domain at a time | Gate 4A-1 approved; synthetic implementation green; owner-context aggregate inventory pending; no protected export/import | Gate 4A-2 requires separate approval after inventory evidence review |
+| 4 | Governed data migration, one domain at a time | Gate 4A-1 evidence green, including owner inventory; no protected export/import | Gate 4A-2 requires separate approval after inventory evidence review |
 | 5 | Operations, private transport, authentication/authorization, recovery | Not started | Functional/data parity accepted |
 | 6 | Selected-core production cutover and rollback window | Not started | Gates 0–5 accepted and maintenance window approved |
 | 7 | Deferred extensions | Not started | New baseline and separate approval per extension group |
@@ -186,11 +190,12 @@ No dependency was changed during the prerequisite disposition. Full evidence is 
 
 ## Next decision
 
-Run the already approved, aggregate-only Gate 4A inventory once from Matthew's interactive Windows
-owner context on RUNA-CONTROL, then review its counts, relationship findings, deterministic manifest,
-and privacy canary result. The script must stop on source drift, tracked changes, unreadable data,
-unknown schema, invalid relationships, or a nondeterministic second pass. Until that evidence is
-accepted, Gate 4A-2 is not requested and no real export/import is authorized.
+Review and decide Gate 4A-2. The green inventory proves the protected population is only 25 unassigned
+chats with 75 turns; there are no projects or project-memory records to export. The recommended next
+slice is therefore a one-time protected chat-only export/import rehearsal into a disposable target,
+with a new disposable target key, exact count/digest reconciliation, privacy canary, deletion of the
+target after evidence capture, and no production adapter or cutover change. Gate 4A-2 remains
+unauthorized until the steward approves that exact protected rehearsal.
 
 Qwen3.6 deliberate review, the existing live BGE endpoint, real data export/import, persistent
 services, production routing, provider reconfiguration, production authentication/authorization, and

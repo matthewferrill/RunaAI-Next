@@ -22,9 +22,12 @@ from an earlier one.
 
 Gate 4A-1 was approved by the steward on 2026-08-21. The synthetic migration implementation and its
 disposable PostgreSQL evidence are green. The reviewed aggregate-only inventory tool is implemented,
-but the authorized owner-context run on RUNA-CONTROL has not occurred. No protected store has been
-opened, decrypted, counted, exported, copied, converted, or imported by RunaAI-Next. No production
-route, persistent service, real target encryption key, or data cutover exists.
+and its authorized owner-context run on RUNA-CONTROL passed on 2026-08-21. It opened the three
+approved roots and decrypted chat records only in memory to produce aggregate evidence: 25 readable
+unassigned chats, 75 turns, no projects, no project memory, no integrity findings, and a deterministic
+second pass. No protected value was emitted, exported, copied, converted, or imported. No production
+route, persistent service, real target encryption key, or data cutover exists. Gate 4A-2 remains
+separately decision-gated.
 
 The Gate 4A package consists of:
 
@@ -35,5 +38,6 @@ The Gate 4A package consists of:
 - `PARITY-CORPUS.json` — synthetic and protected-rehearsal acceptance cases; and
 - `SOURCE-PINS.json` — exact legacy and integration evidence inputs;
 - `run-owner-inventory.mjs` — fail-closed aggregate inventory entry point; and
+- `evidence/OWNER-CONTEXT-INVENTORY-2026-08-21.json` — the allowlisted aggregate-only Control result;
 - `GATE4A-1-SYNTHETIC-RESULTS-2026-08-21.md` — implementation and verification evidence plus the
-  remaining owner action.
+  owner-context result and next approval boundary.

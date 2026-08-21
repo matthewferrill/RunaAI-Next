@@ -1,8 +1,7 @@
 # Gate 4A scope and green criteria — project/chat domain
 
-Status: Gate 4A-1 approved by the steward on 2026-08-21. Synthetic implementation and rehearsal are
-green; the approved owner-context inventory execution on RUNA-CONTROL remains pending. Gate 4A-2 is
-not authorized.
+Status: Gate 4A-1 approved by the steward on 2026-08-21. Synthetic implementation, rehearsal, and the
+approved owner-context inventory execution on RUNA-CONTROL are green. Gate 4A-2 is not authorized.
 
 ## Layman summary
 
@@ -26,7 +25,9 @@ chat or project content is not exported or copied in this approval step.
    Gate 4A are content-equivalent to the reviewed `71ce985` pins under `utf8-lf` canonicalization.
 3. RunaLab is verified clean at `ec5e3466f6f937c8c610bdecf62a09c2491c7137`, tracking
    `origin/main`.
-4. No protected RunaAI data has been opened or migrated by RunaAI-Next.
+4. The one approved aggregate-only inventory opened only the three named legacy roots and decrypted
+   chat records in memory. It emitted no protected value and performed no export, copy, conversion,
+   import, repair, or migration.
 5. The target authority, encryption, mapping, legacy disposition, and inventory output are frozen in
    the adjacent Gate 4A contracts.
 
@@ -117,7 +118,7 @@ it still cannot become the live authority.
 Approval authorizes the synthetic implementation/rehearsal and one bounded owner-context aggregate
 inventory described here. It does not authorize a real export/import.
 
-Status: approved 2026-08-21; synthetic work complete; owner-context inventory execution pending.
+Status: approved 2026-08-21; synthetic work and owner-context inventory complete and green.
 
 ### Gate 4A-2 — protected export/import rehearsal
 

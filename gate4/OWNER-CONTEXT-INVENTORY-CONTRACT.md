@@ -1,7 +1,9 @@
 # Gate 4A owner-context inventory contract
 
 Status: exact read-only scope approved by the steward on 2026-08-21. Tooling and synthetic canary
-tests are green. One execution remains pending in Matthew's interactive owner context on RUNA-CONTROL.
+tests are green. The one authorized execution completed green under Matthew's owner context on
+RUNA-CONTROL on 2026-08-21; aggregate evidence is retained in
+`evidence/OWNER-CONTEXT-INVENTORY-2026-08-21.json`.
 
 ## Purpose
 

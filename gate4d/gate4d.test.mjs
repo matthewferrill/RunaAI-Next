@@ -37,6 +37,10 @@ test("Gate 4D replay is idempotent and changed input is refused", () => {
   assert.equal(replay.idempotentReplay, true);
   assert.throws(() => target.import({ runId: "replay", participantId: participant, legacyRecord: record("High") }),
     error => error.code === "gate4d-run-conflict");
+  const invalid = new MemoryGate4DSettingsTarget();
+  invalid.import({ runId: "invalid-replay", participantId: participant, legacyRecord: record("Turbo") });
+  assert.throws(() => invalid.import({ runId: "invalid-replay", participantId: participant,
+    legacyRecord: { schemaVersion: "wrong", values: {} } }), error => error.code === "gate4d-run-conflict");
 });
 
 test("Gate 4D injected failure restores the exact prior target value", () => {

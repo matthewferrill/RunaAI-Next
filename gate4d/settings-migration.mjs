@@ -5,6 +5,12 @@ export const GATE4D_SETTINGS_VERSION = "runa2-gate4d-setting-import/v1";
 const allowed = new Set(["Low", "Medium", "High"]);
 const safeDefault = "Medium";
 const coded = (code, message) => Object.assign(new Error(message), { code });
+const canonical = value => {
+  if (Array.isArray(value)) return value.map(canonical);
+  if (value && typeof value === "object") return Object.fromEntries(Object.keys(value).sort()
+    .map(key => [key, canonical(value[key])]));
+  return value;
+};
 const safeId = (value, label) => {
   if (typeof value !== "string" || !value.trim() || value.length > 160) throw coded("gate4d-binding-required", `${label} is required.`);
   return value.trim();
@@ -48,7 +54,7 @@ export class MemoryGate4DSettingsTarget {
     const run = safeId(runId, "runId");
     const participant = safeId(participantId, "participantId");
     const mapped = mapLegacySettingsRecord(legacyRecord);
-    const inputHmac = this.#hmac("input", JSON.stringify({ participant, mapped }));
+    const inputHmac = this.#hmac("input", JSON.stringify(canonical({ participant, legacyRecord })));
     const existing = this.runs.get(run);
     if (existing) {
       if (existing.inputHmac !== inputHmac) throw coded("gate4d-run-conflict", "The run id was already used for different input.");

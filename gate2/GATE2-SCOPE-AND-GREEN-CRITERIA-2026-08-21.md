@@ -1,8 +1,8 @@
 # Gate 2 scope and green criteria — 2026-08-21
 
 Status: accepted by the steward for Gate 2A implementation on 2026-08-21. The bounded synthetic
-implementation is complete and awaits Gate 2B evidence acceptance. This acceptance did not authorize
-protected-data access, production activation, a protected merge, or Gate 3.
+implementation is complete and its evidence was accepted under Gate 2B on 2026-08-21. Neither
+approval authorized protected-data access, production activation, a protected merge, or Gate 3.
 
 ## Layman summary
 
@@ -205,7 +205,9 @@ After implementation, the steward reviews representative outputs, all determinis
 results, failures/deferments, source drift, cleanup, and rollback evidence. Evidence acceptance is
 not merge approval.
 
-Status: pending steward review of `GATE2-RESULTS-2026-08-21.md` and retained machine-readable evidence.
+Status: accepted by the steward on 2026-08-21 after review of the layman results, timeout RCA,
+approved remediation, refreshed verification, and retained machine-readable evidence. This was not
+merge approval.
 
 ### Gate 2C — protected merge
 

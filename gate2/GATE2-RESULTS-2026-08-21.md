@@ -1,7 +1,8 @@
 # Gate 2 results — 2026-08-21
 
-Status: bounded Gate 2A implementation and verification are complete. Gate 2B evidence acceptance is
-pending. This is not merge approval, production readiness, protected-data migration, or Gate 3
+Status: bounded Gate 2A implementation and verification are complete. The steward accepted the
+evidence under Gate 2B on 2026-08-21 after the approved Qdrant timeout remediation and refreshed
+verification. This is not merge approval, production readiness, protected-data migration, or Gate 3
 authorization.
 
 ## Layman summary
@@ -99,6 +100,5 @@ Gate 2.
 
 ## Gate 2B decision
 
-The steward should decide whether this evidence is sufficient to accept Gate 2 behavior. Acceptance
-means only that the bounded synthetic evidence is accepted. A separate Gate 2C approval is required
-before merging this branch into `runa2/integration`, and Gate 3 requires a new scope decision.
+The steward accepted this bounded synthetic evidence on 2026-08-21. A separate Gate 2C approval is
+required before merging this branch into `runa2/integration`, and Gate 3 requires a new scope decision.

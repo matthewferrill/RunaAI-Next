@@ -1,8 +1,8 @@
 # Gate 2 — selected core read-only continuity
 
-Status: Gate 2A was approved by the steward and the bounded synthetic implementation completed on
-2026-08-21. Deterministic and disposable real-stack evidence is green. Gate 2B evidence acceptance
-is now required; merge remains separately protected by Gate 2C.
+Status: Gate 2A implementation completed and the steward accepted the bounded synthetic evidence
+under Gate 2B on 2026-08-21. The implementation commits are `628d781` and the approved timeout
+remediation `7da07df`. Merge remains separately protected by Gate 2C.
 
 Gate 2 extends the accepted Gate 1 stack slice to RunaAI's three answer lanes—general chat,
 guarded/local chat, and explicit workspace comprehension—and to synthetic chat, project, and
@@ -20,8 +20,8 @@ Review these records for evidence acceptance:
 - `GATE2-RESULTS-2026-08-21.md`
 - `evidence/STUB-INTEGRATION-RESULTS.json`
 
-The implementation must stay on this gate branch until its evidence is reviewed. Gate 2
-does not authorize protected-data access, production routing, persistent services, learning,
+The implementation must stay on this gate branch until the separate protected merge is approved.
+Gate 2 does not authorize protected-data access, production routing, persistent services, learning,
 governed actions, security activation, model downloads, Qwen3.6 review, or live-BGE activation.
 
 Commands:

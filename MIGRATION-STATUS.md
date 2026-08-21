@@ -74,8 +74,9 @@ repository and never push migration work into either source repository.
   timeout-label race; the steward approved a narrow remediation on 2026-08-21. The refreshed Gate 1
   deterministic suite passes 26/26, Gate 1 integration passes 25/25, and full Gate 0 verification
   passes 48/48 plus 10/10 seals. Timeout and genuine dependency loss are now deterministically
-  distinguished. Gate 2B evidence acceptance is pending. Live-model validation was not run and
-  remains separately decision-gated.
+  distinguished. The steward accepted Gate 2B evidence on 2026-08-21 after reviewing the results,
+  timeout RCA, approved remediation, and refreshed evidence. Gate 2C protected merge approval is now
+  pending. Live-model validation was not run and remains separately decision-gated.
 
 ## Bootstrap findings
 
@@ -113,7 +114,7 @@ plain-language steward experience, or governed action pathway.
 | Bootstrap | Establish repository lineage, remotes, branches, instructions, and status | Complete | Reviewed and merged as `94ba860` |
 | 0 | Freeze contracts, parity corpus, data inventory, redaction policy, and green thresholds | Complete | Approved by steward 2026-08-20; PR #2 accepted for integration |
 | 1 | Smallest disposable read-only chat/research slice | Complete; accepted and merged as `7107ead` | Complete |
-| 2 | All three read-only answer lanes plus chat/project/settings continuity | Gate 2A implementation complete; Gate 2B evidence review pending | Gate 2B evidence acceptance, then separate Gate 2C merge approval |
+| 2 | All three read-only answer lanes plus chat/project/settings continuity | Gate 2A complete; Gate 2B evidence accepted 2026-08-21; Gate 2C pending | Separate Gate 2C protected merge approval |
 | 3 | One reversible governed idempotent action | Not started | Gate 2 parity accepted |
 | 4 | Governed data migration, one domain at a time | Not started | Each domain and owner-context plan approved separately |
 | 5 | Operations, private transport, authentication/authorization, recovery | Not started | Functional/data parity accepted |
@@ -162,11 +163,10 @@ No dependency was changed during the prerequisite disposition. Full evidence is 
 
 ## Next decision
 
-Review `gate2/GATE2-RESULTS-2026-08-21.md` and
-`gate2/evidence/STUB-INTEGRATION-RESULTS.json`. Decide whether to accept the bounded synthetic Gate 2
-evidence under Gate 2B.
+Gate 2B evidence is accepted. Decide whether to authorize Gate 2C: the protected merge of
+`runa2/gate-2-read-only-continuity` into `runa2/integration` after confirming the integration target
+has not moved and the merge is fast-forward or otherwise reviewable without unrelated changes.
 
-Evidence acceptance is not merge approval. Gate 2C separately protects merging this branch into
-`runa2/integration`. Qwen3.6 deliberate review, the existing live BGE endpoint, protected data,
-persistent services, production routing, provider reconfiguration, Gate 3, and production cutover
-remain unauthorized or deferred.
+Gate 2C is not production or Gate 3 approval. Qwen3.6 deliberate review, the existing live BGE
+endpoint, protected data, persistent services, production routing, provider reconfiguration, Gate 3,
+and production cutover remain unauthorized or deferred.

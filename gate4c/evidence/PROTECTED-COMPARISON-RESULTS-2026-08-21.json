@@ -1,0 +1,51 @@
+{
+  "schemaVersion": "runa2-gate4c-protected-aggregate-comparison/v1",
+  "authority": {
+    "legacyCommit": "b4db04090d8f0df87234fab573b396e7824c5354",
+    "nextCommit": "fa13513af8f4b2aa4f93ba5578bb140f410a3dd5",
+    "clean": true,
+    "ownerIdentityVerified": true,
+    "sourcePinsVerified": true
+  },
+  "source": {
+    "entries": 90,
+    "integrityHealthy": true,
+    "unchanged": true
+  },
+  "legacy": {
+    "activeCount": 53,
+    "byScope": {
+      "personal": 1,
+      "project": 5,
+      "capability": 16,
+      "global": 31,
+      "session": 0,
+      "evaluation": 0,
+      "training-candidate": 0
+    }
+  },
+  "projected": {
+    "activeCount": 53,
+    "byScope": {
+      "personal": 1,
+      "project": 5,
+      "capability": 16,
+      "global": 31,
+      "session": 0,
+      "evaluation": 0,
+      "training-candidate": 0
+    }
+  },
+  "checks": {
+    "countsEqual": true,
+    "scopeCountsEqual": true,
+    "deterministicSecondPass": true,
+    "disposableKeysDestroyed": true,
+    "noTargetCreated": true,
+    "modelContextActivated": false,
+    "answerLanesActivated": false,
+    "qdrantActivated": false
+  },
+  "disallowedFieldsEmitted": false,
+  "passed": true
+}

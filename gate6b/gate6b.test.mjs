@@ -261,3 +261,13 @@ test("Control application startup retains logs and permits the full integrity sc
   assert.match(script, /application\.stderr\.log/);
   assert.match(script, /AddMinutes\(10\)/);
 });
+
+test("Control backup proof is candidate-only, encrypted, exact, and disposable", async () => {
+  const script = await readFile(resolve(import.meta.dirname, "control", "Invoke-ControlBackupRestoreProof.ps1"), "utf8");
+  assert.match(script, /DataProtectionScope\]::CurrentUser/);
+  assert.match(script, /candidate-backup-logical-restore-mismatch/);
+  assert.match(script, /restoreproof_runa/);
+  assert.match(script, /dropdb\.exe/);
+  assert.match(script, /plaintextWorkRemoved/);
+  assert.doesNotMatch(script, /C:\\AI\\Projects\\RunaAI/);
+});

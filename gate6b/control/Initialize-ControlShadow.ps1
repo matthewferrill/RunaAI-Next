@@ -186,7 +186,7 @@ Set-Content -LiteralPath $runKeycloakBootstrap -Encoding utf8 -Value @"
 `$env:KC_DB_URL = 'jdbc:postgresql://127.0.0.1:9765/keycloak_candidate'
 `$env:KC_DB_USERNAME = 'keycloak_candidate'
 `$env:KC_DB_PASSWORD = [IO.File]::ReadAllText("`$root\secrets\postgres-keycloak").Trim()
-& '$keycloakHome\bin\kc.bat' start --http-enabled=true --http-host=127.0.0.1 --http-port=9762 --hostname=http://127.0.0.1:9762 --hostname-strict=true --health-enabled=true --metrics-enabled=false
+& '$keycloakHome\bin\kc.bat' start --cache=local --http-enabled=true --http-host=127.0.0.1 --http-port=9762 --http-management-host=127.0.0.1 --http-management-port=9766 --hostname=http://127.0.0.1:9762 --hostname-strict=true --health-enabled=true --metrics-enabled=false
 exit `$LASTEXITCODE
 "@
 $kcListener = Get-NetTCPConnection -State Listen -LocalPort 9762 -ErrorAction SilentlyContinue | Select-Object -First 1
@@ -229,7 +229,7 @@ http://127.0.0.1:9770 {
 "@
 $serviceSpec = [ordered]@{
   postgresql = @{ version='18.6'; binary=(Join-Path $pgBin 'postgres.exe'); port=9765; bind='127.0.0.1' }
-  keycloak = @{ version='26.7.2'; home=$keycloakHome; port=9762; bind='127.0.0.1' }
+  keycloak = @{ version='26.7.2'; home=$keycloakHome; port=9762; managementPort=9766; bind='127.0.0.1'; cache='local-single-node' }
   openfga = @{ version='1.18.3'; binary=$openFgaExe; httpPort=9763; grpcPort=9764; bind='127.0.0.1'; storeId=$fgaFacts.storeId; modelId=$fgaFacts.modelId }
   caddy = @{ version='2.11.4'; binary=(Join-Path $paths.Tools 'caddy\caddy.exe'); privateAddress=$PrivateAddress; tlsPort=9761; providerProxyPort=9770 }
 }

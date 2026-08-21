@@ -15,7 +15,7 @@ exit $LASTEXITCODE
 '@
 Set-Content -LiteralPath (Join-Path $control 'Run-Keycloak.ps1') -Encoding utf8 -Value @"
 `$root='C:\AI\RunaAI-Next-Candidate'; `$env:JAVA_HOME='$javaHome'; `$env:KC_DB='postgres'; `$env:KC_DB_URL='jdbc:postgresql://127.0.0.1:9765/keycloak_candidate'; `$env:KC_DB_USERNAME='keycloak_candidate'; `$env:KC_DB_PASSWORD=[IO.File]::ReadAllText("`$root\secrets\postgres-keycloak").Trim()
-& '$keycloakHome\bin\kc.bat' start --http-enabled=true --http-host=127.0.0.1 --http-port=9762 --hostname=http://127.0.0.1:9762 --hostname-strict=true --health-enabled=true --metrics-enabled=false
+& '$keycloakHome\bin\kc.bat' start --cache=local --http-enabled=true --http-host=127.0.0.1 --http-port=9762 --http-management-host=127.0.0.1 --http-management-port=9766 --hostname=http://127.0.0.1:9762 --hostname-strict=true --health-enabled=true --metrics-enabled=false
 exit `$LASTEXITCODE
 "@
 Set-Content -LiteralPath (Join-Path $control 'Run-Caddy.ps1') -Encoding utf8 -Value @'

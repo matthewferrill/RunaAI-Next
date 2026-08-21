@@ -213,3 +213,6 @@ merge approval.
 
 A separate explicit approval is required to merge Gate 2 into `runa2/integration`. Gate 3 remains a
 separate decision even after that merge.
+
+Status: separately approved by the steward and completed on 2026-08-21 as protected merge commit
+`4c4767f`. This did not authorize Gate 3 or production.

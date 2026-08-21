@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { after, test } from "node:test";
-import { copyFileSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { copyFileSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { spawnSync } from "node:child_process";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -9,6 +9,10 @@ import { createEnvelopeCipher } from "./envelope.mjs";
 import { Gate4aMigrationService, Gate4aProjectChatRepository, buildGate4aPlan } from "./migration.mjs";
 import { assertLegacySourcePins, inventoryFromSnapshot, safeInventoryOutput } from "./inventory.mjs";
 import { sha256 } from "./canonical.mjs";
+import { createGate4aDpapiProtector } from "./dpapi.mjs";
+import { assertApprovedProtectedSnapshot, assertPrivateValuesAbsent, createScopedEncryptedBackup,
+  expectedTargetProjection, logicalProjectionDigest, privateValuesForScan,
+  verifyScopedEncryptedBackup } from "./protected-rehearsal.mjs";
 import { CHAT_A, CHAT_B, CHAT_C, PARTICIPANT, PROJECT_ALPHA, makeSnapshot, testCipher } from "./fixtures.mjs";
 
 const covered = new Set();
@@ -184,6 +188,40 @@ caseTest("G4A-18", "inventory is aggregate-only, deterministic, and distinguishe
   assert.equal("projects" in output, false);
   assert.equal(inventoryFromSnapshot(snapshot, { unreadableChats: 1 }).passed, false);
   assert.equal(inventoryFromSnapshot({ ...snapshot, chats: [] }).passed, true);
+
+  const protectedRoot = mkdtempSync(join(tmpdir(), "runa-gate4a-protected-helper-"));
+  try {
+    const legacyRoot = join(protectedRoot, "legacy");
+    const chatRoot = join(legacyRoot, ".runaai-local", "state", "chats");
+    mkdirSync(join(legacyRoot, ".runaai-local", "state", "projects"), { recursive: true });
+    mkdirSync(join(legacyRoot, ".runaai-local", "state", "memory", "projects"), { recursive: true });
+    mkdirSync(chatRoot, { recursive: true });
+    writeFileSync(join(chatRoot, "store-key.dpapi"), "sealed-key");
+    writeFileSync(join(chatRoot, "catalog.json.enc"), "encrypted-catalog");
+    writeFileSync(join(chatRoot, `${"a".repeat(32)}.json.enc`), "encrypted-chat");
+    const backupRoot = join(protectedRoot, "backup");
+    const backup = createScopedEncryptedBackup({ legacyRepo: legacyRoot, backupRoot, expectedChatFiles: 2 });
+    assert.equal(backup.fileCount, 2);
+    assert.equal(existsSync(join(backupRoot, "store-key.dpapi")), false);
+    assert.equal(verifyScopedEncryptedBackup({ legacyRepo: legacyRoot, backupRoot, original: backup }).unchanged, true);
+
+    const sourceInventory = inventoryFromSnapshot(snapshot);
+    assert.equal(assertApprovedProtectedSnapshot({ snapshot, diagnostics: {},
+      expectedManifest: sourceInventory.digests.domainManifest, expectedProjects: 2,
+      expectedChats: 3, expectedTurns: 4, expectedProjectMemory: 1 }).inventory.passed, true);
+    const projection = expectedTargetProjection(snapshot);
+    assert.equal(logicalProjectionDigest(projection), logicalProjectionDigest(structuredClone(projection)));
+    const privateValues = privateValuesForScan(snapshot);
+    assert.equal(assertPrivateValuesAbsent(privateValues, "ciphertext-only"), true);
+    assert.throws(() => assertPrivateValuesAbsent(privateValues, privateValues[0]),
+      error => error.code === "protected-private-value-leak");
+
+    const dpapiInput = Buffer.from("owner-bound-disposable-key");
+    const protector = createGate4aDpapiProtector({ platform: "win32", spawn: (_exe, args, options) => ({
+      status: 0, stdout: args.at(-1) === "protect" ? Buffer.from(options.input, "base64").toString("base64") : options.input,
+    }) });
+    assert.deepEqual(protector.unprotect(protector.protect(dpapiInput)), dpapiInput);
+  } finally { rmSync(protectedRoot, { recursive: true, force: true }); }
 
   const pinRoot = mkdtempSync(join(tmpdir(), "runa-gate4a-source-pins-"));
   try {

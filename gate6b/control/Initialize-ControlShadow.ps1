@@ -84,9 +84,33 @@ $root = 'C:\AI\RunaAI-Next-Candidate'
 & "$root\tools\postgresql\pgsql\bin\postgres.exe" -D "$root\data\postgresql"
 exit $LASTEXITCODE
 '@
+$stopPostgres = Join-Path $paths.Control 'Stop-Postgresql.ps1'
+Set-Content -LiteralPath $stopPostgres -Encoding utf8 -Value @'
+$root = 'C:\AI\RunaAI-Next-Candidate'
+& "$root\tools\postgresql\pgsql\bin\pg_ctl.exe" -D "$root\data\postgresql" stop -m fast -w
+exit $LASTEXITCODE
+'@
+$postgresIdentity = "$env:COMPUTERNAME\codex-audit"
+& icacls.exe $pgData '/grant:r' "$postgresIdentity`:(OI)(CI)M" | Out-Null
+& icacls.exe $paths.Logs '/grant:r' "$postgresIdentity`:(OI)(CI)M" | Out-Null
+if ($LASTEXITCODE -ne 0) { throw 'candidate-postgres-acl-failed' }
 $pgListener = Get-NetTCPConnection -State Listen -LocalPort 9765 -ErrorAction SilentlyContinue | Select-Object -First 1
 if (-not $pgListener) {
-  $pgProcess = Start-Process powershell.exe -ArgumentList '-NoProfile','-File',$runPostgres -WindowStyle Hidden -PassThru
+  $postmasterPid = Join-Path $pgData 'postmaster.pid'
+  if (Test-Path -LiteralPath $postmasterPid) {
+    $recordedPid = [int](Get-Content -LiteralPath $postmasterPid -TotalCount 1)
+    if (-not (Get-Process -Id $recordedPid -ErrorAction SilentlyContinue)) { Remove-Item -LiteralPath $postmasterPid -Force }
+  }
+  $bootstrapTaskPath = '\RunaAI-Next-Bootstrap\'
+  if (-not (Get-ScheduledTask -TaskPath $bootstrapTaskPath -TaskName 'Postgresql' -ErrorAction SilentlyContinue)) {
+    $taskSettings = New-ScheduledTaskSettingsSet -ExecutionTimeLimit ([TimeSpan]::Zero)
+    $taskPrincipal = New-ScheduledTaskPrincipal -UserId $postgresIdentity -LogonType S4U -RunLevel Limited
+    $taskAction = New-ScheduledTaskAction -Execute 'powershell.exe' -Argument "-NoLogo -NoProfile -ExecutionPolicy Bypass -File `"$runPostgres`""
+    Register-ScheduledTask -TaskPath $bootstrapTaskPath -TaskName 'Postgresql' -Action $taskAction -Settings $taskSettings -Principal $taskPrincipal | Out-Null
+    $stopAction = New-ScheduledTaskAction -Execute 'powershell.exe' -Argument "-NoLogo -NoProfile -ExecutionPolicy Bypass -File `"$stopPostgres`""
+    Register-ScheduledTask -TaskPath $bootstrapTaskPath -TaskName 'Stop-Postgresql' -Action $stopAction -Settings $taskSettings -Principal $taskPrincipal | Out-Null
+  }
+  Start-ScheduledTask -TaskPath $bootstrapTaskPath -TaskName 'Postgresql'
   $deadline = [DateTime]::UtcNow.AddSeconds(60)
   do { Start-Sleep -Milliseconds 500; $pgListener = Get-NetTCPConnection -State Listen -LocalPort 9765 -ErrorAction SilentlyContinue | Select-Object -First 1 } until ($pgListener -or [DateTime]::UtcNow -gt $deadline)
   if (-not $pgListener) { throw 'candidate-postgres-start-failed' }
@@ -222,6 +246,14 @@ $candidate = [ordered]@{
 }
 $candidate | ConvertTo-Json -Depth 10 | Set-Content -LiteralPath (Join-Path $paths.Config 'candidate.json') -Encoding utf8
 foreach ($port in @(9762,9763)) { $listener = Get-NetTCPConnection -State Listen -LocalPort $port -ErrorAction SilentlyContinue | Select-Object -First 1; if ($listener) { Stop-Process -Id $listener.OwningProcess -Force -ErrorAction SilentlyContinue } }
-& (Join-Path $pgBin 'pg_ctl.exe') -D $pgData stop -m fast -w | Out-Null
+$bootstrapTaskPath = '\RunaAI-Next-Bootstrap\'
+if (Get-ScheduledTask -TaskPath $bootstrapTaskPath -TaskName 'Postgresql' -ErrorAction SilentlyContinue) {
+  Start-ScheduledTask -TaskPath $bootstrapTaskPath -TaskName 'Stop-Postgresql'
+  $deadline=[DateTime]::UtcNow.AddSeconds(60)
+  do { Start-Sleep -Milliseconds 500; $pgListener=Get-NetTCPConnection -State Listen -LocalPort 9765 -ErrorAction SilentlyContinue } until (-not $pgListener -or [DateTime]::UtcNow -gt $deadline)
+  if ($pgListener) { throw 'candidate-postgres-stop-failed' }
+  Unregister-ScheduledTask -TaskPath $bootstrapTaskPath -TaskName 'Postgresql' -Confirm:$false
+  Unregister-ScheduledTask -TaskPath $bootstrapTaskPath -TaskName 'Stop-Postgresql' -Confirm:$false
+}
 Remove-Item Env:PGPASSWORD,Env:KC_BOOTSTRAP_ADMIN_PASSWORD,Env:OPENFGA_DATASTORE_PASSWORD,Env:OPENFGA_AUTHN_PRESHARED_KEYS -ErrorAction SilentlyContinue
 [ordered]@{ schemaVersion='runa2-gate6b-control-initialize/v1'; initialized=$true; root=$Root; services=@{ postgresql='stopped'; keycloak='stopped'; openfga='stopped'; caddy='not-started'; application='not-installed' }; protectedDataImported=$false; ownerCredentialEnrolled=$false; productionTrafficChanged=$false; privateValuesIncluded=$false } | ConvertTo-Json -Depth 5 -Compress

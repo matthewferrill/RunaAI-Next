@@ -6,6 +6,7 @@ import { canonicalJson, sha256 } from "./canonical.mjs";
 import { GATE4A_SNAPSHOT_VERSION, LEGACY_CHAT_VERSION } from "./formats.mjs";
 
 const coded = (code, message) => Object.assign(new Error(message), { code });
+const REVIEWED_LEGACY_SOURCE_COUNT = 10;
 
 function inside(root, target) {
   const rel = relative(resolve(root), resolve(target));
@@ -99,8 +100,38 @@ export function assertLegacyAuthority({ legacyRepo, expectedCommit }) {
   return { repo, commit, branch, upstream };
 }
 
-export async function readLegacyProjectChatDomain({ legacyRepo, expectedCommit }) {
-  const authority = assertLegacyAuthority({ legacyRepo, expectedCommit });
+export function assertLegacySourcePins({ authority, sourcePinsPath }) {
+  let pins;
+  try { pins = JSON.parse(readFileSync(sourcePinsPath, "utf8")); }
+  catch { throw coded("inventory-source-pins-invalid", "The reviewed source-pin manifest is unreadable."); }
+  if (pins?.schemaVersion !== "runa2-gate4a-source-pins/v1" || pins.hashCanonicalization !== "utf8-lf" ||
+      pins.legacyHead !== authority.commit || !Array.isArray(pins.sources)) {
+    throw coded("inventory-source-pins-invalid", "The reviewed source-pin manifest does not bind this authority.");
+  }
+  const selected = pins.sources.filter(pin => pin?.repo === "RunaAI");
+  if (selected.length !== REVIEWED_LEGACY_SOURCE_COUNT ||
+      new Set(selected.map(pin => pin.path)).size !== selected.length) {
+    throw coded("inventory-source-pins-invalid", "The reviewed legacy source-pin set has the wrong size or is ambiguous.");
+  }
+  for (const pin of selected) {
+    if (typeof pin.path !== "string" || !/^[a-f0-9]{64}$/.test(String(pin.sha256))) {
+      throw coded("inventory-source-pins-invalid", "A reviewed legacy source pin is malformed.");
+    }
+    const target = resolve(authority.repo, pin.path);
+    if (!inside(authority.repo, target) || !existsSync(target) || !statSync(target).isFile()) {
+      throw coded("inventory-source-pin-mismatch", "A reviewed legacy source is absent or outside the authority root.");
+    }
+    const canonicalText = readFileSync(target, "utf8").replace(/\r\n?/g, "\n");
+    if (sha256(canonicalText) !== pin.sha256) {
+      throw coded("inventory-source-pin-mismatch", "A reviewed legacy source differs from its transport-canonical pin.");
+    }
+  }
+  return { verifiedSourcePins: selected.length, sourcePinsSha256: sha256(canonicalJson(pins)) };
+}
+
+export async function readLegacyProjectChatDomain({ legacyRepo, expectedCommit, sourcePinsPath }) {
+  const authority = { ...assertLegacyAuthority({ legacyRepo, expectedCommit }) };
+  Object.assign(authority, assertLegacySourcePins({ authority, sourcePinsPath }));
   const stateRoot = resolve(authority.repo, ".runaai-local", "state");
   const chatRoot = resolve(stateRoot, "chats");
   const projectRoot = resolve(stateRoot, "projects");
@@ -159,6 +190,7 @@ export async function readLegacyProjectChatDomain({ legacyRepo, expectedCommit }
 export function safeInventoryOutput({ authority, first, second, scriptSha256 }) {
   const deterministic = first.digests.domainManifest === second.digests.domainManifest && canonicalJson(first.counts) === canonicalJson(second.counts);
   return { ...first, sourceCommit: authority.commit, inventoryScriptSha256: scriptSha256,
+    sourcePinsSha256: authority.sourcePinsSha256, verifiedSourcePins: authority.verifiedSourcePins,
     deterministicSecondPass: deterministic, passed: first.passed && second.passed && deterministic };
 }
 

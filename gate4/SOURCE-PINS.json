@@ -2,7 +2,11 @@
   "schemaVersion": "runa2-gate4a-source-pins/v1",
   "recordedAt": "2026-08-21",
   "integrationBase": "0680cfbd179b27052cfb6be652609609185ca5c2",
-  "legacyHead": "71ce985e4272895bbd4c3cf38ed8fbcb6090c2a2",
+  "legacyHead": "b4db04090d8f0df87234fab573b396e7824c5354",
+  "publishedLegacyMainObserved": "71ce985e4272895bbd4c3cf38ed8fbcb6090c2a2",
+  "selectedSourcesEquivalentTo": "71ce985e4272895bbd4c3cf38ed8fbcb6090c2a2",
+  "historyStatus": "control-production-head-not-published",
+  "hashCanonicalization": "utf8-lf",
   "sources": [
     { "repo": "RunaAI", "path": "decisions/0075-durable-chats-managed-projects-functional-surface.md", "sha256": "1c10c35ce8ff5909561e28a54921021b5bcfc0e4218193fda46a2cfb3486891c" },
     { "repo": "RunaAI", "path": "docs/RUNAAI-PRIVATE-CHAT-AND-PERSONAL-LEARNING.md", "sha256": "98e5bdf3821ad15da7255340468f86446cacea89c00b83ebdf96768377feb440" },

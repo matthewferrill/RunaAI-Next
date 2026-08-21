@@ -11,8 +11,9 @@ function argument(name) {
 try {
   const legacyRepo = resolve(argument("--legacy-repo"));
   const expectedCommit = argument("--expected-commit");
-  const firstRead = await readLegacyProjectChatDomain({ legacyRepo, expectedCommit });
-  const secondRead = await readLegacyProjectChatDomain({ legacyRepo, expectedCommit });
+  const sourcePinsPath = fileURLToPath(new URL("./SOURCE-PINS.json", import.meta.url));
+  const firstRead = await readLegacyProjectChatDomain({ legacyRepo, expectedCommit, sourcePinsPath });
+  const secondRead = await readLegacyProjectChatDomain({ legacyRepo, expectedCommit, sourcePinsPath });
   const first = inventoryFromSnapshot(firstRead.snapshot, firstRead.diagnostics);
   const second = inventoryFromSnapshot(secondRead.snapshot, secondRead.diagnostics);
   const sources = [fileURLToPath(import.meta.url), fileURLToPath(new URL("./inventory.mjs", import.meta.url)),

@@ -15,6 +15,11 @@ on RUNA-CONTROL and out of output.
   checkout and its existing ignored `.runaai-local` state.
 - Confirm the running/checkout commit and clean tracked state first. Stop on divergence or unexpected
   tracked changes.
+- Before opening any protected root, verify the adjacent source-pin manifest is bound to the expected
+  production commit and that all ten selected legacy files match their reviewed SHA-256 pins after
+  deterministic `utf8-lf` transport canonicalization. Stop on any missing, extra, malformed, or
+  changed selected source. The current reviewed production authority is
+  `b4db04090d8f0df87234fab573b396e7824c5354`.
 - Use a reviewed, pinned inventory script from RunaAI-Next. The script opens only:
   `.runaai-local/state/chats/`, `.runaai-local/state/projects/`, and
   `.runaai-local/state/memory/projects/`.
@@ -28,7 +33,8 @@ on RUNA-CONTROL and out of output.
 
 ## Allowed aggregate output
 
-- source commit, inventory-script commit/hash, schema versions, and timestamp;
+- source commit, source-pin manifest hash/count, inventory-script commit/hash, schema versions, and
+  timestamp;
 - store availability and key-unseal success as booleans;
 - counts of projects by status, memory-enabled projects, source-reference records, pathway entries,
   chats by assigned/unassigned/archive/unread/branch state, turns by route, project-memory records, and

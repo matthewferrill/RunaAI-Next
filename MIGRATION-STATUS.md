@@ -94,8 +94,11 @@ repository and never push migration work into either source repository.
   integration checks, and the full 93/93 Node profile pass. Gate 1, 2, and 3 disposable integration
   regressions pass 25/25, 21/21, and 16/16 respectively; Gate 0 passes with 10/10 seals and all 12
   pinned legacy suites. The aggregate-only owner inventory tool is implemented and fails closed on
-  authority mismatch, but its one approved owner-context execution on RUNA-CONTROL is still pending.
-  No protected store was opened by RunaAI-Next.
+  authority mismatch. RUNA-CONTROL's clean production checkout is at `b4db040`, while live GitHub
+  `main` was observed at the rewritten `71ce985` history. All ten Gate 4A legacy source selections are
+  content-equivalent after `utf8-lf` canonicalization; the inventory now verifies those pins, bound
+  to `b4db040`, before protected roots can open. Its one approved owner-context execution on
+  RUNA-CONTROL is still pending. No protected store was opened by RunaAI-Next.
 
 ## Bootstrap findings
 

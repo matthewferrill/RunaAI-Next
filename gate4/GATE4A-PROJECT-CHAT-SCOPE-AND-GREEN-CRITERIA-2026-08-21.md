@@ -19,8 +19,11 @@ chat or project content is not exported or copied in this approval step.
 
 1. Gates 0–3 are accepted in `runa2/integration`; Gate 3 merge commit is
    `0680cfbd179b27052cfb6be652609609185ca5c2`.
-2. Legacy RunaAI is verified at `71ce985e4272895bbd4c3cf38ed8fbcb6090c2a2`, tracking
-   `origin/main`, with only the pre-existing untracked `.claude/settings.local.json` preserved.
+2. RUNA-CONTROL's legacy production checkout is verified clean on `main` at
+   `b4db04090d8f0df87234fab573b396e7824c5354`, with its locally recorded `origin/main` at the same
+   commit. Live GitHub `main` was observed at `71ce985e4272895bbd4c3cf38ed8fbcb6090c2a2`, which is absent
+   from the Control checkout after an upstream history rewrite. All ten legacy sources selected by
+   Gate 4A are content-equivalent to the reviewed `71ce985` pins under `utf8-lf` canonicalization.
 3. RunaLab is verified clean at `ec5e3466f6f937c8c610bdecf62a09c2491c7137`, tracking
    `origin/main`.
 4. No protected RunaAI data has been opened or migrated by RunaAI-Next.

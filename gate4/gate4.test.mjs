@@ -1,13 +1,14 @@
 import assert from "node:assert/strict";
 import { after, test } from "node:test";
-import { copyFileSync, mkdtempSync, readFileSync, rmSync } from "node:fs";
+import { copyFileSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { spawnSync } from "node:child_process";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { MemoryGate4aStore } from "./adapters/memory.mjs";
 import { createEnvelopeCipher } from "./envelope.mjs";
 import { Gate4aMigrationService, Gate4aProjectChatRepository, buildGate4aPlan } from "./migration.mjs";
-import { inventoryFromSnapshot, safeInventoryOutput } from "./inventory.mjs";
+import { assertLegacySourcePins, inventoryFromSnapshot, safeInventoryOutput } from "./inventory.mjs";
+import { sha256 } from "./canonical.mjs";
 import { CHAT_A, CHAT_B, CHAT_C, PARTICIPANT, PROJECT_ALPHA, makeSnapshot, testCipher } from "./fixtures.mjs";
 
 const covered = new Set();
@@ -184,9 +185,26 @@ caseTest("G4A-18", "inventory is aggregate-only, deterministic, and distinguishe
   assert.equal(inventoryFromSnapshot(snapshot, { unreadableChats: 1 }).passed, false);
   assert.equal(inventoryFromSnapshot({ ...snapshot, chats: [] }).passed, true);
 
+  const pinRoot = mkdtempSync(join(tmpdir(), "runa-gate4a-source-pins-"));
+  try {
+    mkdirSync(join(pinRoot, "src"));
+    const sourcePaths = Array.from({ length: 10 }, (_, index) => join(pinRoot, "src", `sample-${index}.mjs`));
+    for (const sourcePath of sourcePaths) writeFileSync(sourcePath, "alpha\r\nbeta\r\n", "utf8");
+    const authority = { repo: pinRoot, commit: "a".repeat(40) };
+    const sourcePinsPath = join(pinRoot, "SOURCE-PINS.json");
+    writeFileSync(sourcePinsPath, JSON.stringify({ schemaVersion: "runa2-gate4a-source-pins/v1",
+      legacyHead: authority.commit, hashCanonicalization: "utf8-lf",
+      sources: sourcePaths.map((_, index) => ({ repo: "RunaAI", path: `src/sample-${index}.mjs`,
+        sha256: sha256("alpha\nbeta\n") })) }), "utf8");
+    assert.equal(assertLegacySourcePins({ authority, sourcePinsPath }).verifiedSourcePins, 10);
+    writeFileSync(sourcePaths[0], "changed\r\n", "utf8");
+    assert.throws(() => assertLegacySourcePins({ authority, sourcePinsPath }),
+      error => error.code === "inventory-source-pin-mismatch");
+  } finally { rmSync(pinRoot, { recursive: true, force: true }); }
+
   const cleanPackage = mkdtempSync(join(tmpdir(), "runa-gate4a-owner-inventory-"));
   try {
-    for (const name of ["run-owner-inventory.mjs", "inventory.mjs", "canonical.mjs", "formats.mjs"])
+    for (const name of ["run-owner-inventory.mjs", "inventory.mjs", "canonical.mjs", "formats.mjs", "SOURCE-PINS.json"])
       copyFileSync(new URL(`./${name}`, import.meta.url), join(cleanPackage, name));
     const cli = spawnSync(process.execPath, [join(cleanPackage, "run-owner-inventory.mjs"),
       "--legacy-repo", join(cleanPackage, "missing-legacy"), "--expected-commit", "0".repeat(40)],

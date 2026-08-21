@@ -42,9 +42,18 @@ A deliberately wrong legacy commit was supplied to the inventory CLI. It returne
 `inventory-authority-mismatch` result and stopped before opening any protected store. The real
 owner-context path was not used.
 
-The owner CLI is also executed from a temporary clean package containing only its four reviewed
-files. This proves the inventory entry point needs no `npm install`, `node_modules`, or external
-JavaScript package on RUNA-CONTROL.
+RUNA-CONTROL's clean production checkout is now at
+`b4db04090d8f0df87234fab573b396e7824c5354`, while the live GitHub `main` observed during this review
+remains `71ce985e4272895bbd4c3cf38ed8fbcb6090c2a2`. The latter commit is no longer present in the
+Control checkout, so the two histories cannot be compared there as commits. All ten legacy files
+selected by Gate 4A were compared directly instead: four raw hashes matched and six raw hashes
+differed only because of LF/CRLF transport. All ten match the reviewed pins after `utf8-lf`
+canonicalization. The inventory now verifies those ten pins, bound to the Control production commit,
+before it opens any protected root.
+
+The owner CLI is also executed from a temporary clean package containing only its four reviewed code
+files plus the source-pin manifest. This proves the inventory entry point needs no `npm install`,
+`node_modules`, or external JavaScript package on RUNA-CONTROL.
 
 Gate 1 and Gate 2 integration harnesses share the collector's default metrics port and therefore must
 run sequentially. A concurrent verification attempt produced that expected harness port collision;
@@ -57,7 +66,7 @@ From a reviewed checkout of this branch in Matthew's interactive Windows owner s
 RUNA-CONTROL, first discover and verify the actual legacy production checkout path. Then run:
 
 ```powershell
-node gate4/run-owner-inventory.mjs --legacy-repo <verified-legacy-checkout> --expected-commit 71ce985e4272895bbd4c3cf38ed8fbcb6090c2a2
+node gate4/run-owner-inventory.mjs --legacy-repo <verified-legacy-checkout> --expected-commit b4db04090d8f0df87234fab573b396e7824c5354
 ```
 
 Do not substitute a different commit or run from Omen. DPAPI owner binding is part of the safety

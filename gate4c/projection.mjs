@@ -36,9 +36,13 @@ export function buildApprovedKnowledgeProjection({ source, cipher, now = new Dat
   const activeTargets = new Set(); for (const item of states.filter(value => value.active)) { if (activeTargets.has(item.event.eventId)) throw coded("projection-approval-lineage-invalid", "A lesson has more than one active approval."); activeTargets.add(item.event.eventId); }
   const correctedByApproved = new Set(states.filter(item => item.active).flatMap(item => Array.isArray(item.event.relationships?.corrects) ? item.event.relationships.corrects : []));
   const lessons = states.filter(item => item.active && !correctedByApproved.has(item.event.eventId)).map(item => { const scope = eventScope(item.event); const lesson = requireText(item.event.candidate?.lesson, "candidate lesson"); const limitations = item.event.candidate?.limitations ?? []; const mustNotApply = item.event.candidate?.mustNotApply ?? []; if (!Array.isArray(limitations) || !Array.isArray(mustNotApply) || [...limitations, ...mustNotApply].some(value => typeof value !== "string")) throw coded("projection-event-invalid", "Lesson boundaries are invalid."); return Object.freeze({ lesson, ...scope, limitations: Object.freeze([...limitations]), mustNotApply: Object.freeze([...mustNotApply]), eventType: requireText(item.event.eventType, "event type"), approvalRefHmac: cipher.digest({ type: "approval", value: item.approval.approvalId }), eventRefHmac: cipher.digest({ type: "event", value: item.event.eventId }), eventIntegrityHmac: cipher.digest({ type: "event-integrity", value: item.event.integrity }) }); });
+  const sourceClassification = events.size > 0 && [...events.values()].every(event =>
+    event.source?.sourceType === "synthetic" && event.authority?.status === "synthetic")
+    ? "synthetic-fixture" : "protected-or-unknown";
   const projection = Object.freeze({ schemaVersion: GATE4C_PROJECTION_VERSION, sourceManifestHmac: accepted.manifestHmac,
     builtAt: at.toISOString(), nextReevaluationAt: nextBoundary(accepted.snapshot.entries, at),
     activeLessonCount: lessons.length, lessons: Object.freeze(lessons), persisted: false,
+    sourceClassification,
     sourceAuthority: "accepted-gate4b-journal", derivedOnly: true, modelContextActivated: false,
     toolAuthorityGranted: false, networkAuthorityGranted: false, trainingAuthorityGranted: false });
   projections.add(projection); return projection;

@@ -43,6 +43,16 @@ const citation = z.object({
   contentSha256: z.string().regex(/^[a-f0-9]{64}$/),
   ordinal: z.number().int().positive(),
 }).strict();
+const approvedKnowledgeReference = z.object({
+  approvalRefHmac: z.string().regex(/^[a-f0-9]{64}$/),
+  eventRefHmac: z.string().regex(/^[a-f0-9]{64}$/),
+  eventIntegrityHmac: z.string().regex(/^[a-f0-9]{64}$/),
+}).strict();
+const scopeFiltering = z.object({
+  consideredCount: z.number().int().nonnegative(), eligibleCount: z.number().int().nonnegative(),
+  excludedCount: z.number().int().nonnegative(),
+  excludedByReason: z.record(z.string(), z.number().int().nonnegative()),
+}).strict();
 
 export const Gate2AnswerResponseSchema = z.object({
   schemaVersion: z.literal("runa2-answer-response/v2"),
@@ -82,6 +92,13 @@ export const Gate2AnswerResponseSchema = z.object({
   continuity: z.object({
     durableChatEligible: z.boolean(), turnRecorded: z.boolean(), source: z.string(),
   }).strict(),
+  approvedKnowledge: z.object({
+    schemaVersion: z.literal("runa2-approved-knowledge-delivery-receipt/v1"),
+    availableLibraryCount: z.number().int().nonnegative(), selectedCount: z.number().int().nonnegative(),
+    delivered: z.boolean(), reason: z.string(), scopeFiltering,
+    references: z.array(approvedKnowledgeReference).max(6), degraded: z.boolean(),
+    errorCode: z.string().nullable(), deliveryProvesCompliance: z.literal(false),
+  }).strict(),
 }).strict();
 
 export const parseGate2AnswerRequest = value => Gate2AnswerRequestSchema.parse(value);
@@ -92,4 +109,11 @@ export const GATE2_MODEL_ROLES = Object.freeze({
   guarded: "chat",
   research: "research",
   workspace: "code",
+});
+
+export const GATE2_LANE_CAPABILITIES = Object.freeze({
+  general: Object.freeze(["chat"]),
+  guarded: Object.freeze(["chat", "guarded-read-only"]),
+  research: Object.freeze(["research"]),
+  workspace: Object.freeze(["code", "workspace-read"]),
 });

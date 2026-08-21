@@ -1,6 +1,7 @@
 import { createHash, randomBytes } from "node:crypto";
 import { ReadOnlyAnswerSlice } from "../gate1/core.mjs";
-import { parseGate2AnswerRequest, parseGate2AnswerResponse, GATE2_MODEL_ROLES } from "./contracts.mjs";
+import { parseGate2AnswerRequest, parseGate2AnswerResponse, GATE2_LANE_CAPABILITIES, GATE2_MODEL_ROLES } from "./contracts.mjs";
+import { approvedKnowledgeReceipt, providerAdvisoryFromDelivery } from "../gate4c/answer-context.mjs";
 
 const sha256 = value => createHash("sha256").update(String(value)).digest("hex");
 const protectedPattern = /\b(device vault|dpapi|windows hello|credential store|private key|machine[- ]bound ciphertext)\b/i;
@@ -130,6 +131,7 @@ function providerFor(providers, role) {
 
 export class Gate2ReadOnlyService {
   constructor({ records, index, providers, continuity, workspaceResolver, telemetry = null,
+    approvedKnowledge = null,
     statusProvider = () => ({ provider: "unknown", retrieval: "unknown", reranker: "unknown" }) }) {
     this.records = records;
     this.index = index;
@@ -137,6 +139,7 @@ export class Gate2ReadOnlyService {
     this.continuity = continuity;
     this.workspaceResolver = workspaceResolver;
     this.telemetry = telemetry;
+    this.approvedKnowledge = approvedKnowledge;
     this.statusProvider = statusProvider;
   }
 
@@ -152,22 +155,40 @@ export class Gate2ReadOnlyService {
   async #execute(request) {
     const role = GATE2_MODEL_ROLES[request.lane];
     let resolvedWorkspace = { references: [], denied: [] };
+    let knowledgeDelivery = null;
     let response = deterministicResponse(request);
+    let knowledgeFallbackReason = response ? "not-evaluated-deterministic-boundary" : "adapter-disabled";
     if (!response && request.lane === "workspace") {
       resolvedWorkspace = await this.workspaceResolver.resolve(request.project.projectId, request.workspace.sources);
       if (resolvedWorkspace.denied.length) response = emptyV1(request, {
         answer: "The requested source belongs to another project and was denied before model delivery.",
         reason: "workspace-cross-project-denied", auditCode: "workspace-cross-project-denied",
       });
+      if (response) knowledgeFallbackReason = "not-evaluated-workspace-boundary";
     }
 
     if (!response) {
+      if (this.approvedKnowledge) {
+        try {
+          knowledgeDelivery = await this.approvedKnowledge.select({
+            requestScope: {
+              participantId: request.participant.verified ? request.participant.principalId : null,
+              projectId: request.project.projectId,
+              capabilities: GATE2_LANE_CAPABILITIES[request.lane],
+            },
+            task: request.message,
+          });
+        } catch {
+          knowledgeDelivery = {};
+        }
+      }
       const selectedIndex = request.lane === "workspace"
         ? new ExplicitIndex(this.index, resolvedWorkspace.references)
         : this.index;
       const selectedRecords = request.participant.verified ? this.records : new EphemeralRecordProxy(this.records);
       const provider = providerFor(this.providers, role);
-      const slice = new ReadOnlyAnswerSlice({ records: selectedRecords, index: selectedIndex, provider });
+      const slice = new ReadOnlyAnswerSlice({ records: selectedRecords, index: selectedIndex, provider,
+        advisoryContext: providerAdvisoryFromDelivery(knowledgeDelivery) });
       try {
         response = await slice.answer(gate1Request(request));
       } catch (error) {
@@ -216,6 +237,7 @@ export class Gate2ReadOnlyService {
       turnRecorded: continuityResult.turnRecorded === true,
       source: continuityResult.source,
     };
+    response.approvedKnowledge = approvedKnowledgeReceipt(knowledgeDelivery, knowledgeFallbackReason);
     response.effects = [];
     return parseGate2AnswerResponse(response);
   }

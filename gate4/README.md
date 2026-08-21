@@ -54,3 +54,9 @@ projection and legacy calculations agreed on 53 active lessons and every scope c
 was retained and no answer lane was activated. The accelerated synthetic closeout contract is frozen
 in `GATE4-SYNTHETIC-CLOSEOUT-SCOPE-AND-GREEN-CRITERIA-2026-08-21.md` for Gate 4C-3A, the selected
 Gate 4D compatibility surface, and the Gate 4E build-or-skip measurement.
+
+That accelerated synthetic closeout is implemented on `runa2/gate-4-closeout-synthetic`. Gate 4C-3A
+wires a synthetic-only advisory context through all four read-only lanes; Gate 4D retains only the
+one selected persisted setting and dispositions the obsolete provider surface; Gate 4E records a
+current skip for a separate approved-knowledge index. The combined results and remaining boundaries
+are in `GATE4-SYNTHETIC-CLOSEOUT-RESULTS-2026-08-21.md`.

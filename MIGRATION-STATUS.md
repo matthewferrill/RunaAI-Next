@@ -156,6 +156,14 @@ repository and never push migration work into either source repository.
 - The accelerated synthetic closeout contract for Gate 4C-3A, Gate 4D, and Gate 4E was frozen from
   accepted integration head `4ed6a52` on `runa2/gate-4-closeout-synthetic`. It preserves the standing
   no-protected-data/no-network/no-persistent-service boundary and stops on any hard safety failure.
+- The accelerated synthetic closeout is implemented and locally reviewed on
+  `runa2/gate-4-closeout-synthetic`. Gate 4C-3A supplies scoped synthetic approved knowledge through
+  every read-only lane as non-authoritative advisory context; Gate 4D proves the one-setting
+  compatibility boundary and retires/defer-dispositions the legacy provider surface; Gate 4E records
+  a current skip for a separate approved-knowledge index, with semantic remeasurement triggers. The
+  full 167/167 Node suite, 10/10 seals, 12/12 pinned legacy suites, and disposable Gate 1–4 integration
+  regressions are green. No protected data, model endpoint, persistent service, or production route
+  was opened or changed. This branch is ready for review but is not yet accepted or merged.
 
 ## Bootstrap findings
 
@@ -196,7 +204,7 @@ plain-language steward experience, or governed action pathway.
 | 1 | Smallest disposable read-only chat/research slice | Complete; accepted and merged as `7107ead` | Complete |
 | 2 | All three read-only answer lanes plus chat/project/settings continuity | Complete; evidence accepted and merged as `4c4767f` | Complete |
 | 3 | One reversible governed idempotent action | Complete; accepted and merged as `0680cfb` | Complete |
-| 4 | Governed data migration, one domain at a time | Gate 4A/4B and Gate 4C through protected aggregate comparison accepted; synthetic closeout in progress; legacy unchanged | Continue under the accepted synthetic safety charter; stop only on a hard failure or protected boundary |
+| 4 | Governed data migration, one domain at a time | Gate 4A/4B and Gate 4C through protected aggregate comparison accepted; synthetic closeout implemented and ready for review; legacy unchanged | Review synthetic closeout before integration merge |
 | 5 | Operations, private transport, authentication/authorization, recovery | Not started | Functional/data parity accepted |
 | 6 | Selected-core production cutover and rollback window | Not started | Gates 0–5 accepted and maintenance window approved |
 | 7 | Deferred extensions | Not started | New baseline and separate approval per extension group |
@@ -243,11 +251,10 @@ No dependency was changed during the prerequisite disposition. Full evidence is 
 
 ## Next decision
 
-Gate 4C-2 is accepted and merged. The current work is the frozen accelerated synthetic closeout:
-wire advisory approved knowledge through every read-only answer lane, prove the one-setting Gate 4D
-compatibility boundary without recreating the legacy provider subsystem, and record the Gate 4E
-build-or-skip measurement. Gate 4E defaults to skipping a new approved-knowledge index at the current
-53-lesson scale unless its frozen improvement and safety thresholds are actually demonstrated.
+Gate 4C-2 is accepted and merged. The accelerated synthetic closeout is implemented and ready for
+review. Its Gate 4E result skips a new approved-knowledge index at the current 53-lesson scale because
+no authorized vector arm demonstrated the frozen improvement threshold; the direct selector remains
+the bounded fallback and the semantic gap is explicitly measured rather than hidden.
 
 After this synthetic train is reviewed, the next programme gate is Gate 5 operations/security. The
 unresolved E3 record remains unchanged, E4 authority/device-vault state remains deferred to Gate 5,

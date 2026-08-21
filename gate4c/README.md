@@ -20,12 +20,20 @@ Gate 4C-2's aggregate-only protected comparison was accepted and merged as `4ed6
 legacy projections agreed exactly on 53 active lessons and every scope category without retaining
 private content.
 
-## Not implemented or authorized before Gate 4C-3A
+## Gate 4C-3A synthetic answer delivery
+
+The accelerated synthetic closeout adds an optional, hard-branded synthetic adapter that delivers
+selected lessons through a separate advisory provider field on general, guarded, research, and
+workspace lanes. Deterministic denials run first; participant/project/capability scope filters before
+relevance; provenance never reaches the model; citations remain project evidence only; and aggregate
+receipts distinguish selection from actual delivery. Removing the adapter restores prior behavior.
+
+## Still not implemented or authorized
 
 - protected data migration;
 - retained projection or production PostgreSQL adapter;
-- general, guarded/local, or workspace answer-lane wiring;
-- model/provider calls or model-context activation;
+- protected or production answer-lane activation;
+- live-model semantic validation;
 - Qdrant, embeddings, BGE, or another reranker;
 - learning import, approval, correction, or activation; or
 - production routing, networking, authentication/authorization, or cutover.

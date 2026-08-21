@@ -81,4 +81,3 @@ export function secretReferenceStatus(secretRefs, key) {
     valuesRetained: false,
   });
 }
-

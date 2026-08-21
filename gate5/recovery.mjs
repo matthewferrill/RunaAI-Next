@@ -50,7 +50,6 @@ export function createAuthoritativeBackup({ records, sourceAuthority, sourceComm
     manifest: structuredClone(manifest),
   });
 }
-
 export function openAuthoritativeBackup({ envelope, encryptionKey, digestKey, expectedAuthority, expectedCommit }) {
   if (envelope?.schemaVersion !== GATE5_BACKUP_VERSION || envelope.algorithm !== "AES-256-GCM") throw coded("backup-envelope-invalid", "Backup envelope is invalid.");
   let parsed;
@@ -130,4 +129,3 @@ export function legacySecurityDisposition() {
     windowsHelloPrivateKeys: "never-export-or-copy",
   });
 }
-

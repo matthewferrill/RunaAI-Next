@@ -116,4 +116,3 @@ PostgreSQL adapter/drill, Windows re-enrolment disposition, and retained aggrega
 not authorize protected access, owner credential enrollment/revocation, identity-service deployment,
 non-loopback networking, production secrets, release promotion, Gate 6 cutover, or deletion of any
 legacy credential or store.
-

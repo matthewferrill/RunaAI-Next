@@ -101,4 +101,3 @@ export class PostgresPrincipalStore {
   async rollbackGate5() { await this.pool.query("DROP SCHEMA IF EXISTS gate5 CASCADE"); }
   async close() { if (this.ownsPool) await this.pool.end(); }
 }
-

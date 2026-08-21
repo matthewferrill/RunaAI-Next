@@ -155,4 +155,3 @@ safety criterion fails or owner-bound protected data is required.
   credential enrollment/revocation, destructive recovery drill, release promotion, or cutover.
 - Any identity/authz fail-open, private-data leak, non-idempotent duplicate effect, source mutation,
   unclean service shutdown, or rollback failure is a hard blocker.
-

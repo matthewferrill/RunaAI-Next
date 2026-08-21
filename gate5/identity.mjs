@@ -201,4 +201,3 @@ export class Gate5AuthorizationService {
 
   requiresOnlineIdentity(action) { return HIGH_RISK_ACTIONS.has(action); }
 }
-

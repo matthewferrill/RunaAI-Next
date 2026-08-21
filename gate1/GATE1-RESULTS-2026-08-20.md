@@ -1,11 +1,26 @@
 # Gate 1 results — 2026-08-20
 
-Status: **accepted by the steward under the approved Gate 1 scope amendment.** This is not merge
-approval, production readiness, migration completion, or permission to start Gate 2.
+Status: the original evidence was accepted by the steward under the approved Gate 1 scope amendment.
+After protected code review found three implementation gaps, the 2026-08-21 remediation and refreshed
+evidence are green and await renewed steward acceptance. This is not merge approval, production
+readiness, migration completion, or permission to start Gate 2.
+
+## 2026-08-21 code-review remediation
+
+The total request deadline now covers retrieval through generation, simultaneous duplicate requests
+share one PostgreSQL-owned execution, and the windowed reranker processes all windows in bounded
+32-window batches instead of silently dropping later content. Root causes, exact changes, and the
+approval boundary are recorded in `GATE1-CODE-REVIEW-REMEDIATION-2026-08-21.md`.
+
+Refreshed results are **24/24 focused checks**, **25/25 disposable integration checks**, **38/38
+combined tests**, **10/10 seals**, **12/12 pinned legacy suites**, and **12/12 hard plus 12/12 quality
+Qwen3 Coder runs**. The integration run recorded one provider call across two concurrent workers, 16
+request rows, 16 turns, 51 checkpoints, late-window reranker coverage, total-deadline timeout
+visibility, and clean shutdown of all eight disposable services.
 
 ## What is green
 
-- Focused deterministic suite: **21/21 passed**. It maps all 18 frozen parity cases, repeats every
+- Original focused deterministic suite: **21/21 passed**. It maps all 18 frozen parity cases, repeats every
   model-influenced hard behavior three times, and adds explicit provider-output-limit and telemetry
   canary checks plus a stale-content-digest veto.
 - Disposable selected-stack integration: **22/22 checks passed** using Mastra/AI SDK, Caddy,
@@ -73,9 +88,10 @@ The exact amendment and unchanged boundaries are recorded in
 
 ## Acceptance record
 
-The steward explicitly accepted the regenerated Gate 1 evidence on 2026-08-20. The branch remains
-unmerged. Branch protection and normal code review still apply, and Gate 2 remains unstarted pending a
-separate approval.
+The steward explicitly accepted the amended Gate 1 evidence on 2026-08-20. That acceptance is retained
+as historical evidence. The subsequent code-review remediation changed implementation and regenerated
+the affected evidence on 2026-08-21, so renewed steward acceptance is required before protected review
+can approve a merge. Gate 2 remains unstarted pending a separate approval.
 
 ## Rollback evidence
 

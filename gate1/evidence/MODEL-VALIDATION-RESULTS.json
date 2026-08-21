@@ -27,7 +27,7 @@
       "repetition": 1,
       "role": "fast-chat-research",
       "modelId": "qwen3-coder-30b-a3b-instruct",
-      "elapsedMs": 28504,
+      "elapsedMs": 2008,
       "response": {
         "schemaVersion": "runa2-answer-response/v1",
         "requestId": "general-evidence-answer-1",
@@ -67,7 +67,7 @@
           "outputLimited": false
         },
         "trace": {
-          "correlationId": "6203f90f813503d823706d084c564dbc"
+          "correlationId": "e8af6af8c24349a83a98a98475baeebe"
         },
         "effects": [],
         "auditCodes": [
@@ -91,7 +91,7 @@
       "repetition": 2,
       "role": "fast-chat-research",
       "modelId": "qwen3-coder-30b-a3b-instruct",
-      "elapsedMs": 653,
+      "elapsedMs": 716,
       "response": {
         "schemaVersion": "runa2-answer-response/v1",
         "requestId": "general-evidence-answer-2",
@@ -131,7 +131,7 @@
           "outputLimited": false
         },
         "trace": {
-          "correlationId": "ad970c174ef4c3cd5449d1b3d3399580"
+          "correlationId": "8b5a7203e17dd7ef449a43fb013995ec"
         },
         "effects": [],
         "auditCodes": [
@@ -155,7 +155,7 @@
       "repetition": 3,
       "role": "fast-chat-research",
       "modelId": "qwen3-coder-30b-a3b-instruct",
-      "elapsedMs": 662,
+      "elapsedMs": 721,
       "response": {
         "schemaVersion": "runa2-answer-response/v1",
         "requestId": "general-evidence-answer-3",
@@ -195,7 +195,7 @@
           "outputLimited": false
         },
         "trace": {
-          "correlationId": "63de8082f40f9eb744c3db8418ed3ff1"
+          "correlationId": "905c4dc2858e69c994543f52356656e2"
         },
         "effects": [],
         "auditCodes": [
@@ -219,7 +219,7 @@
       "repetition": 1,
       "role": "fast-chat-research",
       "modelId": "qwen3-coder-30b-a3b-instruct",
-      "elapsedMs": 919,
+      "elapsedMs": 973,
       "response": {
         "schemaVersion": "runa2-answer-response/v1",
         "requestId": "general-metaphysical-no-search-1",
@@ -252,7 +252,7 @@
           "outputLimited": false
         },
         "trace": {
-          "correlationId": "9bc087e34a4a71a2fbda8cf5afd51bdf"
+          "correlationId": "8b59d5688c4e6f1619dc656e81821426"
         },
         "effects": [],
         "auditCodes": []
@@ -274,7 +274,7 @@
       "repetition": 2,
       "role": "fast-chat-research",
       "modelId": "qwen3-coder-30b-a3b-instruct",
-      "elapsedMs": 632,
+      "elapsedMs": 681,
       "response": {
         "schemaVersion": "runa2-answer-response/v1",
         "requestId": "general-metaphysical-no-search-2",
@@ -307,7 +307,7 @@
           "outputLimited": false
         },
         "trace": {
-          "correlationId": "599d7bdcd8d08df6fd2000461c54d51c"
+          "correlationId": "4e17a26937cce25d546900de1686e816"
         },
         "effects": [],
         "auditCodes": []
@@ -329,7 +329,7 @@
       "repetition": 3,
       "role": "fast-chat-research",
       "modelId": "qwen3-coder-30b-a3b-instruct",
-      "elapsedMs": 635,
+      "elapsedMs": 669,
       "response": {
         "schemaVersion": "runa2-answer-response/v1",
         "requestId": "general-metaphysical-no-search-3",
@@ -362,7 +362,7 @@
           "outputLimited": false
         },
         "trace": {
-          "correlationId": "aa3468248dbdad41a4722ecaad4d2165"
+          "correlationId": "3fad73ff59e9ab33924c43e4f7651dbd"
         },
         "effects": [],
         "auditCodes": []
@@ -384,7 +384,7 @@
       "repetition": 1,
       "role": "fast-chat-research",
       "modelId": "qwen3-coder-30b-a3b-instruct",
-      "elapsedMs": 1007,
+      "elapsedMs": 1021,
       "response": {
         "schemaVersion": "runa2-answer-response/v1",
         "requestId": "research-complete-denominator-1",
@@ -431,7 +431,7 @@
           "outputLimited": false
         },
         "trace": {
-          "correlationId": "e28c10cda2011ccc2976763f04414608"
+          "correlationId": "5136770295488958ea02cf04369f9eb3"
         },
         "effects": [],
         "auditCodes": [
@@ -455,7 +455,7 @@
       "repetition": 2,
       "role": "fast-chat-research",
       "modelId": "qwen3-coder-30b-a3b-instruct",
-      "elapsedMs": 744,
+      "elapsedMs": 743,
       "response": {
         "schemaVersion": "runa2-answer-response/v1",
         "requestId": "research-complete-denominator-2",
@@ -502,7 +502,7 @@
           "outputLimited": false
         },
         "trace": {
-          "correlationId": "00be00f689b5eb888d76f8a0ed9bff9c"
+          "correlationId": "8df56210c269aefc620d4f6a3c957466"
         },
         "effects": [],
         "auditCodes": [
@@ -526,7 +526,7 @@
       "repetition": 3,
       "role": "fast-chat-research",
       "modelId": "qwen3-coder-30b-a3b-instruct",
-      "elapsedMs": 756,
+      "elapsedMs": 769,
       "response": {
         "schemaVersion": "runa2-answer-response/v1",
         "requestId": "research-complete-denominator-3",
@@ -573,7 +573,7 @@
           "outputLimited": false
         },
         "trace": {
-          "correlationId": "5780a60f5d7f2f796a057d351b3b76e6"
+          "correlationId": "43f26946b27dfde6647a912ada6dda79"
         },
         "effects": [],
         "auditCodes": [
@@ -597,7 +597,7 @@
       "repetition": 1,
       "role": "fast-chat-research",
       "modelId": "qwen3-coder-30b-a3b-instruct",
-      "elapsedMs": 1251,
+      "elapsedMs": 993,
       "response": {
         "schemaVersion": "runa2-answer-response/v1",
         "requestId": "research-partial-denominator-1",
@@ -647,7 +647,7 @@
           "outputLimited": false
         },
         "trace": {
-          "correlationId": "bd992d09f3048a614ab1bd1af21fa1fd"
+          "correlationId": "3ba5614ab8959a457cb3d1bff83f308e"
         },
         "effects": [],
         "auditCodes": [
@@ -671,7 +671,7 @@
       "repetition": 2,
       "role": "fast-chat-research",
       "modelId": "qwen3-coder-30b-a3b-instruct",
-      "elapsedMs": 966,
+      "elapsedMs": 1001,
       "response": {
         "schemaVersion": "runa2-answer-response/v1",
         "requestId": "research-partial-denominator-2",
@@ -721,7 +721,7 @@
           "outputLimited": false
         },
         "trace": {
-          "correlationId": "05066548893c98895cc166f88c955876"
+          "correlationId": "344b612ad2f8fc8e6887d3c5ef801557"
         },
         "effects": [],
         "auditCodes": [
@@ -745,7 +745,7 @@
       "repetition": 3,
       "role": "fast-chat-research",
       "modelId": "qwen3-coder-30b-a3b-instruct",
-      "elapsedMs": 975,
+      "elapsedMs": 1000,
       "response": {
         "schemaVersion": "runa2-answer-response/v1",
         "requestId": "research-partial-denominator-3",
@@ -795,7 +795,7 @@
           "outputLimited": false
         },
         "trace": {
-          "correlationId": "5a2047e7ba602b2220e505cb6918d9b1"
+          "correlationId": "b8e3e2fd6c2160cb631f14f2ba7b29c4"
         },
         "effects": [],
         "auditCodes": [

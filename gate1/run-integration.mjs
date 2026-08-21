@@ -93,8 +93,15 @@ function runWorker(phase, commonEnv) {
   });
 }
 
+async function chatCallCount(logPath) {
+  if (!existsSync(logPath)) return 0;
+  return (await readFile(logPath, "utf8")).trim().split(/\r?\n/).filter(Boolean).map(JSON.parse)
+    .filter(item => String(item.url).endsWith("/chat/completions")).length;
+}
+
 const rules = [
   ["Resume after process restart.", "A checkpointed synthetic answer resumes without repeating completed work.", "restart", "answer"],
+  ["Return one answer for concurrent duplicates.", "Concurrent duplicate requests share one committed answer.", "configuration", "reranker"],
   ["Where is the reranker configured?", "The reranker is configured at the synthetic private endpoint.", "configuration", "reranker"],
   ["What is the citation boundary?", "This answer names an unavailable section.", "configuration", "not-supplied"],
   ["Summarize the supplied source.", "The supplied synthetic source says the boundary stays read-only.", "malicious", "instruction"],
@@ -122,7 +129,7 @@ const sources = [
     content: "This stale synthetic source has been revoked." }),
 ];
 
-let postgres, qdrant, collector, provider, slowProvider, reranker, caddy, records, report, failure;
+let postgres, qdrant, collector, provider, slowProvider, slowDependency, reranker, caddy, records, report, failure;
 const stopped = {};
 try {
   postgres = startPostgres();
@@ -135,7 +142,10 @@ try {
   });
   slowProvider = startLogged(process.execPath, [path.join(import.meta.dirname, "stub-provider.mjs")], {
     env: { STUB_PORT: "9580", STUB_MODEL: "stub-deterministic-v1", STUB_RULES: JSON.stringify(rules),
-      STUB_LOG: slowWirePath, STUB_LATENCY_MS: "350" },
+      STUB_LOG: slowWirePath, STUB_LATENCY_MS: "700" },
+  });
+  slowDependency = startLogged(process.execPath, [path.join(import.meta.dirname, "stub-provider.mjs")], {
+    env: { STUB_PORT: "9583", STUB_MODEL: "stub-slow-dependency", STUB_LATENCY_MS: "350" },
   });
   reranker = startLogged(process.execPath, [path.join(import.meta.dirname, "stub-reranker.mjs")]);
   caddy = startLogged(caddyExe, ["run", "--config", path.join(import.meta.dirname, "Caddyfile"), "--adapter", "caddyfile"]);
@@ -144,6 +154,7 @@ try {
     waitReady("http://127.0.0.1:9578/v1/traces", collector),
     waitReady("http://127.0.0.1:9579/v1/models", provider),
     waitReady("http://127.0.0.1:9580/v1/models", slowProvider),
+    waitReady("http://127.0.0.1:9583/v1/models", slowDependency),
     waitReady("http://127.0.0.1:9575/healthz", reranker),
     waitReady("http://127.0.0.1:9581/v1/models", caddy),
   ]);
@@ -154,6 +165,10 @@ try {
   const embedder = new OpenAICompatibleEmbedder({ baseURL: "http://127.0.0.1:9581/v1",
     modelId: "stub-embed-v1", dimension: 768, timeoutMs: 1_000 });
   const bge = new WindowedBgeReranker({ baseURL: "http://127.0.0.1:9575", timeoutMs: 1_000 });
+  const fullCoverage = await bge.rerank("late target", [
+    { sourceId: "baseline", content: "late baseline" },
+    { sourceId: "late", content: `${"padding ".repeat(8_000)} late target` },
+  ], 1, { deadlineMs: 3_000 });
   const derived = new QdrantDerivedIndex({ endpoint: "http://127.0.0.1:9573", embedder, reranker: bge, timeoutMs: 1_000 });
   const initialAlignment = await derived.rebuild(await records.listActiveSources());
   await records.revoke("synthetic-revoked-project", "revoked", "former-best");
@@ -161,6 +176,7 @@ try {
   const commonEnv = {
     GATE1_PG_URL: postgres.connectionString,
     GATE1_QDRANT_URL: "http://127.0.0.1:9573",
+    GATE1_SLOW_QDRANT_URL: "http://127.0.0.1:9583",
     GATE1_PROVIDER_URL: "http://127.0.0.1:9581/v1",
     GATE1_SLOW_PROVIDER_URL: "http://127.0.0.1:9582/v1",
     GATE1_MODEL_ID: "stub-deterministic-v1",
@@ -169,10 +185,13 @@ try {
     GATE1_TELEMETRY_HMAC_KEY: "synthetic-gate1-integration-key",
   };
   const phases = ["interrupt", "resume", "duplicate", "ordinary", "honest-miss", "dependency-loss",
-    "timeout", "unknown-citation", "instruction", "protected", "command", "research-complete",
+    "retrieval-timeout", "timeout", "unknown-citation", "instruction", "protected", "command", "research-complete",
     "research-partial", "cross-project", "revoked", "metaphysical"];
   const outcomes = {};
   for (const phase of phases) outcomes[phase] = await runWorker(phase, commonEnv);
+  const concurrentCallsBefore = await chatCallCount(providerWirePath);
+  outcomes.concurrent = await Promise.all([runWorker("concurrent", commonEnv), runWorker("concurrent", commonEnv)]);
+  const concurrentProviderChatCalls = await chatCallCount(providerWirePath) - concurrentCallsBefore;
 
   const finalAlignment = await derived.rebuild(await records.listActiveSources());
   const pool = new pg.Pool({ connectionString: postgres.connectionString });
@@ -197,6 +216,8 @@ try {
     ordinaryGrounded: outcomes.ordinary.response.ground === "record-answers" && outcomes.ordinary.response.citations.length >= 1,
     honestMiss: outcomes["honest-miss"].response.completion.reason === "honest-empty",
     dependencyLossVisible: outcomes["dependency-loss"].response.completion.reason === "dependency-unavailable" && !outcomes["dependency-loss"].response.retrieval.empty,
+    totalDeadlineVisible: outcomes["retrieval-timeout"].response.completion.reason === "timeout" &&
+      outcomes["retrieval-timeout"].response.completion.timedOut && outcomes["retrieval-timeout"].elapsedMs <= 350,
     timeoutVisible: outcomes.timeout.response.completion.timedOut && outcomes.timeout.response.completion.reason === "timeout",
     unknownCitationMarked: outcomes["unknown-citation"].response.auditCodes.includes("unknown-citation"),
     retrievedInstructionInert: outcomes.instruction.response.projectId === "synthetic-project-a" &&
@@ -211,7 +232,11 @@ try {
     crossProjectDenied: outcomes["cross-project"].response.completion.reason === "cross-project-request-denied" && !JSON.stringify(outcomes["cross-project"]).includes("FORBIDDEN_CROSS_PROJECT_CANARY"),
     revokedSourceExcluded: outcomes.revoked.response.auditCodes.includes("inactive-derived-reference-excluded") && outcomes.revoked.response.retrieval.evidenceCount === 0,
     metaphysicalSkippedRetrieval: outcomes.metaphysical.response.retrieval.skipped && outcomes.metaphysical.response.ground === "not-a-question-of-fact",
-    providerCallsBounded: providerChatCalls === 7 && slowProviderChatCalls === 1,
+    concurrentDuplicateExactlyOnce: concurrentProviderChatCalls === 1 &&
+      outcomes.concurrent.every(item => item.counts.requests === 1 && item.counts.turns === 1) &&
+      JSON.stringify(outcomes.concurrent[0].response) === JSON.stringify(outcomes.concurrent[1].response),
+    windowedRerankerFullCoverage: fullCoverage.sources[0]?.sourceId === "late" && fullCoverage.truncated === false,
+    providerCallsBounded: providerChatCalls === 8 && slowProviderChatCalls === 1,
     checkpointsPresent: database.checkpoints > 0,
     finalRebuildAligned: finalAlignment.aligned && finalAlignment.digestsAligned && finalAlignment.sourceCount === sources.length - 1,
     tracesRetained: traces.includes("runaai.answer") && traces.includes("completion.reason"),
@@ -229,6 +254,7 @@ try {
     database,
     providerChatCalls,
     slowProviderChatCalls,
+    concurrentProviderChatCalls,
     outcomes,
     traceSha256: sha256(traces),
     checks,
@@ -242,6 +268,7 @@ try {
   stopped.caddy = await stopChild(caddy);
   stopped.reranker = await stopChild(reranker);
   stopped.slowProvider = await stopChild(slowProvider);
+  stopped.slowDependency = await stopChild(slowDependency);
   stopped.provider = await stopChild(provider);
   stopped.collector = await stopChild(collector);
   stopped.qdrant = await stopChild(qdrant);

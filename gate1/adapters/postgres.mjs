@@ -3,6 +3,10 @@ import pg from "pg";
 
 const sha256 = value => createHash("sha256").update(String(value)).digest("hex");
 const requestSha256 = request => sha256(JSON.stringify(request));
+const requestLockKey = request => {
+  const unsigned = BigInt(`0x${sha256(request.requestId).slice(0, 16)}`);
+  return (unsigned > 0x7fffffffffffffffn ? unsigned - 0x10000000000000000n : unsigned).toString();
+};
 
 export class PostgresRecordStore {
   constructor({ connectionString, pool = null }) {
@@ -89,8 +93,8 @@ export class PostgresRecordStore {
       WHERE project_id=$1 AND source_id=$2 AND section_id=$3`, [projectId, sourceId, sectionId]);
   }
 
-  async getCommitted(request) {
-    const found = await this.pool.query(`SELECT request_sha256 "requestSha256", response_json "response"
+  async #getCommittedWith(client, request) {
+    const found = await client.query(`SELECT request_sha256 "requestSha256", response_json "response"
       FROM gate1.answer_requests WHERE request_id=$1`, [request.requestId]);
     if (!found.rows[0]) return null;
     if (found.rows[0].requestSha256 !== requestSha256(request)) {
@@ -101,8 +105,11 @@ export class PostgresRecordStore {
     return found.rows[0].response;
   }
 
-  async commit(request, response) {
-    const client = await this.pool.connect();
+  async getCommitted(request) {
+    return this.#getCommittedWith(this.pool, request);
+  }
+
+  async #commitWith(client, request, response) {
     try {
       await client.query("BEGIN");
       const inserted = await client.query(`INSERT INTO gate1.answer_requests
@@ -128,7 +135,39 @@ export class PostgresRecordStore {
     } catch (error) {
       await client.query("ROLLBACK");
       throw error;
-    } finally { client.release(); }
+    }
+  }
+
+  async commit(request, response) {
+    const client = await this.pool.connect();
+    try { return await this.#commitWith(client, request, response); }
+    finally { client.release(); }
+  }
+
+  async runOnce(request, operation, { deadlineMs = 5_000 } = {}) {
+    const client = await this.pool.connect();
+    const lockKey = requestLockKey(request);
+    let locked = false;
+    try {
+      await client.query("SELECT set_config('lock_timeout', $1, false)", [`${Math.max(1, Math.floor(deadlineMs))}ms`]);
+      try {
+        await client.query("SELECT pg_advisory_lock($1::bigint)", [lockKey]);
+        locked = true;
+      } catch (error) {
+        if (error?.code !== "55P03") throw error;
+        const timeout = new Error("request deadline expired while waiting for the execution lock");
+        timeout.code = "request-timeout";
+        throw timeout;
+      } finally {
+        await client.query("SELECT set_config('lock_timeout', '0', false)").catch(() => {});
+      }
+      const existing = await this.#getCommittedWith(client, request);
+      if (existing) return existing;
+      return await this.#commitWith(client, request, await operation());
+    } finally {
+      if (locked) await client.query("SELECT pg_advisory_unlock($1::bigint)", [lockKey]).catch(() => {});
+      client.release();
+    }
   }
 
   async counts(requestId) {

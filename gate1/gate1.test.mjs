@@ -1,8 +1,10 @@
 import assert from "node:assert/strict";
+import { createServer } from "node:http";
 import test from "node:test";
 import { MemorySaver } from "@langchain/langgraph";
 import { ReadOnlyAnswerSlice, sourceSection } from "./core.mjs";
 import { MemoryIndex, MemoryRecordStore, ScriptedProvider } from "./adapters/memory.mjs";
+import { WindowedBgeReranker } from "./adapters/qdrant.mjs";
 import { createGate1Telemetry } from "./telemetry.mjs";
 import { createGate1Workflow } from "./workflow.mjs";
 
@@ -206,6 +208,20 @@ test("gate1-duplicate-request: one request produces one turn and one provider ca
   assert.equal(context.records.turns.length, 1);
 });
 
+test("gate1-concurrent-duplicate: simultaneous requests share one provider execution", async () => {
+  const source = sourceSection({ projectId: projectA, sourceId: "concurrent", sectionId: "answer",
+    content: "Concurrent duplicate requests share one committed answer." });
+  const context = harness({ sources: [source], provider: new ScriptedProvider({ delayMs: 75 }) });
+  const envelope = request("concurrent-duplicate", "Return the concurrent duplicate answer.");
+  const [first, second] = await Promise.all([
+    context.workflow.answer(envelope),
+    context.workflow.answer(envelope),
+  ]);
+  assert.deepEqual(second, first);
+  assert.equal(context.provider.calls.length, 1);
+  assert.equal(context.records.turns.length, 1);
+});
+
 test("gate1-restart-resume: a checkpointed result resumes without replaying the provider", async () => {
   const source = sourceSection({ projectId: projectA, sourceId: "restart", sectionId: "answer", content: "A committed checkpoint resumes without repeating completed work." });
   const context = harness({ sources: [source] });
@@ -250,6 +266,55 @@ test("gate1-timeout: a provider deadline is explicit and produces no partial aut
   assert.equal(response.completion.timedOut, true);
   assert.ok(Date.now() - started <= 350);
   assert.deepEqual(response.effects, []);
+});
+
+test("gate1-total-deadline: repeated retrieval cannot consume a fresh deadline per pass", async () => {
+  const index = { searches: 0, async search() {
+    this.searches += 1;
+    await new Promise(resolve => setTimeout(resolve, 200));
+    return { references: [], degraded: false, unavailable: [] };
+  } };
+  const records = new MemoryRecordStore();
+  const provider = new ScriptedProvider();
+  const slice = new ReadOnlyAnswerSlice({ records, index, provider });
+  const started = Date.now();
+  const response = await slice.answer(request("total-deadline", "Explain scope filtering and budget enforcement.",
+    "research", { budgets: { deadlineMs: 100 } }));
+  const elapsedMs = Date.now() - started;
+  assert.equal(response.completion.reason, "timeout");
+  assert.equal(response.completion.timedOut, true);
+  assert.ok(elapsedMs <= 350, `request took ${elapsedMs} ms`);
+  assert.ok(index.searches <= 2);
+  assert.equal(provider.calls.length, 0);
+});
+
+test("windowed reranker: relevant content after window 32 remains eligible", async t => {
+  let calls = 0;
+  const server = createServer(async (incoming, outgoing) => {
+    const chunks = [];
+    for await (const chunk of incoming) chunks.push(chunk);
+    const body = JSON.parse(Buffer.concat(chunks).toString("utf8"));
+    calls += 1;
+    const results = body.documents.map((document, index) => ({ index,
+      score: document.includes("LATE_TARGET") ? 10 : document.includes("baseline") ? 1 : 0 }));
+    outgoing.writeHead(200, { "content-type": "application/json" });
+    outgoing.end(JSON.stringify({ results }));
+  });
+  await new Promise((resolve, reject) => {
+    server.once("error", reject);
+    server.listen(0, "127.0.0.1", resolve);
+  });
+  t.after(() => new Promise(resolve => server.close(resolve)));
+  const address = server.address();
+  const reranker = new WindowedBgeReranker({ baseURL: `http://127.0.0.1:${address.port}`, timeoutMs: 1_000 });
+  const sources = [
+    { sourceId: "baseline", content: "baseline" },
+    { sourceId: "late", content: `${"padding ".repeat(8_000)} LATE_TARGET` },
+  ];
+  const result = await reranker.rerank("late target", sources, 1, { deadlineMs: 3_000 });
+  assert.ok(calls > 1);
+  assert.equal(result.sources[0].sourceId, "late");
+  assert.equal(result.truncated, false);
 });
 
 test("provider output limits are explicit and never deliver a partial model claim", async () => {

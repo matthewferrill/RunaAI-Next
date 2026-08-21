@@ -54,3 +54,9 @@ After the amended evidence passed 12/12 live synthetic model runs, 21/21 focused
 disposable integration checks, 35/35 combined tests, 10/10 seals, and all 12 pinned legacy suites, the
 steward explicitly accepted the Gate 1 evidence on 2026-08-20. This acceptance does not merge the
 branch or authorize Gate 2.
+
+Protected code review later found three implementation gaps in total-deadline enforcement,
+simultaneous-request idempotency, and reranker coverage after window 32. The approved 2026-08-21
+remediation does not change this scope amendment or its deferred roles. Its refreshed evidence is green
+and requires renewed steward acceptance before merge review; see
+`../gate1/GATE1-CODE-REVIEW-REMEDIATION-2026-08-21.md`.

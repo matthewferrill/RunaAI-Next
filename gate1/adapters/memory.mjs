@@ -10,6 +10,7 @@ export class MemoryRecordStore {
       { ...source, contentSha256: source.contentSha256 ?? digest(source.content), active: source.active !== false },
     ]));
     this.committed = new Map();
+    this.inFlight = new Map();
     this.turns = [];
   }
 
@@ -30,6 +31,36 @@ export class MemoryRecordStore {
     this.committed.set(request.requestId, { requestSha256: requestDigest(request), response: structuredClone(response) });
     this.turns.push({ requestId: request.requestId, projectId: request.project.projectId, threadId: request.thread.threadId });
     return structuredClone(response);
+  }
+
+  async runOnce(request, operation, { deadlineMs } = {}) {
+    const existing = await this.getCommitted(request);
+    if (existing) return existing;
+    const requestSha256 = requestDigest(request);
+    const running = this.inFlight.get(request.requestId);
+    if (running) {
+      if (running.requestSha256 !== requestSha256) {
+        const error = new Error("requestId was already used for a different request");
+        error.code = "request-id-conflict";
+        throw error;
+      }
+      if (!deadlineMs) return structuredClone(await running.promise);
+      let timer;
+      try {
+        return structuredClone(await Promise.race([
+          running.promise,
+          new Promise((_, reject) => { timer = setTimeout(() => {
+            const error = new Error("request deadline expired while waiting for the committed result");
+            error.code = "request-timeout";
+            reject(error);
+          }, Math.max(1, deadlineMs)); }),
+        ]));
+      } finally { clearTimeout(timer); }
+    }
+    const promise = (async () => this.commit(request, await operation()))();
+    this.inFlight.set(request.requestId, { requestSha256, promise });
+    try { return structuredClone(await promise); }
+    finally { this.inFlight.delete(request.requestId); }
   }
 
   async activeSources(projectId, references) {

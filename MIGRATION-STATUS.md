@@ -40,7 +40,9 @@ repository and never push migration work into either source repository.
 - The completed laboratory evidence, seals, probes, stack bakeoff, model findings, architecture
   assessment, and conditional estimates are inherited.
 - Gate 1 now contains an isolated synthetic-only implementation of the smallest ordinary read-only
-  chat/research path. It is experimental, unmerged, and not an authority for production behavior.
+  chat/research path. Its approved code-review remediation is implemented and green, but refreshed
+  evidence awaits steward acceptance. It is experimental, unmerged, and not an authority for
+  production behavior.
 - No protected RunaAI data has been opened, copied, converted, or migrated.
 - No model has been downloaded.
 - No persistent service, non-loopback listener, provider credential, production path, or spending has
@@ -54,11 +56,15 @@ repository and never push migration work into either source repository.
   rejected by the sealed latency gate, and the low npm advisory has an explicit synthetic-slice-only
   disposition.
 - Gate 1 implementation was explicitly approved and built on `runa2/gate-1-read-only-slice`. The
-  deterministic suite passes 21/21 and the disposable real-stack integration passes 22/22 with clean
-  shutdown. Qwen3 Coder passes 12/12 live synthetic acceptance runs. On 2026-08-20 the steward approved
+  remediated deterministic suite passes 24/24 and the disposable real-stack integration passes 25/25
+  with clean shutdown. The full repository suite passes 38/38, 10/10 seals and all 12 pinned legacy
+  suites remain green, and Qwen3 Coder passes 12/12 refreshed live synthetic acceptance runs. On 2026-08-20 the steward approved
   a Gate 1 scope amendment deferring Qwen3.6 deliberate review and the existing live BGE endpoint;
   neither is silently replaced or credited. The steward subsequently accepted the regenerated Gate 1
-  evidence. The branch remains unmerged pending normal protected code review.
+  evidence. Protected review then found total-deadline, concurrent-idempotency, and post-window-32
+  reranker gaps. The steward approved the narrow remediation on 2026-08-21; it completed with green
+  refreshed evidence on 2026-08-21. The branch remains unmerged pending renewed evidence acceptance
+  and normal protected code review.
 
 ## Bootstrap findings
 
@@ -95,8 +101,8 @@ plain-language steward experience, or governed action pathway.
 |---|---|---|---|
 | Bootstrap | Establish repository lineage, remotes, branches, instructions, and status | Complete | Reviewed and merged as `94ba860` |
 | 0 | Freeze contracts, parity corpus, data inventory, redaction policy, and green thresholds | Complete | Approved by steward 2026-08-20; PR #2 accepted for integration |
-| 1 | Smallest disposable read-only chat/research slice | Evidence accepted; awaiting protected integration review | Normal review and branch-protection requirements before merge |
-| 2 | All three read-only answer lanes plus chat/project/settings continuity | Not started | Gate 1 evidence accepted |
+| 1 | Smallest disposable read-only chat/research slice | Review remediation green; refreshed evidence awaiting steward acceptance | Renewed evidence acceptance, then normal review and branch protection before merge |
+| 2 | All three read-only answer lanes plus chat/project/settings continuity | Not started | Refreshed Gate 1 evidence accepted |
 | 3 | One reversible governed idempotent action | Not started | Gate 2 parity accepted |
 | 4 | Governed data migration, one domain at a time | Not started | Each domain and owner-context plan approved separately |
 | 5 | Operations, private transport, authentication/authorization, recovery | Not started | Functional/data parity accepted |
@@ -145,9 +151,9 @@ No dependency was changed during the prerequisite disposition. Full evidence is 
 
 ## Next decision
 
-Complete normal protected code review of the accepted Gate 1 branch. Evidence acceptance is not merge
-approval. Qwen3.6 deliberate review and the existing live BGE endpoint remain deferred until a
-separately approved contract and fresh evidence exist.
+Review and accept the refreshed Gate 1 remediation evidence, then complete normal protected code
+review. Evidence acceptance is not merge approval. Qwen3.6 deliberate review and the existing live
+BGE endpoint remain deferred until a separately approved contract and fresh evidence exist.
 
 Gate 2 remains unstarted and requires separate explicit approval even though its Gate 1 evidence
 prerequisite is now satisfied. No current approval authorizes protected data, persistent services,

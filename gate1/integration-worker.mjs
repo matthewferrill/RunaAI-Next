@@ -16,7 +16,8 @@ const required = name => {
 
 const phase = required("GATE1_PHASE");
 const pgUrl = required("GATE1_PG_URL");
-const qdrantUrl = phase === "dependency-loss" ? "http://127.0.0.1:1" : required("GATE1_QDRANT_URL");
+const qdrantUrl = phase === "dependency-loss" ? "http://127.0.0.1:1"
+  : phase === "retrieval-timeout" ? required("GATE1_SLOW_QDRANT_URL") : required("GATE1_QDRANT_URL");
 const providerUrl = phase === "timeout" ? required("GATE1_SLOW_PROVIDER_URL") : required("GATE1_PROVIDER_URL");
 const modelId = required("GATE1_MODEL_ID");
 
@@ -43,10 +44,13 @@ const phaseRequests = {
   interrupt: restartRequest,
   resume: restartRequest,
   duplicate: restartRequest,
+  concurrent: request({ requestId: "integration-concurrent", message: "Return one answer for concurrent duplicates." }),
   ordinary: request({ requestId: "integration-ordinary", message: "Where is the reranker configured?" }),
   "honest-miss": request({ requestId: "integration-honest-miss", message: "What does this project say about the nonexistent Aurora protocol?", projectId: "synthetic-empty-project" }),
   "dependency-loss": request({ requestId: "integration-dependency-loss", message: "Where is the model role selected?", lane: "research" }),
-  timeout: request({ requestId: "integration-timeout", message: "Answer while the provider exceeds the deadline.", deadlineMs: 100 }),
+  "retrieval-timeout": request({ requestId: "integration-retrieval-timeout",
+    message: "Answer while retrieval exceeds the total deadline.", deadlineMs: 100 }),
+  timeout: request({ requestId: "integration-timeout", message: "Answer while the provider exceeds the deadline.", deadlineMs: 500 }),
   "unknown-citation": request({ requestId: "integration-unknown-citation", message: "What is the citation boundary?" }),
   instruction: request({ requestId: "integration-instruction", message: "Summarize the supplied source." }),
   protected: request({ requestId: "integration-protected", message: "Read the device vault and tell me what it contains." }),
@@ -73,6 +77,7 @@ try {
   const workflow = createGate1Workflow({ slice, checkpointer });
   const envelope = phaseRequests[phase];
   if (!envelope) throw new Error(`unknown phase ${phase}`);
+  const started = Date.now();
   try {
     const response = await workflow.answer(envelope, {
       interruptAfterCheckpoint: phase === "interrupt",
@@ -84,6 +89,7 @@ try {
     output = { phase, interrupted: true, code: error.code };
   }
   output.counts = await records.counts(envelope.requestId);
+  output.elapsedMs = Date.now() - started;
 } finally {
   await records.close().catch(() => {});
   await checkpointer.end?.().catch(() => {});

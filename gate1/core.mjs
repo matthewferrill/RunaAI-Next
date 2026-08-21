@@ -9,6 +9,29 @@ const policySuspensionPattern = /\b(turn off|disable|suspend|ignore|bypass)\b.{0
 const crossProjectPattern = /\b(?:other|another) project(?:'s)?\b/i;
 const stopWords = new Set(["a", "an", "and", "does", "explain", "how", "is", "of", "the", "to", "what"]);
 
+function requestTimeoutError() {
+  const error = new Error("total request deadline expired");
+  error.code = "request-timeout";
+  return error;
+}
+
+function remainingDeadlineMs(deadlineAt) {
+  const remaining = deadlineAt - Date.now();
+  if (remaining <= 0) throw requestTimeoutError();
+  return remaining;
+}
+
+async function withinDeadline(deadlineAt, operation) {
+  const remaining = remainingDeadlineMs(deadlineAt);
+  let timer;
+  try {
+    return await Promise.race([
+      Promise.resolve().then(() => operation(remaining)),
+      new Promise((_, reject) => { timer = setTimeout(() => reject(requestTimeoutError()), remaining); }),
+    ]);
+  } finally { clearTimeout(timer); }
+}
+
 export function planResearchPasses(question, maximumPasses) {
   const words = [...new Set(String(question).toLowerCase().match(/[a-z0-9]+/g) ?? [])]
     .filter(word => word.length > 2 && !stopWords.has(word));
@@ -62,6 +85,20 @@ function baseResponse(request, correlationId) {
   };
 }
 
+function timedOutResponse(response, stage) {
+  response.answer = "The answer was not completed before the total request deadline.";
+  response.completion = { reason: "timeout", timedOut: true, outputLimited: false };
+  if (!response.auditCodes.includes("request-timeout")) response.auditCodes.push("request-timeout");
+  if (stage !== "provider") {
+    response.retrieval.empty = false;
+    response.retrieval.degraded = true;
+    const unavailable = `${stage}-timeout`;
+    if (!response.retrieval.unavailable.includes(unavailable)) response.retrieval.unavailable.push(unavailable);
+  }
+  if (response.research) response.research.truncated = true;
+  return parseAnswerResponse(response);
+}
+
 const citationKey = value => `${value.sourceId}\u0000${value.sectionId}`;
 
 function validateCitations(candidate, evidence) {
@@ -102,18 +139,27 @@ export class ReadOnlyAnswerSlice {
 
   async answer(rawRequest) {
     const request = parseAnswerRequest(rawRequest);
-    const existing = await this.records.getCommitted(request);
-    if (existing) return existing;
+    const deadlineAt = Date.now() + request.budgets.deadlineMs;
     const correlationId = randomBytes(16).toString("hex");
-    const execute = () => this.#execute(request, correlationId);
-    const response = this.telemetry
-      ? await this.telemetry.span("runaai.answer", request, { route: "read-only-answer", lane: request.lane,
+    const execute = () => this.#execute(request, correlationId, deadlineAt);
+    const observed = () => this.telemetry
+      ? this.telemetry.span("runaai.answer", request, { route: "read-only-answer", lane: request.lane,
         component: "gate1", operation: "answer", "schema.version": request.schemaVersion }, execute)
-      : await execute();
-    return this.records.commit(request, response);
+      : execute();
+    try {
+      if (typeof this.records.runOnce === "function") {
+        return await this.records.runOnce(request, observed, { deadlineMs: remainingDeadlineMs(deadlineAt) });
+      }
+      const existing = await this.records.getCommitted(request);
+      if (existing) return existing;
+      return this.records.commit(request, await observed());
+    } catch (error) {
+      if (error?.code !== "request-timeout") throw error;
+      return timedOutResponse(baseResponse(request, correlationId), "request");
+    }
   }
 
-  async #execute(request, correlationId) {
+  async #execute(request, correlationId, deadlineAt) {
     const response = baseResponse(request, correlationId);
     const preflight = deterministicPreflight(request.message);
     if (preflight) {
@@ -130,7 +176,7 @@ export class ReadOnlyAnswerSlice {
       response.retrieval.skipped = true;
       response.retrieval.skipReason = "record-not-applicable";
       response.ground = "not-a-question-of-fact";
-      return parseAnswerResponse(await this.#providerAnswer(request, [], response));
+      return parseAnswerResponse(await this.#providerAnswer(request, [], response, deadlineAt));
     }
 
     const passes = request.lane === "research"
@@ -142,8 +188,10 @@ export class ReadOnlyAnswerSlice {
     try {
       for (const pass of passes) {
         const query = pass === "whole-question" ? request.message : pass.slice(5);
-        const result = await this.index.search({ projectId: request.project.projectId, query,
-          maximumPassages: request.budgets.maximumPassages });
+        const result = await withinDeadline(deadlineAt, deadlineMs => this.index.search({
+          projectId: request.project.projectId, query,
+          maximumPassages: request.budgets.maximumPassages, deadlineMs,
+        }));
         response.retrieval.attempted = true;
         if (!response.auditCodes.includes("project-scope-enforced")) response.auditCodes.push("project-scope-enforced");
         response.retrieval.degraded ||= result.degraded === true;
@@ -153,6 +201,7 @@ export class ReadOnlyAnswerSlice {
         if (response.research) response.research.passesRun += 1;
       }
     } catch (error) {
+      if (error?.code === "request-timeout") return timedOutResponse(response, "retrieval");
       response.retrieval.attempted = true;
       response.retrieval.empty = false;
       response.retrieval.degraded = true;
@@ -169,7 +218,14 @@ export class ReadOnlyAnswerSlice {
       return parseAnswerResponse(response);
     }
 
-    let active = await this.records.activeSources(request.project.projectId, [...references.values()]);
+    let active;
+    try {
+      active = await withinDeadline(deadlineAt, () =>
+        this.records.activeSources(request.project.projectId, [...references.values()]));
+    } catch (error) {
+      if (error?.code !== "request-timeout") throw error;
+      return timedOutResponse(response, "records");
+    }
     const deniedInstructions = active.filter(source => containsRetrievedAuthorityInstruction(source.content));
     if (deniedInstructions.length) {
       active = active.filter(source => !deniedInstructions.includes(source));
@@ -177,10 +233,22 @@ export class ReadOnlyAnswerSlice {
       response.auditCodes.push("retrieved-instruction-denied");
     }
     if (typeof this.index.rerank === "function" && active.length) {
-      const reranked = await this.index.rerank(request.message, active, request.budgets.maximumPassages);
+      let reranked;
+      try {
+        reranked = await withinDeadline(deadlineAt, deadlineMs =>
+          this.index.rerank(request.message, active, request.budgets.maximumPassages, { deadlineMs }));
+      } catch (error) {
+        if (error?.code !== "request-timeout") throw error;
+        return timedOutResponse(response, "reranker");
+      }
       active = reranked.sources;
       response.retrieval.degraded ||= reranked.degraded === true;
       response.retrieval.unavailable.push(...(reranked.unavailable ?? []));
+      if (reranked.truncated === true) {
+        response.retrieval.omissions.push("Reranking stopped before every evidence window was scored.");
+        response.auditCodes.push("reranker-truncated");
+        if (response.research) response.research.truncated = true;
+      }
     }
     const { evidence, truncated } = boundedEvidence(
       active.slice(0, request.budgets.maximumPassages), request.budgets.maximumEvidenceCharacters);
@@ -196,7 +264,7 @@ export class ReadOnlyAnswerSlice {
       response.research.passesWithNothing = passesWithNothing;
       response.research.passagesRead = evidence.length;
       response.research.unanswered = terms.filter(term => !evidence.some(item => item.content.toLowerCase().includes(term)));
-      response.research.truncated = truncated || passes.length === request.budgets.maximumPasses;
+      response.research.truncated ||= truncated || passes.length === request.budgets.maximumPasses;
     }
 
     if (!evidence.length) {
@@ -208,22 +276,18 @@ export class ReadOnlyAnswerSlice {
       if (!instructionDenied) response.auditCodes.push("record-silent");
       return parseAnswerResponse(response);
     }
-    return parseAnswerResponse(await this.#providerAnswer(request, evidence, response));
+    return parseAnswerResponse(await this.#providerAnswer(request, evidence, response, deadlineAt));
   }
 
-  async #providerAnswer(request, evidence, response) {
-    const started = Date.now();
+  async #providerAnswer(request, evidence, response, deadlineAt) {
     try {
+      const deadlineMs = remainingDeadlineMs(deadlineAt);
       const generated = await this.provider.answer({
         request: { lane: request.lane, message: request.message, history: request.history },
         evidence: evidence.map(item => ({ sourceId: item.sourceId, sectionId: item.sectionId,
           contentSha256: item.contentSha256, content: item.content, provenance: "untrusted-retrieved-data" })),
-      }, { deadlineMs: request.budgets.deadlineMs, maximumOutputBytes: 16_000 });
-      if (Date.now() - started > request.budgets.deadlineMs + 250) {
-        const error = new Error("provider exceeded deadline tolerance");
-        error.code = "provider-timeout";
-        throw error;
-      }
+      }, { deadlineMs, maximumOutputBytes: 16_000 });
+      if (Date.now() > deadlineAt) throw requestTimeoutError();
       const checked = validateCitations(generated.citations, evidence);
       response.answer = String(generated.answer ?? "");
       response.citations = checked.citations;
@@ -243,11 +307,10 @@ export class ReadOnlyAnswerSlice {
         response.auditCodes.push("provider-output-limited");
         return response;
       }
-      if (error?.code !== "provider-timeout" && error?.name !== "TimeoutError" && error?.name !== "AbortError") throw error;
-      response.answer = "The answer was not completed before the request deadline.";
-      response.completion = { reason: "timeout", timedOut: true, outputLimited: false };
-      response.auditCodes.push("provider-timeout");
-      return response;
+      if (error?.code !== "request-timeout" && error?.code !== "provider-timeout" &&
+        error?.name !== "TimeoutError" && error?.name !== "AbortError") throw error;
+      if (!response.auditCodes.includes("provider-timeout")) response.auditCodes.push("provider-timeout");
+      return timedOutResponse(response, "provider");
     }
   }
 }

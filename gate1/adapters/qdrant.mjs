@@ -22,12 +22,12 @@ export class OpenAICompatibleEmbedder {
     this.timeoutMs = timeoutMs;
   }
 
-  async embed(texts) {
+  async embed(texts, { deadlineMs = this.timeoutMs } = {}) {
     const response = await fetch(this.url, {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({ model: this.modelId, input: texts }),
-      signal: AbortSignal.timeout(this.timeoutMs),
+      signal: AbortSignal.timeout(Math.max(1, Math.min(this.timeoutMs, deadlineMs))),
     });
     if (!response.ok) throw Object.assign(new Error(`embedding dependency returned ${response.status}`), { code: "embedding-unavailable" });
     const body = await boundedJson(response, 8_000_000);
@@ -53,13 +53,17 @@ function windows(text, size = 2_000, overlap = 300) {
 }
 
 export class WindowedBgeReranker {
-  constructor({ baseURL, timeoutMs = 5_000 }) {
+  constructor({ baseURL, timeoutMs = 5_000, batchSize = 32 }) {
+    if (!Number.isInteger(batchSize) || batchSize < 1 || batchSize > 256) {
+      throw new Error("reranker batchSize must be an integer from 1 through 256");
+    }
     const normalized = baseURL.replace(/\/$/, "").replace(/\/rerank$/, "");
     this.url = `${normalized}/rerank`;
     this.timeoutMs = timeoutMs;
+    this.batchSize = batchSize;
   }
 
-  async rerank(query, sources, maximumPassages) {
+  async rerank(query, sources, maximumPassages, { deadlineMs = this.timeoutMs } = {}) {
     const documents = [];
     const owners = [];
     sources.forEach((source, sourceIndex) => windows(source.content).forEach(window => {
@@ -67,29 +71,38 @@ export class WindowedBgeReranker {
       owners.push(sourceIndex);
     }));
     if (!documents.length) return { sources, degraded: false, unavailable: [] };
+    const sourceScores = new Map();
+    const deadlineAt = Date.now() + deadlineMs;
+    let processed = 0;
     try {
-      const response = await fetch(this.url, {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ query, documents: documents.slice(0, 32), top_n: Math.min(32, documents.length) }),
-        signal: AbortSignal.timeout(this.timeoutMs),
-      });
-      if (!response.ok) throw new Error(`reranker returned ${response.status}`);
-      const body = await boundedJson(response, 1_000_000);
-      if (!Array.isArray(body?.results) || !body.results.length) throw new Error("reranker response was empty");
-      const sourceScores = new Map();
-      for (const item of body.results) {
-        if (!Number.isInteger(item.index) || item.index < 0 || item.index >= Math.min(32, documents.length) ||
-          typeof item.score !== "number" || !Number.isFinite(item.score)) throw new Error("reranker response was malformed");
-        const owner = owners[item.index];
-        sourceScores.set(owner, Math.max(sourceScores.get(owner) ?? Number.NEGATIVE_INFINITY, item.score));
+      for (let offset = 0; offset < documents.length; offset += this.batchSize) {
+        const remaining = deadlineAt - Date.now();
+        if (remaining <= 0) throw new DOMException("reranker deadline expired", "TimeoutError");
+        const batch = documents.slice(offset, offset + this.batchSize);
+        const response = await fetch(this.url, {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ query, documents: batch, top_n: batch.length }),
+          signal: AbortSignal.timeout(Math.max(1, Math.min(this.timeoutMs, remaining))),
+        });
+        if (!response.ok) throw new Error(`reranker returned ${response.status}`);
+        const body = await boundedJson(response, 1_000_000);
+        if (!Array.isArray(body?.results) || !body.results.length) throw new Error("reranker response was empty");
+        for (const item of body.results) {
+          if (!Number.isInteger(item.index) || item.index < 0 || item.index >= batch.length ||
+            typeof item.score !== "number" || !Number.isFinite(item.score)) throw new Error("reranker response was malformed");
+          const owner = owners[offset + item.index];
+          sourceScores.set(owner, Math.max(sourceScores.get(owner) ?? Number.NEGATIVE_INFINITY, item.score));
+        }
+        processed += batch.length;
       }
       const ordered = [...sources].map((source, index) => ({ source, index, score: sourceScores.get(index) ?? Number.NEGATIVE_INFINITY }))
         .sort((left, right) => right.score - left.score || left.index - right.index)
         .slice(0, maximumPassages).map(item => item.source);
-      return { sources: ordered, degraded: false, unavailable: [] };
+      return { sources: ordered, degraded: false, unavailable: [], truncated: false };
     } catch {
-      return { sources: sources.slice(0, maximumPassages), degraded: true, unavailable: ["reranker"] };
+      return { sources: sources.slice(0, maximumPassages), degraded: true, unavailable: ["reranker"],
+        truncated: processed > 0 && processed < documents.length };
     }
   }
 }
@@ -103,12 +116,12 @@ export class QdrantDerivedIndex {
     this.timeoutMs = timeoutMs;
   }
 
-  async #request(method, route, body) {
+  async #request(method, route, body, { deadlineMs = this.timeoutMs } = {}) {
     const response = await fetch(`${this.endpoint}${route}`, {
       method,
       headers: body === undefined ? undefined : { "content-type": "application/json" },
       body: body === undefined ? undefined : JSON.stringify(body),
-      signal: AbortSignal.timeout(this.timeoutMs),
+      signal: AbortSignal.timeout(Math.max(1, Math.min(this.timeoutMs, deadlineMs))),
     });
     if (!response.ok) {
       const error = new Error(`qdrant returned ${response.status}`);
@@ -144,15 +157,16 @@ export class QdrantDerivedIndex {
       aligned: count?.result?.count === sources.length && JSON.stringify(observed) === JSON.stringify(expected) };
   }
 
-  async search({ projectId, query, maximumPassages }) {
-    const [vector] = await this.embedder.embed([query]);
+  async search({ projectId, query, maximumPassages, deadlineMs = this.timeoutMs }) {
+    const deadlineAt = Date.now() + deadlineMs;
+    const [vector] = await this.embedder.embed([query], { deadlineMs: Math.max(1, deadlineAt - Date.now()) });
     const body = await this.#request("POST", `/collections/${this.collection}/points/query`, {
       query: vector,
       filter: { must: [{ key: "projectId", match: { value: projectId } }] },
       limit: maximumPassages,
       with_payload: true,
       with_vector: false,
-    });
+    }, { deadlineMs: Math.max(1, deadlineAt - Date.now()) });
     return {
       references: (body?.result?.points ?? []).map(point => ({ projectId: point.payload.projectId,
         sourceId: point.payload.sourceId, sectionId: point.payload.sectionId,
@@ -162,8 +176,8 @@ export class QdrantDerivedIndex {
     };
   }
 
-  async rerank(query, sources, maximumPassages) {
+  async rerank(query, sources, maximumPassages, options = {}) {
     if (!this.reranker) return { sources: sources.slice(0, maximumPassages), degraded: true, unavailable: ["reranker"] };
-    return this.reranker.rerank(query, sources, maximumPassages);
+    return this.reranker.rerank(query, sources, maximumPassages, options);
   }
 }

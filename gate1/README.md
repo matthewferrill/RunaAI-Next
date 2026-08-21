@@ -1,8 +1,9 @@
 # Gate 1 — disposable read-only chat/research slice
 
-Status: implementation and evidence accepted by the steward under the approved Gate 1 scope
-amendment; not merged. Qwen3.6 deliberate review and the existing live BGE endpoint are explicitly
-deferred. See `GATE1-RESULTS-2026-08-20.md`.
+Status: code-review remediation is implemented and green; refreshed evidence awaits steward
+acceptance and protected review. The branch is not merged. Qwen3.6 deliberate review and the existing
+live BGE endpoint remain explicitly deferred. See `GATE1-RESULTS-2026-08-20.md` and
+`GATE1-CODE-REVIEW-REMEDIATION-2026-08-21.md`.
 
 ## Boundary
 
@@ -23,10 +24,10 @@ placeholder before embedding and withheld before reranking or answer generation.
 - `contracts.mjs` — strict request and response envelopes.
 - `content-policy.mjs` — deterministic pre-model authority-instruction veto and safe index placeholder.
 - `core.mjs` — preflight, scoped retrieval, research denominator, active-source veto, citations,
-  honest misses, dependency states, deadlines, output ceilings, and effects-empty enforcement.
+  honest misses, one total request deadline, output ceilings, and effects-empty enforcement.
 - `workflow.mjs` — LangGraph checkpoint, restart, and duplicate-request behavior.
-- `adapters/` — memory test doubles plus PostgreSQL, Qdrant/embedding/windowed-reranker, and Mastra
-  provider adapters.
+- `adapters/` — memory test doubles plus PostgreSQL request-keyed single-flight, Qdrant/embedding,
+  complete batched windowed-reranking, and Mastra provider adapters.
 - `telemetry.mjs` — allowlisted OpenTelemetry attributes and pseudonymized identifiers.
 - `run-integration.mjs` — disposable real-stack composition and fresh-process restart test.
 - `run-model-validation.mjs` — bounded synthetic calls to an already-running private provider. It does

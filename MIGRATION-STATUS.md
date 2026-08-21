@@ -86,11 +86,16 @@ repository and never push migration work into either source repository.
   12/12 pinned legacy suites, and Gate 1/2 integration regressions remain green. The steward accepted
   the evidence and separately approved the protected merge, completed as `0680cfb` on 2026-08-21.
   The source branch remains available; this is not production authorization.
-- Gate 4A planning is isolated on `runa2/gate-4a-project-chat-plan` from `0680cfb`. The proposed first
-  domain is managed projects, durable chats, branch/grouping metadata, and project memory. The package
-  freezes the target authority, application-level encryption requirement, legacy mapping, aggregate
-  owner-context inventory contract, 19-case parity corpus, rollback, and three explicit approvals.
-  No protected store was opened while preparing it.
+- Gate 4A is isolated on `runa2/gate-4a-project-chat-plan` from `0680cfb`. The steward approved Gate
+  4A-1 on 2026-08-21. The synthetic project/chat migration at `1f5f8be` implements the typed
+  `runa_core` authority, immutable `runa_migration` ledger, application AES-256-GCM envelopes,
+  external keyed reconciliation, content-free tombstones, idempotent/restart-safe imports, scoped
+  reads, and Gate-4A-only rollback. All 19/19 frozen Gate 4A cases, 16/16 disposable PostgreSQL
+  integration checks, and the full 93/93 Node profile pass. Gate 1, 2, and 3 disposable integration
+  regressions pass 25/25, 21/21, and 16/16 respectively; Gate 0 passes with 10/10 seals and all 12
+  pinned legacy suites. The aggregate-only owner inventory tool is implemented and fails closed on
+  authority mismatch, but its one approved owner-context execution on RUNA-CONTROL is still pending.
+  No protected store was opened by RunaAI-Next.
 
 ## Bootstrap findings
 
@@ -131,7 +136,7 @@ plain-language steward experience, or governed action pathway.
 | 1 | Smallest disposable read-only chat/research slice | Complete; accepted and merged as `7107ead` | Complete |
 | 2 | All three read-only answer lanes plus chat/project/settings continuity | Complete; evidence accepted and merged as `4c4767f` | Complete |
 | 3 | One reversible governed idempotent action | Complete; accepted and merged as `0680cfb` | Complete |
-| 4 | Governed data migration, one domain at a time | Gate 4A project/chat plan awaiting review; no protected access or implementation | Each domain and owner-context plan approved separately |
+| 4 | Governed data migration, one domain at a time | Gate 4A-1 approved; synthetic implementation green; owner-context aggregate inventory pending; no protected export/import | Gate 4A-2 requires separate approval after inventory evidence review |
 | 5 | Operations, private transport, authentication/authorization, recovery | Not started | Functional/data parity accepted |
 | 6 | Selected-core production cutover and rollback window | Not started | Gates 0–5 accepted and maintenance window approved |
 | 7 | Deferred extensions | Not started | New baseline and separate approval per extension group |
@@ -178,10 +183,11 @@ No dependency was changed during the prerequisite disposition. Full evidence is 
 
 ## Next decision
 
-Review Gate 4A-1. Approval authorizes a synthetic project/chat migration implementation and one bounded
-owner-context inventory on RUNA-CONTROL that emits aggregate counts and digests only. It does not
-authorize exporting, copying, re-encrypting, importing, or cutting over real data. Those remain a
-separate Gate 4A-2 decision after the synthetic and inventory evidence is reviewed.
+Run the already approved, aggregate-only Gate 4A inventory once from Matthew's interactive Windows
+owner context on RUNA-CONTROL, then review its counts, relationship findings, deterministic manifest,
+and privacy canary result. The script must stop on source drift, tracked changes, unreadable data,
+unknown schema, invalid relationships, or a nondeterministic second pass. Until that evidence is
+accepted, Gate 4A-2 is not requested and no real export/import is authorized.
 
 Qwen3.6 deliberate review, the existing live BGE endpoint, real data export/import, persistent
 services, production routing, provider reconfiguration, production authentication/authorization, and

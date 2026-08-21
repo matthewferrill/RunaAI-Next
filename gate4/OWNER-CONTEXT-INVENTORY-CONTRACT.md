@@ -1,6 +1,7 @@
 # Gate 4A owner-context inventory contract
 
-Status: proposed. Do not execute until the steward approves this exact read-only scope.
+Status: exact read-only scope approved by the steward on 2026-08-21. Tooling and synthetic canary
+tests are green. One execution remains pending in Matthew's interactive owner context on RUNA-CONTROL.
 
 ## Purpose
 

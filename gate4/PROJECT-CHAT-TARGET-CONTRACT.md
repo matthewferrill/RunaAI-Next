@@ -1,7 +1,7 @@
 # Gate 4A project/chat target contract
 
-Status: proposed for steward review. This contract names the target authority and mapping; it does not
-authorize protected-data access or migration.
+Status: approved as part of Gate 4A-1 on 2026-08-21. This contract names the target authority and
+mapping; it does not authorize protected-data export/import or production migration.
 
 ## Authority decision
 

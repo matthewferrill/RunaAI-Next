@@ -20,9 +20,11 @@ from an earlier one.
 
 ## Current boundary
 
-Only the Gate 4A review contract is present. No protected store has been opened, decrypted, counted,
-exported, copied, converted, or imported. No production route, persistent service, target encryption
-key, or data cutover exists.
+Gate 4A-1 was approved by the steward on 2026-08-21. The synthetic migration implementation and its
+disposable PostgreSQL evidence are green. The reviewed aggregate-only inventory tool is implemented,
+but the authorized owner-context run on RUNA-CONTROL has not occurred. No protected store has been
+opened, decrypted, counted, exported, copied, converted, or imported by RunaAI-Next. No production
+route, persistent service, real target encryption key, or data cutover exists.
 
 The Gate 4A package consists of:
 
@@ -31,4 +33,7 @@ The Gate 4A package consists of:
 - `OWNER-CONTEXT-INVENTORY-CONTRACT.md` — the bounded read-only inventory that must be reviewed before
   owner-context execution;
 - `PARITY-CORPUS.json` — synthetic and protected-rehearsal acceptance cases; and
-- `SOURCE-PINS.json` — exact legacy and integration evidence inputs.
+- `SOURCE-PINS.json` — exact legacy and integration evidence inputs;
+- `run-owner-inventory.mjs` — fail-closed aggregate inventory entry point; and
+- `GATE4A-1-SYNTHETIC-RESULTS-2026-08-21.md` — implementation and verification evidence plus the
+  remaining owner action.

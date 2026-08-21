@@ -1,7 +1,8 @@
 # Gate 4A scope and green criteria — project/chat domain
 
-Status: proposed for steward review on 2026-08-21. Gate 3 is accepted and merged. No Gate 4 protected
-inventory or implementation is authorized until this contract is approved.
+Status: Gate 4A-1 approved by the steward on 2026-08-21. Synthetic implementation and rehearsal are
+green; the approved owner-context inventory execution on RUNA-CONTROL remains pending. Gate 4A-2 is
+not authorized.
 
 ## Layman summary
 
@@ -113,7 +114,7 @@ it still cannot become the live authority.
 Approval authorizes the synthetic implementation/rehearsal and one bounded owner-context aggregate
 inventory described here. It does not authorize a real export/import.
 
-Status: awaiting steward decision.
+Status: approved 2026-08-21; synthetic work complete; owner-context inventory execution pending.
 
 ### Gate 4A-2 — protected export/import rehearsal
 

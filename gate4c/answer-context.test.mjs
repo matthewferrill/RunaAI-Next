@@ -121,6 +121,18 @@ test("Gate 4C-3A duplicate execution invokes the provider once and rollback is a
   assert.equal(prior.approvedKnowledge.reason, "adapter-disabled");
 });
 
+test("Gate 4C-3A distinguishes selection from actual model delivery", async () => {
+  const payloads = approvedEvent("unavailable", { lesson: "synthetic unavailable dependency guidance" });
+  const context = harness({ payloads });
+  context.service.index.unavailable = true;
+  const response = await context.service.answer(request("unavailable", "unavailable dependency guidance"));
+  assert.equal(response.completion.reason, "dependency-unavailable");
+  assert.equal(response.approvedKnowledge.selectedCount, 1);
+  assert.equal(response.approvedKnowledge.delivered, false);
+  assert.equal(response.approvedKnowledge.reason, "selected-but-not-delivered");
+  assert.equal(context.providers.chat.calls.length, 0);
+});
+
 test("Gate 4C-3A adapter status does not alter continuity rollback ownership", () => {
   const legacy = new MemoryContinuityStore({ adapterName: "legacy-observer" });
   const selected = new MemoryContinuityStore({ adapterName: "postgres-synthetic" });

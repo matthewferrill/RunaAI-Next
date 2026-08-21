@@ -187,14 +187,15 @@ export class Gate2ReadOnlyService {
         : this.index;
       const selectedRecords = request.participant.verified ? this.records : new EphemeralRecordProxy(this.records);
       const provider = providerFor(this.providers, role);
-      const slice = new ReadOnlyAnswerSlice({ records: selectedRecords, index: selectedIndex, provider,
-        advisoryContext: providerAdvisoryFromDelivery(knowledgeDelivery) });
+      const advisoryContext = providerAdvisoryFromDelivery(knowledgeDelivery);
+      const slice = new ReadOnlyAnswerSlice({ records: selectedRecords, index: selectedIndex, provider, advisoryContext });
       try {
         response = await slice.answer(gate1Request(request));
       } catch (error) {
         if (!["provider-model-mismatch", "provider-role-unavailable"].includes(error?.code)) throw error;
         response = emptyV1(request, { answer: "The configured provider identity did not match the deterministic route.",
           reason: error.code, auditCode: error.code, ground: "record-silent" });
+        if (advisoryContext) response.auditCodes.push("approved-knowledge-delivered");
       }
       if (response.model.role !== "not-invoked" && response.model.role !== role) {
         response.answer = "The provider returned under a role that did not match the deterministic application route.";
@@ -237,7 +238,9 @@ export class Gate2ReadOnlyService {
       turnRecorded: continuityResult.turnRecorded === true,
       source: continuityResult.source,
     };
-    response.approvedKnowledge = approvedKnowledgeReceipt(knowledgeDelivery, knowledgeFallbackReason);
+    response.approvedKnowledge = approvedKnowledgeReceipt(knowledgeDelivery, knowledgeFallbackReason, {
+      delivered: response.auditCodes.includes("approved-knowledge-delivered"),
+    });
     response.effects = [];
     return parseGate2AnswerResponse(response);
   }

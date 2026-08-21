@@ -63,7 +63,7 @@ export function providerAdvisoryFromDelivery(delivery) {
   return deliveries.has(delivery) ? delivery.providerContext : null;
 }
 
-export function approvedKnowledgeReceipt(delivery, fallbackReason = "adapter-disabled") {
+export function approvedKnowledgeReceipt(delivery, fallbackReason = "adapter-disabled", { delivered = null } = {}) {
   if (delivery === null || delivery === undefined) return {
     schemaVersion: "runa2-approved-knowledge-delivery-receipt/v1",
     availableLibraryCount: 0, selectedCount: 0, delivered: false, reason: fallbackReason,
@@ -77,5 +77,10 @@ export function approvedKnowledgeReceipt(delivery, fallbackReason = "adapter-dis
     degraded: true, errorCode: "approved-knowledge-delivery-invalid",
     deliveryProvesCompliance: false,
   };
-  return structuredClone(delivery.receipt);
+  const receipt = structuredClone(delivery.receipt);
+  if (delivered === false && receipt.delivered) {
+    receipt.delivered = false;
+    receipt.reason = "selected-but-not-delivered";
+  }
+  return receipt;
 }

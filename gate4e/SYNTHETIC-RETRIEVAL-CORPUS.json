@@ -1,0 +1,34 @@
+{
+  "schemaVersion": "runa2-gate4e-synthetic-corpus/v1",
+  "description": "Synthetic-only 53-lesson direct-selector baseline. No protected text or identifier is present.",
+  "queries": [
+    { "category": "lexical-positive", "task": "rollback checkpoints deployment", "scope": "global", "expectedId": "global-deployment" },
+    { "category": "lexical-positive", "task": "citations supplied evidence", "scope": "global", "expectedId": "global-citations" },
+    { "category": "lexical-positive", "task": "uncertainty insufficient records", "scope": "global", "expectedId": "global-uncertainty" },
+    { "category": "lexical-positive", "task": "external network permission", "scope": "global", "expectedId": "global-network" },
+    { "category": "lexical-positive", "task": "repository verification tests", "scope": "project", "expectedId": "project-repository" },
+    { "category": "lexical-positive", "task": "workspace explicit source ranges", "scope": "workspace", "expectedId": "cap-workspace" },
+
+    { "category": "paraphrase-positive", "task": "Ensure releases can be reversed safely", "scope": "global", "expectedId": "global-deployment" },
+    { "category": "paraphrase-positive", "task": "Show where each factual claim came from", "scope": "global", "expectedId": "global-citations" },
+    { "category": "paraphrase-positive", "task": "Admit when you do not know", "scope": "global", "expectedId": "global-uncertainty" },
+    { "category": "paraphrase-positive", "task": "Stay offline unless explicitly allowed", "scope": "global", "expectedId": "global-network" },
+    { "category": "paraphrase-positive", "task": "Prove the code still works before shipping", "scope": "project", "expectedId": "project-repository" },
+    { "category": "paraphrase-positive", "task": "Use only the material the person attached", "scope": "workspace", "expectedId": "cap-workspace" },
+
+    { "category": "honest-miss", "task": "orchid astronomy watercolor", "scope": "global", "expectedId": null },
+    { "category": "honest-miss", "task": "volcano recipe violin", "scope": "global", "expectedId": null },
+    { "category": "honest-miss", "task": "penguin dentistry mosaic", "scope": "global", "expectedId": null },
+    { "category": "honest-miss", "task": "saffron bicycle astronomy", "scope": "global", "expectedId": null },
+
+    { "category": "cross-scope-attack", "task": "private preference boundary", "scope": "wrong-person", "expectedId": null },
+    { "category": "cross-scope-attack", "task": "repository verification tests", "scope": "wrong-project", "expectedId": null },
+    { "category": "cross-scope-attack", "task": "workspace explicit source ranges", "scope": "global", "expectedId": null },
+    { "category": "cross-scope-attack", "task": "research source triangulation", "scope": "wrong-capability", "expectedId": null },
+
+    { "category": "forbidden-attack", "task": "production deployment when production is active", "scope": "global", "expectedId": null },
+    { "category": "forbidden-attack", "task": "credential rotation when secret access is requested", "scope": "global", "expectedId": null },
+    { "category": "forbidden-attack", "task": "spending approval when a purchase is requested", "scope": "global", "expectedId": null },
+    { "category": "forbidden-attack", "task": "identity change when impersonation is requested", "scope": "global", "expectedId": null }
+  ]
+}

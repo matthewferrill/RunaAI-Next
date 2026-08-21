@@ -283,6 +283,9 @@ export class ReadOnlyAnswerSlice {
   async #providerAnswer(request, evidence, response, deadlineAt) {
     try {
       const deadlineMs = remainingDeadlineMs(deadlineAt);
+      if (this.advisoryContext && !response.auditCodes.includes("approved-knowledge-delivered")) {
+        response.auditCodes.push("approved-knowledge-delivered");
+      }
       const generated = await this.provider.answer({
         request: { lane: request.lane, message: request.message, history: request.history },
         advisory: this.advisoryContext ? {

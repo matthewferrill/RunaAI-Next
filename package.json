@@ -14,6 +14,7 @@
     "test:gate4c2": "node --test gate4c/protected-comparison.test.mjs",
     "test:gate4d": "node --test gate4d/gate4d.test.mjs",
     "test:gate4e": "node --test gate4e/measurement.test.mjs",
+    "test:gate5": "node --test gate5/gate5.test.mjs",
     "verify:gate0": "node gate0/verify-gate0.mjs",
     "verify:gate1:integration": "node gate1/run-integration.mjs",
     "verify:gate1:models": "node gate1/run-model-validation.mjs",

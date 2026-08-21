@@ -7,11 +7,13 @@
     "test": "node --test",
     "test:gate1": "node --test gate1/gate1.test.mjs",
     "test:gate2": "node --test gate2/gate2.test.mjs",
+    "test:gate3": "node --test gate3/gate3.test.mjs",
     "verify:gate0": "node gate0/verify-gate0.mjs",
     "verify:gate1:integration": "node gate1/run-integration.mjs",
     "verify:gate1:models": "node gate1/run-model-validation.mjs",
     "verify:gate2:integration": "node gate2/run-integration.mjs",
-    "verify:gate2:models": "node gate2/run-model-validation.mjs"
+    "verify:gate2:models": "node gate2/run-model-validation.mjs",
+    "verify:gate3:integration": "node gate3/run-integration.mjs"
   },
   "keywords": [],
   "author": "",

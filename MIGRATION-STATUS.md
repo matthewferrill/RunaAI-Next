@@ -37,7 +37,7 @@ repository and never push migration work into either source repository.
   conversations are required; stale reviews are dismissed; admins are included; force-pushes and
   deletion are blocked. Required status checks remain unset until a real CI check exists.
 - `main` remains at the exact RunaLab completion baseline. `runa2/integration` contains the accepted
-  bootstrap, Gate 0 contract freeze, and Gate 1 implementation.
+  bootstrap, Gate 0 contract freeze, Gate 1 implementation, and Gate 2 read-only continuity.
 - The completed laboratory evidence, seals, probes, stack bakeoff, model findings, architecture
   assessment, and conditional estimates are inherited.
 - Gate 1 contains an isolated synthetic-only implementation of the smallest ordinary read-only
@@ -77,6 +77,14 @@ repository and never push migration work into either source repository.
   distinguished. The steward accepted Gate 2B evidence and separately approved Gate 2C on
   2026-08-21. The protected merge completed as `4c4767f`, preserving the reviewed Gate 2 commits and
   source branch. Live-model validation was not run and remains separately decision-gated.
+- Gate 3 was explicitly approved and implemented on `runa2/gate-3-governed-action` from integration
+  head `93cc44e`. The bounded slice has one action only: changing the synthetic verified participant's
+  default intelligence level in an owned managed-project context. Its 26/26 contract suite and 16/16
+  disposable PostgreSQL/LangGraph integration checks pass, including response-loss resume, direct and
+  concurrent replay, atomic failure rollback, stale-revision denial, one deed/one receipt/outbox, and a
+  separately governed rollback from `High` to `Medium`. Evidence is ready for steward acceptance; the
+  full 74/74 Node profile, 10/10 seals, 12/12 pinned legacy suites, and Gate 1/2 integration regressions
+  remain green. The branch is not yet merged and is not production authorization.
 
 ## Bootstrap findings
 
@@ -101,7 +109,8 @@ repository and never push migration work into either source repository.
 - Caddy as outer transport and timeout boundary;
 - OpenTelemetry with allowlisted/redacted attributes;
 - deterministic application routing across the selected model roster; and
-- Keycloak, OpenFGA, and one-time capabilities only after functional/data parity.
+- one-time scoped capabilities for governed effects; and
+- Keycloak and OpenFGA only after functional/data parity.
 
 This list selects infrastructure. It does not replace Runa's identity, constitution, authority,
 consent-first learning, typed knowledge, project/participant scope, provenance, honest uncertainty,
@@ -115,7 +124,7 @@ plain-language steward experience, or governed action pathway.
 | 0 | Freeze contracts, parity corpus, data inventory, redaction policy, and green thresholds | Complete | Approved by steward 2026-08-20; PR #2 accepted for integration |
 | 1 | Smallest disposable read-only chat/research slice | Complete; accepted and merged as `7107ead` | Complete |
 | 2 | All three read-only answer lanes plus chat/project/settings continuity | Complete; evidence accepted and merged as `4c4767f` | Complete |
-| 3 | One reversible governed idempotent action | Not started | Gate 2 parity accepted |
+| 3 | One reversible governed idempotent action | Implementation and evidence complete; awaiting acceptance | Complete; steward approved after Gate 2 acceptance |
 | 4 | Governed data migration, one domain at a time | Not started | Each domain and owner-context plan approved separately |
 | 5 | Operations, private transport, authentication/authorization, recovery | Not started | Functional/data parity accepted |
 | 6 | Selected-core production cutover and rollback window | Not started | Gates 0–5 accepted and maintenance window approved |
@@ -163,9 +172,10 @@ No dependency was changed during the prerequisite disposition. Full evidence is 
 
 ## Next decision
 
-Gate 2 is accepted and merged into `runa2/integration`. Decide whether to prepare the Gate 3 scope,
-corpus, rollback contract, and green criteria for one reversible governed idempotent action.
+Review the bounded Gate 3 evidence and decide whether to merge it into `runa2/integration`. Acceptance
+would establish one development-only governed database action; it would not authorize production use,
+another action kind, outbox delivery, or Gate 4 data migration.
 
-Gate 2 completion is not Gate 3 implementation or production approval. Qwen3.6 deliberate review,
-the existing live BGE endpoint, protected data, persistent services, production routing, provider
-reconfiguration, Gate 3 implementation, and production cutover remain unauthorized or deferred.
+Qwen3.6 deliberate review, the existing live BGE endpoint, protected data, persistent services,
+production routing, provider reconfiguration, Gate 4, production authentication/authorization, and
+production cutover remain unauthorized or deferred.

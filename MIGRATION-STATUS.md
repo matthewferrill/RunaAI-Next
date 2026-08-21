@@ -107,8 +107,9 @@ repository and never push migration work into either source repository.
   75 turns with identical whole-domain logical digests, one committed run, 100 ledger items, atomic
   failure rollback, idempotent restart/replay, owner-bound DPAPI key recovery, scoped-read denial, and
   no private value in retained evidence or target/log scans. The source remained byte-exact. The
-  temporary target schemas, data, key, backup, runtime, listener, and root were removed. Gate 4A-3
-  evidence acceptance and protected merge remain pending; no production adapter or cutover exists.
+  temporary target schemas, data, key, backup, runtime, listener, and root were removed. On 2026-08-21
+  the steward accepted the Gate 4A-2 evidence and separately approved the Gate 4A protected merge into
+  `runa2/integration`. No production adapter or cutover is authorized.
 
 ## Bootstrap findings
 
@@ -149,7 +150,7 @@ plain-language steward experience, or governed action pathway.
 | 1 | Smallest disposable read-only chat/research slice | Complete; accepted and merged as `7107ead` | Complete |
 | 2 | All three read-only answer lanes plus chat/project/settings continuity | Complete; evidence accepted and merged as `4c4767f` | Complete |
 | 3 | One reversible governed idempotent action | Complete; accepted and merged as `0680cfb` | Complete |
-| 4 | Governed data migration, one domain at a time | Gate 4A-1 and Gate 4A-2 evidence green; temporary protected target removed; legacy unchanged | Gate 4A-3 requires separate evidence acceptance and merge approval |
+| 4 | Governed data migration, one domain at a time | Gate 4A project/chat evidence accepted; protected merge approved; legacy unchanged | Select and approve the next Gate 4 domain separately |
 | 5 | Operations, private transport, authentication/authorization, recovery | Not started | Functional/data parity accepted |
 | 6 | Selected-core production cutover and rollback window | Not started | Gates 0–5 accepted and maintenance window approved |
 | 7 | Deferred extensions | Not started | New baseline and separate approval per extension group |
@@ -196,12 +197,11 @@ No dependency was changed during the prerequisite disposition. Full evidence is 
 
 ## Next decision
 
-Review and decide Gate 4A-3. The Control-local protected rehearsal preserved the exact 25-chat/75-turn
-population, proved atomic/idempotent/restart-safe import and owner-bound key recovery, found no private
-value in retained evidence or target/log scans, reproduced the same whole-domain logical digest, and
-left the source unchanged. The target schemas, data, key, backup, runtime, listener, and temporary root
-were removed. Acceptance and merge into `runa2/integration` remain separately unauthorized until the
-steward approves them; no production adapter or cutover is implied.
+After completing the approved Gate 4A protected merge, select the next Gate 4 domain and review its
+scope, protected-data boundary, dependencies, rollback, and green criteria before implementation. Gate
+4A acceptance establishes only the project/chat migration contract and evidence as a development
+baseline. It does not make PostgreSQL live, migrate production data, authorize another data domain, or
+approve cutover.
 
 Qwen3.6 deliberate review, the existing live BGE endpoint, real data export/import, persistent
 services, production routing, provider reconfiguration, production authentication/authorization, and

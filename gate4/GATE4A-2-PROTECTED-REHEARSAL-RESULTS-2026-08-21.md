@@ -1,7 +1,7 @@
 # Gate 4A-2 protected rehearsal results
 
-Status: green on 2026-08-21 under the exact approved Control-local boundary. Gate 4A-3 evidence
-acceptance and merge remain separately decision-gated.
+Status: green on 2026-08-21 under the exact approved Control-local boundary. The steward accepted this
+evidence and approved the protected development merge on 2026-08-21.
 
 ## Layman result
 
@@ -67,5 +67,5 @@ than silently credited as production-runtime validation.
 A green Gate 4A-2 proves the selected mapping can preserve the current protected chat population and
 roll back without changing production. It does not make PostgreSQL live, persist a target key, merge
 the branch, authorize project/learning/knowledge/settings migration, or approve cutover. Gate 4A-3
-requires the steward to accept this evidence and separately approve the protected branch merge into
-`runa2/integration`.
+was satisfied when the steward accepted this evidence and separately approved the protected branch
+merge into `runa2/integration` on 2026-08-21. Production migration and cutover remain unauthorized.

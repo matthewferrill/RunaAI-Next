@@ -28,8 +28,8 @@ unassigned chats, 75 turns, no projects, no project memory, no integrity finding
 second pass. No protected value was emitted, exported, copied, converted, or imported. No production
 route, persistent service, real target encryption key, or data cutover exists. Gate 4A-2 remains
 separately bounded and completed green on 2026-08-21 as one Control-local protected rehearsal. Its
-temporary target, backup, keys, runtime, and listener were removed. Gate 4A-3 evidence acceptance and
-protected merge remain separately decision-gated.
+temporary target, backup, keys, runtime, and listener were removed. The steward accepted the evidence
+and approved the protected development merge on 2026-08-21. Production migration remains unauthorized.
 
 The Gate 4A package consists of:
 

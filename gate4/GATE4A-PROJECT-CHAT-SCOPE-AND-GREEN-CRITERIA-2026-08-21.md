@@ -134,4 +134,5 @@ Status: approved and completed green 2026-08-21 under the adjacent protected-reh
 The steward reviews reconciliation, privacy scans, failures, restart, rollback, source drift, and the
 remaining legacy authority. Merge into `runa2/integration` requires a separate explicit approval.
 
-Status: evidence acceptance and protected merge approval pending steward decision.
+Status: evidence accepted and protected merge approved by the steward on 2026-08-21. This approval is
+limited to integration of the reviewed development baseline; it is not production migration or cutover.

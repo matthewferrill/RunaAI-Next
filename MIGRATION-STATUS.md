@@ -125,8 +125,15 @@ repository and never push migration work into either source repository.
   17 batches; 53 lessons are active and 10 corrected, with zero unreadable, integrity, or lineage
   findings. One readable E3 inbox record remains unresolved; E4 has two authority records but no
   review transactions/capsules; E5 is absent; and the device vault remains owner-bound and unchanged.
-  No protected value was retained and no data was copied or migrated. Any protected rehearsal requires
-  a separate explicit approval.
+  No protected value was retained and no data was copied or migrated. The steward then approved the
+  E6-only Gate 4B-R rehearsal. At `4ee5e93`, the complete 90-entry journal was re-encrypted into
+  disposable loopback PostgreSQL, read back in exact order, and removed. Source and target logical
+  digests matched; transaction rollback, concurrent replay, changed-run refusal, restart retry,
+  encrypted typed storage, and private-value scans passed. E3, E4, E5, the device vault, and every
+  protected source byte remained unchanged. The temporary schemas, database, key, backup, runtime,
+  listener, Control root, and Omen staging root were deleted. Focused Gate 4B tests pass 25/25 and the
+  full repository suite passes 118/118. This evidence awaits steward acceptance and does not authorize
+  a merge, retained migration, learning activation, or cutover.
 
 ## Bootstrap findings
 
@@ -167,7 +174,7 @@ plain-language steward experience, or governed action pathway.
 | 1 | Smallest disposable read-only chat/research slice | Complete; accepted and merged as `7107ead` | Complete |
 | 2 | All three read-only answer lanes plus chat/project/settings continuity | Complete; evidence accepted and merged as `4c4767f` | Complete |
 | 3 | One reversible governed idempotent action | Complete; accepted and merged as `0680cfb` | Complete |
-| 4 | Governed data migration, one domain at a time | Gate 4A accepted; Gate 4B synthetic contract and owner inventory green; legacy unchanged | Approve an E6-only Gate 4B protected rehearsal separately |
+| 4 | Governed data migration, one domain at a time | Gate 4A accepted; Gate 4B synthetic contract, owner inventory, and E6 rehearsal green; legacy unchanged | Accept Gate 4B-R evidence, then decide the protected development merge separately |
 | 5 | Operations, private transport, authentication/authorization, recovery | Not started | Functional/data parity accepted |
 | 6 | Selected-core production cutover and rollback window | Not started | Gates 0–5 accepted and maintenance window approved |
 | 7 | Deferred extensions | Not started | New baseline and separate approval per extension group |
@@ -214,11 +221,11 @@ No dependency was changed during the prerequisite disposition. Full evidence is 
 
 ## Next decision
 
-Review the Gate 4B-I aggregate result and decide whether to authorize Gate 4B-R: one E6-only protected
-rehearsal against a disposable PostgreSQL target. The recommended scope preserves all 90 E6 entries,
-leaves the unresolved E3 record unchanged, excludes E4 authority/device-vault state for Gate 5, and
-has no E5 store to migrate. Gate 4B-R would not activate approved knowledge, production routing, or
-cutover.
+Review and accept or reject the green Gate 4B-R evidence. If accepted, separately decide whether to
+merge the protected development branch into `runa2/integration`. The rehearsal preserved all 90 E6
+entries, left the unresolved E3 record unchanged, deferred E4 authority/device-vault state to Gate 5,
+and confirmed there is no E5 store to migrate. It activated no approved knowledge, production routing,
+or cutover.
 
 Qwen3.6 deliberate review, the existing live BGE endpoint, real data export/import, persistent
 services, production routing, provider reconfiguration, production authentication/authorization, and

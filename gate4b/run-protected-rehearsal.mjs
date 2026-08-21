@@ -35,11 +35,12 @@ function assertPackageMatches(nextRepo, packageRoot) {
   const rows = [];
   for (const name of PACKAGE_FILES) {
     const packaged = resolve(packageRoot, name); const reviewed = resolve(nextRepo, name);
+    const normalized = path => readFileSync(path, "utf8").replaceAll("\r\n", "\n");
     if (!inside(packageRoot, packaged) || !inside(nextRepo, reviewed) || !existsSync(packaged)
-        || !existsSync(reviewed) || !readFileSync(packaged).equals(readFileSync(reviewed))) {
+        || !existsSync(reviewed) || normalized(packaged) !== normalized(reviewed)) {
       throw coded("protected-package-source-mismatch");
     }
-    rows.push({ name, sha256: sha256(readFileSync(packaged)) });
+    rows.push({ name, sha256: sha256(normalized(packaged)) });
   }
   return { verifiedFiles: rows.length, packageSha256: sha256(canonicalJson(rows)) };
 }

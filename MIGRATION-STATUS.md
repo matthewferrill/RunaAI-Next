@@ -176,7 +176,18 @@ repository and never push migration work into either source repository.
   and OpenFGA bakeoff also passed from an isolated tool copy. No protected store, owner credential,
   production secret, non-loopback listener, retained service, or production route was opened. E3
   remains deferred; E4/device-vault ciphertext will not be copied and requires later witnessed
-  re-enrolment; E5 is absent. The branch is ready for review, not production authorization.
+  re-enrolment; E5 is absent. The steward accepted Gate 5 and its protected merge completed as
+  `a986419` on 2026-08-21. The source branch remains available. The merge accepts the application
+  contracts and disposable evidence; it is not proof that a production target is deployed.
+- Gate 6 planning is isolated on `runa2/gate-6-selected-core-cutover` from accepted integration head
+  `a986419`. The steward approved proceeding under the production boundary on 2026-08-21. The frozen
+  Gate 6 contract limits promotion to the three read-only lanes, project/chat/setting continuity, the
+  complete E6 chain and scoped approved-knowledge projection, one governed setting action, and the
+  Gate 5 security boundary. E3 remains deferred; E4 credentials are re-enrolled rather than migrated;
+  E5 is absent; device-vault/DPAPI/session/private-key ciphertext is not copied; the separate approved-
+  knowledge vector index and broader legacy surfaces remain Gate 7 decisions. Gate 6 begins with an
+  executable fail-closed release/cutover rehearsal because the repository currently contains
+  selected-core libraries and harnesses, not a production application entry point or steward UI.
 
 ## Bootstrap findings
 
@@ -218,8 +229,8 @@ plain-language steward experience, or governed action pathway.
 | 2 | All three read-only answer lanes plus chat/project/settings continuity | Complete; evidence accepted and merged as `4c4767f` | Complete |
 | 3 | One reversible governed idempotent action | Complete; accepted and merged as `0680cfb` | Complete |
 | 4 | Governed data migration, one domain at a time | Complete; accepted and merged as `2c38dd5`; legacy unchanged | Complete |
-| 5 | Operations, private transport, authentication/authorization, recovery | Synthetic implementation complete and ready for review | Review before integration merge |
-| 6 | Selected-core production cutover and rollback window | Not started | Gates 0–5 accepted and maintenance window approved |
+| 5 | Operations, private transport, authentication/authorization, recovery | Complete; accepted and merged as `a986419` | Complete |
+| 6 | Selected-core production cutover and rollback window | Scope frozen; executable rehearsal in progress | Approved by steward 2026-08-21; hard blockers fail closed |
 | 7 | Deferred extensions | Not started | New baseline and separate approval per extension group |
 
 ## Bootstrap validation

@@ -117,12 +117,23 @@ export class QdrantDerivedIndex {
   }
 
   async #request(method, route, body, { deadlineMs = this.timeoutMs } = {}) {
-    const response = await fetch(`${this.endpoint}${route}`, {
-      method,
-      headers: body === undefined ? undefined : { "content-type": "application/json" },
-      body: body === undefined ? undefined : JSON.stringify(body),
-      signal: AbortSignal.timeout(Math.max(1, Math.min(this.timeoutMs, deadlineMs))),
-    });
+    const signal = AbortSignal.timeout(Math.max(1, Math.min(this.timeoutMs, deadlineMs)));
+    let response;
+    try {
+      response = await fetch(`${this.endpoint}${route}`, {
+        method,
+        headers: body === undefined ? undefined : { "content-type": "application/json" },
+        body: body === undefined ? undefined : JSON.stringify(body),
+        signal,
+      });
+    } catch (error) {
+      if (signal.aborted && error?.name === "TimeoutError") {
+        const timeout = new Error("qdrant request deadline expired", { cause: error });
+        timeout.code = "request-timeout";
+        throw timeout;
+      }
+      throw error;
+    }
     if (!response.ok) {
       const error = new Error(`qdrant returned ${response.status}`);
       error.code = "qdrant-unavailable";

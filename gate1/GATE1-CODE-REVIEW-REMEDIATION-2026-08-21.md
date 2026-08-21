@@ -1,8 +1,9 @@
 # Gate 1 code-review remediation — 2026-08-21
 
-Status: implemented, green, and accepted by the steward on 2026-08-21; protected review remains.
-This does not authorize merge, Gate 2, protected data, production routing, persistent services, model
-downloads, or either deferred model endpoint.
+Status: implemented, green, and accepted by the steward on 2026-08-21. After separate protected-merge
+approval, Gate 1 was merged into `runa2/integration` as `7107ead`. This does not authorize Gate 2,
+protected data, production routing, persistent services, model downloads, or either deferred model
+endpoint.
 
 ## Review findings and root causes
 
@@ -59,8 +60,9 @@ Reviewable machine evidence remains in:
 
 ## Rollback and approval boundary
 
-No production route or protected store depends on this branch. Rejection requires discarding only the
-Gate 1 branch or reverting the remediation commit; the legacy runtime and all source repositories
-remain unchanged. The prior evidence acceptance remains historical. The steward accepted this
-refreshed evidence on 2026-08-21. That acceptance clears the remediation evidence gate but is not
-merge approval; protected integration review remains required.
+No production route or protected store depends on Gate 1. The source branch and disposable artifacts
+may be retained or discarded independently, but removing the merged remediation would require a
+separately reviewed protected revert. The legacy runtime and all source repositories remain unchanged.
+The prior evidence acceptance remains historical. The steward accepted this refreshed evidence on
+2026-08-21, then separately approved the protected merge completed as `7107ead`. That merge did not
+authorize Gate 2 or production use.

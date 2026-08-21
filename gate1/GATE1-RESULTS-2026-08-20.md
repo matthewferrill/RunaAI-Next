@@ -2,8 +2,9 @@
 
 Status: the original evidence was accepted by the steward under the approved Gate 1 scope amendment.
 After protected code review found three implementation gaps, the 2026-08-21 remediation and refreshed
-evidence passed and were accepted by the steward on 2026-08-21. This is not merge approval,
-production readiness, migration completion, or permission to start Gate 2.
+evidence passed and were accepted by the steward on 2026-08-21. Evidence acceptance alone was not
+merge approval; the steward separately approved the protected merge, completed as `7107ead`. This is
+not production readiness, migration completion, or permission to implement Gate 2.
 
 ## 2026-08-21 code-review remediation
 
@@ -90,12 +91,13 @@ The exact amendment and unchanged boundaries are recorded in
 
 The steward explicitly accepted the amended Gate 1 evidence on 2026-08-20. That acceptance is retained
 as historical evidence. The subsequent code-review remediation changed implementation and regenerated
-the affected evidence on 2026-08-21. The steward accepted that refreshed evidence on 2026-08-21.
-Protected integration review remains required before merge, and Gate 2 remains unstarted pending a
+the affected evidence on 2026-08-21. The steward accepted that refreshed evidence on 2026-08-21 and
+separately approved the protected merge, completed as `7107ead` on the same date. Gate 2 remains a
 separate approval.
 
 ## Rollback evidence
 
 No legacy or protected store was opened and no production route was enabled. All passing integration
-processes stopped. Rejecting the slice requires only discarding this branch and its ignored disposable
-artifacts; the three source repositories and their authoritative data remain unchanged.
+processes stopped. The branch remains preserved; removing merged Gate 1 would require a separately
+reviewed protected revert. Its ignored disposable artifacts remain discardable, and the three source
+repositories and their authoritative data remain unchanged.

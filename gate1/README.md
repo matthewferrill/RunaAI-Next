@@ -1,9 +1,14 @@
 # Gate 1 — disposable read-only chat/research slice
 
-Status: code-review remediation and refreshed evidence were accepted by the steward on 2026-08-21;
-protected integration review remains. The branch is not merged. Qwen3.6 deliberate review and the
-existing live BGE endpoint remain explicitly deferred. See `GATE1-RESULTS-2026-08-20.md` and
-`GATE1-CODE-REVIEW-REMEDIATION-2026-08-21.md`.
+Status: code-review remediation and refreshed evidence were accepted by the steward on 2026-08-21.
+After separate protected-merge approval, Gate 1 was merged into `runa2/integration` as `7107ead`.
+Qwen3.6 deliberate review and the existing live BGE endpoint remain explicitly deferred. See
+`GATE1-RESULTS-2026-08-20.md` and `GATE1-CODE-REVIEW-REMEDIATION-2026-08-21.md`.
+
+Gate 2 regression review later exposed an intermittent Qdrant HTTP timeout-label race. The steward
+approved a narrow normalization fix on 2026-08-21; its implementation and refreshed evidence are
+recorded in `GATE1-QDRANT-TIMEOUT-REMEDIATION-2026-08-21.md`. The fix is isolated on the Gate 2 branch
+pending Gate 2B evidence acceptance and Gate 2C merge approval.
 
 ## Boundary
 
@@ -55,7 +60,8 @@ reviewable summaries are in `gate1/evidence/`.
 
 ## Rollback
 
-No route is enabled and no production or legacy state depends on this branch. Stop only a disposable
-runner if interrupted, confirm its loopback child processes are gone, discard its temporary run
-directory, and delete the Gate 1 branch if rejected. `main`, `runa2/integration`, RunaLab, legacy
-RunaAI, and every protected store remain unchanged.
+No route is enabled and no production or legacy state depends on Gate 1. Stop only a disposable runner
+if interrupted, confirm its loopback child processes are gone, and discard its temporary run directory.
+Gate 1 is now part of `runa2/integration`; removing it would require a separately reviewed protected
+revert rather than deleting the preserved source branch. `main`, RunaLab, legacy RunaAI, and every
+protected store remain unchanged.

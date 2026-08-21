@@ -208,7 +208,9 @@ $caddyFile = Join-Path $paths.Config 'Caddyfile'
 Set-Content -LiteralPath $caddyFile -Encoding utf8 -Value @"
 https://$PrivateAddress`:9761 {
   tls internal
-  request_body { max_size 256KB }
+  request_body {
+    max_size 256KB
+  }
   reverse_proxy 127.0.0.1:9760 {
     lb_retries 0
     transport http {
@@ -227,11 +229,14 @@ http://127.0.0.1:9770 {
   }
 }
 "@
+$caddyExe = Join-Path $paths.Tools 'caddy\caddy.exe'
+& $caddyExe validate --config $caddyFile --adapter caddyfile *> $null
+if ($LASTEXITCODE -ne 0) { throw 'candidate-caddy-configuration-invalid' }
 $serviceSpec = [ordered]@{
   postgresql = @{ version='18.6'; binary=(Join-Path $pgBin 'postgres.exe'); port=9765; bind='127.0.0.1' }
   keycloak = @{ version='26.7.2'; home=$keycloakHome; port=9762; managementPort=9766; bind='127.0.0.1'; cache='local-single-node' }
   openfga = @{ version='1.18.3'; binary=$openFgaExe; httpPort=9763; grpcPort=9764; bind='127.0.0.1'; storeId=$fgaFacts.storeId; modelId=$fgaFacts.modelId }
-  caddy = @{ version='2.11.4'; binary=(Join-Path $paths.Tools 'caddy\caddy.exe'); privateAddress=$PrivateAddress; tlsPort=9761; providerProxyPort=9770 }
+  caddy = @{ version='2.11.4'; binary=$caddyExe; privateAddress=$PrivateAddress; tlsPort=9761; providerProxyPort=9770 }
 }
 $serviceSpec | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath (Join-Path $paths.Config 'service-public.json') -Encoding utf8
 function Hash-Text([string]$Text) {

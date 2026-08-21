@@ -1,6 +1,6 @@
 # Gate 4C-1 synthetic projection results
 
-Status: synthetic implementation green; awaiting Gate 4C-1A steward acceptance
+Status: accepted by the steward and merged into `runa2/integration` as `d203cc7` on 2026-08-21
 
 ## Result
 
@@ -36,7 +36,7 @@ used or changed. The projection is memory-only and `modelContextAuthorized` rema
 
 ## Next decision
 
-Gate 4C-1A asks the steward to accept or reject the synthetic projection contract. Acceptance does
-not authorize protected-data access or answer-lane activation. If accepted, the next recommended step
-is one separately designed aggregate-only comparison of the reconstructed active-state counts and
-scope categories against the already accepted 90-entry Gate 4B journal rehearsal boundary.
+The steward accepted Gate 4C-1A and approved its development merge. The next recommended step is one
+separately designed aggregate-only comparison of reconstructed active-state counts and scope
+categories against the already accepted 90-entry Gate 4B journal boundary. The accepted merge does
+not authorize protected-data access, answer-lane activation, model context, or Qdrant indexing.

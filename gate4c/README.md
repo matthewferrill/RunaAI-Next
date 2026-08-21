@@ -1,8 +1,9 @@
 # Gate 4C-1: approved-knowledge projection
 
 Gate 4C-1 implements only the synthetic, read-only projection contract approved by the steward on
-2026-08-21. It reconstructs current approved lessons from an accepted Gate 4B journal, applies an
-explicit request scope before deterministic selection, and returns an inert advisory-context preview.
+2026-08-21 and merged into `runa2/integration` as `d203cc7`. It reconstructs current approved lessons
+from an accepted Gate 4B journal, applies an explicit request scope before deterministic selection,
+and returns an inert advisory-context preview.
 
 ## Implemented
 

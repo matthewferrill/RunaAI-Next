@@ -55,6 +55,7 @@ function New-Secret([string]$Name, [int]$Bytes = 32) {
 }
 $postgresAdmin = New-Secret 'postgres-admin'; $postgresRuna = New-Secret 'postgres-runa'
 $postgresKeycloak = New-Secret 'postgres-keycloak'; $postgresOpenFga = New-Secret 'postgres-openfga'
+$postgresServiceAccount = New-Secret 'postgres-service-account'
 $keycloakBootstrap = New-Secret 'keycloak-bootstrap'; $keycloakClient = New-Secret 'keycloak-client'
 $openFgaToken = New-Secret 'openfga-token'
 foreach ($name in @('core-encryption','core-hmac','learning-encryption','learning-hmac','telemetry-hmac')) { [void](New-Secret $name) }
@@ -90,7 +91,12 @@ $root = 'C:\AI\RunaAI-Next-Candidate'
 & "$root\tools\postgresql\pgsql\bin\pg_ctl.exe" -D "$root\data\postgresql" stop -m fast -w
 exit $LASTEXITCODE
 '@
-$postgresIdentity = "$env:COMPUTERNAME\codex-audit"
+$postgresAccount = 'runa-candidate-pg'
+$postgresIdentity = "$env:COMPUTERNAME\$postgresAccount"
+if (-not (Get-LocalUser -Name $postgresAccount -ErrorAction SilentlyContinue)) {
+  $accountPassword = ConvertTo-SecureString $postgresServiceAccount -AsPlainText -Force
+  New-LocalUser -Name $postgresAccount -Password $accountPassword -AccountNeverExpires -PasswordNeverExpires -UserMayNotChangePassword -Description 'RunaAI Next candidate PostgreSQL only' | Out-Null
+}
 & icacls.exe $pgData '/grant:r' "$postgresIdentity`:(OI)(CI)M" | Out-Null
 & icacls.exe $paths.Logs '/grant:r' "$postgresIdentity`:(OI)(CI)M" | Out-Null
 if ($LASTEXITCODE -ne 0) { throw 'candidate-postgres-acl-failed' }
@@ -104,11 +110,10 @@ if (-not $pgListener) {
   $bootstrapTaskPath = '\RunaAI-Next-Bootstrap\'
   if (-not (Get-ScheduledTask -TaskPath $bootstrapTaskPath -TaskName 'Postgresql' -ErrorAction SilentlyContinue)) {
     $taskSettings = New-ScheduledTaskSettingsSet -ExecutionTimeLimit ([TimeSpan]::Zero)
-    $taskPrincipal = New-ScheduledTaskPrincipal -UserId $postgresIdentity -LogonType S4U -RunLevel Limited
     $taskAction = New-ScheduledTaskAction -Execute 'powershell.exe' -Argument "-NoLogo -NoProfile -ExecutionPolicy Bypass -File `"$runPostgres`""
-    Register-ScheduledTask -TaskPath $bootstrapTaskPath -TaskName 'Postgresql' -Action $taskAction -Settings $taskSettings -Principal $taskPrincipal | Out-Null
+    Register-ScheduledTask -TaskPath $bootstrapTaskPath -TaskName 'Postgresql' -Action $taskAction -Settings $taskSettings -User $postgresIdentity -Password $postgresServiceAccount | Out-Null
     $stopAction = New-ScheduledTaskAction -Execute 'powershell.exe' -Argument "-NoLogo -NoProfile -ExecutionPolicy Bypass -File `"$stopPostgres`""
-    Register-ScheduledTask -TaskPath $bootstrapTaskPath -TaskName 'Stop-Postgresql' -Action $stopAction -Settings $taskSettings -Principal $taskPrincipal | Out-Null
+    Register-ScheduledTask -TaskPath $bootstrapTaskPath -TaskName 'Stop-Postgresql' -Action $stopAction -Settings $taskSettings -User $postgresIdentity -Password $postgresServiceAccount | Out-Null
   }
   Start-ScheduledTask -TaskPath $bootstrapTaskPath -TaskName 'Postgresql'
   $deadline = [DateTime]::UtcNow.AddSeconds(60)

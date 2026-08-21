@@ -188,6 +188,17 @@ repository and never push migration work into either source repository.
   knowledge vector index and broader legacy surfaces remain Gate 7 decisions. Gate 6 begins with an
   executable fail-closed release/cutover rehearsal because the repository currently contains
   selected-core libraries and harnesses, not a production application entry point or steward UI.
+- Gate 6A's executable release/readiness/cutover boundary is green locally. Its focused suite passes
+  25/25; the full repository run passes 232/232; Gate 0 passes 10/10 seals and all 12 pinned legacy
+  suites; and disposable Gate 1-6 integrations are green with every component stopped. The Gate 6
+  PostgreSQL rehearsal survives restart and response loss, refuses mismatched live identity without
+  advancing state, closes only after the frozen observation window, and proves target-session-aware
+  rollback to legacy. Retained evidence is aggregate-only. A read-only Control inventory found the
+  live legacy runtime clean and commit-aligned at `b4db040`, but the clean RunaAI-Next verification
+  checkout is still at `4ed6a52` with no Gate 6, dependency tree, or release entry point; persistent
+  PostgreSQL, Keycloak, OpenFGA, and private Caddy services are absent. No production traffic or data
+  changed. Gate 6B is therefore hard-blocked on building one real release composition and parallel
+  persistent target before any protected final delta or promotion can safely begin.
 
 ## Bootstrap findings
 
@@ -230,7 +241,7 @@ plain-language steward experience, or governed action pathway.
 | 3 | One reversible governed idempotent action | Complete; accepted and merged as `0680cfb` | Complete |
 | 4 | Governed data migration, one domain at a time | Complete; accepted and merged as `2c38dd5`; legacy unchanged | Complete |
 | 5 | Operations, private transport, authentication/authorization, recovery | Complete; accepted and merged as `a986419` | Complete |
-| 6 | Selected-core production cutover and rollback window | Scope frozen; executable rehearsal in progress | Approved by steward 2026-08-21; hard blockers fail closed |
+| 6 | Selected-core production cutover and rollback window | Gate 6A green; Gate 6B blocked on release composition and parallel persistent target; legacy unchanged | Approved by steward 2026-08-21; hard blockers fail closed |
 | 7 | Deferred extensions | Not started | New baseline and separate approval per extension group |
 
 ## Bootstrap validation

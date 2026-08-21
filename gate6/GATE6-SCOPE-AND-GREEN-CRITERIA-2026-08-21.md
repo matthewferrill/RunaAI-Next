@@ -10,7 +10,9 @@ promoted. No failed or partial rehearsal may change that authority.
 ## Accepted entry state
 
 - Gates 0 through 5 are accepted on `runa2/integration` at `a986419`.
-- Legacy RunaAI remains the running production and protected-data authority at `71ce985`.
+- Legacy RunaAI remains the running production and protected-data authority. Control's clean runtime
+  checkout currently reports `b4db040`; Gate 4 established source equivalence to rewritten GitHub
+  `main` at `71ce985`, but Gate 6 binds the final delta to the live source generation actually frozen.
 - RunaLab remains the frozen stack-evidence source at `ec5e346`.
 - Project/chat and the complete E6 journal have passed owner-context disposable rehearsals. Those
   rehearsals retained no migrated target and did not authorize production cutover.

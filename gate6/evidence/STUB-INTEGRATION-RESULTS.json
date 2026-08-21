@@ -1,0 +1,35 @@
+{
+  "schemaVersion": "runa2-gate6-stub-integration/v1",
+  "runtime": "v22.22.0",
+  "syntheticOnly": true,
+  "protectedDataUsed": false,
+  "productionTrafficChanged": false,
+  "persistentServices": false,
+  "networking": "loopback-disposable-postgresql-only",
+  "counts": {
+    "closedOperations": 10,
+    "rollbackOperations": 8,
+    "totalOperations": 18
+  },
+  "recovery": {
+    "responseLossCode": "cutover-response-lost",
+    "resumedPromotionReplayed": true,
+    "postgresRestarted": true,
+    "rollbackAuthority": "legacy-runaai:synthetic-source"
+  },
+  "checks": {
+    "durableStatePersisted": true,
+    "responseLossVisible": true,
+    "responseLossRetryIdempotent": true,
+    "postgresRestartClean": true,
+    "failedLiveIdentityAtomic": true,
+    "restartResumeAndClose": true,
+    "rollbackReturnsLegacyAuthority": true,
+    "aggregateLedgerOnly": true,
+    "gate6RollbackIsolated": true
+  },
+  "passed": true,
+  "servicesStopped": {
+    "postgres": true
+  }
+}

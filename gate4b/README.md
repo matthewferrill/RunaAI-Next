@@ -5,9 +5,10 @@ learning journal, including candidate events, outcome feedback, lifecycle histor
 approval batches. Approval history is physically and semantically part of the same chain, so it
 cannot be split from the journal without losing exact lineage.
 
-This branch is synthetic-only. It does not open a protected store, unseal a DPAPI credential, copy
-production data, initialize PostgreSQL, activate approved knowledge, retrieve a lesson, call a model,
-start a service, or authorize cutover.
+Gate 4B-I subsequently performed one approved aggregate-only owner inventory. It opened the protected
+stores read-only under Matthew's Control identity and retained no protected value. No production data
+was copied, no PostgreSQL target was initialized, and no approved knowledge, model, service, or cutover
+was activated.
 
 ## What is implemented
 
@@ -22,10 +23,10 @@ start a service, or authorize cutover.
 
 ## What remains decision-gated
 
-1. run the approved Control-local aggregate inventory under Matthew's identity;
-2. use its aggregate result to decide the disposition of E3 inbox, E4 review, E5 grants, and the
-   device vault;
-3. approve or reject a protected rehearsal against a disposable target; and
+1. approve or reject an E6-only protected rehearsal against a disposable target;
+2. leave the one unresolved E3 inbox record unchanged pending a separate decision;
+3. defer E4 authority/device-vault redesign to Gate 5 and retire E5 migration because no store exists;
+   and
 4. defer all approved-knowledge projection and retrieval behavior to Gate 4C.
 
 Run the synthetic suite with `npm run test:gate4b`.

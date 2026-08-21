@@ -52,4 +52,5 @@ are separately gated.
 
 Gate 4B-I was subsequently approved. The fail-closed runner now passes five additional tests proving
 two-pass determinism, output reconstruction, unknown-category denial, exact authority/pin checks, and
-pre-access owner mismatch denial. The next operation is its one authorized Control execution.
+pre-access owner mismatch denial. Its one authorized Control execution subsequently passed; the
+aggregate result is recorded in `GATE4B-I-OWNER-INVENTORY-RESULTS-2026-08-21.md`.

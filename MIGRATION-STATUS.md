@@ -120,9 +120,13 @@ repository and never push migration work into either source repository.
   approved-knowledge projection and retrieval disabled. Its frozen corpus contains 20 synthetic
   cases. The steward approved Gate 4B-I on 2026-08-21; its fail-closed Control runner adds five
   synthetic checks for exact owner/host/commit/branch/source-pin authority, two-pass determinism, and
-  reconstructed allowlisted output. No protected learning store has yet been opened; no PostgreSQL
-  target, production record, DPAPI credential, or device-vault material has been accessed. The one
-  approved owner inventory run is next; any protected rehearsal requires a separate explicit approval.
+  reconstructed allowlisted output. The one approved Control owner inventory passed on 2026-08-21:
+  90 healthy E6 entries contain 63 learning events, 10 lifecycle entries, and 63 approval decisions in
+  17 batches; 53 lessons are active and 10 corrected, with zero unreadable, integrity, or lineage
+  findings. One readable E3 inbox record remains unresolved; E4 has two authority records but no
+  review transactions/capsules; E5 is absent; and the device vault remains owner-bound and unchanged.
+  No protected value was retained and no data was copied or migrated. Any protected rehearsal requires
+  a separate explicit approval.
 
 ## Bootstrap findings
 
@@ -163,7 +167,7 @@ plain-language steward experience, or governed action pathway.
 | 1 | Smallest disposable read-only chat/research slice | Complete; accepted and merged as `7107ead` | Complete |
 | 2 | All three read-only answer lanes plus chat/project/settings continuity | Complete; evidence accepted and merged as `4c4767f` | Complete |
 | 3 | One reversible governed idempotent action | Complete; accepted and merged as `0680cfb` | Complete |
-| 4 | Governed data migration, one domain at a time | Gate 4A accepted; Gate 4B synthetic learning-history contract in review; legacy unchanged | Approve Gate 4B owner inventory separately |
+| 4 | Governed data migration, one domain at a time | Gate 4A accepted; Gate 4B synthetic contract and owner inventory green; legacy unchanged | Approve an E6-only Gate 4B protected rehearsal separately |
 | 5 | Operations, private transport, authentication/authorization, recovery | Not started | Functional/data parity accepted |
 | 6 | Selected-core production cutover and rollback window | Not started | Gates 0–5 accepted and maintenance window approved |
 | 7 | Deferred extensions | Not started | New baseline and separate approval per extension group |
@@ -210,11 +214,11 @@ No dependency was changed during the prerequisite disposition. Full evidence is 
 
 ## Next decision
 
-Review the Gate 4B synthetic learning-history contract. If accepted, the next decision is Gate 4B-I:
-one read-only, aggregate-only Control inventory under Matthew's owner identity. That future run would
-measure the E6 journal and older E3/E4/E5/vault stores without copying or migrating data. It is not
-authorized by the current branch. Gate 4A acceptance establishes only the project/chat development
-baseline and does not make PostgreSQL live or approve cutover.
+Review the Gate 4B-I aggregate result and decide whether to authorize Gate 4B-R: one E6-only protected
+rehearsal against a disposable PostgreSQL target. The recommended scope preserves all 90 E6 entries,
+leaves the unresolved E3 record unchanged, excludes E4 authority/device-vault state for Gate 5, and
+has no E5 store to migrate. Gate 4B-R would not activate approved knowledge, production routing, or
+cutover.
 
 Qwen3.6 deliberate review, the existing live BGE endpoint, real data export/import, persistent
 services, production routing, provider reconfiguration, production authentication/authorization, and

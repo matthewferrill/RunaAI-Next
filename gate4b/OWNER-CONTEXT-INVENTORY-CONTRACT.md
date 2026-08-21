@@ -1,6 +1,6 @@
 # Owner-context aggregate inventory contract
 
-Status: runner implemented and synthetically verified under approved Gate 4B-I; owner execution pending
+Status: owner execution passed on 2026-08-21; protected value was not retained
 
 ## Preconditions for a later run
 

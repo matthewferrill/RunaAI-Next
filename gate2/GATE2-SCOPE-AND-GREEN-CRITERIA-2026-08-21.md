@@ -1,7 +1,8 @@
 # Gate 2 scope and green criteria — 2026-08-21
 
-Status: proposed contract for steward review. This document freezes the proposed Gate 2 boundary; it
-does not authorize implementation, protected-data access, production activation, or Gate 3.
+Status: accepted by the steward for Gate 2A implementation on 2026-08-21. The bounded synthetic
+implementation is complete and awaits Gate 2B evidence acceptance. This acceptance did not authorize
+protected-data access, production activation, a protected merge, or Gate 3.
 
 ## Layman summary
 
@@ -196,11 +197,15 @@ The steward reviews this scope, corpus, pins, verifier profile, and baseline. Ap
 the synthetic Gate 2 implementation and verification described here on
 `runa2/gate-2-read-only-continuity`.
 
+Status: approved by the steward on 2026-08-21; implementation and bounded verification complete.
+
 ### Gate 2B — evidence acceptance
 
 After implementation, the steward reviews representative outputs, all deterministic/integration
 results, failures/deferments, source drift, cleanup, and rollback evidence. Evidence acceptance is
 not merge approval.
+
+Status: pending steward review of `GATE2-RESULTS-2026-08-21.md` and retained machine-readable evidence.
 
 ### Gate 2C — protected merge
 

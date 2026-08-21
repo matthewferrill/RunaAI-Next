@@ -1,0 +1,1300 @@
+{
+  "schemaVersion": "runa2-gate2-stub-integration/v1",
+  "runtime": "v22.22.0",
+  "selectedComposition": [
+    "Mastra",
+    "AI SDK/OpenAI-compatible",
+    "Caddy",
+    "LangGraph/PostgreSQL",
+    "PostgreSQL records and continuity",
+    "Qdrant derived index",
+    "windowed reranker",
+    "OpenTelemetry"
+  ],
+  "syntheticOnly": true,
+  "protectedDataUsed": false,
+  "networking": "loopback-disposable-only",
+  "alignment": {
+    "sourceCount": 6,
+    "vectorCount": 6,
+    "digestsAligned": true,
+    "aligned": true
+  },
+  "database": {
+    "gate1_requests": 9,
+    "gate1_turns": 9,
+    "gate2_requests": 10,
+    "gate2_turns": 11,
+    "chats": 10,
+    "projects": 2,
+    "checkpoints": 39
+  },
+  "rollback": {
+    "gate2_removed": true,
+    "gate1_retained": true,
+    "gate1_rows": 9
+  },
+  "providerChatCalls": 10,
+  "outcomes": {
+    "interrupt": {
+      "phase": "interrupt",
+      "interrupted": true,
+      "code": "response-delivery-interrupted",
+      "elapsedMs": 265,
+      "counts": {
+        "gate1_requests": 1,
+        "gate1_turns": 1,
+        "gate2_requests": 1,
+        "gate2_turns": 1,
+        "request_rows": 1
+      }
+    },
+    "resume": {
+      "phase": "resume",
+      "interrupted": false,
+      "response": {
+        "schemaVersion": "runa2-answer-response/v2",
+        "requestId": "g2-integration-restart",
+        "participantId": "synthetic-participant",
+        "projectId": "synthetic-project-a",
+        "threadId": "chat-g2-integration-restart",
+        "lane": "research",
+        "answer": "The synthetic checkpoint resumes without repeating completed work.",
+        "ground": "record-answers",
+        "retrieval": {
+          "attempted": true,
+          "skipped": false,
+          "skipReason": "",
+          "empty": false,
+          "degraded": false,
+          "evidenceCount": 5,
+          "unavailable": [],
+          "omissions": []
+        },
+        "research": {
+          "passesPlanned": 6,
+          "passesRun": 6,
+          "passesWithNothing": 0,
+          "passagesRead": 5,
+          "unanswered": [],
+          "truncated": true
+        },
+        "workspace": null,
+        "citations": [
+          {
+            "sourceId": "restart",
+            "sectionId": "checkpoint",
+            "contentSha256": "11711c37eb27835b9eba5fee4760cae4340e10b2ab031318c45de75ecdbca602",
+            "ordinal": 1
+          }
+        ],
+        "model": {
+          "role": "research",
+          "provider": "gate2-research-adapter",
+          "modelId": "stub-gate2-v1"
+        },
+        "completion": {
+          "reason": "complete",
+          "timedOut": false,
+          "outputLimited": false
+        },
+        "trace": {
+          "correlationId": "0007790cacc4dde260e227e02d1c47fe"
+        },
+        "effects": [],
+        "auditCodes": [
+          "project-scope-enforced"
+        ],
+        "gates": {
+          "executed": true,
+          "codes": [
+            "answer-gates-executed:research"
+          ]
+        },
+        "status": {
+          "lane": "research",
+          "modelRole": "research",
+          "provider": "gate2-research-adapter",
+          "retrieval": "available",
+          "reranker": "available",
+          "chatAdapter": "postgres-synthetic",
+          "projectAdapter": "postgres-synthetic",
+          "settingsAdapter": "postgres-synthetic",
+          "protectedStoresOpened": false,
+          "rollbackAvailable": true
+        },
+        "continuity": {
+          "durableChatEligible": true,
+          "turnRecorded": true,
+          "source": "postgres-synthetic"
+        }
+      },
+      "elapsedMs": 22,
+      "counts": {
+        "gate1_requests": 1,
+        "gate1_turns": 1,
+        "gate2_requests": 1,
+        "gate2_turns": 1,
+        "request_rows": 1
+      }
+    },
+    "duplicate": {
+      "phase": "duplicate",
+      "interrupted": false,
+      "response": {
+        "schemaVersion": "runa2-answer-response/v2",
+        "requestId": "g2-integration-duplicate",
+        "participantId": "synthetic-participant",
+        "projectId": "synthetic-project-a",
+        "threadId": "chat-g2-integration-duplicate",
+        "lane": "general",
+        "answer": "Duplicate delivery returns one durable synthetic answer.",
+        "ground": "record-answers",
+        "retrieval": {
+          "attempted": true,
+          "skipped": false,
+          "skipReason": "",
+          "empty": false,
+          "degraded": false,
+          "evidenceCount": 5,
+          "unavailable": [],
+          "omissions": []
+        },
+        "research": null,
+        "workspace": null,
+        "citations": [
+          {
+            "sourceId": "continuity",
+            "sectionId": "adapter",
+            "contentSha256": "273e8c0f52b5e303b5dbbd4af6ff8b58143b2a79af13f5479d46c9a82e8192f8",
+            "ordinal": 1
+          }
+        ],
+        "model": {
+          "role": "chat",
+          "provider": "gate2-chat-adapter",
+          "modelId": "stub-gate2-v1"
+        },
+        "completion": {
+          "reason": "complete",
+          "timedOut": false,
+          "outputLimited": false
+        },
+        "trace": {
+          "correlationId": "1167d0cefa6e47299a9564059b136e3d"
+        },
+        "effects": [],
+        "auditCodes": [
+          "project-scope-enforced"
+        ],
+        "gates": {
+          "executed": true,
+          "codes": [
+            "answer-gates-executed:general"
+          ]
+        },
+        "status": {
+          "lane": "general",
+          "modelRole": "chat",
+          "provider": "gate2-chat-adapter",
+          "retrieval": "available",
+          "reranker": "available",
+          "chatAdapter": "postgres-synthetic",
+          "projectAdapter": "postgres-synthetic",
+          "settingsAdapter": "postgres-synthetic",
+          "protectedStoresOpened": false,
+          "rollbackAvailable": true
+        },
+        "continuity": {
+          "durableChatEligible": true,
+          "turnRecorded": true,
+          "source": "postgres-synthetic"
+        }
+      },
+      "duplicateResponse": {
+        "schemaVersion": "runa2-answer-response/v2",
+        "requestId": "g2-integration-duplicate",
+        "participantId": "synthetic-participant",
+        "projectId": "synthetic-project-a",
+        "threadId": "chat-g2-integration-duplicate",
+        "lane": "general",
+        "answer": "Duplicate delivery returns one durable synthetic answer.",
+        "ground": "record-answers",
+        "retrieval": {
+          "attempted": true,
+          "skipped": false,
+          "skipReason": "",
+          "empty": false,
+          "degraded": false,
+          "evidenceCount": 5,
+          "unavailable": [],
+          "omissions": []
+        },
+        "research": null,
+        "workspace": null,
+        "citations": [
+          {
+            "sourceId": "continuity",
+            "sectionId": "adapter",
+            "contentSha256": "273e8c0f52b5e303b5dbbd4af6ff8b58143b2a79af13f5479d46c9a82e8192f8",
+            "ordinal": 1
+          }
+        ],
+        "model": {
+          "role": "chat",
+          "provider": "gate2-chat-adapter",
+          "modelId": "stub-gate2-v1"
+        },
+        "completion": {
+          "reason": "complete",
+          "timedOut": false,
+          "outputLimited": false
+        },
+        "trace": {
+          "correlationId": "1167d0cefa6e47299a9564059b136e3d"
+        },
+        "effects": [],
+        "auditCodes": [
+          "project-scope-enforced"
+        ],
+        "gates": {
+          "executed": true,
+          "codes": [
+            "answer-gates-executed:general"
+          ]
+        },
+        "status": {
+          "lane": "general",
+          "modelRole": "chat",
+          "provider": "gate2-chat-adapter",
+          "retrieval": "available",
+          "reranker": "available",
+          "chatAdapter": "postgres-synthetic",
+          "projectAdapter": "postgres-synthetic",
+          "settingsAdapter": "postgres-synthetic",
+          "protectedStoresOpened": false,
+          "rollbackAvailable": true
+        },
+        "continuity": {
+          "durableChatEligible": true,
+          "turnRecorded": false,
+          "source": "postgres-synthetic"
+        }
+      },
+      "elapsedMs": 316,
+      "counts": {
+        "gate1_requests": 2,
+        "gate1_turns": 2,
+        "gate2_requests": 2,
+        "gate2_turns": 2,
+        "request_rows": 1
+      }
+    },
+    "concurrent": {
+      "phase": "concurrent",
+      "interrupted": false,
+      "responses": [
+        {
+          "schemaVersion": "runa2-answer-response/v2",
+          "requestId": "g2-integration-concurrent",
+          "participantId": "synthetic-participant",
+          "projectId": "synthetic-project-a",
+          "threadId": "chat-g2-integration-concurrent",
+          "lane": "general",
+          "answer": "Concurrent duplicate delivery returns one durable synthetic answer.",
+          "ground": "record-answers",
+          "retrieval": {
+            "attempted": true,
+            "skipped": false,
+            "skipReason": "",
+            "empty": false,
+            "degraded": false,
+            "evidenceCount": 5,
+            "unavailable": [],
+            "omissions": []
+          },
+          "research": null,
+          "workspace": null,
+          "citations": [
+            {
+              "sourceId": "continuity",
+              "sectionId": "adapter",
+              "contentSha256": "273e8c0f52b5e303b5dbbd4af6ff8b58143b2a79af13f5479d46c9a82e8192f8",
+              "ordinal": 1
+            }
+          ],
+          "model": {
+            "role": "chat",
+            "provider": "gate2-chat-adapter",
+            "modelId": "stub-gate2-v1"
+          },
+          "completion": {
+            "reason": "complete",
+            "timedOut": false,
+            "outputLimited": false
+          },
+          "trace": {
+            "correlationId": "0045c0a9047a999540e62160a562e8ac"
+          },
+          "effects": [],
+          "auditCodes": [
+            "project-scope-enforced"
+          ],
+          "gates": {
+            "executed": true,
+            "codes": [
+              "answer-gates-executed:general"
+            ]
+          },
+          "status": {
+            "lane": "general",
+            "modelRole": "chat",
+            "provider": "gate2-chat-adapter",
+            "retrieval": "available",
+            "reranker": "available",
+            "chatAdapter": "postgres-synthetic",
+            "projectAdapter": "postgres-synthetic",
+            "settingsAdapter": "postgres-synthetic",
+            "protectedStoresOpened": false,
+            "rollbackAvailable": true
+          },
+          "continuity": {
+            "durableChatEligible": true,
+            "turnRecorded": true,
+            "source": "postgres-synthetic"
+          }
+        },
+        {
+          "schemaVersion": "runa2-answer-response/v2",
+          "requestId": "g2-integration-concurrent",
+          "participantId": "synthetic-participant",
+          "projectId": "synthetic-project-a",
+          "threadId": "chat-g2-integration-concurrent",
+          "lane": "general",
+          "answer": "Concurrent duplicate delivery returns one durable synthetic answer.",
+          "ground": "record-answers",
+          "retrieval": {
+            "attempted": true,
+            "skipped": false,
+            "skipReason": "",
+            "empty": false,
+            "degraded": false,
+            "evidenceCount": 5,
+            "unavailable": [],
+            "omissions": []
+          },
+          "research": null,
+          "workspace": null,
+          "citations": [
+            {
+              "sourceId": "continuity",
+              "sectionId": "adapter",
+              "contentSha256": "273e8c0f52b5e303b5dbbd4af6ff8b58143b2a79af13f5479d46c9a82e8192f8",
+              "ordinal": 1
+            }
+          ],
+          "model": {
+            "role": "chat",
+            "provider": "gate2-chat-adapter",
+            "modelId": "stub-gate2-v1"
+          },
+          "completion": {
+            "reason": "complete",
+            "timedOut": false,
+            "outputLimited": false
+          },
+          "trace": {
+            "correlationId": "0045c0a9047a999540e62160a562e8ac"
+          },
+          "effects": [],
+          "auditCodes": [
+            "project-scope-enforced"
+          ],
+          "gates": {
+            "executed": true,
+            "codes": [
+              "answer-gates-executed:general"
+            ]
+          },
+          "status": {
+            "lane": "general",
+            "modelRole": "chat",
+            "provider": "gate2-chat-adapter",
+            "retrieval": "available",
+            "reranker": "available",
+            "chatAdapter": "postgres-synthetic",
+            "projectAdapter": "postgres-synthetic",
+            "settingsAdapter": "postgres-synthetic",
+            "protectedStoresOpened": false,
+            "rollbackAvailable": true
+          },
+          "continuity": {
+            "durableChatEligible": true,
+            "turnRecorded": false,
+            "source": "postgres-synthetic"
+          }
+        }
+      ],
+      "elapsedMs": 281,
+      "counts": {
+        "gate1_requests": 3,
+        "gate1_turns": 3,
+        "gate2_requests": 3,
+        "gate2_turns": 3,
+        "request_rows": 1
+      }
+    },
+    "general": {
+      "phase": "general",
+      "interrupted": false,
+      "response": {
+        "schemaVersion": "runa2-answer-response/v2",
+        "requestId": "g2-integration-general",
+        "participantId": "synthetic-participant",
+        "projectId": "synthetic-project-a",
+        "threadId": "chat-g2-integration-general",
+        "lane": "general",
+        "answer": "Gate 2 synthetic continuity is stored in its isolated PostgreSQL schema.",
+        "ground": "record-answers",
+        "retrieval": {
+          "attempted": true,
+          "skipped": false,
+          "skipReason": "",
+          "empty": false,
+          "degraded": false,
+          "evidenceCount": 5,
+          "unavailable": [],
+          "omissions": []
+        },
+        "research": null,
+        "workspace": null,
+        "citations": [
+          {
+            "sourceId": "continuity",
+            "sectionId": "adapter",
+            "contentSha256": "273e8c0f52b5e303b5dbbd4af6ff8b58143b2a79af13f5479d46c9a82e8192f8",
+            "ordinal": 1
+          }
+        ],
+        "model": {
+          "role": "chat",
+          "provider": "gate2-chat-adapter",
+          "modelId": "stub-gate2-v1"
+        },
+        "completion": {
+          "reason": "complete",
+          "timedOut": false,
+          "outputLimited": false
+        },
+        "trace": {
+          "correlationId": "21f2ac5b2356a9099560e6a64014de93"
+        },
+        "effects": [],
+        "auditCodes": [
+          "project-scope-enforced"
+        ],
+        "gates": {
+          "executed": true,
+          "codes": [
+            "answer-gates-executed:general"
+          ]
+        },
+        "status": {
+          "lane": "general",
+          "modelRole": "chat",
+          "provider": "gate2-chat-adapter",
+          "retrieval": "available",
+          "reranker": "available",
+          "chatAdapter": "postgres-synthetic",
+          "projectAdapter": "postgres-synthetic",
+          "settingsAdapter": "postgres-synthetic",
+          "protectedStoresOpened": false,
+          "rollbackAvailable": true
+        },
+        "continuity": {
+          "durableChatEligible": true,
+          "turnRecorded": true,
+          "source": "postgres-synthetic"
+        }
+      },
+      "elapsedMs": 239,
+      "counts": {
+        "gate1_requests": 4,
+        "gate1_turns": 4,
+        "gate2_requests": 4,
+        "gate2_turns": 4,
+        "request_rows": 1
+      }
+    },
+    "research": {
+      "phase": "research",
+      "interrupted": false,
+      "response": {
+        "schemaVersion": "runa2-answer-response/v2",
+        "requestId": "g2-integration-research",
+        "participantId": "synthetic-participant",
+        "projectId": "synthetic-project-a",
+        "threadId": "chat-g2-integration-research",
+        "lane": "research",
+        "answer": "Gate 2 preserves read-only research continuity through scoped records and checkpoints.",
+        "ground": "record-answers",
+        "retrieval": {
+          "attempted": true,
+          "skipped": false,
+          "skipReason": "",
+          "empty": false,
+          "degraded": false,
+          "evidenceCount": 5,
+          "unavailable": [],
+          "omissions": []
+        },
+        "research": {
+          "passesPlanned": 6,
+          "passesRun": 6,
+          "passesWithNothing": 0,
+          "passagesRead": 5,
+          "unanswered": [
+            "preserve"
+          ],
+          "truncated": true
+        },
+        "workspace": null,
+        "citations": [
+          {
+            "sourceId": "research",
+            "sectionId": "continuity",
+            "contentSha256": "10f79055b0acd5091b48e27b19557d38a06f52060a2861966bb9213508d59b07",
+            "ordinal": 1
+          }
+        ],
+        "model": {
+          "role": "research",
+          "provider": "gate2-research-adapter",
+          "modelId": "stub-gate2-v1"
+        },
+        "completion": {
+          "reason": "complete",
+          "timedOut": false,
+          "outputLimited": false
+        },
+        "trace": {
+          "correlationId": "beb66505dfb81ec76e6380ed81f3f654"
+        },
+        "effects": [],
+        "auditCodes": [
+          "project-scope-enforced"
+        ],
+        "gates": {
+          "executed": true,
+          "codes": [
+            "answer-gates-executed:research"
+          ]
+        },
+        "status": {
+          "lane": "research",
+          "modelRole": "research",
+          "provider": "gate2-research-adapter",
+          "retrieval": "available",
+          "reranker": "available",
+          "chatAdapter": "postgres-synthetic",
+          "projectAdapter": "postgres-synthetic",
+          "settingsAdapter": "postgres-synthetic",
+          "protectedStoresOpened": false,
+          "rollbackAvailable": true
+        },
+        "continuity": {
+          "durableChatEligible": true,
+          "turnRecorded": true,
+          "source": "postgres-synthetic"
+        }
+      },
+      "elapsedMs": 249,
+      "counts": {
+        "gate1_requests": 5,
+        "gate1_turns": 5,
+        "gate2_requests": 5,
+        "gate2_turns": 5,
+        "request_rows": 1
+      }
+    },
+    "guarded": {
+      "phase": "guarded",
+      "interrupted": false,
+      "response": {
+        "schemaVersion": "runa2-answer-response/v2",
+        "requestId": "g2-integration-guarded",
+        "participantId": "synthetic-participant",
+        "projectId": "synthetic-project-a",
+        "threadId": "chat-g2-integration-guarded",
+        "lane": "guarded",
+        "answer": "The synthetic guarded policy keeps effects empty.",
+        "ground": "record-answers",
+        "retrieval": {
+          "attempted": true,
+          "skipped": false,
+          "skipReason": "",
+          "empty": false,
+          "degraded": false,
+          "evidenceCount": 5,
+          "unavailable": [],
+          "omissions": []
+        },
+        "research": null,
+        "workspace": null,
+        "citations": [
+          {
+            "sourceId": "governance",
+            "sectionId": "guarded",
+            "contentSha256": "699abc1663eb83f07c60cd71af0b0c3b3a0810fc16d1ccc27a4a9d8341fe68ca",
+            "ordinal": 1
+          }
+        ],
+        "model": {
+          "role": "chat",
+          "provider": "gate2-chat-adapter",
+          "modelId": "stub-gate2-v1"
+        },
+        "completion": {
+          "reason": "complete",
+          "timedOut": false,
+          "outputLimited": false
+        },
+        "trace": {
+          "correlationId": "2c906ade6a035bf4038fdb91c867b6bd"
+        },
+        "effects": [],
+        "auditCodes": [
+          "project-scope-enforced"
+        ],
+        "gates": {
+          "executed": true,
+          "codes": [
+            "answer-gates-executed:guarded"
+          ]
+        },
+        "status": {
+          "lane": "guarded",
+          "modelRole": "chat",
+          "provider": "gate2-chat-adapter",
+          "retrieval": "available",
+          "reranker": "available",
+          "chatAdapter": "postgres-synthetic",
+          "projectAdapter": "postgres-synthetic",
+          "settingsAdapter": "postgres-synthetic",
+          "protectedStoresOpened": false,
+          "rollbackAvailable": true
+        },
+        "continuity": {
+          "durableChatEligible": true,
+          "turnRecorded": true,
+          "source": "postgres-synthetic"
+        }
+      },
+      "elapsedMs": 245,
+      "counts": {
+        "gate1_requests": 6,
+        "gate1_turns": 6,
+        "gate2_requests": 6,
+        "gate2_turns": 6,
+        "request_rows": 1
+      }
+    },
+    "workspace": {
+      "phase": "workspace",
+      "interrupted": false,
+      "response": {
+        "schemaVersion": "runa2-answer-response/v2",
+        "requestId": "g2-integration-workspace",
+        "participantId": "synthetic-participant",
+        "projectId": "synthetic-project-a",
+        "threadId": "chat-g2-integration-workspace",
+        "lane": "workspace",
+        "answer": "The explicit workspace source says extra reads remain zero.",
+        "ground": "record-answers",
+        "retrieval": {
+          "attempted": true,
+          "skipped": false,
+          "skipReason": "",
+          "empty": false,
+          "degraded": false,
+          "evidenceCount": 1,
+          "unavailable": [],
+          "omissions": []
+        },
+        "research": null,
+        "workspace": {
+          "explicitSources": 1,
+          "resolvedSources": 1,
+          "extraReads": 0,
+          "citationStatus": "recognized"
+        },
+        "citations": [
+          {
+            "sourceId": "workspace",
+            "sectionId": "explicit",
+            "contentSha256": "969caa53a244d9762624b7206a67ea246501c12d362139bcdb562db72a7f8a8e",
+            "ordinal": 1
+          }
+        ],
+        "model": {
+          "role": "code",
+          "provider": "gate2-code-adapter",
+          "modelId": "stub-gate2-v1"
+        },
+        "completion": {
+          "reason": "complete",
+          "timedOut": false,
+          "outputLimited": false
+        },
+        "trace": {
+          "correlationId": "17a12937931fddd96a850dd5c3982f79"
+        },
+        "effects": [],
+        "auditCodes": [
+          "project-scope-enforced"
+        ],
+        "gates": {
+          "executed": true,
+          "codes": [
+            "answer-gates-executed:workspace"
+          ]
+        },
+        "status": {
+          "lane": "workspace",
+          "modelRole": "code",
+          "provider": "gate2-code-adapter",
+          "retrieval": "available",
+          "reranker": "available",
+          "chatAdapter": "postgres-synthetic",
+          "projectAdapter": "postgres-synthetic",
+          "settingsAdapter": "postgres-synthetic",
+          "protectedStoresOpened": false,
+          "rollbackAvailable": true
+        },
+        "continuity": {
+          "durableChatEligible": true,
+          "turnRecorded": true,
+          "source": "postgres-synthetic"
+        }
+      },
+      "elapsedMs": 205,
+      "counts": {
+        "gate1_requests": 7,
+        "gate1_turns": 7,
+        "gate2_requests": 7,
+        "gate2_turns": 7,
+        "request_rows": 1
+      }
+    },
+    "workspace-denied": {
+      "phase": "workspace-denied",
+      "interrupted": false,
+      "response": {
+        "schemaVersion": "runa2-answer-response/v2",
+        "requestId": "g2-integration-workspace-denied",
+        "participantId": "synthetic-participant",
+        "projectId": "synthetic-project-a",
+        "threadId": "chat-g2-integration-workspace-denied",
+        "lane": "workspace",
+        "answer": "The requested source belongs to another project and was denied before model delivery.",
+        "ground": "no-ground-needed",
+        "retrieval": {
+          "attempted": false,
+          "skipped": true,
+          "skipReason": "workspace-cross-project-denied",
+          "empty": true,
+          "degraded": false,
+          "evidenceCount": 0,
+          "unavailable": [],
+          "omissions": []
+        },
+        "research": null,
+        "workspace": {
+          "explicitSources": 1,
+          "resolvedSources": 0,
+          "extraReads": 0,
+          "citationStatus": "not-applicable"
+        },
+        "citations": [],
+        "model": {
+          "role": "not-invoked",
+          "provider": "none",
+          "modelId": "none"
+        },
+        "completion": {
+          "reason": "workspace-cross-project-denied",
+          "timedOut": false,
+          "outputLimited": false
+        },
+        "trace": {
+          "correlationId": "1f4a43ca93051c4265dd021a49309a6a"
+        },
+        "effects": [],
+        "auditCodes": [
+          "workspace-cross-project-denied"
+        ],
+        "gates": {
+          "executed": true,
+          "codes": [
+            "answer-gates-executed:workspace"
+          ]
+        },
+        "status": {
+          "lane": "workspace",
+          "modelRole": "code",
+          "provider": "available",
+          "retrieval": "not-used",
+          "reranker": "available",
+          "chatAdapter": "postgres-synthetic",
+          "projectAdapter": "postgres-synthetic",
+          "settingsAdapter": "postgres-synthetic",
+          "protectedStoresOpened": false,
+          "rollbackAvailable": true
+        },
+        "continuity": {
+          "durableChatEligible": true,
+          "turnRecorded": true,
+          "source": "postgres-synthetic"
+        }
+      },
+      "elapsedMs": 101,
+      "counts": {
+        "gate1_requests": 7,
+        "gate1_turns": 7,
+        "gate2_requests": 8,
+        "gate2_turns": 8,
+        "request_rows": 1
+      }
+    },
+    "unverified": {
+      "phase": "unverified",
+      "interrupted": false,
+      "response": {
+        "schemaVersion": "runa2-answer-response/v2",
+        "requestId": "g2-integration-unverified",
+        "participantId": "synthetic-participant",
+        "projectId": "synthetic-project-a",
+        "threadId": "chat-g2-integration-unverified",
+        "lane": "general",
+        "answer": "This answer remains ephemeral for an unverified participant.",
+        "ground": "record-answers",
+        "retrieval": {
+          "attempted": true,
+          "skipped": false,
+          "skipReason": "",
+          "empty": false,
+          "degraded": false,
+          "evidenceCount": 5,
+          "unavailable": [],
+          "omissions": []
+        },
+        "research": null,
+        "workspace": null,
+        "citations": [
+          {
+            "sourceId": "continuity",
+            "sectionId": "adapter",
+            "contentSha256": "273e8c0f52b5e303b5dbbd4af6ff8b58143b2a79af13f5479d46c9a82e8192f8",
+            "ordinal": 1
+          }
+        ],
+        "model": {
+          "role": "chat",
+          "provider": "gate2-chat-adapter",
+          "modelId": "stub-gate2-v1"
+        },
+        "completion": {
+          "reason": "complete",
+          "timedOut": false,
+          "outputLimited": false
+        },
+        "trace": {
+          "correlationId": "11e830e451ebe95f92509a8c785ded46"
+        },
+        "effects": [],
+        "auditCodes": [
+          "project-scope-enforced"
+        ],
+        "gates": {
+          "executed": true,
+          "codes": [
+            "answer-gates-executed:general"
+          ]
+        },
+        "status": {
+          "lane": "general",
+          "modelRole": "chat",
+          "provider": "gate2-chat-adapter",
+          "retrieval": "available",
+          "reranker": "available",
+          "chatAdapter": "postgres-synthetic",
+          "projectAdapter": "postgres-synthetic",
+          "settingsAdapter": "postgres-synthetic",
+          "protectedStoresOpened": false,
+          "rollbackAvailable": true
+        },
+        "continuity": {
+          "durableChatEligible": false,
+          "turnRecorded": false,
+          "source": "ephemeral-unverified"
+        }
+      },
+      "elapsedMs": 165,
+      "counts": {
+        "gate1_requests": 7,
+        "gate1_turns": 7,
+        "gate2_requests": 8,
+        "gate2_turns": 8,
+        "request_rows": 0
+      }
+    },
+    "continuity-prepare": {
+      "phase": "continuity-prepare",
+      "responses": [
+        {
+          "schemaVersion": "runa2-answer-response/v2",
+          "requestId": "g2-continuity-one",
+          "participantId": "synthetic-participant",
+          "projectId": "synthetic-project-a",
+          "threadId": "chat-continuity",
+          "lane": "general",
+          "answer": "The first synthetic continuity turn is recorded.",
+          "ground": "record-answers",
+          "retrieval": {
+            "attempted": true,
+            "skipped": false,
+            "skipReason": "",
+            "empty": false,
+            "degraded": false,
+            "evidenceCount": 5,
+            "unavailable": [],
+            "omissions": []
+          },
+          "research": null,
+          "workspace": null,
+          "citations": [
+            {
+              "sourceId": "continuity",
+              "sectionId": "adapter",
+              "contentSha256": "273e8c0f52b5e303b5dbbd4af6ff8b58143b2a79af13f5479d46c9a82e8192f8",
+              "ordinal": 1
+            }
+          ],
+          "model": {
+            "role": "chat",
+            "provider": "gate2-chat-adapter",
+            "modelId": "stub-gate2-v1"
+          },
+          "completion": {
+            "reason": "complete",
+            "timedOut": false,
+            "outputLimited": false
+          },
+          "trace": {
+            "correlationId": "c60619bed60ce040e4fc96ea503c2dd3"
+          },
+          "effects": [],
+          "auditCodes": [
+            "project-scope-enforced"
+          ],
+          "gates": {
+            "executed": true,
+            "codes": [
+              "answer-gates-executed:general"
+            ]
+          },
+          "status": {
+            "lane": "general",
+            "modelRole": "chat",
+            "provider": "gate2-chat-adapter",
+            "retrieval": "available",
+            "reranker": "available",
+            "chatAdapter": "postgres-synthetic",
+            "projectAdapter": "postgres-synthetic",
+            "settingsAdapter": "postgres-synthetic",
+            "protectedStoresOpened": false,
+            "rollbackAvailable": true
+          },
+          "continuity": {
+            "durableChatEligible": true,
+            "turnRecorded": true,
+            "source": "postgres-synthetic"
+          }
+        },
+        {
+          "schemaVersion": "runa2-answer-response/v2",
+          "requestId": "g2-continuity-two",
+          "participantId": "synthetic-participant",
+          "projectId": "synthetic-project-a",
+          "threadId": "chat-continuity",
+          "lane": "research",
+          "answer": "The second synthetic continuity turn is recorded.",
+          "ground": "record-answers",
+          "retrieval": {
+            "attempted": true,
+            "skipped": false,
+            "skipReason": "",
+            "empty": false,
+            "degraded": false,
+            "evidenceCount": 5,
+            "unavailable": [],
+            "omissions": []
+          },
+          "research": {
+            "passesPlanned": 6,
+            "passesRun": 6,
+            "passesWithNothing": 0,
+            "passagesRead": 5,
+            "unanswered": [
+              "second",
+              "turn"
+            ],
+            "truncated": true
+          },
+          "workspace": null,
+          "citations": [
+            {
+              "sourceId": "research",
+              "sectionId": "continuity",
+              "contentSha256": "10f79055b0acd5091b48e27b19557d38a06f52060a2861966bb9213508d59b07",
+              "ordinal": 1
+            }
+          ],
+          "model": {
+            "role": "research",
+            "provider": "gate2-research-adapter",
+            "modelId": "stub-gate2-v1"
+          },
+          "completion": {
+            "reason": "complete",
+            "timedOut": false,
+            "outputLimited": false
+          },
+          "trace": {
+            "correlationId": "25a5b6ace8555ac5b613bc7eb6bbaf90"
+          },
+          "effects": [],
+          "auditCodes": [
+            "project-scope-enforced"
+          ],
+          "gates": {
+            "executed": true,
+            "codes": [
+              "answer-gates-executed:research"
+            ]
+          },
+          "status": {
+            "lane": "research",
+            "modelRole": "research",
+            "provider": "gate2-research-adapter",
+            "retrieval": "available",
+            "reranker": "available",
+            "chatAdapter": "postgres-synthetic",
+            "projectAdapter": "postgres-synthetic",
+            "settingsAdapter": "postgres-synthetic",
+            "protectedStoresOpened": false,
+            "rollbackAvailable": true
+          },
+          "continuity": {
+            "durableChatEligible": true,
+            "turnRecorded": true,
+            "source": "postgres-synthetic"
+          }
+        }
+      ],
+      "branch": {
+        "chatId": "chat-continuity-branch",
+        "participantId": "synthetic-participant",
+        "projectId": "synthetic-project-a",
+        "title": "Synthetic branch",
+        "parentChatId": "chat-continuity",
+        "branchFromTurn": 0,
+        "archived": false,
+        "unread": false,
+        "turns": [
+          {
+            "requestId": "g2-continuity-one",
+            "lane": "general",
+            "user": "Record the first synthetic continuity turn.",
+            "assistant": "The first synthetic continuity turn is recorded.",
+            "at": "2026-08-21T05:08:56.217Z"
+          }
+        ]
+      }
+    },
+    "continuity-resume": {
+      "phase": "continuity-resume",
+      "chat": {
+        "chatId": "chat-continuity",
+        "participantId": "synthetic-participant",
+        "projectId": "synthetic-project-a",
+        "title": "Synthetic continuity chat",
+        "parentChatId": null,
+        "branchFromTurn": null,
+        "archived": false,
+        "unread": true,
+        "turns": [
+          {
+            "requestId": "g2-continuity-one",
+            "lane": "general",
+            "user": "Record the first synthetic continuity turn.",
+            "assistant": "The first synthetic continuity turn is recorded.",
+            "at": "2026-08-21T05:08:56.120Z"
+          },
+          {
+            "requestId": "g2-continuity-two",
+            "lane": "research",
+            "user": "Record the second synthetic continuity turn.",
+            "assistant": "The second synthetic continuity turn is recorded.",
+            "at": "2026-08-21T05:08:56.203Z"
+          }
+        ]
+      },
+      "branch": {
+        "chatId": "chat-continuity-branch",
+        "participantId": "synthetic-participant",
+        "projectId": "synthetic-project-a",
+        "title": "Synthetic branch",
+        "parentChatId": "chat-continuity",
+        "branchFromTurn": 0,
+        "archived": false,
+        "unread": false,
+        "turns": [
+          {
+            "requestId": "g2-continuity-one",
+            "lane": "general",
+            "user": "Record the first synthetic continuity turn.",
+            "assistant": "The first synthetic continuity turn is recorded.",
+            "at": "2026-08-21T05:08:56.217Z"
+          }
+        ]
+      },
+      "chats": [
+        {
+          "chatId": "chat-continuity-branch",
+          "title": "Synthetic branch",
+          "archived": false,
+          "unread": false
+        },
+        {
+          "chatId": "chat-continuity",
+          "title": "Synthetic continuity chat",
+          "archived": false,
+          "unread": true
+        },
+        {
+          "chatId": "chat-g2-integration-workspace-denied",
+          "title": "Read the explicit foreign workspace source.",
+          "archived": false,
+          "unread": false
+        },
+        {
+          "chatId": "chat-g2-integration-workspace",
+          "title": "Summarize the explicit synthetic workspace source.",
+          "archived": false,
+          "unread": false
+        },
+        {
+          "chatId": "chat-g2-integration-guarded",
+          "title": "Which synthetic policy keeps guarded lookup read-only?",
+          "archived": false,
+          "unread": false
+        },
+        {
+          "chatId": "chat-g2-integration-research",
+          "title": "How does Gate 2 preserve read-only research continuity?",
+          "archived": false,
+          "unread": false
+        },
+        {
+          "chatId": "chat-g2-integration-general",
+          "title": "Where is Gate 2 continuity stored?",
+          "archived": false,
+          "unread": false
+        },
+        {
+          "chatId": "chat-g2-integration-concurrent",
+          "title": "Return one synthetic answer for concurrent duplicate delivery.",
+          "archived": false,
+          "unread": false
+        },
+        {
+          "chatId": "chat-g2-integration-duplicate",
+          "title": "Return one synthetic answer for duplicate delivery.",
+          "archived": false,
+          "unread": false
+        },
+        {
+          "chatId": "chat-g2-integration-restart",
+          "title": "Resume the synthetic Gate 2 answer after process restart.",
+          "archived": false,
+          "unread": false
+        }
+      ],
+      "search": [
+        {
+          "chatId": "chat-continuity",
+          "title": "Synthetic continuity chat",
+          "archived": false,
+          "unread": true
+        }
+      ],
+      "settings": {
+        "defaultIntelligenceLevel": "High"
+      },
+      "project": {
+        "projectId": "synthetic-project-a",
+        "participantId": "synthetic-participant",
+        "displayName": "Synthetic Gate 2",
+        "status": "managed",
+        "environments": [
+          "disposable-loopback"
+        ],
+        "verificationCommands": [
+          "npm.cmd run test:gate2"
+        ],
+        "sourceReferences": [
+          "workspace:explicit"
+        ],
+        "memoryEnabled": true,
+        "memory": [
+          "This synthetic project remains read-only."
+        ]
+      }
+    }
+  },
+  "traceSha256": "71bb9bc626d667a33e9988556d036d3fc1c852773b78eec58ed60c0eb85ddfe1",
+  "checks": {
+    "selectedStackReached": true,
+    "restartInterruptedAfterCommit": true,
+    "restartResumedWithoutDuplicate": true,
+    "duplicateExactlyOnce": true,
+    "concurrentDuplicateExactlyOnce": true,
+    "generalRoleDeterministic": true,
+    "researchRoleDeterministic": true,
+    "guardedRoleDeterministic": true,
+    "workspaceExplicitOnly": true,
+    "workspaceCrossProjectDenied": true,
+    "unverifiedEphemeral": true,
+    "continuityRestartPreserved": true,
+    "projectAndSettingPreserved": true,
+    "protectedStoresNeverOpened": true,
+    "answerGatesAcrossLanes": true,
+    "providerCallsBounded": true,
+    "durableCountsExact": true,
+    "checkpointsPresent": true,
+    "tracesRetained": true,
+    "tracesRedacted": true,
+    "rollbackGate2Only": true
+  },
+  "passed": true,
+  "servicesStopped": {
+    "caddy": true,
+    "reranker": true,
+    "provider": true,
+    "collector": true,
+    "qdrant": true,
+    "postgres": true
+  },
+  "rollbackClean": true
+}

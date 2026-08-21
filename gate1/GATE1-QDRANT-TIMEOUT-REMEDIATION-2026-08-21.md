@@ -1,9 +1,8 @@
 # Gate 1 Qdrant timeout-classification remediation — 2026-08-21
 
 Status: the steward approved this narrow remediation on 2026-08-21 after Gate 2 regression review.
-Implementation and refreshed synthetic evidence are complete on
-`runa2/gate-2-read-only-continuity`. It remains subject to Gate 2B evidence acceptance and Gate 2C
-merge approval.
+Implementation and refreshed synthetic evidence were accepted under Gate 2B and merged into
+`runa2/integration` with Gate 2 as `4c4767f` after separate Gate 2C approval.
 
 ## Layman summary
 

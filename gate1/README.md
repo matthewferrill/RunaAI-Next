@@ -7,8 +7,8 @@ Qwen3.6 deliberate review and the existing live BGE endpoint remain explicitly d
 
 Gate 2 regression review later exposed an intermittent Qdrant HTTP timeout-label race. The steward
 approved a narrow normalization fix on 2026-08-21; its implementation and refreshed evidence are
-recorded in `GATE1-QDRANT-TIMEOUT-REMEDIATION-2026-08-21.md`. The fix is isolated on the Gate 2 branch
-pending Gate 2B evidence acceptance and Gate 2C merge approval.
+recorded in `GATE1-QDRANT-TIMEOUT-REMEDIATION-2026-08-21.md`. The fix was accepted under Gate 2B and
+merged into `runa2/integration` as part of protected Gate 2 merge `4c4767f`.
 
 ## Boundary
 

@@ -25,7 +25,7 @@ exit $LASTEXITCODE
 '@
 Set-Content -LiteralPath (Join-Path $control 'Run-Application.ps1') -Encoding utf8 -Value @"
 `$root='C:\AI\RunaAI-Next-Candidate'
-& '$release\runtime\node.exe' '$release\gate6b\server.mjs' --config '$config'
+& '$release\runtime\node.exe' '$release\gate6b\server.mjs' --config '$config' 1>> "`$root\logs\application.stdout.log" 2>> "`$root\logs\application.stderr.log"
 exit `$LASTEXITCODE
 "@
 $taskPath = '\RunaAI-Next\'
@@ -48,6 +48,6 @@ foreach ($name in @('OpenFga','Keycloak','Caddy')) { Start-ScheduledTask -TaskPa
 $deadline=[DateTime]::UtcNow.AddMinutes(3); do { Start-Sleep -Seconds 1; $ports=@(9761,9762,9763,9764,9770 | Where-Object { Get-NetTCPConnection -State Listen -LocalPort $_ -ErrorAction SilentlyContinue }) } until ($ports.Count -eq 5 -or [DateTime]::UtcNow -gt $deadline)
 if ($ports.Count -ne 5) { throw 'candidate-dependency-task-start-failed' }
 Start-ScheduledTask -TaskPath $taskPath -TaskName 'Application'
-$deadline=[DateTime]::UtcNow.AddMinutes(2); do { Start-Sleep -Seconds 1; try { $live=(Invoke-RestMethod -Uri 'http://127.0.0.1:9760/health/live' -TimeoutSec 3).live -eq $true } catch { $live=$false } } until ($live -or [DateTime]::UtcNow -gt $deadline)
+$deadline=[DateTime]::UtcNow.AddMinutes(10); do { Start-Sleep -Seconds 1; try { $live=(Invoke-RestMethod -Uri 'http://127.0.0.1:9760/health/live' -TimeoutSec 3).live -eq $true } catch { $live=$false } } until ($live -or [DateTime]::UtcNow -gt $deadline)
 if (-not $live) { throw 'candidate-application-task-start-failed' }
 [ordered]@{ schemaVersion='runa2-gate6b-control-register/v1'; registered=$true; releaseId=$ReleaseId; taskCount=@(Get-ScheduledTask -TaskPath $taskPath).Count; applicationLive=$live; shadow=$true; protectedDataImported=$false; ownerCredentialEnrolled=$false; productionTrafficChanged=$false; privateValuesIncluded=$false } | ConvertTo-Json -Compress

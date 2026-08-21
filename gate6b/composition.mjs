@@ -109,9 +109,14 @@ export async function createProductionComposition({ loadedConfig, releaseRoot })
     modelId: config.openfga.modelId, credential: openfgaCredential,
     timeoutMs: config.limits.upstreamDeadlineMs }) });
   const cutoverStore = new PostgresCutoverStore({ pool, cutoverId: config.cutoverId });
-  await cutoverStore.initialize(createInitialCutoverState({ cutoverId: config.cutoverId, manifest,
-    sourceGeneration: config.sourceGeneration, targetGeneration: config.targetGeneration }));
-  const retainedCutover = await cutoverStore.load();
+  const initialCutover = createInitialCutoverState({ cutoverId: config.cutoverId, manifest,
+    sourceGeneration: config.sourceGeneration, targetGeneration: config.targetGeneration });
+  await cutoverStore.initialize(initialCutover);
+  let retainedCutover = await cutoverStore.load();
+  if (retainedCutover.releaseManifestDigest !== manifest.manifestDigest) {
+    await cutoverStore.rebindPristineRelease(initialCutover);
+    retainedCutover = await cutoverStore.load();
+  }
   if (retainedCutover.releaseManifestDigest !== manifest.manifestDigest
       || retainedCutover.sourceGeneration !== config.sourceGeneration
       || retainedCutover.targetGeneration !== config.targetGeneration) {

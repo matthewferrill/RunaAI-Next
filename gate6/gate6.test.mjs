@@ -3,7 +3,7 @@ import test from "node:test";
 
 import { sha256 } from "../gate4/canonical.mjs";
 import { MemoryCutoverStore } from "./adapters/memory.mjs";
-import { createInitialCutoverState, Gate6CutoverCoordinator } from "./cutover.mjs";
+import { createInitialCutoverState, Gate6CutoverCoordinator, rebindPristineCutoverRelease } from "./cutover.mjs";
 import { exactApprovedKnowledge, exactDomains, greenReadiness, liveChecks, liveStatus,
   SOURCE_GENERATION, syntheticRelease, syntheticReleaseBoundary, TARGET_GENERATION } from "./fixtures.mjs";
 import { evaluateReadiness, requiredReadinessFacts } from "./readiness.mjs";
@@ -21,6 +21,25 @@ function harness() {
   const coordinator = new Gate6CutoverCoordinator({ store, manifest, now: () => new Date(clock) });
   return { manifest, store, coordinator, advance: milliseconds => { clock = new Date(clock.getTime() + milliseconds); } };
 }
+
+test("a release can be rebound only before the first cutover operation", () => {
+  const originalManifest = syntheticRelease();
+  const replacementManifest = buildReleaseManifest({ releaseId: "replacement-release",
+    commit: "b".repeat(40), artifactDigest: "c".repeat(64), configurationDigest: "d".repeat(64),
+    applicationEntryPoint: originalManifest.applicationEntryPoint,
+    model: originalManifest.model, services: originalManifest.services });
+  const cutoverId = "pristine-release-rebind";
+  const original = createInitialCutoverState({ cutoverId, manifest: originalManifest,
+    sourceGeneration: SOURCE_GENERATION, targetGeneration: TARGET_GENERATION });
+  const replacement = createInitialCutoverState({ cutoverId, manifest: replacementManifest,
+    sourceGeneration: SOURCE_GENERATION, targetGeneration: TARGET_GENERATION });
+  const rebound = rebindPristineCutoverRelease(original, replacement, 0);
+  assert.equal(rebound.releaseManifestDigest, replacementManifest.manifestDigest);
+  assert.throws(() => rebindPristineCutoverRelease({ ...original, phase: "candidate-ready", revision: 1 }, replacement, 0),
+    hasCode("cutover-release-rebind-denied"));
+  assert.throws(() => rebindPristineCutoverRelease(original, replacement, 1),
+    hasCode("cutover-release-rebind-denied"));
+});
 
 async function toReconciled(value, suffix = "") {
   const domains = exactDomains(`reconcile${suffix}`);

@@ -254,3 +254,10 @@ test("Control Caddy listeners are pinned to their exact interfaces", async () =>
   assert.match(script, /https:\/\/\$PrivateAddress`:9761 \{\r?\n  bind \$PrivateAddress/);
   assert.match(script, /http:\/\/127\.0\.0\.1:9770 \{\r?\n  bind 127\.0\.0\.1/);
 });
+
+test("Control application startup retains logs and permits the full integrity scan", async () => {
+  const script = await readFile(resolve(import.meta.dirname, "control", "Register-ControlShadow.ps1"), "utf8");
+  assert.match(script, /application\.stdout\.log/);
+  assert.match(script, /application\.stderr\.log/);
+  assert.match(script, /AddMinutes\(10\)/);
+});

@@ -8,6 +8,7 @@ import { PostgresCutoverStore } from "./adapters/postgres.mjs";
 import { createInitialCutoverState, Gate6CutoverCoordinator } from "./cutover.mjs";
 import { exactApprovedKnowledge, exactDomains, greenReadiness, liveChecks, liveStatus,
   SOURCE_GENERATION, syntheticRelease, TARGET_GENERATION } from "./fixtures.mjs";
+import { buildReleaseManifest } from "./release.mjs";
 
 const root = path.resolve(import.meta.dirname, "..");
 const outputRoot = path.join(root, "artifacts", "runs", "gate6-selected-core-cutover");
@@ -61,13 +62,27 @@ async function promote(coordinator, suffix) {
 }
 
 let postgresRunning = false;
-let primaryStore, restartStore, rollbackStore, report, failure;
+let rebindStore, primaryStore, restartStore, rollbackStore, report, failure;
 let stoppedForRestart = false;
 try {
   initializePostgres(); startPostgres(); postgresRunning = true;
   const pool = new pg.Pool({ connectionString });
   await pool.query("CREATE SCHEMA gate5_retained; CREATE TABLE gate5_retained.marker(id int)");
   await pool.end();
+
+  const rebindId = "gate6-integration-release-rebind";
+  const rebindOriginal = createInitialCutoverState({ cutoverId: rebindId, manifest,
+    sourceGeneration: SOURCE_GENERATION, targetGeneration: TARGET_GENERATION });
+  const replacementManifest = buildReleaseManifest({ releaseId: "gate6-integration-replacement",
+    commit: "b".repeat(40), artifactDigest: "c".repeat(64), configurationDigest: "d".repeat(64),
+    applicationEntryPoint: manifest.applicationEntryPoint, model: manifest.model, services: manifest.services });
+  const rebindReplacement = createInitialCutoverState({ cutoverId: rebindId, manifest: replacementManifest,
+    sourceGeneration: SOURCE_GENERATION, targetGeneration: TARGET_GENERATION });
+  rebindStore = new PostgresCutoverStore({ connectionString, cutoverId: rebindId });
+  await rebindStore.initialize(rebindOriginal, { reset: true });
+  await rebindStore.rebindPristineRelease(rebindReplacement);
+  const reboundRelease = await rebindStore.load();
+  await rebindStore.close(); rebindStore = null;
 
   const cutoverId = "gate6-integration-close";
   const initial = createInitialCutoverState({ cutoverId, manifest,
@@ -129,6 +144,8 @@ try {
   await scanPool.end();
 
   const checks = {
+    pristineReleaseRebind: reboundRelease.releaseManifestDigest === replacementManifest.manifestDigest
+      && reboundRelease.phase === "planned" && reboundRelease.revision === 0,
     durableStatePersisted: beforeRestart.phase === "promoted" && beforeRestart.revision === 7,
     responseLossVisible: responseLossCode === "cutover-response-lost",
     responseLossRetryIdempotent: resumedPromotion.replayed === true && beforeRestart.operations === 7,
@@ -160,6 +177,7 @@ try {
   if (!report.passed) throw new Error(`Gate 6 integration checks failed: ${JSON.stringify(checks)}`);
 } catch (error) { failure = error; }
 finally {
+  await rebindStore?.close().catch(() => {});
   await primaryStore?.close().catch(() => {});
   await restartStore?.close().catch(() => {});
   await rollbackStore?.close().catch(() => {});

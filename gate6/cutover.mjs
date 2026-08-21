@@ -79,6 +79,22 @@ export function createInitialCutoverState({ cutoverId, manifest, sourceGeneratio
   });
 }
 
+export function rebindPristineCutoverRelease(currentState, nextInitialState, operationCount) {
+  if (!Number.isInteger(operationCount) || operationCount !== 0) {
+    throw coded("cutover-release-rebind-denied", "A release may be rebound only before any cutover operation exists.");
+  }
+  const current = clone(currentState);
+  const next = clone(nextInitialState);
+  const rebound = { ...current,
+    releaseManifestDigest: next.releaseManifestDigest,
+    releaseCommit: next.releaseCommit,
+    releaseArtifactDigest: next.releaseArtifactDigest };
+  if (canonicalJson(rebound) !== canonicalJson(next)) {
+    throw coded("cutover-release-rebind-denied", "A release may be rebound only from the exact pristine planned state.");
+  }
+  return Object.freeze(next);
+}
+
 export class Gate6CutoverCoordinator {
   constructor({ store, manifest, now = () => new Date() }) {
     if (!store?.load || !store?.findOperation || !store?.commitOperation) throw coded("cutover-store-required", "A durable cutover store is required.");

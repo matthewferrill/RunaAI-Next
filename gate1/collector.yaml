@@ -1,0 +1,18 @@
+receivers:
+  otlp:
+    protocols:
+      http:
+        endpoint: 127.0.0.1:9578
+
+exporters:
+  file:
+    path: artifacts/runs/gate1-read-only-slice/traces.json
+
+service:
+  telemetry:
+    logs:
+      level: warn
+  pipelines:
+    traces:
+      receivers: [otlp]
+      exporters: [file]

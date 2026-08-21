@@ -1,0 +1,929 @@
+{
+  "schemaVersion": "runa2-gate1-stub-integration/v1",
+  "runtime": "v22.22.0",
+  "selectedComposition": [
+    "Mastra",
+    "AI SDK/OpenAI-compatible",
+    "Caddy",
+    "LangGraph/PostgreSQL",
+    "PostgreSQL records",
+    "Qdrant derived index",
+    "windowed reranker",
+    "OpenTelemetry"
+  ],
+  "syntheticOnly": true,
+  "initialAlignment": {
+    "sourceCount": 7,
+    "vectorCount": 7,
+    "digestsAligned": true,
+    "aligned": true
+  },
+  "finalAlignment": {
+    "sourceCount": 6,
+    "vectorCount": 6,
+    "digestsAligned": true,
+    "aligned": true
+  },
+  "database": {
+    "requests": 14,
+    "turns": 14,
+    "checkpoints": 42
+  },
+  "providerChatCalls": 7,
+  "slowProviderChatCalls": 1,
+  "outcomes": {
+    "interrupt": {
+      "phase": "interrupt",
+      "interrupted": true,
+      "code": "response-delivery-interrupted",
+      "counts": {
+        "requests": 1,
+        "turns": 1
+      }
+    },
+    "resume": {
+      "phase": "resume",
+      "interrupted": false,
+      "response": {
+        "lane": "research",
+        "model": {
+          "role": "fast-chat-research",
+          "modelId": "stub-deterministic-v1",
+          "provider": "gate1-private-boundary"
+        },
+        "trace": {
+          "correlationId": "e6e8246fd0d557fe5200257454c36852"
+        },
+        "answer": "A checkpointed synthetic answer resumes without repeating completed work.",
+        "ground": "record-answers",
+        "effects": [],
+        "research": {
+          "passesRun": 5,
+          "truncated": false,
+          "unanswered": [],
+          "passagesRead": 4,
+          "passesPlanned": 5,
+          "passesWithNothing": 0
+        },
+        "threadId": "synthetic-thread",
+        "citations": [
+          {
+            "ordinal": 1,
+            "sourceId": "restart",
+            "sectionId": "answer",
+            "contentSha256": "5726585517f86fe2fe80e425ca8e4b0b01c9387d94222f8bc9c1e7357511d7eb"
+          }
+        ],
+        "projectId": "synthetic-project-a",
+        "requestId": "integration-restart",
+        "retrieval": {
+          "empty": false,
+          "skipped": false,
+          "degraded": false,
+          "attempted": true,
+          "omissions": [
+            "Retrieved content containing authority or tool instructions was withheld before model processing.",
+            "One or more derived references were stale, revoked, or outside the active project record."
+          ],
+          "skipReason": "",
+          "unavailable": [],
+          "evidenceCount": 4
+        },
+        "auditCodes": [
+          "project-scope-enforced",
+          "retrieved-instruction-denied",
+          "inactive-derived-reference-excluded"
+        ],
+        "completion": {
+          "reason": "complete",
+          "timedOut": false,
+          "outputLimited": false
+        },
+        "participantId": "synthetic-participant",
+        "schemaVersion": "runa2-answer-response/v1"
+      },
+      "counts": {
+        "requests": 1,
+        "turns": 1
+      }
+    },
+    "duplicate": {
+      "phase": "duplicate",
+      "interrupted": false,
+      "response": {
+        "lane": "research",
+        "model": {
+          "role": "fast-chat-research",
+          "modelId": "stub-deterministic-v1",
+          "provider": "gate1-private-boundary"
+        },
+        "trace": {
+          "correlationId": "e6e8246fd0d557fe5200257454c36852"
+        },
+        "answer": "A checkpointed synthetic answer resumes without repeating completed work.",
+        "ground": "record-answers",
+        "effects": [],
+        "research": {
+          "passesRun": 5,
+          "truncated": false,
+          "unanswered": [],
+          "passagesRead": 4,
+          "passesPlanned": 5,
+          "passesWithNothing": 0
+        },
+        "threadId": "synthetic-thread",
+        "citations": [
+          {
+            "ordinal": 1,
+            "sourceId": "restart",
+            "sectionId": "answer",
+            "contentSha256": "5726585517f86fe2fe80e425ca8e4b0b01c9387d94222f8bc9c1e7357511d7eb"
+          }
+        ],
+        "projectId": "synthetic-project-a",
+        "requestId": "integration-restart",
+        "retrieval": {
+          "empty": false,
+          "skipped": false,
+          "degraded": false,
+          "attempted": true,
+          "omissions": [
+            "Retrieved content containing authority or tool instructions was withheld before model processing.",
+            "One or more derived references were stale, revoked, or outside the active project record."
+          ],
+          "skipReason": "",
+          "unavailable": [],
+          "evidenceCount": 4
+        },
+        "auditCodes": [
+          "project-scope-enforced",
+          "retrieved-instruction-denied",
+          "inactive-derived-reference-excluded"
+        ],
+        "completion": {
+          "reason": "complete",
+          "timedOut": false,
+          "outputLimited": false
+        },
+        "participantId": "synthetic-participant",
+        "schemaVersion": "runa2-answer-response/v1"
+      },
+      "counts": {
+        "requests": 1,
+        "turns": 1
+      }
+    },
+    "ordinary": {
+      "phase": "ordinary",
+      "interrupted": false,
+      "response": {
+        "lane": "general",
+        "model": {
+          "role": "fast-chat-research",
+          "modelId": "stub-deterministic-v1",
+          "provider": "gate1-private-boundary"
+        },
+        "trace": {
+          "correlationId": "a4ae195c544ce8b7640439c5976d82d3"
+        },
+        "answer": "The reranker is configured at the synthetic private endpoint.",
+        "ground": "record-answers",
+        "effects": [],
+        "research": null,
+        "threadId": "synthetic-thread",
+        "citations": [
+          {
+            "ordinal": 1,
+            "sourceId": "configuration",
+            "sectionId": "reranker",
+            "contentSha256": "b4732a3eef769541a756caca6c574b57f66a7a299867d5ae11f3c7298cadc8eb"
+          }
+        ],
+        "projectId": "synthetic-project-a",
+        "requestId": "integration-ordinary",
+        "retrieval": {
+          "empty": false,
+          "skipped": false,
+          "degraded": false,
+          "attempted": true,
+          "omissions": [
+            "Retrieved content containing authority or tool instructions was withheld before model processing.",
+            "One or more derived references were stale, revoked, or outside the active project record."
+          ],
+          "skipReason": "",
+          "unavailable": [],
+          "evidenceCount": 4
+        },
+        "auditCodes": [
+          "project-scope-enforced",
+          "retrieved-instruction-denied",
+          "inactive-derived-reference-excluded"
+        ],
+        "completion": {
+          "reason": "complete",
+          "timedOut": false,
+          "outputLimited": false
+        },
+        "participantId": "synthetic-participant",
+        "schemaVersion": "runa2-answer-response/v1"
+      },
+      "counts": {
+        "requests": 1,
+        "turns": 1
+      }
+    },
+    "honest-miss": {
+      "phase": "honest-miss",
+      "interrupted": false,
+      "response": {
+        "lane": "general",
+        "model": {
+          "role": "not-invoked",
+          "modelId": "none",
+          "provider": "none"
+        },
+        "trace": {
+          "correlationId": "b13771c8b2234c6bdff0c9df514a5105"
+        },
+        "answer": "The synthetic project record did not contain evidence that answers that question.",
+        "ground": "record-silent",
+        "effects": [],
+        "research": null,
+        "threadId": "synthetic-thread",
+        "citations": [],
+        "projectId": "synthetic-empty-project",
+        "requestId": "integration-honest-miss",
+        "retrieval": {
+          "empty": true,
+          "skipped": false,
+          "degraded": false,
+          "attempted": true,
+          "omissions": [],
+          "skipReason": "",
+          "unavailable": [],
+          "evidenceCount": 0
+        },
+        "auditCodes": [
+          "project-scope-enforced",
+          "record-silent"
+        ],
+        "completion": {
+          "reason": "honest-empty",
+          "timedOut": false,
+          "outputLimited": false
+        },
+        "participantId": "synthetic-participant",
+        "schemaVersion": "runa2-answer-response/v1"
+      },
+      "counts": {
+        "requests": 1,
+        "turns": 1
+      }
+    },
+    "dependency-loss": {
+      "phase": "dependency-loss",
+      "interrupted": false,
+      "response": {
+        "lane": "research",
+        "model": {
+          "role": "not-invoked",
+          "modelId": "none",
+          "provider": "none"
+        },
+        "trace": {
+          "correlationId": "70050db04025b043154530a329964cf2"
+        },
+        "answer": "I could not check the synthetic project record because its retrieval dependency was unavailable.",
+        "ground": "record-silent",
+        "effects": [],
+        "research": {
+          "passesRun": 0,
+          "truncated": false,
+          "unanswered": [
+            "whole-question",
+            "where",
+            "model",
+            "role",
+            "selected"
+          ],
+          "passagesRead": 0,
+          "passesPlanned": 5,
+          "passesWithNothing": 0
+        },
+        "threadId": "synthetic-thread",
+        "citations": [],
+        "projectId": "synthetic-project-a",
+        "requestId": "integration-dependency-loss",
+        "retrieval": {
+          "empty": false,
+          "skipped": false,
+          "degraded": true,
+          "attempted": true,
+          "omissions": [
+            "Synthetic retrieval dependency was unavailable; this is not an empty-record result."
+          ],
+          "skipReason": "",
+          "unavailable": [
+            "retrieval-unavailable"
+          ],
+          "evidenceCount": 0
+        },
+        "auditCodes": [
+          "retrieval-dependency-unavailable"
+        ],
+        "completion": {
+          "reason": "dependency-unavailable",
+          "timedOut": false,
+          "outputLimited": false
+        },
+        "participantId": "synthetic-participant",
+        "schemaVersion": "runa2-answer-response/v1"
+      },
+      "counts": {
+        "requests": 1,
+        "turns": 1
+      }
+    },
+    "timeout": {
+      "phase": "timeout",
+      "interrupted": false,
+      "response": {
+        "lane": "general",
+        "model": {
+          "role": "not-invoked",
+          "modelId": "none",
+          "provider": "none"
+        },
+        "trace": {
+          "correlationId": "4d56c29b848b36c283b05e99cfeaf75e"
+        },
+        "answer": "The answer was not completed before the request deadline.",
+        "ground": "record-answers",
+        "effects": [],
+        "research": null,
+        "threadId": "synthetic-thread",
+        "citations": [],
+        "projectId": "synthetic-project-a",
+        "requestId": "integration-timeout",
+        "retrieval": {
+          "empty": false,
+          "skipped": false,
+          "degraded": false,
+          "attempted": true,
+          "omissions": [
+            "Retrieved content containing authority or tool instructions was withheld before model processing.",
+            "One or more derived references were stale, revoked, or outside the active project record."
+          ],
+          "skipReason": "",
+          "unavailable": [],
+          "evidenceCount": 4
+        },
+        "auditCodes": [
+          "project-scope-enforced",
+          "retrieved-instruction-denied",
+          "inactive-derived-reference-excluded",
+          "provider-timeout"
+        ],
+        "completion": {
+          "reason": "timeout",
+          "timedOut": true,
+          "outputLimited": false
+        },
+        "participantId": "synthetic-participant",
+        "schemaVersion": "runa2-answer-response/v1"
+      },
+      "counts": {
+        "requests": 1,
+        "turns": 1
+      }
+    },
+    "unknown-citation": {
+      "phase": "unknown-citation",
+      "interrupted": false,
+      "response": {
+        "lane": "general",
+        "model": {
+          "role": "fast-chat-research",
+          "modelId": "stub-deterministic-v1",
+          "provider": "gate1-private-boundary"
+        },
+        "trace": {
+          "correlationId": "c7a2fdae949b306c87cfe2cd06413e2b"
+        },
+        "answer": "This answer names an unavailable section.\n\nCitation check: one or more references were not present in the supplied evidence.",
+        "ground": "record-answers",
+        "effects": [],
+        "research": null,
+        "threadId": "synthetic-thread",
+        "citations": [],
+        "projectId": "synthetic-project-a",
+        "requestId": "integration-unknown-citation",
+        "retrieval": {
+          "empty": false,
+          "skipped": false,
+          "degraded": false,
+          "attempted": true,
+          "omissions": [
+            "Retrieved content containing authority or tool instructions was withheld before model processing.",
+            "One or more derived references were stale, revoked, or outside the active project record."
+          ],
+          "skipReason": "",
+          "unavailable": [],
+          "evidenceCount": 4
+        },
+        "auditCodes": [
+          "project-scope-enforced",
+          "retrieved-instruction-denied",
+          "inactive-derived-reference-excluded",
+          "unknown-citation"
+        ],
+        "completion": {
+          "reason": "citation-unverified",
+          "timedOut": false,
+          "outputLimited": false
+        },
+        "participantId": "synthetic-participant",
+        "schemaVersion": "runa2-answer-response/v1"
+      },
+      "counts": {
+        "requests": 1,
+        "turns": 1
+      }
+    },
+    "instruction": {
+      "phase": "instruction",
+      "interrupted": false,
+      "response": {
+        "lane": "general",
+        "model": {
+          "role": "fast-chat-research",
+          "modelId": "stub-deterministic-v1",
+          "provider": "gate1-private-boundary"
+        },
+        "trace": {
+          "correlationId": "ed0b7f65eaff848725e8bd7d20be871a"
+        },
+        "answer": "The supplied synthetic source says the boundary stays read-only.\n\nCitation check: one or more references were not present in the supplied evidence.",
+        "ground": "record-answers",
+        "effects": [],
+        "research": null,
+        "threadId": "synthetic-thread",
+        "citations": [],
+        "projectId": "synthetic-project-a",
+        "requestId": "integration-instruction",
+        "retrieval": {
+          "empty": false,
+          "skipped": false,
+          "degraded": false,
+          "attempted": true,
+          "omissions": [
+            "Retrieved content containing authority or tool instructions was withheld before model processing.",
+            "One or more derived references were stale, revoked, or outside the active project record."
+          ],
+          "skipReason": "",
+          "unavailable": [],
+          "evidenceCount": 4
+        },
+        "auditCodes": [
+          "project-scope-enforced",
+          "retrieved-instruction-denied",
+          "inactive-derived-reference-excluded",
+          "unknown-citation"
+        ],
+        "completion": {
+          "reason": "citation-unverified",
+          "timedOut": false,
+          "outputLimited": false
+        },
+        "participantId": "synthetic-participant",
+        "schemaVersion": "runa2-answer-response/v1"
+      },
+      "counts": {
+        "requests": 1,
+        "turns": 1
+      }
+    },
+    "protected": {
+      "phase": "protected",
+      "interrupted": false,
+      "response": {
+        "lane": "general",
+        "model": {
+          "role": "not-invoked",
+          "modelId": "none",
+          "provider": "none"
+        },
+        "trace": {
+          "correlationId": "5d2551144a944ce7f2462ca2a0361964"
+        },
+        "answer": "That source is protected and is not available to this read-only migration slice.",
+        "ground": "no-ground-needed",
+        "effects": [],
+        "research": null,
+        "threadId": "synthetic-thread",
+        "citations": [],
+        "projectId": "synthetic-project-a",
+        "requestId": "integration-protected",
+        "retrieval": {
+          "empty": true,
+          "skipped": true,
+          "degraded": false,
+          "attempted": false,
+          "omissions": [],
+          "skipReason": "protected-source-denied",
+          "unavailable": [],
+          "evidenceCount": 0
+        },
+        "auditCodes": [
+          "protected-source-denied"
+        ],
+        "completion": {
+          "reason": "protected-source-denied",
+          "timedOut": false,
+          "outputLimited": false
+        },
+        "participantId": "synthetic-participant",
+        "schemaVersion": "runa2-answer-response/v1"
+      },
+      "counts": {
+        "requests": 1,
+        "turns": 1
+      }
+    },
+    "command": {
+      "phase": "command",
+      "interrupted": false,
+      "response": {
+        "lane": "general",
+        "model": {
+          "role": "not-invoked",
+          "modelId": "none",
+          "provider": "none"
+        },
+        "trace": {
+          "correlationId": "9094b38996f8d5043f6ff62ca435480e"
+        },
+        "answer": "That command is not available in this migration slice.",
+        "ground": "no-ground-needed",
+        "effects": [],
+        "research": null,
+        "threadId": "synthetic-thread",
+        "citations": [],
+        "projectId": "synthetic-project-a",
+        "requestId": "integration-command",
+        "retrieval": {
+          "empty": true,
+          "skipped": true,
+          "degraded": false,
+          "attempted": false,
+          "omissions": [],
+          "skipReason": "unknown-command",
+          "unavailable": [],
+          "evidenceCount": 0
+        },
+        "auditCodes": [
+          "unknown-command"
+        ],
+        "completion": {
+          "reason": "unknown-command",
+          "timedOut": false,
+          "outputLimited": false
+        },
+        "participantId": "synthetic-participant",
+        "schemaVersion": "runa2-answer-response/v1"
+      },
+      "counts": {
+        "requests": 1,
+        "turns": 1
+      }
+    },
+    "research-complete": {
+      "phase": "research-complete",
+      "interrupted": false,
+      "response": {
+        "lane": "research",
+        "model": {
+          "role": "fast-chat-research",
+          "modelId": "stub-deterministic-v1",
+          "provider": "gate1-private-boundary"
+        },
+        "trace": {
+          "correlationId": "69fe407c4d28a3c3ec28c891e2c771f0"
+        },
+        "answer": "Approved knowledge reaches an answer through scoped retrieval and citation enforcement.",
+        "ground": "record-answers",
+        "effects": [],
+        "research": {
+          "passesRun": 5,
+          "truncated": false,
+          "unanswered": [],
+          "passagesRead": 4,
+          "passesPlanned": 5,
+          "passesWithNothing": 0
+        },
+        "threadId": "synthetic-thread",
+        "citations": [
+          {
+            "ordinal": 1,
+            "sourceId": "knowledge",
+            "sectionId": "answer-flow",
+            "contentSha256": "26f7e86909c265447241d811032d09f299838716ea8297a0b9cae4fbe83ae65c"
+          }
+        ],
+        "projectId": "synthetic-project-a",
+        "requestId": "integration-research-complete",
+        "retrieval": {
+          "empty": false,
+          "skipped": false,
+          "degraded": false,
+          "attempted": true,
+          "omissions": [
+            "Retrieved content containing authority or tool instructions was withheld before model processing.",
+            "One or more derived references were stale, revoked, or outside the active project record."
+          ],
+          "skipReason": "",
+          "unavailable": [],
+          "evidenceCount": 4
+        },
+        "auditCodes": [
+          "project-scope-enforced",
+          "retrieved-instruction-denied",
+          "inactive-derived-reference-excluded"
+        ],
+        "completion": {
+          "reason": "complete",
+          "timedOut": false,
+          "outputLimited": false
+        },
+        "participantId": "synthetic-participant",
+        "schemaVersion": "runa2-answer-response/v1"
+      },
+      "counts": {
+        "requests": 1,
+        "turns": 1
+      }
+    },
+    "research-partial": {
+      "phase": "research-partial",
+      "interrupted": false,
+      "response": {
+        "lane": "research",
+        "model": {
+          "role": "fast-chat-research",
+          "modelId": "stub-deterministic-v1",
+          "provider": "gate1-private-boundary"
+        },
+        "trace": {
+          "correlationId": "0c3c03dfba528c656723bbefa20d2d9a"
+        },
+        "answer": "The supplied evidence describes project scope filtering; it does not establish budget enforcement.",
+        "ground": "record-answers",
+        "effects": [],
+        "research": {
+          "passesRun": 5,
+          "truncated": false,
+          "unanswered": [
+            "budget"
+          ],
+          "passagesRead": 4,
+          "passesPlanned": 5,
+          "passesWithNothing": 0
+        },
+        "threadId": "synthetic-thread",
+        "citations": [
+          {
+            "ordinal": 1,
+            "sourceId": "scope",
+            "sectionId": "filtering",
+            "contentSha256": "92fcce0a4f459ba9dfa5f9aff1b0d02b54b7db3d6b990882beb9d72752e28a11"
+          }
+        ],
+        "projectId": "synthetic-project-a",
+        "requestId": "integration-research-partial",
+        "retrieval": {
+          "empty": false,
+          "skipped": false,
+          "degraded": false,
+          "attempted": true,
+          "omissions": [
+            "Retrieved content containing authority or tool instructions was withheld before model processing.",
+            "One or more derived references were stale, revoked, or outside the active project record."
+          ],
+          "skipReason": "",
+          "unavailable": [],
+          "evidenceCount": 4
+        },
+        "auditCodes": [
+          "project-scope-enforced",
+          "retrieved-instruction-denied",
+          "inactive-derived-reference-excluded"
+        ],
+        "completion": {
+          "reason": "complete",
+          "timedOut": false,
+          "outputLimited": false
+        },
+        "participantId": "synthetic-participant",
+        "schemaVersion": "runa2-answer-response/v1"
+      },
+      "counts": {
+        "requests": 1,
+        "turns": 1
+      }
+    },
+    "cross-project": {
+      "phase": "cross-project",
+      "interrupted": false,
+      "response": {
+        "lane": "general",
+        "model": {
+          "role": "not-invoked",
+          "modelId": "none",
+          "provider": "none"
+        },
+        "trace": {
+          "correlationId": "6d827262bad9dcc0692d5fb047e95baf"
+        },
+        "answer": "This request is scoped to the trusted project in its request envelope; another project's record is not available.",
+        "ground": "no-ground-needed",
+        "effects": [],
+        "research": null,
+        "threadId": "synthetic-thread",
+        "citations": [],
+        "projectId": "synthetic-project-a",
+        "requestId": "integration-cross-project",
+        "retrieval": {
+          "empty": true,
+          "skipped": true,
+          "degraded": false,
+          "attempted": false,
+          "omissions": [],
+          "skipReason": "cross-project-request-denied",
+          "unavailable": [],
+          "evidenceCount": 0
+        },
+        "auditCodes": [
+          "cross-project-request-denied"
+        ],
+        "completion": {
+          "reason": "cross-project-request-denied",
+          "timedOut": false,
+          "outputLimited": false
+        },
+        "participantId": "synthetic-participant",
+        "schemaVersion": "runa2-answer-response/v1"
+      },
+      "counts": {
+        "requests": 1,
+        "turns": 1
+      }
+    },
+    "revoked": {
+      "phase": "revoked",
+      "interrupted": false,
+      "response": {
+        "lane": "research",
+        "model": {
+          "role": "not-invoked",
+          "modelId": "none",
+          "provider": "none"
+        },
+        "trace": {
+          "correlationId": "46b587e95d8157846b46b38ac6315540"
+        },
+        "answer": "The synthetic project record did not contain evidence that answers that question.",
+        "ground": "record-silent",
+        "effects": [],
+        "research": {
+          "passesRun": 8,
+          "truncated": true,
+          "unanswered": [
+            "answer",
+            "question",
+            "whose",
+            "former",
+            "best",
+            "source",
+            "revoked"
+          ],
+          "passagesRead": 0,
+          "passesPlanned": 8,
+          "passesWithNothing": 0
+        },
+        "threadId": "synthetic-thread",
+        "citations": [],
+        "projectId": "synthetic-revoked-project",
+        "requestId": "integration-revoked",
+        "retrieval": {
+          "empty": true,
+          "skipped": false,
+          "degraded": false,
+          "attempted": true,
+          "omissions": [
+            "One or more derived references were stale, revoked, or outside the active project record."
+          ],
+          "skipReason": "",
+          "unavailable": [],
+          "evidenceCount": 0
+        },
+        "auditCodes": [
+          "project-scope-enforced",
+          "inactive-derived-reference-excluded",
+          "record-silent"
+        ],
+        "completion": {
+          "reason": "honest-empty",
+          "timedOut": false,
+          "outputLimited": false
+        },
+        "participantId": "synthetic-participant",
+        "schemaVersion": "runa2-answer-response/v1"
+      },
+      "counts": {
+        "requests": 1,
+        "turns": 1
+      }
+    },
+    "metaphysical": {
+      "phase": "metaphysical",
+      "interrupted": false,
+      "response": {
+        "lane": "general",
+        "model": {
+          "role": "fast-chat-research",
+          "modelId": "stub-deterministic-v1",
+          "provider": "gate1-private-boundary"
+        },
+        "trace": {
+          "correlationId": "eb4dcbbd2a183add907b8ed12efe0afb"
+        },
+        "answer": "That is not a question the synthetic project record can settle.",
+        "ground": "not-a-question-of-fact",
+        "effects": [],
+        "research": null,
+        "threadId": "synthetic-thread",
+        "citations": [],
+        "projectId": "synthetic-project-a",
+        "requestId": "integration-metaphysical",
+        "retrieval": {
+          "empty": true,
+          "skipped": true,
+          "degraded": false,
+          "attempted": false,
+          "omissions": [],
+          "skipReason": "record-not-applicable",
+          "unavailable": [],
+          "evidenceCount": 0
+        },
+        "auditCodes": [],
+        "completion": {
+          "reason": "complete",
+          "timedOut": false,
+          "outputLimited": false
+        },
+        "participantId": "synthetic-participant",
+        "schemaVersion": "runa2-answer-response/v1"
+      },
+      "counts": {
+        "requests": 1,
+        "turns": 1
+      }
+    }
+  },
+  "traceSha256": "cd00b91dd54f1581806393d0ee4d975a9d65bca4e17e5ce5b470314430605ed2",
+  "checks": {
+    "initialAlignment": true,
+    "restartInterruptedAfterCommit": true,
+    "restartResumedSameResult": true,
+    "duplicateExactlyOnce": true,
+    "ordinaryGrounded": true,
+    "honestMiss": true,
+    "dependencyLossVisible": true,
+    "timeoutVisible": true,
+    "unknownCitationMarked": true,
+    "retrievedInstructionInert": true,
+    "protectedDeniedBeforeRead": true,
+    "unknownCommandDeterministic": true,
+    "researchDenominatorComplete": true,
+    "researchGapNamed": true,
+    "crossProjectDenied": true,
+    "revokedSourceExcluded": true,
+    "metaphysicalSkippedRetrieval": true,
+    "providerCallsBounded": true,
+    "checkpointsPresent": true,
+    "finalRebuildAligned": true,
+    "tracesRetained": true,
+    "tracesRedacted": true
+  },
+  "passed": true,
+  "servicesStopped": {
+    "caddy": true,
+    "reranker": true,
+    "slowProvider": true,
+    "provider": true,
+    "collector": true,
+    "qdrant": true,
+    "postgres": true
+  },
+  "rollbackClean": true
+}

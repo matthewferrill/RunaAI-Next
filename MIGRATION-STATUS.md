@@ -39,19 +39,26 @@ repository and never push migration work into either source repository.
 - `main` and `runa2/integration` begin at the exact RunaLab completion commit.
 - The completed laboratory evidence, seals, probes, stack bakeoff, model findings, architecture
   assessment, and conditional estimates are inherited.
-- No RunaAI behavior has been ported into this repository.
+- Gate 1 now contains an isolated synthetic-only implementation of the smallest ordinary read-only
+  chat/research path. It is experimental, unmerged, and not an authority for production behavior.
 - No protected RunaAI data has been opened, copied, converted, or migrated.
 - No model has been downloaded.
-- No persistent service, network listener, provider credential, production path, or spending has been
-  activated.
+- No persistent service, non-loopback listener, provider credential, production path, or spending has
+  been activated. Gate 1 verification used only bounded disposable loopback child processes.
 - No migration gate is approved merely by this bootstrap.
 - Bootstrap documentation and clean-clone validation were reviewed and merged into
   `runa2/integration` as `94ba860`.
 - Gate 0 contract/evidence freeze was approved by the steward on 2026-08-20 for integration through
-  PR #2. No Gate 1 implementation has started.
-- Gate 1 prerequisites are complete on `runa2/gate-1-prerequisites`: exact Node 22.22.0 is installed
-  and green, Node 22.23.2 is rejected by the sealed latency gate, and the low npm advisory has an
-  explicit synthetic-slice-only disposition. Gate 1 remains unstarted pending explicit approval.
+  PR #2. The steward separately approved Gate 1 implementation on 2026-08-20.
+- Gate 1 prerequisites are complete: exact Node 22.22.0 is installed and green, Node 22.23.2 is
+  rejected by the sealed latency gate, and the low npm advisory has an explicit synthetic-slice-only
+  disposition.
+- Gate 1 implementation was explicitly approved and built on `runa2/gate-1-read-only-slice`. The
+  deterministic suite passes 21/21 and the disposable real-stack integration passes 22/22 with clean
+  shutdown. Qwen3 Coder passes 12/12 live synthetic acceptance runs, but Qwen3.6 MTP times out 3/3 on
+  the selected OpenAI-compatible provider path at the frozen 30-second ceiling. Gate 1 is therefore
+  not green and cannot be approved or merged without the steward choosing a disposition recorded in
+  `gate1/GATE1-RESULTS-2026-08-20.md`.
 
 ## Bootstrap findings
 
@@ -88,7 +95,7 @@ plain-language steward experience, or governed action pathway.
 |---|---|---|---|
 | Bootstrap | Establish repository lineage, remotes, branches, instructions, and status | Complete | Reviewed and merged as `94ba860` |
 | 0 | Freeze contracts, parity corpus, data inventory, redaction policy, and green thresholds | Complete | Approved by steward 2026-08-20; PR #2 accepted for integration |
-| 1 | Smallest disposable read-only chat/research slice | Not started | Explicit Gate 1 start approval after prerequisite evidence review |
+| 1 | Smallest disposable read-only chat/research slice | Implemented; review-role blocker | Steward disposition of the Qwen3.6 provider-path failure, then evidence acceptance |
 | 2 | All three read-only answer lanes plus chat/project/settings continuity | Not started | Gate 1 evidence accepted |
 | 3 | One reversible governed idempotent action | Not started | Gate 2 parity accepted |
 | 4 | Governed data migration, one domain at a time | Not started | Each domain and owner-context plan approved separately |
@@ -133,14 +140,16 @@ advisory, `GHSA-866g-f22w-33x8` / `CVE-2026-8769`, through
 the newest published 3.x observed during disposition was 3.0.32, within the advertised affected range.
 The risk is temporarily accepted only for Gate 1's disposable synthetic boundary with hard time,
 byte, abort, and retry controls. It continues to block production and widened network/provider scope.
-No dependency was changed. Full evidence is in `gate0/GATE1-PREREQUISITES-2026-08-20.md`.
+No dependency was changed during the prerequisite disposition. Full evidence is in
+`gate0/GATE1-PREREQUISITES-2026-08-20.md`.
 
 ## Next decision
 
-Review the Gate 1 prerequisite evidence and decide whether to approve Gate 1's isolated disposable
-implementation branch. Prerequisite completion is not permission to touch protected data, start
-persistent services, activate a listener, widen provider/network scope, or change production.
+Choose the deliberate-review disposition in `gate1/GATE1-RESULTS-2026-08-20.md`. The recommended
+choice is to amend Gate 1 explicitly to the green ordinary chat/research slice and defer Qwen3.6 review
+integration; the alternative is a separately approved native LM Studio provider bakeoff. Do not raise
+the deadline or substitute Qwen3 Coder for review without new evidence.
 
-The recommended first implementation decision remains Gate 1's smallest read-only chat/research slice,
-but only after Gate 0 establishes its baseline, exact green thresholds, rollback, and representative
-review set.
+No choice authorizes protected data, persistent services, production routing, provider reconfiguration,
+or a merge. After the decision, rerun the applicable frozen verification and present Gate 1 evidence
+for explicit steward approval.

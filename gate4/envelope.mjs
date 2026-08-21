@@ -19,11 +19,16 @@ function contextOf({ recordType, participantId, recordId, field }) {
 export function createEnvelopeCipher({ encryptionKey, hmacKey, keyId = "disposable-test-key", random = randomBytes, onDecrypt = null }) {
   const encKey = key32(encryptionKey, "encryptionKey");
   const macKey = key32(hmacKey, "hmacKey");
-  const digest = value => hmac256(macKey, canonicalJson(value));
+  let destroyed = false;
+  const available = () => {
+    if (destroyed) throw coded("envelope-key-destroyed", "Envelope key material has been destroyed.");
+  };
+  const digest = value => { available(); return hmac256(macKey, canonicalJson(value)); };
   return Object.freeze({
     keyId,
     digest,
     encrypt(context, value) {
+      available();
       const bound = contextOf(context);
       const nonce = random(12);
       if (!Buffer.isBuffer(nonce) || nonce.length !== 12) throw coded("envelope-random-invalid", "Envelope nonce must be 12 bytes.");
@@ -42,6 +47,7 @@ export function createEnvelopeCipher({ encryptionKey, hmacKey, keyId = "disposab
       });
     },
     decrypt(context, envelope) {
+      available();
       const bound = contextOf(context);
       try {
         if (envelope?.schemaVersion !== PRIVATE_ENVELOPE_VERSION || envelope.algorithm !== "aes-256-gcm" || envelope.keyId !== keyId) {
@@ -58,6 +64,10 @@ export function createEnvelopeCipher({ encryptionKey, hmacKey, keyId = "disposab
       } catch {
         throw coded("private-envelope-invalid", "The private record failed its authenticated envelope check.");
       }
+    },
+    destroy() {
+      if (!destroyed) { encKey.fill(0); macKey.fill(0); destroyed = true; }
+      return Object.freeze({ destroyed: true });
     },
   });
 }

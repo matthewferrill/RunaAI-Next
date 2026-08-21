@@ -114,6 +114,13 @@ if (-not $pgListener) {
   do { Start-Sleep -Milliseconds 500; $pgListener = Get-NetTCPConnection -State Listen -LocalPort 9765 -ErrorAction SilentlyContinue | Select-Object -First 1 } until ($pgListener -or [DateTime]::UtcNow -gt $deadline)
   if (-not $pgListener) { throw 'candidate-postgres-start-failed' }
 }
+$deadline = [DateTime]::UtcNow.AddSeconds(60)
+do {
+  Start-Sleep -Milliseconds 500
+  & (Join-Path $pgBin 'pg_isready.exe') -h 127.0.0.1 -p 9765 -d postgres -U postgres *> $null
+  $pgReady = $LASTEXITCODE -eq 0
+} until ($pgReady -or [DateTime]::UtcNow -gt $deadline)
+if (-not $pgReady) { throw 'candidate-postgres-ready-failed' }
 function Ensure-Role([string]$Role, [string]$Password) {
   $present = & (Join-Path $pgBin 'psql.exe') -h 127.0.0.1 -p 9765 -U postgres -d postgres -tAc "SELECT 1 FROM pg_roles WHERE rolname='$Role'"
   if (($present -join '').Trim() -ne '1') {

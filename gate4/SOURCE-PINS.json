@@ -10,14 +10,14 @@
   "sources": [
     { "repo": "RunaAI", "path": "decisions/0075-durable-chats-managed-projects-functional-surface.md", "sha256": "1c10c35ce8ff5909561e28a54921021b5bcfc0e4218193fda46a2cfb3486891c" },
     { "repo": "RunaAI", "path": "docs/RUNAAI-PRIVATE-CHAT-AND-PERSONAL-LEARNING.md", "sha256": "98e5bdf3821ad15da7255340468f86446cacea89c00b83ebdf96768377feb440" },
-    { "repo": "RunaAI", "path": "docs/RUNAAI-MEMORY-AND-STATE.md", "sha256": "b1f27bb1a1da657c94e2474b1983084f503a3ad68e87a5b60720d5cec07f8ccb" },
+    { "repo": "RunaAI", "path": "docs/RUNAAI-MEMORY-AND-STATE.md", "sha256": "e7c096be856611a8c841081475ffbca1f763f91a645e66cf4b9b4d497d97031a" },
     { "repo": "RunaAI", "path": "src/runa/chat-store.mjs", "sha256": "2d9ae1e58d82a631b4670456fdff597fba057e1d9f475b7e8aae5e7d50eb5b65" },
     { "repo": "RunaAI", "path": "src/runa/project-store.mjs", "sha256": "27a39e8b9bfb97d95f51119bcddbb74bce9a9abb81561f0d3c4766b55a2f1c6c" },
-    { "repo": "RunaAI", "path": "src/runa/memory-store.mjs", "sha256": "0da6c227150b3d9444ad9f4cc46b457cdf757e4b0dd04800e3ac41df7912cbb3" },
-    { "repo": "RunaAI", "path": "src/runa/local-state.mjs", "sha256": "9116dadfe3bf8ba710e51a27a405cff772025719a6606685182339495d05c908" },
+    { "repo": "RunaAI", "path": "src/runa/memory-store.mjs", "sha256": "c03b796680221c72e2ea74b567845000c35ee2f4b0ec4917040d1b5e0e89ae3f" },
+    { "repo": "RunaAI", "path": "src/runa/local-state.mjs", "sha256": "496aad2a21de13cd6450c8288f15b8b43fe261d3b68755c66fcb525bba308e92" },
     { "repo": "RunaAI", "path": "scripts/runa-chat-store-tests.mjs", "sha256": "bfde9edb199a0f14265435f434b85efb312293bc406e827772da7a491f2d3073" },
     { "repo": "RunaAI", "path": "scripts/runa-project-store-tests.mjs", "sha256": "d8ff1eac87a7e9d8a3cf6bfaf1b68e58254349fa8bb924decdffa5031167e195" },
-    { "repo": "RunaAI", "path": "scripts/runa-project-memory-boundary-tests.mjs", "sha256": "cb6cb2d56e3f352acb959b98d6715f589b008752d629a1e46ceb3e6335f10c6a" },
+    { "repo": "RunaAI", "path": "scripts/runa-project-memory-boundary-tests.mjs", "sha256": "caa6e4f124f611977071859b4f130856ce498a5f37404fa2023114cad842c4a2" },
     { "repo": "RunaAI-Next", "path": "gate2/adapters/postgres.mjs", "sha256": "9bfdfd2d134e6b311a3a9ea78b548dd32e81cfaa9b3f5b69bf5bc80514469711" },
     { "repo": "RunaAI-Next", "path": "RUNA-2-ARCHITECTURE-ASSESSMENT-2026-08-20.md", "sha256": "afe67c134b97628163581e1677abfb3fe8af91310ac94e8a49fdea156cf36159" }
   ]

@@ -60,3 +60,21 @@ is orientation only; verify branch, commit, working tree, and implementation cla
   that exact operation.
 - Before pushing, fetch and confirm the branch is not behind or diverged.
 - Record verification commands and results in the gate handoff.
+
+## RUNA-CONTROL access workflow
+
+- Omen's established SSH configuration is `C:\Users\matth\.ssh\config`.
+- For ordinary source and Git inspection, use `runa-control-codex`. This runs as
+  `RUNA-CONTROL\codex-audit`; it cannot unseal Matthew's DPAPI CurrentUser data. When inspecting a
+  Matthew-owned checkout, use a command-scoped override such as
+  `git -c safe.directory=C:/AI/Projects/RunaAI ...`; do not persist a global exception.
+- For an explicitly authorized owner-context operation, use
+  `ssh -F C:\Users\matth\.ssh\config -o ClearAllForwardings=yes runa-control <command>`. This profile
+  runs as `RUNA-CONTROL\Matthew` and supports command execution, including owner-bound DPAPI access.
+- Attempt the appropriate established Control profile before asking the steward to copy commands or
+  run PowerShell manually. Ask only when interactive presence, a new authorization, or a steward
+  decision is genuinely required.
+- Owner-context access is not blanket migration approval. Keep every command within the current gate,
+  verify exact checkout/branch/commit/cleanliness first, fail closed on drift, and never print or copy
+  protected values. Record the access identity, bounded command purpose, and safe result in the gate
+  handoff.

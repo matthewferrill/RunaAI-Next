@@ -57,9 +57,9 @@ export function deterministicPreflight(message) {
   return null;
 }
 
-export function classifyGround(message, evidence) {
+export function classifyGround(message, evidence, advisoryContext = null) {
   if (metaphysicalPattern.test(message)) return "not-a-question-of-fact";
-  return evidence.length ? "record-answers" : "record-silent";
+  return evidence.length || advisoryContext?.lessonCount > 0 ? "record-answers" : "record-silent";
 }
 
 function baseResponse(request, correlationId) {
@@ -130,11 +130,12 @@ function boundedEvidence(evidence, maximumCharacters) {
 }
 
 export class ReadOnlyAnswerSlice {
-  constructor({ records, index, provider, telemetry = null }) {
+  constructor({ records, index, provider, telemetry = null, advisoryContext = null }) {
     this.records = records;
     this.index = index;
     this.provider = provider;
     this.telemetry = telemetry;
+    this.advisoryContext = advisoryContext;
   }
 
   async answer(rawRequest) {
@@ -258,7 +259,7 @@ export class ReadOnlyAnswerSlice {
       response.retrieval.omissions.push("One or more derived references were stale, revoked, or outside the active project record.");
       response.auditCodes.push("inactive-derived-reference-excluded");
     }
-    response.ground = classifyGround(request.message, evidence);
+    response.ground = classifyGround(request.message, evidence, this.advisoryContext);
     if (response.research) {
       const terms = passes.filter(pass => pass.startsWith("term:")).map(pass => pass.slice(5));
       response.research.passesWithNothing = passesWithNothing;
@@ -267,7 +268,7 @@ export class ReadOnlyAnswerSlice {
       response.research.truncated ||= truncated || passes.length === request.budgets.maximumPasses;
     }
 
-    if (!evidence.length) {
+    if (!evidence.length && (!this.advisoryContext || response.auditCodes.includes("retrieved-instruction-denied"))) {
       const instructionDenied = response.auditCodes.includes("retrieved-instruction-denied");
       response.answer = instructionDenied
         ? "The retrieved source was withheld because it contained instructions that could alter authority or invoke a tool."
@@ -282,8 +283,28 @@ export class ReadOnlyAnswerSlice {
   async #providerAnswer(request, evidence, response, deadlineAt) {
     try {
       const deadlineMs = remainingDeadlineMs(deadlineAt);
+      if (this.advisoryContext && !response.auditCodes.includes("approved-knowledge-delivered")) {
+        response.auditCodes.push("approved-knowledge-delivered");
+      }
       const generated = await this.provider.answer({
         request: { lane: request.lane, message: request.message, history: request.history },
+        advisory: this.advisoryContext ? {
+          schemaVersion: this.advisoryContext.schemaVersion,
+          label: this.advisoryContext.label,
+          lessons: this.advisoryContext.lessons,
+          lessonCount: this.advisoryContext.lessonCount,
+          retrievalPolicy: this.advisoryContext.retrievalPolicy,
+          mayAuthorizeAction: false,
+          toolPermissionAllowed: false,
+          filePermissionAllowed: false,
+          networkPermissionAllowed: false,
+          spendingPermissionAllowed: false,
+          workerPermissionAllowed: false,
+          trainingAllowed: false,
+          policyChangeAllowed: false,
+          identityChangeAllowed: false,
+          ordinaryChatLearningEnabled: false,
+        } : null,
         evidence: evidence.map(item => ({ sourceId: item.sourceId, sectionId: item.sectionId,
           contentSha256: item.contentSha256, content: item.content, provenance: "untrusted-retrieved-data" })),
       }, { deadlineMs, maximumOutputBytes: 16_000 });

@@ -1,6 +1,6 @@
 # Gate 4C-2 protected aggregate comparison results
 
-Status: passed on Control; steward acceptance and merge pending
+Status: passed on Control; accepted by the steward and merged into `runa2/integration` as `4ed6a52`
 
 ## Plain-language result
 
@@ -56,6 +56,6 @@ activated. E3, E4, E5, and the device vault were not migrated or changed.
 
 ## Decision gate
 
-Steward acceptance may merge only the comparison harness and aggregate evidence. It does not approve
+The accepted merge includes only the comparison harness and aggregate evidence. It does not approve
 answer-lane wiring, model-context activation, retained projection storage, Qdrant, embeddings,
 reranking, or migration of any additional RunaAI subsystem.

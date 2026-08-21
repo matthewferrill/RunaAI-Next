@@ -37,7 +37,7 @@ repository and never push migration work into either source repository.
   conversations are required; stale reviews are dismissed; admins are included; force-pushes and
   deletion are blocked. Required status checks remain unset until a real CI check exists.
 - `main` remains at the exact RunaLab completion baseline. `runa2/integration` contains the accepted
-  bootstrap and Gates 0–3.
+  bootstrap, Gates 0–3, Gate 4A, Gate 4B, and Gate 4C through the protected aggregate comparison.
 - The completed laboratory evidence, seals, probes, stack bakeoff, model findings, architecture
   assessment, and conditional estimates are inherited.
 - Gate 1 contains an isolated synthetic-only implementation of the smallest ordinary read-only
@@ -146,6 +146,24 @@ repository and never push migration work into either source repository.
   Qdrant, embeddings, BGE, and production routing remain disabled. The steward accepted Gate 4C-1A
   and approved its development merge on 2026-08-21. The merge completed as `d203cc7`, preserving the
   reviewed commits and source branch.
+- Gate 4C-2's explicitly authorized Control comparison reconstructed the complete E6 active boundary
+  independently in legacy RunaAI and the Gate 4C projection. Both produced 53 active lessons with
+  exact scope parity: 1 personal, 5 project, 16 capability, and 31 global. No protected content or
+  identifier was retained, both Control repositories remained unchanged, the temporary dependency
+  copy was removed, and the full Node suite passed 152/152. The steward accepted and merged the
+  comparison-only development evidence into `runa2/integration` as `4ed6a52` on 2026-08-21. It did
+  not activate answer lanes, persist a projection, or authorize a derived index.
+- The accelerated synthetic closeout contract for Gate 4C-3A, Gate 4D, and Gate 4E was frozen from
+  accepted integration head `4ed6a52` on `runa2/gate-4-closeout-synthetic`. It preserves the standing
+  no-protected-data/no-network/no-persistent-service boundary and stops on any hard safety failure.
+- The accelerated synthetic closeout is implemented and locally reviewed on
+  `runa2/gate-4-closeout-synthetic`. Gate 4C-3A supplies scoped synthetic approved knowledge through
+  every read-only lane as non-authoritative advisory context; Gate 4D proves the one-setting
+  compatibility boundary and retires/defer-dispositions the legacy provider surface; Gate 4E records
+  a current skip for a separate approved-knowledge index, with semantic remeasurement triggers. The
+  full 167/167 Node suite, 10/10 seals, 12/12 pinned legacy suites, and disposable Gate 1–4 integration
+  regressions are green. No protected data, model endpoint, persistent service, or production route
+  was opened or changed. This branch is ready for review but is not yet accepted or merged.
 
 ## Bootstrap findings
 
@@ -186,7 +204,7 @@ plain-language steward experience, or governed action pathway.
 | 1 | Smallest disposable read-only chat/research slice | Complete; accepted and merged as `7107ead` | Complete |
 | 2 | All three read-only answer lanes plus chat/project/settings continuity | Complete; evidence accepted and merged as `4c4767f` | Complete |
 | 3 | One reversible governed idempotent action | Complete; accepted and merged as `0680cfb` | Complete |
-| 4 | Governed data migration, one domain at a time | Gate 4A/4B and Gate 4C-1 accepted and merged; legacy unchanged | Define and approve Gate 4C-2 protected aggregate comparison separately |
+| 4 | Governed data migration, one domain at a time | Gate 4A/4B and Gate 4C through protected aggregate comparison accepted; synthetic closeout implemented and ready for review; legacy unchanged | Review synthetic closeout before integration merge |
 | 5 | Operations, private transport, authentication/authorization, recovery | Not started | Functional/data parity accepted |
 | 6 | Selected-core production cutover and rollback window | Not started | Gates 0–5 accepted and maintenance window approved |
 | 7 | Deferred extensions | Not started | New baseline and separate approval per extension group |
@@ -233,12 +251,15 @@ No dependency was changed during the prerequisite disposition. Full evidence is 
 
 ## Next decision
 
-Gate 4C-1 is accepted and merged. The next decision is whether to define Gate 4C-2 as one bounded,
-aggregate-only Control comparison of reconstructed active-state counts and scope categories against
-the accepted E6 journal boundary. That comparison is not authorized by the Gate 4C-1 merge.
-Answer-lane activation, model-context use, and derived Qdrant indexing remain separate later
-decisions. The unresolved E3 record remains unchanged, E4 authority/device-vault state remains
-deferred to Gate 5, and there is no E5 store to migrate.
+Gate 4C-2 is accepted and merged. The accelerated synthetic closeout is implemented and ready for
+review. Its Gate 4E result skips a new approved-knowledge index at the current 53-lesson scale because
+no authorized vector arm demonstrated the frozen improvement threshold; the direct selector remains
+the bounded fallback and the semantic gap is explicitly measured rather than hidden.
+
+After this synthetic train is reviewed, the next programme gate is Gate 5 operations/security. The
+unresolved E3 record remains unchanged, E4 authority/device-vault state remains deferred to Gate 5,
+there is no E5 store to migrate, and the optional protected Gate 4D setting import waits for target
+participant identity binding and a later bounded owner campaign.
 
 Qwen3.6 deliberate review, the existing live BGE endpoint, real data export/import, persistent
 services, production routing, provider reconfiguration, production authentication/authorization, and

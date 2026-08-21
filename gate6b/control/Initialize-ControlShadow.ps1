@@ -108,12 +108,15 @@ if (-not $pgListener) {
     if (-not (Get-Process -Id $recordedPid -ErrorAction SilentlyContinue)) { Remove-Item -LiteralPath $postmasterPid -Force }
   }
   $bootstrapTaskPath = '\RunaAI-Next-Bootstrap\'
+  $taskSettings = New-ScheduledTaskSettingsSet -ExecutionTimeLimit ([TimeSpan]::Zero) -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries
   if (-not (Get-ScheduledTask -TaskPath $bootstrapTaskPath -TaskName 'Postgresql' -ErrorAction SilentlyContinue)) {
-    $taskSettings = New-ScheduledTaskSettingsSet -ExecutionTimeLimit ([TimeSpan]::Zero)
     $taskAction = New-ScheduledTaskAction -Execute 'powershell.exe' -Argument "-NoLogo -NoProfile -ExecutionPolicy Bypass -File `"$runPostgres`""
     Register-ScheduledTask -TaskPath $bootstrapTaskPath -TaskName 'Postgresql' -Action $taskAction -Settings $taskSettings -User $postgresIdentity -Password $postgresServiceAccount | Out-Null
     $stopAction = New-ScheduledTaskAction -Execute 'powershell.exe' -Argument "-NoLogo -NoProfile -ExecutionPolicy Bypass -File `"$stopPostgres`""
     Register-ScheduledTask -TaskPath $bootstrapTaskPath -TaskName 'Stop-Postgresql' -Action $stopAction -Settings $taskSettings -User $postgresIdentity -Password $postgresServiceAccount | Out-Null
+  } else {
+    Set-ScheduledTask -TaskPath $bootstrapTaskPath -TaskName 'Postgresql' -Settings $taskSettings | Out-Null
+    Set-ScheduledTask -TaskPath $bootstrapTaskPath -TaskName 'Stop-Postgresql' -Settings $taskSettings | Out-Null
   }
   Start-ScheduledTask -TaskPath $bootstrapTaskPath -TaskName 'Postgresql'
   $deadline = [DateTime]::UtcNow.AddSeconds(60)

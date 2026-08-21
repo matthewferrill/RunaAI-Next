@@ -30,7 +30,7 @@ exit `$LASTEXITCODE
 "@
 $taskPath = '\RunaAI-Next\'
 if (@(Get-ScheduledTask -TaskPath $taskPath -ErrorAction SilentlyContinue).Count -ne 0) { throw 'candidate-tasks-already-registered' }
-$settings = New-ScheduledTaskSettingsSet -ExecutionTimeLimit ([TimeSpan]::Zero) -RestartCount 5 -RestartInterval (New-TimeSpan -Minutes 1) -StartWhenAvailable
+$settings = New-ScheduledTaskSettingsSet -ExecutionTimeLimit ([TimeSpan]::Zero) -RestartCount 5 -RestartInterval (New-TimeSpan -Minutes 1) -StartWhenAvailable -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries
 $systemPrincipal = New-ScheduledTaskPrincipal -UserId 'SYSTEM' -LogonType ServiceAccount -RunLevel Highest
 $postgresIdentity = "$env:COMPUTERNAME\runa-candidate-pg"
 $postgresPassword = [IO.File]::ReadAllText((Join-Path $Root 'secrets\postgres-service-account')).Trim()

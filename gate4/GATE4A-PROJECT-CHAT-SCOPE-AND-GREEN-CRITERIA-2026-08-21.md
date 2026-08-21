@@ -136,3 +136,4 @@ remaining legacy authority. Merge into `runa2/integration` requires a separate e
 
 Status: evidence accepted and protected merge approved by the steward on 2026-08-21. This approval is
 limited to integration of the reviewed development baseline; it is not production migration or cutover.
+The protected merge completed as `90572a0`.

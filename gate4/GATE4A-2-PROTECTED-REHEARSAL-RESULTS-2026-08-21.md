@@ -1,7 +1,8 @@
 # Gate 4A-2 protected rehearsal results
 
 Status: green on 2026-08-21 under the exact approved Control-local boundary. The steward accepted this
-evidence and approved the protected development merge on 2026-08-21.
+evidence and approved the protected development merge on 2026-08-21. The merge completed as
+`90572a0`.
 
 ## Layman result
 

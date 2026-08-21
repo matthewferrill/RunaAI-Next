@@ -109,7 +109,10 @@ repository and never push migration work into either source repository.
   no private value in retained evidence or target/log scans. The source remained byte-exact. The
   temporary target schemas, data, key, backup, runtime, listener, and root were removed. On 2026-08-21
   the steward accepted the Gate 4A-2 evidence and separately approved the Gate 4A protected merge into
-  `runa2/integration`. No production adapter or cutover is authorized.
+  `runa2/integration`. The protected merge completed as `90572a0`, preserving the reviewed Gate 4A
+  commits and source branch. Post-merge verification passed the full 93/93 Node profile, Gate 1–4
+  disposable integration regressions, 10/10 seals, and all 12 pinned legacy suites. No production
+  adapter or cutover is authorized.
 
 ## Bootstrap findings
 
@@ -150,7 +153,7 @@ plain-language steward experience, or governed action pathway.
 | 1 | Smallest disposable read-only chat/research slice | Complete; accepted and merged as `7107ead` | Complete |
 | 2 | All three read-only answer lanes plus chat/project/settings continuity | Complete; evidence accepted and merged as `4c4767f` | Complete |
 | 3 | One reversible governed idempotent action | Complete; accepted and merged as `0680cfb` | Complete |
-| 4 | Governed data migration, one domain at a time | Gate 4A project/chat evidence accepted; protected merge approved; legacy unchanged | Select and approve the next Gate 4 domain separately |
+| 4 | Governed data migration, one domain at a time | Gate 4A project/chat evidence accepted and merged as `90572a0`; legacy unchanged | Select and approve the next Gate 4 domain separately |
 | 5 | Operations, private transport, authentication/authorization, recovery | Not started | Functional/data parity accepted |
 | 6 | Selected-core production cutover and rollback window | Not started | Gates 0–5 accepted and maintenance window approved |
 | 7 | Deferred extensions | Not started | New baseline and separate approval per extension group |

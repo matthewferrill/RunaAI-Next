@@ -15,7 +15,8 @@
     "gate0/BASELINE-RESULTS.json",
     "gate0/DATA-INVENTORY.md",
     "gate0/TRACE-REDACTION-POLICY.md",
-    "gate0/GREEN-THRESHOLDS.md"
+    "gate0/GREEN-THRESHOLDS.md",
+    "gate0/GATE1-SCOPE-AMENDMENT-2026-08-20.md"
   ],
   "inherited": {
     "nodeCommand": ["node", "--test"],

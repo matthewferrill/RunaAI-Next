@@ -1,7 +1,7 @@
 # Gate 1 results — 2026-08-20
 
-Status: **implementation evidence assembled; approval blocked by the deliberate-review model role.**
-This is not a production-readiness or migration-completion claim.
+Status: **green under the steward-approved Gate 1 scope amendment; awaiting explicit evidence
+acceptance.** This is not merge approval, production readiness, or migration completion.
 
 ## What is green
 
@@ -37,61 +37,45 @@ Reviewable machine evidence:
 
 - `evidence/STUB-INTEGRATION-RESULTS.json`
 - `evidence/MODEL-VALIDATION-RESULTS.json`
+- `evidence/MODEL-VALIDATION-DEFERRED-REVIEW-2026-08-20.json`
 
-## Model result and blocker
+## Amended model acceptance result
 
-The approved roster was exercised against the already-running private RUNA-HOME endpoint using only
-synthetic Gate 1 data. No model was downloaded, explicitly loaded, reconfigured, or left behind as a
-new service.
+The amended Gate 1 denominator exercised the ordinary read-only chat/research role against the
+already-running private RUNA-HOME endpoint using only synthetic data. No model was downloaded,
+explicitly loaded, reconfigured, or left behind as a new service.
 
 | Role | Model | Result at the frozen 30-second request ceiling |
 |---|---|---|
 | Ordinary chat/research | Qwen3 Coder 30B-A3B | **12/12 hard and 12/12 quality passed** across four cases repeated three times. |
-| Deliberate review | Qwen3.6 27B MTP | **0/3 passed**; all three clean-source requests ended in the typed timeout state. |
 
-The combined retained report is therefore 12/15 hard, 12/15 quality (80%), below the 100% hard and
-90% quality gates. Earlier diagnostic runs exposed and corrected two harness issues: Mastra generation
-settings had been placed at the wrong option level, and an artificial 256-token ceiling ended the
-review output by length. With those fixed, Qwen3.6 still timed out 3/3 at the unchanged deadline.
+The retained report is 12/12 hard, 12/12 quality (100%), satisfying the unchanged 100% hard and at
+least 90% quality thresholds. The report records Qwen3.6 and the live BGE endpoint as deferred and does
+not invoke either one.
 
-The cause is a provider-path mismatch, not an untested-model question. The lab selected Qwen3.6 using
-LM Studio's native `/api/v1/chat` reasoning-off control. Gate 1 uses the approved AI SDK/OpenAI-compatible
-path; LM Studio's documented chat-completions payload does not expose that native reasoning control.
-The prompt directive that worked for earlier Qwen3 tool tests did not make Qwen3.6 complete this Gate 1
-case within 30 seconds.
+## Retained deferred-role evidence
 
-This is a hard failure for the deliberate-review role and blocks Gate 1 approval **as currently
-scoped**. It must not be hidden by averaging, increasing the deadline, or claiming the earlier model
-matrix proves this adapter path.
+Before the amendment, Qwen3.6 MTP completed 0/3 clean-source deliberate-review cases within the frozen
+30-second ceiling through the approved OpenAI-compatible path. That failed 12/15 combined report is
+preserved unchanged apart from its historical schema label in
+`MODEL-VALIDATION-DEFERRED-REVIEW-2026-08-20.json`.
 
-Runtime documentation checked for this conclusion:
+The steward approved deferring—not passing or replacing—the deliberate-review role. Qwen3 Coder is
+not credited for review because its sealed matrix passed only 3/8 review cases. Reintroducing Qwen3.6
+requires a separately approved provider contract and fresh acceptance evidence.
 
-- `https://lmstudio.ai/docs/developer/openai-compat/chat-completions`
-- `https://lmstudio.ai/docs/developer/rest/chat`
+The windowed BGE-compatible adapter passed the disposable real-stack test, while the existing private
+BGE endpoint timed out on a bounded synthetic request. The live endpoint is likewise deferred; Gate 1
+claims only adapter behavior and explicit degradation, not live-reranker readiness.
 
-## Separate live dependency limitation
+The exact amendment and unchanged boundaries are recorded in
+`gate0/GATE1-SCOPE-AMENDMENT-2026-08-20.md`.
 
-The windowed reranker adapter passed the disposable real-stack test. A bounded synthetic request to
-the existing private BGE endpoint timed out before model validation, so the retained model report says
-`not-validated` for that live service. This does not invalidate the disposable adapter proof or the
-explicit reranker-degraded path, but it blocks a claim that the existing live reranker is currently
-ready.
+## Acceptance boundary
 
-## Decision options
-
-1. **Defer the deliberate-review role from Gate 1 (recommended).** Accept only the green ordinary
-   read-only chat/research slice, keep hostile retrieved instructions behind the deterministic veto,
-   and reopen Qwen3.6 provider integration behind a new reviewed contract. This requires an explicit
-   Gate 0 scope amendment before Gate 1 can be called green.
-2. Build and bake off a separate LM Studio native provider adapter so Mastra can preserve the selected
-   review model's native reasoning control. This adds architecture and test work and is not authorized
-   by the current approved provider stack.
-3. Raise the request deadline above 30 seconds. This weakens the frozen interactive contract and is not
-   recommended; the 60-second diagnostic was rejected by the existing schema before any provider call.
-
-The existing Qwen Coder model is not a safe silent substitute for deliberate review: the sealed model
-matrix passed only 3/8 review cases for that model. Qwen3.6 should be deferred or integrated correctly,
-not replaced by an unqualified fallback.
+The implementation and evidence are green for the amended minimum slice, but Gate 1 is not accepted or
+merged by this result. The steward must explicitly accept this regenerated evidence. Branch protection
+and normal review still apply afterward, and Gate 2 remains unstarted.
 
 ## Rollback evidence
 

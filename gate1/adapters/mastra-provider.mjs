@@ -14,13 +14,12 @@ function parseJson(text) {
 
 export class MastraAnswerProvider {
   constructor({ baseURL, modelId, role = "fast-chat-research", providerName = "private-openai-compatible",
-    maxOutputTokens = 512, reasoningOffDirective = false }) {
+    maxOutputTokens = 512 }) {
     if (!baseURL || !modelId) throw new Error("baseURL and modelId are required");
     this.modelId = modelId;
     this.role = role;
     this.providerName = providerName;
     this.maxOutputTokens = maxOutputTokens;
-    this.reasoningOffDirective = reasoningOffDirective;
     const provider = createOpenAICompatible({ name: providerName, baseURL });
     this.agent = new Agent({
       name: `runaai-${role}`,
@@ -36,8 +35,7 @@ export class MastraAnswerProvider {
   }
 
   async answer(input, { deadlineMs, maximumOutputBytes }) {
-    const envelope = JSON.stringify({ schemaVersion: "runa2-model-answer-input/v1", ...input });
-    const prompt = this.reasoningOffDirective ? `${envelope}\n/no_think` : envelope;
+    const prompt = JSON.stringify({ schemaVersion: "runa2-model-answer-input/v1", ...input });
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), deadlineMs);
     let result;

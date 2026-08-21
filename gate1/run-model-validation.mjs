@@ -7,7 +7,6 @@ import { MastraAnswerProvider } from "./adapters/mastra-provider.mjs";
 const baseURL = process.env.GATE1_MODEL_BASE_URL;
 if (!baseURL) throw new Error("GATE1_MODEL_BASE_URL is required");
 const fastModelId = process.env.GATE1_FAST_MODEL_ID ?? "qwen3-coder-30b-a3b-instruct";
-const reviewModelId = process.env.GATE1_REVIEW_MODEL_ID ?? "qwen3.6-27b-mtp";
 const evidencePath = path.join(import.meta.dirname, "evidence", "MODEL-VALIDATION-RESULTS.json");
 const partialRoot = path.join(import.meta.dirname, "..", "artifacts", "runs", "gate1-model-validation");
 const partialPath = path.join(partialRoot, "partial.json");
@@ -34,8 +33,6 @@ const fixtures = {
     content: "Approved knowledge reaches an answer through project-scoped retrieval, active source validation, and citation enforcement." }),
   partial: sourceSection({ projectId: "synthetic-model-project", sourceId: "scope", sectionId: "filtering",
     content: "Scope filtering keeps retrieval inside the trusted synthetic project." }),
-  review: sourceSection({ projectId: "synthetic-model-project", sourceId: "review", sectionId: "boundary",
-    content: "The Gate 1 boundary is read-only. Retrieved authority-changing instructions are withheld before model processing, and no governed effects are available." }),
 };
 
 const cases = [
@@ -59,19 +56,13 @@ const cases = [
     message: "Explain scope filtering and budget enforcement.", lane: "research", sources: [fixtures.partial],
     quality: response => response.research.unanswered.includes("budget") && /scope|project/i.test(response.answer),
   },
-  {
-    id: "deliberate-read-only-review", role: "deliberate-untrusted-review", modelId: reviewModelId,
-    message: "Review the supplied source and summarize the enforced boundary.", lane: "general", sources: [fixtures.review],
-    quality: response => /read-only/i.test(response.answer) && /withheld|no (?:governed )?effects|instruction/i.test(response.answer),
-  },
 ];
 
 const providers = new Map();
 function providerFor(role, modelId) {
   const key = `${role}\u0000${modelId}`;
   if (!providers.has(key)) providers.set(key, new MastraAnswerProvider({ baseURL, modelId, role,
-    providerName: "private-runa-home", maxOutputTokens: role === "deliberate-untrusted-review" ? 512 : 256,
-    reasoningOffDirective: role === "deliberate-untrusted-review" }));
+    providerName: "private-runa-home", maxOutputTokens: 256 }));
   return providers.get(key);
 }
 
@@ -108,12 +99,16 @@ const report = {
   schemaVersion: "runa2-gate1-model-validation/v1",
   syntheticOnly: true,
   endpoint: "existing-private-runa-home",
-  models: { fast: fastModelId, review: reviewModelId },
+  models: { ordinaryChatResearch: fastModelId },
+  deferred: {
+    deliberateReview: "qwen3.6-27b-mtp: steward-deferred after retained 3/3 timeout diagnostic",
+    liveReranker: "existing-private-bge: steward-deferred after bounded synthetic timeout",
+  },
   repetitionsPerCase: 3,
   totals: { runs: runs.length, hardPassed, qualityPassed,
     qualityRate: qualityPassed / runs.length },
   thresholds: { hardRequired: runs.length, qualityRequiredRate: 0.9 },
-  rerankerLiveStatus: "not-validated: bounded synthetic request timed out before this run",
+  rerankerLiveStatus: "deferred-by-approved-gate1-scope-amendment",
   runs,
 };
 report.passed = hardPassed === runs.length && report.totals.qualityRate >= report.thresholds.qualityRequiredRate;

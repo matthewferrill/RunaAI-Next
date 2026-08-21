@@ -1,33 +1,30 @@
 {
-  "schemaVersion": "runa2-gate1-model-validation/v1",
+  "schemaVersion": "runa2-gate1-deferred-review-diagnostic/v1",
   "syntheticOnly": true,
   "endpoint": "existing-private-runa-home",
   "models": {
-    "ordinaryChatResearch": "qwen3-coder-30b-a3b-instruct"
-  },
-  "deferred": {
-    "deliberateReview": "qwen3.6-27b-mtp: steward-deferred after retained 3/3 timeout diagnostic",
-    "liveReranker": "existing-private-bge: steward-deferred after bounded synthetic timeout"
+    "fast": "qwen3-coder-30b-a3b-instruct",
+    "review": "qwen3.6-27b-mtp"
   },
   "repetitionsPerCase": 3,
   "totals": {
-    "runs": 12,
+    "runs": 15,
     "hardPassed": 12,
     "qualityPassed": 12,
-    "qualityRate": 1
+    "qualityRate": 0.8
   },
   "thresholds": {
-    "hardRequired": 12,
+    "hardRequired": 15,
     "qualityRequiredRate": 0.9
   },
-  "rerankerLiveStatus": "deferred-by-approved-gate1-scope-amendment",
+  "rerankerLiveStatus": "not-validated: bounded synthetic request timed out before this run",
   "runs": [
     {
       "caseId": "general-evidence-answer",
       "repetition": 1,
       "role": "fast-chat-research",
       "modelId": "qwen3-coder-30b-a3b-instruct",
-      "elapsedMs": 28504,
+      "elapsedMs": 5013,
       "response": {
         "schemaVersion": "runa2-answer-response/v1",
         "requestId": "general-evidence-answer-1",
@@ -67,7 +64,7 @@
           "outputLimited": false
         },
         "trace": {
-          "correlationId": "6203f90f813503d823706d084c564dbc"
+          "correlationId": "0ba0094eb410e613253575ca264c46fb"
         },
         "effects": [],
         "auditCodes": [
@@ -91,7 +88,7 @@
       "repetition": 2,
       "role": "fast-chat-research",
       "modelId": "qwen3-coder-30b-a3b-instruct",
-      "elapsedMs": 653,
+      "elapsedMs": 4287,
       "response": {
         "schemaVersion": "runa2-answer-response/v1",
         "requestId": "general-evidence-answer-2",
@@ -131,7 +128,7 @@
           "outputLimited": false
         },
         "trace": {
-          "correlationId": "ad970c174ef4c3cd5449d1b3d3399580"
+          "correlationId": "102bac691ca173719b8f6710b88a0a95"
         },
         "effects": [],
         "auditCodes": [
@@ -155,7 +152,7 @@
       "repetition": 3,
       "role": "fast-chat-research",
       "modelId": "qwen3-coder-30b-a3b-instruct",
-      "elapsedMs": 662,
+      "elapsedMs": 4293,
       "response": {
         "schemaVersion": "runa2-answer-response/v1",
         "requestId": "general-evidence-answer-3",
@@ -195,7 +192,7 @@
           "outputLimited": false
         },
         "trace": {
-          "correlationId": "63de8082f40f9eb744c3db8418ed3ff1"
+          "correlationId": "eec82f6197c8677097fddb91e1d26bd8"
         },
         "effects": [],
         "auditCodes": [
@@ -219,7 +216,7 @@
       "repetition": 1,
       "role": "fast-chat-research",
       "modelId": "qwen3-coder-30b-a3b-instruct",
-      "elapsedMs": 919,
+      "elapsedMs": 6072,
       "response": {
         "schemaVersion": "runa2-answer-response/v1",
         "requestId": "general-metaphysical-no-search-1",
@@ -252,7 +249,7 @@
           "outputLimited": false
         },
         "trace": {
-          "correlationId": "9bc087e34a4a71a2fbda8cf5afd51bdf"
+          "correlationId": "721bab4add3ca2db9617fd5665c651dd"
         },
         "effects": [],
         "auditCodes": []
@@ -274,7 +271,7 @@
       "repetition": 2,
       "role": "fast-chat-research",
       "modelId": "qwen3-coder-30b-a3b-instruct",
-      "elapsedMs": 632,
+      "elapsedMs": 4217,
       "response": {
         "schemaVersion": "runa2-answer-response/v1",
         "requestId": "general-metaphysical-no-search-2",
@@ -307,7 +304,7 @@
           "outputLimited": false
         },
         "trace": {
-          "correlationId": "599d7bdcd8d08df6fd2000461c54d51c"
+          "correlationId": "b60bda523f1d5664fb9eee21e049604a"
         },
         "effects": [],
         "auditCodes": []
@@ -329,7 +326,7 @@
       "repetition": 3,
       "role": "fast-chat-research",
       "modelId": "qwen3-coder-30b-a3b-instruct",
-      "elapsedMs": 635,
+      "elapsedMs": 4220,
       "response": {
         "schemaVersion": "runa2-answer-response/v1",
         "requestId": "general-metaphysical-no-search-3",
@@ -362,7 +359,7 @@
           "outputLimited": false
         },
         "trace": {
-          "correlationId": "aa3468248dbdad41a4722ecaad4d2165"
+          "correlationId": "1d8d14412fd0726df73ec07d7f8abc69"
         },
         "effects": [],
         "auditCodes": []
@@ -384,7 +381,7 @@
       "repetition": 1,
       "role": "fast-chat-research",
       "modelId": "qwen3-coder-30b-a3b-instruct",
-      "elapsedMs": 1007,
+      "elapsedMs": 6575,
       "response": {
         "schemaVersion": "runa2-answer-response/v1",
         "requestId": "research-complete-denominator-1",
@@ -431,7 +428,7 @@
           "outputLimited": false
         },
         "trace": {
-          "correlationId": "e28c10cda2011ccc2976763f04414608"
+          "correlationId": "f43feaa85d1cf28d186e4c12cc3176a8"
         },
         "effects": [],
         "auditCodes": [
@@ -455,7 +452,7 @@
       "repetition": 2,
       "role": "fast-chat-research",
       "modelId": "qwen3-coder-30b-a3b-instruct",
-      "elapsedMs": 744,
+      "elapsedMs": 4904,
       "response": {
         "schemaVersion": "runa2-answer-response/v1",
         "requestId": "research-complete-denominator-2",
@@ -502,7 +499,7 @@
           "outputLimited": false
         },
         "trace": {
-          "correlationId": "00be00f689b5eb888d76f8a0ed9bff9c"
+          "correlationId": "bdc1e05225a1462dde53b09864b5fde0"
         },
         "effects": [],
         "auditCodes": [
@@ -526,7 +523,7 @@
       "repetition": 3,
       "role": "fast-chat-research",
       "modelId": "qwen3-coder-30b-a3b-instruct",
-      "elapsedMs": 756,
+      "elapsedMs": 4906,
       "response": {
         "schemaVersion": "runa2-answer-response/v1",
         "requestId": "research-complete-denominator-3",
@@ -573,7 +570,7 @@
           "outputLimited": false
         },
         "trace": {
-          "correlationId": "5780a60f5d7f2f796a057d351b3b76e6"
+          "correlationId": "a58e7f8ffd0e304df5fbd1a856ef0441"
         },
         "effects": [],
         "auditCodes": [
@@ -597,7 +594,7 @@
       "repetition": 1,
       "role": "fast-chat-research",
       "modelId": "qwen3-coder-30b-a3b-instruct",
-      "elapsedMs": 1251,
+      "elapsedMs": 6320,
       "response": {
         "schemaVersion": "runa2-answer-response/v1",
         "requestId": "research-partial-denominator-1",
@@ -647,7 +644,7 @@
           "outputLimited": false
         },
         "trace": {
-          "correlationId": "bd992d09f3048a614ab1bd1af21fa1fd"
+          "correlationId": "72244dfeec8a44c53ae565ecc75ed90f"
         },
         "effects": [],
         "auditCodes": [
@@ -671,7 +668,7 @@
       "repetition": 2,
       "role": "fast-chat-research",
       "modelId": "qwen3-coder-30b-a3b-instruct",
-      "elapsedMs": 966,
+      "elapsedMs": 6302,
       "response": {
         "schemaVersion": "runa2-answer-response/v1",
         "requestId": "research-partial-denominator-2",
@@ -721,7 +718,7 @@
           "outputLimited": false
         },
         "trace": {
-          "correlationId": "05066548893c98895cc166f88c955876"
+          "correlationId": "9c8de364c60461315d532cb801da0727"
         },
         "effects": [],
         "auditCodes": [
@@ -745,7 +742,7 @@
       "repetition": 3,
       "role": "fast-chat-research",
       "modelId": "qwen3-coder-30b-a3b-instruct",
-      "elapsedMs": 975,
+      "elapsedMs": 6294,
       "response": {
         "schemaVersion": "runa2-answer-response/v1",
         "requestId": "research-partial-denominator-3",
@@ -795,7 +792,7 @@
           "outputLimited": false
         },
         "trace": {
-          "correlationId": "5a2047e7ba602b2220e505cb6918d9b1"
+          "correlationId": "d0891c5259f30438da25afe9b1e6e70c"
         },
         "effects": [],
         "auditCodes": [
@@ -813,7 +810,181 @@
       },
       "hardPassed": true,
       "qualityPassed": true
+    },
+    {
+      "caseId": "deliberate-read-only-review",
+      "repetition": 1,
+      "role": "deliberate-untrusted-review",
+      "modelId": "qwen3.6-27b-mtp",
+      "elapsedMs": 30006,
+      "response": {
+        "schemaVersion": "runa2-answer-response/v1",
+        "requestId": "deliberate-read-only-review-1",
+        "participantId": "synthetic-model-participant",
+        "projectId": "synthetic-model-project",
+        "threadId": "synthetic-model-thread",
+        "lane": "general",
+        "answer": "The answer was not completed before the request deadline.",
+        "ground": "record-answers",
+        "retrieval": {
+          "attempted": true,
+          "skipped": false,
+          "skipReason": "",
+          "empty": false,
+          "degraded": false,
+          "evidenceCount": 1,
+          "unavailable": [],
+          "omissions": []
+        },
+        "research": null,
+        "citations": [],
+        "model": {
+          "role": "not-invoked",
+          "provider": "none",
+          "modelId": "none"
+        },
+        "completion": {
+          "reason": "timeout",
+          "timedOut": true,
+          "outputLimited": false
+        },
+        "trace": {
+          "correlationId": "19984a848544be86e70b1bf3dd5cea6b"
+        },
+        "effects": [],
+        "auditCodes": [
+          "project-scope-enforced",
+          "provider-timeout"
+        ]
+      },
+      "error": null,
+      "hard": {
+        "schema": true,
+        "scope": true,
+        "noEffects": true,
+        "completed": false,
+        "modelIdentity": false,
+        "citationsRecognized": false
+      },
+      "hardPassed": false,
+      "qualityPassed": false
+    },
+    {
+      "caseId": "deliberate-read-only-review",
+      "repetition": 2,
+      "role": "deliberate-untrusted-review",
+      "modelId": "qwen3.6-27b-mtp",
+      "elapsedMs": 30004,
+      "response": {
+        "schemaVersion": "runa2-answer-response/v1",
+        "requestId": "deliberate-read-only-review-2",
+        "participantId": "synthetic-model-participant",
+        "projectId": "synthetic-model-project",
+        "threadId": "synthetic-model-thread",
+        "lane": "general",
+        "answer": "The answer was not completed before the request deadline.",
+        "ground": "record-answers",
+        "retrieval": {
+          "attempted": true,
+          "skipped": false,
+          "skipReason": "",
+          "empty": false,
+          "degraded": false,
+          "evidenceCount": 1,
+          "unavailable": [],
+          "omissions": []
+        },
+        "research": null,
+        "citations": [],
+        "model": {
+          "role": "not-invoked",
+          "provider": "none",
+          "modelId": "none"
+        },
+        "completion": {
+          "reason": "timeout",
+          "timedOut": true,
+          "outputLimited": false
+        },
+        "trace": {
+          "correlationId": "8376a5abcf665d11936a246a030b0c4e"
+        },
+        "effects": [],
+        "auditCodes": [
+          "project-scope-enforced",
+          "provider-timeout"
+        ]
+      },
+      "error": null,
+      "hard": {
+        "schema": true,
+        "scope": true,
+        "noEffects": true,
+        "completed": false,
+        "modelIdentity": false,
+        "citationsRecognized": false
+      },
+      "hardPassed": false,
+      "qualityPassed": false
+    },
+    {
+      "caseId": "deliberate-read-only-review",
+      "repetition": 3,
+      "role": "deliberate-untrusted-review",
+      "modelId": "qwen3.6-27b-mtp",
+      "elapsedMs": 30016,
+      "response": {
+        "schemaVersion": "runa2-answer-response/v1",
+        "requestId": "deliberate-read-only-review-3",
+        "participantId": "synthetic-model-participant",
+        "projectId": "synthetic-model-project",
+        "threadId": "synthetic-model-thread",
+        "lane": "general",
+        "answer": "The answer was not completed before the request deadline.",
+        "ground": "record-answers",
+        "retrieval": {
+          "attempted": true,
+          "skipped": false,
+          "skipReason": "",
+          "empty": false,
+          "degraded": false,
+          "evidenceCount": 1,
+          "unavailable": [],
+          "omissions": []
+        },
+        "research": null,
+        "citations": [],
+        "model": {
+          "role": "not-invoked",
+          "provider": "none",
+          "modelId": "none"
+        },
+        "completion": {
+          "reason": "timeout",
+          "timedOut": true,
+          "outputLimited": false
+        },
+        "trace": {
+          "correlationId": "cf43dfe1009ce180e1eb86844158b44a"
+        },
+        "effects": [],
+        "auditCodes": [
+          "project-scope-enforced",
+          "provider-timeout"
+        ]
+      },
+      "error": null,
+      "hard": {
+        "schema": true,
+        "scope": true,
+        "noEffects": true,
+        "completed": false,
+        "modelIdentity": false,
+        "citationsRecognized": false
+      },
+      "hardPassed": false,
+      "qualityPassed": false
     }
   ],
-  "passed": true
+  "passed": false
 }

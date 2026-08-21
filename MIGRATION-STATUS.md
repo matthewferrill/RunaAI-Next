@@ -55,10 +55,10 @@ repository and never push migration work into either source repository.
   disposition.
 - Gate 1 implementation was explicitly approved and built on `runa2/gate-1-read-only-slice`. The
   deterministic suite passes 21/21 and the disposable real-stack integration passes 22/22 with clean
-  shutdown. Qwen3 Coder passes 12/12 live synthetic acceptance runs, but Qwen3.6 MTP times out 3/3 on
-  the selected OpenAI-compatible provider path at the frozen 30-second ceiling. Gate 1 is therefore
-  not green and cannot be approved or merged without the steward choosing a disposition recorded in
-  `gate1/GATE1-RESULTS-2026-08-20.md`.
+  shutdown. Qwen3 Coder passes 12/12 live synthetic acceptance runs. On 2026-08-20 the steward approved
+  a Gate 1 scope amendment deferring Qwen3.6 deliberate review and the existing live BGE endpoint;
+  neither is silently replaced or credited. Gate 1 is green under that amended scope but remains
+  unaccepted and unmerged pending review of the regenerated evidence.
 
 ## Bootstrap findings
 
@@ -95,7 +95,7 @@ plain-language steward experience, or governed action pathway.
 |---|---|---|---|
 | Bootstrap | Establish repository lineage, remotes, branches, instructions, and status | Complete | Reviewed and merged as `94ba860` |
 | 0 | Freeze contracts, parity corpus, data inventory, redaction policy, and green thresholds | Complete | Approved by steward 2026-08-20; PR #2 accepted for integration |
-| 1 | Smallest disposable read-only chat/research slice | Implemented; review-role blocker | Steward disposition of the Qwen3.6 provider-path failure, then evidence acceptance |
+| 1 | Smallest disposable read-only chat/research slice | Green under approved amendment; awaiting acceptance | Steward review and explicit acceptance of regenerated Gate 1 evidence |
 | 2 | All three read-only answer lanes plus chat/project/settings continuity | Not started | Gate 1 evidence accepted |
 | 3 | One reversible governed idempotent action | Not started | Gate 2 parity accepted |
 | 4 | Governed data migration, one domain at a time | Not started | Each domain and owner-context plan approved separately |
@@ -145,11 +145,10 @@ No dependency was changed during the prerequisite disposition. Full evidence is 
 
 ## Next decision
 
-Choose the deliberate-review disposition in `gate1/GATE1-RESULTS-2026-08-20.md`. The recommended
-choice is to amend Gate 1 explicitly to the green ordinary chat/research slice and defer Qwen3.6 review
-integration; the alternative is a separately approved native LM Studio provider bakeoff. Do not raise
-the deadline or substitute Qwen3 Coder for review without new evidence.
+Review the regenerated Gate 1 evidence and decide whether to accept the amended minimum slice. Scope
+acceptance is not merge approval and does not start Gate 2. Qwen3.6 deliberate review and the existing
+live BGE endpoint remain deferred until a separately approved contract and fresh evidence exist.
 
-No choice authorizes protected data, persistent services, production routing, provider reconfiguration,
-or a merge. After the decision, rerun the applicable frozen verification and present Gate 1 evidence
-for explicit steward approval.
+No acceptance authorizes protected data, persistent services, production routing, provider
+reconfiguration, or a merge. After Gate 1 evidence is explicitly accepted, normal review and branch
+protection still apply before integration.

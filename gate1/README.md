@@ -1,7 +1,8 @@
 # Gate 1 — disposable read-only chat/research slice
 
-Status: implemented on `runa2/gate-1-read-only-slice`; not approved or merged. The deliberate-review
-model role is a recorded decision blocker. See `GATE1-RESULTS-2026-08-20.md`.
+Status: implemented and green under the steward-approved Gate 1 scope amendment; not yet accepted or
+merged. Qwen3.6 deliberate review and the existing live BGE endpoint are explicitly deferred. See
+`GATE1-RESULTS-2026-08-20.md`.
 
 ## Boundary
 
@@ -41,9 +42,11 @@ npm.cmd run test:gate1
 npm.cmd run verify:gate1:integration
 $env:GATE1_MODEL_BASE_URL='http://<private-provider>/v1'
 $env:GATE1_FAST_MODEL_ID='qwen3-coder-30b-a3b-instruct'
-$env:GATE1_REVIEW_MODEL_ID='qwen3.6-27b-mtp'
 npm.cmd run verify:gate1:models
 ```
+
+The model command invokes only the amended ordinary chat/research role. It does not invoke Qwen3.6 or
+the live BGE endpoint. Their failed diagnostic and deferral remain documented separately.
 
 The integration runner starts only disposable loopback PostgreSQL, Qdrant, Caddy, OpenTelemetry,
 provider-stub, and reranker-stub processes and stops them in `finally`. Raw run artifacts are ignored;

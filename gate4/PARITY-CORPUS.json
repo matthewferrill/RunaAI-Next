@@ -1,0 +1,26 @@
+{
+  "schemaVersion": "runa2-gate4a-parity-corpus/v1",
+  "domain": "project-chat",
+  "dataClass": "synthetic-only-until-gate4a-2",
+  "cases": [
+    { "id": "G4A-01", "kind": "round-trip", "fixture": "managed-project-with-unassigned-and-assigned-chats", "hard": ["counts-equal", "digests-equal", "order-equal", "private-fields-encrypted"] },
+    { "id": "G4A-02", "kind": "project-state", "fixture": "archived-project-memory-disabled", "hard": ["status-preserved", "memory-disabled", "enable-denied"] },
+    { "id": "G4A-03", "kind": "branch", "fixture": "self-contained-branch-parent-absent", "hard": ["turn-prefix-equal", "provenance-preserved", "read-succeeds"] },
+    { "id": "G4A-04", "kind": "scope", "fixture": "wrong-participant", "hard": ["denied-before-return-decrypt", "zero-private-output"] },
+    { "id": "G4A-05", "kind": "scope", "fixture": "wrong-project", "hard": ["denied-before-return-decrypt", "zero-private-output"] },
+    { "id": "G4A-06", "kind": "authority", "fixture": "source-reference-with-no-root-grant", "hard": ["metadata-only", "no-read-authority"] },
+    { "id": "G4A-07", "kind": "memory", "fixture": "disabled-project-with-historical-memory", "hard": ["record-preserved", "context-excludes-record", "not-approved-knowledge"] },
+    { "id": "G4A-08", "kind": "idempotency", "fixture": "same-manifest-imported-twice", "hard": ["one-project", "one-chat", "one-copy-each-turn", "one-memory", "one-ledger-item"] },
+    { "id": "G4A-09", "kind": "conflict", "fixture": "same-source-key-different-digest", "hard": ["run-denied", "target-unchanged", "conflict-visible"] },
+    { "id": "G4A-10", "kind": "tamper", "fixture": "ciphertext-swapped-between-turns", "hard": ["decrypt-denied", "target-not-served", "zero-private-output"] },
+    { "id": "G4A-11", "kind": "tamper", "fixture": "wrong-key-tag-field-or-envelope-version", "hard": ["all-denied", "zero-partial-record", "zero-private-output"] },
+    { "id": "G4A-12", "kind": "deletion", "fixture": "record-missing-from-second-snapshot", "hard": ["target-content-removed", "content-free-tombstone", "replay-does-not-restore"] },
+    { "id": "G4A-13", "kind": "recovery", "fixture": "crash-before-transaction-commit", "hard": ["no-partial-domain", "retry-completes-once"] },
+    { "id": "G4A-14", "kind": "recovery", "fixture": "response-loss-after-commit", "hard": ["one-commit", "replay-returns-existing-result", "no-duplicate-ledger"] },
+    { "id": "G4A-15", "kind": "dependency-loss", "fixture": "postgres-unavailable-mid-run", "hard": ["run-fails-visible", "prior-snapshot-readable", "legacy-adapter-selectable"] },
+    { "id": "G4A-16", "kind": "invalid-source", "fixture": "unknown-version-unsafe-id-count-mismatch-or-invalid-relation", "hard": ["run-denied", "prior-snapshot-unchanged", "reason-distinguishable"] },
+    { "id": "G4A-17", "kind": "privacy", "fixture": "planted-private-canaries-in-every-sensitive-field", "hard": ["zero-canaries-in-logs", "zero-canaries-in-otel", "zero-canaries-in-ledger", "zero-canaries-in-inventory-output"] },
+    { "id": "G4A-18", "kind": "inventory", "fixture": "synthetic-owner-store-two-pass", "hard": ["aggregate-only", "manifest-deterministic", "unreadable-distinct-from-empty", "no-writes"] },
+    { "id": "G4A-19", "kind": "rollback", "fixture": "legacy-adapter-after-target-rehearsal", "hard": ["legacy-unchanged", "target-disposable", "no-reverse-conversion"] }
+  ]
+}

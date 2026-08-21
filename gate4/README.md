@@ -1,0 +1,34 @@
+# Gate 4 — governed data migration
+
+Gate 4 migrates governed product data one domain at a time. It does not grant blanket permission to
+open or copy every legacy store. PostgreSQL becomes authoritative only after the applicable domain
+has passed inventory, synthetic rehearsal, protected rehearsal, reconciliation, rollback, and steward
+acceptance.
+
+## Domain order
+
+1. **Gate 4A — projects, durable chats, and project memory.** This is the smallest coherent domain
+   because chat assignment and project memory depend on the managed-project boundary.
+2. **Gate 4B — learning events and candidate lifecycle.** Separate approval required.
+3. **Gate 4C — approved knowledge and curricula.** Separate approval required.
+4. **Gate 4D — settings and intentionally retained provider metadata.** Secrets are never copied and
+   require a later re-entry or re-sealing ceremony.
+5. **Gate 4E — derived Qdrant indexes.** Rebuild only from accepted PostgreSQL source/lifecycle truth.
+
+The order after Gate 4A may change by explicit steward decision. No later domain inherits approval
+from an earlier one.
+
+## Current boundary
+
+Only the Gate 4A review contract is present. No protected store has been opened, decrypted, counted,
+exported, copied, converted, or imported. No production route, persistent service, target encryption
+key, or data cutover exists.
+
+The Gate 4A package consists of:
+
+- `GATE4A-PROJECT-CHAT-SCOPE-AND-GREEN-CRITERIA-2026-08-21.md` — authorization and stop rules;
+- `PROJECT-CHAT-TARGET-CONTRACT.md` — canonical authority, schema, encryption, and legacy disposition;
+- `OWNER-CONTEXT-INVENTORY-CONTRACT.md` — the bounded read-only inventory that must be reviewed before
+  owner-context execution;
+- `PARITY-CORPUS.json` — synthetic and protected-rehearsal acceptance cases; and
+- `SOURCE-PINS.json` — exact legacy and integration evidence inputs.

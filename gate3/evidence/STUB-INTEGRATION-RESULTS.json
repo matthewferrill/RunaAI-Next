@@ -1,0 +1,306 @@
+{
+  "schemaVersion": "runa2-gate3-stub-integration/v1",
+  "runtime": "v22.22.0",
+  "selectedComposition": [
+    "LangGraph/PostgreSQL checkpoints",
+    "PostgreSQL proposal/idempotency/outbox/postcondition",
+    "one-time scoped capability",
+    "Gate 2 PostgreSQL setting continuity"
+  ],
+  "syntheticOnly": true,
+  "protectedDataUsed": false,
+  "networking": "loopback-disposable-postgresql-only",
+  "actionKinds": [
+    "participant-setting.set-default-intelligence-level"
+  ],
+  "outcomes": {
+    "interrupt": {
+      "phase": "interrupt",
+      "interrupted": true,
+      "code": "receipt-delivery-interrupted",
+      "counts": {
+        "proposals": 1,
+        "receipts": 1,
+        "capabilities": 1,
+        "outbox": 1,
+        "checkpoints": 3
+      }
+    },
+    "resume": {
+      "phase": "resume",
+      "receipt": {
+        "schemaVersion": "runa2-action-receipt/v1",
+        "receiptId": "g3r-d184aa4f6e3a58d61b6771503be61718b2c7",
+        "proposalId": "g3p-c126cd8fa43a4dd377d9860fa19faa9aa19c",
+        "proposalDigest": "c126cd8fa43a4dd377d9860fa19faa9aa19c443ed04751c69c39d4eb7e7cc807",
+        "participantId": "synthetic-steward",
+        "projectId": "synthetic-project-a",
+        "action": {
+          "kind": "participant-setting.set-default-intelligence-level",
+          "settingKey": "defaultIntelligenceLevel",
+          "value": "High"
+        },
+        "beforeValue": "Medium",
+        "afterValue": "High",
+        "beforeSha256": "6f9d01ba7749097fdc09a6348c91f909be2e7788a997fb193619ded64711b9c5",
+        "afterSha256": "9662263baa88aeed47c35563908158cea4ae8e72f83a16303ef973b77ec90641",
+        "capabilityId": "g3c-c85ce3170406dda5f6c4fd49d8606a759602",
+        "idempotencyKey": "d184aa4f6e3a58d61b6771503be61718b2c7f8b6edcc024ae77ef7fedb155ea8",
+        "rollbackOfReceiptId": null,
+        "executedAt": "2026-08-21T12:16:15.038Z",
+        "replayed": false,
+        "auditCodes": [
+          "verified-steward",
+          "exact-preview-bound",
+          "stale-state-checked",
+          "one-time-capability-consumed",
+          "one-deed-one-receipt"
+        ]
+      },
+      "counts": {
+        "proposals": 1,
+        "receipts": 1,
+        "capabilities": 1,
+        "outbox": 1,
+        "checkpoints": 3
+      }
+    },
+    "workflowReplay": {
+      "phase": "workflow-replay",
+      "receipt": {
+        "schemaVersion": "runa2-action-receipt/v1",
+        "receiptId": "g3r-d184aa4f6e3a58d61b6771503be61718b2c7",
+        "proposalId": "g3p-c126cd8fa43a4dd377d9860fa19faa9aa19c",
+        "proposalDigest": "c126cd8fa43a4dd377d9860fa19faa9aa19c443ed04751c69c39d4eb7e7cc807",
+        "participantId": "synthetic-steward",
+        "projectId": "synthetic-project-a",
+        "action": {
+          "kind": "participant-setting.set-default-intelligence-level",
+          "settingKey": "defaultIntelligenceLevel",
+          "value": "High"
+        },
+        "beforeValue": "Medium",
+        "afterValue": "High",
+        "beforeSha256": "6f9d01ba7749097fdc09a6348c91f909be2e7788a997fb193619ded64711b9c5",
+        "afterSha256": "9662263baa88aeed47c35563908158cea4ae8e72f83a16303ef973b77ec90641",
+        "capabilityId": "g3c-c85ce3170406dda5f6c4fd49d8606a759602",
+        "idempotencyKey": "d184aa4f6e3a58d61b6771503be61718b2c7f8b6edcc024ae77ef7fedb155ea8",
+        "rollbackOfReceiptId": null,
+        "executedAt": "2026-08-21T12:16:15.038Z",
+        "replayed": false,
+        "auditCodes": [
+          "verified-steward",
+          "exact-preview-bound",
+          "stale-state-checked",
+          "one-time-capability-consumed",
+          "one-deed-one-receipt"
+        ]
+      },
+      "counts": {
+        "proposals": 1,
+        "receipts": 1,
+        "capabilities": 1,
+        "outbox": 1,
+        "checkpoints": 3
+      }
+    },
+    "directReplay": {
+      "phase": "direct-replay",
+      "receipt": {
+        "schemaVersion": "runa2-action-receipt/v1",
+        "receiptId": "g3r-d184aa4f6e3a58d61b6771503be61718b2c7",
+        "proposalId": "g3p-c126cd8fa43a4dd377d9860fa19faa9aa19c",
+        "proposalDigest": "c126cd8fa43a4dd377d9860fa19faa9aa19c443ed04751c69c39d4eb7e7cc807",
+        "participantId": "synthetic-steward",
+        "projectId": "synthetic-project-a",
+        "action": {
+          "kind": "participant-setting.set-default-intelligence-level",
+          "settingKey": "defaultIntelligenceLevel",
+          "value": "High"
+        },
+        "beforeValue": "Medium",
+        "afterValue": "High",
+        "beforeSha256": "6f9d01ba7749097fdc09a6348c91f909be2e7788a997fb193619ded64711b9c5",
+        "afterSha256": "9662263baa88aeed47c35563908158cea4ae8e72f83a16303ef973b77ec90641",
+        "capabilityId": "g3c-c85ce3170406dda5f6c4fd49d8606a759602",
+        "idempotencyKey": "d184aa4f6e3a58d61b6771503be61718b2c7f8b6edcc024ae77ef7fedb155ea8",
+        "rollbackOfReceiptId": null,
+        "executedAt": "2026-08-21T12:16:15.038Z",
+        "replayed": true,
+        "auditCodes": [
+          "verified-steward",
+          "exact-preview-bound",
+          "stale-state-checked",
+          "one-time-capability-consumed",
+          "one-deed-one-receipt"
+        ]
+      },
+      "counts": {
+        "proposals": 1,
+        "receipts": 1,
+        "capabilities": 1,
+        "outbox": 1,
+        "checkpoints": 3
+      }
+    },
+    "concurrentReplay": {
+      "phase": "concurrent-replay",
+      "receipts": [
+        {
+          "schemaVersion": "runa2-action-receipt/v1",
+          "receiptId": "g3r-d184aa4f6e3a58d61b6771503be61718b2c7",
+          "proposalId": "g3p-c126cd8fa43a4dd377d9860fa19faa9aa19c",
+          "proposalDigest": "c126cd8fa43a4dd377d9860fa19faa9aa19c443ed04751c69c39d4eb7e7cc807",
+          "participantId": "synthetic-steward",
+          "projectId": "synthetic-project-a",
+          "action": {
+            "kind": "participant-setting.set-default-intelligence-level",
+            "settingKey": "defaultIntelligenceLevel",
+            "value": "High"
+          },
+          "beforeValue": "Medium",
+          "afterValue": "High",
+          "beforeSha256": "6f9d01ba7749097fdc09a6348c91f909be2e7788a997fb193619ded64711b9c5",
+          "afterSha256": "9662263baa88aeed47c35563908158cea4ae8e72f83a16303ef973b77ec90641",
+          "capabilityId": "g3c-c85ce3170406dda5f6c4fd49d8606a759602",
+          "idempotencyKey": "d184aa4f6e3a58d61b6771503be61718b2c7f8b6edcc024ae77ef7fedb155ea8",
+          "rollbackOfReceiptId": null,
+          "executedAt": "2026-08-21T12:16:15.038Z",
+          "replayed": true,
+          "auditCodes": [
+            "verified-steward",
+            "exact-preview-bound",
+            "stale-state-checked",
+            "one-time-capability-consumed",
+            "one-deed-one-receipt"
+          ]
+        },
+        {
+          "schemaVersion": "runa2-action-receipt/v1",
+          "receiptId": "g3r-d184aa4f6e3a58d61b6771503be61718b2c7",
+          "proposalId": "g3p-c126cd8fa43a4dd377d9860fa19faa9aa19c",
+          "proposalDigest": "c126cd8fa43a4dd377d9860fa19faa9aa19c443ed04751c69c39d4eb7e7cc807",
+          "participantId": "synthetic-steward",
+          "projectId": "synthetic-project-a",
+          "action": {
+            "kind": "participant-setting.set-default-intelligence-level",
+            "settingKey": "defaultIntelligenceLevel",
+            "value": "High"
+          },
+          "beforeValue": "Medium",
+          "afterValue": "High",
+          "beforeSha256": "6f9d01ba7749097fdc09a6348c91f909be2e7788a997fb193619ded64711b9c5",
+          "afterSha256": "9662263baa88aeed47c35563908158cea4ae8e72f83a16303ef973b77ec90641",
+          "capabilityId": "g3c-c85ce3170406dda5f6c4fd49d8606a759602",
+          "idempotencyKey": "d184aa4f6e3a58d61b6771503be61718b2c7f8b6edcc024ae77ef7fedb155ea8",
+          "rollbackOfReceiptId": null,
+          "executedAt": "2026-08-21T12:16:15.038Z",
+          "replayed": true,
+          "auditCodes": [
+            "verified-steward",
+            "exact-preview-bound",
+            "stale-state-checked",
+            "one-time-capability-consumed",
+            "one-deed-one-receipt"
+          ]
+        }
+      ],
+      "counts": {
+        "proposals": 1,
+        "receipts": 1,
+        "capabilities": 1,
+        "outbox": 1,
+        "checkpoints": 3
+      }
+    },
+    "rollback": {
+      "phase": "approve",
+      "receipt": {
+        "schemaVersion": "runa2-action-receipt/v1",
+        "receiptId": "g3r-85c1003f16f8c6ef8d53a8b50c094563509c",
+        "proposalId": "g3p-c702195d3177b70707a2b27c2544d514eee6",
+        "proposalDigest": "c702195d3177b70707a2b27c2544d514eee662e904984bde592ae1b1802b3d2c",
+        "participantId": "synthetic-steward",
+        "projectId": "synthetic-project-a",
+        "action": {
+          "kind": "participant-setting.set-default-intelligence-level",
+          "settingKey": "defaultIntelligenceLevel",
+          "value": "Medium"
+        },
+        "beforeValue": "High",
+        "afterValue": "Medium",
+        "beforeSha256": "31840c3d63f5f14f4ac6490e6726c8148dd9274a287213f8bb19d9a4001a0a96",
+        "afterSha256": "5ff994259290bb04d27ff1a92394249641b56dec90502f9b2c65360f83d26736",
+        "capabilityId": "g3c-6f29ab5eb2479965d060f3042f1e8c16fe43",
+        "idempotencyKey": "85c1003f16f8c6ef8d53a8b50c094563509ccd89bcbc90df7045cfae6b93afa1",
+        "rollbackOfReceiptId": "g3r-d184aa4f6e3a58d61b6771503be61718b2c7",
+        "executedAt": "2026-08-21T12:16:19.806Z",
+        "replayed": false,
+        "auditCodes": [
+          "verified-steward",
+          "exact-preview-bound",
+          "stale-state-checked",
+          "one-time-capability-consumed",
+          "one-deed-one-receipt"
+        ]
+      },
+      "counts": {
+        "proposals": 6,
+        "receipts": 2,
+        "capabilities": 2,
+        "outbox": 2,
+        "checkpoints": 6
+      }
+    }
+  },
+  "failureBeforeCode": "action-simulated-before-effect",
+  "failureAfterCode": "action-simulated-atomic-rollback",
+  "staleCode": "action-stale-state",
+  "tamperedCode": "action-proposal-tampered",
+  "finalSetting": "Medium",
+  "counts": {
+    "proposals": 6,
+    "receipts": 2,
+    "capabilities": 2,
+    "outbox": 2,
+    "outbox_pending": 2,
+    "failed_attempts": 3
+  },
+  "database": {
+    "receipts": 2,
+    "capabilities": 2,
+    "outbox": 2,
+    "executed_proposals": 2,
+    "failed_attempts": 3,
+    "checkpoints": 6
+  },
+  "receiptDigest": "64d13df4a416ad5c62ca989997597e86bdd6ae16d0300b34dd1f4cdc3143aa6f",
+  "rollback": {
+    "gate3_removed": true,
+    "gate2_retained": true,
+    "final_setting": "Medium"
+  },
+  "checks": {
+    "proposalInertBeforeApproval": true,
+    "interruptedAfterCommittedReceipt": true,
+    "freshWorkerResumeSameReceipt": true,
+    "workflowReplaySameReceipt": true,
+    "directAndConcurrentReplayOneDeed": true,
+    "oneForwardCapabilityReceiptOutbox": true,
+    "failBeforeEffectClean": true,
+    "failAfterEffectAtomicRollback": true,
+    "staleStateDenied": true,
+    "tamperedProposalDenied": true,
+    "rollbackGovernedAndExact": true,
+    "finalCountsExact": true,
+    "failedOutcomesRecorded": true,
+    "receiptsBoundEffects": true,
+    "checkpointsPresent": true,
+    "gate3RollbackIsolated": true
+  },
+  "passed": true,
+  "servicesStopped": {
+    "postgres": true
+  },
+  "rollbackClean": true
+}

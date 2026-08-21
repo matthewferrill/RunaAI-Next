@@ -1,0 +1,19 @@
+{
+  "schemaVersion": "runa2-gate3-source-pins/v1",
+  "recordedAt": "2026-08-21",
+  "integrationBase": "93cc44e9ae90412975f6548bd6eeb2b065bf78a0",
+  "legacyHead": "71ce985e4272895bbd4c3cf38ed8fbcb6090c2a2",
+  "sources": [
+    { "repo": "RunaAI", "path": "docs/RUNAAI-ACTION-PATHWAY.md", "sha256": "5d6a933d6de89327abbdc457e09ebf6e3e411c4837b5f009bb91b0f51be100a0" },
+    { "repo": "RunaAI", "path": "decisions/0076-build-the-action-pathway.md", "sha256": "ec2e77c65dfd3d453737b3b9dca41cbf21037b5927b97ab8ecced9b1caca4d78" },
+    { "repo": "RunaAI", "path": "decisions/0077-make-the-action-pathway-conversational.md", "sha256": "d606410569f524726f09388e6131433f5bbdf673b227b3d539125c6aaeda6afd" },
+    { "repo": "RunaAI", "path": "src/runa/action-pathway.mjs", "sha256": "4847509da5716cb57c0b99b998c85d9f49d0a4f7493685eedb3a3ad9d5c6ca0e" },
+    { "repo": "RunaAI", "path": "src/runa/action-executors.mjs", "sha256": "1e21d0d783b6dad894ebc1be329b18951736ccd50505764c96804adcc33ccba3" },
+    { "repo": "RunaAI", "path": "scripts/runa-action-pathway-tests.mjs", "sha256": "c6e08321f305e2a47c6f59b6acba9b907bc0bfb2f33e8709a888d82eda2c691d" },
+    { "repo": "RunaAI", "path": "scripts/runa-action-executor-tests.mjs", "sha256": "bc41c5385fb1426b2f13126bf7970ea4c78210adf4390f10a444418a5238a073" },
+    { "repo": "RunaAI-Next", "path": "STACK-BAKEOFF.md", "sha256": "fd705fbea2dcb584b3a2036a7f5a1dc1396c51b9747689730fe6e2d5c55604fe" },
+    { "repo": "RunaAI-Next", "path": "LAB-COMPLETION-REPORT-2026-08-20.md", "sha256": "0307012347c11921e1b1c8c9ca013ebd369639a86b616b64164098ab7f189c64" },
+    { "repo": "RunaAI-Next", "path": "RUNA-2-ARCHITECTURE-ASSESSMENT-2026-08-20.md", "sha256": "afe67c134b97628163581e1677abfb3fe8af91310ac94e8a49fdea156cf36159" },
+    { "repo": "RunaAI-Next", "path": "VERTICAL-INTEGRATION-PREREGISTRATION.md", "sha256": "75bf5dca63b8b8503543b655a9408074a8999054edb777dcfedb88ed1507ff83" }
+  ]
+}

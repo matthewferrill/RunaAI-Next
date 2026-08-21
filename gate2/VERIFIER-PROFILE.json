@@ -1,0 +1,80 @@
+{
+  "schemaVersion": "runa2-gate2-verifier-profile/v1",
+  "status": "planning-only-commands-not-yet-implemented",
+  "node": {
+    "selected": "22.22.0"
+  },
+  "baseline": {
+    "integrationCommit": "7107eadefd8c4a0ce6acf050119e80c44e16b5cb",
+    "legacyCommit": "71ce985e4272895bbd4c3cf38ed8fbcb6090c2a2",
+    "runalabCommit": "ec5e3466f6f937c8c610bdecf62a09c2491c7137"
+  },
+  "requiredDocuments": [
+    "gate2/README.md",
+    "gate2/GATE2-SCOPE-AND-GREEN-CRITERIA-2026-08-21.md",
+    "gate2/PARITY-CORPUS.json",
+    "gate2/SOURCE-PINS.json",
+    "gate2/VERIFIER-PROFILE.json",
+    "gate2/BASELINE-RESULTS-2026-08-21.md"
+  ],
+  "requiredRegressions": {
+    "gate0": ["npm.cmd", "run", "verify:gate0"],
+    "gate1Focused": ["npm.cmd", "run", "test:gate1"],
+    "gate1Integration": ["npm.cmd", "run", "verify:gate1:integration"],
+    "inheritedNodeTestsExpected": 14,
+    "sealVerifiersExpected": 10,
+    "pinnedLegacySuitesExpected": 12
+  },
+  "safeLegacyBaselineExecuted": [
+    "scripts/runa-answer-loop-tests.mjs",
+    "scripts/runa-workspace-comprehension-tests.mjs",
+    "scripts/runa-chat-store-tests.mjs",
+    "scripts/runa-project-store-tests.mjs",
+    "scripts/runa-settings-store-tests.mjs",
+    "scripts/runa-session-reference-tests.mjs",
+    "scripts/runa-citation-verification-tests.mjs",
+    "scripts/runa-citation-enforcement-tests.mjs",
+    "scripts/runa-injection-screening-tests.mjs",
+    "scripts/runa-router-tests.mjs",
+    "scripts/runa-role-context-budget-tests.mjs",
+    "scripts/runa-reachability-tests.mjs",
+    "scripts/runa-model-roster-tests.mjs"
+  ],
+  "pinnedObserversNotExecutedDuringPlanning": [
+    {
+      "path": "scripts/runa-chat-lane-smoke-tests.mjs",
+      "reason": "Its general lane uses the legacy checkout as a workspace root and may initialize shared semantic state; Gate 2 must reproduce the behavior with an explicit disposable root."
+    },
+    {
+      "path": "scripts/runa-project-memory-boundary-tests.mjs",
+      "reason": "One command-route assertion may consult default legacy project status; Gate 2 must use injected synthetic repositories."
+    },
+    {
+      "path": "scripts/runa-household-identity-tests.mjs",
+      "reason": "Identity behavior is pinned for participant semantics, but owner/device ceremony is outside Gate 2 and must not be inferred from a planning run."
+    },
+    {
+      "path": "scripts/runa-command-runner-tests.mjs",
+      "reason": "The broad route suite includes default legacy surfaces; Gate 2 needs a synthetic, dependency-injected route harness before execution."
+    }
+  ],
+  "plannedGate2Commands": {
+    "focused": ["node", "--test", "gate2/gate2.test.mjs"],
+    "integration": ["node", "gate2/run-integration.mjs"],
+    "model": ["node", "gate2/run-model-validation.mjs"]
+  },
+  "modelValidation": {
+    "default": "not-run",
+    "allowedRole": "qwen3-coder-30b-a3b-instruct",
+    "repetitionsPerRepresentativeCase": 3,
+    "hardPassRate": 1,
+    "qualityPassRateMinimum": 0.9,
+    "qwen36": "deferred",
+    "liveBge": "deferred"
+  },
+  "protectedChecks": {
+    "dpapiOwnerRoundTrip": "not-applicable-and-prohibited-in-gate2",
+    "windowsHelloCeremony": "not-applicable-and-prohibited-in-gate2",
+    "legacyStoreInventory": "not-applicable-and-prohibited-in-gate2"
+  }
+}

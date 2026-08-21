@@ -36,12 +36,14 @@ repository and never push migration work into either source repository.
 - GitHub branch protection is active on `main` and `runa2/integration`: pull requests and resolved
   conversations are required; stale reviews are dismissed; admins are included; force-pushes and
   deletion are blocked. Required status checks remain unset until a real CI check exists.
-- `main` and `runa2/integration` begin at the exact RunaLab completion commit.
+- `main` remains at the exact RunaLab completion baseline. `runa2/integration` contains the accepted
+  bootstrap, Gate 0 contract freeze, and Gate 1 implementation.
 - The completed laboratory evidence, seals, probes, stack bakeoff, model findings, architecture
   assessment, and conditional estimates are inherited.
-- Gate 1 now contains an isolated synthetic-only implementation of the smallest ordinary read-only
+- Gate 1 contains an isolated synthetic-only implementation of the smallest ordinary read-only
   chat/research path. Its approved code-review remediation and refreshed evidence were accepted by the
-  steward on 2026-08-21. It is experimental, unmerged, and not an authority for production behavior.
+  steward on 2026-08-21 and merged into `runa2/integration` as `7107ead`. It is development evidence,
+  not an authority for production behavior.
 - No protected RunaAI data has been opened, copied, converted, or migrated.
 - No model has been downloaded.
 - No persistent service, non-loopback listener, provider credential, production path, or spending has
@@ -62,8 +64,12 @@ repository and never push migration work into either source repository.
   neither is silently replaced or credited. The steward subsequently accepted the regenerated Gate 1
   evidence. Protected review then found total-deadline, concurrent-idempotency, and post-window-32
   reranker gaps. The steward approved the narrow remediation on 2026-08-21; it completed with green
-  refreshed evidence on 2026-08-21, which the steward accepted the same day. The branch remains
-  unmerged pending normal protected code review.
+  refreshed evidence on 2026-08-21, which the steward accepted the same day. The steward separately
+  approved the protected merge, completed as `7107ead` on 2026-08-21. The source branch remains
+  available.
+- Gate 2 planning is isolated on `runa2/gate-2-read-only-continuity` from `7107ead`. Its proposed
+  scope, synthetic parity corpus, exact legacy pins, verifier profile, and safe focused baseline are
+  recorded in `gate2/`. No Gate 2 implementation is started or authorized by those records.
 
 ## Bootstrap findings
 
@@ -100,8 +106,8 @@ plain-language steward experience, or governed action pathway.
 |---|---|---|---|
 | Bootstrap | Establish repository lineage, remotes, branches, instructions, and status | Complete | Reviewed and merged as `94ba860` |
 | 0 | Freeze contracts, parity corpus, data inventory, redaction policy, and green thresholds | Complete | Approved by steward 2026-08-20; PR #2 accepted for integration |
-| 1 | Smallest disposable read-only chat/research slice | Refreshed remediation evidence accepted; awaiting protected integration review | Normal review and branch protection before merge |
-| 2 | All three read-only answer lanes plus chat/project/settings continuity | Not started | Refreshed Gate 1 evidence accepted |
+| 1 | Smallest disposable read-only chat/research slice | Complete; accepted and merged as `7107ead` | Complete |
+| 2 | All three read-only answer lanes plus chat/project/settings continuity | Planning package prepared; implementation not started | Steward accepts Gate 2 scope, corpus, and green criteria |
 | 3 | One reversible governed idempotent action | Not started | Gate 2 parity accepted |
 | 4 | Governed data migration, one domain at a time | Not started | Each domain and owner-context plan approved separately |
 | 5 | Operations, private transport, authentication/authorization, recovery | Not started | Functional/data parity accepted |
@@ -150,10 +156,10 @@ No dependency was changed during the prerequisite disposition. Full evidence is 
 
 ## Next decision
 
-Complete normal protected code review and decide whether to merge Gate 1 into `runa2/integration`.
-Evidence acceptance is not merge approval. Qwen3.6 deliberate review and the existing live BGE
-endpoint remain deferred until a separately approved contract and fresh evidence exist.
+Review `gate2/GATE2-SCOPE-AND-GREEN-CRITERIA-2026-08-21.md`, `gate2/PARITY-CORPUS.json`,
+`gate2/SOURCE-PINS.json`, `gate2/VERIFIER-PROFILE.json`, and the safe focused baseline. Decide whether
+to authorize the bounded synthetic Gate 2 implementation on `runa2/gate-2-read-only-continuity`.
 
-Gate 2 remains unstarted and requires separate explicit approval even though its Gate 1 evidence
-prerequisite is now satisfied. No current approval authorizes protected data, persistent services,
-production routing, provider reconfiguration, or a merge.
+Gate 2 implementation remains unstarted until that approval. Qwen3.6 deliberate review and the
+existing live BGE endpoint remain deferred. No current approval authorizes protected data,
+persistent services, production routing, provider reconfiguration, Gate 3, or a protected merge.

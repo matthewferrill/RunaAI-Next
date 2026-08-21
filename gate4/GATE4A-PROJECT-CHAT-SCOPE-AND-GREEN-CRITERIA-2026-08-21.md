@@ -1,8 +1,8 @@
 # Gate 4A scope and green criteria — project/chat domain
 
 Status: Gate 4A-1 approved by the steward on 2026-08-21. Synthetic implementation, rehearsal, and the
-approved owner-context inventory execution on RUNA-CONTROL are green. Gate 4A-2 was approved on
-2026-08-21 under `GATE4A-2-PROTECTED-REHEARSAL-PLAN-2026-08-21.md`; execution is pending.
+approved owner-context inventory execution on RUNA-CONTROL are green. Gate 4A-2 was approved and
+completed green on 2026-08-21 under `GATE4A-2-PROTECTED-REHEARSAL-PLAN-2026-08-21.md`.
 
 ## Layman summary
 
@@ -127,11 +127,11 @@ After 4A-1 evidence is reviewed, a separate approval must name the target host/s
 ceremony, encrypted transfer boundary (if any), backup, deletion handling, rollback window, and exact
 aggregate inventory snapshot. It authorizes an isolated rehearsal only, not cutover.
 
-Status: approved 2026-08-21 under the adjacent protected-rehearsal plan; execution pending.
+Status: approved and completed green 2026-08-21 under the adjacent protected-rehearsal plan.
 
 ### Gate 4A-3 — evidence acceptance and protected merge
 
 The steward reviews reconciliation, privacy scans, failures, restart, rollback, source drift, and the
 remaining legacy authority. Merge into `runa2/integration` requires a separate explicit approval.
 
-Status: not requested.
+Status: evidence acceptance and protected merge approval pending steward decision.

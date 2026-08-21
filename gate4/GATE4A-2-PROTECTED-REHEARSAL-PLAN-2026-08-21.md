@@ -1,8 +1,9 @@
 # Gate 4A-2 protected chat rehearsal plan
 
-Status: approved by the steward on 2026-08-21. This authorizes one Control-local protected rehearsal
-under the exact boundary below. It does not authorize production installation, cutover, adapter
-selection, source mutation, protected merge, or any later Gate 4 domain.
+Status: approved by the steward and completed green on 2026-08-21. Aggregate results are retained in
+`evidence/PROTECTED-REHEARSAL-RESULTS-2026-08-21.json`. This does not authorize production
+installation, cutover, adapter selection, source mutation, protected merge, or any later Gate 4
+domain.
 
 ## Exact source snapshot
 

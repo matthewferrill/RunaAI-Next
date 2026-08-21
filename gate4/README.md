@@ -27,13 +27,15 @@ approved roots and decrypted chat records only in memory to produce aggregate ev
 unassigned chats, 75 turns, no projects, no project memory, no integrity findings, and a deterministic
 second pass. No protected value was emitted, exported, copied, converted, or imported. No production
 route, persistent service, real target encryption key, or data cutover exists. Gate 4A-2 remains
-separately bounded and was approved on 2026-08-21 for one Control-local protected rehearsal; execution
-is pending.
+separately bounded and completed green on 2026-08-21 as one Control-local protected rehearsal. Its
+temporary target, backup, keys, runtime, and listener were removed. Gate 4A-3 evidence acceptance and
+protected merge remain separately decision-gated.
 
 The Gate 4A package consists of:
 
 - `GATE4A-PROJECT-CHAT-SCOPE-AND-GREEN-CRITERIA-2026-08-21.md` — authorization and stop rules;
 - `GATE4A-2-PROTECTED-REHEARSAL-PLAN-2026-08-21.md` — the exact Control-local protected boundary;
+- `GATE4A-2-PROTECTED-REHEARSAL-RESULTS-2026-08-21.md` — protected reconciliation and cleanup result;
 - `PROJECT-CHAT-TARGET-CONTRACT.md` — canonical authority, schema, encryption, and legacy disposition;
 - `OWNER-CONTEXT-INVENTORY-CONTRACT.md` — the bounded read-only inventory that must be reviewed before
   owner-context execution;
@@ -41,5 +43,6 @@ The Gate 4A package consists of:
 - `SOURCE-PINS.json` — exact legacy and integration evidence inputs;
 - `run-owner-inventory.mjs` — fail-closed aggregate inventory entry point; and
 - `evidence/OWNER-CONTEXT-INVENTORY-2026-08-21.json` — the allowlisted aggregate-only Control result;
+- `evidence/PROTECTED-REHEARSAL-RESULTS-2026-08-21.json` — allowlisted aggregate protected evidence;
 - `GATE4A-1-SYNTHETIC-RESULTS-2026-08-21.md` — implementation and verification evidence plus the
   owner-context result and next approval boundary.

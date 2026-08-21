@@ -168,6 +168,26 @@ test("HTTP candidate exposes aggregate status and keeps shadow routes closed", a
   assert.doesNotMatch(deniedBody, /PRIVATE_TOKEN_CANARY/);
 });
 
+test("HTTP candidate reports authority-store loss as service unavailable", async t => {
+  const { application } = harness({ cutoverStatus: async () => {
+    throw Object.assign(new Error("private database detail"), { code: "ECONNREFUSED" });
+  } });
+  const server = createCandidateHttpServer({ application, runtimeStatus: async () => ({}),
+    readinessStatus: async () => ({}), dependencyHealth: async () => ({ ready: false }),
+    staticRoot: resolve("gate6b/public") });
+  server.listen(0, "127.0.0.1");
+  await once(server, "listening");
+  t.after(() => server.close());
+  const response = await fetch(`http://127.0.0.1:${server.address().port}/api/selected/answer`, {
+    method: "POST", headers: { "content-type": "application/json" },
+    body: JSON.stringify({ requestId: "authority-loss", lane: "general", threadId: "thread", message: "Hi" }),
+  });
+  assert.equal(response.status, 503);
+  const body = await response.text();
+  assert.match(body, /cutover-authority-unavailable/);
+  assert.doesNotMatch(body, /private database detail|ECONNREFUSED/);
+});
+
 test("release artifact verification detects changed and extra files", async t => {
   const root = await mkdtemp(join(tmpdir(), "runa-gate6b-artifact-"));
   t.after(() => rm(root, { recursive: true, force: true }));

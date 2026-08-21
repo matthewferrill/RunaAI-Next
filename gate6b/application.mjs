@@ -67,8 +67,10 @@ export class SelectedCoreApplication {
   }
 
   async authority() {
-    return assertSelectedAuthority({ mode: this.mode, targetGeneration: this.targetGeneration,
-      cutover: await this.cutoverStatus() });
+    let cutover;
+    try { cutover = await this.cutoverStatus(); }
+    catch { throw coded("cutover-authority-unavailable", "The selected authority store is unavailable."); }
+    return assertSelectedAuthority({ mode: this.mode, targetGeneration: this.targetGeneration, cutover });
   }
 
   async answer({ credential = null, body }) {

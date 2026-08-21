@@ -1,0 +1,33 @@
+{
+  "schemaVersion": "runa2-gate4c1-parity-corpus/v1",
+  "cases": [
+    { "id": "G4C-01", "claim": "accepted Gate 4B chain is revalidated" },
+    { "id": "G4C-02", "claim": "tampered authenticated record is denied" },
+    { "id": "G4C-03", "claim": "changed accepted manifest is denied" },
+    { "id": "G4C-04", "claim": "only active approved lessons project" },
+    { "id": "G4C-05", "claim": "approved corrections supersede prior lessons" },
+    { "id": "G4C-06", "claim": "revoked and approval-expired lessons are excluded" },
+    { "id": "G4C-07", "claim": "event expiry deletion-due and deletion are excluded" },
+    { "id": "G4C-08", "claim": "safe hold and reviewed release resolve deterministically" },
+    { "id": "G4C-09", "claim": "all request scope dimensions are explicit" },
+    { "id": "G4C-10", "claim": "personal knowledge requires exact participant" },
+    { "id": "G4C-11", "claim": "project knowledge fails closed when undeclared or mismatched" },
+    { "id": "G4C-12", "claim": "capability knowledge requires declared capability" },
+    { "id": "G4C-13", "claim": "session evaluation and training material never advises" },
+    { "id": "G4C-14", "claim": "scope filtering precedes relevance ranking" },
+    { "id": "G4C-15", "claim": "selection is deterministic" },
+    { "id": "G4C-16", "claim": "weak one-term matches return at most one lesson" },
+    { "id": "G4C-17", "claim": "lesson count and token budget remain bounded" },
+    { "id": "G4C-18", "claim": "must-not-apply conditions suppress selection" },
+    { "id": "G4C-19", "claim": "selected provenance uses keyed references" },
+    { "id": "G4C-20", "claim": "changed journal head invalidates projection" },
+    { "id": "G4C-21", "claim": "lifecycle boundary requires rebuild" },
+    { "id": "G4C-22", "claim": "fabricated projections are denied" },
+    { "id": "G4C-23", "claim": "safe query failure emits no context" },
+    { "id": "G4C-24", "claim": "curricula remain inactive candidate templates" },
+    { "id": "G4C-25", "claim": "advisory context grants no authority" },
+    { "id": "G4C-26", "claim": "projection status is content-free and inactive" },
+    { "id": "G4C-27", "claim": "malformed lifecycle semantics fail closed" },
+    { "id": "G4C-28", "claim": "duplicate active approval authority fails closed" }
+  ]
+}

@@ -47,3 +47,8 @@ The Gate 4A package consists of:
 - `evidence/PROTECTED-REHEARSAL-RESULTS-2026-08-21.json` — allowlisted aggregate protected evidence;
 - `GATE4A-1-SYNTHETIC-RESULTS-2026-08-21.md` — implementation and verification evidence plus the
   owner-context result and next approval boundary.
+
+Gate 4B is accepted and merged. Gate 4C-1 now has a separate synthetic projection implementation on
+`runa2/gate-4c-approved-knowledge-projection`. It opens no protected data and activates no answer
+lane. Its 28-case frozen corpus and full 146-test Node suite are green. Steward acceptance remains
+required before any protected comparison or answer-lane wiring.

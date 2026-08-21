@@ -16,7 +16,8 @@ try {
   const first = inventoryFromSnapshot(firstRead.snapshot, firstRead.diagnostics);
   const second = inventoryFromSnapshot(secondRead.snapshot, secondRead.diagnostics);
   const sources = [fileURLToPath(import.meta.url), fileURLToPath(new URL("./inventory.mjs", import.meta.url)),
-    fileURLToPath(new URL("./canonical.mjs", import.meta.url)), fileURLToPath(new URL("./contracts.mjs", import.meta.url))];
+    fileURLToPath(new URL("./canonical.mjs", import.meta.url)),
+    fileURLToPath(new URL("./formats.mjs", import.meta.url))];
   const output = safeInventoryOutput({ authority: firstRead.authority, first, second,
     scriptSha256: inventoryScriptHash(sources) });
   process.stdout.write(`${JSON.stringify(output)}\n`);

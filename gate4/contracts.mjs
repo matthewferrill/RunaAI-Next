@@ -1,10 +1,10 @@
 import { z } from "zod";
 import { canonicalJson } from "./canonical.mjs";
+import { GATE4A_SNAPSHOT_VERSION, LEGACY_CHAT_VERSION, LEGACY_PROJECT_VERSION,
+  TARGET_RECORD_VERSION } from "./formats.mjs";
 
-export const GATE4A_SNAPSHOT_VERSION = "runa2-gate4a-source-snapshot/v1";
-export const LEGACY_CHAT_VERSION = "runa-chat-store/v1";
-export const LEGACY_PROJECT_VERSION = "runa-project-store/v1";
-export const TARGET_RECORD_VERSION = "runa2-project-chat-record/v1";
+export { GATE4A_SNAPSHOT_VERSION, LEGACY_CHAT_VERSION, LEGACY_PROJECT_VERSION,
+  TARGET_RECORD_VERSION };
 
 const projectId = z.string().regex(/^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/).max(160);
 const chatId = z.string().regex(/^[a-f0-9]{32}$/);

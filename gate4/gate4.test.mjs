@@ -1,6 +1,9 @@
 import assert from "node:assert/strict";
 import { after, test } from "node:test";
-import { readFileSync } from "node:fs";
+import { copyFileSync, mkdtempSync, readFileSync, rmSync } from "node:fs";
+import { spawnSync } from "node:child_process";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { MemoryGate4aStore } from "./adapters/memory.mjs";
 import { createEnvelopeCipher } from "./envelope.mjs";
 import { Gate4aMigrationService, Gate4aProjectChatRepository, buildGate4aPlan } from "./migration.mjs";
@@ -180,6 +183,18 @@ caseTest("G4A-18", "inventory is aggregate-only, deterministic, and distinguishe
   assert.equal("projects" in output, false);
   assert.equal(inventoryFromSnapshot(snapshot, { unreadableChats: 1 }).passed, false);
   assert.equal(inventoryFromSnapshot({ ...snapshot, chats: [] }).passed, true);
+
+  const cleanPackage = mkdtempSync(join(tmpdir(), "runa-gate4a-owner-inventory-"));
+  try {
+    for (const name of ["run-owner-inventory.mjs", "inventory.mjs", "canonical.mjs", "formats.mjs"])
+      copyFileSync(new URL(`./${name}`, import.meta.url), join(cleanPackage, name));
+    const cli = spawnSync(process.execPath, [join(cleanPackage, "run-owner-inventory.mjs"),
+      "--legacy-repo", join(cleanPackage, "missing-legacy"), "--expected-commit", "0".repeat(40)],
+    { encoding: "utf8", windowsHide: true });
+    assert.equal(cli.status, 1);
+    assert.equal(cli.stderr.includes("ERR_MODULE_NOT_FOUND"), false, cli.stderr);
+    assert.equal(JSON.parse(cli.stdout.trim()).disallowedFieldsEmitted, false);
+  } finally { rmSync(cleanPackage, { recursive: true, force: true }); }
 });
 
 caseTest("G4A-19", "rollback selects legacy records without reverse conversion", async () => {

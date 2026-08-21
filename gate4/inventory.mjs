@@ -3,7 +3,7 @@ import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { resolve, join, relative, sep, isAbsolute } from "node:path";
 import { pathToFileURL } from "node:url";
 import { canonicalJson, sha256 } from "./canonical.mjs";
-import { GATE4A_SNAPSHOT_VERSION, LEGACY_CHAT_VERSION } from "./contracts.mjs";
+import { GATE4A_SNAPSHOT_VERSION, LEGACY_CHAT_VERSION } from "./formats.mjs";
 
 const coded = (code, message) => Object.assign(new Error(message), { code });
 

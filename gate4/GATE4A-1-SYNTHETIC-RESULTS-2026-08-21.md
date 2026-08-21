@@ -42,6 +42,10 @@ A deliberately wrong legacy commit was supplied to the inventory CLI. It returne
 `inventory-authority-mismatch` result and stopped before opening any protected store. The real
 owner-context path was not used.
 
+The owner CLI is also executed from a temporary clean package containing only its four reviewed
+files. This proves the inventory entry point needs no `npm install`, `node_modules`, or external
+JavaScript package on RUNA-CONTROL.
+
 Gate 1 and Gate 2 integration harnesses share the collector's default metrics port and therefore must
 run sequentially. A concurrent verification attempt produced that expected harness port collision;
 the sequential Gate 2 rerun passed and every disposable child service stopped. This did not affect

@@ -230,8 +230,12 @@ http://127.0.0.1:9770 {
 }
 "@
 $caddyExe = Join-Path $paths.Tools 'caddy\caddy.exe'
+$priorErrorPreference = $ErrorActionPreference
+$ErrorActionPreference = 'Continue'
 & $caddyExe validate --config $caddyFile --adapter caddyfile *> $null
-if ($LASTEXITCODE -ne 0) { throw 'candidate-caddy-configuration-invalid' }
+$caddyValidationExit = $LASTEXITCODE
+$ErrorActionPreference = $priorErrorPreference
+if ($caddyValidationExit -ne 0) { throw 'candidate-caddy-configuration-invalid' }
 $serviceSpec = [ordered]@{
   postgresql = @{ version='18.6'; binary=(Join-Path $pgBin 'postgres.exe'); port=9765; bind='127.0.0.1' }
   keycloak = @{ version='26.7.2'; home=$keycloakHome; port=9762; managementPort=9766; bind='127.0.0.1'; cache='local-single-node' }

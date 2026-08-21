@@ -49,6 +49,9 @@ repository and never push migration work into either source repository.
   `runa2/integration` as `94ba860`.
 - Gate 0 contract/evidence freeze was approved by the steward on 2026-08-20 for integration through
   PR #2. No Gate 1 implementation has started.
+- Gate 1 prerequisites are complete on `runa2/gate-1-prerequisites`: exact Node 22.22.0 is installed
+  and green, Node 22.23.2 is rejected by the sealed latency gate, and the low npm advisory has an
+  explicit synthetic-slice-only disposition. Gate 1 remains unstarted pending explicit approval.
 
 ## Bootstrap findings
 
@@ -85,7 +88,7 @@ plain-language steward experience, or governed action pathway.
 |---|---|---|---|
 | Bootstrap | Establish repository lineage, remotes, branches, instructions, and status | Complete | Reviewed and merged as `94ba860` |
 | 0 | Freeze contracts, parity corpus, data inventory, redaction policy, and green thresholds | Complete | Approved by steward 2026-08-20; PR #2 accepted for integration |
-| 1 | Smallest disposable read-only chat/research slice | Not started | Gate 0 evidence accepted |
+| 1 | Smallest disposable read-only chat/research slice | Not started | Explicit Gate 1 start approval after prerequisite evidence review |
 | 2 | All three read-only answer lanes plus chat/project/settings continuity | Not started | Gate 1 evidence accepted |
 | 3 | One reversible governed idempotent action | Not started | Gate 2 parity accepted |
 | 4 | Governed data migration, one domain at a time | Not started | Each domain and owner-context plan approved separately |
@@ -120,17 +123,23 @@ were correctly skipped, and live approved-library provenance was explicitly not 
 application service was started. This is recorded as an environment limitation, not as guarded-lane
 or Gate 1 parity evidence.
 
-Gate 0 selects Node `>=22.22.0 <23`; Omen currently has `22.21.0`. The bootstrap's one low npm advisory
-is accepted only for documentation-only Gate 0. Installing the selected Node patch and recording a
-fresh, exact advisory disposition are Gate 1 entry criteria; no runtime or dependency was changed here.
+The Gate 1 prerequisite batch installed exact Node 22.22.0 and reran the full Gate 0 verifier green.
+Node 22.23.2 was tested and rejected because its sealed stub average repeatedly measured 12.54–14.70
+ms; installed Node 22.22.0 measured 0.66–0.78 ms. The repository now pins the accepted patch.
+
+The npm result is two low dependency entries for one underlying uncontrolled-resource-consumption
+advisory, `GHSA-866g-f22w-33x8` / `CVE-2026-8769`, through
+`@mastra/core@1.59.0 -> @ai-sdk/provider-utils-v5@3.0.30`. GitHub lists no first patched version and
+the newest published 3.x observed during disposition was 3.0.32, within the advertised affected range.
+The risk is temporarily accepted only for Gate 1's disposable synthetic boundary with hard time,
+byte, abort, and retry controls. It continues to block production and widened network/provider scope.
+No dependency was changed. Full evidence is in `gate0/GATE1-PREREQUISITES-2026-08-20.md`.
 
 ## Next decision
 
-Satisfy the two Gate 1 prerequisites without beginning Gate 1 implementation: install the selected
-Node 22 patch in a separately approved runtime-maintenance batch, then capture and explicitly
-disposition the exact low npm advisory. After both are recorded, request explicit approval to start
-Gate 1's isolated disposable implementation branch. Gate 0 acceptance is not permission to touch
-protected data, start persistent services, activate networking, or change production.
+Review the Gate 1 prerequisite evidence and decide whether to approve Gate 1's isolated disposable
+implementation branch. Prerequisite completion is not permission to touch protected data, start
+persistent services, activate a listener, widen provider/network scope, or change production.
 
 The recommended first implementation decision remains Gate 1's smallest read-only chat/research slice,
 but only after Gate 0 establishes its baseline, exact green thresholds, rollback, and representative

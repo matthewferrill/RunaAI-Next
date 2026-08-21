@@ -59,7 +59,7 @@ if (legacy) {
   process.stdout.write("Legacy source pins/tests: NOT RUN (set RUNAAI_LEGACY_CHECKOUT for Gate 0 acceptance)\n");
 }
 
-const [major, minor] = process.versions.node.split(".").map(Number);
-const selectedNode = major === 22 && minor >= 22;
-process.stdout.write(`Node ${process.versions.node}: ${selectedNode ? "selected Gate 1 runtime" : "Gate 0 evidence only; Gate 1 requires >=22.22.0 <23"}\n`);
+const selectedNode = process.versions.node === profile.node.selected;
+assert.ok(selectedNode || profile.node.gate0EvidenceMayRunOlder, `Gate 1 requires exact Node ${profile.node.selected}`);
+process.stdout.write(`Node ${process.versions.node}: ${selectedNode ? "selected Gate 1 runtime" : `Gate 0 evidence only; Gate 1 requires exact Node ${profile.node.selected}`}\n`);
 process.stdout.write(`Gate 0 verification passed: 18 corpus cases, 14 inherited tests expected, 10 seals, ${legacy ? "12 legacy focused suites" : "legacy optional phase not run"}.\n`);

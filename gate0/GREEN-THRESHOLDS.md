@@ -13,14 +13,16 @@ All of the following are required:
    is activated.
 6. Known environment limitations and unexecuted owner/operator checks remain explicit.
 
-The current Omen Node `22.21.0` may produce Gate 0 evidence, but it is not an accepted Gate 1 runtime.
-The selected runtime is Node `>=22.22.0 <23` because the committed dependency graph includes a package
-that declares `>=22.22.0` for the Node 22 line.
+The original Omen Node `22.21.0` may produce Gate 0 evidence, but it is not an accepted Gate 1 runtime.
+The selected runtime is exact Node `22.22.0`. It is the first Node 22 patch satisfying the committed
+dependency graph and it passes the sealed suite. Node `22.23.2` is explicitly rejected because its
+stub completion average repeatedly failed the single-digit threshold.
 
-The one low npm advisory observed during bootstrap is accepted only for documentation-only Gate 0.
-Before Gate 1 implementation, a fresh audit on the selected Node patch must identify its exact package,
-path, affected range, and available fix. The steward must explicitly accept or resolve it. Do not run
-`npm audit fix` or change dependency versions implicitly.
+The bootstrap advisory is now identified as `GHSA-866g-f22w-33x8` / `CVE-2026-8769`, one underlying
+low availability issue surfaced on two dependency nodes. No patched provider-utils 3.x release exists.
+It is temporarily accepted for the disposable synthetic Gate 1 slice under the controls in
+`GATE1-PREREQUISITES-2026-08-20.md`; it blocks production and any widened network/provider scope.
+Do not run `npm audit fix` or change dependency versions implicitly.
 
 ## Gate 1 green threshold
 

@@ -136,6 +136,14 @@ repository and never push migration work into either source repository.
   development merge on 2026-08-21. The merge completed as `61d364b`, preserving the reviewed commits
   and source branch. It does not authorize a retained migration, learning activation, Gate 4C, or
   production cutover.
+- The steward selected projection-first Gate 4C-1 on 2026-08-21. The isolated branch
+  `runa2/gate-4c-approved-knowledge-projection` reconstructs active approved knowledge only from an
+  authenticated accepted Gate 4B chain, requires explicit participant/project/capability scope before
+  deterministic bounded relevance, uses keyed provenance, and denies stale or lifecycle-due
+  projections. Curriculum catalogs remain inactive candidate templates. Its frozen corpus passes
+  28/28, the full Node suite passes 146/146, and Gate 0 plus Gate 1-4 disposable regressions are green.
+  No protected data was opened; model-context activation, answer-lane wiring, persistent projection,
+  Qdrant, embeddings, BGE, and production routing remain disabled. Gate 4C-1A acceptance is pending.
 
 ## Bootstrap findings
 
@@ -176,7 +184,7 @@ plain-language steward experience, or governed action pathway.
 | 1 | Smallest disposable read-only chat/research slice | Complete; accepted and merged as `7107ead` | Complete |
 | 2 | All three read-only answer lanes plus chat/project/settings continuity | Complete; evidence accepted and merged as `4c4767f` | Complete |
 | 3 | One reversible governed idempotent action | Complete; accepted and merged as `0680cfb` | Complete |
-| 4 | Governed data migration, one domain at a time | Gate 4A and Gate 4B accepted and merged; legacy unchanged | Define and approve Gate 4C projection/retrieval separately |
+| 4 | Governed data migration, one domain at a time | Gate 4A/4B accepted; Gate 4C-1 synthetic projection green; legacy unchanged | Accept or reject Gate 4C-1A |
 | 5 | Operations, private transport, authentication/authorization, recovery | Not started | Functional/data parity accepted |
 | 6 | Selected-core production cutover and rollback window | Not started | Gates 0–5 accepted and maintenance window approved |
 | 7 | Deferred extensions | Not started | New baseline and separate approval per extension group |
@@ -223,10 +231,11 @@ No dependency was changed during the prerequisite disposition. Full evidence is 
 
 ## Next decision
 
-Gate 4B is accepted and merged. The next decision is whether and how to define Gate 4C for
-approved-knowledge projection and retrieval. Gate 4C is not authorized by the Gate 4B merge. The
-unresolved E3 record remains unchanged, E4 authority/device-vault state remains deferred to Gate 5,
-and there is no E5 store to migrate.
+Gate 4C-1 synthetic projection evidence is ready for acceptance. Acceptance would confirm the
+projection contract only. A protected comparison, answer-lane activation, model-context use, and
+derived Qdrant indexing each remain separate later decisions. The unresolved E3 record remains
+unchanged, E4 authority/device-vault state remains deferred to Gate 5, and there is no E5 store to
+migrate.
 
 Qwen3.6 deliberate review, the existing live BGE endpoint, real data export/import, persistent
 services, production routing, provider reconfiguration, production authentication/authorization, and

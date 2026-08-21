@@ -1,0 +1,22 @@
+{
+  admin off
+  auto_https off
+}
+
+http://127.0.0.1:9581 {
+  reverse_proxy 127.0.0.1:9579 {
+    transport http {
+      dial_timeout 1s
+      response_header_timeout 2s
+    }
+  }
+}
+
+http://127.0.0.1:9582 {
+  reverse_proxy 127.0.0.1:9580 {
+    transport http {
+      dial_timeout 1s
+      response_header_timeout 2s
+    }
+  }
+}

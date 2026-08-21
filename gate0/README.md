@@ -27,6 +27,8 @@ their invariants, but their end-to-end port is Gate 2 work.
   inventory.
 - `TRACE-REDACTION-POLICY.md` defines the Gate 1 telemetry allowlist and retention.
 - `GREEN-THRESHOLDS.md` defines the conditions for accepting Gate 0 and later Gate 1 evidence.
+- `GATE1-SCOPE-AMENDMENT-2026-08-20.md` records the steward-approved narrowing made after the first
+  Gate 1 model evidence, without rewriting the original freeze or crediting deferred roles.
 - `verify-gate0.mjs` validates this freeze and, when a legacy checkout is supplied, its pinned files
   and focused tests.
 

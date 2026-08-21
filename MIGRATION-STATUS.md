@@ -1,6 +1,6 @@
 # RunaAI migration status
 
-Status date: 2026-08-20. This is the living migration handoff for RunaAI-Next. Update it in the same
+Status date: 2026-08-21. This is the living migration handoff for RunaAI-Next. Update it in the same
 commit whenever a gate changes repository direction, authority, implementation status, safety
 boundaries, verification state, or the next planned work.
 
@@ -39,19 +39,31 @@ repository and never push migration work into either source repository.
 - `main` and `runa2/integration` begin at the exact RunaLab completion commit.
 - The completed laboratory evidence, seals, probes, stack bakeoff, model findings, architecture
   assessment, and conditional estimates are inherited.
-- No RunaAI behavior has been ported into this repository.
+- Gate 1 now contains an isolated synthetic-only implementation of the smallest ordinary read-only
+  chat/research path. Its approved code-review remediation and refreshed evidence were accepted by the
+  steward on 2026-08-21. It is experimental, unmerged, and not an authority for production behavior.
 - No protected RunaAI data has been opened, copied, converted, or migrated.
 - No model has been downloaded.
-- No persistent service, network listener, provider credential, production path, or spending has been
-  activated.
+- No persistent service, non-loopback listener, provider credential, production path, or spending has
+  been activated. Gate 1 verification used only bounded disposable loopback child processes.
 - No migration gate is approved merely by this bootstrap.
 - Bootstrap documentation and clean-clone validation were reviewed and merged into
   `runa2/integration` as `94ba860`.
 - Gate 0 contract/evidence freeze was approved by the steward on 2026-08-20 for integration through
-  PR #2. No Gate 1 implementation has started.
-- Gate 1 prerequisites are complete on `runa2/gate-1-prerequisites`: exact Node 22.22.0 is installed
-  and green, Node 22.23.2 is rejected by the sealed latency gate, and the low npm advisory has an
-  explicit synthetic-slice-only disposition. Gate 1 remains unstarted pending explicit approval.
+  PR #2. The steward separately approved Gate 1 implementation on 2026-08-20.
+- Gate 1 prerequisites are complete: exact Node 22.22.0 is installed and green, Node 22.23.2 is
+  rejected by the sealed latency gate, and the low npm advisory has an explicit synthetic-slice-only
+  disposition.
+- Gate 1 implementation was explicitly approved and built on `runa2/gate-1-read-only-slice`. The
+  remediated deterministic suite passes 24/24 and the disposable real-stack integration passes 25/25
+  with clean shutdown. The full repository suite passes 38/38, 10/10 seals and all 12 pinned legacy
+  suites remain green, and Qwen3 Coder passes 12/12 refreshed live synthetic acceptance runs. On 2026-08-20 the steward approved
+  a Gate 1 scope amendment deferring Qwen3.6 deliberate review and the existing live BGE endpoint;
+  neither is silently replaced or credited. The steward subsequently accepted the regenerated Gate 1
+  evidence. Protected review then found total-deadline, concurrent-idempotency, and post-window-32
+  reranker gaps. The steward approved the narrow remediation on 2026-08-21; it completed with green
+  refreshed evidence on 2026-08-21, which the steward accepted the same day. The branch remains
+  unmerged pending normal protected code review.
 
 ## Bootstrap findings
 
@@ -88,8 +100,8 @@ plain-language steward experience, or governed action pathway.
 |---|---|---|---|
 | Bootstrap | Establish repository lineage, remotes, branches, instructions, and status | Complete | Reviewed and merged as `94ba860` |
 | 0 | Freeze contracts, parity corpus, data inventory, redaction policy, and green thresholds | Complete | Approved by steward 2026-08-20; PR #2 accepted for integration |
-| 1 | Smallest disposable read-only chat/research slice | Not started | Explicit Gate 1 start approval after prerequisite evidence review |
-| 2 | All three read-only answer lanes plus chat/project/settings continuity | Not started | Gate 1 evidence accepted |
+| 1 | Smallest disposable read-only chat/research slice | Refreshed remediation evidence accepted; awaiting protected integration review | Normal review and branch protection before merge |
+| 2 | All three read-only answer lanes plus chat/project/settings continuity | Not started | Refreshed Gate 1 evidence accepted |
 | 3 | One reversible governed idempotent action | Not started | Gate 2 parity accepted |
 | 4 | Governed data migration, one domain at a time | Not started | Each domain and owner-context plan approved separately |
 | 5 | Operations, private transport, authentication/authorization, recovery | Not started | Functional/data parity accepted |
@@ -133,14 +145,15 @@ advisory, `GHSA-866g-f22w-33x8` / `CVE-2026-8769`, through
 the newest published 3.x observed during disposition was 3.0.32, within the advertised affected range.
 The risk is temporarily accepted only for Gate 1's disposable synthetic boundary with hard time,
 byte, abort, and retry controls. It continues to block production and widened network/provider scope.
-No dependency was changed. Full evidence is in `gate0/GATE1-PREREQUISITES-2026-08-20.md`.
+No dependency was changed during the prerequisite disposition. Full evidence is in
+`gate0/GATE1-PREREQUISITES-2026-08-20.md`.
 
 ## Next decision
 
-Review the Gate 1 prerequisite evidence and decide whether to approve Gate 1's isolated disposable
-implementation branch. Prerequisite completion is not permission to touch protected data, start
-persistent services, activate a listener, widen provider/network scope, or change production.
+Complete normal protected code review and decide whether to merge Gate 1 into `runa2/integration`.
+Evidence acceptance is not merge approval. Qwen3.6 deliberate review and the existing live BGE
+endpoint remain deferred until a separately approved contract and fresh evidence exist.
 
-The recommended first implementation decision remains Gate 1's smallest read-only chat/research slice,
-but only after Gate 0 establishes its baseline, exact green thresholds, rollback, and representative
-review set.
+Gate 2 remains unstarted and requires separate explicit approval even though its Gate 1 evidence
+prerequisite is now satisfied. No current approval authorizes protected data, persistent services,
+production routing, provider reconfiguration, or a merge.

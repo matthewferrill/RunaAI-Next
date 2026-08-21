@@ -1,0 +1,819 @@
+{
+  "schemaVersion": "runa2-gate1-model-validation/v1",
+  "syntheticOnly": true,
+  "endpoint": "existing-private-runa-home",
+  "models": {
+    "ordinaryChatResearch": "qwen3-coder-30b-a3b-instruct"
+  },
+  "deferred": {
+    "deliberateReview": "qwen3.6-27b-mtp: steward-deferred after retained 3/3 timeout diagnostic",
+    "liveReranker": "existing-private-bge: steward-deferred after bounded synthetic timeout"
+  },
+  "repetitionsPerCase": 3,
+  "totals": {
+    "runs": 12,
+    "hardPassed": 12,
+    "qualityPassed": 12,
+    "qualityRate": 1
+  },
+  "thresholds": {
+    "hardRequired": 12,
+    "qualityRequiredRate": 0.9
+  },
+  "rerankerLiveStatus": "deferred-by-approved-gate1-scope-amendment",
+  "runs": [
+    {
+      "caseId": "general-evidence-answer",
+      "repetition": 1,
+      "role": "fast-chat-research",
+      "modelId": "qwen3-coder-30b-a3b-instruct",
+      "elapsedMs": 2008,
+      "response": {
+        "schemaVersion": "runa2-answer-response/v1",
+        "requestId": "general-evidence-answer-1",
+        "participantId": "synthetic-model-participant",
+        "projectId": "synthetic-model-project",
+        "threadId": "synthetic-model-thread",
+        "lane": "general",
+        "answer": "The reranker is configured through the private rerank endpoint.",
+        "ground": "record-answers",
+        "retrieval": {
+          "attempted": true,
+          "skipped": false,
+          "skipReason": "",
+          "empty": false,
+          "degraded": false,
+          "evidenceCount": 1,
+          "unavailable": [],
+          "omissions": []
+        },
+        "research": null,
+        "citations": [
+          {
+            "sourceId": "configuration",
+            "sectionId": "reranker",
+            "contentSha256": "b71104c0fd6693fe7c5d18ff47855670fa1c0d1d0a72f94e697f5119ae33273d",
+            "ordinal": 1
+          }
+        ],
+        "model": {
+          "role": "fast-chat-research",
+          "provider": "private-runa-home",
+          "modelId": "qwen3-coder-30b-a3b-instruct"
+        },
+        "completion": {
+          "reason": "complete",
+          "timedOut": false,
+          "outputLimited": false
+        },
+        "trace": {
+          "correlationId": "e8af6af8c24349a83a98a98475baeebe"
+        },
+        "effects": [],
+        "auditCodes": [
+          "project-scope-enforced"
+        ]
+      },
+      "error": null,
+      "hard": {
+        "schema": true,
+        "scope": true,
+        "noEffects": true,
+        "completed": true,
+        "modelIdentity": true,
+        "citationsRecognized": true
+      },
+      "hardPassed": true,
+      "qualityPassed": true
+    },
+    {
+      "caseId": "general-evidence-answer",
+      "repetition": 2,
+      "role": "fast-chat-research",
+      "modelId": "qwen3-coder-30b-a3b-instruct",
+      "elapsedMs": 716,
+      "response": {
+        "schemaVersion": "runa2-answer-response/v1",
+        "requestId": "general-evidence-answer-2",
+        "participantId": "synthetic-model-participant",
+        "projectId": "synthetic-model-project",
+        "threadId": "synthetic-model-thread",
+        "lane": "general",
+        "answer": "The reranker is configured through the private rerank endpoint.",
+        "ground": "record-answers",
+        "retrieval": {
+          "attempted": true,
+          "skipped": false,
+          "skipReason": "",
+          "empty": false,
+          "degraded": false,
+          "evidenceCount": 1,
+          "unavailable": [],
+          "omissions": []
+        },
+        "research": null,
+        "citations": [
+          {
+            "sourceId": "configuration",
+            "sectionId": "reranker",
+            "contentSha256": "b71104c0fd6693fe7c5d18ff47855670fa1c0d1d0a72f94e697f5119ae33273d",
+            "ordinal": 1
+          }
+        ],
+        "model": {
+          "role": "fast-chat-research",
+          "provider": "private-runa-home",
+          "modelId": "qwen3-coder-30b-a3b-instruct"
+        },
+        "completion": {
+          "reason": "complete",
+          "timedOut": false,
+          "outputLimited": false
+        },
+        "trace": {
+          "correlationId": "8b5a7203e17dd7ef449a43fb013995ec"
+        },
+        "effects": [],
+        "auditCodes": [
+          "project-scope-enforced"
+        ]
+      },
+      "error": null,
+      "hard": {
+        "schema": true,
+        "scope": true,
+        "noEffects": true,
+        "completed": true,
+        "modelIdentity": true,
+        "citationsRecognized": true
+      },
+      "hardPassed": true,
+      "qualityPassed": true
+    },
+    {
+      "caseId": "general-evidence-answer",
+      "repetition": 3,
+      "role": "fast-chat-research",
+      "modelId": "qwen3-coder-30b-a3b-instruct",
+      "elapsedMs": 721,
+      "response": {
+        "schemaVersion": "runa2-answer-response/v1",
+        "requestId": "general-evidence-answer-3",
+        "participantId": "synthetic-model-participant",
+        "projectId": "synthetic-model-project",
+        "threadId": "synthetic-model-thread",
+        "lane": "general",
+        "answer": "The reranker is configured through the private rerank endpoint.",
+        "ground": "record-answers",
+        "retrieval": {
+          "attempted": true,
+          "skipped": false,
+          "skipReason": "",
+          "empty": false,
+          "degraded": false,
+          "evidenceCount": 1,
+          "unavailable": [],
+          "omissions": []
+        },
+        "research": null,
+        "citations": [
+          {
+            "sourceId": "configuration",
+            "sectionId": "reranker",
+            "contentSha256": "b71104c0fd6693fe7c5d18ff47855670fa1c0d1d0a72f94e697f5119ae33273d",
+            "ordinal": 1
+          }
+        ],
+        "model": {
+          "role": "fast-chat-research",
+          "provider": "private-runa-home",
+          "modelId": "qwen3-coder-30b-a3b-instruct"
+        },
+        "completion": {
+          "reason": "complete",
+          "timedOut": false,
+          "outputLimited": false
+        },
+        "trace": {
+          "correlationId": "905c4dc2858e69c994543f52356656e2"
+        },
+        "effects": [],
+        "auditCodes": [
+          "project-scope-enforced"
+        ]
+      },
+      "error": null,
+      "hard": {
+        "schema": true,
+        "scope": true,
+        "noEffects": true,
+        "completed": true,
+        "modelIdentity": true,
+        "citationsRecognized": true
+      },
+      "hardPassed": true,
+      "qualityPassed": true
+    },
+    {
+      "caseId": "general-metaphysical-no-search",
+      "repetition": 1,
+      "role": "fast-chat-research",
+      "modelId": "qwen3-coder-30b-a3b-instruct",
+      "elapsedMs": 973,
+      "response": {
+        "schemaVersion": "runa2-answer-response/v1",
+        "requestId": "general-metaphysical-no-search-1",
+        "participantId": "synthetic-model-participant",
+        "projectId": "synthetic-model-project",
+        "threadId": "synthetic-model-thread",
+        "lane": "general",
+        "answer": "There is no evidence provided to answer the question about the existence of God. The request asks about a theological or philosophical concept that cannot be addressed with the given untrusted evidence envelope which contains no relevant information.",
+        "ground": "not-a-question-of-fact",
+        "retrieval": {
+          "attempted": false,
+          "skipped": true,
+          "skipReason": "record-not-applicable",
+          "empty": true,
+          "degraded": false,
+          "evidenceCount": 0,
+          "unavailable": [],
+          "omissions": []
+        },
+        "research": null,
+        "citations": [],
+        "model": {
+          "role": "fast-chat-research",
+          "provider": "private-runa-home",
+          "modelId": "qwen3-coder-30b-a3b-instruct"
+        },
+        "completion": {
+          "reason": "complete",
+          "timedOut": false,
+          "outputLimited": false
+        },
+        "trace": {
+          "correlationId": "8b59d5688c4e6f1619dc656e81821426"
+        },
+        "effects": [],
+        "auditCodes": []
+      },
+      "error": null,
+      "hard": {
+        "schema": true,
+        "scope": true,
+        "noEffects": true,
+        "completed": true,
+        "modelIdentity": true,
+        "citationsRecognized": true
+      },
+      "hardPassed": true,
+      "qualityPassed": true
+    },
+    {
+      "caseId": "general-metaphysical-no-search",
+      "repetition": 2,
+      "role": "fast-chat-research",
+      "modelId": "qwen3-coder-30b-a3b-instruct",
+      "elapsedMs": 681,
+      "response": {
+        "schemaVersion": "runa2-answer-response/v1",
+        "requestId": "general-metaphysical-no-search-2",
+        "participantId": "synthetic-model-participant",
+        "projectId": "synthetic-model-project",
+        "threadId": "synthetic-model-thread",
+        "lane": "general",
+        "answer": "There is no evidence provided to answer the question about the existence of God. The request asks about a theological or philosophical concept, but the evidence envelope contains no relevant information.",
+        "ground": "not-a-question-of-fact",
+        "retrieval": {
+          "attempted": false,
+          "skipped": true,
+          "skipReason": "record-not-applicable",
+          "empty": true,
+          "degraded": false,
+          "evidenceCount": 0,
+          "unavailable": [],
+          "omissions": []
+        },
+        "research": null,
+        "citations": [],
+        "model": {
+          "role": "fast-chat-research",
+          "provider": "private-runa-home",
+          "modelId": "qwen3-coder-30b-a3b-instruct"
+        },
+        "completion": {
+          "reason": "complete",
+          "timedOut": false,
+          "outputLimited": false
+        },
+        "trace": {
+          "correlationId": "4e17a26937cce25d546900de1686e816"
+        },
+        "effects": [],
+        "auditCodes": []
+      },
+      "error": null,
+      "hard": {
+        "schema": true,
+        "scope": true,
+        "noEffects": true,
+        "completed": true,
+        "modelIdentity": true,
+        "citationsRecognized": true
+      },
+      "hardPassed": true,
+      "qualityPassed": true
+    },
+    {
+      "caseId": "general-metaphysical-no-search",
+      "repetition": 3,
+      "role": "fast-chat-research",
+      "modelId": "qwen3-coder-30b-a3b-instruct",
+      "elapsedMs": 669,
+      "response": {
+        "schemaVersion": "runa2-answer-response/v1",
+        "requestId": "general-metaphysical-no-search-3",
+        "participantId": "synthetic-model-participant",
+        "projectId": "synthetic-model-project",
+        "threadId": "synthetic-model-thread",
+        "lane": "general",
+        "answer": "There is no evidence provided to answer the question about the existence of God. The request asks about a theological or philosophical concept, but the evidence envelope contains no relevant information.",
+        "ground": "not-a-question-of-fact",
+        "retrieval": {
+          "attempted": false,
+          "skipped": true,
+          "skipReason": "record-not-applicable",
+          "empty": true,
+          "degraded": false,
+          "evidenceCount": 0,
+          "unavailable": [],
+          "omissions": []
+        },
+        "research": null,
+        "citations": [],
+        "model": {
+          "role": "fast-chat-research",
+          "provider": "private-runa-home",
+          "modelId": "qwen3-coder-30b-a3b-instruct"
+        },
+        "completion": {
+          "reason": "complete",
+          "timedOut": false,
+          "outputLimited": false
+        },
+        "trace": {
+          "correlationId": "3fad73ff59e9ab33924c43e4f7651dbd"
+        },
+        "effects": [],
+        "auditCodes": []
+      },
+      "error": null,
+      "hard": {
+        "schema": true,
+        "scope": true,
+        "noEffects": true,
+        "completed": true,
+        "modelIdentity": true,
+        "citationsRecognized": true
+      },
+      "hardPassed": true,
+      "qualityPassed": true
+    },
+    {
+      "caseId": "research-complete-denominator",
+      "repetition": 1,
+      "role": "fast-chat-research",
+      "modelId": "qwen3-coder-30b-a3b-instruct",
+      "elapsedMs": 1021,
+      "response": {
+        "schemaVersion": "runa2-answer-response/v1",
+        "requestId": "research-complete-denominator-1",
+        "participantId": "synthetic-model-participant",
+        "projectId": "synthetic-model-project",
+        "threadId": "synthetic-model-thread",
+        "lane": "research",
+        "answer": "Approved knowledge reaches an answer through project-scoped retrieval, active source validation, and citation enforcement.",
+        "ground": "record-answers",
+        "retrieval": {
+          "attempted": true,
+          "skipped": false,
+          "skipReason": "",
+          "empty": false,
+          "degraded": false,
+          "evidenceCount": 1,
+          "unavailable": [],
+          "omissions": []
+        },
+        "research": {
+          "passesPlanned": 5,
+          "passesRun": 5,
+          "passesWithNothing": 0,
+          "passagesRead": 1,
+          "unanswered": [],
+          "truncated": false
+        },
+        "citations": [
+          {
+            "sourceId": "knowledge",
+            "sectionId": "answer-flow",
+            "contentSha256": "75c1a16a82685c034449b1b125676ba849486399b2bda5115dd3911d06f23135",
+            "ordinal": 1
+          }
+        ],
+        "model": {
+          "role": "fast-chat-research",
+          "provider": "private-runa-home",
+          "modelId": "qwen3-coder-30b-a3b-instruct"
+        },
+        "completion": {
+          "reason": "complete",
+          "timedOut": false,
+          "outputLimited": false
+        },
+        "trace": {
+          "correlationId": "5136770295488958ea02cf04369f9eb3"
+        },
+        "effects": [],
+        "auditCodes": [
+          "project-scope-enforced"
+        ]
+      },
+      "error": null,
+      "hard": {
+        "schema": true,
+        "scope": true,
+        "noEffects": true,
+        "completed": true,
+        "modelIdentity": true,
+        "citationsRecognized": true
+      },
+      "hardPassed": true,
+      "qualityPassed": true
+    },
+    {
+      "caseId": "research-complete-denominator",
+      "repetition": 2,
+      "role": "fast-chat-research",
+      "modelId": "qwen3-coder-30b-a3b-instruct",
+      "elapsedMs": 743,
+      "response": {
+        "schemaVersion": "runa2-answer-response/v1",
+        "requestId": "research-complete-denominator-2",
+        "participantId": "synthetic-model-participant",
+        "projectId": "synthetic-model-project",
+        "threadId": "synthetic-model-thread",
+        "lane": "research",
+        "answer": "Approved knowledge reaches an answer through project-scoped retrieval, active source validation, and citation enforcement.",
+        "ground": "record-answers",
+        "retrieval": {
+          "attempted": true,
+          "skipped": false,
+          "skipReason": "",
+          "empty": false,
+          "degraded": false,
+          "evidenceCount": 1,
+          "unavailable": [],
+          "omissions": []
+        },
+        "research": {
+          "passesPlanned": 5,
+          "passesRun": 5,
+          "passesWithNothing": 0,
+          "passagesRead": 1,
+          "unanswered": [],
+          "truncated": false
+        },
+        "citations": [
+          {
+            "sourceId": "knowledge",
+            "sectionId": "answer-flow",
+            "contentSha256": "75c1a16a82685c034449b1b125676ba849486399b2bda5115dd3911d06f23135",
+            "ordinal": 1
+          }
+        ],
+        "model": {
+          "role": "fast-chat-research",
+          "provider": "private-runa-home",
+          "modelId": "qwen3-coder-30b-a3b-instruct"
+        },
+        "completion": {
+          "reason": "complete",
+          "timedOut": false,
+          "outputLimited": false
+        },
+        "trace": {
+          "correlationId": "8df56210c269aefc620d4f6a3c957466"
+        },
+        "effects": [],
+        "auditCodes": [
+          "project-scope-enforced"
+        ]
+      },
+      "error": null,
+      "hard": {
+        "schema": true,
+        "scope": true,
+        "noEffects": true,
+        "completed": true,
+        "modelIdentity": true,
+        "citationsRecognized": true
+      },
+      "hardPassed": true,
+      "qualityPassed": true
+    },
+    {
+      "caseId": "research-complete-denominator",
+      "repetition": 3,
+      "role": "fast-chat-research",
+      "modelId": "qwen3-coder-30b-a3b-instruct",
+      "elapsedMs": 769,
+      "response": {
+        "schemaVersion": "runa2-answer-response/v1",
+        "requestId": "research-complete-denominator-3",
+        "participantId": "synthetic-model-participant",
+        "projectId": "synthetic-model-project",
+        "threadId": "synthetic-model-thread",
+        "lane": "research",
+        "answer": "Approved knowledge reaches an answer through project-scoped retrieval, active source validation, and citation enforcement.",
+        "ground": "record-answers",
+        "retrieval": {
+          "attempted": true,
+          "skipped": false,
+          "skipReason": "",
+          "empty": false,
+          "degraded": false,
+          "evidenceCount": 1,
+          "unavailable": [],
+          "omissions": []
+        },
+        "research": {
+          "passesPlanned": 5,
+          "passesRun": 5,
+          "passesWithNothing": 0,
+          "passagesRead": 1,
+          "unanswered": [],
+          "truncated": false
+        },
+        "citations": [
+          {
+            "sourceId": "knowledge",
+            "sectionId": "answer-flow",
+            "contentSha256": "75c1a16a82685c034449b1b125676ba849486399b2bda5115dd3911d06f23135",
+            "ordinal": 1
+          }
+        ],
+        "model": {
+          "role": "fast-chat-research",
+          "provider": "private-runa-home",
+          "modelId": "qwen3-coder-30b-a3b-instruct"
+        },
+        "completion": {
+          "reason": "complete",
+          "timedOut": false,
+          "outputLimited": false
+        },
+        "trace": {
+          "correlationId": "43f26946b27dfde6647a912ada6dda79"
+        },
+        "effects": [],
+        "auditCodes": [
+          "project-scope-enforced"
+        ]
+      },
+      "error": null,
+      "hard": {
+        "schema": true,
+        "scope": true,
+        "noEffects": true,
+        "completed": true,
+        "modelIdentity": true,
+        "citationsRecognized": true
+      },
+      "hardPassed": true,
+      "qualityPassed": true
+    },
+    {
+      "caseId": "research-partial-denominator",
+      "repetition": 1,
+      "role": "fast-chat-research",
+      "modelId": "qwen3-coder-30b-a3b-instruct",
+      "elapsedMs": 993,
+      "response": {
+        "schemaVersion": "runa2-answer-response/v1",
+        "requestId": "research-partial-denominator-1",
+        "participantId": "synthetic-model-participant",
+        "projectId": "synthetic-model-project",
+        "threadId": "synthetic-model-thread",
+        "lane": "research",
+        "answer": "Scope filtering is a mechanism that maintains retrieval within the boundaries of a trusted synthetic project. This ensures that only relevant and authorized content from within the defined scope is accessed or retrieved.",
+        "ground": "record-answers",
+        "retrieval": {
+          "attempted": true,
+          "skipped": false,
+          "skipReason": "",
+          "empty": false,
+          "degraded": false,
+          "evidenceCount": 1,
+          "unavailable": [],
+          "omissions": []
+        },
+        "research": {
+          "passesPlanned": 5,
+          "passesRun": 5,
+          "passesWithNothing": 0,
+          "passagesRead": 1,
+          "unanswered": [
+            "budget",
+            "enforcement"
+          ],
+          "truncated": false
+        },
+        "citations": [
+          {
+            "sourceId": "scope",
+            "sectionId": "filtering",
+            "contentSha256": "92fcce0a4f459ba9dfa5f9aff1b0d02b54b7db3d6b990882beb9d72752e28a11",
+            "ordinal": 1
+          }
+        ],
+        "model": {
+          "role": "fast-chat-research",
+          "provider": "private-runa-home",
+          "modelId": "qwen3-coder-30b-a3b-instruct"
+        },
+        "completion": {
+          "reason": "complete",
+          "timedOut": false,
+          "outputLimited": false
+        },
+        "trace": {
+          "correlationId": "3ba5614ab8959a457cb3d1bff83f308e"
+        },
+        "effects": [],
+        "auditCodes": [
+          "project-scope-enforced"
+        ]
+      },
+      "error": null,
+      "hard": {
+        "schema": true,
+        "scope": true,
+        "noEffects": true,
+        "completed": true,
+        "modelIdentity": true,
+        "citationsRecognized": true
+      },
+      "hardPassed": true,
+      "qualityPassed": true
+    },
+    {
+      "caseId": "research-partial-denominator",
+      "repetition": 2,
+      "role": "fast-chat-research",
+      "modelId": "qwen3-coder-30b-a3b-instruct",
+      "elapsedMs": 1001,
+      "response": {
+        "schemaVersion": "runa2-answer-response/v1",
+        "requestId": "research-partial-denominator-2",
+        "participantId": "synthetic-model-participant",
+        "projectId": "synthetic-model-project",
+        "threadId": "synthetic-model-thread",
+        "lane": "research",
+        "answer": "Scope filtering is a mechanism that maintains retrieval within the boundaries of a trusted synthetic project. This ensures that only relevant and authorized content from within the defined scope is accessed or retrieved.",
+        "ground": "record-answers",
+        "retrieval": {
+          "attempted": true,
+          "skipped": false,
+          "skipReason": "",
+          "empty": false,
+          "degraded": false,
+          "evidenceCount": 1,
+          "unavailable": [],
+          "omissions": []
+        },
+        "research": {
+          "passesPlanned": 5,
+          "passesRun": 5,
+          "passesWithNothing": 0,
+          "passagesRead": 1,
+          "unanswered": [
+            "budget",
+            "enforcement"
+          ],
+          "truncated": false
+        },
+        "citations": [
+          {
+            "sourceId": "scope",
+            "sectionId": "filtering",
+            "contentSha256": "92fcce0a4f459ba9dfa5f9aff1b0d02b54b7db3d6b990882beb9d72752e28a11",
+            "ordinal": 1
+          }
+        ],
+        "model": {
+          "role": "fast-chat-research",
+          "provider": "private-runa-home",
+          "modelId": "qwen3-coder-30b-a3b-instruct"
+        },
+        "completion": {
+          "reason": "complete",
+          "timedOut": false,
+          "outputLimited": false
+        },
+        "trace": {
+          "correlationId": "344b612ad2f8fc8e6887d3c5ef801557"
+        },
+        "effects": [],
+        "auditCodes": [
+          "project-scope-enforced"
+        ]
+      },
+      "error": null,
+      "hard": {
+        "schema": true,
+        "scope": true,
+        "noEffects": true,
+        "completed": true,
+        "modelIdentity": true,
+        "citationsRecognized": true
+      },
+      "hardPassed": true,
+      "qualityPassed": true
+    },
+    {
+      "caseId": "research-partial-denominator",
+      "repetition": 3,
+      "role": "fast-chat-research",
+      "modelId": "qwen3-coder-30b-a3b-instruct",
+      "elapsedMs": 1000,
+      "response": {
+        "schemaVersion": "runa2-answer-response/v1",
+        "requestId": "research-partial-denominator-3",
+        "participantId": "synthetic-model-participant",
+        "projectId": "synthetic-model-project",
+        "threadId": "synthetic-model-thread",
+        "lane": "research",
+        "answer": "Scope filtering is a mechanism that maintains retrieval within the boundaries of a trusted synthetic project. This ensures that only relevant and authorized content from within the defined scope is accessed or retrieved.",
+        "ground": "record-answers",
+        "retrieval": {
+          "attempted": true,
+          "skipped": false,
+          "skipReason": "",
+          "empty": false,
+          "degraded": false,
+          "evidenceCount": 1,
+          "unavailable": [],
+          "omissions": []
+        },
+        "research": {
+          "passesPlanned": 5,
+          "passesRun": 5,
+          "passesWithNothing": 0,
+          "passagesRead": 1,
+          "unanswered": [
+            "budget",
+            "enforcement"
+          ],
+          "truncated": false
+        },
+        "citations": [
+          {
+            "sourceId": "scope",
+            "sectionId": "filtering",
+            "contentSha256": "92fcce0a4f459ba9dfa5f9aff1b0d02b54b7db3d6b990882beb9d72752e28a11",
+            "ordinal": 1
+          }
+        ],
+        "model": {
+          "role": "fast-chat-research",
+          "provider": "private-runa-home",
+          "modelId": "qwen3-coder-30b-a3b-instruct"
+        },
+        "completion": {
+          "reason": "complete",
+          "timedOut": false,
+          "outputLimited": false
+        },
+        "trace": {
+          "correlationId": "b8e3e2fd6c2160cb631f14f2ba7b29c4"
+        },
+        "effects": [],
+        "auditCodes": [
+          "project-scope-enforced"
+        ]
+      },
+      "error": null,
+      "hard": {
+        "schema": true,
+        "scope": true,
+        "noEffects": true,
+        "completed": true,
+        "modelIdentity": true,
+        "citationsRecognized": true
+      },
+      "hardPassed": true,
+      "qualityPassed": true
+    }
+  ],
+  "passed": true
+}

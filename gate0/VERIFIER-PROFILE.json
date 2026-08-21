@@ -1,7 +1,7 @@
 {
   "schemaVersion": "runa2-gate0-verifier-profile/v1",
   "node": {
-    "selected": ">=22.22.0 <23",
+    "selected": "22.22.0",
     "gate0EvidenceMayRunOlder": true,
     "gate1ImplementationRequiresSelectedRuntime": true
   },

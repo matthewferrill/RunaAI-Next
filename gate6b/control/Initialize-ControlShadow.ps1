@@ -77,10 +77,19 @@ log_filename = 'postgresql-%Y-%m-%d.log'
 "@
 }
 $env:PGPASSWORD = $postgresAdmin
+$runPostgres = Join-Path $paths.Control 'Run-Postgresql.ps1'
+Set-Content -LiteralPath $runPostgres -Encoding utf8 -Value @'
+$ErrorActionPreference = 'Stop'
+$root = 'C:\AI\RunaAI-Next-Candidate'
+& "$root\tools\postgresql\pgsql\bin\postgres.exe" -D "$root\data\postgresql"
+exit $LASTEXITCODE
+'@
 $pgListener = Get-NetTCPConnection -State Listen -LocalPort 9765 -ErrorAction SilentlyContinue | Select-Object -First 1
 if (-not $pgListener) {
-  & (Join-Path $pgBin 'pg_ctl.exe') -D $pgData -l (Join-Path $paths.Logs 'postgres-bootstrap.log') start -w
-  if ($LASTEXITCODE -ne 0) { throw 'candidate-postgres-start-failed' }
+  $pgProcess = Start-Process powershell.exe -ArgumentList '-NoProfile','-File',$runPostgres -WindowStyle Hidden -PassThru
+  $deadline = [DateTime]::UtcNow.AddSeconds(60)
+  do { Start-Sleep -Milliseconds 500; $pgListener = Get-NetTCPConnection -State Listen -LocalPort 9765 -ErrorAction SilentlyContinue | Select-Object -First 1 } until ($pgListener -or [DateTime]::UtcNow -gt $deadline)
+  if (-not $pgListener) { throw 'candidate-postgres-start-failed' }
 }
 function Ensure-Role([string]$Role, [string]$Password) {
   $present = & (Join-Path $pgBin 'psql.exe') -h 127.0.0.1 -p 9765 -U postgres -d postgres -tAc "SELECT 1 FROM pg_roles WHERE rolname='$Role'"

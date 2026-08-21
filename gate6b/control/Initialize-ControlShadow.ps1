@@ -234,7 +234,11 @@ $serviceSpec = [ordered]@{
   caddy = @{ version='2.11.4'; binary=(Join-Path $paths.Tools 'caddy\caddy.exe'); privateAddress=$PrivateAddress; tlsPort=9761; providerProxyPort=9770 }
 }
 $serviceSpec | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath (Join-Path $paths.Config 'service-public.json') -Encoding utf8
-function Hash-Text([string]$Text) { $hash = [Security.Cryptography.SHA256]::HashData([Text.Encoding]::UTF8.GetBytes($Text)); [Convert]::ToHexString($hash).ToLowerInvariant() }
+function Hash-Text([string]$Text) {
+  $algorithm = [Security.Cryptography.SHA256]::Create()
+  try { $hash = $algorithm.ComputeHash([Text.Encoding]::UTF8.GetBytes($Text)) } finally { $algorithm.Dispose() }
+  return ([BitConverter]::ToString($hash) -replace '-', '').ToLowerInvariant()
+}
 $pgIdentity = Hash-Text ((Get-Content -LiteralPath (Join-Path $pgData 'postgresql.conf') -Raw) + (Get-Content -LiteralPath (Join-Path $pgData 'pg_hba.conf') -Raw) + (Get-FileHash -Algorithm SHA256 -LiteralPath (Join-Path $pgBin 'postgres.exe')).Hash)
 $kcIdentity = Hash-Text (($serviceSpec.keycloak | ConvertTo-Json -Compress) + (Get-FileHash -Algorithm SHA256 -LiteralPath (Join-Path $keycloakHome 'lib\quarkus-run.jar')).Hash)
 $fgaIdentity = Hash-Text (($serviceSpec.openfga | ConvertTo-Json -Compress) + (Get-FileHash -Algorithm SHA256 -LiteralPath $openFgaExe).Hash)

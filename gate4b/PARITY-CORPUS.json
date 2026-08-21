@@ -1,0 +1,27 @@
+{
+  "schemaVersion": "runa2-gate4b-parity-corpus/v1",
+  "domain": "learning-events",
+  "dataClass": "synthetic-only-until-separate-owner-inventory-approval",
+  "cases": [
+    { "id": "G4B-01", "kind": "round-trip", "hard": ["entry-order-equal", "entry-digest-equal", "private-payload-encrypted"] },
+    { "id": "G4B-02", "kind": "history", "hard": ["all-entry-kinds-preserved", "approval-batch-preserved"] },
+    { "id": "G4B-03", "kind": "idempotency", "hard": ["one-run", "one-copy-per-entry"] },
+    { "id": "G4B-04", "kind": "conflict", "hard": ["changed-run-denied", "target-unchanged"] },
+    { "id": "G4B-05", "kind": "append", "hard": ["exact-prefix-retained", "new-entry-appended"] },
+    { "id": "G4B-06", "kind": "shrink", "hard": ["denied", "target-unchanged"] },
+    { "id": "G4B-07", "kind": "rewrite", "hard": ["denied", "target-unchanged"] },
+    { "id": "G4B-08", "kind": "atomicity", "hard": ["zero-partial-records", "retry-once"] },
+    { "id": "G4B-09", "kind": "response-loss", "hard": ["one-commit", "replay-result"] },
+    { "id": "G4B-10", "kind": "invalid-source", "hard": ["version-distinguishable", "digest-distinguishable"] },
+    { "id": "G4B-11", "kind": "chain", "hard": ["gap-denied", "broken-link-denied"] },
+    { "id": "G4B-12", "kind": "lineage", "hard": ["outcome-target-required", "lifecycle-target-required", "approval-target-required"] },
+    { "id": "G4B-13", "kind": "privacy", "hard": ["no-private-index", "no-private-plan", "no-private-ledger"] },
+    { "id": "G4B-14", "kind": "tamper", "hard": ["record-binding", "authenticated-denial"] },
+    { "id": "G4B-15", "kind": "authority", "hard": ["history-preserved", "projection-disabled", "no-retrieval"] },
+    { "id": "G4B-16", "kind": "inventory", "hard": ["aggregate-only", "deterministic-second-pass", "content-free"] },
+    { "id": "G4B-17", "kind": "inventory-failure", "hard": ["empty-distinct", "unreadable-distinct", "integrity-distinct"] },
+    { "id": "G4B-18", "kind": "inventory-authority", "hard": ["owner-required", "clean-pin-required", "fail-closed"] },
+    { "id": "G4B-19", "kind": "legacy-stores", "hard": ["e3-unresolved", "e4-unresolved", "e5-unresolved", "vault-unresolved"] },
+    { "id": "G4B-20", "kind": "dependency-loss", "hard": ["failure-visible", "legacy-source-available"] }
+  ]
+}

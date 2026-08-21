@@ -1,6 +1,6 @@
 # Gate 4C-2 protected aggregate comparison plan
 
-Status: steward-approved for one bounded Control run; implementation and evidence pending
+Status: protected comparison passed; steward acceptance pending
 
 ## Purpose
 

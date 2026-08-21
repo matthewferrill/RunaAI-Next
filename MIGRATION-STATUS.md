@@ -132,8 +132,10 @@ repository and never push migration work into either source repository.
   encrypted typed storage, and private-value scans passed. E3, E4, E5, the device vault, and every
   protected source byte remained unchanged. The temporary schemas, database, key, backup, runtime,
   listener, Control root, and Omen staging root were deleted. Focused Gate 4B tests pass 25/25 and the
-  full repository suite passes 118/118. This evidence awaits steward acceptance and does not authorize
-  a merge, retained migration, learning activation, or cutover.
+  full repository suite passes 118/118. The steward accepted the evidence and approved the protected
+  development merge on 2026-08-21. The merge completed as `61d364b`, preserving the reviewed commits
+  and source branch. It does not authorize a retained migration, learning activation, Gate 4C, or
+  production cutover.
 
 ## Bootstrap findings
 
@@ -174,7 +176,7 @@ plain-language steward experience, or governed action pathway.
 | 1 | Smallest disposable read-only chat/research slice | Complete; accepted and merged as `7107ead` | Complete |
 | 2 | All three read-only answer lanes plus chat/project/settings continuity | Complete; evidence accepted and merged as `4c4767f` | Complete |
 | 3 | One reversible governed idempotent action | Complete; accepted and merged as `0680cfb` | Complete |
-| 4 | Governed data migration, one domain at a time | Gate 4A accepted; Gate 4B synthetic contract, owner inventory, and E6 rehearsal green; legacy unchanged | Accept Gate 4B-R evidence, then decide the protected development merge separately |
+| 4 | Governed data migration, one domain at a time | Gate 4A and Gate 4B accepted and merged; legacy unchanged | Define and approve Gate 4C projection/retrieval separately |
 | 5 | Operations, private transport, authentication/authorization, recovery | Not started | Functional/data parity accepted |
 | 6 | Selected-core production cutover and rollback window | Not started | Gates 0–5 accepted and maintenance window approved |
 | 7 | Deferred extensions | Not started | New baseline and separate approval per extension group |
@@ -221,11 +223,10 @@ No dependency was changed during the prerequisite disposition. Full evidence is 
 
 ## Next decision
 
-Review and accept or reject the green Gate 4B-R evidence. If accepted, separately decide whether to
-merge the protected development branch into `runa2/integration`. The rehearsal preserved all 90 E6
-entries, left the unresolved E3 record unchanged, deferred E4 authority/device-vault state to Gate 5,
-and confirmed there is no E5 store to migrate. It activated no approved knowledge, production routing,
-or cutover.
+Gate 4B is accepted and merged. The next decision is whether and how to define Gate 4C for
+approved-knowledge projection and retrieval. Gate 4C is not authorized by the Gate 4B merge. The
+unresolved E3 record remains unchanged, E4 authority/device-vault state remains deferred to Gate 5,
+and there is no E5 store to migrate.
 
 Qwen3.6 deliberate review, the existing live BGE endpoint, real data export/import, persistent
 services, production routing, provider reconfiguration, production authentication/authorization, and

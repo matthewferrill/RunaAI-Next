@@ -5,7 +5,7 @@ import { z } from "zod";
 import { canonicalJson } from "../gate4/canonical.mjs";
 import { validateReleaseBoundary, secretReferenceStatus } from "../gate5/operations.mjs";
 
-const secretRef = z.string().regex(/^(env|file|vault|secret-store):[A-Za-z0-9._/\\-]{1,200}$/);
+const secretRef = z.string().regex(/^(env|file|vault|secret-store):[A-Za-z0-9._/-]{1,200}$/);
 const url = z.string().url().max(500);
 const bounded = z.string().min(1).max(200);
 const service = z.object({ version: bounded, configurationDigest: z.string().regex(/^[a-f0-9]{64}$/) }).strict();

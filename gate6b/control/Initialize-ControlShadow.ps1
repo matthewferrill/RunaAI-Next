@@ -246,10 +246,10 @@ $caddyIdentity = Hash-Text ((Get-Content -LiteralPath $caddyFile -Raw) + (Get-Fi
 $candidate = [ordered]@{
   schemaVersion='runa2-gate6b-release-config/v1'; profile='release'; mode='shadow'; bind=@{ host='127.0.0.1'; port=9760 }; publicBaseUrl="https://$PrivateAddress`:9761"
   releaseManifestPath='release.json'; sourceGeneration='legacy-runaai:control-production'; targetGeneration='runaai-next:control-candidate'; cutoverId='runaai-next-selected-core'
-  databaseUrlRef='file:C:\AI\RunaAI-Next-Candidate\secrets\database-url'
-  keyRefs=@{ coreEncryption='file:C:\AI\RunaAI-Next-Candidate\secrets\core-encryption'; coreHmac='file:C:\AI\RunaAI-Next-Candidate\secrets\core-hmac'; learningEncryption='file:C:\AI\RunaAI-Next-Candidate\secrets\learning-encryption'; learningHmac='file:C:\AI\RunaAI-Next-Candidate\secrets\learning-hmac'; telemetryHmac='file:C:\AI\RunaAI-Next-Candidate\secrets\telemetry-hmac' }
-  keycloak=@{ issuer='http://127.0.0.1:9762/realms/runaai-next'; clientId='runaai-next'; clientCredentialRef='file:C:\AI\RunaAI-Next-Candidate\secrets\keycloak-client' }
-  openfga=@{ baseUrl='http://127.0.0.1:9763'; storeId=$fgaFacts.storeId; modelId=$fgaFacts.modelId; credentialRef='file:C:\AI\RunaAI-Next-Candidate\secrets\openfga-token' }
+  databaseUrlRef='file:C:/AI/RunaAI-Next-Candidate/secrets/database-url'
+  keyRefs=@{ coreEncryption='file:C:/AI/RunaAI-Next-Candidate/secrets/core-encryption'; coreHmac='file:C:/AI/RunaAI-Next-Candidate/secrets/core-hmac'; learningEncryption='file:C:/AI/RunaAI-Next-Candidate/secrets/learning-encryption'; learningHmac='file:C:/AI/RunaAI-Next-Candidate/secrets/learning-hmac'; telemetryHmac='file:C:/AI/RunaAI-Next-Candidate/secrets/telemetry-hmac' }
+  keycloak=@{ issuer='http://127.0.0.1:9762/realms/runaai-next'; clientId='runaai-next'; clientCredentialRef='file:C:/AI/RunaAI-Next-Candidate/secrets/keycloak-client' }
+  openfga=@{ baseUrl='http://127.0.0.1:9763'; storeId=$fgaFacts.storeId; modelId=$fgaFacts.modelId; credentialRef='file:C:/AI/RunaAI-Next-Candidate/secrets/openfga-token' }
   provider=@{ baseUrl='http://127.0.0.1:9770/v1'; modelId=$ModelId }
   services=@{ postgresql=@{ version='18.6'; configurationDigest=$pgIdentity }; keycloak=@{ version='26.7.2'; configurationDigest=$kcIdentity }; openfga=@{ version='1.18.3'; configurationDigest=$fgaIdentity }; caddy=@{ version='2.11.4'; configurationDigest=$caddyIdentity } }
   limits=@{ maxRequestBytes=262144; totalDeadlineMs=30000; upstreamDeadlineMs=10000 }

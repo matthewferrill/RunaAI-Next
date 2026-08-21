@@ -199,6 +199,12 @@ repository and never push migration work into either source repository.
   PostgreSQL, Keycloak, OpenFGA, and private Caddy services are absent. No production traffic or data
   changed. Gate 6B is therefore hard-blocked on building one real release composition and parallel
   persistent target before any protected final delta or promotion can safely begin.
+- Gate 6B's exact release-composition and parallel-candidate criteria are frozen on
+  `runa2/gate-6b-release-composition` from accepted integration commit `2b15ef1`. The release must
+  wire `runa_core`, `runa_learning`, the selected setting/action receipts, Gate 5 security, and Gate 6
+  authority into one fail-closed Node 22.22.0 entry point. It may run on Control only as an isolated
+  empty shadow candidate; protected data, owner credentials, selected-write freeze, and traffic
+  promotion remain Gate 6C/6D boundaries.
 
 ## Bootstrap findings
 
@@ -241,7 +247,7 @@ plain-language steward experience, or governed action pathway.
 | 3 | One reversible governed idempotent action | Complete; accepted and merged as `0680cfb` | Complete |
 | 4 | Governed data migration, one domain at a time | Complete; accepted and merged as `2c38dd5`; legacy unchanged | Complete |
 | 5 | Operations, private transport, authentication/authorization, recovery | Complete; accepted and merged as `a986419` | Complete |
-| 6 | Selected-core production cutover and rollback window | Gate 6A green; Gate 6B blocked on release composition and parallel persistent target; legacy unchanged | Approved by steward 2026-08-21; hard blockers fail closed |
+| 6 | Selected-core production cutover and rollback window | Gate 6A accepted; Gate 6B exact composition frozen and implementation started; legacy unchanged | Approved by steward 2026-08-21; hard blockers fail closed |
 | 7 | Deferred extensions | Not started | New baseline and separate approval per extension group |
 
 ## Bootstrap validation

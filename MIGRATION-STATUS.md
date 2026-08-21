@@ -156,14 +156,20 @@ repository and never push migration work into either source repository.
 - The accelerated synthetic closeout contract for Gate 4C-3A, Gate 4D, and Gate 4E was frozen from
   accepted integration head `4ed6a52` on `runa2/gate-4-closeout-synthetic`. It preserves the standing
   no-protected-data/no-network/no-persistent-service boundary and stops on any hard safety failure.
-- The accelerated synthetic closeout is implemented and locally reviewed on
-  `runa2/gate-4-closeout-synthetic`. Gate 4C-3A supplies scoped synthetic approved knowledge through
+- The accelerated synthetic closeout was accepted and merged into `runa2/integration` as `2c38dd5`
+  on 2026-08-21. Gate 4C-3A supplies scoped synthetic approved knowledge through
   every read-only lane as non-authoritative advisory context; Gate 4D proves the one-setting
   compatibility boundary and retires/defer-dispositions the legacy provider surface; Gate 4E records
   a current skip for a separate approved-knowledge index, with semantic remeasurement triggers. The
   full 167/167 Node suite, 10/10 seals, 12/12 pinned legacy suites, and disposable Gate 1–4 integration
   regressions are green. No protected data, model endpoint, persistent service, or production route
-  was opened or changed. This branch is ready for review but is not yet accepted or merged.
+  was opened or changed. The reviewed source branch remains available.
+- Gate 5 planning is isolated on `runa2/gate-5-operations-security` from accepted integration head
+  `2c38dd5`. Its frozen synthetic train preserves Runa's household authority policy while replacing
+  Windows-bound target authentication/session plumbing with Keycloak OIDC, OpenFGA enforcement,
+  one-time capabilities, private Caddy transport, secret references, allowlisted telemetry, and
+  authoritative PostgreSQL recovery. Protected E3/E4/device-vault access, production identity,
+  non-loopback networking, retained services, and cutover remain separately blocked.
 
 ## Bootstrap findings
 
@@ -204,8 +210,8 @@ plain-language steward experience, or governed action pathway.
 | 1 | Smallest disposable read-only chat/research slice | Complete; accepted and merged as `7107ead` | Complete |
 | 2 | All three read-only answer lanes plus chat/project/settings continuity | Complete; evidence accepted and merged as `4c4767f` | Complete |
 | 3 | One reversible governed idempotent action | Complete; accepted and merged as `0680cfb` | Complete |
-| 4 | Governed data migration, one domain at a time | Gate 4A/4B and Gate 4C through protected aggregate comparison accepted; synthetic closeout implemented and ready for review; legacy unchanged | Review synthetic closeout before integration merge |
-| 5 | Operations, private transport, authentication/authorization, recovery | Not started | Functional/data parity accepted |
+| 4 | Governed data migration, one domain at a time | Complete; accepted and merged as `2c38dd5`; legacy unchanged | Complete |
+| 5 | Operations, private transport, authentication/authorization, recovery | Contract frozen; synthetic implementation in progress | Functional/data parity accepted |
 | 6 | Selected-core production cutover and rollback window | Not started | Gates 0–5 accepted and maintenance window approved |
 | 7 | Deferred extensions | Not started | New baseline and separate approval per extension group |
 
@@ -251,12 +257,12 @@ No dependency was changed during the prerequisite disposition. Full evidence is 
 
 ## Next decision
 
-Gate 4C-2 is accepted and merged. The accelerated synthetic closeout is implemented and ready for
-review. Its Gate 4E result skips a new approved-knowledge index at the current 53-lesson scale because
+Gate 4 is accepted and merged. Its Gate 4E result skips a new approved-knowledge index at the current
+53-lesson scale because
 no authorized vector arm demonstrated the frozen improvement threshold; the direct selector remains
 the bounded fallback and the semantic gap is explicitly measured rather than hidden.
 
-After this synthetic train is reviewed, the next programme gate is Gate 5 operations/security. The
+Gate 5 operations/security is now the active isolated programme gate. The
 unresolved E3 record remains unchanged, E4 authority/device-vault state remains deferred to Gate 5,
 there is no E5 store to migrate, and the optional protected Gate 4D setting import waits for target
 participant identity binding and a later bounded owner campaign.

@@ -1,0 +1,27 @@
+{
+  "schemaVersion": "runa2-gate5-stub-integration/v1",
+  "runtime": "v22.22.0",
+  "syntheticOnly": true,
+  "protectedDataUsed": false,
+  "networking": "loopback-disposable-postgresql-only",
+  "sourceRecordCount": 3,
+  "restoredRecordCount": 3,
+  "checks": {
+    "postgresPrincipalAuthority": true,
+    "onlineIdentityRequired": true,
+    "productAndRelationshipAuthorization": true,
+    "authenticatedBackupManifest": true,
+    "injectedRestoreAtomic": true,
+    "exactRestore": true,
+    "retryIdempotent": true,
+    "changedRunDenied": true,
+    "rollbackTargetOnly": true,
+    "noPrivateValueRetained": true,
+    "gate5RollbackIsolated": true
+  },
+  "passed": true,
+  "servicesStopped": {
+    "postgres": true
+  },
+  "keysDestroyed": true
+}

@@ -21,7 +21,8 @@
     "verify:gate2:integration": "node gate2/run-integration.mjs",
     "verify:gate2:models": "node gate2/run-model-validation.mjs",
     "verify:gate3:integration": "node gate3/run-integration.mjs",
-    "verify:gate4:integration": "node gate4/run-integration.mjs"
+    "verify:gate4:integration": "node gate4/run-integration.mjs",
+    "verify:gate5:integration": "node gate5/run-integration.mjs"
   },
   "keywords": [],
   "author": "",

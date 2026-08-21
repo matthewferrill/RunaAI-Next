@@ -93,7 +93,7 @@ export class OneTimeCapabilityService {
     const issuedAt = this.now();
     const argumentHash = capabilityArgumentHash(args);
     const intentDigest = sha256(canonical({ participantId: participant.principalId, action, resource, argumentHash, approvalId, approvalDigest }));
-    return this.store.issue({
+    return await this.store.issue({
       schemaVersion: GATE5_CAPABILITY_VERSION,
       requestId,
       capabilityId: this.ids(),
@@ -115,13 +115,13 @@ export class OneTimeCapabilityService {
     });
   }
 
-  revoke(capabilityId) { return this.store.revoke(capabilityId, this.now().toISOString()); }
+  async revoke(capabilityId) { return await this.store.revoke(capabilityId, this.now().toISOString()); }
 
   async execute({ capabilityId, participant, action, resource, arguments: args, effect }) {
     if (!participant?.verified) throw coded("capability-identity-required", "Verified identity is required.");
     const decision = await this.authorize({ participant, action, resource });
     if (!decision?.allowed) throw coded(decision?.reason ?? "capability-authorization-denied", "Capability execution was denied.");
-    const reservation = this.store.reserve({
+    const reservation = await this.store.reserve({
       capabilityId,
       actorId: participant.principalId,
       action,
@@ -134,7 +134,7 @@ export class OneTimeCapabilityService {
     try {
       const deed = await effect({ idempotencyKey: reservation.row.idempotencyKey, arguments: clone(args) });
       const executedAt = this.now().toISOString();
-      return Object.freeze(this.store.commit(capabilityId, {
+      return Object.freeze(await this.store.commit(capabilityId, {
         schemaVersion: "runa2-gate5-capability-receipt/v1",
         receiptId: this.ids(),
         capabilityId,
@@ -147,9 +147,8 @@ export class OneTimeCapabilityService {
         replayed: false,
       }));
     } catch (error) {
-      this.store.release(capabilityId);
+      await this.store.release(capabilityId);
       throw error;
     }
   }
 }
-

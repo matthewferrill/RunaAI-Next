@@ -207,7 +207,7 @@ test("capability actor, action, resource, arguments, revocation, and expiry fail
   });
   const revokedService = capabilityFixture();
   const revoked = await revokedService.issue(capRequest());
-  assert.equal(revokedService.revoke(revoked.capabilityId), true);
+  assert.equal(await revokedService.revoke(revoked.capabilityId), true);
   await assert.rejects(() => revokedService.execute({ capabilityId: revoked.capabilityId, participant: participant(), action: revoked.action, resource: revoked.resource, arguments: capRequest().arguments, effect: async () => ({}) }), error => error.code === "capability-revoked");
   const late = () => new Date("2026-08-21T16:10:00.000Z");
   const expiring = capabilityFixture({ clock: (() => { let calls = 0; return () => calls++ === 0 ? now() : late(); })() });
@@ -356,4 +356,3 @@ test("owner recovery re-enrols and never imports Windows-bound authority", () =>
   assert.equal(disposition.e3, "defer-one-unresolved-record");
   assert.equal(disposition.e5, "retire-absent-store");
 });
-

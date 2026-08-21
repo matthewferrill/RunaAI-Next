@@ -170,6 +170,13 @@ repository and never push migration work into either source repository.
   one-time capabilities, private Caddy transport, secret references, allowlisted telemetry, and
   authoritative PostgreSQL recovery. Protected E3/E4/device-vault access, production identity,
   non-loopback networking, retained services, and cutover remain separately blocked.
+- Gate 5's synthetic implementation and local review are complete. The focused suite passes 40/40,
+  the full Node suite passes 207/207, Gate 0 passes 10/10 seals and 12/12 pinned legacy suites, and
+  disposable Gate 1-5 integrations are green with clean shutdown. The existing disposable Keycloak
+  and OpenFGA bakeoff also passed from an isolated tool copy. No protected store, owner credential,
+  production secret, non-loopback listener, retained service, or production route was opened. E3
+  remains deferred; E4/device-vault ciphertext will not be copied and requires later witnessed
+  re-enrolment; E5 is absent. The branch is ready for review, not production authorization.
 
 ## Bootstrap findings
 
@@ -211,7 +218,7 @@ plain-language steward experience, or governed action pathway.
 | 2 | All three read-only answer lanes plus chat/project/settings continuity | Complete; evidence accepted and merged as `4c4767f` | Complete |
 | 3 | One reversible governed idempotent action | Complete; accepted and merged as `0680cfb` | Complete |
 | 4 | Governed data migration, one domain at a time | Complete; accepted and merged as `2c38dd5`; legacy unchanged | Complete |
-| 5 | Operations, private transport, authentication/authorization, recovery | Contract frozen; synthetic implementation in progress | Functional/data parity accepted |
+| 5 | Operations, private transport, authentication/authorization, recovery | Synthetic implementation complete and ready for review | Review before integration merge |
 | 6 | Selected-core production cutover and rollback window | Not started | Gates 0–5 accepted and maintenance window approved |
 | 7 | Deferred extensions | Not started | New baseline and separate approval per extension group |
 
@@ -262,10 +269,13 @@ Gate 4 is accepted and merged. Its Gate 4E result skips a new approved-knowledge
 no authorized vector arm demonstrated the frozen improvement threshold; the direct selector remains
 the bounded fallback and the semantic gap is explicitly measured rather than hidden.
 
-Gate 5 operations/security is now the active isolated programme gate. The
+Gate 5 operations/security is implemented and locally reviewed on its isolated branch. The
 unresolved E3 record remains unchanged, E4 authority/device-vault state remains deferred to Gate 5,
 there is no E5 store to migrate, and the optional protected Gate 4D setting import waits for target
 participant identity binding and a later bounded owner campaign.
+
+The next decision is acceptance of the Gate 5 development boundary. Gate 6 remains blocked on that
+acceptance and a separately approved maintenance/cutover window.
 
 Qwen3.6 deliberate review, the existing live BGE endpoint, real data export/import, persistent
 services, production routing, provider reconfiguration, production authentication/authorization, and

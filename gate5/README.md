@@ -12,9 +12,10 @@ adapters.
   and records dependency-loss behavior.
 - `recovery.mjs` proves authenticated backup and distinct-target restore and freezes the Windows-bound
   re-enrolment disposition.
+- `postgres.mjs` keeps product principal binding and restored authoritative records in PostgreSQL.
 - `gate5.test.mjs` uses synthetic values only. It opens no protected store and starts no service.
+- `run-integration.mjs` uses disposable loopback PostgreSQL and deletes its runtime after the check.
 
 The existing `bakeoffs/security/run-security.mjs` remains the disposable loopback proof for real
 Keycloak OIDC and OpenFGA behavior. Gate 5 may reuse it when the already-installed prerequisites are
 available; its absence cannot be credited as a pass.
-

@@ -143,7 +143,7 @@ plain-language steward experience, or governed action pathway.
 | 1 | Smallest disposable read-only chat/research slice | Complete; accepted and merged as `7107ead` | Complete |
 | 2 | All three read-only answer lanes plus chat/project/settings continuity | Complete; evidence accepted and merged as `4c4767f` | Complete |
 | 3 | One reversible governed idempotent action | Complete; accepted and merged as `0680cfb` | Complete |
-| 4 | Governed data migration, one domain at a time | Gate 4A-1 evidence green, including owner inventory; no protected export/import | Gate 4A-2 requires separate approval after inventory evidence review |
+| 4 | Governed data migration, one domain at a time | Gate 4A-1 evidence green; Gate 4A-2 Control-local protected rehearsal approved, execution pending | Gate 4A-3 requires separate evidence acceptance and merge approval |
 | 5 | Operations, private transport, authentication/authorization, recovery | Not started | Functional/data parity accepted |
 | 6 | Selected-core production cutover and rollback window | Not started | Gates 0–5 accepted and maintenance window approved |
 | 7 | Deferred extensions | Not started | New baseline and separate approval per extension group |
@@ -190,12 +190,11 @@ No dependency was changed during the prerequisite disposition. Full evidence is 
 
 ## Next decision
 
-Review and decide Gate 4A-2. The green inventory proves the protected population is only 25 unassigned
-chats with 75 turns; there are no projects or project-memory records to export. The recommended next
-slice is therefore a one-time protected chat-only export/import rehearsal into a disposable target,
-with a new disposable target key, exact count/digest reconciliation, privacy canary, deletion of the
-target after evidence capture, and no production adapter or cutover change. Gate 4A-2 remains
-unauthorized until the steward approves that exact protected rehearsal.
+Execute the approved Gate 4A-2 Control-local protected rehearsal against the exact 25-chat/75-turn
+inventory snapshot. It must use a scoped encrypted backup, owner-bound disposable target keys,
+loopback-only disposable PostgreSQL, exact reconciliation, source revalidation, and verified deletion
+of every target/backup/key/runtime artifact. No production adapter, cutover, or protected merge is
+authorized. Green evidence advances only to the Gate 4A-3 steward decision.
 
 Qwen3.6 deliberate review, the existing live BGE endpoint, real data export/import, persistent
 services, production routing, provider reconfiguration, production authentication/authorization, and

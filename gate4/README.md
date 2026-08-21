@@ -27,11 +27,13 @@ approved roots and decrypted chat records only in memory to produce aggregate ev
 unassigned chats, 75 turns, no projects, no project memory, no integrity findings, and a deterministic
 second pass. No protected value was emitted, exported, copied, converted, or imported. No production
 route, persistent service, real target encryption key, or data cutover exists. Gate 4A-2 remains
-separately decision-gated.
+separately bounded and was approved on 2026-08-21 for one Control-local protected rehearsal; execution
+is pending.
 
 The Gate 4A package consists of:
 
 - `GATE4A-PROJECT-CHAT-SCOPE-AND-GREEN-CRITERIA-2026-08-21.md` — authorization and stop rules;
+- `GATE4A-2-PROTECTED-REHEARSAL-PLAN-2026-08-21.md` — the exact Control-local protected boundary;
 - `PROJECT-CHAT-TARGET-CONTRACT.md` — canonical authority, schema, encryption, and legacy disposition;
 - `OWNER-CONTEXT-INVENTORY-CONTRACT.md` — the bounded read-only inventory that must be reviewed before
   owner-context execution;

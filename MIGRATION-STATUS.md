@@ -37,14 +37,16 @@ repository and never push migration work into either source repository.
   conversations are required; stale reviews are dismissed; admins are included; force-pushes and
   deletion are blocked. Required status checks remain unset until a real CI check exists.
 - `main` remains at the exact RunaLab completion baseline. `runa2/integration` contains the accepted
-  bootstrap, Gate 0 contract freeze, Gate 1 implementation, and Gate 2 read-only continuity.
+  bootstrap and Gates 0–3.
 - The completed laboratory evidence, seals, probes, stack bakeoff, model findings, architecture
   assessment, and conditional estimates are inherited.
 - Gate 1 contains an isolated synthetic-only implementation of the smallest ordinary read-only
   chat/research path. Its approved code-review remediation and refreshed evidence were accepted by the
   steward on 2026-08-21 and merged into `runa2/integration` as `7107ead`. It is development evidence,
   not an authority for production behavior.
-- No protected RunaAI data has been opened, copied, converted, or migrated.
+- The one approved Gate 4A aggregate inventory opened only the named project/chat roots and decrypted
+  chat records in memory under Matthew's Control identity. It emitted no protected value and copied,
+  converted, imported, or migrated no record.
 - No model has been downloaded.
 - No persistent service, non-loopback listener, provider credential, production path, or spending has
   been activated. Gate 1 verification used only bounded disposable loopback child processes.
@@ -82,9 +84,32 @@ repository and never push migration work into either source repository.
   default intelligence level in an owned managed-project context. Its 26/26 contract suite and 16/16
   disposable PostgreSQL/LangGraph integration checks pass, including response-loss resume, direct and
   concurrent replay, atomic failure rollback, stale-revision denial, one deed/one receipt/outbox, and a
-  separately governed rollback from `High` to `Medium`. Evidence is ready for steward acceptance; the
-  full 74/74 Node profile, 10/10 seals, 12/12 pinned legacy suites, and Gate 1/2 integration regressions
-  remain green. The branch is not yet merged and is not production authorization.
+  separately governed rollback from `High` to `Medium`. The full 74/74 Node profile, 10/10 seals,
+  12/12 pinned legacy suites, and Gate 1/2 integration regressions remain green. The steward accepted
+  the evidence and separately approved the protected merge, completed as `0680cfb` on 2026-08-21.
+  The source branch remains available; this is not production authorization.
+- Gate 4A is isolated on `runa2/gate-4a-project-chat-plan` from `0680cfb`. The steward approved Gate
+  4A-1 on 2026-08-21. The synthetic project/chat migration at `1f5f8be` implements the typed
+  `runa_core` authority, immutable `runa_migration` ledger, application AES-256-GCM envelopes,
+  external keyed reconciliation, content-free tombstones, idempotent/restart-safe imports, scoped
+  reads, and Gate-4A-only rollback. All 19/19 frozen Gate 4A cases, 16/16 disposable PostgreSQL
+  integration checks, and the full 93/93 Node profile pass. Gate 1, 2, and 3 disposable integration
+  regressions pass 25/25, 21/21, and 16/16 respectively; Gate 0 passes with 10/10 seals and all 12
+  pinned legacy suites. The aggregate-only owner inventory tool is implemented and fails closed on
+  authority mismatch. RUNA-CONTROL's clean production checkout is at `b4db040`, while live GitHub
+  `main` was observed at the rewritten `71ce985` history. All ten Gate 4A legacy source selections are
+  content-equivalent after `utf8-lf` canonicalization; the inventory now verifies those pins, bound
+  to `b4db040`, before protected roots can open. The approved owner-context execution passed on
+  RUNA-CONTROL: 25 readable unassigned chats, 75 turns, zero projects or project-memory records, zero
+  unreadable/relationship findings, deterministic second pass, and no disallowed output. No record
+  was exported, copied, converted, imported, repaired, or migrated during inventory. The steward then
+  approved Gate 4A-2, and the Control-local protected rehearsal at `04bfb7d` preserved all 25 chats and
+  75 turns with identical whole-domain logical digests, one committed run, 100 ledger items, atomic
+  failure rollback, idempotent restart/replay, owner-bound DPAPI key recovery, scoped-read denial, and
+  no private value in retained evidence or target/log scans. The source remained byte-exact. The
+  temporary target schemas, data, key, backup, runtime, listener, and root were removed. On 2026-08-21
+  the steward accepted the Gate 4A-2 evidence and separately approved the Gate 4A protected merge into
+  `runa2/integration`. No production adapter or cutover is authorized.
 
 ## Bootstrap findings
 
@@ -124,8 +149,8 @@ plain-language steward experience, or governed action pathway.
 | 0 | Freeze contracts, parity corpus, data inventory, redaction policy, and green thresholds | Complete | Approved by steward 2026-08-20; PR #2 accepted for integration |
 | 1 | Smallest disposable read-only chat/research slice | Complete; accepted and merged as `7107ead` | Complete |
 | 2 | All three read-only answer lanes plus chat/project/settings continuity | Complete; evidence accepted and merged as `4c4767f` | Complete |
-| 3 | One reversible governed idempotent action | Implementation and evidence complete; awaiting acceptance | Complete; steward approved after Gate 2 acceptance |
-| 4 | Governed data migration, one domain at a time | Not started | Each domain and owner-context plan approved separately |
+| 3 | One reversible governed idempotent action | Complete; accepted and merged as `0680cfb` | Complete |
+| 4 | Governed data migration, one domain at a time | Gate 4A project/chat evidence accepted; protected merge approved; legacy unchanged | Select and approve the next Gate 4 domain separately |
 | 5 | Operations, private transport, authentication/authorization, recovery | Not started | Functional/data parity accepted |
 | 6 | Selected-core production cutover and rollback window | Not started | Gates 0–5 accepted and maintenance window approved |
 | 7 | Deferred extensions | Not started | New baseline and separate approval per extension group |
@@ -172,10 +197,12 @@ No dependency was changed during the prerequisite disposition. Full evidence is 
 
 ## Next decision
 
-Review the bounded Gate 3 evidence and decide whether to merge it into `runa2/integration`. Acceptance
-would establish one development-only governed database action; it would not authorize production use,
-another action kind, outbox delivery, or Gate 4 data migration.
+After completing the approved Gate 4A protected merge, select the next Gate 4 domain and review its
+scope, protected-data boundary, dependencies, rollback, and green criteria before implementation. Gate
+4A acceptance establishes only the project/chat migration contract and evidence as a development
+baseline. It does not make PostgreSQL live, migrate production data, authorize another data domain, or
+approve cutover.
 
-Qwen3.6 deliberate review, the existing live BGE endpoint, protected data, persistent services,
-production routing, provider reconfiguration, Gate 4, production authentication/authorization, and
+Qwen3.6 deliberate review, the existing live BGE endpoint, real data export/import, persistent
+services, production routing, provider reconfiguration, production authentication/authorization, and
 production cutover remain unauthorized or deferred.

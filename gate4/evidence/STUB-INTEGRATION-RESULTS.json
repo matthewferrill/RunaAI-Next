@@ -1,0 +1,65 @@
+{
+  "schemaVersion": "runa2-gate4a-stub-integration/v1",
+  "runtime": "v22.22.0",
+  "selectedComposition": [
+    "PostgreSQL runa_core authority",
+    "PostgreSQL immutable migration ledger",
+    "application AES-256-GCM envelopes",
+    "external HMAC reconciliation keys"
+  ],
+  "syntheticOnly": true,
+  "protectedDataUsed": false,
+  "persistentServices": false,
+  "networking": "loopback-disposable-postgresql-only",
+  "inventoryExecuted": false,
+  "counts": {
+    "initial": {
+      "projects": 2,
+      "chats": 3,
+      "turns": 4,
+      "projectMemory": 1
+    },
+    "final": {
+      "projects": 2,
+      "chats": 2,
+      "turns": 3,
+      "projectMemory": 1
+    },
+    "runs": 3,
+    "items": 28,
+    "tombstones": 2
+  },
+  "recovery": {
+    "responseLossCode": "migration-response-lost",
+    "beforeCommitCode": "migration-simulated-before-commit",
+    "restartReplay": true
+  },
+  "rollback": {
+    "core_removed": true,
+    "migration_removed": true,
+    "gate2_retained": true,
+    "gate3_retained": true
+  },
+  "checks": {
+    "concurrentInitialOneCommit": true,
+    "initialCountsExact": true,
+    "encryptedRoundTripExact": true,
+    "responseLossVisible": true,
+    "postgresRestartClean": true,
+    "restartReplaySameRun": true,
+    "deletionApplied": true,
+    "beforeCommitFailureVisible": true,
+    "beforeCommitAtomic": true,
+    "finalUpdateApplied": true,
+    "finalCountsExact": true,
+    "ledgerCountsExact": true,
+    "privateCanaryAbsentFromDatabaseText": true,
+    "contentDigestsAreKeyedShape": true,
+    "approvedTypedSchemaPresent": true,
+    "gate4RollbackIsolated": true
+  },
+  "passed": true,
+  "servicesStopped": {
+    "postgres": true
+  }
+}

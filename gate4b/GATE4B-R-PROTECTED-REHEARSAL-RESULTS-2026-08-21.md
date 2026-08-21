@@ -1,6 +1,6 @@
 # Gate 4B-R protected E6 rehearsal results
 
-Status: green on 2026-08-21 under the exact approved Control-local boundary. This evidence now awaits steward acceptance; it does not authorize a merge, retained migration, learning activation, or production cutover.
+Status: green on 2026-08-21 under the exact approved Control-local boundary. The steward accepted this evidence and approved the protected development merge on 2026-08-21. The merge completed as `61d364b`. It does not authorize a retained migration, learning activation, Gate 4C, or production cutover.
 
 ## Layman result
 
@@ -40,4 +40,4 @@ The one-time protected runner used Control's installed Node 24.19.0. Repository 
 
 ## Next approval boundary
 
-A green Gate 4B-R proves the selected append-only mapping can preserve the current protected E6 journal and be removed without changing production. It does not decide the E3 record, design E4/device-vault security, create E5, activate approved knowledge, retain PostgreSQL, merge the branch, or authorize cutover. The next gate is steward acceptance of this evidence and a separate decision on the protected development merge.
+A green Gate 4B-R proves the selected append-only mapping can preserve the current protected E6 journal and be removed without changing production. The accepted development merge preserves that evidence and tooling in `runa2/integration`; it does not decide the E3 record, design E4/device-vault security, create E5, activate approved knowledge, retain PostgreSQL, authorize Gate 4C, or authorize cutover.

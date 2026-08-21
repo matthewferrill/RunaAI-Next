@@ -29,10 +29,9 @@ or learning path was activated; and all temporary assets were destroyed.
 
 ## What remains decision-gated
 
-1. accept or reject the Gate 4B-R evidence and separately approve any protected development merge;
-2. leave the one unresolved E3 inbox record unchanged pending a separate decision;
-3. defer E4 authority/device-vault redesign to Gate 5 and retire E5 migration because no store exists;
+1. leave the one unresolved E3 inbox record unchanged pending a separate decision;
+2. defer E4 authority/device-vault redesign to Gate 5 and retire E5 migration because no store exists;
    and
-4. defer all approved-knowledge projection and retrieval behavior to Gate 4C.
+3. define and approve all approved-knowledge projection and retrieval behavior separately in Gate 4C.
 
 Run the synthetic suite with `npm run test:gate4b`.

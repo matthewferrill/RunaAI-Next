@@ -77,8 +77,11 @@ log_filename = 'postgresql-%Y-%m-%d.log'
 "@
 }
 $env:PGPASSWORD = $postgresAdmin
-& (Join-Path $pgBin 'pg_ctl.exe') -D $pgData -l (Join-Path $paths.Logs 'postgres-bootstrap.log') start -w
-if ($LASTEXITCODE -ne 0) { throw 'candidate-postgres-start-failed' }
+$pgListener = Get-NetTCPConnection -State Listen -LocalPort 9765 -ErrorAction SilentlyContinue | Select-Object -First 1
+if (-not $pgListener) {
+  & (Join-Path $pgBin 'pg_ctl.exe') -D $pgData -l (Join-Path $paths.Logs 'postgres-bootstrap.log') start -w
+  if ($LASTEXITCODE -ne 0) { throw 'candidate-postgres-start-failed' }
+}
 function Ensure-Role([string]$Role, [string]$Password) {
   $present = & (Join-Path $pgBin 'psql.exe') -h 127.0.0.1 -p 9765 -U postgres -d postgres -tAc "SELECT 1 FROM pg_roles WHERE rolname='$Role'"
   if (($present -join '').Trim() -ne '1') {
@@ -114,7 +117,8 @@ $env:OPENFGA_AUTHN_PRESHARED_KEYS = [IO.File]::ReadAllText("$root\secrets\openfg
 & "$root\tools\openfga\openfga.exe" run --http-addr 127.0.0.1:9763 --grpc-addr 127.0.0.1:9764 --metrics-enabled=false --playground-enabled=false --log-format json
 exit $LASTEXITCODE
 '@
-$fgaProcess = Start-Process powershell.exe -ArgumentList '-NoProfile','-File',$runOpenFga -WindowStyle Hidden -PassThru
+$fgaListener = Get-NetTCPConnection -State Listen -LocalPort 9763 -ErrorAction SilentlyContinue | Select-Object -First 1
+if (-not $fgaListener) { $fgaProcess = Start-Process powershell.exe -ArgumentList '-NoProfile','-File',$runOpenFga -WindowStyle Hidden -PassThru }
 $deadline = [DateTime]::UtcNow.AddSeconds(60)
 do { Start-Sleep -Milliseconds 500; try { $fgaReady = (Invoke-WebRequest -UseBasicParsing -Uri 'http://127.0.0.1:9763/healthz' -TimeoutSec 2).StatusCode -eq 200 } catch { $fgaReady = $false } } until ($fgaReady -or [DateTime]::UtcNow -gt $deadline)
 if (-not $fgaReady) { throw 'candidate-openfga-start-failed' }
@@ -132,10 +136,22 @@ if (Test-Path -LiteralPath $fgaFactsPath) { $fgaFacts = Get-Content -LiteralPath
 
 $javaHome = Get-ChildItem -LiteralPath (Join-Path $paths.Tools 'java') -Directory | Select-Object -First 1 -ExpandProperty FullName
 $keycloakHome = Join-Path $paths.Tools 'keycloak\keycloak-26.7.2'
-$env:JAVA_HOME = $javaHome; $env:KC_BOOTSTRAP_ADMIN_USERNAME = 'candidate-bootstrap'; $env:KC_BOOTSTRAP_ADMIN_PASSWORD = $keycloakBootstrap
-$env:KC_DB = 'postgres'; $env:KC_DB_URL = 'jdbc:postgresql://127.0.0.1:9765/keycloak_candidate'; $env:KC_DB_USERNAME = 'keycloak_candidate'; $env:KC_DB_PASSWORD = $postgresKeycloak
-$kcArgs = "/d /s /c `"`"$keycloakHome\bin\kc.bat`" start --http-enabled=true --http-host=127.0.0.1 --http-port=9762 --hostname=http://127.0.0.1:9762 --hostname-strict=true --health-enabled=true --metrics-enabled=false`""
-$kcProcess = Start-Process cmd.exe -ArgumentList $kcArgs -WindowStyle Hidden -PassThru
+$runKeycloakBootstrap = Join-Path $paths.Control 'Run-Keycloak-Bootstrap.ps1'
+Set-Content -LiteralPath $runKeycloakBootstrap -Encoding utf8 -Value @"
+`$ErrorActionPreference = 'Stop'
+`$root = 'C:\AI\RunaAI-Next-Candidate'
+`$env:JAVA_HOME = '$javaHome'
+`$env:KC_BOOTSTRAP_ADMIN_USERNAME = 'candidate-bootstrap'
+`$env:KC_BOOTSTRAP_ADMIN_PASSWORD = [IO.File]::ReadAllText("`$root\secrets\keycloak-bootstrap").Trim()
+`$env:KC_DB = 'postgres'
+`$env:KC_DB_URL = 'jdbc:postgresql://127.0.0.1:9765/keycloak_candidate'
+`$env:KC_DB_USERNAME = 'keycloak_candidate'
+`$env:KC_DB_PASSWORD = [IO.File]::ReadAllText("`$root\secrets\postgres-keycloak").Trim()
+& '$keycloakHome\bin\kc.bat' start --http-enabled=true --http-host=127.0.0.1 --http-port=9762 --hostname=http://127.0.0.1:9762 --hostname-strict=true --health-enabled=true --metrics-enabled=false
+exit `$LASTEXITCODE
+"@
+$kcListener = Get-NetTCPConnection -State Listen -LocalPort 9762 -ErrorAction SilentlyContinue | Select-Object -First 1
+if (-not $kcListener) { $kcProcess = Start-Process powershell.exe -ArgumentList '-NoProfile','-File',$runKeycloakBootstrap -WindowStyle Hidden -PassThru }
 $deadline = [DateTime]::UtcNow.AddMinutes(3)
 do { Start-Sleep -Seconds 1; try { $kcReady = (Invoke-WebRequest -UseBasicParsing -Uri 'http://127.0.0.1:9762/realms/master/.well-known/openid-configuration' -TimeoutSec 3).StatusCode -eq 200 } catch { $kcReady = $false } } until ($kcReady -or [DateTime]::UtcNow -gt $deadline)
 if (-not $kcReady) { throw 'candidate-keycloak-start-failed' }

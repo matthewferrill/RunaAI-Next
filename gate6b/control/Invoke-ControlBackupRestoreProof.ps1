@@ -73,7 +73,7 @@ function Database-DataSummary([string]$Database) {
       digest=(Hash-Bytes ([Text.Encoding]::UTF8.GetBytes($rowText))) })
     $totalRows += $rows.Count
   }
-  $canonical = ConvertTo-Json -InputObject @($tables) -Depth 5 -Compress
+  $canonical = ConvertTo-Json -InputObject ($tables.ToArray()) -Depth 5 -Compress
   return [pscustomobject]@{ tableCount=$tables.Count; rowCount=$totalRows;
     digest=(Hash-Bytes ([Text.Encoding]::UTF8.GetBytes($canonical))) }
 }

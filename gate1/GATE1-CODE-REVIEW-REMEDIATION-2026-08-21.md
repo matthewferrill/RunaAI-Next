@@ -1,6 +1,6 @@
 # Gate 1 code-review remediation — 2026-08-21
 
-Status: implemented and green; refreshed evidence awaits steward acceptance and protected review.
+Status: implemented, green, and accepted by the steward on 2026-08-21; protected review remains.
 This does not authorize merge, Gate 2, protected data, production routing, persistent services, model
 downloads, or either deferred model endpoint.
 
@@ -61,5 +61,6 @@ Reviewable machine evidence remains in:
 
 No production route or protected store depends on this branch. Rejection requires discarding only the
 Gate 1 branch or reverting the remediation commit; the legacy runtime and all source repositories
-remain unchanged. The prior evidence acceptance remains historical, but the code change requires the
-steward to accept this refreshed evidence before protected integration review can approve a merge.
+remain unchanged. The prior evidence acceptance remains historical. The steward accepted this
+refreshed evidence on 2026-08-21. That acceptance clears the remediation evidence gate but is not
+merge approval; protected integration review remains required.

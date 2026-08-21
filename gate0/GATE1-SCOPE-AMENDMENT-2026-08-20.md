@@ -57,6 +57,6 @@ branch or authorize Gate 2.
 
 Protected code review later found three implementation gaps in total-deadline enforcement,
 simultaneous-request idempotency, and reranker coverage after window 32. The approved 2026-08-21
-remediation does not change this scope amendment or its deferred roles. Its refreshed evidence is green
-and requires renewed steward acceptance before merge review; see
+remediation does not change this scope amendment or its deferred roles. The steward accepted its green
+refreshed evidence on 2026-08-21; protected merge review remains required. See
 `../gate1/GATE1-CODE-REVIEW-REMEDIATION-2026-08-21.md`.

@@ -2,8 +2,8 @@
 
 Status: the original evidence was accepted by the steward under the approved Gate 1 scope amendment.
 After protected code review found three implementation gaps, the 2026-08-21 remediation and refreshed
-evidence are green and await renewed steward acceptance. This is not merge approval, production
-readiness, migration completion, or permission to start Gate 2.
+evidence passed and were accepted by the steward on 2026-08-21. This is not merge approval,
+production readiness, migration completion, or permission to start Gate 2.
 
 ## 2026-08-21 code-review remediation
 
@@ -90,8 +90,9 @@ The exact amendment and unchanged boundaries are recorded in
 
 The steward explicitly accepted the amended Gate 1 evidence on 2026-08-20. That acceptance is retained
 as historical evidence. The subsequent code-review remediation changed implementation and regenerated
-the affected evidence on 2026-08-21, so renewed steward acceptance is required before protected review
-can approve a merge. Gate 2 remains unstarted pending a separate approval.
+the affected evidence on 2026-08-21. The steward accepted that refreshed evidence on 2026-08-21.
+Protected integration review remains required before merge, and Gate 2 remains unstarted pending a
+separate approval.
 
 ## Rollback evidence
 

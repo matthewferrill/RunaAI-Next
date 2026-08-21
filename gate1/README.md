@@ -1,8 +1,8 @@
 # Gate 1 — disposable read-only chat/research slice
 
-Status: code-review remediation is implemented and green; refreshed evidence awaits steward
-acceptance and protected review. The branch is not merged. Qwen3.6 deliberate review and the existing
-live BGE endpoint remain explicitly deferred. See `GATE1-RESULTS-2026-08-20.md` and
+Status: code-review remediation and refreshed evidence were accepted by the steward on 2026-08-21;
+protected integration review remains. The branch is not merged. Qwen3.6 deliberate review and the
+existing live BGE endpoint remain explicitly deferred. See `GATE1-RESULTS-2026-08-20.md` and
 `GATE1-CODE-REVIEW-REMEDIATION-2026-08-21.md`.
 
 ## Boundary

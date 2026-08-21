@@ -1,6 +1,6 @@
 # RunaAI migration status
 
-Status date: 2026-08-20. This is the living migration handoff for RunaAI-Next. Update it in the same
+Status date: 2026-08-21. This is the living migration handoff for RunaAI-Next. Update it in the same
 commit whenever a gate changes repository direction, authority, implementation status, safety
 boundaries, verification state, or the next planned work.
 
@@ -40,9 +40,8 @@ repository and never push migration work into either source repository.
 - The completed laboratory evidence, seals, probes, stack bakeoff, model findings, architecture
   assessment, and conditional estimates are inherited.
 - Gate 1 now contains an isolated synthetic-only implementation of the smallest ordinary read-only
-  chat/research path. Its approved code-review remediation is implemented and green, but refreshed
-  evidence awaits steward acceptance. It is experimental, unmerged, and not an authority for
-  production behavior.
+  chat/research path. Its approved code-review remediation and refreshed evidence were accepted by the
+  steward on 2026-08-21. It is experimental, unmerged, and not an authority for production behavior.
 - No protected RunaAI data has been opened, copied, converted, or migrated.
 - No model has been downloaded.
 - No persistent service, non-loopback listener, provider credential, production path, or spending has
@@ -63,8 +62,8 @@ repository and never push migration work into either source repository.
   neither is silently replaced or credited. The steward subsequently accepted the regenerated Gate 1
   evidence. Protected review then found total-deadline, concurrent-idempotency, and post-window-32
   reranker gaps. The steward approved the narrow remediation on 2026-08-21; it completed with green
-  refreshed evidence on 2026-08-21. The branch remains unmerged pending renewed evidence acceptance
-  and normal protected code review.
+  refreshed evidence on 2026-08-21, which the steward accepted the same day. The branch remains
+  unmerged pending normal protected code review.
 
 ## Bootstrap findings
 
@@ -101,7 +100,7 @@ plain-language steward experience, or governed action pathway.
 |---|---|---|---|
 | Bootstrap | Establish repository lineage, remotes, branches, instructions, and status | Complete | Reviewed and merged as `94ba860` |
 | 0 | Freeze contracts, parity corpus, data inventory, redaction policy, and green thresholds | Complete | Approved by steward 2026-08-20; PR #2 accepted for integration |
-| 1 | Smallest disposable read-only chat/research slice | Review remediation green; refreshed evidence awaiting steward acceptance | Renewed evidence acceptance, then normal review and branch protection before merge |
+| 1 | Smallest disposable read-only chat/research slice | Refreshed remediation evidence accepted; awaiting protected integration review | Normal review and branch protection before merge |
 | 2 | All three read-only answer lanes plus chat/project/settings continuity | Not started | Refreshed Gate 1 evidence accepted |
 | 3 | One reversible governed idempotent action | Not started | Gate 2 parity accepted |
 | 4 | Governed data migration, one domain at a time | Not started | Each domain and owner-context plan approved separately |
@@ -151,9 +150,9 @@ No dependency was changed during the prerequisite disposition. Full evidence is 
 
 ## Next decision
 
-Review and accept the refreshed Gate 1 remediation evidence, then complete normal protected code
-review. Evidence acceptance is not merge approval. Qwen3.6 deliberate review and the existing live
-BGE endpoint remain deferred until a separately approved contract and fresh evidence exist.
+Complete normal protected code review and decide whether to merge Gate 1 into `runa2/integration`.
+Evidence acceptance is not merge approval. Qwen3.6 deliberate review and the existing live BGE
+endpoint remain deferred until a separately approved contract and fresh evidence exist.
 
 Gate 2 remains unstarted and requires separate explicit approval even though its Gate 1 evidence
 prerequisite is now satisfied. No current approval authorizes protected data, persistent services,

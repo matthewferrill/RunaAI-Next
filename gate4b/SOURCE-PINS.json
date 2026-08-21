@@ -1,0 +1,22 @@
+{
+  "schemaVersion": "runa2-gate4b-source-pins/v1",
+  "recordedAt": "2026-08-21",
+  "integrationBase": "9b0d4a48460b7ca0cb552831f826f94f0257929d",
+  "controlLegacyHead": "b4db04090d8f0df87234fab573b396e7824c5354",
+  "publishedLegacyMainObserved": "71ce985e4272895bbd4c3cf38ed8fbcb6090c2a2",
+  "historyStatus": "control-production-head-not-published",
+  "selectedSourceContentEquivalentAcrossObservedCheckouts": true,
+  "sources": [
+    { "path": "docs/RUNAAI-LEARNING-EVENT-CONTRACT-E6-0.md", "gitBlobSha1": "57dd21712012e907f677d76a1f32ca19693e2d7b" },
+    { "path": "docs/RUNAAI-LEARNING-EVENT-JOURNAL-E6-1.md", "gitBlobSha1": "1e30eaef9d10d06bbbfe0330fa9eae249203d9a7" },
+    { "path": "src/runa/learning-event-contract.mjs", "gitBlobSha1": "f37d987a1c99de12214014d6f5297ad20fdb7e38" },
+    { "path": "src/runa/learning-event-journal.mjs", "gitBlobSha1": "e59eeeae4617ffa9c0a3d5bb884a4f693f7b1f30" },
+    { "path": "src/runa/learning-approval-service.mjs", "gitBlobSha1": "c180a71dc7b8afc86b54281e9a58298a191fed7c" },
+    { "path": "src/runa/learning-approved-knowledge-service.mjs", "gitBlobSha1": "094af4aa60e62bbf33e3317b8dd50396f57fd9b0" },
+    { "path": "src/runa/learning-center-service.mjs", "gitBlobSha1": "66bd9a261efc7f272644c61d2bdfe857684ee94c" },
+    { "path": "src/runa/learning-inbox-store.mjs", "gitBlobSha1": "4e0241af2f839cdf39090f3a250915872d4e6f7c" },
+    { "path": "src/runa/learning-review-store.mjs", "gitBlobSha1": "b87bc3c161b9abfb47c948781160fd6ad33127c3" },
+    { "path": "src/runa/approved-knowledge-e5-grant-store.mjs", "gitBlobSha1": "d88cacedfb03ce2c1d93d71d35cded07f3c16104" },
+    { "path": "src/runa/learning-device-vault.mjs", "gitBlobSha1": "41fed5fe5349f2d403df4de908673be548c271e5" }
+  ]
+}

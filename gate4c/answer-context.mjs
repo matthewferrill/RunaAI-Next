@@ -1,4 +1,4 @@
-import { safeRetrieveApprovedKnowledge } from "./projection.mjs";
+import { buildApprovedKnowledgeProjection, safeRetrieveApprovedKnowledge } from "./projection.mjs";
 
 const deliveries = new WeakSet();
 const zeroScope = Object.freeze({ consideredCount: 0, eligibleCount: 0, excludedCount: 0,
@@ -50,6 +50,42 @@ export class SyntheticApprovedKnowledgeAdapter {
     }
     const result = safeRetrieveApprovedKnowledge({ projection: this.projection,
       currentManifestHmac: this.currentManifestHmac, requestScope, task,
+      cipher: this.cipher, now: this.now() });
+    if (result.errorCode) return makeDelivery({ result, libraryCount, delivered: false,
+      reason: "approved-knowledge-unavailable", degraded: true, errorCode: result.errorCode });
+    const delivered = result.selected === true && result.context !== null;
+    return makeDelivery({ result, libraryCount, delivered,
+      reason: result.reason ?? (delivered ? "relevant-approved-knowledge" : "no-relevant-approved-knowledge") });
+  }
+}
+
+export class AcceptedApprovedKnowledgeAdapter {
+  constructor({ loadSource, cipher, expectedSourceClassification = "protected-or-unknown", now = () => new Date() }) {
+    if (typeof loadSource !== "function") throw new TypeError("loadSource must be a function");
+    this.loadSource = loadSource;
+    this.cipher = cipher;
+    this.expectedSourceClassification = expectedSourceClassification;
+    this.now = now;
+  }
+
+  async select({ requestScope, task }) {
+    let projection;
+    try {
+      const source = await this.loadSource({ requestScope, task });
+      projection = buildApprovedKnowledgeProjection({ source, cipher: this.cipher, now: this.now() });
+    } catch (error) {
+      return makeDelivery({ result: {}, libraryCount: 0, delivered: false,
+        reason: "approved-knowledge-unavailable", degraded: true,
+        errorCode: typeof error?.code === "string" ? error.code : "approved-knowledge-source-unavailable" });
+    }
+    const libraryCount = projection.activeLessonCount;
+    if (projection.sourceClassification !== this.expectedSourceClassification) {
+      return makeDelivery({ result: {}, libraryCount, delivered: false,
+        reason: "approved-knowledge-source-classification-mismatch", degraded: true,
+        errorCode: "approved-knowledge-source-classification-mismatch" });
+    }
+    const result = safeRetrieveApprovedKnowledge({ projection,
+      currentManifestHmac: projection.sourceManifestHmac, requestScope, task,
       cipher: this.cipher, now: this.now() });
     if (result.errorCode) return makeDelivery({ result, libraryCount, delivered: false,
       reason: "approved-knowledge-unavailable", degraded: true, errorCode: result.errorCode });

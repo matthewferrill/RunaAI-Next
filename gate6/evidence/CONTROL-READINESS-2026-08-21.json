@@ -1,0 +1,47 @@
+{
+  "schemaVersion": "runa2-gate6-control-readiness/v1",
+  "observedAt": "2026-08-21",
+  "inspectionMode": "read-only-aggregate",
+  "host": "RUNA-CONTROL",
+  "legacy": {
+    "checkoutExists": true,
+    "branch": "main",
+    "trackedClean": true,
+    "checkoutCommit": "b4db04090d8f0df87234fab573b396e7824c5354",
+    "runtimeStatusReachable": true,
+    "runningCommitMatchesCheckout": true,
+    "listenersLoopbackOnly": true
+  },
+  "candidate": {
+    "checkoutExists": true,
+    "branch": "runa2/integration",
+    "trackedClean": true,
+    "checkoutCommit": "4ed6a527cb201851ad906cc4948074803308ac8b",
+    "gate6Present": false,
+    "dependenciesInstalled": false,
+    "releaseApplicationEntrypointPresent": false,
+    "candidateListenerCount": 0
+  },
+  "selectedStackServices": {
+    "postgresqlPersistent": false,
+    "keycloakPersistent": false,
+    "openfgaPersistent": false,
+    "caddyPrivateTls": false
+  },
+  "protectedStoresOpened": false,
+  "protectedValuesEmitted": false,
+  "productionTrafficChanged": false,
+  "productionReady": false,
+  "blockers": [
+    "release-application-composition-missing",
+    "reviewed-release-artifact-and-manifest-missing",
+    "persistent-postgresql-missing",
+    "persistent-keycloak-missing",
+    "persistent-openfga-missing",
+    "private-tls-entrypoint-missing",
+    "target-owner-credential-not-enrolled",
+    "production-backup-restore-proof-missing",
+    "protected-final-delta-not-run",
+    "zero-delta-reconciliation-not-run"
+  ]
+}

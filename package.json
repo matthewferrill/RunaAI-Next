@@ -15,6 +15,7 @@
     "test:gate4d": "node --test gate4d/gate4d.test.mjs",
     "test:gate4e": "node --test gate4e/measurement.test.mjs",
     "test:gate5": "node --test gate5/gate5.test.mjs",
+    "test:gate6": "node --test gate6/gate6.test.mjs",
     "verify:gate0": "node gate0/verify-gate0.mjs",
     "verify:gate1:integration": "node gate1/run-integration.mjs",
     "verify:gate1:models": "node gate1/run-model-validation.mjs",
@@ -22,7 +23,8 @@
     "verify:gate2:models": "node gate2/run-model-validation.mjs",
     "verify:gate3:integration": "node gate3/run-integration.mjs",
     "verify:gate4:integration": "node gate4/run-integration.mjs",
-    "verify:gate5:integration": "node gate5/run-integration.mjs"
+    "verify:gate5:integration": "node gate5/run-integration.mjs",
+    "verify:gate6:integration": "node gate6/run-integration.mjs"
   },
   "keywords": [],
   "author": "",

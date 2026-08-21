@@ -57,8 +57,8 @@ repository and never push migration work into either source repository.
   deterministic suite passes 21/21 and the disposable real-stack integration passes 22/22 with clean
   shutdown. Qwen3 Coder passes 12/12 live synthetic acceptance runs. On 2026-08-20 the steward approved
   a Gate 1 scope amendment deferring Qwen3.6 deliberate review and the existing live BGE endpoint;
-  neither is silently replaced or credited. Gate 1 is green under that amended scope but remains
-  unaccepted and unmerged pending review of the regenerated evidence.
+  neither is silently replaced or credited. The steward subsequently accepted the regenerated Gate 1
+  evidence. The branch remains unmerged pending normal protected code review.
 
 ## Bootstrap findings
 
@@ -95,7 +95,7 @@ plain-language steward experience, or governed action pathway.
 |---|---|---|---|
 | Bootstrap | Establish repository lineage, remotes, branches, instructions, and status | Complete | Reviewed and merged as `94ba860` |
 | 0 | Freeze contracts, parity corpus, data inventory, redaction policy, and green thresholds | Complete | Approved by steward 2026-08-20; PR #2 accepted for integration |
-| 1 | Smallest disposable read-only chat/research slice | Green under approved amendment; awaiting acceptance | Steward review and explicit acceptance of regenerated Gate 1 evidence |
+| 1 | Smallest disposable read-only chat/research slice | Evidence accepted; awaiting protected integration review | Normal review and branch-protection requirements before merge |
 | 2 | All three read-only answer lanes plus chat/project/settings continuity | Not started | Gate 1 evidence accepted |
 | 3 | One reversible governed idempotent action | Not started | Gate 2 parity accepted |
 | 4 | Governed data migration, one domain at a time | Not started | Each domain and owner-context plan approved separately |
@@ -145,10 +145,10 @@ No dependency was changed during the prerequisite disposition. Full evidence is 
 
 ## Next decision
 
-Review the regenerated Gate 1 evidence and decide whether to accept the amended minimum slice. Scope
-acceptance is not merge approval and does not start Gate 2. Qwen3.6 deliberate review and the existing
-live BGE endpoint remain deferred until a separately approved contract and fresh evidence exist.
+Complete normal protected code review of the accepted Gate 1 branch. Evidence acceptance is not merge
+approval. Qwen3.6 deliberate review and the existing live BGE endpoint remain deferred until a
+separately approved contract and fresh evidence exist.
 
-No acceptance authorizes protected data, persistent services, production routing, provider
-reconfiguration, or a merge. After Gate 1 evidence is explicitly accepted, normal review and branch
-protection still apply before integration.
+Gate 2 remains unstarted and requires separate explicit approval even though its Gate 1 evidence
+prerequisite is now satisfied. No current approval authorizes protected data, persistent services,
+production routing, provider reconfiguration, or a merge.

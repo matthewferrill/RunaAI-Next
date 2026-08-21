@@ -1,8 +1,8 @@
 # Gate 1 — disposable read-only chat/research slice
 
-Status: implemented and green under the steward-approved Gate 1 scope amendment; not yet accepted or
-merged. Qwen3.6 deliberate review and the existing live BGE endpoint are explicitly deferred. See
-`GATE1-RESULTS-2026-08-20.md`.
+Status: implementation and evidence accepted by the steward under the approved Gate 1 scope
+amendment; not merged. Qwen3.6 deliberate review and the existing live BGE endpoint are explicitly
+deferred. See `GATE1-RESULTS-2026-08-20.md`.
 
 ## Boundary
 

@@ -47,3 +47,10 @@ revocation, timeout, output-limit, duplicate, restart, and telemetry cases remai
 This amendment authorizes evidence regeneration for the narrowed Gate 1 denominator. It does not
 approve Gate 1 for merge or start Gate 2. The steward must review and explicitly accept the regenerated
 Gate 1 evidence after all applicable verification is green.
+
+## Evidence acceptance
+
+After the amended evidence passed 12/12 live synthetic model runs, 21/21 focused checks, 22/22
+disposable integration checks, 35/35 combined tests, 10/10 seals, and all 12 pinned legacy suites, the
+steward explicitly accepted the Gate 1 evidence on 2026-08-20. This acceptance does not merge the
+branch or authorize Gate 2.

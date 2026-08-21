@@ -1,7 +1,7 @@
 # Gate 1 results — 2026-08-20
 
-Status: **green under the steward-approved Gate 1 scope amendment; awaiting explicit evidence
-acceptance.** This is not merge approval, production readiness, or migration completion.
+Status: **accepted by the steward under the approved Gate 1 scope amendment.** This is not merge
+approval, production readiness, migration completion, or permission to start Gate 2.
 
 ## What is green
 
@@ -71,11 +71,11 @@ claims only adapter behavior and explicit degradation, not live-reranker readine
 The exact amendment and unchanged boundaries are recorded in
 `gate0/GATE1-SCOPE-AMENDMENT-2026-08-20.md`.
 
-## Acceptance boundary
+## Acceptance record
 
-The implementation and evidence are green for the amended minimum slice, but Gate 1 is not accepted or
-merged by this result. The steward must explicitly accept this regenerated evidence. Branch protection
-and normal review still apply afterward, and Gate 2 remains unstarted.
+The steward explicitly accepted the regenerated Gate 1 evidence on 2026-08-20. The branch remains
+unmerged. Branch protection and normal code review still apply, and Gate 2 remains unstarted pending a
+separate approval.
 
 ## Rollback evidence
 

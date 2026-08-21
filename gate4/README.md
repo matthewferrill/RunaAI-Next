@@ -48,7 +48,9 @@ The Gate 4A package consists of:
 - `GATE4A-1-SYNTHETIC-RESULTS-2026-08-21.md` — implementation and verification evidence plus the
   owner-context result and next approval boundary.
 
-Gate 4B is accepted and merged. Gate 4C-1's synthetic projection contract is also accepted and merged
-as `d203cc7`. It opened no protected data and activated no answer lane. Its 28-case frozen corpus and
-full 146-test Node suite are green. A protected comparison and answer-lane wiring remain separate
-approval gates.
+Gate 4B is accepted and merged. Gate 4C-1's synthetic projection contract is accepted and merged as
+`d203cc7`. Gate 4C-2's aggregate-only protected comparison was accepted and merged as `4ed6a52`; its
+projection and legacy calculations agreed on 53 active lessons and every scope count. No lesson text
+was retained and no answer lane was activated. The accelerated synthetic closeout contract is frozen
+in `GATE4-SYNTHETIC-CLOSEOUT-SCOPE-AND-GREEN-CRITERIA-2026-08-21.md` for Gate 4C-3A, the selected
+Gate 4D compatibility surface, and the Gate 4E build-or-skip measurement.

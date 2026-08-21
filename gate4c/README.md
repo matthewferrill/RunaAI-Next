@@ -1,4 +1,4 @@
-# Gate 4C-1: approved-knowledge projection
+# Gate 4C: approved-knowledge projection
 
 Gate 4C-1 implements only the synthetic, read-only projection contract approved by the steward on
 2026-08-21 and merged into `runa2/integration` as `d203cc7`. It reconstructs current approved lessons
@@ -16,9 +16,13 @@ and returns an inert advisory-context preview.
 - fail-closed safe retrieval; and
 - inactive curriculum-catalog validation.
 
-## Not implemented or authorized
+Gate 4C-2's aggregate-only protected comparison was accepted and merged as `4ed6a52`. The new and
+legacy projections agreed exactly on 53 active lessons and every scope category without retaining
+private content.
 
-- protected inventory, rehearsal, or data migration;
+## Not implemented or authorized before Gate 4C-3A
+
+- protected data migration;
 - retained projection or production PostgreSQL adapter;
 - general, guarded/local, or workspace answer-lane wiring;
 - model/provider calls or model-context activation;

@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { once } from "node:events";
-import { mkdtemp, rm, writeFile } from "node:fs/promises";
+import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { AcceptedApprovedKnowledgeAdapter, approvedKnowledgeReceipt,
@@ -247,4 +247,10 @@ test("Keycloak and OpenFGA clients use bounded authenticated online decisions", 
   assert.equal(calls[1].authorization, "Bearer PRIVATE_FGA_CANARY");
   assert.doesNotMatch(JSON.stringify(identity), /PRIVATE_/);
   assert.doesNotMatch(JSON.stringify(decision), /PRIVATE_/);
+});
+
+test("Control Caddy listeners are pinned to their exact interfaces", async () => {
+  const script = await readFile(resolve(import.meta.dirname, "control", "Initialize-ControlShadow.ps1"), "utf8");
+  assert.match(script, /https:\/\/\$PrivateAddress`:9761 \{\r?\n  bind \$PrivateAddress/);
+  assert.match(script, /http:\/\/127\.0\.0\.1:9770 \{\r?\n  bind 127\.0\.0\.1/);
 });

@@ -207,6 +207,7 @@ if ($clients.Count -eq 0) {
 $caddyFile = Join-Path $paths.Config 'Caddyfile'
 Set-Content -LiteralPath $caddyFile -Encoding utf8 -Value @"
 https://$PrivateAddress`:9761 {
+  bind $PrivateAddress
   tls internal
   request_body {
     max_size 256KB
@@ -220,6 +221,7 @@ https://$PrivateAddress`:9761 {
   }
 }
 http://127.0.0.1:9770 {
+  bind 127.0.0.1
   reverse_proxy http://$ProviderAddress`:1234 {
     lb_retries 0
     transport http {

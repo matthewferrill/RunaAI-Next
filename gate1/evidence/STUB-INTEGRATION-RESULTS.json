@@ -41,7 +41,7 @@
         "requests": 1,
         "turns": 1
       },
-      "elapsedMs": 246
+      "elapsedMs": 253
     },
     "resume": {
       "phase": "resume",
@@ -54,7 +54,7 @@
           "provider": "gate1-private-boundary"
         },
         "trace": {
-          "correlationId": "c53197b7ae69c234be5212e36ceb5110"
+          "correlationId": "b40cb44acaff7d487b57fba04263250b"
         },
         "answer": "A checkpointed synthetic answer resumes without repeating completed work.",
         "ground": "record-answers",
@@ -108,7 +108,7 @@
         "requests": 1,
         "turns": 1
       },
-      "elapsedMs": 24
+      "elapsedMs": 25
     },
     "duplicate": {
       "phase": "duplicate",
@@ -121,7 +121,7 @@
           "provider": "gate1-private-boundary"
         },
         "trace": {
-          "correlationId": "c53197b7ae69c234be5212e36ceb5110"
+          "correlationId": "b40cb44acaff7d487b57fba04263250b"
         },
         "answer": "A checkpointed synthetic answer resumes without repeating completed work.",
         "ground": "record-answers",
@@ -175,7 +175,7 @@
         "requests": 1,
         "turns": 1
       },
-      "elapsedMs": 9
+      "elapsedMs": 10
     },
     "ordinary": {
       "phase": "ordinary",
@@ -188,7 +188,7 @@
           "provider": "gate1-private-boundary"
         },
         "trace": {
-          "correlationId": "481a26cdcfceaf63ad2971b25caa3a17"
+          "correlationId": "59849990803734cf603afe5ba1f71d15"
         },
         "answer": "The reranker is configured at the synthetic private endpoint.",
         "ground": "record-answers",
@@ -235,7 +235,7 @@
         "requests": 1,
         "turns": 1
       },
-      "elapsedMs": 207
+      "elapsedMs": 235
     },
     "honest-miss": {
       "phase": "honest-miss",
@@ -248,7 +248,7 @@
           "provider": "none"
         },
         "trace": {
-          "correlationId": "0bd8677f0deb08bfd9d658bc0228c570"
+          "correlationId": "09b0de910fe10a7745913314040244ac"
         },
         "answer": "The synthetic project record did not contain evidence that answers that question.",
         "ground": "record-silent",
@@ -284,7 +284,7 @@
         "requests": 1,
         "turns": 1
       },
-      "elapsedMs": 130
+      "elapsedMs": 124
     },
     "dependency-loss": {
       "phase": "dependency-loss",
@@ -297,7 +297,7 @@
           "provider": "none"
         },
         "trace": {
-          "correlationId": "2af001f2a86320f89be025d11ac426f7"
+          "correlationId": "442b4841fccdbd9d90e21d1e498980be"
         },
         "answer": "I could not check the synthetic project record because its retrieval dependency was unavailable.",
         "ground": "record-silent",
@@ -349,7 +349,7 @@
         "requests": 1,
         "turns": 1
       },
-      "elapsedMs": 118
+      "elapsedMs": 122
     },
     "retrieval-timeout": {
       "phase": "retrieval-timeout",
@@ -362,7 +362,7 @@
           "provider": "none"
         },
         "trace": {
-          "correlationId": "5d4659bed0e5761b7a7282f72d753c5c"
+          "correlationId": "f3a9518668fd692a983a7e1e66e942c3"
         },
         "answer": "The answer was not completed before the total request deadline.",
         "ground": "record-silent",
@@ -399,7 +399,7 @@
         "requests": 1,
         "turns": 1
       },
-      "elapsedMs": 160
+      "elapsedMs": 166
     },
     "timeout": {
       "phase": "timeout",
@@ -412,7 +412,7 @@
           "provider": "none"
         },
         "trace": {
-          "correlationId": "fbf9a8af92481eb8e9d597efe96b6f8c"
+          "correlationId": "d7da90637ac9946e7c55b515de5fbcd7"
         },
         "answer": "The answer was not completed before the total request deadline.",
         "ground": "record-answers",
@@ -454,7 +454,7 @@
         "requests": 1,
         "turns": 1
       },
-      "elapsedMs": 573
+      "elapsedMs": 565
     },
     "unknown-citation": {
       "phase": "unknown-citation",
@@ -467,7 +467,7 @@
           "provider": "gate1-private-boundary"
         },
         "trace": {
-          "correlationId": "df2ea5db86ac0b9e7b89539bdacda06c"
+          "correlationId": "4faa4d1412677f1b805900bd121b9300"
         },
         "answer": "This answer names an unavailable section.\n\nCitation check: one or more references were not present in the supplied evidence.",
         "ground": "record-answers",
@@ -508,7 +508,7 @@
         "requests": 1,
         "turns": 1
       },
-      "elapsedMs": 227
+      "elapsedMs": 225
     },
     "instruction": {
       "phase": "instruction",
@@ -521,7 +521,7 @@
           "provider": "gate1-private-boundary"
         },
         "trace": {
-          "correlationId": "df945a8674b526fe7231e5768d814ee2"
+          "correlationId": "fae476913ee280bad5ebffed6f96fa3f"
         },
         "answer": "The supplied synthetic source says the boundary stays read-only.\n\nCitation check: one or more references were not present in the supplied evidence.",
         "ground": "record-answers",
@@ -562,7 +562,7 @@
         "requests": 1,
         "turns": 1
       },
-      "elapsedMs": 240
+      "elapsedMs": 226
     },
     "protected": {
       "phase": "protected",
@@ -575,7 +575,7 @@
           "provider": "none"
         },
         "trace": {
-          "correlationId": "dab93964f134e1c3b7ab23beb958778c"
+          "correlationId": "a6ff9726548bc1534010f17815e2b562"
         },
         "answer": "That source is protected and is not available to this read-only migration slice.",
         "ground": "no-ground-needed",
@@ -610,7 +610,7 @@
         "requests": 1,
         "turns": 1
       },
-      "elapsedMs": 93
+      "elapsedMs": 96
     },
     "command": {
       "phase": "command",
@@ -623,7 +623,7 @@
           "provider": "none"
         },
         "trace": {
-          "correlationId": "d77820941d967fac23490c2690c9e4c8"
+          "correlationId": "e03033d19c63c761fb809336e74742ed"
         },
         "answer": "That command is not available in this migration slice.",
         "ground": "no-ground-needed",
@@ -658,7 +658,7 @@
         "requests": 1,
         "turns": 1
       },
-      "elapsedMs": 96
+      "elapsedMs": 97
     },
     "research-complete": {
       "phase": "research-complete",
@@ -671,7 +671,7 @@
           "provider": "gate1-private-boundary"
         },
         "trace": {
-          "correlationId": "4e18f234e744b12444a8d8a267c5bdd0"
+          "correlationId": "8755dac1c9f1c82e9d65a246078ec16b"
         },
         "answer": "Approved knowledge reaches an answer through scoped retrieval and citation enforcement.",
         "ground": "record-answers",
@@ -738,7 +738,7 @@
           "provider": "gate1-private-boundary"
         },
         "trace": {
-          "correlationId": "4e78e576de26aa7e451b72ab4d519f67"
+          "correlationId": "02fa959fcf020f309a8777f8031d3e55"
         },
         "answer": "The supplied evidence describes project scope filtering; it does not establish budget enforcement.",
         "ground": "record-answers",
@@ -794,7 +794,7 @@
         "requests": 1,
         "turns": 1
       },
-      "elapsedMs": 226
+      "elapsedMs": 231
     },
     "cross-project": {
       "phase": "cross-project",
@@ -807,7 +807,7 @@
           "provider": "none"
         },
         "trace": {
-          "correlationId": "efbed7b1b49899f6524f074a28b45285"
+          "correlationId": "be10510e06cec645defcc488f2a19d4b"
         },
         "answer": "This request is scoped to the trusted project in its request envelope; another project's record is not available.",
         "ground": "no-ground-needed",
@@ -842,7 +842,7 @@
         "requests": 1,
         "turns": 1
       },
-      "elapsedMs": 93
+      "elapsedMs": 97
     },
     "revoked": {
       "phase": "revoked",
@@ -855,7 +855,7 @@
           "provider": "none"
         },
         "trace": {
-          "correlationId": "419a2198e1309071a418999e8a364d84"
+          "correlationId": "66e28c84dc1377dd97f6007b6339b80e"
         },
         "answer": "The synthetic project record did not contain evidence that answers that question.",
         "ground": "record-silent",
@@ -909,7 +909,7 @@
         "requests": 1,
         "turns": 1
       },
-      "elapsedMs": 171
+      "elapsedMs": 174
     },
     "metaphysical": {
       "phase": "metaphysical",
@@ -922,7 +922,7 @@
           "provider": "gate1-private-boundary"
         },
         "trace": {
-          "correlationId": "98fc2a011eedbb48ed1e720c847fca61"
+          "correlationId": "d17f735d15925c5d16be8a715ccbc062"
         },
         "answer": "That is not a question the synthetic project record can settle.",
         "ground": "not-a-question-of-fact",
@@ -955,7 +955,7 @@
         "requests": 1,
         "turns": 1
       },
-      "elapsedMs": 146
+      "elapsedMs": 144
     },
     "concurrent": [
       {
@@ -969,7 +969,7 @@
             "provider": "gate1-private-boundary"
           },
           "trace": {
-            "correlationId": "ac048e2d6dbb5b0c1f33ca00ca77cad8"
+            "correlationId": "ccd97c2968d93d819eed316a41a7e514"
           },
           "answer": "Concurrent duplicate requests share one committed answer.",
           "ground": "record-answers",
@@ -1016,7 +1016,7 @@
           "requests": 1,
           "turns": 1
         },
-        "elapsedMs": 236
+        "elapsedMs": 238
       },
       {
         "phase": "concurrent",
@@ -1029,7 +1029,7 @@
             "provider": "gate1-private-boundary"
           },
           "trace": {
-            "correlationId": "ac048e2d6dbb5b0c1f33ca00ca77cad8"
+            "correlationId": "ccd97c2968d93d819eed316a41a7e514"
           },
           "answer": "Concurrent duplicate requests share one committed answer.",
           "ground": "record-answers",
@@ -1076,11 +1076,11 @@
           "requests": 1,
           "turns": 1
         },
-        "elapsedMs": 247
+        "elapsedMs": 248
       }
     ]
   },
-  "traceSha256": "b37ad6670dcc40343115aa0bd8a3b55d26d87463520bb2f231a405c6273a06c5",
+  "traceSha256": "e3a911dcbabe9045ede23675be1f645083b28a2c81e7ec45a258d1628a9d59ac",
   "checks": {
     "initialAlignment": true,
     "restartInterruptedAfterCommit": true,

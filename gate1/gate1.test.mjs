@@ -4,7 +4,7 @@ import test from "node:test";
 import { MemorySaver } from "@langchain/langgraph";
 import { ReadOnlyAnswerSlice, sourceSection } from "./core.mjs";
 import { MemoryIndex, MemoryRecordStore, ScriptedProvider } from "./adapters/memory.mjs";
-import { WindowedBgeReranker } from "./adapters/qdrant.mjs";
+import { QdrantDerivedIndex, WindowedBgeReranker } from "./adapters/qdrant.mjs";
 import { createGate1Telemetry } from "./telemetry.mjs";
 import { createGate1Workflow } from "./workflow.mjs";
 
@@ -285,6 +285,51 @@ test("gate1-total-deadline: repeated retrieval cannot consume a fresh deadline p
   assert.equal(response.completion.timedOut, true);
   assert.ok(elapsedMs <= 350, `request took ${elapsedMs} ms`);
   assert.ok(index.searches <= 2);
+  assert.equal(provider.calls.length, 0);
+});
+
+test("qdrant HTTP timeout is normalized to the typed request-timeout result", async t => {
+  const server = createServer(async (_incoming, outgoing) => {
+    await new Promise(resolve => setTimeout(resolve, 350));
+    outgoing.writeHead(404, { "content-type": "application/json" });
+    outgoing.end("{}");
+  });
+  await new Promise((resolve, reject) => {
+    server.once("error", reject);
+    server.listen(0, "127.0.0.1", resolve);
+  });
+  t.after(() => new Promise(resolve => server.close(resolve)));
+  const address = server.address();
+  const embedder = { dimension: 1, async embed() { return [[1]]; } };
+  const index = new QdrantDerivedIndex({ endpoint: `http://127.0.0.1:${address.port}`,
+    embedder, timeoutMs: 80 });
+  const provider = new ScriptedProvider();
+  const slice = new ReadOnlyAnswerSlice({ records: new MemoryRecordStore(), index, provider });
+  const response = await slice.answer(request("qdrant-inner-timeout", "Read the delayed synthetic dependency.",
+    "general", { budgets: { deadlineMs: 100 } }));
+  assert.equal(response.completion.reason, "timeout");
+  assert.equal(response.completion.timedOut, true);
+  assert.ok(response.retrieval.unavailable.includes("retrieval-timeout"));
+  assert.equal(provider.calls.length, 0);
+});
+
+test("qdrant connection refusal remains dependency-unavailable rather than timeout", async () => {
+  const probe = createServer();
+  await new Promise((resolve, reject) => {
+    probe.once("error", reject);
+    probe.listen(0, "127.0.0.1", resolve);
+  });
+  const address = probe.address();
+  await new Promise(resolve => probe.close(resolve));
+  const embedder = { dimension: 1, async embed() { return [[1]]; } };
+  const index = new QdrantDerivedIndex({ endpoint: `http://127.0.0.1:${address.port}`,
+    embedder, timeoutMs: 80 });
+  const provider = new ScriptedProvider();
+  const slice = new ReadOnlyAnswerSlice({ records: new MemoryRecordStore(), index, provider });
+  const response = await slice.answer(request("qdrant-refused", "Read the unavailable synthetic dependency.",
+    "general", { budgets: { deadlineMs: 100 } }));
+  assert.equal(response.completion.reason, "dependency-unavailable");
+  assert.equal(response.completion.timedOut, false);
   assert.equal(provider.calls.length, 0);
 });
 

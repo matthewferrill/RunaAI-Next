@@ -70,10 +70,12 @@ repository and never push migration work into either source repository.
 - Gate 2 planning and implementation are isolated on `runa2/gate-2-read-only-continuity` from
   `7107ead`. The steward approved Gate 2A on 2026-08-21. The bounded synthetic implementation now
   passes all 34 frozen corpus cases and 21/21 disposable selected-stack integration checks with clean
-  shutdown and Gate-2-only rollback. Gate 1 deterministic regression passes 24/24, full Gate 0
-  verification passes 46/46 plus 10/10 seals, and an immediate clean Gate 1 integration rerun passes
-  25/25 after one transparently recorded timing-label flake. Gate 2B evidence acceptance is pending.
-  Live-model validation was not run and remains separately decision-gated.
+  shutdown and Gate-2-only rollback. Gate 2 regression review exposed an intermittent Gate 1 Qdrant
+  timeout-label race; the steward approved a narrow remediation on 2026-08-21. The refreshed Gate 1
+  deterministic suite passes 26/26, Gate 1 integration passes 25/25, and full Gate 0 verification
+  passes 48/48 plus 10/10 seals. Timeout and genuine dependency loss are now deterministically
+  distinguished. Gate 2B evidence acceptance is pending. Live-model validation was not run and
+  remains separately decision-gated.
 
 ## Bootstrap findings
 

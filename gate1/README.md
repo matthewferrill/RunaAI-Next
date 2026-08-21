@@ -5,6 +5,11 @@ After separate protected-merge approval, Gate 1 was merged into `runa2/integrati
 Qwen3.6 deliberate review and the existing live BGE endpoint remain explicitly deferred. See
 `GATE1-RESULTS-2026-08-20.md` and `GATE1-CODE-REVIEW-REMEDIATION-2026-08-21.md`.
 
+Gate 2 regression review later exposed an intermittent Qdrant HTTP timeout-label race. The steward
+approved a narrow normalization fix on 2026-08-21; its implementation and refreshed evidence are
+recorded in `GATE1-QDRANT-TIMEOUT-REMEDIATION-2026-08-21.md`. The fix is isolated on the Gate 2 branch
+pending Gate 2B evidence acceptance and Gate 2C merge approval.
+
 ## Boundary
 
 This is a synthetic-only proof of the smallest RunaAI answer path. It accepts a typed participant,

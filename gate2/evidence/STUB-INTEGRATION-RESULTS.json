@@ -99,7 +99,7 @@
           "outputLimited": false
         },
         "trace": {
-          "correlationId": "0007790cacc4dde260e227e02d1c47fe"
+          "correlationId": "e9303dbc061a16c33cc8cf0b5a49e271"
         },
         "effects": [],
         "auditCodes": [
@@ -129,7 +129,7 @@
           "source": "postgres-synthetic"
         }
       },
-      "elapsedMs": 22,
+      "elapsedMs": 20,
       "counts": {
         "gate1_requests": 1,
         "gate1_turns": 1,
@@ -181,7 +181,7 @@
           "outputLimited": false
         },
         "trace": {
-          "correlationId": "1167d0cefa6e47299a9564059b136e3d"
+          "correlationId": "3c81d2c147fd2b56419281ddcecb6764"
         },
         "effects": [],
         "auditCodes": [
@@ -251,7 +251,7 @@
           "outputLimited": false
         },
         "trace": {
-          "correlationId": "1167d0cefa6e47299a9564059b136e3d"
+          "correlationId": "3c81d2c147fd2b56419281ddcecb6764"
         },
         "effects": [],
         "auditCodes": [
@@ -281,7 +281,7 @@
           "source": "postgres-synthetic"
         }
       },
-      "elapsedMs": 316,
+      "elapsedMs": 278,
       "counts": {
         "gate1_requests": 2,
         "gate1_turns": 2,
@@ -334,7 +334,7 @@
             "outputLimited": false
           },
           "trace": {
-            "correlationId": "0045c0a9047a999540e62160a562e8ac"
+            "correlationId": "a4149e8201081dc60057dad61ae8434c"
           },
           "effects": [],
           "auditCodes": [
@@ -404,7 +404,7 @@
             "outputLimited": false
           },
           "trace": {
-            "correlationId": "0045c0a9047a999540e62160a562e8ac"
+            "correlationId": "a4149e8201081dc60057dad61ae8434c"
           },
           "effects": [],
           "auditCodes": [
@@ -435,7 +435,7 @@
           }
         }
       ],
-      "elapsedMs": 281,
+      "elapsedMs": 282,
       "counts": {
         "gate1_requests": 3,
         "gate1_turns": 3,
@@ -487,7 +487,7 @@
           "outputLimited": false
         },
         "trace": {
-          "correlationId": "21f2ac5b2356a9099560e6a64014de93"
+          "correlationId": "49af3a561a8bc5a06c6f87fc84405bac"
         },
         "effects": [],
         "auditCodes": [
@@ -517,7 +517,7 @@
           "source": "postgres-synthetic"
         }
       },
-      "elapsedMs": 239,
+      "elapsedMs": 247,
       "counts": {
         "gate1_requests": 4,
         "gate1_turns": 4,
@@ -578,7 +578,7 @@
           "outputLimited": false
         },
         "trace": {
-          "correlationId": "beb66505dfb81ec76e6380ed81f3f654"
+          "correlationId": "e21abca3a0ccacdc0c338a465e631883"
         },
         "effects": [],
         "auditCodes": [
@@ -608,7 +608,7 @@
           "source": "postgres-synthetic"
         }
       },
-      "elapsedMs": 249,
+      "elapsedMs": 258,
       "counts": {
         "gate1_requests": 5,
         "gate1_turns": 5,
@@ -660,7 +660,7 @@
           "outputLimited": false
         },
         "trace": {
-          "correlationId": "2c906ade6a035bf4038fdb91c867b6bd"
+          "correlationId": "5f6d4835bad1c1b535efbde4025b7bae"
         },
         "effects": [],
         "auditCodes": [
@@ -690,7 +690,7 @@
           "source": "postgres-synthetic"
         }
       },
-      "elapsedMs": 245,
+      "elapsedMs": 303,
       "counts": {
         "gate1_requests": 6,
         "gate1_turns": 6,
@@ -747,7 +747,7 @@
           "outputLimited": false
         },
         "trace": {
-          "correlationId": "17a12937931fddd96a850dd5c3982f79"
+          "correlationId": "9b0415dd3552f08a4bd571d1c45839bd"
         },
         "effects": [],
         "auditCodes": [
@@ -777,7 +777,7 @@
           "source": "postgres-synthetic"
         }
       },
-      "elapsedMs": 205,
+      "elapsedMs": 244,
       "counts": {
         "gate1_requests": 7,
         "gate1_turns": 7,
@@ -827,7 +827,7 @@
           "outputLimited": false
         },
         "trace": {
-          "correlationId": "1f4a43ca93051c4265dd021a49309a6a"
+          "correlationId": "fc8420cfcb77067e9352e9b4403a169e"
         },
         "effects": [],
         "auditCodes": [
@@ -909,7 +909,7 @@
           "outputLimited": false
         },
         "trace": {
-          "correlationId": "11e830e451ebe95f92509a8c785ded46"
+          "correlationId": "eb4a2f304832f70f3a2008246c4dd47e"
         },
         "effects": [],
         "auditCodes": [
@@ -939,7 +939,7 @@
           "source": "ephemeral-unverified"
         }
       },
-      "elapsedMs": 165,
+      "elapsedMs": 211,
       "counts": {
         "gate1_requests": 7,
         "gate1_turns": 7,
@@ -991,7 +991,7 @@
             "outputLimited": false
           },
           "trace": {
-            "correlationId": "c60619bed60ce040e4fc96ea503c2dd3"
+            "correlationId": "9c52ef22446385579b46ba108cf69b14"
           },
           "effects": [],
           "auditCodes": [
@@ -1071,7 +1071,7 @@
             "outputLimited": false
           },
           "trace": {
-            "correlationId": "25a5b6ace8555ac5b613bc7eb6bbaf90"
+            "correlationId": "cd01d6beb5987e97ac77c5e5df162ae4"
           },
           "effects": [],
           "auditCodes": [
@@ -1117,7 +1117,7 @@
             "lane": "general",
             "user": "Record the first synthetic continuity turn.",
             "assistant": "The first synthetic continuity turn is recorded.",
-            "at": "2026-08-21T05:08:56.217Z"
+            "at": "2026-08-21T05:24:14.796Z"
           }
         ]
       }
@@ -1139,14 +1139,14 @@
             "lane": "general",
             "user": "Record the first synthetic continuity turn.",
             "assistant": "The first synthetic continuity turn is recorded.",
-            "at": "2026-08-21T05:08:56.120Z"
+            "at": "2026-08-21T05:24:14.706Z"
           },
           {
             "requestId": "g2-continuity-two",
             "lane": "research",
             "user": "Record the second synthetic continuity turn.",
             "assistant": "The second synthetic continuity turn is recorded.",
-            "at": "2026-08-21T05:08:56.203Z"
+            "at": "2026-08-21T05:24:14.781Z"
           }
         ]
       },
@@ -1165,7 +1165,7 @@
             "lane": "general",
             "user": "Record the first synthetic continuity turn.",
             "assistant": "The first synthetic continuity turn is recorded.",
-            "at": "2026-08-21T05:08:56.217Z"
+            "at": "2026-08-21T05:24:14.796Z"
           }
         ]
       },
@@ -1263,7 +1263,7 @@
       }
     }
   },
-  "traceSha256": "71bb9bc626d667a33e9988556d036d3fc1c852773b78eec58ed60c0eb85ddfe1",
+  "traceSha256": "670e125cbfdb11815ca272007cabdbbe8709eb5776303e67c9b743e2f83d1368",
   "checks": {
     "selectedStackReached": true,
     "restartInterruptedAfterCommit": true,

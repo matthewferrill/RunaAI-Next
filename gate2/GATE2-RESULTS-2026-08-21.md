@@ -73,14 +73,18 @@ all reported stopped. The machine-readable report is `evidence/STUB-INTEGRATION-
 
 ### Regression results
 
-- Gate 1 deterministic suite: 24/24 passed.
-- Full Gate 0 verification: 46/46 Node tests passed, 10/10 seals passed, and all instrumentation checks
+- Gate 1 deterministic suite: 26/26 passed, including deterministic separation of Qdrant HTTP timeout
+  from genuine connection refusal.
+- Full Gate 0 verification: 48/48 Node tests passed, 10/10 seals passed, and all instrumentation checks
   passed. Its optional live legacy phase was not rerun because this gate did not set
   `RUNAAI_LEGACY_CHECKOUT`; Gate 2's pinned safe baseline remains recorded separately.
 - Gate 1 disposable integration: the first regression run passed 24/25 checks but labeled the
   synthetic slow-retrieval result `dependency-unavailable` after 161 ms instead of the expected
-  `timeout`. It still stayed bounded, invoked no model, and stopped all services. An immediate clean
-  rerun passed 25/25 with all services stopped. No Gate 1 code or threshold was changed.
+  `timeout`. RCA found a race between the total request timer and Node's HTTP `TimeoutError` code `23`.
+  The steward approved a narrow Qdrant-only normalization fix. The refreshed deterministic suite and
+  25/25 integration checks now prove that HTTP timeout reports timeout while connection refusal remains
+  dependency-unavailable. Full evidence is in
+  `../gate1/GATE1-QDRANT-TIMEOUT-REMEDIATION-2026-08-21.md`.
 
 ## Deliberate deferments
 

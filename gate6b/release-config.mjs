@@ -51,7 +51,7 @@ function releaseBoundary(config) {
 
 export async function loadReleaseConfig(path) {
   let parsed;
-  try { parsed = schema.parse(JSON.parse(await readFile(path, "utf8"))); }
+  try { parsed = schema.parse(JSON.parse((await readFile(path, "utf8")).replace(/^\uFEFF/, ""))); }
   catch (error) { throw coded("release-config-invalid", error.message); }
   if (parsed.limits.upstreamDeadlineMs >= parsed.limits.totalDeadlineMs) {
     throw coded("release-config-invalid", "The upstream deadline must be shorter than the total deadline.");

@@ -213,6 +213,8 @@ test("release configuration is strict, digest-bound, and retains references only
   const loaded = await loadReleaseConfig(path);
   assert.match(loaded.configurationDigest, /^[a-f0-9]{64}$/);
   assert.equal(loaded.value.mode, "shadow");
+  await writeFile(path, `\uFEFF${JSON.stringify(config)}`, "utf8");
+  assert.equal((await loadReleaseConfig(path)).configurationDigest, loaded.configurationDigest);
   await writeFile(path, JSON.stringify({ ...config, literalPassword: "forbidden" }), "utf8");
   await assert.rejects(loadReleaseConfig(path), error => error.code === "release-config-invalid");
 });

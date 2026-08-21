@@ -16,12 +16,14 @@ start a service, or authorize cutover.
 - keyed, content-free relational indexes;
 - append-only prefix enforcement, idempotency, atomic failure, and response-loss recovery;
 - a 20-case synthetic parity corpus; and
-- a fail-closed aggregate inventory contract for a later separately approved owner-context run.
+- a fail-closed aggregate inventory runner approved under Gate 4B-I. It verifies Control, Matthew's
+  identity, both exact clean commits, the migration branch, and every source pin before DPAPI or store
+  access; performs two independent in-memory passes; and emits only a reconstructed allowlist.
 
 ## What remains decision-gated
 
-1. approve one Control-local aggregate inventory run under Matthew's identity;
-2. use that aggregate result to decide the disposition of E3 inbox, E4 review, E5 grants, and the
+1. run the approved Control-local aggregate inventory under Matthew's identity;
+2. use its aggregate result to decide the disposition of E3 inbox, E4 review, E5 grants, and the
    device vault;
 3. approve or reject a protected rehearsal against a disposable target; and
 4. defer all approved-knowledge projection and retrieval behavior to Gate 4C.

@@ -118,9 +118,11 @@ repository and never push migration work into either source repository.
   on 2026-08-21. The branch preserves the complete E6 append-only learning-event and approval-history
   chain in authenticated envelopes, enforces append-only successors and retry safety, and keeps all
   approved-knowledge projection and retrieval disabled. Its frozen corpus contains 20 synthetic
-  cases. No protected learning store has been opened; no Control adapter, PostgreSQL target,
-  production record, DPAPI credential, or device-vault material has been accessed. A later owner
-  inventory run and any protected rehearsal require separate explicit approvals.
+  cases. The steward approved Gate 4B-I on 2026-08-21; its fail-closed Control runner adds five
+  synthetic checks for exact owner/host/commit/branch/source-pin authority, two-pass determinism, and
+  reconstructed allowlisted output. No protected learning store has yet been opened; no PostgreSQL
+  target, production record, DPAPI credential, or device-vault material has been accessed. The one
+  approved owner inventory run is next; any protected rehearsal requires a separate explicit approval.
 
 ## Bootstrap findings
 

@@ -17,6 +17,7 @@
     { "path": "src/runa/learning-inbox-store.mjs", "gitBlobSha1": "4e0241af2f839cdf39090f3a250915872d4e6f7c" },
     { "path": "src/runa/learning-review-store.mjs", "gitBlobSha1": "b87bc3c161b9abfb47c948781160fd6ad33127c3" },
     { "path": "src/runa/approved-knowledge-e5-grant-store.mjs", "gitBlobSha1": "d88cacedfb03ce2c1d93d71d35cded07f3c16104" },
-    { "path": "src/runa/learning-device-vault.mjs", "gitBlobSha1": "41fed5fe5349f2d403df4de908673be548c271e5" }
+    { "path": "src/runa/learning-device-vault.mjs", "gitBlobSha1": "41fed5fe5349f2d403df4de908673be548c271e5" },
+    { "path": "src/runa/learning-device-vault-service.mjs", "gitBlobSha1": "d7f55a91a8c6390ed146bdd213287d77bf8dfdfa" }
   ]
 }

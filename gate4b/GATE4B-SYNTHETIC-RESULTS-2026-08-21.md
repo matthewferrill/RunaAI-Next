@@ -15,8 +15,8 @@ production record, persistent service, external network, model, or provider was 
 
 | Check | Result |
 |---|---:|
-| Frozen Gate 4B synthetic corpus | 20/20 passed |
-| Full Node regression profile | 113/113 passed |
+| Frozen Gate 4B synthetic corpus and owner-runner checks | 25/25 passed |
+| Full Node regression profile | 118/118 passed |
 | Gate 1 disposable integration | passed; 25 checks; all services stopped |
 | Gate 2 disposable integration | passed; 21 checks; all services stopped |
 | Gate 3 disposable integration | passed; 16 checks; PostgreSQL stopped |
@@ -44,13 +44,12 @@ ciphertext in the synthetic target.
 
 ## What this evidence does not prove
 
-It does not measure Control's current E6 records, establish E3/E4/E5/vault disposition, prove a real
+It does not yet measure Control's current E6 records, establish E3/E4/E5/vault disposition, prove a real
 PostgreSQL migration, activate approved knowledge, or authorize production migration/cutover. Those
 are separately gated.
 
 ## Next decision
 
-The next decision is Gate 4B-I: whether to implement the fail-closed Control adapter and run one
-read-only, aggregate-only owner inventory under Matthew's identity. That inventory would measure the
-named learning stores twice in memory and retain only allowlisted counts. Approval of this synthetic
-evidence does not itself authorize that run.
+Gate 4B-I was subsequently approved. The fail-closed runner now passes five additional tests proving
+two-pass determinism, output reconstruction, unknown-category denial, exact authority/pin checks, and
+pre-access owner mismatch denial. The next operation is its one authorized Control execution.

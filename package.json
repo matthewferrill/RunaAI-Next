@@ -9,7 +9,7 @@
     "test:gate2": "node --test gate2/gate2.test.mjs",
     "test:gate3": "node --test gate3/gate3.test.mjs",
     "test:gate4": "node --test gate4/gate4.test.mjs",
-    "test:gate4b": "node --test gate4b/gate4b.test.mjs",
+    "test:gate4b": "node --test gate4b/gate4b.test.mjs gate4b/owner-inventory.test.mjs",
     "verify:gate0": "node gate0/verify-gate0.mjs",
     "verify:gate1:integration": "node gate1/run-integration.mjs",
     "verify:gate1:models": "node gate1/run-model-validation.mjs",

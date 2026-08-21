@@ -1,6 +1,6 @@
 # Owner-context aggregate inventory contract
 
-Status: contract and synthetic aggregator only; no protected runner and no owner-context execution
+Status: runner implemented and synthetically verified under approved Gate 4B-I; owner execution pending
 
 ## Preconditions for a later run
 
@@ -25,9 +25,14 @@ export, conversion, initialization, lock-file creation, or target write.
 ## Allowlisted output
 
 Output may include only source commit/pin status; store presence; counts by entry kind, event type,
-destination, scope, lifecycle action, and approval action; earliest/latest timestamps; byte/count
+destination, scope, resolved lifecycle state, and resolved approval state; byte/count
 ceilings; unreadable, integrity, chain, and unresolved-lineage counts; aggregate E3/E4/E5/vault
 presence and counts; deterministic-second-pass status; and a fixed `disallowedFieldsEmitted: false`.
+
+The existing safe journal API does not expose approval action payloads without returning protected
+records. Gate 4B-I therefore reports entry-kind totals and resolved approval states, explicitly marks
+action counts unavailable, and does not invent them. A later protected rehearsal can validate exact
+approval actions while building the encrypted target snapshot in memory.
 
 Output must not include protected content, paths, filenames, ids, source locators, lessons, statements,
 tasks, evidence, rationale, outcomes, ciphertext, key material, passphrases, credentials, entry digests,
@@ -35,5 +40,6 @@ or record-level error detail.
 
 ## Gate
 
-Implementing the Control adapter and running this inventory requires explicit Gate 4B-I approval.
-The current branch intentionally cannot open a protected store.
+Gate 4B-I was explicitly approved on 2026-08-21. The runner may execute once on Control under the
+preconditions above. That approval does not authorize export, migration, a target database, rehearsal,
+or cutover.

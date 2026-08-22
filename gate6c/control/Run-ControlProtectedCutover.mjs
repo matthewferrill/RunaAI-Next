@@ -2,7 +2,6 @@ import { createHash, randomBytes } from "node:crypto";
 import { readFile, stat } from "node:fs/promises";
 import { hostname, userInfo } from "node:os";
 import { dirname, isAbsolute, join, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
 import { spawnSync } from "node:child_process";
 import pg from "pg";
 
@@ -555,11 +554,8 @@ async function main(argv) {
   } finally { await context.close(); }
 }
 
-if (process.argv[1]
-    && resolve(process.argv[1]).toLowerCase() === resolve(fileURLToPath(import.meta.url)).toLowerCase()) {
-  main(process.argv.slice(2)).then(result => process.stdout.write(`${JSON.stringify(result)}\n`), error => {
-    const safe = /^[a-z0-9-]{1,100}$/.test(String(error?.code ?? "")) ? error.code : "gate6cd-protected-cutover-failed";
-    process.stderr.write(`${JSON.stringify({ schemaVersion: "runa2-gate6cd-error/v1", errorCode: safe,
-      privateValuesIncluded: false })}\n`); process.exitCode = 1;
-  });
-}
+main(process.argv.slice(2)).then(result => process.stdout.write(`${JSON.stringify(result)}\n`), error => {
+  const safe = /^[a-z0-9-]{1,100}$/.test(String(error?.code ?? "")) ? error.code : "gate6cd-protected-cutover-failed";
+  process.stderr.write(`${JSON.stringify({ schemaVersion: "runa2-gate6cd-error/v1", errorCode: safe,
+    privateValuesIncluded: false })}\n`); process.exitCode = 1;
+});

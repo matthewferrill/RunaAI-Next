@@ -316,6 +316,9 @@ test("Control owner tools bind the exact candidate config and DPAPI user context
   const localhostDeploy = readFileSync(new URL("./control/Deploy-ControlLocalhostShadow.ps1", import.meta.url), "utf8");
   const resumeDeploy = readFileSync(new URL("./control/Deploy-ControlEnrollmentResume.ps1", import.meta.url), "utf8");
   const resumeRebind = readFileSync(new URL("./control/Invoke-ControlOwnerAuthorityRebindAfterEnrollment.ps1", import.meta.url), "utf8");
+  const flowProof = readFileSync(new URL("./control/Test-ControlOwnerPasskeyFlow.ps1", import.meta.url), "utf8");
+  const configureFlow = readFileSync(new URL("./control/Configure-ControlOwnerPasskeyFlow.ps1", import.meta.url), "utf8");
+  const restoreFlow = readFileSync(new URL("./control/Restore-ControlOwnerPasskeyFlow.ps1", import.meta.url), "utf8");
   const rebind = readFileSync(new URL("./control/Rebind-ControlOwnerAuthority.mjs", import.meta.url), "utf8");
   assert.match(prepare, /config\\candidate\.json/);
   assert.match(operator, /config\\\\candidate\.json/);
@@ -342,6 +345,21 @@ test("Control owner tools bind the exact candidate config and DPAPI user context
   assert.match(resumeDeploy, /rolledBack=\$true/);
   assert.match(resumeRebind, /interrupted-enrollment-recovery-release/);
   assert.match(resumeRebind, /webauthn-passwordless' \}\)\.Count -ne 1/);
+  assert.match(flowProof, /runaai-next-gate6c-flow-proof/);
+  assert.match(flowProof, /finally \{/);
+  assert.match(flowProof, /Method Delete -Uri "\$base\/admin\/realms\/\$realmName"/);
+  for (const source of [flowProof, configureFlow]) {
+    assert.match(source, /webauthn-authenticator-passwordless/);
+    assert.match(source, /'default\.reference\.value'='webauthn'/);
+    assert.match(source, /'default\.reference\.maxAge'='300'/);
+  }
+  assert.match(configureFlow, /authenticationFlowBindingOverrides/);
+  assert.match(configureFlow, /owner-passkey-flow-safety-state-drift/);
+  assert.match(configureFlow, /protectedDataImported=\$false/);
+  assert.match(configureFlow, /productionTrafficChanged=\$false/);
+  assert.match(restoreFlow, /owner-passkey-flow-rollback-safety-state-drift/);
+  assert.match(restoreFlow, /ownerCredentialRetained=\$true/);
+  assert.doesNotMatch(configureFlow, /Write-Output.*password|Set-Clipboard/);
 });
 
 test("browser owner ceremony uses PKCE, exact owner binding, WebAuthn, and opaque sessions", async () => {

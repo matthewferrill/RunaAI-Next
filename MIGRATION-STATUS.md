@@ -8,11 +8,12 @@ boundaries, verification state, or the next planned work.
 
 | Repository or branch | Current role | Authority |
 |---|---|---|
-| Legacy `RunaAI` repository | Running implementation and behavior reference | Production, protected data, current behavior, and current operational status until cutover |
+| Legacy `RunaAI` repository | Intact rollback system and behavior reference | Verified fallback; no longer selected-core write authority after Gate 6D close |
 | `Runalab` repository | Completed stack-selection and evidence archive | Historical component evidence only; no new product implementation |
 | RunaAI-Next `main` | Exact inherited RunaLab completion baseline | Stable integration target only after reviewed migration completion |
 | RunaAI-Next `runa2/integration` | Accumulated accepted migration gates | Development integration; not production |
 | Short-lived `runa2/*` gate branches | One approved, measured migration slice | Experimental until validated and approved |
+| Control release `runaai-next-gate6d-promotion-2026-08-22-a886754` | Running selected-core RunaAI application | Production authority for the exact Gate 6 selected core |
 
 The product name is RunaAI. `RunaAI-Next`, `runa2`, and similar labels are repository and branch
 identifiers during migration, not product identities.
@@ -36,8 +37,9 @@ repository and never push migration work into either source repository.
 - GitHub branch protection is active on `main` and `runa2/integration`: pull requests and resolved
   conversations are required; stale reviews are dismissed; admins are included; force-pushes and
   deletion are blocked. Required status checks remain unset until a real CI check exists.
-- `main` remains at the exact RunaLab completion baseline. `runa2/integration` contains the accepted
-  bootstrap, Gates 0–3, Gate 4A, Gate 4B, and Gate 4C through the protected aggregate comparison.
+- `main` remains at the exact RunaLab completion baseline. `runa2/integration` contains accepted work
+  through Gate 6C preparation; the reviewed Gate 6D production branch records the exact promoted
+  release and post-cutover hardening.
 - The completed laboratory evidence, seals, probes, stack bakeoff, model findings, architecture
   assessment, and conditional estimates are inherited.
 - Gate 1 contains an isolated synthetic-only implementation of the smallest ordinary read-only
@@ -48,8 +50,10 @@ repository and never push migration work into either source repository.
   chat records in memory under Matthew's Control identity. It emitted no protected value and copied,
   converted, imported, or migrated no record.
 - No model has been downloaded.
-- No persistent service, non-loopback listener, provider credential, production path, or spending has
-  been activated. Gate 1 verification used only bounded disposable loopback child processes.
+- Gate 6D activated the exact private Control production path for the selected core. No model was
+  downloaded, no provider credential was introduced, and no external spending path was activated.
+  Candidate PostgreSQL, Keycloak, OpenFGA, Node, and Caddy are retained; only private Caddy TLS is
+  exposed, while the other candidate listeners remain loopback-bound.
 - No migration gate is approved merely by this bootstrap.
 - Bootstrap documentation and clean-clone validation were reviewed and merged into
   `runa2/integration` as `94ba860`.
@@ -268,6 +272,18 @@ repository and never push migration work into either source repository.
   deny rules, no import, no traffic change, and planned revision zero. The corrected design archives a
   released lease before a distinct retry, inserts audit fields explicitly, runs operator prerequisites
   before freeze activation, and emits a safe step-specific failure code.
+- Gate 6D is complete and closed. Exact release
+  `runaai-next-gate6d-promotion-2026-08-22-a886754` at `a886754` is authoritative for the selected
+  core on Control. The four approved domains reconciled exactly with 102 project/chat records, 90 E6
+  entries, one selected setting, zero selected action receipts, and 53 active approved-knowledge
+  lessons. A fresh owner passkey session, all three representative read-only lanes, the governed
+  setting change and rollback, target-session revocation, 120/120 samples over 60 minutes, 14 freeze
+  checks, and final reconciliation passed. Cutover closed, the freeze was released with reason
+  `gate6-closed`, and legacy remains healthy and tracked-clean at `b4db040` as the rollback system.
+  Matthew's exact Caddy root is trusted only in `CurrentUser\Root`; Windows-native chain validation
+  reaches the private HTTPS entry point with status 200 and no certificate bypass. Full verification
+  passes 298/298 and the combined Gate 6B/6C focused suites pass 65/65. Details are in
+  `gate6c/GATE6D-CUTOVER-RESULTS-2026-08-22.md`.
 
 ## Bootstrap findings
 
@@ -310,7 +326,7 @@ plain-language steward experience, or governed action pathway.
 | 3 | One reversible governed idempotent action | Complete; accepted and merged as `0680cfb` | Complete |
 | 4 | Governed data migration, one domain at a time | Complete; accepted and merged as `2c38dd5`; legacy unchanged | Complete |
 | 5 | Operations, private transport, authentication/authorization, recovery | Complete; accepted and merged as `a986419` | Complete |
-| 6 | Selected-core production cutover and rollback window | Gate 6A accepted; Gate 6B complete; Gate 6C owner and backup prerequisites complete; protected maintenance window authorized and operator verified; candidate remains shadow until execution | Execute the exact-pinned maintenance window; pause only for the fresh passkey validation or a hard failure |
+| 6 | Selected-core production cutover and rollback window | Complete and closed; exact selected-core release is authoritative, observation green, freeze released, legacy rollback healthy | Complete |
 | 7 | Deferred extensions | Not started | New baseline and separate approval per extension group |
 
 ## Bootstrap validation
@@ -355,26 +371,13 @@ No dependency was changed during the prerequisite disposition. Full evidence is 
 
 ## Next operation
 
-Gate 6B infrastructure and Gate 6C target-owner/backup prerequisites are complete. The exact release
-`runaai-next-gate6c-readiness-2026-08-22-669139e` runs beside legacy as a shadow. The owner ceremony is
-complete, the recurring encrypted backup and disposable restore proof are current, and the read-only
-freeze preflight passed. These facts do not promote the candidate: legacy remains authoritative,
-cutover remains planned at revision zero, no protected row is imported, no freeze is active, and no
-traffic has changed.
+Gate 6 is closed. The owner can now log in and test the selected-core production release at
+`https://192.168.50.169:9761/`. Operational work should preserve the exact immutable release,
+recurring encrypted backups, private listener boundary, active target authority, and the intact legacy
+rollback path.
 
-The coordinated protected Gate 6C/6D maintenance window is authorized. The operator must reverify the
-current facts, deploy an exact active-mode candidate that remains non-authoritative while cutover is
-planned, activate the temporary whole-legacy-state write deny, perform the owner-context four-domain
-capture and target import, require zero-difference reconciliation, and proceed immediately to Gate 6D
-promotion or target-only rollback before restoring legacy writes. After promotion it pauses for one
-fresh owner passkey login, then performs governed validation, a full-hour observation, final
-reconciliation, close, and freeze release.
-E3 remains deferred, E4/device-vault ciphertext is not copied, E5 is absent, and the separate
-approved-knowledge vector index remains skipped. The maintenance authorization covers only the exact
-selected four-domain operation and does not authorize any deferred store or Gate 7 extension.
-
-Gate 6D remains a separate maintenance-window decision: final delta under write freeze,
-zero-difference reconciliation, witnessed promotion, one governed validation action, one-hour
-observation, and rollback authority. Qwen3.6 deliberate review, the existing live BGE
-endpoint, broader legacy surfaces, and every Gate 7 extension remain deferred unless separately
-selected.
+The next migration decision is Gate 7, not an automatic continuation. E3, E4/device-vault recovery,
+the separate approved-knowledge vector index, Qwen3.6 deliberate review, the existing live BGE
+endpoint, and broader legacy surfaces remain deferred. Each extension group requires a new current
+baseline, a bounded scope, explicit evidence, and its own approval before implementation or protected
+data access.

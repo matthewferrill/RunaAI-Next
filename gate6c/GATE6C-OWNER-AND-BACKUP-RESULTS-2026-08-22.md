@@ -1,6 +1,6 @@
 # Gate 6C owner and backup readiness results
 
-Status: target owner complete; recurring backup and restore proof current; candidate remains shadow
+Status: Gate 6C prerequisites complete; superseded operationally by the closed Gate 6D cutover
 
 ## Outcome
 
@@ -9,9 +9,10 @@ passkeys, and the witnessed seven-step ceremony proves recovery authority, prima
 sign-in, fresh user-verified step-up, target session/capability revocation, recovery enrollment, and
 recovery verification.
 
-This is a readiness result, not a promotion. Legacy RunaAI remains the authority generation, the
-candidate remains in `shadow` mode with cutover phase `planned` revision zero, no protected data has
-been imported, and no production traffic has changed.
+This document records the pre-cutover readiness result. At that observation, it was not a promotion:
+legacy RunaAI remained authoritative, the candidate was in `shadow` mode, and no protected data or
+traffic had changed. Gate 6D subsequently completed and closed; current authority is recorded in
+`GATE6D-CUTOVER-RESULTS-2026-08-22.md`.
 
 ## Exact running shadow release
 
@@ -98,9 +99,10 @@ reviewed operator now separates exact promotion-candidate deployment, non-protec
 freeze/capture/import/promotion, restart, one fresh passkey validation, full-hour observation, and
 close. It fails closed to target rollback plus legacy-runtime verification and freeze release.
 
-This authorization does not change the evidence above: at this document revision the running release
-is still the non-authoritative shadow, the freeze is inactive, protected data is not imported, and no
-traffic has changed. Actual maintenance-window evidence must replace this paragraph after execution.
+This authorization did not change the readiness evidence above. The later maintenance-window evidence
+is retained separately in `GATE6D-CUTOVER-RESULTS-2026-08-22.md`; it records successful import,
+promotion, live validation, observation, close, and freeze release without rewriting this historical
+pre-cutover snapshot.
 
 The extended disposable verifier now checks decrypted retained rows and active approved-knowledge
 parity in addition to four-domain commit, restart persistence, idempotent replay, private-canary

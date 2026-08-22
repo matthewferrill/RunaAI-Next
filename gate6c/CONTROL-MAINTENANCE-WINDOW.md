@@ -4,12 +4,10 @@ This runbook separates the reversible candidate-only setup, the one fresh owner 
 and the protected-data boundary. The bounded Control wrappers make each phase executable and
 fail-closed; they do not collapse the phases into an unattended cutover.
 
-Current status (2026-08-22): all candidate-only and owner-interactive prerequisites are complete. The
-exact Gate 6C release is running as a non-authoritative Control shadow, the seven-step owner ceremony
-is complete with two distinct passkeys, the recurring encrypted backup and distinct-target restore
-proof are current, and the write-freeze preflight passed read-only. No protected record has been
-imported, no freeze is active, no traffic has changed, and the candidate has not been promoted.
-The steward explicitly authorized the protected Gate 6C/6D maintenance window on 2026-08-22.
+Current status (2026-08-22): completed. The steward authorized the protected Gate 6C/6D maintenance
+window, every phase below passed, Gate 6D closed, and the temporary legacy freeze was released. The
+exact selected-core release is authoritative on Control; legacy remains intact and healthy as the
+rollback system. Retained aggregate evidence is in `GATE6D-CUTOVER-RESULTS-2026-08-22.md`.
 
 ## Before the owner joins
 
@@ -27,8 +25,9 @@ The owner must be present to enroll and witness new target credentials. The cere
 new WebAuthn/passkey, sign-out/sign-in, fresh WebAuthn step-up, session/capability revocation, and a
 second newly enrolled recovery credential. Legacy credential material is never opened or copied.
 
-This boundary is complete. Its evidence remains a prerequisite only; owner completion does not grant
-the candidate write authority, import authorization, or production traffic.
+This boundary completed before promotion. Its evidence was a prerequisite only; the later exact
+reconciliation and cutover transition, not owner enrollment by itself, granted selected-core
+production authority.
 
 ## Protected maintenance window
 
@@ -59,5 +58,6 @@ on only existing selected subdirectories cannot prevent a new project/chat root 
 without modifying legacy state first. The supplied freeze tool therefore applies a temporary
 write-deny to the entire legacy `.runaai-local/state` root while preserving reads. This migrates and
 opens no deferred store, but it temporarily pauses all legacy state writes. Activating that broader
-maintenance impact required an explicit steward decision. That decision is recorded, but the script
-is still not run during preparation and no freeze is active until the exact activation phase begins.
+maintenance impact required an explicit steward decision. The freeze was activated only for the
+bounded window, verified throughout, and released after Gate 6D close with
+`selectedWritesFrozen=false` and reason `gate6-closed`.

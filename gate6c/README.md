@@ -1,4 +1,4 @@
-# Gate 6C protected staging
+# Gate 6C protected staging and Gate 6D cutover
 
 Gate 6C prepares the exact owner ceremony, recurring encrypted backup, bounded selected-write freeze,
 owner-context aggregate inventory, memory-only protected delta, reconciliation, and promotion-ready
@@ -11,15 +11,18 @@ promotion are deliberately absent until their explicit maintenance-window bounda
 
 `GATE6C-PREPARATION-RESULTS-2026-08-21.md` records the first green non-protected tranche.
 `GATE6C-OWNER-AND-BACKUP-RESULTS-2026-08-22.md` records the completed target owner ceremony, current
-encrypted backup/restore proof, and the explicit fact that the candidate remains shadow.
-`CONTROL-MAINTENANCE-WINDOW.md` records the remaining protected Control sequence and the conservative
-whole-state write-freeze finding.
+encrypted backup/restore proof, and the pre-cutover fact that the candidate was still shadow at that
+prerequisite checkpoint.
+`CONTROL-MAINTENANCE-WINDOW.md` records the protected Control sequence and conservative whole-state
+write-freeze finding. `GATE6D-CUTOVER-RESULTS-2026-08-22.md` records its completed production execution,
+observation, close, TLS trust result, and current operating boundary.
 
 The browser boundary uses authorization code plus PKCE, Keycloak application-initiated passkey
 registration, exact product-owner binding, encrypted PostgreSQL sessions, opaque host cookies, and
-online refresh/session revocation. The reviewed shadow release is now running, and the target owner
-ceremony is complete. This establishes target identity readiness only: no protected record, legacy
-write freeze, production route, or authority transition has occurred.
+online refresh/session revocation. The owner ceremony is complete and Gate 6D has promoted the exact
+reviewed selected-core release. RunaAI-Next is authoritative for the selected core, the final
+reconciliation and 60-minute observation passed, and the temporary legacy freeze is released. Legacy
+remains intact as the verified rollback system.
 
 The exact migration domains are:
 

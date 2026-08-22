@@ -444,6 +444,8 @@ test("Control owner tools bind the exact candidate config and DPAPI user context
   assert.match(cutover, /rollback\(context, runId\)/);
   assert.match(cutover, /prerequisite-check/);
   assert.match(cutover, /gate6cd-\$\{step\}-failed/);
+  assert.match(cutover, /fileURLToPath\(import\.meta\.url\)/);
+  assert.match(cutover, /toLowerCase\(\)/);
   assert.match(cutover, /privateValuesIncluded: false/);
   assert.doesNotMatch(cutover, /console\.log|Write-Output.*password/);
   assert.match(promotionDeploy, /candidate\.mode-ne 'active'/);
@@ -454,6 +456,7 @@ test("Control owner tools bind the exact candidate config and DPAPI user context
   assert.match(window, /Start-Sleep -Seconds 30/);
   assert.match(window, /Release-Freeze 'gate6-closed'/);
   assert.match(window, /Invoke-Operator 'prerequisite-check'/);
+  assert.match(window, /gate6d-operator-output-invalid/);
   assert.match(window, /Recover/);
 });
 

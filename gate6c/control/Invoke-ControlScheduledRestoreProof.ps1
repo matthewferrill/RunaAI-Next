@@ -38,7 +38,7 @@ function Invoke-Checked([string]$Executable, [string[]]$Arguments, [string]$Code
 function Invoke-RestoreBytes([string]$Database, [byte[]]$Archive, [string]$Password) {
   $start = New-Object Diagnostics.ProcessStartInfo
   $start.FileName = (Join-Path $pgBin 'pg_restore.exe')
-  $start.Arguments = "-h 127.0.0.1 -p 9765 -U postgres --exit-on-error --no-owner --no-privileges -d $Database"
+  $start.Arguments = "-h 127.0.0.1 -p 9765 -U postgres --no-password --exit-on-error --no-owner --no-privileges -d $Database"
   $start.UseShellExecute = $false
   $start.CreateNoWindow = $true
   $start.RedirectStandardInput = $true
@@ -62,6 +62,7 @@ Add-Type -AssemblyName System.Security
 $entropy = [Text.Encoding]::UTF8.GetBytes("runa2-gate6c-scheduled-backup:$ReleaseId")
 $scope = [Security.Cryptography.DataProtectionScope]::LocalMachine
 $password = [IO.File]::ReadAllText((Join-Path $Root 'secrets\postgres-admin')).Trim()
+$env:PGPASSWORD = $password
 $specs = @(
   [pscustomobject]@{ Source='runaai_next'; Restore='g6cproof_runa'; Owner='runa_candidate' },
   [pscustomobject]@{ Source='keycloak_candidate'; Restore='g6cproof_keycloak'; Owner='keycloak_candidate' },
@@ -72,15 +73,15 @@ $results = New-Object Collections.Generic.List[object]
 $failure = $null
 try {
   foreach ($spec in $specs) {
-    $present = & (Join-Path $pgBin 'psql.exe') -h 127.0.0.1 -p 9765 -U postgres -d postgres -tAc "SELECT 1 FROM pg_database WHERE datname='$($spec.Restore)'"
+    $present = & (Join-Path $pgBin 'psql.exe') -w -h 127.0.0.1 -p 9765 -U postgres -d postgres -tAc "SELECT 1 FROM pg_database WHERE datname='$($spec.Restore)'"
     if (($present -join '').Trim()) { throw 'candidate-restore-target-already-exists' }
-    Invoke-Checked (Join-Path $pgBin 'createdb.exe') @('-h','127.0.0.1','-p','9765','-U','postgres','-O',$spec.Owner,$spec.Restore) 'candidate-restore-target-create-failed'
+    Invoke-Checked (Join-Path $pgBin 'createdb.exe') @('--no-password','-h','127.0.0.1','-p','9765','-U','postgres','-O',$spec.Owner,$spec.Restore) 'candidate-restore-target-create-failed'
     $created.Add($spec.Restore)
     $protectedPath = Join-Path $generation.FullName "$($spec.Source).dump.dpapi"
     $archive = [Security.Cryptography.ProtectedData]::Unprotect([IO.File]::ReadAllBytes($protectedPath), $entropy, $scope)
     Invoke-RestoreBytes $spec.Restore $archive $password
     [Array]::Clear($archive, 0, $archive.Length)
-    $tableCount = & (Join-Path $pgBin 'psql.exe') -X -h 127.0.0.1 -p 9765 -U postgres -d $spec.Restore -A -t -v ON_ERROR_STOP=1 -c "SELECT count(*) FROM pg_tables WHERE schemaname NOT IN ('pg_catalog','information_schema')"
+    $tableCount = & (Join-Path $pgBin 'psql.exe') -w -X -h 127.0.0.1 -p 9765 -U postgres -d $spec.Restore -A -t -v ON_ERROR_STOP=1 -c "SELECT count(*) FROM pg_tables WHERE schemaname NOT IN ('pg_catalog','information_schema')"
     if ($LASTEXITCODE -ne 0) { throw 'candidate-scheduled-restore-query-failed' }
     $results.Add([ordered]@{ database=$spec.Source; distinctTarget=$spec.Restore;
       restored=$true; tableCount=[int](($tableCount -join '').Trim()) })
@@ -88,8 +89,9 @@ try {
 } catch { $failure = $_ }
 finally {
   foreach ($database in $created) {
-    Invoke-Checked (Join-Path $pgBin 'dropdb.exe') @('-h','127.0.0.1','-p','9765','-U','postgres','--force',$database) 'candidate-restore-target-cleanup-failed'
+    Invoke-Checked (Join-Path $pgBin 'dropdb.exe') @('--no-password','-h','127.0.0.1','-p','9765','-U','postgres','--force',$database) 'candidate-restore-target-cleanup-failed'
   }
+  Remove-Item Env:PGPASSWORD -ErrorAction SilentlyContinue
   $password = $null
 }
 if ($failure) { throw $failure }

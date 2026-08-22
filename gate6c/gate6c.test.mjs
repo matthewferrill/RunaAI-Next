@@ -276,6 +276,7 @@ test("Control scheduled backup never writes a plaintext dump", () => {
   assert.match(source, /RedirectStandardOutput = \$true/);
   assert.match(source, /ProtectedData\]::Protect/);
   assert.match(source, /DataProtectionScope\]::LocalMachine/);
+  assert.match(source, /--no-password/);
   assert.match(source, /completed\.Count -ge 30/);
   assert.doesNotMatch(source, /--file|\.dump['"]/);
   assert.doesNotMatch(source, /Remove-Item/);
@@ -288,6 +289,9 @@ test("Control restore proof streams decrypted archives only to distinct targets"
   assert.doesNotMatch(source, /config\\release\.json/);
   assert.match(source, /ProtectedData\]::Unprotect/);
   assert.match(source, /RedirectStandardInput = \$true/);
+  assert.match(source, /\$env:PGPASSWORD = \$password/);
+  assert.match(source, /--no-password/);
+  assert.match(source, /psql\.exe'\) -w/);
   assert.match(source, /g6cproof_runa/);
   assert.match(source, /dropdb\.exe/);
   assert.match(source, /plaintextBackupCount=0/);

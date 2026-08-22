@@ -50,7 +50,7 @@ function Invoke-DumpBytes([string]$Database, [string]$Password) {
   if ($Database -notin @('runaai_next','keycloak_candidate','openfga_candidate')) { throw 'candidate-backup-database-invalid' }
   $start = New-Object Diagnostics.ProcessStartInfo
   $start.FileName = $pgDump
-  $start.Arguments = "-h 127.0.0.1 -p 9765 -U postgres --format=custom --no-owner --no-privileges $Database"
+  $start.Arguments = "-h 127.0.0.1 -p 9765 -U postgres --no-password --format=custom --no-owner --no-privileges $Database"
   $start.UseShellExecute = $false
   $start.CreateNoWindow = $true
   $start.RedirectStandardOutput = $true

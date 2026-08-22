@@ -220,25 +220,28 @@ repository and never push migration work into either source repository.
   at the exact pre-restart commit. Pre/post schema, counts, and complete logical authority digests match
   for the application, Keycloak, and OpenFGA databases. Gate 6B is closed without importing protected
   data or changing authority.
-- Gate 6C planning is isolated on `runa2/gate-6c-protected-staging-plan` from accepted integration
-  head `6f7ad23`. Its frozen preparation train binds the exact four selected domains, new target owner
+- Gate 6C preparation was merged to accepted integration as `ff15c61`. Its frozen train binds the
+  exact four selected domains, new target owner
   ceremony, recurring encrypted backup, bounded selected-write freeze, aggregate owner preflight,
   memory-only retained delta, exact reconciliation, abort cleanup, and promotion-ready handoff. The
   setting value and selected action-receipt count remain unknown until an authorized aggregate-only
   preflight. Non-protected implementation may proceed, but owner enrollment, protected-store access,
   legacy write freeze, retained import, and traffic promotion remain blocked until the coordinated
   maintenance window.
-- Gate 6C's first non-protected preparation tranche is green. Its focused suite passes 24/24, the
-  full Node suite 276/276, Gate 0 and all disposable Gate 1-6C integrations are green, and every
+- Gate 6C's first non-protected preparation tranche is green. Its focused suite passes 27/27, the
+  full Node suite 280/280, Gate 0 and all disposable Gate 1-6C integrations are green, and every
   disposable service stopped. The tranche implements exact authority contracts, the owner-ceremony
   state machine, encrypted backup/scheduled restore tooling, a fail-closed selected setting/action
   inventory, four-domain PostgreSQL staging, exact reconciliation, restart/replay, and target-only
-  rollback. It opened no protected store and changed no Control service, ACL, credential, retained
-  protected row, traffic, or authority. Legacy has no reliable selective maintenance switch; the
-  prepared safe default is a reversible whole-state write deny that preserves reads and requires a
-  named maintenance-window decision before activation. The current hard implementation prerequisite
-  is a real browser OIDC/PKCE and WebAuthn ceremony entry point; synthetic evidence or an admin token
-  cannot substitute for witnessed owner sign-in, step-up, revocation, and recovery.
+  rollback. The exact merged release `runaai-next-gate6c-shadow-2026-08-22-ff15c61` now runs on
+  Control at commit `ff15c618`, verified artifact `fff3c379`, and verified configuration `f8db543c`.
+  Its browser entry point is green and stopped at `verify-recovery-authority`; selected data and target
+  users remain empty. It opened no protected store and changed no legacy service, ACL, credential,
+  retained protected row, traffic, or authority. Legacy has no reliable selective maintenance switch;
+  the prepared safe default is a reversible whole-state write deny that preserves reads and requires a
+  named maintenance-window decision before activation. The current hard boundary is the witnessed
+  recovery-authority and owner passkey ceremony; synthetic evidence or an admin token cannot
+  substitute for witnessed owner sign-in, step-up, revocation, and recovery.
 
 ## Bootstrap findings
 
@@ -281,7 +284,7 @@ plain-language steward experience, or governed action pathway.
 | 3 | One reversible governed idempotent action | Complete; accepted and merged as `0680cfb` | Complete |
 | 4 | Governed data migration, one domain at a time | Complete; accepted and merged as `2c38dd5`; legacy unchanged | Complete |
 | 5 | Operations, private transport, authentication/authorization, recovery | Complete; accepted and merged as `a986419` | Complete |
-| 6 | Selected-core production cutover and rollback window | Gate 6A accepted; Gate 6B complete; Gate 6C non-protected code and disposable browser ceremony green but not deployed; legacy unchanged | Review, build, and deploy the exact shadow ceremony release before owner/protected execution |
+| 6 | Selected-core production cutover and rollback window | Gate 6A accepted; Gate 6B complete; Gate 6C browser shadow deployed and green; no owner, protected import, freeze, or authority change | Witness recovery authority and complete the owner passkey ceremony before protected execution |
 | 7 | Deferred extensions | Not started | New baseline and separate approval per extension group |
 
 ## Bootstrap validation
@@ -333,9 +336,10 @@ authority, or production traffic.
 
 Gate 6C's contract is frozen and its non-protected implementation tranche is green. The private
 browser OIDC/PKCE entry point, encrypted PostgreSQL session store, passkey enrollment actions, exact
-owner binding, and revocation checks are implemented and disposable-tested, but are not deployed on
-Control. Review and build one new immutable shadow release, deploy and prove that entry point plus the
-recurring backup schedule, then present one coordinated owner/maintenance window for new target
+owner binding, and revocation checks are implemented, disposable-tested, and deployed on Control as
+the exact empty shadow release `runaai-next-gate6c-shadow-2026-08-22-ff15c61`. It is stopped before
+recovery-authority verification with zero target users. Prove the recurring backup schedule, then
+present one coordinated owner/maintenance window for new target
 credential enrollment, final backup verification, allowlisted aggregate preflight, selected-write
 freeze, memory-only retained delta, exact reconciliation, and immediate Gate 6D promotion or rollback.
 E3 remains deferred, E4/device-vault ciphertext is not copied, E5 is absent, and the separate

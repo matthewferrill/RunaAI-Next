@@ -57,6 +57,17 @@ export async function composeReadinessStatus({ application, dependencyHealth, co
     privateValuesIncluded: false });
 }
 
+export async function protectedImportCompleted(pool, enabled) {
+  if (enabled !== true) return false;
+  try {
+    return (await pool.query("SELECT EXISTS(SELECT 1 FROM runa_gate6c.runs WHERE status='completed') imported"))
+      .rows[0].imported === true;
+  } catch (error) {
+    if (error?.code === "42P01") return false;
+    throw error;
+  }
+}
+
 export async function createProductionComposition({ loadedConfig, releaseRoot }) {
   const config = loadedConfig.value;
   const relative = value => isAbsolute(value) ? value : resolve(loadedConfig.directory, value);
@@ -181,9 +192,7 @@ export async function createProductionComposition({ loadedConfig, releaseRoot })
       dependencies: Object.freeze({ postgresql, keycloak, openfga, provider }),
       privateValuesIncluded: false });
   };
-  const protectedImportStatus = async () => config.gate6c?.enabled === true
-    && (await pool.query("SELECT EXISTS(SELECT 1 FROM runa_gate6c.runs WHERE status='completed') imported"))
-      .rows[0].imported === true;
+  const protectedImportStatus = () => protectedImportCompleted(pool, config.gate6c?.enabled);
   const readinessStatus = () => composeReadinessStatus({ application, dependencyHealth,
     configuration: safeConfigurationStatus(loadedConfig, telemetryKey), artifact, browserCeremony,
     protectedImportStatus });

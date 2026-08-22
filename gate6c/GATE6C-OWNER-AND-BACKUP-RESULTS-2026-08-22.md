@@ -64,14 +64,20 @@ write deny has not been activated.
 - The first backup invocation under the new release stopped before creating a generation because the
   scheduled task still pinned the prior release. The task action was advanced with exact before/after
   checks and rollback, after which backup and restore passed.
+- The first promotion-candidate deployment reached the new release but its readiness endpoint failed
+  closed because PostgreSQL correctly reported that the not-yet-initialized Gate 6C run table did not
+  exist. The deployment wrapper restored the exact prior release, config, launcher, and backup action.
+  Live confirmation showed the prior shadow release at planned revision zero, legacy authority,
+  `protectedDataImported=false`, `productionTrafficChanged=false`, and no freeze marker. Readiness now
+  classifies SQLSTATE `42P01` as “import not started” while every other database error still propagates.
 
-Neither event changed legacy RunaAI, imported protected data, activated a freeze, promoted the
+None of these events changed legacy RunaAI, imported protected data, activated a freeze, promoted the
 candidate, or changed traffic.
 
 ## Verification
 
-- Full Node suite: **292/292 passed**.
-- Gate 6B focused suite: **23/23 passed**.
+- Full Node suite: **293/293 passed**.
+- Gate 6B focused suite: **24/24 passed**.
 - Gate 6C focused suite: **36/36 passed**.
 - All new PowerShell files parse successfully.
 - Candidate tasks: application, Caddy, Keycloak, OpenFGA, and PostgreSQL running; protected backup
@@ -92,4 +98,4 @@ traffic has changed. Actual maintenance-window evidence must replace this paragr
 The extended disposable verifier now checks decrypted retained rows and active approved-knowledge
 parity in addition to four-domain commit, restart persistence, idempotent replay, private-canary
 absence, encrypted browser-session persistence, and target-only rollback. It passes. The current full
-suite passes **292/292**, Gate 6B passes **23/23**, and Gate 6C passes **36/36**.
+suite passes **293/293**, Gate 6B passes **24/24**, and Gate 6C passes **36/36**.

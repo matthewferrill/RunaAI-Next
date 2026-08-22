@@ -13,7 +13,7 @@ import { createCandidateHttpServer } from "./http-server.mjs";
 import { ARTIFACT_FILE, buildArtifactManifest, verifyReleaseArtifact } from "./artifact.mjs";
 import { KeycloakOnlineClient, OpenFgaChecker } from "./clients.mjs";
 import { loadReleaseConfig } from "./release-config.mjs";
-import { composeReadinessStatus } from "./composition.mjs";
+import { composeReadinessStatus, protectedImportCompleted } from "./composition.mjs";
 
 const target = "runaai-next:test-target";
 const activeCutover = () => ({ phase: "promoted", revision: 7, authorityGeneration: target });
@@ -80,6 +80,15 @@ test("readiness reports protected import and traffic only after selected authori
   assert.equal(status.authority, "active");
   assert.equal(status.protectedDataImported, true);
   assert.equal(status.productionTrafficChanged, true);
+});
+
+test("readiness treats an uninitialized Gate 6C schema as no protected import", async () => {
+  const missing = Object.assign(new Error("relation does not exist"), { code: "42P01" });
+  assert.equal(await protectedImportCompleted({ async query() { throw missing; } }, true), false);
+  assert.equal(await protectedImportCompleted({ async query() { throw new Error("must not query"); } }, false), false);
+  await assert.rejects(protectedImportCompleted({ async query() {
+    throw Object.assign(new Error("database unavailable"), { code: "ECONNREFUSED" });
+  } }, true), error => error.code === "ECONNREFUSED");
 });
 
 test("active verified general answer is identity and relationship scoped", async () => {

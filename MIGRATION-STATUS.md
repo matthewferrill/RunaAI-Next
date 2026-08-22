@@ -255,8 +255,13 @@ repository and never push migration work into either source repository.
   bounded operator is implemented with exact-pinned promotion-candidate deployment, read-only
   preflight, whole-state freeze, two-pass four-domain capture, retained-row and approved-knowledge
   reconciliation, promotion/rollback, fresh passkey live validation, 120-sample one-hour observation,
-  and verified freeze release. Synthetic and disposable verification is green at 292/292 overall,
-  23/23 Gate 6B, and 36/36 Gate 6C; this entry does not claim the live window has run.
+  and verified freeze release. Synthetic and disposable verification is green at 293/293 overall,
+  24/24 Gate 6B, and 36/36 Gate 6C; this entry does not claim the live window has run.
+- The first exact promotion-candidate deployment failed closed on SQLSTATE `42P01` because readiness
+  queried the Gate 6C run table before the protected-import schema existed. Automatic rollback restored
+  the exact prior shadow release and backup action; live confirmation retained planned revision zero,
+  legacy authority, no protected import, no traffic change, and no freeze marker. The bootstrap state
+  now means “not imported,” while all other database errors still fail readiness closed.
 
 ## Bootstrap findings
 

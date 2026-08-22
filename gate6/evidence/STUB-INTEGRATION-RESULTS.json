@@ -18,6 +18,7 @@
     "rollbackAuthority": "legacy-runaai:synthetic-source"
   },
   "checks": {
+    "pristineReleaseRebind": true,
     "durableStatePersisted": true,
     "responseLossVisible": true,
     "responseLossRetryIdempotent": true,

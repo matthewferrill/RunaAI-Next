@@ -1,0 +1,131 @@
+{
+  "schemaVersion": "runa2-gate6b-control-shadow-results/v1",
+  "observedAt": "2026-08-21",
+  "status": "green-shadow-only",
+  "gateBoundary": {
+    "candidateAuthority": "shadow",
+    "legacyAuthorityGeneration": "legacy-runaai:control-production",
+    "protectedDataImported": false,
+    "ownerCredentialEnrolled": false,
+    "legacyWritesFrozen": false,
+    "productionTrafficChanged": false,
+    "targetPromoted": false
+  },
+  "release": {
+    "branch": "runa2/gate-6b-release-composition",
+    "commit": "77f3017d10f4e4670ad551b3d000cc2569c1dfdb",
+    "releaseId": "runaai-next-selected-core-2026-08-21-77f3017",
+    "applicationEntryPoint": "gate6b/server.mjs",
+    "selectedScopeVersion": "runa2-selected-core/2026-08-21",
+    "artifactDigest": "a7fcc146b40c4522f10b1f11c81aafc320800482bd70efc81f6d02ce880599e2",
+    "configurationDigest": "4e57995b1342a38ae1c61a4175a88d91e0e77b509dc2ac62cf3207b71dac8fe4",
+    "manifestDigest": "4167a8268295f8e973486e197845a2c1d3ac3efb0c5af632ae704d371f0f7343",
+    "artifactFileCount": 29380,
+    "artifactVerified": true,
+    "nodeVersion": "22.22.0",
+    "modelId": "qwen3-coder-30b-a3b-instruct"
+  },
+  "localVerification": {
+    "fullNodeSuite": { "passed": 252, "failed": 0 },
+    "focusedGate6bSuite": { "passed": 19, "failed": 0 },
+    "gate6bDisposableIntegration": { "passed": 11, "failed": 0, "servicesStopped": true },
+    "gate6DisposableIntegration": { "passed": 10, "failed": 0, "servicesStopped": true }
+  },
+  "control": {
+    "host": "RUNA-CONTROL",
+    "privateTlsStatus": 200,
+    "cutover": { "phase": "planned", "revision": 0 },
+    "dependenciesReady": {
+      "postgresql": true,
+      "keycloak": true,
+      "openfga": true,
+      "provider": true
+    },
+    "tasks": {
+      "count": 5,
+      "running": ["Application", "Caddy", "Keycloak", "OpenFga", "Postgresql"]
+    },
+    "listeners": [
+      { "address": "127.0.0.1", "port": 9760, "process": "node" },
+      { "address": "192.168.50.169", "port": 9761, "process": "caddy" },
+      { "address": "127.0.0.1", "port": 9762, "process": "java" },
+      { "address": "127.0.0.1", "port": 9763, "process": "openfga" },
+      { "address": "127.0.0.1", "port": 9764, "process": "openfga" },
+      { "address": "127.0.0.1", "port": 9765, "process": "postgres" },
+      { "address": "127.0.0.1", "port": 9766, "process": "java" },
+      { "address": "127.0.0.1", "port": 9770, "process": "caddy" }
+    ],
+    "wildcardCandidateListener": false,
+    "applicationRestart": {
+      "stopped": true,
+      "ready": true,
+      "elapsedSeconds": 13.8,
+      "exactReleasePreserved": true,
+      "legacyAuthorityPreserved": true
+    },
+    "dependencyLoss": {
+      "openfga": { "listenerStopped": true, "healthStatus": 503, "selectedRouteStatus": 423, "recovered": true },
+      "keycloak": { "listenerStopped": true, "healthStatus": 503, "selectedRouteStatus": 423, "recovered": true },
+      "providerProxy": { "listenerStopped": true, "healthStatus": 503, "selectedRouteStatus": 423, "recovered": true },
+      "postgresql": {
+        "selectedRouteStatus": 503,
+        "errorCode": "cutover-authority-unavailable",
+        "requestContentEchoed": false,
+        "databaseDetailExposed": false,
+        "recovered": true
+      }
+    },
+    "backupRestore": {
+      "releaseId": "runaai-next-selected-core-2026-08-21-77f3017",
+      "databaseCount": 3,
+      "allExact": true,
+      "encryptedBackupCount": 3,
+      "distinctTargetsDestroyed": true,
+      "plaintextWorkRemoved": true,
+      "servicesRecovered": true,
+      "manifestDigest": "69793e5ba3afc6591bf22a144a90a03581bf6b615b8b0eac6f5384e10d1ed630"
+    }
+  },
+  "legacyControl": {
+    "checkoutPath": "C:\\AI\\Projects\\RunaAI",
+    "branch": "main",
+    "commit": "b4db04090d8f0df87234fab573b396e7824c5354",
+    "trackedClean": true,
+    "runtimeReachable": true,
+    "runningCommitMatchesCheckout": true,
+    "listeners": [
+      { "address": "127.0.0.1", "port": 3786, "process": "node" },
+      { "address": "127.0.0.1", "port": 3787, "process": "node" }
+    ],
+    "listenersLoopbackOnly": true,
+    "protectedStoresOpened": false
+  },
+  "sourcePreservation": {
+    "runalab": {
+      "path": "D:\\Projects\\Runalab",
+      "branch": "main",
+      "commit": "ec5e3466f6f937c8c610bdecf62a09c2491c7137",
+      "trackedClean": true,
+      "changedByGate6b": false
+    },
+    "legacyRunaai": {
+      "path": "D:\\AI\\Projects\\RunaAI",
+      "branch": "main",
+      "commit": "71ce985e4272895bbd4c3cf38ed8fbcb6090c2a2",
+      "trackedClean": true,
+      "preexistingUntrackedPreserved": [".claude/settings.local.json"],
+      "changedByGate6b": false
+    }
+  },
+  "deferredOperationalWork": {
+    "controlHostRestart": {
+      "performed": false,
+      "reason": "It would interrupt the unchanged legacy service and is not a frozen Gate 6B green criterion; rehearse only in an approved maintenance window before promotion."
+    },
+    "recurringProtectedBackupSchedule": {
+      "activated": false,
+      "reason": "The Gate 6B target is an empty shadow. Activate the reviewed owner-context backup schedule before any Gate 6C protected import."
+    }
+  },
+  "privateValuesIncluded": false
+}

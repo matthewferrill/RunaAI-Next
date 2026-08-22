@@ -1,4 +1,5 @@
 import pg from "pg";
+import { rebindPristineCutoverRelease } from "../cutover.mjs";
 
 const coded = (code, message) => Object.assign(new Error(message), { code });
 const clone = value => structuredClone(value);
@@ -46,6 +47,33 @@ export class PostgresCutoverStore {
     const row = (await this.pool.query("SELECT state_json FROM gate6.cutover_state WHERE cutover_id=$1", [this.cutoverId])).rows[0];
     if (!row) throw coded("cutover-state-not-found", "The durable cutover state is not initialized.");
     return clone(row.state_json);
+  }
+
+  async rebindPristineRelease(initialState) {
+    if (initialState.cutoverId !== this.cutoverId) throw coded("cutover-id-mismatch", "Initial state belongs to another cutover.");
+    const client = await this.pool.connect();
+    let committed = false;
+    try {
+      await client.query("BEGIN ISOLATION LEVEL SERIALIZABLE");
+      const current = (await client.query(`SELECT revision,phase,authority_generation,state_json
+        FROM gate6.cutover_state WHERE cutover_id=$1 FOR UPDATE`, [this.cutoverId])).rows[0];
+      if (!current) throw coded("cutover-state-not-found", "The durable cutover state is not initialized.");
+      const operationCount = Number((await client.query(`SELECT count(*)::int AS count FROM gate6.operations
+        WHERE cutover_id=$1`, [this.cutoverId])).rows[0].count);
+      if (current.revision !== current.state_json.revision || current.phase !== current.state_json.phase
+          || current.authority_generation !== current.state_json.authorityGeneration) {
+        throw coded("cutover-release-rebind-denied", "The retained cutover columns and state disagree.");
+      }
+      const rebound = rebindPristineCutoverRelease(current.state_json, initialState, operationCount);
+      await client.query(`UPDATE gate6.cutover_state SET state_json=$2::jsonb,updated_at=clock_timestamp()
+        WHERE cutover_id=$1`, [this.cutoverId, JSON.stringify(rebound)]);
+      await client.query("COMMIT"); committed = true;
+      return clone(rebound);
+    } catch (error) {
+      if (!committed) await client.query("ROLLBACK").catch(() => {});
+      if (error?.code === "40001") throw coded("cutover-revision-conflict", "The cutover transaction conflicted with another operation.");
+      throw error;
+    } finally { client.release(); }
   }
 
   async findOperation(operationId, inputDigest) {

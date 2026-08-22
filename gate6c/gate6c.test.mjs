@@ -18,6 +18,7 @@ import { inspectSelectedContinuity } from "./selected-inventory.mjs";
 import { MemoryGate6cStore } from "./adapters/memory.mjs";
 import { BrowserOwnerCeremonyService, MemoryBrowserCeremonyStore } from "./browser-ceremony.mjs";
 import { bindOwnerAndVerifyRecoveryAuthority } from "./control/Advance-ControlRecoveryAuthority.mjs";
+import { rebindOwnerRecoveryAuthority } from "./control/Rebind-ControlOwnerAuthority.mjs";
 
 const SOURCE = "b4db04090d8f0df87234fab573b396e7824c5354";
 const TARGET = "77f3017d10f4e4670ad551b3d000cc2569c1dfdb";
@@ -311,6 +312,8 @@ test("Control owner tools bind the exact candidate config and DPAPI user context
   const prepare = readFileSync(new URL("./control/Prepare-ControlOwner.ps1", import.meta.url), "utf8");
   const operator = readFileSync(new URL("./control/Advance-ControlRecoveryAuthority.mjs", import.meta.url), "utf8");
   const clipboard = readFileSync(new URL("./control/Copy-ControlOwnerBootstrapPassword.ps1", import.meta.url), "utf8");
+  const localhostDeploy = readFileSync(new URL("./control/Deploy-ControlLocalhostShadow.ps1", import.meta.url), "utf8");
+  const rebind = readFileSync(new URL("./control/Rebind-ControlOwnerAuthority.mjs", import.meta.url), "utf8");
   assert.match(prepare, /config\\candidate\.json/);
   assert.match(operator, /config\\\\candidate\.json/);
   for (const source of [prepare, clipboard]) {
@@ -323,6 +326,12 @@ test("Control owner tools bind the exact candidate config and DPAPI user context
   assert.match(operator, /verifyReleaseArtifact/);
   assert.match(operator, /--untracked-files=no/);
   assert.doesNotMatch(operator, /config\.sourceGeneration !== args\["legacy-commit"\]/);
+  assert.match(localhostDeploy, /http:\/\/localhost:9762\/realms\/runaai-next/);
+  assert.match(localhostDeploy, /rolledBack=\$true/);
+  assert.match(localhostDeploy, /priorCeremonyRetained=\$true/);
+  assert.doesNotMatch(localhostDeploy, /C:\\AI\\Projects\\RunaAI/);
+  assert.match(rebind, /priorCeremonyRetained: true/);
+  assert.match(rebind, /webauthn-rp-domain-correction/);
 });
 
 test("browser owner ceremony uses PKCE, exact owner binding, WebAuthn, and opaque sessions", async () => {
@@ -510,4 +519,55 @@ test("owner operator rolls back when the target principal store is no longer emp
     advanceOwnerCeremony, digestEvidence, bindingDigest }), { code: "gate6c-owner-principal-state-changed" });
   assert.equal(queries.at(-1), "ROLLBACK");
   assert.equal(released, true);
+});
+
+test("owner rebind retains the failed-IP audit row and advances only the corrected ceremony", async () => {
+  const priorBinding = binding();
+  const correctedBinding = { ...binding(), releaseId: "runaai-next-gate6c-localhost" };
+  const priorState = advanceOwnerCeremony(createOwnerCeremonyState(priorBinding), {
+    operationId: "prior-authority", command: "verify-recovery-authority",
+    evidence: { passed: true, evidenceDigest: digestEvidence({ prior: true }) }, observedAt: NOW.toISOString() });
+  const currentState = createOwnerCeremonyState(correctedBinding);
+  const priorDigest = bindingDigest(priorBinding); const correctedDigest = bindingDigest(correctedBinding);
+  const queries = []; let released = false;
+  const client = { async query(sql, parameters = []) {
+    queries.push({ sql: String(sql).replace(/\s+/g, " ").trim(), parameters });
+    if (String(sql).includes("FROM gate5.principals")) return { rows: [{
+      oidc_subject: "11111111-1111-4111-8111-111111111111", role: "primary-steward",
+      age_class: "adult", status: "active", record_version: 1 }] };
+    if (String(sql).includes("FROM gate6c.owner_ceremonies")) return { rows: [
+      { binding_digest: priorDigest, state_json: priorState },
+      { binding_digest: correctedDigest, state_json: currentState }] };
+    if (String(sql).includes("UPDATE gate6c.owner_ceremonies")) return { rowCount: 1, rows: [] };
+    return { rows: [], rowCount: 1 };
+  }, release() { released = true; } };
+  const result = await rebindOwnerRecoveryAuthority({ pool: { async connect() { return client; } },
+    priorBinding, binding: correctedBinding, subject: "11111111-1111-4111-8111-111111111111",
+    observedAt: NOW.toISOString(), operationId: "control-owner-rebind-123456abcdef",
+    advanceOwnerCeremony, digestEvidence, bindingDigest });
+  assert.deepEqual(result, { schemaVersion: "runa2-gate6c-owner-rebind-result/v1", passed: true,
+    priorCeremonyRetained: true, ceremonyRevision: 1, nextStep: "enroll-primary-credential",
+    privateValuesIncluded: false });
+  const update = queries.find(item => item.sql.startsWith("UPDATE gate6c.owner_ceremonies"));
+  assert.equal(update.parameters[0], correctedDigest);
+  assert.equal(JSON.parse(update.parameters[1]).revision, 1);
+  assert.equal(queries.at(-1).sql, "COMMIT"); assert.equal(released, true);
+});
+
+test("owner rebind rolls back if both exact ceremony rows are not retained", async () => {
+  const priorBinding = binding(); const correctedBinding = { ...binding(), releaseId: "corrected-release" };
+  const queries = []; let released = false;
+  const client = { async query(sql) {
+    queries.push(String(sql).replace(/\s+/g, " ").trim());
+    if (String(sql).includes("FROM gate5.principals")) return { rows: [{
+      oidc_subject: "11111111-1111-4111-8111-111111111111", role: "primary-steward",
+      age_class: "adult", status: "active", record_version: 1 }] };
+    if (String(sql).includes("FROM gate6c.owner_ceremonies")) return { rows: [] };
+    return { rows: [], rowCount: 0 };
+  }, release() { released = true; } };
+  await assert.rejects(rebindOwnerRecoveryAuthority({ pool: { async connect() { return client; } },
+    priorBinding, binding: correctedBinding, subject: "11111111-1111-4111-8111-111111111111",
+    observedAt: NOW.toISOString(), operationId: "control-owner-rebind-123456abcdef",
+    advanceOwnerCeremony, digestEvidence, bindingDigest }), { code: "gate6c-owner-rebind-ceremony-missing" });
+  assert.equal(queries.at(-1), "ROLLBACK"); assert.equal(released, true);
 });

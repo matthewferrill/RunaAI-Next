@@ -120,8 +120,7 @@ async function main(argv) {
       || manifest.releaseId !== args["expected-release-id"] || manifest.commit !== args["expected-commit"]
       || manifest.artifactDigest !== args["expected-artifact-digest"]
       || manifest.configurationDigest !== loaded.configurationDigest
-      || config.gate6c.legacyCommit !== args["legacy-commit"]
-      || config.sourceGeneration !== args["legacy-commit"]) {
+      || config.gate6c.legacyCommit !== args["legacy-commit"]) {
     throw coded("gate6c-owner-release-authority-mismatch", "The running release is not the exact reviewed shadow authority.");
   }
   await verifyReleaseArtifact(releaseRoot, manifest.artifactDigest);

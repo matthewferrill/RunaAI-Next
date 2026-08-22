@@ -1,0 +1,41 @@
+{
+  "schemaVersion": "runa2-gate7a-synthetic-results/v1",
+  "passed": true,
+  "policyDigest": "3aefce3ccecfc3b727135bab70ca0eb0dda6fc49fafbb4a89d0f3cbcc959018d",
+  "matrixDigest": "53780146692eb264b856a94a5d6716e688916c567db9153539bbcbb62069465a",
+  "readiness": {
+    "schemaVersion": "runa2-gate7a-client-access-readiness/v1",
+    "passed": true,
+    "canonicalOrigin": "https://runa.example.com",
+    "browserIssuer": "https://runa.example.com/auth/realms/runaai-next",
+    "relyingPartyId": "runa.example.com",
+    "standardHttps": true,
+    "ordinaryBrowserTrust": true,
+    "privateCaRequired": false,
+    "publicSelfRegistration": false,
+    "individualPrincipalsRequired": true,
+    "independentRecoveryRequired": true,
+    "backendLoopbackOnly": true,
+    "homeClientReachable": false,
+    "directRouterPortForward": false,
+    "clientCaseCount": 5,
+    "acceptancePlanDigest": "d36ab2a13cde95cb1157d61be8f07d7db40c0f0974fc68375a84da19f92016fb",
+    "liveDeploymentReady": false,
+    "deploymentBlockers": [
+      "canonical-hostname",
+      "dns-certificate-method",
+      "off-lan-ingress-privacy",
+      "non-owner-acceptance-fixture"
+    ],
+    "offLanIngressActivated": false,
+    "productionChanged": false,
+    "protectedStoresOpened": false,
+    "privateValuesIncluded": false
+  },
+  "dependencyAdded": false,
+  "serviceStarted": false,
+  "networkActivated": false,
+  "productionChanged": false,
+  "protectedStoresOpened": false,
+  "privateValuesIncluded": false
+}

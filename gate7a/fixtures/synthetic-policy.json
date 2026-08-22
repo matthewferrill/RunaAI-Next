@@ -1,0 +1,91 @@
+{
+  "schemaVersion": "runa2-gate7a-client-access-policy/v1",
+  "canonicalOrigin": "https://runa.example.com",
+  "keycloak": {
+    "browserIssuer": "https://runa.example.com/auth/realms/runaai-next",
+    "internalIssuer": "http://127.0.0.1:9762/realms/runaai-next",
+    "relativePath": "/auth",
+    "realm": "runaai-next",
+    "clientId": "runaai-next",
+    "redirectUris": [
+      "https://runa.example.com/session/callback"
+    ],
+    "webOrigins": [
+      "https://runa.example.com"
+    ],
+    "publicSelfRegistration": false
+  },
+  "webauthn": {
+    "relyingPartyId": "runa.example.com",
+    "userVerification": "required",
+    "discoverableCredential": "required",
+    "platformPasskeysAllowed": true,
+    "syncedPasskeysAllowed": true,
+    "crossDevicePasskeysAllowed": true,
+    "ownerMinimumCredentials": 2,
+    "independentRecoveryRequired": true
+  },
+  "accounts": {
+    "individualPrincipalsRequired": true,
+    "sharedAccountsAllowed": false,
+    "invitationRequired": true,
+    "invitationSingleUse": true,
+    "invitationMaximumMinutes": 10
+  },
+  "sessions": {
+    "storage": "encrypted-postgresql",
+    "onlineRevocationRequired": true,
+    "maximumMinutes": 480,
+    "cookie": {
+      "opaque": true,
+      "secure": true,
+      "httpOnly": true,
+      "sameSite": "lax",
+      "hostOnly": true
+    }
+  },
+  "governance": {
+    "freshPasskeyStepUpRequired": true,
+    "stepUpMaximumSeconds": 300,
+    "openFgaBeforeProtectedWork": true
+  },
+  "ingress": {
+    "lanMode": "private-interface",
+    "offLanMode": "disabled",
+    "directRouterPortForward": false,
+    "controlAdministrativeRouteExposed": false,
+    "certificateTrust": "public-webpki",
+    "tlsPort": 443
+  },
+  "services": {
+    "caddy": {
+      "bind": "private-interface",
+      "port": 443,
+      "clientReachable": true
+    },
+    "application": {
+      "bind": "127.0.0.1",
+      "port": 9760,
+      "clientReachable": false
+    },
+    "keycloak": {
+      "bind": "127.0.0.1",
+      "port": 9762,
+      "clientReachable": false
+    },
+    "openfga": {
+      "bind": "127.0.0.1",
+      "port": 9763,
+      "clientReachable": false
+    },
+    "postgresql": {
+      "bind": "127.0.0.1",
+      "port": 9765,
+      "clientReachable": false
+    },
+    "homeProvider": {
+      "clientReachable": false,
+      "allowedCaller": "control"
+    }
+  }
+}

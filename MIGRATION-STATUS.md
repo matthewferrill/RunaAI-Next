@@ -38,8 +38,7 @@ repository and never push migration work into either source repository.
   conversations are required; stale reviews are dismissed; admins are included; force-pushes and
   deletion are blocked. Required status checks remain unset until a real CI check exists.
 - `main` remains at the exact RunaLab completion baseline. `runa2/integration` contains accepted work
-  through Gate 6C preparation; the reviewed Gate 6D production branch records the exact promoted
-  release and post-cutover hardening.
+  through the reconciled Gate 6D production release and post-cutover hardening.
 - The completed laboratory evidence, seals, probes, stack bakeoff, model findings, architecture
   assessment, and conditional estimates are inherited.
 - Gate 1 contains an isolated synthetic-only implementation of the smallest ordinary read-only
@@ -54,6 +53,13 @@ repository and never push migration work into either source repository.
   downloaded, no provider credential was introduced, and no external spending path was activated.
   Candidate PostgreSQL, Keycloak, OpenFGA, Node, and Caddy are retained; only private Caddy TLS is
   exposed, while the other candidate listeners remain loopback-bound.
+- Gate 7A's approved corrective multi-device contract and synthetic foundation are complete. The
+  focused suite passes 24/24 and the full repository suite passes 322/322. The policy requires one
+  permanent WebPKI-trusted HTTPS origin for Omen, other PCs, phones, and approved off-LAN browsers;
+  individual invitation-only principals; user-verified multi-device passkeys; online-revocable
+  encrypted sessions; and fresh OpenFGA-gated step-up for governed work. No DNS, certificate, listener,
+  ingress, credential, protected store, or production release changed. `runa.example.com` is a reserved
+  synthetic fixture, not a selected live hostname.
 - No migration gate is approved merely by this bootstrap.
 - Bootstrap documentation and clean-clone validation were reviewed and merged into
   `runa2/integration` as `94ba860`.
@@ -327,7 +333,8 @@ plain-language steward experience, or governed action pathway.
 | 4 | Governed data migration, one domain at a time | Complete; accepted and merged as `2c38dd5`; legacy unchanged | Complete |
 | 5 | Operations, private transport, authentication/authorization, recovery | Complete; accepted and merged as `a986419` | Complete |
 | 6 | Selected-core production cutover and rollback window | Complete and closed; exact selected-core release is authoritative, observation green, freeze released, legacy rollback healthy | Complete |
-| 7 | Deferred extensions | Not started | New baseline and separate approval per extension group |
+| 7A | Multi-device access foundation | Contract and synthetic implementation complete; focused 24/24 and full 322/322 green | Live hostname, DNS/certificate, off-LAN ingress privacy, and first non-owner fixture remain decision-gated |
+| 7B+ | Deferred UI and extensions | Not started | New baseline and separate approval per extension group |
 
 ## Bootstrap validation
 
@@ -378,8 +385,16 @@ UI, so the URL is not a normal chat login screen. Operational work should preser
 release, recurring encrypted backups, private listener boundary, active target authority, and the
 intact legacy rollback path.
 
-The next migration decision is Gate 7, not an automatic continuation. E3, E4/device-vault recovery,
+Gate 7A is the approved corrective client-access foundation. Decision 0079 and H2 confirm that Omen,
+additional PCs, distinct users, phones, and eventual off-LAN access were original requirements. The
+current Control-local IP, internal CA, and browser-visible loopback issuer are retained commissioning
+evidence, not the permanent client topology. The synthetic policy now enforces one canonical trusted
+HTTPS origin, same-origin external Keycloak, per-person multi-passkey identity, bounded ingress, and a
+five-client acceptance matrix before the conversational UI is built. Its focused suite passes 24/24;
+the full repository suite passes 322/322. No live state changed.
+
+The next operation is live Gate 7A planning. It is blocked on the steward-controlled permanent
+hostname, DNS/certificate method, off-LAN privacy/ingress choice, and first non-owner acceptance
+fixture. Do not deploy the reserved `runa.example.com` synthetic value. E3, E4/device-vault recovery,
 the separate approved-knowledge vector index, Qwen3.6 deliberate review, the existing live BGE
-endpoint, broader legacy surfaces, and the user-facing conversational UI remain deferred. Each
-extension group requires a new current baseline, a bounded scope, explicit evidence, and its own
-approval before implementation or protected data access.
+endpoint, broader legacy surfaces, and the user-facing conversational UI remain separately deferred.

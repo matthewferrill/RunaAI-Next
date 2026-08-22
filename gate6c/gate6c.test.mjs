@@ -17,6 +17,7 @@ import { reconcileGate6c } from "./reconciliation.mjs";
 import { inspectSelectedContinuity } from "./selected-inventory.mjs";
 import { MemoryGate6cStore } from "./adapters/memory.mjs";
 import { BrowserOwnerCeremonyService, MemoryBrowserCeremonyStore } from "./browser-ceremony.mjs";
+import { bindOwnerAndVerifyRecoveryAuthority } from "./control/Advance-ControlRecoveryAuthority.mjs";
 
 const SOURCE = "b4db04090d8f0df87234fab573b396e7824c5354";
 const TARGET = "77f3017d10f4e4670ad551b3d000cc2569c1dfdb";
@@ -448,4 +449,47 @@ test("browser enrollment requires the exact distinct passkey count", async () =>
   { code: "gate6c-browser-credential-count-invalid" });
   assert.equal((await service.status()).nextStep, "enroll-primary-credential");
   assert.equal(active, false);
+});
+
+test("owner operator atomically binds the exact target principal and advances recovery authority", async () => {
+  const authority = binding();
+  const initial = createOwnerCeremonyState(authority);
+  const queries = [];
+  let released = false;
+  const client = { async query(sql, parameters = []) {
+    queries.push({ sql: String(sql).replace(/\s+/g, " ").trim(), parameters });
+    if (String(sql).includes("count(*)")) return { rows: [{ count: 0 }] };
+    if (String(sql).includes("SELECT state_json")) return { rows: [{ state_json: initial }] };
+    if (String(sql).includes("UPDATE gate6c.owner_ceremonies")) return { rowCount: 1, rows: [] };
+    return { rowCount: 1, rows: [] };
+  }, release() { released = true; } };
+  const result = await bindOwnerAndVerifyRecoveryAuthority({ pool: { async connect() { return client; } },
+    binding: authority, subject: "11111111-1111-4111-8111-111111111111",
+    observedAt: NOW.toISOString(), operationId: "control-recovery-authority-123456abcdef",
+    advanceOwnerCeremony, digestEvidence, bindingDigest });
+  assert.deepEqual(result, { schemaVersion: "runa2-gate6c-owner-authority-result/v1", passed: true,
+    principalId: "matthew-owner", ceremonyRevision: 1, nextStep: "enroll-primary-credential",
+    privateValuesIncluded: false });
+  assert.equal(queries[0].sql, "BEGIN ISOLATION LEVEL SERIALIZABLE");
+  assert.equal(queries.at(-1).sql, "COMMIT");
+  assert.deepEqual(queries.find(item => item.sql.startsWith("INSERT INTO gate5.principals")).parameters,
+    ["matthew-owner", "11111111-1111-4111-8111-111111111111"]);
+  assert.equal(JSON.parse(queries.find(item => item.sql.startsWith("UPDATE gate6c.owner_ceremonies")).parameters[1]).revision, 1);
+  assert.equal(released, true);
+});
+
+test("owner operator rolls back when the target principal store is no longer empty", async () => {
+  const queries = [];
+  let released = false;
+  const client = { async query(sql) {
+    queries.push(String(sql).replace(/\s+/g, " ").trim());
+    if (String(sql).includes("count(*)")) return { rows: [{ count: 1 }] };
+    return { rows: [], rowCount: 0 };
+  }, release() { released = true; } };
+  await assert.rejects(bindOwnerAndVerifyRecoveryAuthority({ pool: { async connect() { return client; } },
+    binding: binding(), subject: "11111111-1111-4111-8111-111111111111",
+    observedAt: NOW.toISOString(), operationId: "control-recovery-authority-123456abcdef",
+    advanceOwnerCeremony, digestEvidence, bindingDigest }), { code: "gate6c-owner-principal-state-changed" });
+  assert.equal(queries.at(-1), "ROLLBACK");
+  assert.equal(released, true);
 });

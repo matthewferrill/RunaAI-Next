@@ -1,7 +1,7 @@
 {
   "schemaVersion": "runa2-gate6b-control-shadow-results/v1",
   "observedAt": "2026-08-21",
-  "status": "blocked-only-on-control-host-restart",
+  "status": "green-shadow-only",
   "gateBoundary": {
     "candidateAuthority": "shadow",
     "legacyAuthorityGeneration": "legacy-runaai:control-production",
@@ -45,6 +45,22 @@
       "count": 5,
       "running": ["Application", "Caddy", "Keycloak", "OpenFga", "Postgresql"]
     },
+    "hostRestart": {
+      "performed": true,
+      "finalBootUtc": "2026-08-22T01:27:22.5000000Z",
+      "candidateTasksStartedAtBoot": true,
+      "candidateColdReadySeconds": 489,
+      "candidateExactReleasePreserved": true,
+      "candidateAuthorityPreserved": true,
+      "legacyRecoveredAfterMatthewLogin": true,
+      "legacyExactCommitPreserved": true,
+      "prePostAuthorityExact": true,
+      "authorityComparison": [
+        { "database": "runaai_next", "schemaDigestEqual": true, "tableCountEqual": true, "rowCountEqual": true, "sourceLogicalDigestEqual": true },
+        { "database": "keycloak_candidate", "schemaDigestEqual": true, "tableCountEqual": true, "rowCountEqual": true, "sourceLogicalDigestEqual": true },
+        { "database": "openfga_candidate", "schemaDigestEqual": true, "tableCountEqual": true, "rowCountEqual": true, "sourceLogicalDigestEqual": true }
+      ]
+    },
     "listeners": [
       { "address": "127.0.0.1", "port": 9760, "process": "node" },
       { "address": "192.168.50.169", "port": 9761, "process": "caddy" },
@@ -83,7 +99,9 @@
       "distinctTargetsDestroyed": true,
       "plaintextWorkRemoved": true,
       "servicesRecovered": true,
-      "manifestDigest": "69793e5ba3afc6591bf22a144a90a03581bf6b615b8b0eac6f5384e10d1ed630"
+      "preHostRestartManifestDigest": "69793e5ba3afc6591bf22a144a90a03581bf6b615b8b0eac6f5384e10d1ed630",
+      "postHostRestartManifestDigest": "a4812b2c27a399ef7e9ccc4718725046724059e9d808c037cb2d2c719972cccf",
+      "prePostLogicalDigestsEqual": true
     }
   },
   "legacyControl": {
@@ -118,12 +136,6 @@
     }
   },
   "deferredOperationalWork": {
-    "controlHostRestart": {
-      "performed": false,
-      "requiredBy": "gate6/GATE6-SCOPE-AND-GREEN-CRITERIA-2026-08-21.md",
-      "gate6bClosureBlocked": true,
-      "reason": "The accepted Gate 6 umbrella criteria require this proof. It would briefly interrupt unchanged legacy RunaAI, so it needs an explicit owner-approved maintenance window."
-    },
     "recurringProtectedBackupSchedule": {
       "activated": false,
       "reason": "The Gate 6B target is an empty shadow. Activate the reviewed owner-context backup schedule before any Gate 6C protected import."

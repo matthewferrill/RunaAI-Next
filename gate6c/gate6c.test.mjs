@@ -314,6 +314,8 @@ test("Control owner tools bind the exact candidate config and DPAPI user context
   const clipboard = readFileSync(new URL("./control/Copy-ControlOwnerBootstrapPassword.ps1", import.meta.url), "utf8");
   const repair = readFileSync(new URL("./control/Repair-ControlOwnerBootstrapPassword.ps1", import.meta.url), "utf8");
   const localhostDeploy = readFileSync(new URL("./control/Deploy-ControlLocalhostShadow.ps1", import.meta.url), "utf8");
+  const resumeDeploy = readFileSync(new URL("./control/Deploy-ControlEnrollmentResume.ps1", import.meta.url), "utf8");
+  const resumeRebind = readFileSync(new URL("./control/Invoke-ControlOwnerAuthorityRebindAfterEnrollment.ps1", import.meta.url), "utf8");
   const rebind = readFileSync(new URL("./control/Rebind-ControlOwnerAuthority.mjs", import.meta.url), "utf8");
   assert.match(prepare, /config\\candidate\.json/);
   assert.match(operator, /config\\\\candidate\.json/);
@@ -336,6 +338,10 @@ test("Control owner tools bind the exact candidate config and DPAPI user context
   assert.doesNotMatch(localhostDeploy, /C:\\AI\\Projects\\RunaAI/);
   assert.match(rebind, /priorCeremonyRetained: true/);
   assert.match(rebind, /webauthn-rp-domain-correction/);
+  assert.match(resumeDeploy, /candidate-current-safety-state-drift/);
+  assert.match(resumeDeploy, /rolledBack=\$true/);
+  assert.match(resumeRebind, /interrupted-enrollment-recovery-release/);
+  assert.match(resumeRebind, /webauthn-passwordless' \}\)\.Count -ne 1/);
 });
 
 test("browser owner ceremony uses PKCE, exact owner binding, WebAuthn, and opaque sessions", async () => {
@@ -575,6 +581,7 @@ test("owner rebind retains the failed-IP audit row and advances only the correct
   }, release() { released = true; } };
   const result = await rebindOwnerRecoveryAuthority({ pool: { async connect() { return client; } },
     priorBinding, binding: correctedBinding, subject: "11111111-1111-4111-8111-111111111111",
+    reason: "webauthn-rp-domain-correction",
     observedAt: NOW.toISOString(), operationId: "control-owner-rebind-123456abcdef",
     advanceOwnerCeremony, digestEvidence, bindingDigest });
   assert.deepEqual(result, { schemaVersion: "runa2-gate6c-owner-rebind-result/v1", passed: true,
@@ -599,6 +606,7 @@ test("owner rebind rolls back if both exact ceremony rows are not retained", asy
   }, release() { released = true; } };
   await assert.rejects(rebindOwnerRecoveryAuthority({ pool: { async connect() { return client; } },
     priorBinding, binding: correctedBinding, subject: "11111111-1111-4111-8111-111111111111",
+    reason: "webauthn-rp-domain-correction",
     observedAt: NOW.toISOString(), operationId: "control-owner-rebind-123456abcdef",
     advanceOwnerCeremony, digestEvidence, bindingDigest }), { code: "gate6c-owner-rebind-ceremony-missing" });
   assert.equal(queries.at(-1), "ROLLBACK"); assert.equal(released, true);

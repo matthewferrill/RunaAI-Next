@@ -12,7 +12,8 @@ const uuid = value => /^[a-f0-9]{8}-[a-f0-9]{4}-[1-8][a-f0-9]{3}-[89ab][a-f0-9]{
 
 function argumentsOf(argv) {
   const names = ["release-root", "config", "expected-release-id", "expected-commit",
-    "expected-artifact-digest", "prior-release-id", "legacy-repo", "legacy-commit"];
+    "expected-artifact-digest", "prior-release-id", "prior-commit", "prior-artifact-digest",
+    "reason", "legacy-repo", "legacy-commit"];
   const accepted = new Set(names); const result = {};
   for (let index = 0; index < argv.length; index += 2) {
     const key = String(argv[index] ?? "").replace(/^--/, ""); const value = argv[index + 1];
@@ -31,10 +32,13 @@ function git(repo, args) {
   return result.stdout.trim();
 }
 
-export async function rebindOwnerRecoveryAuthority({ pool, priorBinding, binding, subject,
+export async function rebindOwnerRecoveryAuthority({ pool, priorBinding, binding, subject, reason,
   observedAt = new Date().toISOString(), operationId, advanceOwnerCeremony, digestEvidence, bindingDigest }) {
   if (!uuid(subject) || !/^control-owner-rebind-[a-f0-9]{12}$/.test(String(operationId))) {
     throw coded("gate6c-owner-rebind-input-invalid", "The exact owner rebind input is invalid.");
+  }
+  if (!["webauthn-rp-domain-correction", "interrupted-enrollment-recovery-release"].includes(reason)) {
+    throw coded("gate6c-owner-rebind-reason-invalid", "The owner rebind reason is not approved.");
   }
   const priorDigest = bindingDigest(priorBinding); const digest = bindingDigest(binding);
   if (priorDigest === digest) throw coded("gate6c-owner-rebind-unchanged", "The corrected release must have a distinct authority binding.");
@@ -58,7 +62,7 @@ export async function rebindOwnerRecoveryAuthority({ pool, priorBinding, binding
       throw coded("gate6c-owner-rebind-ceremony-state-mismatch", "The prior or corrected owner ceremony has drifted.");
     }
     const evidence = { passed: true, evidenceDigest: digestEvidence({ command: "verify-recovery-authority",
-      authorityVerified: true, reason: "webauthn-rp-domain-correction", priorBindingDigest: priorDigest,
+      authorityVerified: true, reason, priorBindingDigest: priorDigest,
       principalRef: binding.participantRefHmac, observedAt }) };
     const next = advanceOwnerCeremony(current, { operationId, command: "verify-recovery-authority", evidence, observedAt });
     const updated = await client.query(`UPDATE gate6c.owner_ceremonies SET state_json=$2::jsonb,
@@ -76,7 +80,8 @@ async function main(argv) {
   const args = argumentsOf(argv);
   if (process.platform !== "win32" || hostname().toUpperCase() !== "RUNA-CONTROL"
       || userInfo().username.toLowerCase() !== "matthew") throw coded("gate6c-owner-rebind-context-invalid", "Owner rebind must run as Matthew on RUNA-CONTROL.");
-  if (!hex40(args["expected-commit"]) || !hex40(args["legacy-commit"]) || !hex64(args["expected-artifact-digest"])) {
+  if (!hex40(args["expected-commit"]) || !hex40(args["prior-commit"]) || !hex40(args["legacy-commit"])
+      || !hex64(args["expected-artifact-digest"]) || !hex64(args["prior-artifact-digest"])) {
     throw coded("gate6c-owner-rebind-pins-invalid", "The release and legacy pins are invalid.");
   }
   const releaseRoot = resolve(args["release-root"]); const configPath = resolve(args.config);
@@ -114,12 +119,14 @@ async function main(argv) {
   const base = { schemaVersion: formats.GATE6C_BINDING_VERSION, cutoverId: config.cutoverId,
     releaseCommit: manifest.commit, artifactDigest: manifest.artifactDigest, sourceGeneration: config.gate6c.legacyCommit,
     targetGeneration: config.targetGeneration, participantRefHmac: cipher.digest({ type: "gate6c-owner-participant", principalId: "matthew-owner" }) };
-  const binding = { ...base, releaseId: manifest.releaseId }; const priorBinding = { ...base, releaseId: args["prior-release-id"] };
+  const binding = { ...base, releaseId: manifest.releaseId };
+  const priorBinding = { ...base, releaseId: args["prior-release-id"],
+    releaseCommit: args["prior-commit"], artifactDigest: args["prior-artifact-digest"] };
   const subject = process.env.RUNA_GATE6C_OWNER_SUBJECT; delete process.env.RUNA_GATE6C_OWNER_SUBJECT;
   const pg = createRequire(join(releaseRoot, "package.json"))("pg");
   const pool = new pg.Pool({ connectionString, connectionTimeoutMillis: 2_000, query_timeout: 8_000,
     application_name: "runaai-next-owner-rebind" });
-  try { return await rebindOwnerRecoveryAuthority({ pool, priorBinding, binding, subject,
+  try { return await rebindOwnerRecoveryAuthority({ pool, priorBinding, binding, subject, reason: args.reason,
     operationId: `control-owner-rebind-${contracts.digestEvidence({ prior: contracts.bindingDigest(priorBinding),
       current: contracts.bindingDigest(binding) }).slice(0, 12)}`, advanceOwnerCeremony: ceremony.advanceOwnerCeremony,
     digestEvidence: contracts.digestEvidence, bindingDigest: contracts.bindingDigest }); }

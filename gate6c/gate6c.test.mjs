@@ -319,6 +319,9 @@ test("Control owner tools bind the exact candidate config and DPAPI user context
   const flowProof = readFileSync(new URL("./control/Test-ControlOwnerPasskeyFlow.ps1", import.meta.url), "utf8");
   const configureFlow = readFileSync(new URL("./control/Configure-ControlOwnerPasskeyFlow.ps1", import.meta.url), "utf8");
   const restoreFlow = readFileSync(new URL("./control/Restore-ControlOwnerPasskeyFlow.ps1", import.meta.url), "utf8");
+  const amrProof = readFileSync(new URL("./control/Test-ControlPasskeyAmrMapper.ps1", import.meta.url), "utf8");
+  const configureAmr = readFileSync(new URL("./control/Configure-ControlOwnerPasskeyAmr.ps1", import.meta.url), "utf8");
+  const restoreAmr = readFileSync(new URL("./control/Restore-ControlOwnerPasskeyAmr.ps1", import.meta.url), "utf8");
   const rebind = readFileSync(new URL("./control/Rebind-ControlOwnerAuthority.mjs", import.meta.url), "utf8");
   assert.match(prepare, /config\\candidate\.json/);
   assert.match(operator, /config\\\\candidate\.json/);
@@ -360,6 +363,20 @@ test("Control owner tools bind the exact candidate config and DPAPI user context
   assert.match(restoreFlow, /owner-passkey-flow-rollback-safety-state-drift/);
   assert.match(restoreFlow, /ownerCredentialRetained=\$true/);
   assert.doesNotMatch(configureFlow, /Write-Output.*password|Set-Clipboard/);
+  assert.match(amrProof, /runaai-next-gate6c-amr-proof/);
+  assert.match(amrProof, /oidc-hardcoded-claim-mapper/);
+  assert.match(amrProof, /'claim\.value'='\["webauthn"\]'/);
+  assert.match(amrProof, /inspected\.active -ne \$true/);
+  assert.match(amrProof, /Method Delete -Uri "\$base\/admin\/realms\/\$realmName"/);
+  assert.match(configureAmr, /owner-passkey-amr-flow-not-exclusive/);
+  assert.match(configureAmr, /directAccessGrantsEnabled -ne \$false/);
+  assert.match(configureAmr, /serviceAccountsEnabled -ne \$false/);
+  assert.match(configureAmr, /included\.client\.audience/);
+  assert.match(configureAmr, /oidc-hardcoded-claim-mapper/);
+  assert.match(configureAmr, /owner-passkey-amr-replacement-invalid/);
+  assert.match(restoreAmr, /owner-passkey-amr-rollback-safety-state-drift/);
+  assert.match(restoreAmr, /passkeyFlowRetained=\$true/);
+  assert.doesNotMatch(configureAmr, /Write-Output.*password|Set-Clipboard/);
 });
 
 test("browser owner ceremony uses PKCE, exact owner binding, WebAuthn, and opaque sessions", async () => {

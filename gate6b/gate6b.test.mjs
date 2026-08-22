@@ -13,6 +13,7 @@ import { createCandidateHttpServer } from "./http-server.mjs";
 import { ARTIFACT_FILE, buildArtifactManifest, verifyReleaseArtifact } from "./artifact.mjs";
 import { KeycloakOnlineClient, OpenFgaChecker } from "./clients.mjs";
 import { loadReleaseConfig } from "./release-config.mjs";
+import { composeReadinessStatus } from "./composition.mjs";
 
 const target = "runaai-next:test-target";
 const activeCutover = () => ({ phase: "promoted", revision: 7, authorityGeneration: target });
@@ -41,6 +42,32 @@ test("shadow and legacy authority cannot enable selected routes", () => {
   assert.equal(selectedAuthorityStatus({ mode: "active", cutover: { ...activeCutover(), authorityGeneration: "legacy" }, targetGeneration: target }).enabled, false);
   assert.throws(() => assertSelectedAuthority({ mode: "active", cutover: { ...activeCutover(), phase: "reconciled" }, targetGeneration: target }),
     error => error.code === "candidate-shadow-authority");
+});
+
+test("readiness reports a completed owner without promoting the shadow candidate", async () => {
+  const status = await composeReadinessStatus({
+    application: { async authority() {
+      throw Object.assign(new Error("shadow"), { code: "candidate-shadow-authority" });
+    } },
+    dependencyHealth: async () => ({ ready: true }),
+    configuration: { configurationDigest: "a".repeat(64) },
+    artifact: { artifactDigest: "b".repeat(64) },
+    browserCeremony: { async status() { return { complete: true }; } },
+  });
+  assert.equal(status.ownerCredentialEnrolled, true);
+  assert.equal(status.authority, "shadow");
+  assert.equal(status.protectedDataImported, false);
+  assert.equal(status.productionTrafficChanged, false);
+});
+
+test("readiness remains unenrolled when no Gate 6C ceremony is enabled", async () => {
+  const status = await composeReadinessStatus({
+    application: { async authority() { return { enabled: true }; } },
+    dependencyHealth: async () => ({ ready: true }),
+    configuration: {}, artifact: {},
+  });
+  assert.equal(status.ownerCredentialEnrolled, false);
+  assert.equal(status.authority, "active");
 });
 
 test("active verified general answer is identity and relationship scoped", async () => {

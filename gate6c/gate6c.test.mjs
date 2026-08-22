@@ -19,6 +19,7 @@ import { MemoryGate6cStore } from "./adapters/memory.mjs";
 import { BrowserOwnerCeremonyService, MemoryBrowserCeremonyStore } from "./browser-ceremony.mjs";
 import { bindOwnerAndVerifyRecoveryAuthority } from "./control/Advance-ControlRecoveryAuthority.mjs";
 import { rebindOwnerRecoveryAuthority } from "./control/Rebind-ControlOwnerAuthority.mjs";
+import { rebindCompletedOwnerCeremony } from "./control/Rebind-ControlCompletedOwnerCeremony.mjs";
 
 const SOURCE = "b4db04090d8f0df87234fab573b396e7824c5354";
 const TARGET = "77f3017d10f4e4670ad551b3d000cc2569c1dfdb";
@@ -658,4 +659,35 @@ test("owner rebind rolls back if both exact ceremony rows are not retained", asy
     observedAt: NOW.toISOString(), operationId: "control-owner-rebind-123456abcdef",
     advanceOwnerCeremony, digestEvidence, bindingDigest }), { code: "gate6c-owner-rebind-ceremony-missing" });
   assert.equal(queries.at(-1), "ROLLBACK"); assert.equal(released, true);
+});
+
+test("completed owner rebind preserves completion without promoting the candidate", async () => {
+  const priorBinding = binding();
+  const nextBinding = { ...binding(), releaseId: "runaai-next-readiness-release",
+    releaseCommit: "e".repeat(40), artifactDigest: "f".repeat(64) };
+  const priorState = ceremony(priorBinding); const currentState = createOwnerCeremonyState(nextBinding);
+  const priorDigest = bindingDigest(priorBinding); const nextDigest = bindingDigest(nextBinding);
+  const queries = []; let released = false;
+  const client = { async query(sql, parameters = []) {
+    queries.push({ sql: String(sql).replace(/\s+/g, " ").trim(), parameters });
+    if (String(sql).includes("FROM gate5.principals")) return { rows: [{
+      oidc_subject: "11111111-1111-4111-8111-111111111111", role: "primary-steward",
+      age_class: "adult", status: "active", record_version: 1 }] };
+    if (String(sql).includes("FROM gate6c.owner_ceremonies")) return { rows: [
+      { binding_digest: priorDigest, state_json: priorState },
+      { binding_digest: nextDigest, state_json: currentState }] };
+    return { rows: [], rowCount: 1 };
+  }, release() { released = true; } };
+  const result = await rebindCompletedOwnerCeremony({ pool: { async connect() { return client; } },
+    priorBinding, binding: nextBinding, subject: "11111111-1111-4111-8111-111111111111",
+    reason: "completed-owner-readiness-release", observedAt: NOW.toISOString(),
+    operationId: "control-completed-owner-rebind-123456abcdef",
+    assertOwnerCeremonyComplete, bindingDigest });
+  assert.equal(result.ceremonyComplete, true);
+  assert.equal(result.candidatePromoted, false);
+  const update = queries.find(item => item.sql.startsWith("UPDATE gate6c.owner_ceremonies"));
+  assert.equal(update.parameters[0], nextDigest);
+  assertOwnerCeremonyComplete(JSON.parse(update.parameters[1]), nextBinding);
+  assert.equal(queries.at(-1).sql, "COMMIT");
+  assert.equal(released, true);
 });

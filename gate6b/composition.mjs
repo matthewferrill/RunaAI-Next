@@ -40,6 +40,22 @@ async function probe(url, timeoutMs) {
   } catch { return false; }
 }
 
+export async function composeReadinessStatus({ application, dependencyHealth, configuration,
+  artifact, browserCeremony = null }) {
+  const [authority, dependencies, ceremony] = await Promise.all([
+    application.authority().then(() => "active",
+      error => error?.code === "candidate-shadow-authority" ? "shadow" : "unavailable"),
+    dependencyHealth(),
+    browserCeremony ? browserCeremony.status() : Promise.resolve(null),
+  ]);
+  return Object.freeze({ schemaVersion: "runa2-gate6b-shadow-readiness/v1",
+    authority, dependencies, configuration, artifact,
+    protectedDataImported: false,
+    ownerCredentialEnrolled: ceremony?.complete === true,
+    productionTrafficChanged: false,
+    privateValuesIncluded: false });
+}
+
 export async function createProductionComposition({ loadedConfig, releaseRoot }) {
   const config = loadedConfig.value;
   const relative = value => isAbsolute(value) ? value : resolve(loadedConfig.directory, value);
@@ -164,12 +180,8 @@ export async function createProductionComposition({ loadedConfig, releaseRoot })
       dependencies: Object.freeze({ postgresql, keycloak, openfga, provider }),
       privateValuesIncluded: false });
   };
-  const readinessStatus = async () => Object.freeze({ schemaVersion: "runa2-gate6b-shadow-readiness/v1",
-    authority: await application.authority().then(() => "active", error => error?.code === "candidate-shadow-authority" ? "shadow" : "unavailable"),
-    dependencies: await dependencyHealth(), configuration: safeConfigurationStatus(loadedConfig, telemetryKey),
-    artifact,
-    protectedDataImported: false, ownerCredentialEnrolled: false, productionTrafficChanged: false,
-    privateValuesIncluded: false });
+  const readinessStatus = () => composeReadinessStatus({ application, dependencyHealth,
+    configuration: safeConfigurationStatus(loadedConfig, telemetryKey), artifact, browserCeremony });
 
   return Object.freeze({ application, browserCeremony, runtimeStatus, readinessStatus, dependencyHealth,
     releaseManifest: manifest,

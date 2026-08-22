@@ -188,6 +188,45 @@ test("HTTP candidate reports authority-store loss as service unavailable", async
   assert.doesNotMatch(body, /private database detail|ECONNREFUSED/);
 });
 
+test("HTTP owner ceremony redirects through OIDC and sets only an opaque host cookie", async t => {
+  const { application } = harness({ mode: "shadow" });
+  const calls = [];
+  const browserCeremony = {
+    publicBaseUrl: "https://candidate.test",
+    async status() { return { schemaVersion: "runa2-gate6c-browser-status/v1",
+      nextStep: "verify-sign-in", complete: false, privateValuesIncluded: false }; },
+    async start(step) { calls.push(["start", step]); return { redirectUrl: "http://keycloak.test/auth?state=opaque" }; },
+    async callback(input) { calls.push(["callback", input]); return { sessionId: "opaque-session-id" }; },
+    async credentialForSession(value) { calls.push(["session", value]); return "PRIVATE_TOKEN"; },
+    async revokeAndVerify() { calls.push(["revoke"]); return { revision: 5, nextStep: "enroll-recovery-credential" }; },
+  };
+  const server = createCandidateHttpServer({ application, browserCeremony,
+    runtimeStatus: async () => ({}), readinessStatus: async () => ({}),
+    dependencyHealth: async () => ({ ready: true }), staticRoot: resolve("gate6b/public") });
+  server.listen(0, "127.0.0.1");
+  await once(server, "listening");
+  t.after(() => server.close());
+  const base = `http://127.0.0.1:${server.address().port}`;
+  const start = await fetch(`${base}/owner-ceremony/start?step=verify-sign-in`, { redirect: "manual" });
+  assert.equal(start.status, 303);
+  assert.equal(start.headers.get("location"), "http://keycloak.test/auth?state=opaque");
+  const callback = await fetch(`${base}/owner-ceremony/callback?state=opaque-state&code=opaque-code`,
+    { redirect: "manual" });
+  assert.equal(callback.status, 303);
+  const retainedCookie = callback.headers.get("set-cookie");
+  assert.match(retainedCookie, /^__Host-runa_owner_session=opaque-session-id;/);
+  assert.match(retainedCookie, /Secure; HttpOnly; SameSite=Strict/);
+  assert.doesNotMatch(retainedCookie, /PRIVATE_TOKEN/);
+  const wrongOrigin = await fetch(`${base}/api/owner-ceremony/revoke`, { method: "POST",
+    headers: { origin: "https://wrong.test", cookie: "__Host-runa_owner_session=opaque-session-id" } });
+  assert.equal(wrongOrigin.status, 400);
+  const revoked = await fetch(`${base}/api/owner-ceremony/revoke`, { method: "POST",
+    headers: { origin: "https://candidate.test", cookie: "__Host-runa_owner_session=opaque-session-id" } });
+  assert.equal(revoked.status, 200);
+  assert.equal((await revoked.json()).nextStep, "enroll-recovery-credential");
+  assert.deepEqual(calls.map(call => call[0]), ["start", "callback", "session", "revoke"]);
+});
+
 test("release artifact verification detects changed and extra files", async t => {
   const root = await mkdtemp(join(tmpdir(), "runa-gate6b-artifact-"));
   t.after(() => rm(root, { recursive: true, force: true }));
@@ -222,6 +261,7 @@ test("release configuration is strict, digest-bound, and retains references only
     },
     keycloak: { issuer: "http://127.0.0.1:9762/realms/runaai-next", clientId: "runaai-next",
       clientCredentialRef: "file:secrets/keycloak-client" },
+    gate6c: { enabled: false, legacyCommit: "b".repeat(40), expectedPrincipalId: "matthew-owner" },
     openfga: { baseUrl: "http://127.0.0.1:9763", storeId: "store", modelId: "model",
       credentialRef: "file:secrets/openfga-token" },
     provider: { baseUrl: "http://127.0.0.1:1234/v1", modelId: "selected-model" },
@@ -233,6 +273,7 @@ test("release configuration is strict, digest-bound, and retains references only
   const loaded = await loadReleaseConfig(path);
   assert.match(loaded.configurationDigest, /^[a-f0-9]{64}$/);
   assert.equal(loaded.value.mode, "shadow");
+  assert.equal(loaded.value.gate6c.enabled, false);
   await writeFile(path, `\uFEFF${JSON.stringify(config)}`, "utf8");
   assert.equal((await loadReleaseConfig(path)).configurationDigest, loaded.configurationDigest);
   await writeFile(path, JSON.stringify({ ...config, literalPassword: "forbidden" }), "utf8");
@@ -249,6 +290,9 @@ test("Keycloak and OpenFGA clients use bounded authenticated online decisions", 
     if (request.url.endsWith("/token/introspect")) response.end(JSON.stringify({ active: true,
       iss: "http://issuer", aud: ["runaai-next"], sub: "owner-subject", auth_time: 1_787_339_880,
       exp: 1_787_343_600, amr: ["webauthn"] }));
+    else if (request.url.startsWith("/account/credentials")) response.end(JSON.stringify([{
+      type: "webauthn-passwordless", userCredentialMetadatas: [{ credential: { id: "not-retained" } }],
+    }]));
     else response.end(JSON.stringify({ allowed: true }));
   });
   server.listen(0, "127.0.0.1");
@@ -259,12 +303,15 @@ test("Keycloak and OpenFGA clients use bounded authenticated online decisions", 
     clientCredential: "PRIVATE_CLIENT_CANARY" }).inspect("PRIVATE_BEARER_CANARY");
   assert.equal(identity.active, true);
   assert.equal(identity.subject, "owner-subject");
+  assert.equal((await new KeycloakOnlineClient({ issuer: baseUrl, clientId: "runaai-next",
+    clientCredential: "PRIVATE_CLIENT_CANARY" }).countPasswordless("PRIVATE_BEARER_CANARY")).count, 1);
   const decision = await new OpenFgaChecker({ baseUrl, storeId: "store", modelId: "model",
     credential: "PRIVATE_FGA_CANARY" }).check({ actorId: "owner", action: "chat-ephemeral",
     resource: "project:runa:personal" });
   assert.equal(decision.allowed, true);
   assert.match(calls[0].body, /client_secret=PRIVATE_CLIENT_CANARY/);
-  assert.equal(calls[1].authorization, "Bearer PRIVATE_FGA_CANARY");
+  assert.equal(calls[1].authorization, "Bearer PRIVATE_BEARER_CANARY");
+  assert.equal(calls[2].authorization, "Bearer PRIVATE_FGA_CANARY");
   assert.doesNotMatch(JSON.stringify(identity), /PRIVATE_/);
   assert.doesNotMatch(JSON.stringify(decision), /PRIVATE_/);
 });

@@ -15,6 +15,24 @@ function json(response, status, value) {
   response.end(payload);
 }
 
+function redirect(response, location, cookie = null) {
+  response.writeHead(303, { location, "cache-control": "no-store",
+    "x-content-type-options": "nosniff", ...(cookie ? { "set-cookie": cookie } : {}) });
+  response.end();
+}
+
+function cookie(request, name) {
+  const values = String(request.headers.cookie ?? "").split(";");
+  for (const value of values) {
+    const index = value.indexOf("=");
+    if (index > 0 && value.slice(0, index).trim() === name) return value.slice(index + 1).trim();
+  }
+  return null;
+}
+
+const sessionCookie = (value, maximumAge = 900) =>
+  `__Host-runa_owner_session=${value}; Path=/; Max-Age=${maximumAge}; Secure; HttpOnly; SameSite=Strict`;
+
 async function body(request, maximumBytes) {
   const chunks = [];
   let size = 0;
@@ -37,7 +55,8 @@ function credential(request) {
 
 async function staticFile(request, response, staticRoot) {
   const requested = new URL(request.url, "http://127.0.0.1").pathname;
-  const relative = requested === "/" ? "index.html" : requested.replace(/^\//, "");
+  const relative = requested === "/" ? "index.html"
+    : requested === "/owner-ceremony" ? "owner-ceremony.html" : requested.replace(/^\//, "");
   const root = resolve(staticRoot);
   const file = resolve(join(root, normalize(relative)));
   if (file !== root && !file.startsWith(`${root}\\`) && !file.startsWith(`${root}/`)) return false;
@@ -52,7 +71,7 @@ async function staticFile(request, response, staticRoot) {
 }
 
 export function createCandidateHttpServer({ application, runtimeStatus, readinessStatus, dependencyHealth,
-  staticRoot, maxRequestBytes = 1_048_576 }) {
+  browserCeremony = null, staticRoot, maxRequestBytes = 1_048_576 }) {
   return createServer(async (request, response) => {
     const correlationId = randomBytes(12).toString("hex");
     try {
@@ -66,6 +85,34 @@ export function createCandidateHttpServer({ application, runtimeStatus, readines
       }
       if (request.method === "GET" && url.pathname === "/api/runtime/status") return json(response, 200, await runtimeStatus());
       if (request.method === "GET" && url.pathname === "/api/readiness/status") return json(response, 200, await readinessStatus());
+      if (request.method === "GET" && url.pathname === "/api/owner-ceremony/status") {
+        if (!browserCeremony) throw coded("gate6c-browser-ceremony-unavailable", "The owner ceremony is unavailable.");
+        return json(response, 200, await browserCeremony.status());
+      }
+      if (request.method === "GET" && url.pathname === "/owner-ceremony/start") {
+        if (!browserCeremony) throw coded("gate6c-browser-ceremony-unavailable", "The owner ceremony is unavailable.");
+        const started = await browserCeremony.start(url.searchParams.get("step"));
+        return redirect(response, started.redirectUrl);
+      }
+      if (request.method === "GET" && url.pathname === "/owner-ceremony/callback") {
+        if (!browserCeremony) throw coded("gate6c-browser-ceremony-unavailable", "The owner ceremony is unavailable.");
+        const result = await browserCeremony.callback({ state: url.searchParams.get("state"),
+          code: url.searchParams.get("code"), actionStatus: url.searchParams.get("kc_action_status") });
+        return redirect(response, "/owner-ceremony", sessionCookie(result.sessionId));
+      }
+      if (request.method === "POST" && url.pathname === "/api/owner-ceremony/revoke") {
+        if (!browserCeremony) throw coded("gate6c-browser-ceremony-unavailable", "The owner ceremony is unavailable.");
+        if (request.headers.origin !== browserCeremony.publicBaseUrl) {
+          throw coded("gate6c-browser-origin-invalid", "The owner ceremony origin is invalid.");
+        }
+        const retainedSession = cookie(request, "__Host-runa_owner_session");
+        if (!retainedSession) throw coded("gate6c-browser-session-invalid", "The browser session is missing.");
+        await browserCeremony.credentialForSession(retainedSession);
+        const ceremony = await browserCeremony.revokeAndVerify();
+        response.setHeader("set-cookie", sessionCookie("", 0));
+        return json(response, 200, { schemaVersion: "runa2-gate6c-browser-revocation/v1",
+          revision: ceremony.revision, nextStep: ceremony.nextStep, privateValuesIncluded: false });
+      }
       if (request.method === "POST" && url.pathname === "/api/selected/answer") {
         return json(response, 200, await application.answer({ credential: credential(request), body: await body(request, maxRequestBytes) }));
       }
@@ -91,4 +138,3 @@ export function createCandidateHttpServer({ application, runtimeStatus, readines
     }
   });
 }
-

@@ -1,0 +1,31 @@
+{
+  "schemaVersion": "runa2-gate6c-stub-integration/v1",
+  "runtime": "v22.22.0",
+  "syntheticOnly": true,
+  "protectedDataUsed": false,
+  "ownerCredentialEnrolled": false,
+  "legacyWriteFreezeActivated": false,
+  "productionTrafficChanged": false,
+  "networking": "loopback-disposable-postgresql-only",
+  "checks": {
+    "fourDomainsCommitted": true,
+    "exactCounts": true,
+    "restartPersistent": true,
+    "idempotentReplay": true,
+    "privateCanariesAbsent": true,
+    "browserSessionEncryptedAndRestartPersistent": true,
+    "targetOnlyRollback": true
+  },
+  "counts": {
+    "projectRecords": 2,
+    "chats": 3,
+    "turns": 4,
+    "learningEntries": 6,
+    "settings": 1,
+    "receipts": 1
+  },
+  "passed": true,
+  "servicesStopped": {
+    "postgres": true
+  }
+}

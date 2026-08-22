@@ -22,6 +22,9 @@ import { PostgresRequestCoordinator, PostgresSelectedContinuityStore,
 import { PostgresAcceptedLearningSource } from "./adapters/postgres-learning.mjs";
 import { decodeKey, readSecretReference, safeConfigurationStatus } from "./release-config.mjs";
 import { verifyReleaseArtifact } from "./artifact.mjs";
+import { BrowserOwnerCeremonyService } from "../gate6c/browser-ceremony.mjs";
+import { PostgresBrowserCeremonyStore, PostgresPendingCapabilityRevoker } from "../gate6c/adapters/postgres-browser.mjs";
+import { GATE6C_BINDING_VERSION } from "../gate6c/formats.mjs";
 
 const coded = (code, message) => Object.assign(new Error(message), { code });
 
@@ -127,6 +130,23 @@ export async function createProductionComposition({ loadedConfig, releaseRoot })
     targetGeneration: config.targetGeneration, cutoverStatus, answerService, actionService,
     authenticator, authorizer, requestCoordinator: new PostgresRequestCoordinator({ pool }) });
 
+  let browserCeremony = null;
+  if (config.gate6c?.enabled === true) {
+    const binding = { schemaVersion: GATE6C_BINDING_VERSION, cutoverId: config.cutoverId,
+      releaseId: manifest.releaseId, releaseCommit: manifest.commit,
+      artifactDigest: manifest.artifactDigest, sourceGeneration: config.gate6c.legacyCommit,
+      targetGeneration: config.targetGeneration,
+      participantRefHmac: coreCipher.digest({ type: "gate6c-owner-participant",
+        principalId: config.gate6c.expectedPrincipalId }) };
+    browserCeremony = new BrowserOwnerCeremonyService({
+      store: new PostgresBrowserCeremonyStore({ pool, cipher: coreCipher }),
+      oidc: keycloakClient, principalStore, binding, publicBaseUrl: config.publicBaseUrl,
+      clientId: config.keycloak.clientId, expectedPrincipalId: config.gate6c.expectedPrincipalId,
+      capabilityRevoker: new PostgresPendingCapabilityRevoker({ pool }),
+    });
+    await browserCeremony.initialize();
+  }
+
   const runtimeStatus = async () => {
     const cutover = await cutoverStatus();
     return releaseRuntimeStatus({ manifest, authorityGeneration: cutover.authorityGeneration,
@@ -151,7 +171,7 @@ export async function createProductionComposition({ loadedConfig, releaseRoot })
     protectedDataImported: false, ownerCredentialEnrolled: false, productionTrafficChanged: false,
     privateValuesIncluded: false });
 
-  return Object.freeze({ application, runtimeStatus, readinessStatus, dependencyHealth,
+  return Object.freeze({ application, browserCeremony, runtimeStatus, readinessStatus, dependencyHealth,
     releaseManifest: manifest,
     async close() { await pool.end(); } });
 }

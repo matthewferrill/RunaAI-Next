@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>RunaAI owner ceremony</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <main>
+    <p class="eyebrow">RunaAI Next · private candidate</p>
+    <h1>Owner ceremony</h1>
+    <p>This page witnesses new target credentials only. It cannot import a legacy credential,
+      open a protected legacy store, promote traffic, or make the candidate authoritative.</p>
+    <section class="card" aria-live="polite">
+      <h2>Current gate</h2>
+      <p id="ceremony-status">Checking the exact ceremony state…</p>
+      <p><a id="ceremony-action" hidden>Continue with Keycloak</a></p>
+      <button id="ceremony-revoke" type="button" hidden>Revoke target sessions and continue</button>
+    </section>
+    <p><a href="/">Return to candidate status</a></p>
+  </main>
+  <script src="/owner-ceremony.js"></script>
+</body>
+</html>

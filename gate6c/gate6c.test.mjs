@@ -312,14 +312,18 @@ test("Control owner tools bind the exact candidate config and DPAPI user context
   const prepare = readFileSync(new URL("./control/Prepare-ControlOwner.ps1", import.meta.url), "utf8");
   const operator = readFileSync(new URL("./control/Advance-ControlRecoveryAuthority.mjs", import.meta.url), "utf8");
   const clipboard = readFileSync(new URL("./control/Copy-ControlOwnerBootstrapPassword.ps1", import.meta.url), "utf8");
+  const repair = readFileSync(new URL("./control/Repair-ControlOwnerBootstrapPassword.ps1", import.meta.url), "utf8");
   const localhostDeploy = readFileSync(new URL("./control/Deploy-ControlLocalhostShadow.ps1", import.meta.url), "utf8");
   const rebind = readFileSync(new URL("./control/Rebind-ControlOwnerAuthority.mjs", import.meta.url), "utf8");
   assert.match(prepare, /config\\candidate\.json/);
   assert.match(operator, /config\\\\candidate\.json/);
-  for (const source of [prepare, clipboard]) {
+  for (const source of [prepare, clipboard, repair]) {
     assert.match(source, /Add-Type -AssemblyName System\.Security/);
     assert.match(source, /DataProtectionScope\]::CurrentUser/);
   }
+  assert.match(repair, /owner-bootstrap-repair-state-invalid/);
+  assert.match(repair, /passkeyCredentials=0/);
+  assert.doesNotMatch(repair, /Write-Output.*password|Set-Clipboard/);
   assert.match(prepare, /serviceAccountsEnabled=\$false/);
   assert.match(prepare, /webAuthnPolicyPasswordlessPasskeysEnabled/);
   assert.match(operator, /BEGIN ISOLATION LEVEL SERIALIZABLE/);

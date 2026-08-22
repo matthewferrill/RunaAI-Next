@@ -84,7 +84,7 @@ export class SelectedCoreApplication {
     if (!decision?.allowed) throw coded(decision?.reason ?? "authorization-denied", "The selected read route was denied.");
     const request = answerRequest(body, participant);
     const run = () => this.answerService.answer(request);
-    return this.requestCoordinator ? this.requestCoordinator.runOnce({
+    return this.requestCoordinator && request.participant.verified ? this.requestCoordinator.runOnce({
       operation: "answer", requestId: request.requestId, actorId: request.participant.principalId,
       inputDigest: sha256(JSON.stringify(request)), execute: run,
     }) : run();

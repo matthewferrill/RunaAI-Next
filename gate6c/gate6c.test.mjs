@@ -19,6 +19,8 @@ import { MemoryGate6cStore } from "./adapters/memory.mjs";
 import { BrowserOwnerCeremonyService, MemoryBrowserCeremonyStore } from "./browser-ceremony.mjs";
 import { bindOwnerAndVerifyRecoveryAuthority } from "./control/Advance-ControlRecoveryAuthority.mjs";
 import { rebindOwnerRecoveryAuthority } from "./control/Rebind-ControlOwnerAuthority.mjs";
+import { rebindCompletedOwnerCeremony } from "./control/Rebind-ControlCompletedOwnerCeremony.mjs";
+import { bindProtectedSnapshotsToOwner, ownerAggregateInventory } from "./control-maintenance.mjs";
 
 const SOURCE = "b4db04090d8f0df87234fab573b396e7824c5354";
 const TARGET = "77f3017d10f4e4670ad551b3d000cc2569c1dfdb";
@@ -75,6 +77,27 @@ function completeInput({ runId = "gate6c-synthetic-1", key = Buffer.alloc(32, 77
     freezeLease: issueFreezeLease({ binding: authority, leaseId: "freeze-1", now: NOW }),
     inventory: inventory(authority, plan.domains) }, plan, key };
 }
+
+test("protected source snapshots bind explicitly to the enrolled target owner", () => {
+  const source = snapshots();
+  const mapped = bindProtectedSnapshotsToOwner({ ...source, targetParticipantId: "matthew-owner" });
+  assert.equal(mapped.projectChatSnapshot.participantId, "matthew-owner");
+  assert.equal(mapped.learningSnapshot.participantId, "matthew-owner");
+  assert.notEqual(source.projectChatSnapshot.participantId, mapped.projectChatSnapshot.participantId);
+  assert.equal(source.learningSnapshot.participantId, source.projectChatSnapshot.participantId);
+  assert.throws(() => bindProtectedSnapshotsToOwner({ ...source, targetParticipantId: "" }),
+    { code: "gate6c-target-participant-invalid" });
+});
+
+test("final owner inventory contains only the four selected aggregate domains", () => {
+  const authority = binding();
+  const { plan } = completeInput();
+  const retained = ownerAggregateInventory({ binding: authority, domains: plan.domains });
+  assertOwnerAggregateInventory(retained, { binding: authority });
+  assert.deepEqual(Object.keys(retained.domains).sort(),
+    ["action-receipts", "learning-events", "project-chat", "setting"]);
+  assert.equal(retained.privateValuesIncluded, false);
+});
 
 test("authority binding is exact and secret-like fields are refused", () => {
   assert.equal(assertBinding(binding()).releaseCommit, TARGET);
@@ -270,9 +293,13 @@ test("selected owner inventory fails closed on a possible setting action", () =>
 
 test("Control scheduled backup never writes a plaintext dump", () => {
   const source = readFileSync(new URL("./control/Invoke-ControlScheduledBackup.ps1", import.meta.url), "utf8");
+  assert.match(source, /candidate\.releaseManifestPath/);
+  assert.match(source, /candidate-running-release-mismatch/);
+  assert.doesNotMatch(source, /config\\release\.json/);
   assert.match(source, /RedirectStandardOutput = \$true/);
   assert.match(source, /ProtectedData\]::Protect/);
   assert.match(source, /DataProtectionScope\]::LocalMachine/);
+  assert.match(source, /--no-password/);
   assert.match(source, /completed\.Count -ge 30/);
   assert.doesNotMatch(source, /--file|\.dump['"]/);
   assert.doesNotMatch(source, /Remove-Item/);
@@ -280,8 +307,14 @@ test("Control scheduled backup never writes a plaintext dump", () => {
 
 test("Control restore proof streams decrypted archives only to distinct targets", () => {
   const source = readFileSync(new URL("./control/Invoke-ControlScheduledRestoreProof.ps1", import.meta.url), "utf8");
+  assert.match(source, /candidate\.releaseManifestPath/);
+  assert.match(source, /candidate-running-release-mismatch/);
+  assert.doesNotMatch(source, /config\\release\.json/);
   assert.match(source, /ProtectedData\]::Unprotect/);
   assert.match(source, /RedirectStandardInput = \$true/);
+  assert.match(source, /\$env:PGPASSWORD = \$password/);
+  assert.match(source, /--no-password/);
+  assert.match(source, /psql\.exe'\) -w/);
   assert.match(source, /g6cproof_runa/);
   assert.match(source, /dropdb\.exe/);
   assert.match(source, /plaintextBackupCount=0/);
@@ -290,11 +323,51 @@ test("Control restore proof streams decrypted archives only to distinct targets"
 
 test("Control backup schedule is SYSTEM-owned and fail-closed at its capacity", () => {
   const source = readFileSync(new URL("./control/Register-ControlBackupSchedule.ps1", import.meta.url), "utf8");
+  const update = readFileSync(new URL("./control/Update-ControlBackupScheduleRelease.ps1", import.meta.url), "utf8");
+  assert.match(source, /candidate\.releaseManifestPath/);
+  assert.match(source, /candidate-running-release-mismatch/);
+  assert.doesNotMatch(source, /config\\release\.json/);
   assert.match(source, /\$taskName = 'ProtectedBackup'/);
   assert.match(source, /UserId 'SYSTEM'/);
   assert.match(source, /-AtStartup/);
   assert.match(source, /retentionMode='fail-closed-at-30-generations'/);
   assert.doesNotMatch(source, /Unregister-ScheduledTask|Remove-Item/);
+  assert.match(update, /Set-ScheduledTask/);
+  assert.match(update, /ownerCredentialEnrolled-ne \$true/);
+  assert.match(update, /candidatePromoted=\$false/);
+  assert.match(update, /-Action \$priorAction/);
+  assert.doesNotMatch(update, /Unregister-ScheduledTask|Remove-Item/);
+});
+
+test("Control maintenance preflight proves private TLS without bypassing certificate validation", () => {
+  const script = readFileSync(new URL("./control/Invoke-ControlProtectedMaintenanceWindow.ps1", import.meta.url), "utf8");
+  assert.match(script, /Invoke-WebRequest -UseBasicParsing -Uri/);
+  assert.match(script, /gate6d-preflight-private-tls-invalid/);
+  assert.doesNotMatch(script, /ServerCertificateValidationCallback|SkipCertificateCheck|(?:^|\s)(?:-k|--insecure)(?:\s|$)/m);
+});
+
+test("selected owner inventory preserves the documented default when the setting root is absent", () => {
+  const root = mkdtempSync(join(tmpdir(), "gate6c-selected-"));
+  try {
+    const result = inspectSelectedContinuity({ stateRoot: root, reconciliationKey: Buffer.alloc(32, 7) });
+    assert.equal(result.domains.setting.count, 1);
+    assert.equal(result.settingSourcePresent, false);
+    assert.equal(result.defaultApplied, true);
+    assert.equal(JSON.stringify(result).includes("Medium"), false);
+    const input = planInput(); input.legacySetting = null;
+    const plan = buildGate6cFinalDeltaPlan(input, { coreCipher: coreCipher(), learningCipher: learningCipher(),
+      reconciliationKey: Buffer.alloc(32, 8) });
+    assert.equal(plan.setting.value, "Medium");
+  } finally { rmSync(root, { recursive: true, force: true }); }
+});
+
+test("selected owner inventory refuses a partial setting root", () => {
+  const root = mkdtempSync(join(tmpdir(), "gate6c-selected-"));
+  try {
+    mkdirSync(join(root, "settings"), { recursive: true });
+    assert.throws(() => inspectSelectedContinuity({ stateRoot: root,
+      reconciliationKey: Buffer.alloc(32, 7) }), { code: "gate6c-setting-source-missing" });
+  } finally { rmSync(root, { recursive: true, force: true }); }
 });
 
 test("Control freeze tool preserves reads, records original ACL, and cannot casually release", () => {
@@ -303,6 +376,8 @@ test("Control freeze tool preserves reads, records original ACL, and cannot casu
   assert.match(source, /legacyReadsAvailable=\$true/);
   assert.match(source, /SetSecurityDescriptorSddlForm/);
   assert.match(source, /verified-rollback','gate6-closed/);
+  assert.match(source, /freeze-history/);
+  assert.match(source, /Add-Member -NotePropertyName releaseReason/);
   assert.match(source, /DataProtectionScope\]::LocalMachine/);
   assert.match(source, /legacy-state-changed-during-freeze/);
   assert.doesNotMatch(source, /Remove-Item|rmSync|\.runaai-local\\state.*-Recurse -Force/);
@@ -312,14 +387,33 @@ test("Control owner tools bind the exact candidate config and DPAPI user context
   const prepare = readFileSync(new URL("./control/Prepare-ControlOwner.ps1", import.meta.url), "utf8");
   const operator = readFileSync(new URL("./control/Advance-ControlRecoveryAuthority.mjs", import.meta.url), "utf8");
   const clipboard = readFileSync(new URL("./control/Copy-ControlOwnerBootstrapPassword.ps1", import.meta.url), "utf8");
+  const repair = readFileSync(new URL("./control/Repair-ControlOwnerBootstrapPassword.ps1", import.meta.url), "utf8");
   const localhostDeploy = readFileSync(new URL("./control/Deploy-ControlLocalhostShadow.ps1", import.meta.url), "utf8");
+  const resumeDeploy = readFileSync(new URL("./control/Deploy-ControlEnrollmentResume.ps1", import.meta.url), "utf8");
+  const resumeRebind = readFileSync(new URL("./control/Invoke-ControlOwnerAuthorityRebindAfterEnrollment.ps1", import.meta.url), "utf8");
+  const completedOwnerDeploy = readFileSync(new URL("./control/Deploy-ControlCompletedOwnerReadiness.ps1", import.meta.url), "utf8");
+  const flowProof = readFileSync(new URL("./control/Test-ControlOwnerPasskeyFlow.ps1", import.meta.url), "utf8");
+  const configureFlow = readFileSync(new URL("./control/Configure-ControlOwnerPasskeyFlow.ps1", import.meta.url), "utf8");
+  const restoreFlow = readFileSync(new URL("./control/Restore-ControlOwnerPasskeyFlow.ps1", import.meta.url), "utf8");
+  const amrProof = readFileSync(new URL("./control/Test-ControlPasskeyAmrMapper.ps1", import.meta.url), "utf8");
+  const configureAmr = readFileSync(new URL("./control/Configure-ControlOwnerPasskeyAmr.ps1", import.meta.url), "utf8");
+  const restoreAmr = readFileSync(new URL("./control/Restore-ControlOwnerPasskeyAmr.ps1", import.meta.url), "utf8");
   const rebind = readFileSync(new URL("./control/Rebind-ControlOwnerAuthority.mjs", import.meta.url), "utf8");
+  const completedRebind = readFileSync(new URL("./control/Rebind-ControlCompletedOwnerCeremony.mjs", import.meta.url), "utf8");
+  const maintenance = readFileSync(new URL("./control-maintenance.mjs", import.meta.url), "utf8");
+  const cutover = readFileSync(new URL("./control/Run-ControlProtectedCutover.mjs", import.meta.url), "utf8");
+  const promotionDeploy = readFileSync(new URL("./control/Deploy-ControlPromotionCandidate.ps1", import.meta.url), "utf8");
+  const ownerRelationships = readFileSync(new URL("./control/Configure-ControlOwnerRelationships.ps1", import.meta.url), "utf8");
+  const window = readFileSync(new URL("./control/Invoke-ControlProtectedMaintenanceWindow.ps1", import.meta.url), "utf8");
   assert.match(prepare, /config\\candidate\.json/);
   assert.match(operator, /config\\\\candidate\.json/);
-  for (const source of [prepare, clipboard]) {
+  for (const source of [prepare, clipboard, repair]) {
     assert.match(source, /Add-Type -AssemblyName System\.Security/);
     assert.match(source, /DataProtectionScope\]::CurrentUser/);
   }
+  assert.match(repair, /owner-bootstrap-repair-state-invalid/);
+  assert.match(repair, /passkeyCredentials=0/);
+  assert.doesNotMatch(repair, /Write-Output.*password|Set-Clipboard/);
   assert.match(prepare, /serviceAccountsEnabled=\$false/);
   assert.match(prepare, /webAuthnPolicyPasswordlessPasskeysEnabled/);
   assert.match(operator, /BEGIN ISOLATION LEVEL SERIALIZABLE/);
@@ -332,6 +426,86 @@ test("Control owner tools bind the exact candidate config and DPAPI user context
   assert.doesNotMatch(localhostDeploy, /C:\\AI\\Projects\\RunaAI/);
   assert.match(rebind, /priorCeremonyRetained: true/);
   assert.match(rebind, /webauthn-rp-domain-correction/);
+  assert.match(resumeDeploy, /candidate-current-safety-state-drift/);
+  assert.match(resumeDeploy, /rolledBack=\$true/);
+  assert.match(resumeRebind, /interrupted-enrollment-recovery-release/);
+  assert.match(resumeRebind, /webauthn-passwordless' \}\)\.Count -ne 1/);
+  assert.match(completedOwnerDeploy, /ownerCredentialEnrolled-ne \$true/);
+  assert.match(completedOwnerDeploy, /authority-ne 'shadow'/);
+  assert.match(completedOwnerDeploy, /candidatePromoted=\$false/);
+  assert.match(completedOwnerDeploy, /rolledBack=\$true/);
+  assert.match(completedOwnerDeploy, /Rebind-ControlCompletedOwnerCeremony\.mjs/);
+  assert.match(completedOwnerDeploy, /function Expand-Response/);
+  assert.match(flowProof, /runaai-next-gate6c-flow-proof/);
+  assert.match(flowProof, /finally \{/);
+  assert.match(flowProof, /Method Delete -Uri "\$base\/admin\/realms\/\$realmName"/);
+  for (const source of [flowProof, configureFlow]) {
+    assert.match(source, /webauthn-authenticator-passwordless/);
+    assert.match(source, /'default\.reference\.value'='webauthn'/);
+    assert.match(source, /'default\.reference\.maxAge'='300'/);
+  }
+  assert.match(configureFlow, /authenticationFlowBindingOverrides/);
+  assert.match(configureFlow, /owner-passkey-flow-safety-state-drift/);
+  assert.match(configureFlow, /protectedDataImported=\$false/);
+  assert.match(configureFlow, /productionTrafficChanged=\$false/);
+  assert.match(restoreFlow, /owner-passkey-flow-rollback-safety-state-drift/);
+  assert.match(restoreFlow, /ownerCredentialRetained=\$true/);
+  assert.doesNotMatch(configureFlow, /Write-Output.*password|Set-Clipboard/);
+  assert.match(amrProof, /runaai-next-gate6c-amr-proof/);
+  assert.match(amrProof, /oidc-hardcoded-claim-mapper/);
+  assert.match(amrProof, /'claim\.value'='\["webauthn"\]'/);
+  assert.match(amrProof, /inspected\.active -ne \$true/);
+  assert.match(amrProof, /Method Delete -Uri "\$base\/admin\/realms\/\$realmName"/);
+  assert.match(configureAmr, /owner-passkey-amr-flow-not-exclusive/);
+  assert.match(configureAmr, /directAccessGrantsEnabled -ne \$false/);
+  assert.match(configureAmr, /serviceAccountsEnabled -ne \$false/);
+  assert.match(configureAmr, /included\.client\.audience/);
+  assert.match(configureAmr, /oidc-hardcoded-claim-mapper/);
+  assert.match(configureAmr, /owner-passkey-amr-replacement-invalid/);
+  assert.match(restoreAmr, /owner-passkey-amr-rollback-safety-state-drift/);
+  assert.match(restoreAmr, /passkeyFlowRetained=\$true/);
+  assert.doesNotMatch(configureAmr, /Write-Output.*password|Set-Clipboard/);
+  assert.match(maintenance, /GATE6C_REQUIRED_DOMAINS/);
+  assert.match(maintenance, /participantId: targetParticipantId/);
+  assert.match(maintenance, /PostgresAcceptedLearningSource/);
+  assert.match(cutover, /C:\\\\AI\\\\Projects\\\\RunaAI/);
+  assert.match(cutover, /readLegacyProjectChatDomain/);
+  assert.match(cutover, /readProtectedE6Snapshot/);
+  assert.match(cutover, /inspectSelectedContinuity/);
+  assert.match(cutover, /targetParticipantId: context\.config\.gate6c\.expectedPrincipalId/);
+  assert.match(cutover, /activeSessionCredentials/);
+  assert.match(cutover, /rollback\(context, runId\)/);
+  assert.match(cutover, /prerequisite-check/);
+  assert.match(cutover, /gate6cd-\$\{step\}-failed/);
+  assert.match(cutover, /main\(process\.argv\.slice\(2\)\)\.then/);
+  assert.match(cutover, /writeSync\(1,/);
+  assert.match(cutover, /writeSync\(2,/);
+  assert.match(cutover, /let step = "arguments"/);
+  assert.match(cutover, /gate6cd-context-close-failed/);
+  assert.match(cutover, /gate6cd-operator-timeout/);
+  assert.doesNotMatch(cutover, /import\.meta\.url ===/);
+  assert.match(cutover, /privateValuesIncluded: false/);
+  assert.doesNotMatch(cutover, /console\.log|Write-Output.*password/);
+  assert.match(promotionDeploy, /candidate\.mode-ne 'active'/);
+  assert.match(promotionDeploy, /authority-ne 'shadow'/);
+  assert.match(promotionDeploy, /rolledBack=\$true/);
+  assert.match(promotionDeploy, /candidate-promotion-rollback-not-clean/);
+  assert.match(promotionDeploy, /--prior-config \$configBackup/);
+  assert.match(completedRebind, /priorConfig\.cutoverId/);
+  assert.match(completedRebind, /priorManifest\.releaseId/);
+  assert.match(completedRebind, /candidate\.pre-gate6d-/);
+  assert.match(ownerRelationships, /owner-relationships-partial-state/);
+  assert.match(ownerRelationships, /project:runa%3Apersonal/);
+  assert.match(ownerRelationships, /deletes=@\{tuple_keys=\$keys\}/);
+  assert.match(ownerRelationships, /legacyModified=\$false/);
+  assert.doesNotMatch(ownerRelationships, /Write-Output.*token|Set-Clipboard/);
+  assert.match(window, /Set-ControlLegacyWriteFreeze\.ps1/);
+  assert.match(window, /for\(\$index=0;\$index-lt 120;\$index\+\+\)/);
+  assert.match(window, /Start-Sleep -Seconds 30/);
+  assert.match(window, /Release-Freeze 'gate6-closed'/);
+  assert.match(window, /Invoke-Operator 'prerequisite-check'/);
+  assert.match(window, /gate6d-operator-output-invalid/);
+  assert.match(window, /Recover/);
 });
 
 test("browser owner ceremony uses PKCE, exact owner binding, WebAuthn, and opaque sessions", async () => {
@@ -415,6 +589,14 @@ test("browser owner ceremony uses PKCE, exact owner binding, WebAuthn, and opaqu
     code: "code-three" });
   assert.equal(recovered.nextStep, null);
   assert.equal((await service.status()).complete, true);
+  const validation = await service.startValidationSession();
+  const validationUrl = new URL(validation.redirectUrl);
+  assert.equal(validationUrl.searchParams.has("kc_action"), false);
+  const validated = await service.callback({ state: validationUrl.searchParams.get("state"),
+    code: "gate6d-validation" });
+  assert.equal(validated.validationSession, true);
+  assert.equal(await service.credentialForSession(validated.sessionId), "PRIVATE_BROWSER_TOKEN_6");
+  assert.equal((await service.status()).complete, true);
 });
 
 test("browser owner ceremony rejects password-only and an unbound subject", async () => {
@@ -476,6 +658,34 @@ test("browser enrollment requires the exact distinct passkey count", async () =>
   { code: "gate6c-browser-credential-count-invalid" });
   assert.equal((await service.status()).nextStep, "enroll-primary-credential");
   assert.equal(active, false);
+});
+
+test("an interrupted enrollment resumes by proving the exact existing passkey", async () => {
+  const store = new MemoryBrowserCeremonyStore();
+  const oidc = { issuer: "http://issuer", authorizationUrl(input) {
+    const value = new URL("http://issuer/auth");
+    value.searchParams.set("state", input.state);
+    if (input.action) value.searchParams.set("kc_action", input.action);
+    return value.toString();
+  }, async exchangeCode() { return { accessToken: "PRIVATE", refreshToken: "PRIVATE_REFRESH" }; },
+  async inspect() { return { active: true, issuer: "http://issuer", audience: ["runaai-next"],
+    subject: "owner-subject", authenticatedAt: NOW.toISOString(),
+    expiresAt: new Date(NOW.getTime() + 60_000).toISOString(), methods: ["webauthn"] }; },
+  async countPasswordless() { return { decided: true, count: 1 }; },
+  async revoke() { return { revoked: true }; } };
+  const service = new BrowserOwnerCeremonyService({ store, oidc,
+    principalStore: { async bySubject() { return { principalId: "matthew-owner", status: "active" }; } },
+    binding: binding(), publicBaseUrl: "https://candidate.test", clientId: "runaai-next",
+    expectedPrincipalId: "matthew-owner", now: () => NOW, random: size => Buffer.alloc(size, 31) });
+  await service.initialize();
+  await store.advanceCeremony({ binding: binding(), operationId: "authority", command: "verify-recovery-authority",
+    evidence: { passed: true, evidenceDigest: digestEvidence({ command: "authority" }) },
+    observedAt: NOW.toISOString() });
+  const resumed = await service.start("enroll-primary-credential", { resumeExisting: true });
+  const url = new URL(resumed.redirectUrl);
+  assert.equal(url.searchParams.has("kc_action"), false);
+  const completed = await service.callback({ state: url.searchParams.get("state"), code: "resume-code" });
+  assert.equal(completed.nextStep, "verify-sign-in");
 });
 
 test("owner operator atomically binds the exact target principal and advances recovery authority", async () => {
@@ -543,6 +753,7 @@ test("owner rebind retains the failed-IP audit row and advances only the correct
   }, release() { released = true; } };
   const result = await rebindOwnerRecoveryAuthority({ pool: { async connect() { return client; } },
     priorBinding, binding: correctedBinding, subject: "11111111-1111-4111-8111-111111111111",
+    reason: "webauthn-rp-domain-correction",
     observedAt: NOW.toISOString(), operationId: "control-owner-rebind-123456abcdef",
     advanceOwnerCeremony, digestEvidence, bindingDigest });
   assert.deepEqual(result, { schemaVersion: "runa2-gate6c-owner-rebind-result/v1", passed: true,
@@ -567,7 +778,39 @@ test("owner rebind rolls back if both exact ceremony rows are not retained", asy
   }, release() { released = true; } };
   await assert.rejects(rebindOwnerRecoveryAuthority({ pool: { async connect() { return client; } },
     priorBinding, binding: correctedBinding, subject: "11111111-1111-4111-8111-111111111111",
+    reason: "webauthn-rp-domain-correction",
     observedAt: NOW.toISOString(), operationId: "control-owner-rebind-123456abcdef",
     advanceOwnerCeremony, digestEvidence, bindingDigest }), { code: "gate6c-owner-rebind-ceremony-missing" });
   assert.equal(queries.at(-1), "ROLLBACK"); assert.equal(released, true);
+});
+
+test("completed owner rebind preserves completion without promoting the candidate", async () => {
+  const priorBinding = binding();
+  const nextBinding = { ...binding(), cutoverId: "selected-core-retry", releaseId: "runaai-next-readiness-release",
+    releaseCommit: "e".repeat(40), artifactDigest: "f".repeat(64) };
+  const priorState = ceremony(priorBinding); const currentState = createOwnerCeremonyState(nextBinding);
+  const priorDigest = bindingDigest(priorBinding); const nextDigest = bindingDigest(nextBinding);
+  const queries = []; let released = false;
+  const client = { async query(sql, parameters = []) {
+    queries.push({ sql: String(sql).replace(/\s+/g, " ").trim(), parameters });
+    if (String(sql).includes("FROM gate5.principals")) return { rows: [{
+      oidc_subject: "11111111-1111-4111-8111-111111111111", role: "primary-steward",
+      age_class: "adult", status: "active", record_version: 1 }] };
+    if (String(sql).includes("FROM gate6c.owner_ceremonies")) return { rows: [
+      { binding_digest: priorDigest, state_json: priorState },
+      { binding_digest: nextDigest, state_json: currentState }] };
+    return { rows: [], rowCount: 1 };
+  }, release() { released = true; } };
+  const result = await rebindCompletedOwnerCeremony({ pool: { async connect() { return client; } },
+    priorBinding, binding: nextBinding, subject: "11111111-1111-4111-8111-111111111111",
+    reason: "completed-owner-readiness-release", observedAt: NOW.toISOString(),
+    operationId: "control-completed-owner-rebind-123456abcdef",
+    assertOwnerCeremonyComplete, bindingDigest });
+  assert.equal(result.ceremonyComplete, true);
+  assert.equal(result.candidatePromoted, false);
+  const update = queries.find(item => item.sql.startsWith("UPDATE gate6c.owner_ceremonies"));
+  assert.equal(update.parameters[0], nextDigest);
+  assertOwnerCeremonyComplete(JSON.parse(update.parameters[1]), nextBinding);
+  assert.equal(queries.at(-1).sql, "COMMIT");
+  assert.equal(released, true);
 });

@@ -40,6 +40,34 @@ async function probe(url, timeoutMs) {
   } catch { return false; }
 }
 
+export async function composeReadinessStatus({ application, dependencyHealth, configuration,
+  artifact, browserCeremony = null, protectedImportStatus = async () => false }) {
+  const [authority, dependencies, ceremony, protectedDataImported] = await Promise.all([
+    application.authority().then(() => "active",
+      error => error?.code === "candidate-shadow-authority" ? "shadow" : "unavailable"),
+    dependencyHealth(),
+    browserCeremony ? browserCeremony.status() : Promise.resolve(null),
+    protectedImportStatus(),
+  ]);
+  return Object.freeze({ schemaVersion: "runa2-gate6b-shadow-readiness/v1",
+    authority, dependencies, configuration, artifact,
+    protectedDataImported: protectedDataImported === true,
+    ownerCredentialEnrolled: ceremony?.complete === true,
+    productionTrafficChanged: authority === "active",
+    privateValuesIncluded: false });
+}
+
+export async function protectedImportCompleted(pool, enabled) {
+  if (enabled !== true) return false;
+  try {
+    return (await pool.query("SELECT EXISTS(SELECT 1 FROM runa_gate6c.runs WHERE status='completed') imported"))
+      .rows[0].imported === true;
+  } catch (error) {
+    if (error?.code === "42P01") return false;
+    throw error;
+  }
+}
+
 export async function createProductionComposition({ loadedConfig, releaseRoot }) {
   const config = loadedConfig.value;
   const relative = value => isAbsolute(value) ? value : resolve(loadedConfig.directory, value);
@@ -164,12 +192,10 @@ export async function createProductionComposition({ loadedConfig, releaseRoot })
       dependencies: Object.freeze({ postgresql, keycloak, openfga, provider }),
       privateValuesIncluded: false });
   };
-  const readinessStatus = async () => Object.freeze({ schemaVersion: "runa2-gate6b-shadow-readiness/v1",
-    authority: await application.authority().then(() => "active", error => error?.code === "candidate-shadow-authority" ? "shadow" : "unavailable"),
-    dependencies: await dependencyHealth(), configuration: safeConfigurationStatus(loadedConfig, telemetryKey),
-    artifact,
-    protectedDataImported: false, ownerCredentialEnrolled: false, productionTrafficChanged: false,
-    privateValuesIncluded: false });
+  const protectedImportStatus = () => protectedImportCompleted(pool, config.gate6c?.enabled);
+  const readinessStatus = () => composeReadinessStatus({ application, dependencyHealth,
+    configuration: safeConfigurationStatus(loadedConfig, telemetryKey), artifact, browserCeremony,
+    protectedImportStatus });
 
   return Object.freeze({ application, browserCeremony, runtimeStatus, readinessStatus, dependencyHealth,
     releaseManifest: manifest,

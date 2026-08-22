@@ -13,6 +13,7 @@ import { createCandidateHttpServer } from "./http-server.mjs";
 import { ARTIFACT_FILE, buildArtifactManifest, verifyReleaseArtifact } from "./artifact.mjs";
 import { KeycloakOnlineClient, OpenFgaChecker } from "./clients.mjs";
 import { loadReleaseConfig } from "./release-config.mjs";
+import { composeReadinessStatus, protectedImportCompleted } from "./composition.mjs";
 
 const target = "runaai-next:test-target";
 const activeCutover = () => ({ phase: "promoted", revision: 7, authorityGeneration: target });
@@ -43,6 +44,53 @@ test("shadow and legacy authority cannot enable selected routes", () => {
     error => error.code === "candidate-shadow-authority");
 });
 
+test("readiness reports a completed owner without promoting the shadow candidate", async () => {
+  const status = await composeReadinessStatus({
+    application: { async authority() {
+      throw Object.assign(new Error("shadow"), { code: "candidate-shadow-authority" });
+    } },
+    dependencyHealth: async () => ({ ready: true }),
+    configuration: { configurationDigest: "a".repeat(64) },
+    artifact: { artifactDigest: "b".repeat(64) },
+    browserCeremony: { async status() { return { complete: true }; } },
+  });
+  assert.equal(status.ownerCredentialEnrolled, true);
+  assert.equal(status.authority, "shadow");
+  assert.equal(status.protectedDataImported, false);
+  assert.equal(status.productionTrafficChanged, false);
+});
+
+test("readiness remains unenrolled when no Gate 6C ceremony is enabled", async () => {
+  const status = await composeReadinessStatus({
+    application: { async authority() { return { enabled: true }; } },
+    dependencyHealth: async () => ({ ready: true }),
+    configuration: {}, artifact: {},
+  });
+  assert.equal(status.ownerCredentialEnrolled, false);
+  assert.equal(status.authority, "active");
+});
+
+test("readiness reports protected import and traffic only after selected authority is active", async () => {
+  const status = await composeReadinessStatus({
+    application: { async authority() { return { enabled: true }; } },
+    dependencyHealth: async () => ({ ready: true }), configuration: {}, artifact: {},
+    browserCeremony: { async status() { return { complete: true }; } },
+    protectedImportStatus: async () => true,
+  });
+  assert.equal(status.authority, "active");
+  assert.equal(status.protectedDataImported, true);
+  assert.equal(status.productionTrafficChanged, true);
+});
+
+test("readiness treats an uninitialized Gate 6C schema as no protected import", async () => {
+  const missing = Object.assign(new Error("relation does not exist"), { code: "42P01" });
+  assert.equal(await protectedImportCompleted({ async query() { throw missing; } }, true), false);
+  assert.equal(await protectedImportCompleted({ async query() { throw new Error("must not query"); } }, false), false);
+  await assert.rejects(protectedImportCompleted({ async query() {
+    throw Object.assign(new Error("database unavailable"), { code: "ECONNREFUSED" });
+  } }, true), error => error.code === "ECONNREFUSED");
+});
+
 test("active verified general answer is identity and relationship scoped", async () => {
   const { application, calls } = harness();
   const response = await application.answer({ credential: "opaque-token", body: {
@@ -56,12 +104,16 @@ test("active verified general answer is identity and relationship scoped", async
 });
 
 test("unverified general chat is ephemeral and cannot claim a project", async () => {
-  const { application, calls } = harness();
+  let persisted = false;
+  const { application, calls } = harness({ requestCoordinator: {
+    async runOnce() { persisted = true; throw new Error("unverified response must not persist"); },
+  } });
   await application.answer({ body: { requestId: "guest-1", lane: "general", threadId: "guest-thread",
     projectId: "another-project", message: "Hello", history: [], workspace: null } });
   assert.equal(calls.auth.length, 0);
   assert.equal(calls.answers[0].participant.verified, false);
   assert.equal(calls.answers[0].project.projectId, "runa:ephemeral");
+  assert.equal(persisted, false);
 });
 
 test("unverified workspace is denied before an answer service read", async () => {
@@ -195,8 +247,10 @@ test("HTTP owner ceremony redirects through OIDC and sets only an opaque host co
     publicBaseUrl: "https://candidate.test",
     async status() { return { schemaVersion: "runa2-gate6c-browser-status/v1",
       nextStep: "verify-sign-in", complete: false, privateValuesIncluded: false }; },
-    async start(step) { calls.push(["start", step]); return { redirectUrl: "http://keycloak.test/auth?state=opaque" }; },
-    async callback(input) { calls.push(["callback", input]); return { sessionId: "opaque-session-id" }; },
+    async start(step, options) { calls.push(["start", step, options]); return { redirectUrl: "http://keycloak.test/auth?state=opaque" }; },
+    async startValidationSession() { calls.push(["validation-start"]); return { redirectUrl: "http://keycloak.test/auth?state=validation" }; },
+    async callback(input) { calls.push(["callback", input]); return { sessionId: "opaque-session-id",
+      validationSession: input.state === "validation-state" }; },
     async credentialForSession(value) { calls.push(["session", value]); return "PRIVATE_TOKEN"; },
     async revokeAndVerify() { calls.push(["revoke"]); return { revision: 5, nextStep: "enroll-recovery-credential" }; },
   };
@@ -210,6 +264,16 @@ test("HTTP owner ceremony redirects through OIDC and sets only an opaque host co
   const start = await fetch(`${base}/owner-ceremony/start?step=verify-sign-in`, { redirect: "manual" });
   assert.equal(start.status, 303);
   assert.equal(start.headers.get("location"), "http://keycloak.test/auth?state=opaque");
+  const resume = await fetch(`${base}/owner-ceremony/resume-enrollment?step=enroll-primary-credential`, { redirect: "manual" });
+  assert.equal(resume.status, 303);
+  assert.deepEqual(calls[1], ["start", "enroll-primary-credential", { resumeExisting: true }]);
+  const validation = await fetch(`${base}/gate6d-validation/start`, { redirect: "manual" });
+  assert.equal(validation.status, 303);
+  assert.equal(validation.headers.get("location"), "http://keycloak.test/auth?state=validation");
+  const validationCallback = await fetch(`${base}/owner-ceremony/callback?state=validation-state&code=opaque-code`,
+    { redirect: "manual" });
+  assert.equal(validationCallback.status, 303);
+  assert.equal(validationCallback.headers.get("location"), "/gate6d-validation");
   const callback = await fetch(`${base}/owner-ceremony/callback?state=opaque-state&code=opaque-code`,
     { redirect: "manual" });
   assert.equal(callback.status, 303);
@@ -217,6 +281,11 @@ test("HTTP owner ceremony redirects through OIDC and sets only an opaque host co
   assert.match(retainedCookie, /^__Host-runa_owner_session=opaque-session-id;/);
   assert.match(retainedCookie, /Secure; HttpOnly; SameSite=Strict/);
   assert.doesNotMatch(retainedCookie, /PRIVATE_TOKEN/);
+  const validationStatus = await fetch(`${base}/api/gate6d/session/status`, {
+    headers: { cookie: "__Host-runa_owner_session=opaque-session-id" },
+  });
+  assert.equal(validationStatus.status, 200);
+  assert.equal((await validationStatus.json()).active, true);
   const wrongOrigin = await fetch(`${base}/api/owner-ceremony/revoke`, { method: "POST",
     headers: { origin: "https://wrong.test", cookie: "__Host-runa_owner_session=opaque-session-id" } });
   assert.equal(wrongOrigin.status, 400);
@@ -224,7 +293,8 @@ test("HTTP owner ceremony redirects through OIDC and sets only an opaque host co
     headers: { origin: "https://candidate.test", cookie: "__Host-runa_owner_session=opaque-session-id" } });
   assert.equal(revoked.status, 200);
   assert.equal((await revoked.json()).nextStep, "enroll-recovery-credential");
-  assert.deepEqual(calls.map(call => call[0]), ["start", "callback", "session", "revoke"]);
+  assert.deepEqual(calls.map(call => call[0]), ["start", "start", "validation-start", "callback",
+    "callback", "session", "session", "revoke"]);
 });
 
 test("release artifact verification detects changed and extra files", async t => {
@@ -312,6 +382,8 @@ test("Keycloak and OpenFGA clients use bounded authenticated online decisions", 
   assert.match(calls[0].body, /client_secret=PRIVATE_CLIENT_CANARY/);
   assert.equal(calls[1].authorization, "Bearer PRIVATE_BEARER_CANARY");
   assert.equal(calls[2].authorization, "Bearer PRIVATE_FGA_CANARY");
+  assert.deepEqual(JSON.parse(calls[2].body).tuple_key, { user: "user:owner",
+    relation: "chat_ephemeral", object: "project:runa%3Apersonal" });
   assert.doesNotMatch(JSON.stringify(identity), /PRIVATE_/);
   assert.doesNotMatch(JSON.stringify(decision), /PRIVATE_/);
 });
@@ -320,6 +392,34 @@ test("Control Caddy listeners are pinned to their exact interfaces", async () =>
   const script = await readFile(resolve(import.meta.dirname, "control", "Initialize-ControlShadow.ps1"), "utf8");
   assert.match(script, /https:\/\/\$PrivateAddress`:9761 \{\r?\n  bind \$PrivateAddress/);
   assert.match(script, /http:\/\/127\.0\.0\.1:9770 \{\r?\n  bind 127\.0\.0\.1/);
+});
+
+test("Control Caddy trust is exact, user-scoped, strictly verified, and reversible", async () => {
+  const script = await readFile(resolve(import.meta.dirname, "control", "Trust-ControlCaddyRoot.ps1"), "utf8");
+  assert.match(script, /certutil\.exe -user -f -addstore Root/);
+  assert.match(script, /Cert:\\CurrentUser\\Root/);
+  assert.doesNotMatch(script, /Cert:\\LocalMachine\\Root/);
+  assert.match(script, /control-caddy-trust-interactive-session-required/);
+  assert.match(script, /X509BasicConstraintsExtension/);
+  assert.match(script, /certificateValidationBypassed=\$false/);
+  assert.match(script, /runa2-gate6b-control-caddy-trust-error\/v1/);
+  assert.match(script, /failureStage=\$failureStage/);
+  assert.match(script, /Invoke-WebRequest -UseBasicParsing -Uri/);
+  assert.doesNotMatch(script, /ServerCertificateValidationCallback|SkipCertificateCheck|(?:^|\s)(?:-k|--insecure)(?:\s|$)/m);
+  assert.match(script, /if\(\$imported\)\{& certutil\.exe -user -f -delstore Root/);
+});
+
+test("Control Caddy trust enters only Matthew's existing interactive session and removes its task", async () => {
+  const script = await readFile(resolve(import.meta.dirname, "control", "Invoke-ControlInteractiveCaddyTrust.ps1"), "utf8");
+  assert.match(script, /LogonType Interactive/);
+  assert.match(script, /RUNA-CONTROL\\Matthew/);
+  assert.match(script, /ExpectedToolSha256/);
+  assert.match(script, /Copy-Item -LiteralPath \$systemRootCert -Destination \$stagedRootCert/);
+  assert.match(script, /RootCertPath/);
+  assert.match(script, /RunLevel Limited/);
+  assert.match(script, /privateValuesIncluded-ne\$false/);
+  assert.match(script, /finally\{if\(\$registered\)\{Unregister-ScheduledTask/);
+  assert.doesNotMatch(script, /Remove-Item|LocalMachine/);
 });
 
 test("Control application startup retains logs and permits the full integrity scan", async () => {

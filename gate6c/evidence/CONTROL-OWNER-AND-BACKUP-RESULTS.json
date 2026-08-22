@@ -1,0 +1,51 @@
+{
+  "schemaVersion": "runa2-gate6c-control-owner-backup-results/v1",
+  "observedDate": "2026-08-22",
+  "release": {
+    "releaseId": "runaai-next-gate6c-readiness-2026-08-22-669139e",
+    "commit": "669139ec7e0c1a043f2854b92e2db964137537ee",
+    "artifactDigest": "d8a39de16b79c78de0e8d6211f9af2b2e007e1139836596b5cc8a9f0e58b7b77",
+    "artifactFileCount": 29423,
+    "configurationDigest": "c0980e45c2443601038da2c76c1deb6fc9de6ca32eadae1a769719f3594d1424",
+    "manifestDigest": "46f3e1e40677807bb3fe95492e3dd40543c485ea7d2074749c2d88fee97f726a"
+  },
+  "owner": {
+    "ceremonyComplete": true,
+    "ceremonyRevision": 7,
+    "passwordlessCredentialCount": 2,
+    "priorCeremonyRetained": true
+  },
+  "backup": {
+    "scheduleActive": true,
+    "principal": "SYSTEM",
+    "lastTaskResult": 0,
+    "generation": "20260822T0843051927477Z",
+    "encryptedBackupCount": 3,
+    "plaintextBackupCount": 0,
+    "distinctRestoreVerified": true,
+    "distinctTargetsDestroyed": true
+  },
+  "legacy": {
+    "commit": "b4db04090d8f0df87234fab573b396e7824c5354",
+    "branch": "main",
+    "trackedClean": true,
+    "freezePreflightPassed": true,
+    "freezeActivated": false,
+    "modified": false
+  },
+  "candidate": {
+    "authority": "shadow",
+    "cutoverPhase": "planned",
+    "cutoverRevision": 0,
+    "protectedDataImported": false,
+    "productionTrafficChanged": false,
+    "promoted": false
+  },
+  "verification": {
+    "fullNodePassed": 289,
+    "fullNodeFailed": 0,
+    "gate6bPassed": 22,
+    "gate6cPassed": 34
+  },
+  "privateValuesIncluded": false
+}

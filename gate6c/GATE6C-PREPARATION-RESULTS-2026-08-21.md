@@ -1,6 +1,10 @@
 # Gate 6C non-protected preparation results
 
-Status: preparation and Control shadow deployment green; owner ceremony execution and protected staging not started
+Status: historical preparation result; current owner and backup readiness is recorded in
+`GATE6C-OWNER-AND-BACKUP-RESULTS-2026-08-22.md`
+
+This document preserves the exact state at the close of the first non-protected tranche. Statements
+below that the owner or backup work had not started are historical, not the current Control status.
 
 ## Outcome
 

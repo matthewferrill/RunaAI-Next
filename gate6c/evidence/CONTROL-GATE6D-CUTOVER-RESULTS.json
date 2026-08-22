@@ -1,0 +1,69 @@
+{
+  "schemaVersion": "runa2-gate6d-control-cutover-results/v1",
+  "observedDate": "2026-08-22",
+  "release": {
+    "releaseId": "runaai-next-gate6d-promotion-2026-08-22-a886754",
+    "commit": "a8867543f914cabd997f161950016723355138d2",
+    "artifactDigest": "2e1f909941f3021530c83c3d288953f0d3144b8603eb006f8502b32022905235",
+    "artifactFileCount": 29434,
+    "configurationDigest": "d1a638635fd460e4b45c7597b2f7f3216c7a9e8bf73bf003c54918a1a5ce162b",
+    "manifestDigest": "93f2c9b3ddecec5f552308f973abd10005b9abd47e822baed7dc1427c8fc7b3b"
+  },
+  "cutover": {
+    "phase": "closed",
+    "authorityGeneration": "runaai-next:control-candidate",
+    "readinessAuthority": "active",
+    "protectedDataImported": true,
+    "productionTrafficChanged": true,
+    "finalReconciliationExact": true,
+    "legacyRollbackHealthy": true
+  },
+  "selectedDomainCounts": {
+    "projectChat": 102,
+    "learningEvents": 90,
+    "setting": 1,
+    "actionReceipts": 0,
+    "approvedKnowledgeActive": 53
+  },
+  "validation": {
+    "freshOwnerPasskeyVerified": true,
+    "representativeLaneCount": 3,
+    "governedReceiptCount": 2,
+    "settingRestored": true,
+    "targetSessionRevoked": true
+  },
+  "observation": {
+    "durationMinutes": 60,
+    "sampleCount": 120,
+    "freezeVerificationCount": 14
+  },
+  "freeze": {
+    "status": "released",
+    "selectedWritesFrozen": false,
+    "legacyReadsAvailable": true,
+    "releaseReason": "gate6-closed"
+  },
+  "legacy": {
+    "commit": "b4db04090d8f0df87234fab573b396e7824c5354",
+    "branch": "main",
+    "trackedClean": true,
+    "modified": false
+  },
+  "privateTls": {
+    "scope": "CurrentUser\\Root",
+    "thumbprint": "7FA7C30BFD47DD04D74262F784605C1E6733AB53",
+    "rootSha256": "b62e7098f5ea65486f1d251e3e8780ac6966f4e4b9df46889a6be9da5e6ab189",
+    "trustedRootCount": 1,
+    "httpsStatus": 200,
+    "certificateValidationBypassed": false
+  },
+  "verification": {
+    "fullNodePassed": 298,
+    "fullNodeFailed": 0,
+    "gate6bAndGate6cFocusedPassed": 65,
+    "gate6bAndGate6cFocusedFailed": 0,
+    "powershellParsePassed": true
+  },
+  "deferredStoresOpened": false,
+  "privateValuesIncluded": false
+}

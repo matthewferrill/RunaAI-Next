@@ -144,12 +144,27 @@ export class OpenFgaChecker {
   }
   async check({ actorId, action, resource }) {
     const relation = action.replaceAll("-", "_");
+    const separator = String(resource).indexOf(":");
+    if (!String(actorId).trim() || separator <= 0 || separator === String(resource).length - 1) {
+      throw coded("authorization-input-invalid", "Relationship authorization input is invalid.");
+    }
+    const resourceType = String(resource).slice(0, separator);
+    if (!/^[a-z][a-z0-9_]*$/.test(resourceType)) {
+      throw coded("authorization-input-invalid", "Relationship authorization input is invalid.");
+    }
+    let user; let object;
+    try {
+      user = `user:${encodeURIComponent(String(actorId))}`;
+      object = `${resourceType}:${encodeURIComponent(String(resource).slice(separator + 1))}`;
+    } catch {
+      throw coded("authorization-input-invalid", "Relationship authorization input is invalid.");
+    }
     let response;
     try {
       response = await fetch(`${this.baseUrl}/stores/${this.storeId}/check`, {
         method: "POST", headers: { "content-type": "application/json",
           ...(this.credential ? { authorization: `Bearer ${this.credential}` } : {}) },
-        body: JSON.stringify({ tuple_key: { user: `user:${actorId}`, relation, object: resource },
+        body: JSON.stringify({ tuple_key: { user, relation, object },
           authorization_model_id: this.modelId }), signal: AbortSignal.timeout(this.timeoutMs),
       });
     } catch { throw coded("authorization-service-unavailable", "Relationship authorization is unavailable."); }

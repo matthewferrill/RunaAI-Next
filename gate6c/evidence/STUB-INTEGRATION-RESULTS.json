@@ -9,6 +9,7 @@
   "networking": "loopback-disposable-postgresql-only",
   "checks": {
     "fourDomainsCommitted": true,
+    "retainedRowsReconciled": true,
     "exactCounts": true,
     "restartPersistent": true,
     "idempotentReplay": true,

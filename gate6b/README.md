@@ -49,7 +49,7 @@ under the Control owner's DPAPI context, verifies logical parity in distinct dis
 removes plaintext work, and never opens or writes a legacy store.
 
 The candidate is empty and non-authoritative, so no recurring protected-data backup schedule is
-active. That schedule remains a prerequisite before a later protected import. The accepted umbrella
-Gate 6 contract also requires the candidate and legacy service to survive a Control host restart. That
-reboot needs an owner-approved maintenance window because it briefly interrupts legacy; Gate 6B
-therefore remains open until the restart proof passes.
+active. That schedule remains a prerequisite before a later protected import. The owner-approved
+Control host-restart proof passed: candidate tasks started at boot, the exact release returned after
+its complete cold artifact scan, legacy returned after Matthew's required login, and pre/post logical
+authority digests matched for all three candidate databases.

@@ -1,7 +1,7 @@
 # Gate 6B release composition and Control shadow results
 
-Status: all non-host-restart checks are green; Gate 6B remains open pending an owner-approved Control
-host restart.
+Status: green at the complete Gate 6B shadow boundary, including the owner-approved Control host
+restart on 2026-08-21.
 
 Gate 6B produced the first complete runnable selected-core RunaAI-Next release and installed it on
 Control as a separate, empty, non-authoritative candidate. Every completed application, service,
@@ -78,17 +78,22 @@ The owner-triggered encrypted backup/restore procedure is proven for the exact r
 protected-data schedule is intentionally not active while the candidate is empty; it must be enabled
 and verified before Gate 6C imports any protected record.
 
-A full Control host reboot was not performed. The accepted umbrella Gate 6 criteria explicitly require
-the parallel candidate to survive a host restart, although the later Gate 6B-specific checklist
-accidentally omitted that line. A reboot would briefly interrupt legacy RunaAI, so this is the one
-remaining Gate 6B blocker and requires an explicit owner-approved maintenance window. Gate 6C must not
-start until both legacy and candidate restart cleanly and report their exact pre-restart identities.
+The owner authorized and completed the Control host-restart window. The final proof is bound to the
+boot at `2026-08-22T01:27:22.5000000Z`. All five candidate tasks started at boot. The candidate verified
+all 29,380 artifact files and returned on the exact release in 489 seconds, within its ten-minute cold
+startup allowance. It is a background service and opens no desktop window; an owner-triggered second
+reboot reset the first scan, then completed normally.
+
+Legacy RunaAI returned after Matthew's Windows login, as designed for its owner-bound CurrentUser
+stores. It reported the exact pre-restart commit and original loopback listeners. The post-restart
+encrypted restore proof matched the pre-restart schema, table counts, row counts, and complete logical
+digests for `runaai_next`, Keycloak, and OpenFGA. No authority record changed.
 
 ## Gate decision
 
-The installed shadow candidate is healthy and may remain running, but Gate 6B is not closed until the
-host-restart proof passes. This result does not authorize Gate 6C, protected import, owner enrollment,
-legacy-write freeze, production routing, or promotion. The exact aggregate evidence is retained in
+Gate 6B is closed green as an isolated shadow candidate. This result authorizes Gate 6C planning but
+does not by itself authorize protected import, owner enrollment, legacy-write freeze, production
+routing, or promotion. The exact aggregate evidence is retained in
 `evidence/CONTROL-SHADOW-RESULTS.json`.
 
 Gate 6C must begin with a reviewed owner/backup/import plan and stop before any protected operation

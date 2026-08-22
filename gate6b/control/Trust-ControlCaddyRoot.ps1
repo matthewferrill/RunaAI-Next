@@ -65,8 +65,8 @@ try{
   }
   try{
     if(@(Get-ChildItem -LiteralPath 'Cert:\CurrentUser\Root'|Where-Object{$_.Thumbprint-eq$ExpectedRootThumbprint}).Count-ne 1){throw 'control-caddy-trust-import-mismatch'}
-    $failureStage='https-validation';$httpsStatus=& curl.exe -sS -o NUL -w '%{http_code}' --max-time 10 "$publicBaseUrl/health/ready" 2>$null
-    if($LASTEXITCODE-ne 0-or[string]$httpsStatus-ne'200'){throw 'control-caddy-trust-https-verification-failed'}
+    $failureStage='https-validation';$httpsResponse=Invoke-WebRequest -UseBasicParsing -Uri "$publicBaseUrl/health/ready" -TimeoutSec 10
+    if([int]$httpsResponse.StatusCode-ne 200){throw 'control-caddy-trust-https-verification-failed'}
   }catch{
     if($imported){& certutil.exe -user -f -delstore Root $ExpectedRootThumbprint *> $null;if($LASTEXITCODE-ne 0){throw 'control-caddy-trust-rollback-failed'}}
     throw

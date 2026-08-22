@@ -341,9 +341,9 @@ test("Control backup schedule is SYSTEM-owned and fail-closed at its capacity", 
 
 test("Control maintenance preflight proves private TLS without bypassing certificate validation", () => {
   const script = readFileSync(new URL("./control/Invoke-ControlProtectedMaintenanceWindow.ps1", import.meta.url), "utf8");
-  assert.match(script, /curl\.exe -sS -o NUL -w '%\{http_code\}' --max-time 10/);
+  assert.match(script, /Invoke-WebRequest -UseBasicParsing -Uri/);
   assert.match(script, /gate6d-preflight-private-tls-invalid/);
-  assert.doesNotMatch(script, /(?:^|\s)(?:-k|--insecure)(?:\s|$)/m);
+  assert.doesNotMatch(script, /ServerCertificateValidationCallback|SkipCertificateCheck|(?:^|\s)(?:-k|--insecure)(?:\s|$)/m);
 });
 
 test("selected owner inventory preserves the documented default when the setting root is absent", () => {

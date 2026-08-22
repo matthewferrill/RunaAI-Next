@@ -101,6 +101,11 @@ preflight now uses the Windows certificate chain used by the browser and explici
 ## Current operating boundary
 
 RunaAI-Next is now the production authority for the selected core at
-`https://192.168.50.169:9761/`. Legacy RunaAI remains intact and healthy as the verified rollback and
-behavior-reference system; it is no longer the write authority for the selected promoted domains.
-No Gate 7 extension is implied by this close.
+`https://192.168.50.169:9761/`. That browser root is the governed aggregate status surface; the owner
+passkey page is the bounded Gate 6D validation surface. The selected-core application routes are live,
+but Gate 6 does not include a finished conversational/steward UI or claim that ordinary browser chat
+testing is available yet.
+
+Legacy RunaAI remains intact and healthy as the verified rollback and behavior-reference system; it is
+no longer the write authority for the selected promoted domains. No Gate 7 extension is implied by
+this close.

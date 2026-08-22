@@ -24,6 +24,10 @@ reviewed selected-core release. RunaAI-Next is authoritative for the selected co
 reconciliation and 60-minute observation passed, and the temporary legacy freeze is released. Legacy
 remains intact as the verified rollback system.
 
+The current browser root is an aggregate status surface, and the owner passkey page is the bounded
+Gate 6D validation surface. The selected-core application routes are live, but a finished steward chat
+interface is outside Gate 6 and has not been claimed by this cutover.
+
 The exact migration domains are:
 
 - `project-chat`;

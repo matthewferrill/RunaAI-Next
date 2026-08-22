@@ -371,13 +371,15 @@ No dependency was changed during the prerequisite disposition. Full evidence is 
 
 ## Next operation
 
-Gate 6 is closed. The owner can now log in and test the selected-core production release at
-`https://192.168.50.169:9761/`. Operational work should preserve the exact immutable release,
-recurring encrypted backups, private listener boundary, active target authority, and the intact legacy
-rollback path.
+Gate 6 is closed. The owner can now open the governed production status surface at
+`https://192.168.50.169:9761/`; the exact passkey flow and selected-core routes have already passed
+their witnessed live validation. This release does not yet include a finished conversational/steward
+UI, so the URL is not a normal chat login screen. Operational work should preserve the exact immutable
+release, recurring encrypted backups, private listener boundary, active target authority, and the
+intact legacy rollback path.
 
 The next migration decision is Gate 7, not an automatic continuation. E3, E4/device-vault recovery,
 the separate approved-knowledge vector index, Qwen3.6 deliberate review, the existing live BGE
-endpoint, and broader legacy surfaces remain deferred. Each extension group requires a new current
-baseline, a bounded scope, explicit evidence, and its own approval before implementation or protected
-data access.
+endpoint, broader legacy surfaces, and the user-facing conversational UI remain deferred. Each
+extension group requires a new current baseline, a bounded scope, explicit evidence, and its own
+approval before implementation or protected data access.

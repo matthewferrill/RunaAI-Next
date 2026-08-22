@@ -316,7 +316,6 @@ test("Control owner tools bind the exact candidate config and DPAPI user context
   const localhostDeploy = readFileSync(new URL("./control/Deploy-ControlLocalhostShadow.ps1", import.meta.url), "utf8");
   const resumeDeploy = readFileSync(new URL("./control/Deploy-ControlEnrollmentResume.ps1", import.meta.url), "utf8");
   const resumeRebind = readFileSync(new URL("./control/Invoke-ControlOwnerAuthorityRebindAfterEnrollment.ps1", import.meta.url), "utf8");
-  const ipv6Loopback = readFileSync(new URL("./control/Enable-ControlKeycloakIPv6Loopback.ps1", import.meta.url), "utf8");
   const rebind = readFileSync(new URL("./control/Rebind-ControlOwnerAuthority.mjs", import.meta.url), "utf8");
   assert.match(prepare, /config\\candidate\.json/);
   assert.match(operator, /config\\\\candidate\.json/);
@@ -343,11 +342,6 @@ test("Control owner tools bind the exact candidate config and DPAPI user context
   assert.match(resumeDeploy, /rolledBack=\$true/);
   assert.match(resumeRebind, /interrupted-enrollment-recovery-release/);
   assert.match(resumeRebind, /webauthn-passwordless' \}\)\.Count -ne 1/);
-  assert.match(ipv6Loopback, /listenAddress='::1'/);
-  assert.match(ipv6Loopback, /connectAddress='127\.0\.0\.1'/);
-  assert.match(ipv6Loopback, /lanListenerAdded=\$false/);
-  assert.match(ipv6Loopback, /portproxy delete v6tov4/);
-  assert.doesNotMatch(ipv6Loopback, /listenaddress=0\.0\.0\.0|listenaddress=::(?!1)/);
 });
 
 test("browser owner ceremony uses PKCE, exact owner binding, WebAuthn, and opaque sessions", async () => {

@@ -327,7 +327,8 @@ plain-language steward experience, or governed action pathway.
 | 4 | Governed data migration, one domain at a time | Complete; accepted and merged as `2c38dd5`; legacy unchanged | Complete |
 | 5 | Operations, private transport, authentication/authorization, recovery | Complete; accepted and merged as `a986419` | Complete |
 | 6 | Selected-core production cutover and rollback window | Complete and closed; exact selected-core release is authoritative, observation green, freeze released, legacy rollback healthy | Complete |
-| 7 | Deferred extensions | Not started | New baseline and separate approval per extension group |
+| 7A | Multi-device access foundation | Corrective contract approved; scope and representative matrix frozen before synthetic implementation | Synthetic contract may proceed; live domain/DNS/ingress remains decision-gated |
+| 7B+ | Deferred UI and extensions | Not started | New baseline and separate approval per extension group |
 
 ## Bootstrap validation
 
@@ -378,8 +379,15 @@ UI, so the URL is not a normal chat login screen. Operational work should preser
 release, recurring encrypted backups, private listener boundary, active target authority, and the
 intact legacy rollback path.
 
-The next migration decision is Gate 7, not an automatic continuation. E3, E4/device-vault recovery,
-the separate approved-knowledge vector index, Qwen3.6 deliberate review, the existing live BGE
-endpoint, broader legacy surfaces, and the user-facing conversational UI remain deferred. Each
-extension group requires a new current baseline, a bounded scope, explicit evidence, and its own
-approval before implementation or protected data access.
+Gate 7A is the approved corrective client-access foundation. Decision 0079 and H2 confirm that Omen,
+additional PCs, distinct users, phones, and eventual off-LAN access were original requirements. The
+current Control-local IP, internal CA, and browser-visible loopback issuer are retained commissioning
+evidence, not the permanent client topology. Gate 7A freezes one canonical trusted HTTPS origin,
+same-origin external Keycloak, per-person multi-passkey identity, bounded ingress, and a five-client
+acceptance matrix before the conversational UI is built.
+
+Synthetic Gate 7A work may proceed without networking or protected data. Live deployment remains
+blocked on the steward-controlled hostname, DNS/certificate method, off-LAN privacy/ingress choice, and
+first non-owner acceptance fixture. E3, E4/device-vault recovery, the separate approved-knowledge
+vector index, Qwen3.6 deliberate review, the existing live BGE endpoint, broader legacy surfaces, and
+the user-facing conversational UI remain separately deferred.

@@ -1,0 +1,58 @@
+{
+  "schemaVersion": "runa2-gate7a-client-matrix/v1",
+  "cases": [
+    {
+      "id": "owner-omen-lan",
+      "network": "lan",
+      "clientClass": "windows-pc",
+      "principalClass": "primary-owner",
+      "authenticator": "platform-passkey",
+      "freshStepUpRequired": true
+    },
+    {
+      "id": "member-windows-lan",
+      "network": "lan",
+      "clientClass": "windows-pc",
+      "principalClass": "household-member",
+      "authenticator": "platform-or-synced-passkey",
+      "freshStepUpRequired": true
+    },
+    {
+      "id": "owner-phone-lan",
+      "network": "lan",
+      "clientClass": "phone",
+      "principalClass": "primary-owner",
+      "authenticator": "platform-or-synced-passkey",
+      "freshStepUpRequired": true
+    },
+    {
+      "id": "owner-pc-off-lan",
+      "network": "off-lan",
+      "clientClass": "windows-pc",
+      "principalClass": "primary-owner",
+      "authenticator": "platform-or-cross-device-passkey",
+      "freshStepUpRequired": true
+    },
+    {
+      "id": "member-phone-off-lan",
+      "network": "off-lan",
+      "clientClass": "phone",
+      "principalClass": "household-member",
+      "authenticator": "platform-or-synced-passkey",
+      "freshStepUpRequired": true
+    }
+  ],
+  "requiredAssertions": [
+    "ordinary-browser-trust",
+    "canonical-origin-only",
+    "external-issuer-only",
+    "user-verified-passkey",
+    "individual-principal",
+    "participant-project-scope",
+    "opaque-revocable-session",
+    "fresh-governed-step-up",
+    "no-client-backend-listener",
+    "no-client-home-route"
+  ],
+  "privateValuesIncluded": false
+}

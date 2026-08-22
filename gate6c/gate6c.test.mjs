@@ -301,6 +301,7 @@ test("Control restore proof streams decrypted archives only to distinct targets"
 
 test("Control backup schedule is SYSTEM-owned and fail-closed at its capacity", () => {
   const source = readFileSync(new URL("./control/Register-ControlBackupSchedule.ps1", import.meta.url), "utf8");
+  const update = readFileSync(new URL("./control/Update-ControlBackupScheduleRelease.ps1", import.meta.url), "utf8");
   assert.match(source, /candidate\.releaseManifestPath/);
   assert.match(source, /candidate-running-release-mismatch/);
   assert.doesNotMatch(source, /config\\release\.json/);
@@ -309,6 +310,11 @@ test("Control backup schedule is SYSTEM-owned and fail-closed at its capacity", 
   assert.match(source, /-AtStartup/);
   assert.match(source, /retentionMode='fail-closed-at-30-generations'/);
   assert.doesNotMatch(source, /Unregister-ScheduledTask|Remove-Item/);
+  assert.match(update, /Set-ScheduledTask/);
+  assert.match(update, /ownerCredentialEnrolled-ne \$true/);
+  assert.match(update, /candidatePromoted=\$false/);
+  assert.match(update, /-Action \$priorAction/);
+  assert.doesNotMatch(update, /Unregister-ScheduledTask|Remove-Item/);
 });
 
 test("Control freeze tool preserves reads, records original ACL, and cannot casually release", () => {

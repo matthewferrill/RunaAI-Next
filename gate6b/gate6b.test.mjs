@@ -382,6 +382,8 @@ test("Keycloak and OpenFGA clients use bounded authenticated online decisions", 
   assert.match(calls[0].body, /client_secret=PRIVATE_CLIENT_CANARY/);
   assert.equal(calls[1].authorization, "Bearer PRIVATE_BEARER_CANARY");
   assert.equal(calls[2].authorization, "Bearer PRIVATE_FGA_CANARY");
+  assert.deepEqual(JSON.parse(calls[2].body).tuple_key, { user: "user:owner",
+    relation: "chat_ephemeral", object: "project:runa%3Apersonal" });
   assert.doesNotMatch(JSON.stringify(identity), /PRIVATE_/);
   assert.doesNotMatch(JSON.stringify(decision), /PRIVATE_/);
 });

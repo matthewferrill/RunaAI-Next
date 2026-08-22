@@ -396,6 +396,7 @@ test("Control owner tools bind the exact candidate config and DPAPI user context
   const maintenance = readFileSync(new URL("./control-maintenance.mjs", import.meta.url), "utf8");
   const cutover = readFileSync(new URL("./control/Run-ControlProtectedCutover.mjs", import.meta.url), "utf8");
   const promotionDeploy = readFileSync(new URL("./control/Deploy-ControlPromotionCandidate.ps1", import.meta.url), "utf8");
+  const ownerRelationships = readFileSync(new URL("./control/Configure-ControlOwnerRelationships.ps1", import.meta.url), "utf8");
   const window = readFileSync(new URL("./control/Invoke-ControlProtectedMaintenanceWindow.ps1", import.meta.url), "utf8");
   assert.match(prepare, /config\\candidate\.json/);
   assert.match(operator, /config\\\\candidate\.json/);
@@ -486,6 +487,11 @@ test("Control owner tools bind the exact candidate config and DPAPI user context
   assert.match(completedRebind, /priorConfig\.cutoverId/);
   assert.match(completedRebind, /priorManifest\.releaseId/);
   assert.match(completedRebind, /candidate\.pre-gate6d-/);
+  assert.match(ownerRelationships, /owner-relationships-partial-state/);
+  assert.match(ownerRelationships, /project:runa%3Apersonal/);
+  assert.match(ownerRelationships, /deletes=@\{tuple_keys=\$keys\}/);
+  assert.match(ownerRelationships, /legacyModified=\$false/);
+  assert.doesNotMatch(ownerRelationships, /Write-Output.*token|Set-Clipboard/);
   assert.match(window, /Set-ControlLegacyWriteFreeze\.ps1/);
   assert.match(window, /for\(\$index=0;\$index-lt 120;\$index\+\+\)/);
   assert.match(window, /Start-Sleep -Seconds 30/);

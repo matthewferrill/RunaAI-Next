@@ -92,7 +92,7 @@ async function main(argv) {
   const releaseRoot = resolve(args["release-root"]);
   const configPath = resolve(args.config);
   const expectedRoot = resolve("C:\\AI\\RunaAI-Next-Candidate\\releases", args["expected-release-id"]);
-  if (releaseRoot !== expectedRoot || configPath !== resolve("C:\\AI\\RunaAI-Next-Candidate\\config\\release.json")) {
+  if (releaseRoot !== expectedRoot || configPath !== resolve("C:\\AI\\RunaAI-Next-Candidate\\config\\candidate.json")) {
     throw coded("gate6c-owner-path-invalid", "The owner operator paths are outside the exact candidate release boundary.");
   }
   const legacyRepo = resolve(args["legacy-repo"]);

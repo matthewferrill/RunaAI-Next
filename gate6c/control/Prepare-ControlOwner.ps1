@@ -14,7 +14,7 @@ Add-Type -AssemblyName System.Security
 if ($env:COMPUTERNAME -ne 'RUNA-CONTROL' -or [Security.Principal.WindowsIdentity]::GetCurrent().Name -ne 'RUNA-CONTROL\Matthew') { throw 'owner-authority-context-invalid' }
 if ([IO.Path]::GetFullPath($Root) -ne 'C:\AI\RunaAI-Next-Candidate') { throw 'candidate-root-invalid' }
 $releaseRoot = Join-Path $Root "releases\$ReleaseId"
-$configPath = Join-Path $Root 'config\release.json'
+$configPath = Join-Path $Root 'config\candidate.json'
 $operatorPath = Join-Path $Root 'staging\gate6c-ff15c61\Advance-ControlRecoveryAuthority.mjs'
 $bootstrapPath = Join-Path $Root 'secrets\owner-bootstrap-password.dpapi'
 $base = 'http://127.0.0.1:9762'

@@ -17,6 +17,7 @@
     "test:gate5": "node --test gate5/gate5.test.mjs",
     "test:gate6": "node --test gate6/gate6.test.mjs",
     "test:gate6b": "node --test gate6b/gate6b.test.mjs",
+    "test:gate6c": "node --test gate6c/gate6c.test.mjs",
     "verify:gate0": "node gate0/verify-gate0.mjs",
     "verify:gate1:integration": "node gate1/run-integration.mjs",
     "verify:gate1:models": "node gate1/run-model-validation.mjs",
@@ -27,6 +28,7 @@
     "verify:gate5:integration": "node gate5/run-integration.mjs",
     "verify:gate6:integration": "node gate6/run-integration.mjs",
     "verify:gate6b:integration": "node gate6b/run-integration.mjs",
+    "verify:gate6c:integration": "node gate6c/run-integration.mjs",
     "build:gate6b:release": "node gate6b/build-release.mjs"
   },
   "keywords": [],

@@ -1,0 +1,451 @@
+import assert from "node:assert/strict";
+import test from "node:test";
+import { randomBytes } from "node:crypto";
+import { mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { makeSnapshot as makeProjectChat, testCipher as coreCipher, PARTICIPANT } from "../gate4/fixtures.mjs";
+import { makeSnapshot as makeLearning, testCipher as learningCipher } from "../gate4b/fixtures.mjs";
+import { assertBackupProof, assertBinding, assertOwnerAggregateInventory, bindingDigest,
+  digestEvidence } from "./contracts.mjs";
+import { advanceOwnerCeremony, assertOwnerCeremonyComplete, createOwnerCeremonyState } from "./ceremony.mjs";
+import { issueFreezeLease, releaseFreezeLease, renewFreezeLease } from "./freeze.mjs";
+import { GATE6C_BACKUP_VERSION, GATE6C_BINDING_VERSION, GATE6C_INVENTORY_VERSION,
+  GATE6C_OWNER_STEPS } from "./formats.mjs";
+import { Gate6cFinalDeltaService, buildGate6cFinalDeltaPlan } from "./migration.mjs";
+import { reconcileGate6c } from "./reconciliation.mjs";
+import { inspectSelectedContinuity } from "./selected-inventory.mjs";
+import { MemoryGate6cStore } from "./adapters/memory.mjs";
+import { BrowserOwnerCeremonyService, MemoryBrowserCeremonyStore } from "./browser-ceremony.mjs";
+
+const SOURCE = "b4db04090d8f0df87234fab573b396e7824c5354";
+const TARGET = "77f3017d10f4e4670ad551b3d000cc2569c1dfdb";
+const NOW = new Date("2026-08-21T22:00:00.000Z");
+const binding = () => ({ schemaVersion: GATE6C_BINDING_VERSION, cutoverId: "selected-core-2026-08-21",
+  releaseId: "runaai-next-selected-core-2026-08-21-77f3017", releaseCommit: TARGET,
+  artifactDigest: "a7fcc146b40c4522f10b1f11c81aafc320800482bd70efc81f6d02ce880599e2",
+  sourceGeneration: SOURCE, targetGeneration: "runaai-next-control-candidate-v1",
+  participantRefHmac: "a".repeat(64) });
+const evidence = (command) => ({ passed: true, evidenceDigest: digestEvidence({ command, synthetic: true }),
+  ...(["enroll-primary-credential", "verify-sign-in", "verify-fresh-step-up",
+    "enroll-recovery-credential", "verify-recovery"].includes(command) ? { method: "webauthn" } : {}),
+  ...(command === "verify-revocation" ? { sessionsRevoked: true, capabilitiesRevoked: true } : {}) });
+function ceremony(authority = binding()) {
+  let state = createOwnerCeremonyState(authority);
+  GATE6C_OWNER_STEPS.forEach((command, index) => {
+    state = advanceOwnerCeremony(state, { operationId: `owner-${index + 1}`, command,
+      evidence: evidence(command), observedAt: new Date(NOW.getTime() + index * 1_000).toISOString() });
+  });
+  return state;
+}
+const backup = authority => ({ schemaVersion: GATE6C_BACKUP_VERSION, bindingDigest: bindingDigest(authority),
+  scheduleActive: true, encryptedBackupCount: 3, plaintextBackupCount: 0,
+  manifestDigest: "b".repeat(64), distinctRestoreVerified: true,
+  verifiedAt: new Date(NOW.getTime() - 60_000).toISOString(), privateValuesIncluded: false });
+function snapshots() {
+  const projectChatSnapshot = makeProjectChat();
+  const learningSnapshot = makeLearning();
+  learningSnapshot.participantId = projectChatSnapshot.participantId;
+  return { projectChatSnapshot, learningSnapshot };
+}
+const setting = value => ({ schemaVersion: "runa-settings-store/v1",
+  values: { defaultIntelligenceLevel: value } });
+const receipt = (digest = "c".repeat(64)) => ({ schemaVersion: "runa2-gate6c-selected-receipt-source/v1",
+  sourceReceiptDigest: digest, occurredAt: "2026-08-21T21:00:00.000Z",
+  beforeValue: "Medium", afterValue: "High", status: "executed" });
+function planInput(overrides = {}) {
+  return { runId: "gate6c-synthetic-1", binding: binding(), ...snapshots(),
+    legacySetting: setting("High"), selectedReceipts: [receipt()], ...overrides };
+}
+function inventory(authority, domains) {
+  return { schemaVersion: GATE6C_INVENTORY_VERSION, bindingDigest: bindingDigest(authority),
+    sourceCommit: authority.sourceGeneration, sourceBranch: "main", trackedClean: true,
+    sourcePinsVerified: true, twoPassDeterministic: true, settingValueAllowed: true,
+    selectedReceiptClassified: true, domains: structuredClone(domains), deferredStoresOpened: false,
+    sourceModified: false, privateValuesIncluded: false };
+}
+function completeInput({ runId = "gate6c-synthetic-1", key = Buffer.alloc(32, 77), receipts = [receipt()] } = {}) {
+  const authority = binding();
+  const base = planInput({ runId, binding: authority, selectedReceipts: receipts });
+  const plan = buildGate6cFinalDeltaPlan(base, { coreCipher: coreCipher(), learningCipher: learningCipher(),
+    reconciliationKey: key });
+  return { input: { ...base, ownerCeremony: ceremony(authority), backupProof: backup(authority),
+    freezeLease: issueFreezeLease({ binding: authority, leaseId: "freeze-1", now: NOW }),
+    inventory: inventory(authority, plan.domains) }, plan, key };
+}
+
+test("authority binding is exact and secret-like fields are refused", () => {
+  assert.equal(assertBinding(binding()).releaseCommit, TARGET);
+  assert.throws(() => assertBinding({ ...binding(), token: "private" }), { code: "gate6c-binding-invalid" });
+  assert.throws(() => assertBinding({ ...binding(), targetGeneration: SOURCE }), { code: "gate6c-binding-invalid" });
+});
+
+test("owner ceremony enforces order and user-verified methods", () => {
+  const state = createOwnerCeremonyState(binding());
+  assert.throws(() => advanceOwnerCeremony(state, { operationId: "wrong", command: "verify-sign-in",
+    evidence: evidence("verify-sign-in"), observedAt: NOW.toISOString() }), { code: "gate6c-owner-step-order-invalid" });
+  let next = advanceOwnerCeremony(state, { operationId: "one", command: GATE6C_OWNER_STEPS[0],
+    evidence: evidence(GATE6C_OWNER_STEPS[0]), observedAt: NOW.toISOString() });
+  assert.throws(() => advanceOwnerCeremony(next, { operationId: "two", command: GATE6C_OWNER_STEPS[1],
+    evidence: { ...evidence(GATE6C_OWNER_STEPS[1]), method: "password" }, observedAt: NOW.toISOString() }),
+  { code: "gate6c-owner-method-invalid" });
+});
+
+test("complete owner ceremony proves sign-in, step-up, revocation, and recovery", () => {
+  const state = assertOwnerCeremonyComplete(ceremony(), binding());
+  assert.equal(state.complete, true);
+  assert.equal(state.events.length, 7);
+  assert.equal(JSON.stringify(state).includes("credentialId"), false);
+});
+
+test("backup proof requires recurrence, encryption, distinct restore, and freshness", () => {
+  assert.equal(assertBackupProof(backup(binding()), { binding: binding(), now: NOW }).scheduleActive, true);
+  assert.throws(() => assertBackupProof({ ...backup(binding()), plaintextBackupCount: 1 },
+    { binding: binding(), now: NOW }), { code: "gate6c-backup-proof-invalid" });
+  assert.throws(() => assertBackupProof({ ...backup(binding()), verifiedAt: "2026-08-19T00:00:00.000Z" },
+    { binding: binding(), now: NOW }), { code: "gate6c-backup-proof-stale" });
+});
+
+test("freeze lease is bounded, renewable, and not casually releasable", () => {
+  const lease = issueFreezeLease({ binding: binding(), leaseId: "freeze-1", now: NOW, durationMinutes: 30 });
+  const renewed = renewFreezeLease(lease, { binding: binding(), now: new Date(NOW.getTime() + 60_000), durationMinutes: 45 });
+  assert.ok(Date.parse(renewed.expiresAt) > Date.parse(lease.expiresAt));
+  assert.throws(() => releaseFreezeLease(renewed, { binding: binding(), now: new Date(NOW.getTime() + 120_000),
+    reason: "review-needed" }), { code: "gate6c-freeze-release-denied" });
+  assert.equal(releaseFreezeLease(renewed, { binding: binding(), now: new Date(NOW.getTime() + 120_000),
+    reason: "verified-rollback" }).status, "released");
+});
+
+test("owner aggregate inventory accepts exactly four selected domains", () => {
+  const { plan } = completeInput();
+  assert.equal(Object.keys(assertOwnerAggregateInventory(inventory(binding(), plan.domains),
+    { binding: binding() }).domains).length, 4);
+  const wrong = inventory(binding(), plan.domains); delete wrong.domains.setting;
+  assert.throws(() => assertOwnerAggregateInventory(wrong, { binding: binding() }),
+    { code: "gate6c-domain-set-invalid" });
+});
+
+test("final delta maps all selected domains and no deferred store", () => {
+  const { plan } = completeInput();
+  assert.deepEqual(Object.keys(plan.domains).sort(), ["action-receipts", "learning-events", "project-chat", "setting"]);
+  assert.equal(plan.setting.value, "High");
+  assert.equal(plan.receiptRecords.length, 1);
+  assert.equal(plan.deferredStoresOpened, false);
+  assert.equal(plan.plaintextPersisted, false);
+});
+
+test("final delta accepts a verified zero-receipt source without inventing history", () => {
+  const { plan } = completeInput({ receipts: [] });
+  assert.equal(plan.domains["action-receipts"].count, 0);
+  assert.equal(plan.receiptRecords.length, 0);
+});
+
+test("final delta rejects an invalid setting and duplicate selected receipt", () => {
+  assert.throws(() => buildGate6cFinalDeltaPlan(planInput({ legacySetting: setting("Extreme") }),
+    { coreCipher: coreCipher(), learningCipher: learningCipher(), reconciliationKey: Buffer.alloc(32, 1) }),
+  { code: "gate6c-setting-source-invalid" });
+  assert.throws(() => buildGate6cFinalDeltaPlan(planInput({ selectedReceipts: [receipt(), receipt()] }),
+    { coreCipher: coreCipher(), learningCipher: learningCipher(), reconciliationKey: Buffer.alloc(32, 1) }),
+  { code: "gate6c-selected-receipt-duplicate" });
+});
+
+test("final delta refuses participant and source-generation drift", () => {
+  const mismatched = planInput(); mismatched.learningSnapshot.participantId = "another-owner";
+  assert.throws(() => buildGate6cFinalDeltaPlan(mismatched,
+    { coreCipher: coreCipher(), learningCipher: learningCipher(), reconciliationKey: Buffer.alloc(32, 1) }),
+  { code: "gate6c-participant-mismatch" });
+  const drift = planInput(); drift.learningSnapshot.sourceCommit = "d".repeat(40);
+  assert.throws(() => buildGate6cFinalDeltaPlan(drift,
+    { coreCipher: coreCipher(), learningCipher: learningCipher(), reconciliationKey: Buffer.alloc(32, 1) }),
+  { code: "gate6c-source-generation-drift" });
+});
+
+test("staging commits once and exact retry is idempotent", async () => {
+  const { input, key } = completeInput(); const store = new MemoryGate6cStore();
+  const service = new Gate6cFinalDeltaService({ store, coreCipher: coreCipher(),
+    learningCipher: learningCipher(), reconciliationKey: key, now: () => NOW });
+  const first = await service.stage(input); const replay = await service.stage(input);
+  assert.equal(first.committed, true); assert.equal(first.replayed, false); assert.equal(replay.replayed, true);
+  assert.equal(store.audit(PARTICIPANT).receipts, 1);
+});
+
+test("changed input under one run id is refused", async () => {
+  const { input, key } = completeInput(); const store = new MemoryGate6cStore();
+  const service = new Gate6cFinalDeltaService({ store, coreCipher: coreCipher(),
+    learningCipher: learningCipher(), reconciliationKey: key, now: () => NOW });
+  await service.stage(input);
+  const changed = completeInput({ key, receipts: [] }).input;
+  await assert.rejects(() => service.stage(changed), { code: "gate6c-run-conflict" });
+});
+
+test("failure before commit leaves no target rows", async () => {
+  const { input, key } = completeInput(); const store = new MemoryGate6cStore();
+  const service = new Gate6cFinalDeltaService({ store, coreCipher: coreCipher(),
+    learningCipher: learningCipher(), reconciliationKey: key, now: () => NOW });
+  await assert.rejects(() => service.stage(input, { failBeforeCommit: true }), { code: "gate6c-simulated-before-commit" });
+  assert.equal(store.audit(PARTICIPANT), null);
+});
+
+test("response loss retries to the one committed run", async () => {
+  const { input, key } = completeInput(); const store = new MemoryGate6cStore();
+  const service = new Gate6cFinalDeltaService({ store, coreCipher: coreCipher(),
+    learningCipher: learningCipher(), reconciliationKey: key, now: () => NOW });
+  await assert.rejects(() => service.stage(input, { failAfterCommit: true }), { code: "gate6c-response-lost" });
+  assert.equal((await service.stage(input)).replayed, true);
+});
+
+test("pre-promotion rollback restores only the target run", async () => {
+  const { input, key } = completeInput(); const store = new MemoryGate6cStore();
+  const service = new Gate6cFinalDeltaService({ store, coreCipher: coreCipher(),
+    learningCipher: learningCipher(), reconciliationKey: key, now: () => NOW });
+  await service.stage(input);
+  assert.throws(() => service.rollback({ runId: input.runId, targetAuthoritative: true,
+    legacyRuntimeVerified: true, selectedWritesStillFrozen: true }), { code: "gate6c-rollback-boundary-invalid" });
+  const result = await service.rollback({ runId: input.runId, targetAuthoritative: false,
+    legacyRuntimeVerified: true, selectedWritesStillFrozen: true });
+  assert.equal(result.legacyModified, false); assert.equal(store.audit(PARTICIPANT), null);
+});
+
+test("exact reconciliation covers all domains and approved knowledge", () => {
+  const { plan } = completeInput();
+  const domains = Object.fromEntries(Object.entries(plan.domains).map(([name, value]) => [name,
+    { sourceCount: value.count, targetCount: value.count,
+      sourceDigest: value.logicalDigest, targetDigest: value.logicalDigest }]));
+  const knowledge = { sourceActive: 2, targetActive: 2, sourceDigest: "d".repeat(64),
+    targetDigest: "d".repeat(64), sourceScopeCounts: { personal: 1, project: 1 },
+    targetScopeCounts: { personal: 1, project: 1 } };
+  const result = reconcileGate6c({ binding: binding(), domains, approvedKnowledge: knowledge,
+    sourceStillFrozen: true, deferredStoresUntouched: true, oneDeedOneReceipt: true });
+  assert.equal(result.exact, true);
+  domains.setting.targetCount = 2;
+  assert.throws(() => reconcileGate6c({ binding: binding(), domains, approvedKnowledge: knowledge,
+    sourceStillFrozen: true, deferredStoresUntouched: true, oneDeedOneReceipt: true }),
+  { code: "gate6c-domain-reconciliation-failed" });
+});
+
+test("private evidence fields are refused", () => {
+  const { plan } = completeInput(); const value = inventory(binding(), plan.domains);
+  value.sessionToken = "PRIVATE";
+  assert.throws(() => assertOwnerAggregateInventory(value, { binding: binding() }),
+    { code: "gate6c-owner-inventory-invalid" });
+});
+
+test("each plan uses a memory-only reconciliation key", () => {
+  const one = buildGate6cFinalDeltaPlan(planInput(), { coreCipher: coreCipher(),
+    learningCipher: learningCipher(), reconciliationKey: Buffer.alloc(32, 1) });
+  const two = buildGate6cFinalDeltaPlan(planInput(), { coreCipher: coreCipher(),
+    learningCipher: learningCipher(), reconciliationKey: randomBytes(32) });
+  assert.notEqual(one.domains.setting.logicalDigest, two.domains.setting.logicalDigest);
+  assert.equal(JSON.stringify(one).includes("reconciliationKey"), false);
+});
+
+test("selected owner inventory reads only setting and action roots", () => {
+  const root = mkdtempSync(join(tmpdir(), "gate6c-selected-"));
+  try {
+    mkdirSync(join(root, "settings"), { recursive: true });
+    writeFileSync(join(root, "settings", "values.json"), JSON.stringify(setting("High")));
+    const result = inspectSelectedContinuity({ stateRoot: root, reconciliationKey: Buffer.alloc(32, 7) });
+    assert.equal(result.domains.setting.count, 1);
+    assert.equal(result.domains["action-receipts"].count, 0);
+    assert.equal(result.deferredStoresOpened, false);
+    assert.equal(JSON.stringify(result).includes("High"), false);
+  } finally { rmSync(root, { recursive: true, force: true }); }
+});
+
+test("selected owner inventory fails closed on a possible setting action", () => {
+  const root = mkdtempSync(join(tmpdir(), "gate6c-selected-"));
+  try {
+    mkdirSync(join(root, "settings"), { recursive: true });
+    mkdirSync(join(root, "actions", "proposals"), { recursive: true });
+    writeFileSync(join(root, "settings", "values.json"), JSON.stringify(setting("Medium")));
+    writeFileSync(join(root, "actions", "proposals", "0000000000000001.json"), JSON.stringify({
+      schemaVersion: "runa-action-pathway/v1", kind: "file-write",
+      payload: { relativePath: "defaultIntelligenceLevel" } }));
+    assert.throws(() => inspectSelectedContinuity({ stateRoot: root,
+      reconciliationKey: Buffer.alloc(32, 7) }), { code: "gate6c-selected-receipt-review-required" });
+  } finally { rmSync(root, { recursive: true, force: true }); }
+});
+
+test("Control scheduled backup never writes a plaintext dump", () => {
+  const source = readFileSync(new URL("./control/Invoke-ControlScheduledBackup.ps1", import.meta.url), "utf8");
+  assert.match(source, /RedirectStandardOutput = \$true/);
+  assert.match(source, /ProtectedData\]::Protect/);
+  assert.match(source, /DataProtectionScope\]::LocalMachine/);
+  assert.match(source, /completed\.Count -ge 30/);
+  assert.doesNotMatch(source, /--file|\.dump['"]/);
+  assert.doesNotMatch(source, /Remove-Item/);
+});
+
+test("Control restore proof streams decrypted archives only to distinct targets", () => {
+  const source = readFileSync(new URL("./control/Invoke-ControlScheduledRestoreProof.ps1", import.meta.url), "utf8");
+  assert.match(source, /ProtectedData\]::Unprotect/);
+  assert.match(source, /RedirectStandardInput = \$true/);
+  assert.match(source, /g6cproof_runa/);
+  assert.match(source, /dropdb\.exe/);
+  assert.match(source, /plaintextBackupCount=0/);
+  assert.doesNotMatch(source, /WriteAllBytes|Set-Content/);
+});
+
+test("Control backup schedule is SYSTEM-owned and fail-closed at its capacity", () => {
+  const source = readFileSync(new URL("./control/Register-ControlBackupSchedule.ps1", import.meta.url), "utf8");
+  assert.match(source, /\$taskName = 'ProtectedBackup'/);
+  assert.match(source, /UserId 'SYSTEM'/);
+  assert.match(source, /-AtStartup/);
+  assert.match(source, /retentionMode='fail-closed-at-30-generations'/);
+  assert.doesNotMatch(source, /Unregister-ScheduledTask|Remove-Item/);
+});
+
+test("Control freeze tool preserves reads, records original ACL, and cannot casually release", () => {
+  const source = readFileSync(new URL("./control/Set-ControlLegacyWriteFreeze.ps1", import.meta.url), "utf8");
+  assert.match(source, /conservative-entire-legacy-state-root-write-deny/);
+  assert.match(source, /legacyReadsAvailable=\$true/);
+  assert.match(source, /SetSecurityDescriptorSddlForm/);
+  assert.match(source, /verified-rollback','gate6-closed/);
+  assert.match(source, /DataProtectionScope\]::LocalMachine/);
+  assert.match(source, /legacy-state-changed-during-freeze/);
+  assert.doesNotMatch(source, /Remove-Item|rmSync|\.runaai-local\\state.*-Recurse -Force/);
+});
+
+test("browser owner ceremony uses PKCE, exact owner binding, WebAuthn, and opaque sessions", async () => {
+  const store = new MemoryBrowserCeremonyStore();
+  const active = new Set();
+  const refreshPairs = new Map();
+  const calls = { exchanges: [], revoked: [] };
+  const oidc = {
+    issuer: "http://keycloak.test/realms/runaai-next",
+    authorizationUrl(input) {
+      const value = new URL(`${this.issuer}/protocol/openid-connect/auth`);
+      value.search = new URLSearchParams({ state: input.state, code_challenge: input.codeChallenge,
+        code_challenge_method: "S256", redirect_uri: input.redirectUri }).toString();
+      if (input.action) value.searchParams.set("kc_action", input.action);
+      return value.toString();
+    },
+    async exchangeCode(input) {
+      calls.exchanges.push(input);
+      const token = `PRIVATE_BROWSER_TOKEN_${calls.exchanges.length}`;
+      const refreshToken = `PRIVATE_BROWSER_REFRESH_${calls.exchanges.length}`;
+      active.add(token);
+      refreshPairs.set(refreshToken, token);
+      return { accessToken: token, refreshToken };
+    },
+    async inspect(token) {
+      return { active: active.has(token), issuer: this.issuer, audience: ["runaai-next"],
+        subject: "prebound-owner-subject", authenticatedAt: NOW.toISOString(),
+        expiresAt: new Date(NOW.getTime() + 600_000).toISOString(), methods: ["webauthn"] };
+    },
+    async countPasswordless(token) {
+      return { decided: true, count: token.endsWith("_1") ? 1 : token.endsWith("_4") ? 2 : 0 };
+    },
+    async revoke(token) { active.delete(refreshPairs.get(token)); calls.revoked.push(token); return { revoked: true }; },
+  };
+  let randomCounter = 18;
+  const service = new BrowserOwnerCeremonyService({ store, oidc,
+    principalStore: { async bySubject(subject) { assert.equal(subject, "prebound-owner-subject");
+      return { principalId: "matthew-owner", status: "active" }; } }, binding: binding(),
+    publicBaseUrl: "https://192.168.50.20:9761", clientId: "runaai-next",
+    expectedPrincipalId: "matthew-owner", now: () => NOW,
+    random: size => Buffer.alloc(size, ++randomCounter),
+    capabilityRevoker: { async revokeAll() { return { revoked: 0, remaining: 0 }; } },
+  });
+  await service.initialize();
+  await store.advanceCeremony({ binding: binding(), operationId: "external-recovery-authority",
+    command: "verify-recovery-authority", evidence: { passed: true,
+      evidenceDigest: digestEvidence({ synthetic: "recovery-authority" }) }, observedAt: NOW.toISOString() });
+
+  const primary = await service.start("enroll-primary-credential");
+  const primaryUrl = new URL(primary.redirectUrl);
+  assert.equal(primaryUrl.searchParams.get("kc_action"), "webauthn-register-passwordless");
+  const enrolled = await service.callback({ state: primaryUrl.searchParams.get("state"),
+    code: "enroll-primary", actionStatus: "success" });
+  assert.equal(enrolled.nextStep, "verify-sign-in");
+
+  const signIn = await service.start("verify-sign-in");
+  const signInUrl = new URL(signIn.redirectUrl);
+  assert.equal(signInUrl.searchParams.get("code_challenge_method"), "S256");
+  assert.equal(signInUrl.searchParams.has("code_verifier"), false);
+  const state = signInUrl.searchParams.get("state");
+  const signedIn = await service.callback({ state, code: "code-one" });
+  assert.equal(signedIn.nextStep, "verify-fresh-step-up");
+  assert.doesNotMatch(JSON.stringify(signedIn), /PRIVATE_BROWSER_TOKEN/);
+  await assert.rejects(service.callback({ state, code: "code-one" }),
+    { code: "gate6c-browser-flow-invalid" });
+
+  const stepUp = await service.start("verify-fresh-step-up");
+  await service.callback({ state: new URL(stepUp.redirectUrl).searchParams.get("state"), code: "code-two" });
+  const revoked = await service.revokeAndVerify();
+  assert.equal(revoked.nextStep, "enroll-recovery-credential");
+  assert.equal(calls.revoked.length, 3);
+  await assert.rejects(service.credentialForSession(signedIn.sessionId),
+    { code: "gate6c-browser-session-invalid" });
+
+  const recoveryEnrollment = await service.start("enroll-recovery-credential");
+  const recoveryEnrollmentUrl = new URL(recoveryEnrollment.redirectUrl);
+  await service.callback({ state: recoveryEnrollmentUrl.searchParams.get("state"),
+    code: "enroll-recovery", actionStatus: "success" });
+  const recovery = await service.start("verify-recovery");
+  const recovered = await service.callback({ state: new URL(recovery.redirectUrl).searchParams.get("state"),
+    code: "code-three" });
+  assert.equal(recovered.nextStep, null);
+  assert.equal((await service.status()).complete, true);
+});
+
+test("browser owner ceremony rejects password-only and an unbound subject", async () => {
+  async function prepared(decision, principal) {
+    const store = new MemoryBrowserCeremonyStore();
+    const oidc = { issuer: "http://issuer", authorizationUrl(input) {
+      return `http://issuer/auth?state=${encodeURIComponent(input.state)}`;
+    }, async exchangeCode() { return { accessToken: "PRIVATE", refreshToken: "PRIVATE_REFRESH" }; }, async inspect() { return decision; },
+    async revoke() { return { revoked: true }; } };
+    const service = new BrowserOwnerCeremonyService({ store, oidc,
+      principalStore: { async bySubject() { return principal; } }, binding: binding(),
+      publicBaseUrl: "https://candidate.test", clientId: "runaai-next",
+      expectedPrincipalId: "matthew-owner", now: () => NOW, random: size => Buffer.alloc(size, 23) });
+    await service.initialize();
+    for (const [operationId, command, evidenceValue] of [
+      ["authority", "verify-recovery-authority", { passed: true,
+        evidenceDigest: digestEvidence({ command: "authority" }) }],
+      ["enroll", "enroll-primary-credential", { passed: true, method: "webauthn",
+        evidenceDigest: digestEvidence({ command: "enroll" }) }],
+    ]) await store.advanceCeremony({ binding: binding(), operationId, command,
+      evidence: evidenceValue, observedAt: NOW.toISOString() });
+    return { service, state: new URL((await service.start("verify-sign-in")).redirectUrl).searchParams.get("state") };
+  }
+  const base = { active: true, issuer: "http://issuer", audience: ["runaai-next"],
+    subject: "subject", authenticatedAt: NOW.toISOString(),
+    expiresAt: new Date(NOW.getTime() + 60_000).toISOString() };
+  const password = await prepared({ ...base, methods: ["pwd"] },
+    { principalId: "matthew-owner", status: "active" });
+  await assert.rejects(password.service.callback({ state: password.state, code: "password" }),
+    { code: "gate6c-browser-user-verification-required" });
+  const wrongOwner = await prepared({ ...base, methods: ["webauthn"] },
+    { principalId: "someone-else", status: "active" });
+  await assert.rejects(wrongOwner.service.callback({ state: wrongOwner.state, code: "wrongown" }),
+    { code: "gate6c-browser-owner-binding-mismatch" });
+});
+
+test("browser enrollment requires the exact distinct passkey count", async () => {
+  const store = new MemoryBrowserCeremonyStore();
+  let active = true;
+  const oidc = { issuer: "http://issuer", authorizationUrl(input) {
+    return `http://issuer/auth?state=${encodeURIComponent(input.state)}`;
+  }, async exchangeCode() { return { accessToken: "PRIVATE", refreshToken: "PRIVATE_REFRESH" }; },
+  async inspect() { return { active, issuer: "http://issuer", audience: ["runaai-next"],
+    subject: "owner-subject", authenticatedAt: NOW.toISOString(),
+    expiresAt: new Date(NOW.getTime() + 60_000).toISOString(), methods: ["pwd"] }; },
+  async countPasswordless() { return { decided: true, count: 0 }; },
+  async revoke() { active = false; return { revoked: true }; } };
+  const service = new BrowserOwnerCeremonyService({ store, oidc,
+    principalStore: { async bySubject() { return { principalId: "matthew-owner", status: "active" }; } },
+    binding: binding(), publicBaseUrl: "https://candidate.test", clientId: "runaai-next",
+    expectedPrincipalId: "matthew-owner", now: () => NOW, random: size => Buffer.alloc(size, 29) });
+  await service.initialize();
+  await store.advanceCeremony({ binding: binding(), operationId: "authority", command: "verify-recovery-authority",
+    evidence: { passed: true, evidenceDigest: digestEvidence({ command: "authority" }) },
+    observedAt: NOW.toISOString() });
+  const started = await service.start("enroll-primary-credential");
+  await assert.rejects(service.callback({ state: new URL(started.redirectUrl).searchParams.get("state"),
+    code: "enrollment-code", actionStatus: "success" }),
+  { code: "gate6c-browser-credential-count-invalid" });
+  assert.equal((await service.status()).nextStep, "enroll-primary-credential");
+  assert.equal(active, false);
+});

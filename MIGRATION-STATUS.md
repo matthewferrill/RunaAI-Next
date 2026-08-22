@@ -228,6 +228,17 @@ repository and never push migration work into either source repository.
   preflight. Non-protected implementation may proceed, but owner enrollment, protected-store access,
   legacy write freeze, retained import, and traffic promotion remain blocked until the coordinated
   maintenance window.
+- Gate 6C's first non-protected preparation tranche is green. Its focused suite passes 24/24, the
+  full Node suite 276/276, Gate 0 and all disposable Gate 1-6C integrations are green, and every
+  disposable service stopped. The tranche implements exact authority contracts, the owner-ceremony
+  state machine, encrypted backup/scheduled restore tooling, a fail-closed selected setting/action
+  inventory, four-domain PostgreSQL staging, exact reconciliation, restart/replay, and target-only
+  rollback. It opened no protected store and changed no Control service, ACL, credential, retained
+  protected row, traffic, or authority. Legacy has no reliable selective maintenance switch; the
+  prepared safe default is a reversible whole-state write deny that preserves reads and requires a
+  named maintenance-window decision before activation. The current hard implementation prerequisite
+  is a real browser OIDC/PKCE and WebAuthn ceremony entry point; synthetic evidence or an admin token
+  cannot substitute for witnessed owner sign-in, step-up, revocation, and recovery.
 
 ## Bootstrap findings
 
@@ -270,7 +281,7 @@ plain-language steward experience, or governed action pathway.
 | 3 | One reversible governed idempotent action | Complete; accepted and merged as `0680cfb` | Complete |
 | 4 | Governed data migration, one domain at a time | Complete; accepted and merged as `2c38dd5`; legacy unchanged | Complete |
 | 5 | Operations, private transport, authentication/authorization, recovery | Complete; accepted and merged as `a986419` | Complete |
-| 6 | Selected-core production cutover and rollback window | Gate 6A accepted; Gate 6B complete and green; Gate 6C contract frozen for non-protected implementation; legacy unchanged | Gate 6C owner/protected execution remains blocked until tooling is green and the steward is present |
+| 6 | Selected-core production cutover and rollback window | Gate 6A accepted; Gate 6B complete; Gate 6C non-protected code and disposable browser ceremony green but not deployed; legacy unchanged | Review, build, and deploy the exact shadow ceremony release before owner/protected execution |
 | 7 | Deferred extensions | Not started | New baseline and separate approval per extension group |
 
 ## Bootstrap validation
@@ -320,8 +331,11 @@ legacy on Control as an empty shadow, and its service restart, host restart, dep
 listener, and encrypted restore behavior are proven. It still has no owner, protected record, write
 authority, or production traffic.
 
-Gate 6C's contract is frozen. Complete its non-protected implementation and disposable proof as one
-accelerated preparation train. Then present one coordinated owner/maintenance window for new target
+Gate 6C's contract is frozen and its non-protected implementation tranche is green. The private
+browser OIDC/PKCE entry point, encrypted PostgreSQL session store, passkey enrollment actions, exact
+owner binding, and revocation checks are implemented and disposable-tested, but are not deployed on
+Control. Review and build one new immutable shadow release, deploy and prove that entry point plus the
+recurring backup schedule, then present one coordinated owner/maintenance window for new target
 credential enrollment, final backup verification, allowlisted aggregate preflight, selected-write
 freeze, memory-only retained delta, exact reconciliation, and immediate Gate 6D promotion or rollback.
 E3 remains deferred, E4/device-vault ciphertext is not copied, E5 is absent, and the separate

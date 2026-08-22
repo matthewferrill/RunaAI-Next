@@ -260,6 +260,7 @@ $candidate = [ordered]@{
   databaseUrlRef='file:../secrets/database-url'
   keyRefs=@{ coreEncryption='file:../secrets/core-encryption'; coreHmac='file:../secrets/core-hmac'; learningEncryption='file:../secrets/learning-encryption'; learningHmac='file:../secrets/learning-hmac'; telemetryHmac='file:../secrets/telemetry-hmac' }
   keycloak=@{ issuer='http://127.0.0.1:9762/realms/runaai-next'; clientId='runaai-next'; clientCredentialRef='file:../secrets/keycloak-client' }
+  gate6c=@{ enabled=$false; legacyCommit='b4db04090d8f0df87234fab573b396e7824c5354'; expectedPrincipalId='matthew-owner' }
   openfga=@{ baseUrl='http://127.0.0.1:9763'; storeId=$fgaFacts.storeId; modelId=$fgaFacts.modelId; credentialRef='file:../secrets/openfga-token' }
   provider=@{ baseUrl='http://127.0.0.1:9770/v1'; modelId=$ModelId }
   services=@{ postgresql=@{ version='18.6'; configurationDigest=$pgIdentity }; keycloak=@{ version='26.7.2'; configurationDigest=$kcIdentity }; openfga=@{ version='1.18.3'; configurationDigest=$fgaIdentity }; caddy=@{ version='2.11.4'; configurationDigest=$caddyIdentity } }

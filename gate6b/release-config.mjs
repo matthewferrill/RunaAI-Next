@@ -9,6 +9,8 @@ const secretRef = z.string().regex(/^(env|file|vault|secret-store):[A-Za-z0-9._/
 const url = z.string().url().max(500);
 const bounded = z.string().min(1).max(200);
 const service = z.object({ version: bounded, configurationDigest: z.string().regex(/^[a-f0-9]{64}$/) }).strict();
+const gate6c = z.object({ enabled: z.boolean(), legacyCommit: z.string().regex(/^[a-f0-9]{40}$/),
+  expectedPrincipalId: z.string().regex(/^[a-z0-9][a-z0-9-]{0,63}$/) }).strict();
 const schema = z.object({
   schemaVersion: z.literal("runa2-gate6b-release-config/v1"),
   profile: z.literal("release"),
@@ -23,6 +25,7 @@ const schema = z.object({
   keyRefs: z.object({ coreEncryption: secretRef, coreHmac: secretRef, learningEncryption: secretRef,
     learningHmac: secretRef, telemetryHmac: secretRef }).strict(),
   keycloak: z.object({ issuer: url, clientId: bounded, clientCredentialRef: secretRef }).strict(),
+  gate6c: gate6c.optional(),
   openfga: z.object({ baseUrl: url, storeId: bounded, modelId: bounded, credentialRef: secretRef }).strict(),
   provider: z.object({ baseUrl: url, modelId: bounded }).strict(),
   services: z.object({ postgresql: service, keycloak: service, openfga: service, caddy: service }).strict(),

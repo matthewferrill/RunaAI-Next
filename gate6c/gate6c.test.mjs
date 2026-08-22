@@ -482,6 +482,34 @@ test("browser enrollment requires the exact distinct passkey count", async () =>
   assert.equal(active, false);
 });
 
+test("an interrupted enrollment resumes by proving the exact existing passkey", async () => {
+  const store = new MemoryBrowserCeremonyStore();
+  const oidc = { issuer: "http://issuer", authorizationUrl(input) {
+    const value = new URL("http://issuer/auth");
+    value.searchParams.set("state", input.state);
+    if (input.action) value.searchParams.set("kc_action", input.action);
+    return value.toString();
+  }, async exchangeCode() { return { accessToken: "PRIVATE", refreshToken: "PRIVATE_REFRESH" }; },
+  async inspect() { return { active: true, issuer: "http://issuer", audience: ["runaai-next"],
+    subject: "owner-subject", authenticatedAt: NOW.toISOString(),
+    expiresAt: new Date(NOW.getTime() + 60_000).toISOString(), methods: ["webauthn"] }; },
+  async countPasswordless() { return { decided: true, count: 1 }; },
+  async revoke() { return { revoked: true }; } };
+  const service = new BrowserOwnerCeremonyService({ store, oidc,
+    principalStore: { async bySubject() { return { principalId: "matthew-owner", status: "active" }; } },
+    binding: binding(), publicBaseUrl: "https://candidate.test", clientId: "runaai-next",
+    expectedPrincipalId: "matthew-owner", now: () => NOW, random: size => Buffer.alloc(size, 31) });
+  await service.initialize();
+  await store.advanceCeremony({ binding: binding(), operationId: "authority", command: "verify-recovery-authority",
+    evidence: { passed: true, evidenceDigest: digestEvidence({ command: "authority" }) },
+    observedAt: NOW.toISOString() });
+  const resumed = await service.start("enroll-primary-credential", { resumeExisting: true });
+  const url = new URL(resumed.redirectUrl);
+  assert.equal(url.searchParams.has("kc_action"), false);
+  const completed = await service.callback({ state: url.searchParams.get("state"), code: "resume-code" });
+  assert.equal(completed.nextStep, "verify-sign-in");
+});
+
 test("owner operator atomically binds the exact target principal and advances recovery authority", async () => {
   const authority = binding();
   const initial = createOwnerCeremonyState(authority);

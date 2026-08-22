@@ -94,6 +94,11 @@ export function createCandidateHttpServer({ application, runtimeStatus, readines
         const started = await browserCeremony.start(url.searchParams.get("step"));
         return redirect(response, started.redirectUrl);
       }
+      if (request.method === "GET" && url.pathname === "/owner-ceremony/resume-enrollment") {
+        if (!browserCeremony) throw coded("gate6c-browser-ceremony-unavailable", "The owner ceremony is unavailable.");
+        const started = await browserCeremony.start(url.searchParams.get("step"), { resumeExisting: true });
+        return redirect(response, started.redirectUrl);
+      }
       if (request.method === "GET" && url.pathname === "/owner-ceremony/callback") {
         if (!browserCeremony) throw coded("gate6c-browser-ceremony-unavailable", "The owner ceremony is unavailable.");
         const result = await browserCeremony.callback({ state: url.searchParams.get("state"),

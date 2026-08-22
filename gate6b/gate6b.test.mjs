@@ -195,7 +195,7 @@ test("HTTP owner ceremony redirects through OIDC and sets only an opaque host co
     publicBaseUrl: "https://candidate.test",
     async status() { return { schemaVersion: "runa2-gate6c-browser-status/v1",
       nextStep: "verify-sign-in", complete: false, privateValuesIncluded: false }; },
-    async start(step) { calls.push(["start", step]); return { redirectUrl: "http://keycloak.test/auth?state=opaque" }; },
+    async start(step, options) { calls.push(["start", step, options]); return { redirectUrl: "http://keycloak.test/auth?state=opaque" }; },
     async callback(input) { calls.push(["callback", input]); return { sessionId: "opaque-session-id" }; },
     async credentialForSession(value) { calls.push(["session", value]); return "PRIVATE_TOKEN"; },
     async revokeAndVerify() { calls.push(["revoke"]); return { revision: 5, nextStep: "enroll-recovery-credential" }; },
@@ -210,6 +210,9 @@ test("HTTP owner ceremony redirects through OIDC and sets only an opaque host co
   const start = await fetch(`${base}/owner-ceremony/start?step=verify-sign-in`, { redirect: "manual" });
   assert.equal(start.status, 303);
   assert.equal(start.headers.get("location"), "http://keycloak.test/auth?state=opaque");
+  const resume = await fetch(`${base}/owner-ceremony/resume-enrollment?step=enroll-primary-credential`, { redirect: "manual" });
+  assert.equal(resume.status, 303);
+  assert.deepEqual(calls[1], ["start", "enroll-primary-credential", { resumeExisting: true }]);
   const callback = await fetch(`${base}/owner-ceremony/callback?state=opaque-state&code=opaque-code`,
     { redirect: "manual" });
   assert.equal(callback.status, 303);
@@ -224,7 +227,7 @@ test("HTTP owner ceremony redirects through OIDC and sets only an opaque host co
     headers: { origin: "https://candidate.test", cookie: "__Host-runa_owner_session=opaque-session-id" } });
   assert.equal(revoked.status, 200);
   assert.equal((await revoked.json()).nextStep, "enroll-recovery-credential");
-  assert.deepEqual(calls.map(call => call[0]), ["start", "callback", "session", "revoke"]);
+  assert.deepEqual(calls.map(call => call[0]), ["start", "start", "callback", "session", "revoke"]);
 });
 
 test("release artifact verification detects changed and extra files", async t => {

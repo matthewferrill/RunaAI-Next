@@ -220,6 +220,14 @@ repository and never push migration work into either source repository.
   at the exact pre-restart commit. Pre/post schema, counts, and complete logical authority digests match
   for the application, Keycloak, and OpenFGA databases. Gate 6B is closed without importing protected
   data or changing authority.
+- Gate 6C planning is isolated on `runa2/gate-6c-protected-staging-plan` from accepted integration
+  head `6f7ad23`. Its frozen preparation train binds the exact four selected domains, new target owner
+  ceremony, recurring encrypted backup, bounded selected-write freeze, aggregate owner preflight,
+  memory-only retained delta, exact reconciliation, abort cleanup, and promotion-ready handoff. The
+  setting value and selected action-receipt count remain unknown until an authorized aggregate-only
+  preflight. Non-protected implementation may proceed, but owner enrollment, protected-store access,
+  legacy write freeze, retained import, and traffic promotion remain blocked until the coordinated
+  maintenance window.
 
 ## Bootstrap findings
 
@@ -262,7 +270,7 @@ plain-language steward experience, or governed action pathway.
 | 3 | One reversible governed idempotent action | Complete; accepted and merged as `0680cfb` | Complete |
 | 4 | Governed data migration, one domain at a time | Complete; accepted and merged as `2c38dd5`; legacy unchanged | Complete |
 | 5 | Operations, private transport, authentication/authorization, recovery | Complete; accepted and merged as `a986419` | Complete |
-| 6 | Selected-core production cutover and rollback window | Gate 6A accepted; Gate 6B complete and green; Gate 6C/6D not started; legacy unchanged | Gate 6C protected-operation plan is next; hard blockers remain fail-closed |
+| 6 | Selected-core production cutover and rollback window | Gate 6A accepted; Gate 6B complete and green; Gate 6C contract frozen for non-protected implementation; legacy unchanged | Gate 6C owner/protected execution remains blocked until tooling is green and the steward is present |
 | 7 | Deferred extensions | Not started | New baseline and separate approval per extension group |
 
 ## Bootstrap validation
@@ -312,12 +320,13 @@ legacy on Control as an empty shadow, and its service restart, host restart, dep
 listener, and encrypted restore behavior are proven. It still has no owner, protected record, write
 authority, or production traffic.
 
-The next decision is Gate 6C protected staging. Its frozen plan must bind
-the exact final domains, owner-context backup schedule, target owner re-enrolment, source-write freeze
-boundary, memory-only decrypt/re-encrypt path, exact reconciliation, abort cleanup, and unchanged
-legacy rollback. E3 remains deferred, E4/device-vault ciphertext is not copied, E5 is absent, and the
-separate approved-knowledge vector index remains skipped. No protected operation is authorized by the
-Gate 6B result.
+Gate 6C's contract is frozen. Complete its non-protected implementation and disposable proof as one
+accelerated preparation train. Then present one coordinated owner/maintenance window for new target
+credential enrollment, final backup verification, allowlisted aggregate preflight, selected-write
+freeze, memory-only retained delta, exact reconciliation, and immediate Gate 6D promotion or rollback.
+E3 remains deferred, E4/device-vault ciphertext is not copied, E5 is absent, and the separate
+approved-knowledge vector index remains skipped. No protected operation is authorized by the Gate 6B
+result or by synthetic Gate 6C implementation.
 
 Gate 6D remains a separate maintenance-window decision: final delta under write freeze,
 zero-difference reconciliation, witnessed promotion, one governed validation action, one-hour

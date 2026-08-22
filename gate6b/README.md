@@ -39,3 +39,15 @@ closed rather than being overwritten.
 
 Gate 6B stops before protected-store access, any RunaAI import, owner enrollment, legacy-write
 freeze, traffic change, or target promotion. Those remain Gate 6C/6D decisions.
+
+## Result and recovery evidence
+
+`GATE6B-RESULTS-2026-08-21.md` and `evidence/CONTROL-SHADOW-RESULTS.json` record the exact running
+release, local verification, Control listeners, dependency-loss drills, application restart, legacy
+preservation, and final backup/restore proof. The backup procedure encrypts retained candidate dumps
+under the Control owner's DPAPI context, verifies logical parity in distinct disposable targets,
+removes plaintext work, and never opens or writes a legacy store.
+
+The candidate is empty and non-authoritative, so no recurring protected-data backup schedule is
+active. That schedule and a maintenance-window host restart rehearsal remain prerequisites before a
+later protected import or promotion; neither is implied by Gate 6B acceptance.

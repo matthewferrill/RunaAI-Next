@@ -194,17 +194,27 @@ repository and never push migration work into either source repository.
   PostgreSQL rehearsal survives restart and response loss, refuses mismatched live identity without
   advancing state, closes only after the frozen observation window, and proves target-session-aware
   rollback to legacy. Retained evidence is aggregate-only. A read-only Control inventory found the
-  live legacy runtime clean and commit-aligned at `b4db040`, but the clean RunaAI-Next verification
-  checkout is still at `4ed6a52` with no Gate 6, dependency tree, or release entry point; persistent
-  PostgreSQL, Keycloak, OpenFGA, and private Caddy services are absent. No production traffic or data
-  changed. Gate 6B is therefore hard-blocked on building one real release composition and parallel
-  persistent target before any protected final delta or promotion can safely begin.
+  live legacy runtime clean and commit-aligned at `b4db040`. At that Gate 6A observation, the clean
+  RunaAI-Next verification checkout was still at `4ed6a52` with no Gate 6, dependency tree, release
+  entry point, or persistent selected-stack service. That was the hard blocker Gate 6B subsequently
+  closed; no production traffic or protected data changed during the Gate 6A inventory.
 - Gate 6B's exact release-composition and parallel-candidate criteria are frozen on
   `runa2/gate-6b-release-composition` from accepted integration commit `2b15ef1`. The release must
   wire `runa_core`, `runa_learning`, the selected setting/action receipts, Gate 5 security, and Gate 6
   authority into one fail-closed Node 22.22.0 entry point. It may run on Control only as an isolated
   empty shadow candidate; protected data, owner credentials, selected-write freeze, and traffic
   promotion remain Gate 6C/6D boundaries.
+- Gate 6B is green at its frozen shadow boundary on the exact release
+  `runaai-next-selected-core-2026-08-21-77f3017` (`77f3017`). Control now runs candidate-owned
+  PostgreSQL 18.6, Keycloak 26.7.2, OpenFGA 1.18.3, Node 22.22.0, and Caddy 2.11.4 with only the exact
+  private Caddy bind exposed and every other candidate listener on loopback. The live artifact's
+  29,380 files verify; all dependency, service-restart, shadow-denial, and encrypted distinct-target
+  restore checks are green. The full suite passes 252/252, the focused suite 19/19, and the disposable
+  Gate 6B and Gate 6 integrations pass 11/11 and 10/10. Legacy Control remains reachable, clean, and
+  commit-aligned at `b4db040` on its original loopback listeners. No protected data, owner credential,
+  legacy-write freeze, traffic change, or promotion occurred. Recurring protected-data backup and a
+  full host-restart rehearsal are deliberately deferred until an approved Gate 6C/6D maintenance
+  boundary.
 
 ## Bootstrap findings
 
@@ -247,7 +257,7 @@ plain-language steward experience, or governed action pathway.
 | 3 | One reversible governed idempotent action | Complete; accepted and merged as `0680cfb` | Complete |
 | 4 | Governed data migration, one domain at a time | Complete; accepted and merged as `2c38dd5`; legacy unchanged | Complete |
 | 5 | Operations, private transport, authentication/authorization, recovery | Complete; accepted and merged as `a986419` | Complete |
-| 6 | Selected-core production cutover and rollback window | Gate 6A accepted; Gate 6B exact composition frozen and implementation started; legacy unchanged | Approved by steward 2026-08-21; hard blockers fail closed |
+| 6 | Selected-core production cutover and rollback window | Gate 6A accepted; Gate 6B shadow candidate green; Gate 6C protected staging and Gate 6D promotion not started; legacy unchanged | New protected-operation and maintenance gates remain explicit blockers |
 | 7 | Deferred extensions | Not started | New baseline and separate approval per extension group |
 
 ## Bootstrap validation
@@ -292,19 +302,20 @@ No dependency was changed during the prerequisite disposition. Full evidence is 
 
 ## Next decision
 
-Gate 4 is accepted and merged. Its Gate 4E result skips a new approved-knowledge index at the current
-53-lesson scale because
-no authorized vector arm demonstrated the frozen improvement threshold; the direct selector remains
-the bounded fallback and the semantic gap is explicitly measured rather than hidden.
+Gate 6B has completed the safe infrastructure work: one exact selected-core release is running beside
+legacy on Control as an empty shadow, and its restart, dependency failure, listener, and encrypted
+restore behavior are proven. It still has no owner, protected record, write authority, or production
+traffic.
 
-Gate 5 operations/security is implemented and locally reviewed on its isolated branch. The
-unresolved E3 record remains unchanged, E4 authority/device-vault state remains deferred to Gate 5,
-there is no E5 store to migrate, and the optional protected Gate 4D setting import waits for target
-participant identity binding and a later bounded owner campaign.
+The next decision is Gate 6C protected staging. Before opening a protected store, its plan must bind
+the exact final domains, owner-context backup schedule, target owner re-enrolment, source-write freeze
+boundary, memory-only decrypt/re-encrypt path, exact reconciliation, abort cleanup, and unchanged
+legacy rollback. E3 remains deferred, E4/device-vault ciphertext is not copied, E5 is absent, and the
+separate approved-knowledge vector index remains skipped. No protected operation is authorized by the
+Gate 6B result.
 
-The next decision is acceptance of the Gate 5 development boundary. Gate 6 remains blocked on that
-acceptance and a separately approved maintenance/cutover window.
-
-Qwen3.6 deliberate review, the existing live BGE endpoint, real data export/import, persistent
-services, production routing, provider reconfiguration, production authentication/authorization, and
-production cutover remain unauthorized or deferred.
+Gate 6D remains a separate maintenance-window decision: host restart rehearsal, final delta under
+write freeze, zero-difference reconciliation, witnessed promotion, one governed validation action,
+one-hour observation, and rollback authority. Qwen3.6 deliberate review, the existing live BGE
+endpoint, broader legacy surfaces, and every Gate 7 extension remain deferred unless separately
+selected.

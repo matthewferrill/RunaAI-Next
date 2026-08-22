@@ -1,7 +1,7 @@
 {
   "schemaVersion": "runa2-gate6b-control-shadow-results/v1",
   "observedAt": "2026-08-21",
-  "status": "green-shadow-only",
+  "status": "blocked-only-on-control-host-restart",
   "gateBoundary": {
     "candidateAuthority": "shadow",
     "legacyAuthorityGeneration": "legacy-runaai:control-production",
@@ -120,7 +120,9 @@
   "deferredOperationalWork": {
     "controlHostRestart": {
       "performed": false,
-      "reason": "It would interrupt the unchanged legacy service and is not a frozen Gate 6B green criterion; rehearse only in an approved maintenance window before promotion."
+      "requiredBy": "gate6/GATE6-SCOPE-AND-GREEN-CRITERIA-2026-08-21.md",
+      "gate6bClosureBlocked": true,
+      "reason": "The accepted Gate 6 umbrella criteria require this proof. It would briefly interrupt unchanged legacy RunaAI, so it needs an explicit owner-approved maintenance window."
     },
     "recurringProtectedBackupSchedule": {
       "activated": false,

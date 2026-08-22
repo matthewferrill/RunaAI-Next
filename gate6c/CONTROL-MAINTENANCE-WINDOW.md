@@ -3,6 +3,10 @@
 This runbook is intentionally not executable as one unattended command. It separates the reversible
 candidate-only setup from the owner-interactive and protected-data boundary.
 
+Current status (2026-08-22): pre-owner step 1 is complete. The exact Gate 6C browser release is
+running as an empty, non-authoritative Control shadow and is stopped at `verify-recovery-authority`.
+No target user or credential exists, and steps 2-5 below have not run.
+
 ## Before the owner joins
 
 1. Deploy the exact reviewed Gate 6C release beside legacy; do not replace the legacy checkout.

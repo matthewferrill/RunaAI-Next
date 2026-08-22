@@ -1,6 +1,6 @@
 # Gate 6C non-protected preparation results
 
-Status: preparation tranche green; live owner ceremony and protected execution not started
+Status: preparation and Control shadow deployment green; owner ceremony execution and protected staging not started
 
 ## Outcome
 
@@ -11,10 +11,10 @@ setting/action inventory, memory-only migration plan, retained PostgreSQL stagin
 reconciliation, idempotent retry, restart persistence, and target-only rollback.
 
 The tranche deliberately does not claim Gate 6C completion. A complete browser OIDC authorization
-code/PKCE and PostgreSQL-session entry point is now implemented and green in disposable validation,
-but it has not been built into or deployed over the live Gate 6B Control candidate. An admin row,
-pasted bearer token, or synthetic ceremony receipt is not accepted as a substitute for the future
-owner-interactive run.
+code/PKCE and PostgreSQL-session entry point is implemented, disposable-tested, and deployed as a
+new non-authoritative Control shadow release. It is stopped at `verify-recovery-authority`, before
+creating a target user or credential. An admin row, pasted bearer token, or synthetic ceremony
+receipt is not accepted as a substitute for the future owner-interactive run.
 
 ## Implemented boundaries
 
@@ -94,7 +94,30 @@ exact replay; found no private canary; rolled the entire target run back; and re
 PostgreSQL root. It also proved that a browser session and its exact authority binding survive a
 PostgreSQL restart while neither its access nor refresh credential appears in plaintext storage.
 
-## Live state unchanged
+## Control shadow deployment
+
+On 2026-08-22, the exact merged integration commit
+`ff15c618ecbcb5095f362c6055f4a485af3148e7` was built and deployed as immutable release
+`runaai-next-gate6c-shadow-2026-08-22-ff15c61`. The verified release facts are:
+
+- artifact digest `fff3c379258efe4a2cabf2835c91897c4df528b4ab20b229e967d86a12354668` across
+  29,407 shipped files;
+- configuration digest `f8db543ca9cb1886d38db1dd7fba49e43d144bbe39a053c42e084734c210dc20`;
+- release-manifest digest `75baa0822b51e47563b45b41f0fee558dbb759e02ced8d72305ee9c759cca756`;
+- all five candidate tasks running, with the PostgreSQL, Keycloak, OpenFGA, and provider dependency
+  probes ready;
+- the browser page and status endpoint available, with the ceremony at `planned`, revision zero,
+  next step `verify-recovery-authority`;
+- selected target counts zero for projects, chats, turns, project memory, learning entries, settings,
+  principals, and cutover operations; one expected empty ceremony binding row and no browser flow or
+  session rows; and
+- zero users in the target Keycloak realm.
+
+The deployment retained exact pre-change configuration and launcher files. Only the candidate
+application task was restarted; PostgreSQL, Keycloak, OpenFGA, Caddy, legacy RunaAI, and production
+routing were not cycled or changed.
+
+## Protected and authority state unchanged
 
 - No owner credential was enrolled.
 - No protected RunaAI store was opened by Gate 6C.
@@ -106,10 +129,9 @@ PostgreSQL restart while neither its access nor refresh credential appears in pl
 
 ## Remaining hard prerequisite
 
-Commit and review this tranche, build a new exact immutable shadow release, and deploy it beside
-legacy with the browser ceremony explicitly enabled. Then configure the existing private Keycloak
-realm for user-verification-required passwordless WebAuthn, pre-bind the exact target owner under the
-recovery-authority witness, and perform the real enrollment/sign-in/step-up/revocation/recovery run.
-Those steps create new target credentials and require the owner's interactive Windows Hello/passkey
-presence; they have not started. Only after that entry point and the recurring backup schedule are
+The next boundary is owner-interactive: witness recovery authority, configure the existing private
+Keycloak realm for user-verification-required passwordless WebAuthn, pre-bind the exact target owner,
+and perform the real enrollment/sign-in/step-up/revocation/recovery run. Those steps create new
+target identity and credential state and require the owner's interactive Windows Hello/passkey
+presence; they have not started. Only after that ceremony and the recurring backup schedule are
 deployed and proven can the protected maintenance window begin.

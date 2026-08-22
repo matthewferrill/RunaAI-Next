@@ -262,6 +262,12 @@ repository and never push migration work into either source repository.
   the exact prior shadow release and backup action; live confirmation retained planned revision zero,
   legacy authority, no protected import, no traffic change, and no freeze marker. The bootstrap state
   now means “not imported,” while all other database errors still fail readiness closed.
+- The first authorized protected attempt failed before any cutover transition. Target rollback kept
+  legacy authority; ACL restoration succeeded, but marker finalization initially failed because two
+  audit properties were absent. Bounded recovery finalized the marker as `released` and confirmed zero
+  deny rules, no import, no traffic change, and planned revision zero. The corrected design archives a
+  released lease before a distinct retry, inserts audit fields explicitly, runs operator prerequisites
+  before freeze activation, and emits a safe step-specific failure code.
 
 ## Bootstrap findings
 

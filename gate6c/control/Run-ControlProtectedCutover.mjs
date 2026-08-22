@@ -34,7 +34,7 @@ const hex40 = value => /^[a-f0-9]{40}$/.test(String(value));
 const hex64 = value => /^[a-f0-9]{64}$/.test(String(value));
 const candidateRoot = resolve("C:\\AI\\RunaAI-Next-Candidate");
 const legacyRoot = resolve("C:\\AI\\Projects\\RunaAI");
-const phases = new Set(["migrate-promote", "verify-live", "close", "rollback"]);
+const phases = new Set(["prerequisite-check", "migrate-promote", "verify-live", "close", "rollback"]);
 
 function argumentsOf(argv) {
   const names = new Set(["phase", "release-root", "config", "expected-release-id", "expected-commit",
@@ -315,30 +315,38 @@ async function rollback(context, runId) {
 }
 
 async function migratePromote(context) {
-  const lease = await freezeLease(context); const backup = await backupProof(context);
-  const state = await context.coordinator.status();
-  if (state.phase !== "planned" || state.revision !== 0) {
-    throw coded("gate6cd-cutover-not-pristine", "The protected cutover is not at its exact pristine state.");
-  }
-  const candidate = await readiness(context, "candidate");
   const runId = `gate6c-control-${context.manifest.commit.slice(0, 12)}`;
-  const key = randomBytes(32); let staged = false;
+  const key = randomBytes(32); let staged = false; let step = "freeze-lease";
   try {
+    const lease = await freezeLease(context); step = "backup-proof";
+    const backup = await backupProof(context); step = "cutover-status";
+    const state = await context.coordinator.status();
+    if (state.phase !== "planned" || state.revision !== 0) {
+      throw coded("gate6cd-cutover-not-pristine", "The protected cutover is not at its exact pristine state.");
+    }
+    step = "candidate-readiness";
+    const candidate = await readiness(context, "candidate"); step = "record-candidate-readiness";
     await context.coordinator.recordCandidateReadiness(`gate6cd-candidate-${context.manifest.commit.slice(0, 12)}`, candidate);
+    step = "record-freeze";
     await context.coordinator.freezeSelectedWrites(`gate6cd-freeze-${context.manifest.commit.slice(0, 12)}`, {
       selectedWritesFrozen: true, legacyReadsAvailable: true, sourceGeneration: context.config.sourceGeneration });
+    step = "record-backup";
     await context.coordinator.verifyBackup(`gate6cd-backup-${context.manifest.commit.slice(0, 12)}`, {
       backupVerified: true, distinctRestoreVerified: true, sourceGeneration: context.config.sourceGeneration,
       manifestDigest: backup.manifestDigest });
+    step = "protected-capture";
     const captured = await capture(context, key);
+    step = "build-final-delta";
     const input = planInput(context, captured, runId);
     const plan = buildGate6cFinalDeltaPlan(input, { coreCipher: context.coreCipher,
       learningCipher: context.learningCipher, reconciliationKey: key });
     input.ownerCeremony = context.ceremony; input.backupProof = backup; input.freezeLease = lease;
     input.inventory = ownerAggregateInventory({ binding: context.binding, domains: plan.domains });
+    step = "stage-final-delta";
     await new Gate6cFinalDeltaService({ store: context.targetStore, coreCipher: context.coreCipher,
       learningCipher: context.learningCipher, reconciliationKey: key }).stage(input);
     staged = true;
+    step = "verify-retained-delta";
     const verified = await verifyRetainedFinalDelta({ plan, learningSnapshot: captured.learningSnapshot,
       store: context.targetStore, coreCipher: context.coreCipher, learningCipher: context.learningCipher,
       reconciliationKey: key, now: new Date() });
@@ -346,6 +354,7 @@ async function migratePromote(context) {
     const reconciled = reconcileGate6c({ binding: context.binding, domains: verified.domains,
       approvedKnowledge: verified.approvedKnowledge, sourceStillFrozen: true,
       deferredStoresUntouched: true, oneDeedOneReceipt: true });
+    step = "record-final-delta";
     await context.coordinator.commitFinalDelta(`gate6cd-delta-${context.manifest.commit.slice(0, 12)}`, {
       sourceStillFrozen: true, sourceGeneration: context.config.sourceGeneration,
       targetGeneration: context.config.targetGeneration, domains: reconciled.domains });
@@ -354,10 +363,12 @@ async function migratePromote(context) {
       targetGeneration: context.config.targetGeneration, domains: reconciled.domains,
       approvedKnowledge: reconciled.approvedKnowledge, oneDeedOneReceipt: true,
       deferredStoresUntouched: true });
+    step = "promotion-readiness";
     const promotion = await readiness(context, "promotion", {
       ownerCredentialVerified: true, freshStepUpVerified: true, protectedDeltaAuthorityReady: true,
       sourceWriteFreezeReady: true, zeroDeltaReconciliationReady: true });
     await context.coordinator.recordPromotionReadiness(`gate6cd-ready-${context.manifest.commit.slice(0, 12)}`, promotion);
+    step = "promote";
     await context.coordinator.promote(`gate6cd-promote-${context.manifest.commit.slice(0, 12)}`, {
       sourceStillFrozen: true, expectedAuthorityGeneration: context.config.sourceGeneration,
       targetGeneration: context.config.targetGeneration });
@@ -366,9 +377,25 @@ async function migratePromote(context) {
         .map(([name, value]) => [name, value.count])), approvedKnowledgeActive: verified.approvedKnowledge.sourceActive,
       sourceModified: false, deferredStoresOpened: false, privateValuesIncluded: false });
   } catch (error) {
-    if (staged || (await context.coordinator.status()).phase !== "planned") await rollback(context, runId);
-    throw error;
+    try {
+      if (staged || (await context.coordinator.status()).phase !== "planned") await rollback(context, runId);
+    } catch { throw coded("gate6cd-automatic-rollback-failed", "Automatic target rollback failed closed."); }
+    if (/^[a-z0-9-]{1,100}$/.test(String(error?.code ?? ""))) throw error;
+    throw coded(`gate6cd-${step}-failed`, "A protected-cutover step failed closed.");
   } finally { key.fill(0); }
+}
+
+async function prerequisiteCheck(context) {
+  const state = await context.coordinator.status();
+  if (state.phase !== "planned" || state.revision !== 0) {
+    throw coded("gate6cd-cutover-not-pristine", "The protected cutover is not at its exact pristine state.");
+  }
+  const backup = await backupProof(context);
+  const candidate = await readiness(context, "candidate");
+  return Object.freeze({ schemaVersion: "runa2-gate6cd-prerequisite-check/v1", passed: true,
+    phase: state.phase, revision: state.revision, backupVerified: backup.distinctRestoreVerified,
+    candidateReadinessPassed: candidate.passed, protectedStoresOpened: false,
+    privateValuesIncluded: false });
 }
 
 async function post(path, body, credential = null) {
@@ -517,6 +544,7 @@ async function main(argv) {
   const args = argumentsOf(argv); const context = await loadContext(args);
   const runId = `gate6c-control-${context.manifest.commit.slice(0, 12)}`;
   try {
+    if (args.phase === "prerequisite-check") return prerequisiteCheck(context);
     if (args.phase === "migrate-promote") return migratePromote(context);
     if (args.phase === "verify-live") return liveValidate(context);
     if (args.phase === "close") return closeCutover(context);

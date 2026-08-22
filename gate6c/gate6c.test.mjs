@@ -345,6 +345,8 @@ test("Control freeze tool preserves reads, records original ACL, and cannot casu
   assert.match(source, /legacyReadsAvailable=\$true/);
   assert.match(source, /SetSecurityDescriptorSddlForm/);
   assert.match(source, /verified-rollback','gate6-closed/);
+  assert.match(source, /freeze-history/);
+  assert.match(source, /Add-Member -NotePropertyName releaseReason/);
   assert.match(source, /DataProtectionScope\]::LocalMachine/);
   assert.match(source, /legacy-state-changed-during-freeze/);
   assert.doesNotMatch(source, /Remove-Item|rmSync|\.runaai-local\\state.*-Recurse -Force/);
@@ -440,6 +442,8 @@ test("Control owner tools bind the exact candidate config and DPAPI user context
   assert.match(cutover, /targetParticipantId: context\.config\.gate6c\.expectedPrincipalId/);
   assert.match(cutover, /activeSessionCredentials/);
   assert.match(cutover, /rollback\(context, runId\)/);
+  assert.match(cutover, /prerequisite-check/);
+  assert.match(cutover, /gate6cd-\$\{step\}-failed/);
   assert.match(cutover, /privateValuesIncluded: false/);
   assert.doesNotMatch(cutover, /console\.log|Write-Output.*password/);
   assert.match(promotionDeploy, /candidate\.mode-ne 'active'/);
@@ -449,6 +453,7 @@ test("Control owner tools bind the exact candidate config and DPAPI user context
   assert.match(window, /for\(\$index=0;\$index-lt 120;\$index\+\+\)/);
   assert.match(window, /Start-Sleep -Seconds 30/);
   assert.match(window, /Release-Freeze 'gate6-closed'/);
+  assert.match(window, /Invoke-Operator 'prerequisite-check'/);
   assert.match(window, /Recover/);
 });
 

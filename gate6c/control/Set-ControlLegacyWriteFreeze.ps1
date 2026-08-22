@@ -66,7 +66,10 @@ function Unprotect-Authority {
 
 Verify-GitAuthority
 if ($Mode -eq 'Preflight') {
-  if (Test-Path -LiteralPath $markerPath) { throw 'legacy-freeze-marker-already-exists' }
+  if (Test-Path -LiteralPath $markerPath) {
+    $priorMarker = Get-Content -Raw -LiteralPath $markerPath | ConvertFrom-Json
+    if ($priorMarker.status -ne 'released' -or $priorMarker.selectedWritesFrozen -ne $false) { throw 'legacy-freeze-marker-already-exists' }
+  }
   Assert-Inheritance
   [ordered]@{ schemaVersion='runa2-gate6c-freeze-preflight/v1'; passed=$true;
     sourceCommit=$ExpectedCommit; sourceBranch='main'; trackedClean=$true; stateRootPresent=$true;
@@ -77,7 +80,20 @@ if ($Mode -eq 'Preflight') {
 
 if ($Mode -eq 'Activate') {
   if ($LeaseId -notmatch '^[A-Za-z0-9._:-]{1,160}$' -or $DurationMinutes -lt 15 -or $DurationMinutes -gt 180) { throw 'legacy-freeze-lease-invalid' }
-  if (Test-Path -LiteralPath $markerPath) { throw 'legacy-freeze-marker-already-exists' }
+  if (Test-Path -LiteralPath $markerPath) {
+    $priorMarker = Get-Content -Raw -LiteralPath $markerPath | ConvertFrom-Json
+    if ($priorMarker.status -ne 'released' -or $priorMarker.selectedWritesFrozen -ne $false -or
+        $priorMarker.sourceGeneration -ne $ExpectedCommit -or $priorMarker.leaseId -eq $LeaseId) {
+      throw 'legacy-freeze-marker-already-exists'
+    }
+    $historyRoot = Join-Path $controlRoot 'freeze-history'
+    $historyMarker = Join-Path $historyRoot "$($priorMarker.leaseId).json"
+    $historyAuthority = Join-Path $historyRoot "$($priorMarker.leaseId).dpapi"
+    if ((Test-Path -LiteralPath $historyMarker) -or (Test-Path -LiteralPath $historyAuthority)) { throw 'legacy-freeze-history-exists' }
+    New-Item -ItemType Directory -Path $historyRoot -Force | Out-Null
+    Copy-Item -LiteralPath $markerPath -Destination $historyMarker
+    Copy-Item -LiteralPath $protectedPath -Destination $historyAuthority
+  }
   Assert-Inheritance
   New-Item -ItemType Directory -Path $controlRoot -Force | Out-Null
   $key = New-Object byte[] 32
@@ -134,8 +150,8 @@ if ($Mode -eq 'Release') {
   Set-Acl -LiteralPath $stateRoot -AclObject $acl
   $marker.status = 'released'
   $marker.selectedWritesFrozen = $false
-  $marker.releaseReason = $ReleaseReason
-  $marker.releasedAt = [DateTime]::UtcNow.ToString('o')
+  $marker | Add-Member -NotePropertyName releaseReason -NotePropertyValue $ReleaseReason -Force
+  $marker | Add-Member -NotePropertyName releasedAt -NotePropertyValue ([DateTime]::UtcNow.ToString('o')) -Force
   $marker | ConvertTo-Json | Set-Content -LiteralPath $markerPath -Encoding utf8
   [ordered]@{ schemaVersion='runa2-gate6c-freeze-release/v1'; released=$true;
     releaseReason=$ReleaseReason; sourceGeneration=$ExpectedCommit; sourceModified=$false;

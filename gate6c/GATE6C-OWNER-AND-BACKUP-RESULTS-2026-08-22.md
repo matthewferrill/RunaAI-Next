@@ -53,8 +53,8 @@ temporary target, the targets were verified and destroyed, and no protected lega
 
 The legacy freeze tool ran only in `Preflight` mode against clean legacy commit
 `b4db04090d8f0df87234fab573b396e7824c5354`. It verified the state root and ACL inheritance, opened
-no protected store, changed no ACL, created no freeze marker, and modified no source. The whole-state
-write deny has not been activated.
+no protected store, changed no ACL, created no freeze marker, and modified no source. A later
+authorized attempt activated and then released the whole-state write deny as recorded below.
 
 ## Fail-closed events
 
@@ -70,9 +70,16 @@ write deny has not been activated.
   Live confirmation showed the prior shadow release at planned revision zero, legacy authority,
   `protectedDataImported=false`, `productionTrafficChanged=false`, and no freeze marker. Readiness now
   classifies SQLSTATE `42P01` as “import not started” while every other database error still propagates.
+- The first authorized freeze/import attempt stopped before the first cutover transition and rolled
+  target state back with legacy authority retained. Freeze release restored the original ACL before
+  Windows PowerShell refused to add two new audit properties to the retained marker. Recovery added
+  only those missing properties, reran the exact release verifier, and confirmed `released`, zero deny
+  rules, planned revision zero, legacy authority, no import, and no traffic change. The freeze tool now
+  uses explicit audit-property insertion, archives a completed lease before a distinct retry, and the
+  operator runs its backup/readiness prerequisites before any future freeze with step-specific errors.
 
-None of these events changed legacy RunaAI, imported protected data, activated a freeze, promoted the
-candidate, or changed traffic.
+None of these events changed legacy content, imported protected data, promoted the candidate, or
+changed traffic. The one bounded freeze activation was fully released with the original ACL restored.
 
 ## Verification
 

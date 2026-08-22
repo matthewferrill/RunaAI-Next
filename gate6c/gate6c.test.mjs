@@ -307,6 +307,23 @@ test("Control freeze tool preserves reads, records original ACL, and cannot casu
   assert.doesNotMatch(source, /Remove-Item|rmSync|\.runaai-local\\state.*-Recurse -Force/);
 });
 
+test("Control owner tools bind the exact candidate config and DPAPI user context", () => {
+  const prepare = readFileSync(new URL("./control/Prepare-ControlOwner.ps1", import.meta.url), "utf8");
+  const operator = readFileSync(new URL("./control/Advance-ControlRecoveryAuthority.mjs", import.meta.url), "utf8");
+  const clipboard = readFileSync(new URL("./control/Copy-ControlOwnerBootstrapPassword.ps1", import.meta.url), "utf8");
+  assert.match(prepare, /config\\candidate\.json/);
+  assert.match(operator, /config\\\\candidate\.json/);
+  for (const source of [prepare, clipboard]) {
+    assert.match(source, /Add-Type -AssemblyName System\.Security/);
+    assert.match(source, /DataProtectionScope\]::CurrentUser/);
+  }
+  assert.match(prepare, /serviceAccountsEnabled=\$false/);
+  assert.match(prepare, /webAuthnPolicyPasswordlessPasskeysEnabled/);
+  assert.match(operator, /BEGIN ISOLATION LEVEL SERIALIZABLE/);
+  assert.match(operator, /verifyReleaseArtifact/);
+  assert.match(operator, /--untracked-files=no/);
+});
+
 test("browser owner ceremony uses PKCE, exact owner binding, WebAuthn, and opaque sessions", async () => {
   const store = new MemoryBrowserCeremonyStore();
   const active = new Set();

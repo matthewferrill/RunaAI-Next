@@ -339,6 +339,30 @@ test("Control backup schedule is SYSTEM-owned and fail-closed at its capacity", 
   assert.doesNotMatch(update, /Unregister-ScheduledTask|Remove-Item/);
 });
 
+test("selected owner inventory preserves the documented default when the setting root is absent", () => {
+  const root = mkdtempSync(join(tmpdir(), "gate6c-selected-"));
+  try {
+    const result = inspectSelectedContinuity({ stateRoot: root, reconciliationKey: Buffer.alloc(32, 7) });
+    assert.equal(result.domains.setting.count, 1);
+    assert.equal(result.settingSourcePresent, false);
+    assert.equal(result.defaultApplied, true);
+    assert.equal(JSON.stringify(result).includes("Medium"), false);
+    const input = planInput(); input.legacySetting = null;
+    const plan = buildGate6cFinalDeltaPlan(input, { coreCipher: coreCipher(), learningCipher: learningCipher(),
+      reconciliationKey: Buffer.alloc(32, 8) });
+    assert.equal(plan.setting.value, "Medium");
+  } finally { rmSync(root, { recursive: true, force: true }); }
+});
+
+test("selected owner inventory refuses a partial setting root", () => {
+  const root = mkdtempSync(join(tmpdir(), "gate6c-selected-"));
+  try {
+    mkdirSync(join(root, "settings"), { recursive: true });
+    assert.throws(() => inspectSelectedContinuity({ stateRoot: root,
+      reconciliationKey: Buffer.alloc(32, 7) }), { code: "gate6c-setting-source-missing" });
+  } finally { rmSync(root, { recursive: true, force: true }); }
+});
+
 test("Control freeze tool preserves reads, records original ACL, and cannot casually release", () => {
   const source = readFileSync(new URL("./control/Set-ControlLegacyWriteFreeze.ps1", import.meta.url), "utf8");
   assert.match(source, /conservative-entire-legacy-state-root-write-deny/);
@@ -456,6 +480,7 @@ test("Control owner tools bind the exact candidate config and DPAPI user context
   assert.match(promotionDeploy, /candidate\.mode-ne 'active'/);
   assert.match(promotionDeploy, /authority-ne 'shadow'/);
   assert.match(promotionDeploy, /rolledBack=\$true/);
+  assert.match(promotionDeploy, /candidate-promotion-rollback-not-clean/);
   assert.match(window, /Set-ControlLegacyWriteFreeze\.ps1/);
   assert.match(window, /for\(\$index=0;\$index-lt 120;\$index\+\+\)/);
   assert.match(window, /Start-Sleep -Seconds 30/);

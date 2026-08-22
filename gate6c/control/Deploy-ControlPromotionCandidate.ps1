@@ -41,11 +41,19 @@ if((& git.exe -C $legacy rev-parse HEAD).Trim()-ne $legacyCommit-or(& git.exe -C
 $beforeRuntime=Invoke-RestMethod -Uri 'http://127.0.0.1:9760/api/runtime/status' -TimeoutSec 10
 $beforeReadiness=Invoke-RestMethod -Uri 'http://127.0.0.1:9760/api/readiness/status' -TimeoutSec 10
 $beforeCeremony=Invoke-RestMethod -Uri 'http://127.0.0.1:9760/api/owner-ceremony/status' -TimeoutSec 10
+$currentCandidate=Get-Content -Raw -LiteralPath $config|ConvertFrom-Json
+$priorCutoverSafe=($beforeRuntime.cutover.phase-eq 'planned'-and$beforeRuntime.cutover.revision-eq 0)-or
+  ($beforeRuntime.cutover.phase-eq 'rolled-back'-and$beforeRuntime.authorityGeneration-eq$currentCandidate.sourceGeneration)
 if($beforeRuntime.running.releaseId-ne $PriorReleaseId-or$beforeRuntime.running.commit-ne $PriorCommit-or
-  $beforeRuntime.running.artifactDigest-ne $PriorArtifactDigest-or$beforeRuntime.cutover.phase-ne 'planned'-or
-  $beforeRuntime.cutover.revision-ne 0-or$beforeReadiness.authority-ne 'shadow'-or
+  $beforeRuntime.running.artifactDigest-ne $PriorArtifactDigest-or-not$priorCutoverSafe-or$beforeReadiness.authority-ne 'shadow'-or
   $beforeReadiness.protectedDataImported-ne $false-or$beforeReadiness.productionTrafficChanged-ne $false-or
   $beforeCeremony.complete-ne $true-or$beforeCeremony.revision-ne 7){throw 'candidate-promotion-current-state-drift'}
+if($beforeRuntime.cutover.phase-eq 'rolled-back'){
+  $marker=Get-Content -Raw -LiteralPath (Join-Path $root 'gate6c\freeze-lease.json')|ConvertFrom-Json
+  $stateAcl=Get-Acl -LiteralPath (Join-Path $legacy '.runaai-local\state')
+  if($marker.status-ne 'released'-or$marker.selectedWritesFrozen-ne $false-or
+    @($stateAcl.Access|Where-Object{$_.AccessControlType-eq 'Deny'}).Count-ne 0){throw 'candidate-promotion-rollback-not-clean'}
+}
 $password=$null;$token=$null;$subject=$null
 try{$password=[IO.File]::ReadAllText((Join-Path $root 'secrets\keycloak-bootstrap')).Trim();$base='http://localhost:9762'
   $token=(Invoke-RestMethod -Method Post -Uri "$base/realms/master/protocol/openid-connect/token" -ContentType 'application/x-www-form-urlencoded' -Body @{grant_type='password';client_id='admin-cli';username='candidate-bootstrap';password=$password}).access_token

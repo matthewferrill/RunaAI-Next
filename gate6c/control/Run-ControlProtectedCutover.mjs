@@ -67,6 +67,14 @@ async function json(path, code) {
   catch { throw coded(code, "A required protected-cutover JSON document is unavailable."); }
 }
 
+async function optionalJson(path, invalidCode) {
+  try { return JSON.parse((await readFile(path, "utf8")).replace(/^\uFEFF/, "")); }
+  catch (error) {
+    if (error?.code === "ENOENT") return null;
+    throw coded(invalidCode, "An optional protected-cutover JSON document is invalid.");
+  }
+}
+
 function sha256(value) { return createHash("sha256").update(value).digest("hex"); }
 
 function assertLegacy(repo, commit) {
@@ -239,7 +247,7 @@ async function capture(context, reconciliationKey) {
   }
   const mapped = bindProtectedSnapshotsToOwner({ projectChatSnapshot: firstProject.snapshot,
     learningSnapshot: firstLearning.snapshot, targetParticipantId: context.config.gate6c.expectedPrincipalId });
-  const legacySetting = await json(join(stateRoot, "settings", "values.json"), "gate6cd-setting-source-invalid");
+  const legacySetting = await optionalJson(join(stateRoot, "settings", "values.json"), "gate6cd-setting-source-invalid");
   return Object.freeze({ ...mapped, legacySetting, selectedReceipts: Object.freeze([]),
     selected: firstSelected, privateValuesIncluded: false });
 }

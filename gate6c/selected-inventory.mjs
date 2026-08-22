@@ -69,10 +69,14 @@ export function inspectSelectedContinuity({ stateRoot, reconciliationKey }) {
   const before = { settings: treeDigest(settingsRoot, reconciliationKey),
     actions: treeDigest(actionsRoot, reconciliationKey) };
   const settingPath = join(settingsRoot, "values.json");
-  if (!existsSync(settingPath)) throw coded("gate6c-setting-source-missing", "The selected persisted setting record is absent.");
-  const legacySetting = readJson(settingPath, "gate6c-setting-source-invalid");
+  const settingSourcePresent = existsSync(settingPath);
+  if (!settingSourcePresent && existsSync(settingsRoot)) {
+    throw coded("gate6c-setting-source-missing", "A partial selected setting root cannot establish the legacy default.");
+  }
+  const legacySetting = settingSourcePresent ? readJson(settingPath, "gate6c-setting-source-invalid") : null;
   const mapped = mapLegacySettingsRecord(legacySetting);
-  if (!mapped.sourceValueAccepted || mapped.emittedKeys.length !== 1
+  if ((!settingSourcePresent && !mapped.defaultApplied)
+      || (settingSourcePresent && !mapped.sourceValueAccepted) || mapped.emittedKeys.length !== 1
       || mapped.emittedKeys[0] !== "defaultIntelligenceLevel") {
     throw coded("gate6c-setting-source-invalid", "The selected persisted setting is outside its frozen allowlist.");
   }
@@ -87,7 +91,8 @@ export function inspectSelectedContinuity({ stateRoot, reconciliationKey }) {
       setting: Object.freeze({ count: 1, logicalDigest: hmac(reconciliationKey, mapped.values) }),
       "action-receipts": Object.freeze({ count: 0, logicalDigest: hmac(reconciliationKey, []) }),
     }),
-    settingValueAllowed: true, selectedReceiptClassified: true,
+    settingValueAllowed: true, settingSourcePresent, defaultApplied: mapped.defaultApplied,
+    selectedReceiptClassified: true,
     unrelatedActionCount: actions.unrelatedActionCount, sourceTreeDigest: hmac(reconciliationKey, before),
     sourceModified: false, deferredStoresOpened: false, privateValuesIncluded: false });
 }

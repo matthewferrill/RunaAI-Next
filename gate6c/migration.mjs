@@ -64,7 +64,9 @@ export function buildGate6cFinalDeltaPlan(input, { coreCipher, learningCipher,
     throw coded("gate6c-source-generation-drift", "The learning snapshot does not belong to the frozen source generation.");
   }
   const setting = mapLegacySettingsRecord(input.legacySetting);
-  if (!setting.sourceValueAccepted) throw coded("gate6c-setting-source-invalid", "The final protected setting must be an explicit allowed value.");
+  if (!setting.sourceValueAccepted && !(input.legacySetting === null && setting.defaultApplied)) {
+    throw coded("gate6c-setting-source-invalid", "The final protected setting must be explicit or a proven absent-source default.");
+  }
   const receipts = (input.selectedReceipts ?? []).map(normalizeReceipt)
     .sort((left, right) => left.occurredAt.localeCompare(right.occurredAt)
       || left.sourceReceiptDigest.localeCompare(right.sourceReceiptDigest));

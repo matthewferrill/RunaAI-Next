@@ -399,11 +399,22 @@ test("Control Caddy trust is exact, user-scoped, strictly verified, and reversib
   assert.match(script, /certutil\.exe -user -f -addstore Root/);
   assert.match(script, /Cert:\\CurrentUser\\Root/);
   assert.doesNotMatch(script, /Cert:\\LocalMachine\\Root/);
+  assert.match(script, /control-caddy-trust-interactive-session-required/);
   assert.match(script, /X509BasicConstraintsExtension/);
   assert.match(script, /certificateValidationBypassed=\$false/);
   assert.match(script, /curl\.exe -sS -o NUL -w '%\{http_code\}' --max-time 10/);
   assert.doesNotMatch(script, /(?:^|\s)(?:-k|--insecure)(?:\s|$)/m);
   assert.match(script, /if\(\$imported\)\{& certutil\.exe -user -f -delstore Root/);
+});
+
+test("Control Caddy trust enters only Matthew's existing interactive session and removes its task", async () => {
+  const script = await readFile(resolve(import.meta.dirname, "control", "Invoke-ControlInteractiveCaddyTrust.ps1"), "utf8");
+  assert.match(script, /LogonType Interactive/);
+  assert.match(script, /RUNA-CONTROL\\Matthew/);
+  assert.match(script, /ExpectedToolSha256/);
+  assert.match(script, /privateValuesIncluded-ne\$false/);
+  assert.match(script, /finally\{if\(\$registered\)\{Unregister-ScheduledTask/);
+  assert.doesNotMatch(script, /Remove-Item|LocalMachine/);
 });
 
 test("Control application startup retains logs and permits the full integrity scan", async () => {

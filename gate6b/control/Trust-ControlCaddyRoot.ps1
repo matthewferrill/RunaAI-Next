@@ -4,7 +4,8 @@ param(
   [Parameter(Mandatory)][string]$ExpectedCommit,
   [Parameter(Mandatory)][string]$ExpectedArtifactDigest,
   [Parameter(Mandatory)][string]$ExpectedRootSha256,
-  [Parameter(Mandatory)][string]$ExpectedRootThumbprint
+  [Parameter(Mandatory)][string]$ExpectedRootThumbprint,
+  [string]$ResultPath=''
 )
 
 Set-StrictMode -Version Latest
@@ -14,9 +15,11 @@ $rootCertPath='C:\Windows\System32\config\systemprofile\AppData\Roaming\Caddy\pk
 $expectedSubject='CN=Caddy Local Authority - 2026 ECC Root';$publicBaseUrl='https://192.168.50.169:9761'
 $trustScope='CurrentUser\Root'
 if($env:COMPUTERNAME-ne'RUNA-CONTROL'-or[Security.Principal.WindowsIdentity]::GetCurrent().Name-ne'RUNA-CONTROL\Matthew'){throw 'control-caddy-trust-context-invalid'}
+if([Diagnostics.Process]::GetCurrentProcess().SessionId-eq 0){throw 'control-caddy-trust-interactive-session-required'}
 if($ReleaseId-notmatch'^[A-Za-z0-9._-]{1,100}$'-or$ExpectedCommit-notmatch'^[a-f0-9]{40}$'-or
   $ExpectedArtifactDigest-notmatch'^[a-f0-9]{64}$'-or$ExpectedRootSha256-notmatch'^[a-f0-9]{64}$'-or
   $ExpectedRootThumbprint-notmatch'^[A-F0-9]{40}$'){throw 'control-caddy-trust-pin-invalid'}
+if($ResultPath-ne''-and[IO.Path]::GetFullPath($ResultPath)-notmatch'^C:\\AI\\RunaAI-Next-Candidate\\staging\\caddy-trust-[a-f0-9]{12}\\result\.json$'){throw 'control-caddy-trust-result-path-invalid'}
 foreach($path in @($configPath,$rootCertPath)){if(-not(Test-Path -LiteralPath $path -PathType Leaf)){throw 'control-caddy-trust-required-path-missing'}}
 $config=Get-Content -Raw -LiteralPath $configPath|ConvertFrom-Json;$manifestPath=Join-Path (Split-Path -Parent $configPath) $config.releaseManifestPath
 $manifest=Get-Content -Raw -LiteralPath $manifestPath|ConvertFrom-Json;$runtime=Invoke-RestMethod 'http://127.0.0.1:9760/api/runtime/status' -TimeoutSec 10
@@ -54,5 +57,6 @@ try{
     if($imported){& certutil.exe -user -f -delstore Root $ExpectedRootThumbprint *> $null;if($LASTEXITCODE-ne 0){throw 'control-caddy-trust-rollback-failed'}}
     throw
   }
-  [ordered]@{schemaVersion='runa2-gate6b-control-caddy-trust/v1';passed=$true;scope=$trustScope;thumbprint=$ExpectedRootThumbprint;alreadyTrusted=$alreadyTrusted;httpsStatus=200;certificateValidationBypassed=$false;privateValuesIncluded=$false}|ConvertTo-Json -Compress
+  $result=[ordered]@{schemaVersion='runa2-gate6b-control-caddy-trust/v1';passed=$true;scope=$trustScope;thumbprint=$ExpectedRootThumbprint;alreadyTrusted=$alreadyTrusted;httpsStatus=200;certificateValidationBypassed=$false;privateValuesIncluded=$false}|ConvertTo-Json -Compress
+  if($ResultPath-ne''){Set-Content -LiteralPath $ResultPath -Value $result -Encoding utf8 -NoNewline}else{$result}
 }finally{$certificate.Dispose()}

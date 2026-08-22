@@ -12,6 +12,7 @@ param(
 Set-StrictMode -Version Latest
 $ErrorActionPreference='Stop'
 $candidateRoot='C:\AI\RunaAI-Next-Candidate';$taskPath='\RunaAI-Next\'
+$systemRootCert='C:\Windows\System32\config\systemprofile\AppData\Roaming\Caddy\pki\authorities\local\root.crt'
 if($env:COMPUTERNAME-ne'RUNA-CONTROL'-or[Security.Principal.WindowsIdentity]::GetCurrent().Name-ne'RUNA-CONTROL\Matthew'){throw 'control-caddy-interactive-context-invalid'}
 if($ExpectedToolSha256-notmatch'^[a-f0-9]{64}$'){throw 'control-caddy-interactive-tool-pin-invalid'}
 $exactToolPath=[IO.Path]::GetFullPath($ToolPath);$staging=Join-Path $candidateRoot "staging\caddy-trust-$($ExpectedToolSha256.Substring(0,12))"
@@ -22,9 +23,13 @@ if($interactive.Count-eq 0){throw 'control-caddy-interactive-owner-session-missi
 $resultPath=Join-Path $staging 'result.json';$taskName="CaddyTrust-$($ExpectedToolSha256.Substring(0,12))"
 if(Test-Path -LiteralPath $resultPath){throw 'control-caddy-interactive-result-exists'}
 if(Get-ScheduledTask -TaskPath $taskPath -TaskName $taskName -ErrorAction SilentlyContinue){throw 'control-caddy-interactive-task-exists'}
+$stagedRootCert=Join-Path $staging 'root.crt'
+if(Test-Path -LiteralPath $stagedRootCert){throw 'control-caddy-interactive-certificate-exists'}
+Copy-Item -LiteralPath $systemRootCert -Destination $stagedRootCert
+if((Get-FileHash -LiteralPath $stagedRootCert -Algorithm SHA256).Hash.ToLowerInvariant()-ne$ExpectedRootSha256){throw 'control-caddy-interactive-certificate-mismatch'}
 $arguments=@('-NoLogo','-NoProfile','-NonInteractive','-ExecutionPolicy','Bypass','-File',('"'+$exactToolPath+'"'),
   '-ReleaseId',('"'+$ReleaseId+'"'),'-ExpectedCommit',('"'+$ExpectedCommit+'"'),'-ExpectedArtifactDigest',('"'+$ExpectedArtifactDigest+'"'),
-  '-ExpectedRootSha256',('"'+$ExpectedRootSha256+'"'),'-ExpectedRootThumbprint',('"'+$ExpectedRootThumbprint+'"'),'-ResultPath',('"'+$resultPath+'"'))-join' '
+  '-ExpectedRootSha256',('"'+$ExpectedRootSha256+'"'),'-ExpectedRootThumbprint',('"'+$ExpectedRootThumbprint+'"'),'-RootCertPath',('"'+$stagedRootCert+'"'),'-ResultPath',('"'+$resultPath+'"'))-join' '
 $action=New-ScheduledTaskAction -Execute 'powershell.exe' -Argument $arguments
 $principal=New-ScheduledTaskPrincipal -UserId 'RUNA-CONTROL\Matthew' -LogonType Interactive -RunLevel Limited
 $settings=New-ScheduledTaskSettingsSet -ExecutionTimeLimit (New-TimeSpan -Minutes 2) -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries
@@ -37,7 +42,7 @@ try{
   if(-not(Test-Path -LiteralPath $resultPath)){throw 'control-caddy-interactive-result-missing'}
   $result=Get-Content -Raw -LiteralPath $resultPath|ConvertFrom-Json
   if($result.schemaVersion-eq'runa2-gate6b-control-caddy-trust-error/v1'-and$result.passed-eq$false-and
-    [string]$result.errorCode-match'^control-caddy-trust-[a-z-]+$'-and$result.privateValuesIncluded-eq$false){throw [string]$result.errorCode}
+    [string]$result.errorCode-match'^control-caddy-trust-[a-z-]+$'-and[string]$result.failureStage-match'^[a-z-]+$'-and$result.privateValuesIncluded-eq$false){throw "control-caddy-trust-$([string]$result.failureStage)-failed"}
   if($result.schemaVersion-ne'runa2-gate6b-control-caddy-trust/v1'-or$result.passed-ne$true-or$result.scope-ne'CurrentUser\Root'-or
     $result.thumbprint-ne$ExpectedRootThumbprint-or$result.httpsStatus-ne 200-or$result.certificateValidationBypassed-ne$false-or$result.privateValuesIncluded-ne$false){throw 'control-caddy-interactive-result-invalid'}
   $result|ConvertTo-Json -Compress

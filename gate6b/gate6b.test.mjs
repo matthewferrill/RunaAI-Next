@@ -403,6 +403,7 @@ test("Control Caddy trust is exact, user-scoped, strictly verified, and reversib
   assert.match(script, /X509BasicConstraintsExtension/);
   assert.match(script, /certificateValidationBypassed=\$false/);
   assert.match(script, /runa2-gate6b-control-caddy-trust-error\/v1/);
+  assert.match(script, /failureStage=\$failureStage/);
   assert.match(script, /curl\.exe -sS -o NUL -w '%\{http_code\}' --max-time 10/);
   assert.doesNotMatch(script, /(?:^|\s)(?:-k|--insecure)(?:\s|$)/m);
   assert.match(script, /if\(\$imported\)\{& certutil\.exe -user -f -delstore Root/);
@@ -413,6 +414,9 @@ test("Control Caddy trust enters only Matthew's existing interactive session and
   assert.match(script, /LogonType Interactive/);
   assert.match(script, /RUNA-CONTROL\\Matthew/);
   assert.match(script, /ExpectedToolSha256/);
+  assert.match(script, /Copy-Item -LiteralPath \$systemRootCert -Destination \$stagedRootCert/);
+  assert.match(script, /RootCertPath/);
+  assert.match(script, /RunLevel Limited/);
   assert.match(script, /privateValuesIncluded-ne\$false/);
   assert.match(script, /finally\{if\(\$registered\)\{Unregister-ScheduledTask/);
   assert.doesNotMatch(script, /Remove-Item|LocalMachine/);

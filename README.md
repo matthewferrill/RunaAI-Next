@@ -5,9 +5,10 @@ repository label only; the product, application, schemas, services, and user exp
 RunaAI.
 
 The repository was seeded from the completed RunaLab stack-selection history at commit `ec5e346`,
-preserved by tag `runalab-stack-baseline-2026-08-20`. Legacy RunaAI remains the current production and
-behavioral authority until an explicitly approved final cutover. No migration implementation or
-protected-data conversion is authorized merely because this repository exists.
+preserved by tag `runalab-stack-baseline-2026-08-20`. Gate 6D made the exact selected-core Control
+release named in `MIGRATION-STATUS.md` authoritative for that scope. Legacy RunaAI remains the intact
+rollback system and behavioral reference. No further migration implementation or protected-data
+conversion is authorized merely because this repository exists.
 
 Start with:
 

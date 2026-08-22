@@ -10,7 +10,9 @@ RunaAI; `Next` is only a temporary repository and checkout label during migratio
 - `runa2/integration` is the migration integration branch.
 - `runalab/main` is fetch-only laboratory evidence.
 - `runaai-legacy/main` is fetch-only current-behavior reference.
-- Legacy RunaAI remains the production and behavioral authority until an explicitly approved cutover.
+- Gate 6D made the exact selected-core Control release named in `MIGRATION-STATUS.md` the production
+  authority for that scope. Legacy RunaAI remains the intact rollback system and behavioral reference;
+  it is not the selected-core write authority.
 - Do not merge the unrelated RunaAI history into this repository. Port verified behavior and governed
   data contracts deliberately and record their disposition.
 

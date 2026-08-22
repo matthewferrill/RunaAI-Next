@@ -368,6 +368,7 @@ test("Control owner tools bind the exact candidate config and DPAPI user context
   assert.match(completedOwnerDeploy, /candidatePromoted=\$false/);
   assert.match(completedOwnerDeploy, /rolledBack=\$true/);
   assert.match(completedOwnerDeploy, /Rebind-ControlCompletedOwnerCeremony\.mjs/);
+  assert.match(completedOwnerDeploy, /function Expand-Response/);
   assert.match(flowProof, /runaai-next-gate6c-flow-proof/);
   assert.match(flowProof, /finally \{/);
   assert.match(flowProof, /Method Delete -Uri "\$base\/admin\/realms\/\$realmName"/);

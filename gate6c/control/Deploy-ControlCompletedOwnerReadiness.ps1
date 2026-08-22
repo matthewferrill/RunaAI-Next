@@ -38,6 +38,11 @@ function Wait-Release([string]$ExpectedRelease,[int]$Minutes=12) {
   } catch {} } until ([DateTime]::UtcNow -gt $deadline)
   throw "candidate-release-start-timeout:$ExpectedRelease"
 }
+function Expand-Response([object]$Response) {
+  foreach($item in @($Response)) {
+    if($item -is [Array]) { foreach($nested in $item) { $nested } } else { $item }
+  }
+}
 
 if ($env:COMPUTERNAME -ne 'RUNA-CONTROL' -or [Security.Principal.WindowsIdentity]::GetCurrent().Name -ne 'RUNA-CONTROL\Matthew') { throw 'candidate-readiness-context-invalid' }
 $pins=[ordered]@{
@@ -70,10 +75,10 @@ try {
   $token=(Invoke-RestMethod -Method Post -Uri "$base/realms/master/protocol/openid-connect/token" `
     -ContentType 'application/x-www-form-urlencoded' -Body @{grant_type='password';client_id='admin-cli';username='candidate-bootstrap';password=$password}).access_token
   $headers=@{Authorization="Bearer $token"}
-  $users=@(Invoke-RestMethod -Method Get -Uri "$base/admin/realms/runaai-next/users?username=matthew-owner&exact=true" -Headers $headers)
+  $users=@(Expand-Response (Invoke-RestMethod -Method Get -Uri "$base/admin/realms/runaai-next/users?username=matthew-owner&exact=true" -Headers $headers))
   if($users.Count-ne 1){throw 'candidate-owner-user-mismatch'}
   $ownerSubject=[string]$users[0].id
-  $credentials=@(Invoke-RestMethod -Method Get -Uri "$base/admin/realms/runaai-next/users/$ownerSubject/credentials" -Headers $headers)
+  $credentials=@(Expand-Response (Invoke-RestMethod -Method Get -Uri "$base/admin/realms/runaai-next/users/$ownerSubject/credentials" -Headers $headers))
   if(@($credentials|Where-Object{$_.type-eq 'webauthn-passwordless'}).Count-ne 2){throw 'candidate-owner-passkey-count-mismatch'}
 } finally { Remove-Variable password,token -ErrorAction SilentlyContinue }
 

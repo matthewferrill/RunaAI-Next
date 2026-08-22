@@ -3,6 +3,7 @@ param([string]$Root = 'C:\AI\RunaAI-Next-Candidate')
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
+Add-Type -AssemblyName System.Security
 if ($env:COMPUTERNAME -ne 'RUNA-CONTROL' -or [Security.Principal.WindowsIdentity]::GetCurrent().Name -ne 'RUNA-CONTROL\Matthew') { throw 'owner-authority-context-invalid' }
 if ([IO.Path]::GetFullPath($Root) -ne 'C:\AI\RunaAI-Next-Candidate') { throw 'candidate-root-invalid' }
 $path = Join-Path $Root 'secrets\owner-bootstrap-password.dpapi'

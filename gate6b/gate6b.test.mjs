@@ -402,6 +402,7 @@ test("Control Caddy trust is exact, user-scoped, strictly verified, and reversib
   assert.match(script, /control-caddy-trust-interactive-session-required/);
   assert.match(script, /X509BasicConstraintsExtension/);
   assert.match(script, /certificateValidationBypassed=\$false/);
+  assert.match(script, /runa2-gate6b-control-caddy-trust-error\/v1/);
   assert.match(script, /curl\.exe -sS -o NUL -w '%\{http_code\}' --max-time 10/);
   assert.doesNotMatch(script, /(?:^|\s)(?:-k|--insecure)(?:\s|$)/m);
   assert.match(script, /if\(\$imported\)\{& certutil\.exe -user -f -delstore Root/);

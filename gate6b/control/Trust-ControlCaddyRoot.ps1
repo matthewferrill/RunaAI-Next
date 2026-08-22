@@ -14,6 +14,14 @@ $root='C:\AI\RunaAI-Next-Candidate';$configPath=Join-Path $root 'config\candidat
 $rootCertPath='C:\Windows\System32\config\systemprofile\AppData\Roaming\Caddy\pki\authorities\local\root.crt'
 $expectedSubject='CN=Caddy Local Authority - 2026 ECC Root';$publicBaseUrl='https://192.168.50.169:9761'
 $trustScope='CurrentUser\Root'
+trap{
+  $failure=[string]$_.Exception.Message
+  if($failure-notmatch'^control-caddy-trust-[a-z-]+$'){$failure='control-caddy-trust-failed'}
+  if($ResultPath-ne''-and[IO.Path]::GetFullPath($ResultPath)-match'^C:\\AI\\RunaAI-Next-Candidate\\staging\\caddy-trust-[a-f0-9]{12}\\result\.json$'){
+    [ordered]@{schemaVersion='runa2-gate6b-control-caddy-trust-error/v1';passed=$false;errorCode=$failure;certificateValidationBypassed=$false;privateValuesIncluded=$false}|ConvertTo-Json -Compress|Set-Content -LiteralPath $ResultPath -Encoding utf8 -NoNewline
+  }
+  exit 1
+}
 if($env:COMPUTERNAME-ne'RUNA-CONTROL'-or[Security.Principal.WindowsIdentity]::GetCurrent().Name-ne'RUNA-CONTROL\Matthew'){throw 'control-caddy-trust-context-invalid'}
 if([Diagnostics.Process]::GetCurrentProcess().SessionId-eq 0){throw 'control-caddy-trust-interactive-session-required'}
 if($ReleaseId-notmatch'^[A-Za-z0-9._-]{1,100}$'-or$ExpectedCommit-notmatch'^[a-f0-9]{40}$'-or

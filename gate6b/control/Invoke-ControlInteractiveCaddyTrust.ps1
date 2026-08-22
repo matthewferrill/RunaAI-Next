@@ -36,6 +36,8 @@ try{
   do{Start-Sleep -Milliseconds 500;if(Test-Path -LiteralPath $resultPath){break};$state=(Get-ScheduledTask -TaskPath $taskPath -TaskName $taskName).State}until([DateTime]::UtcNow-gt$deadline-or$state-eq'Ready')
   if(-not(Test-Path -LiteralPath $resultPath)){throw 'control-caddy-interactive-result-missing'}
   $result=Get-Content -Raw -LiteralPath $resultPath|ConvertFrom-Json
+  if($result.schemaVersion-eq'runa2-gate6b-control-caddy-trust-error/v1'-and$result.passed-eq$false-and
+    [string]$result.errorCode-match'^control-caddy-trust-[a-z-]+$'-and$result.privateValuesIncluded-eq$false){throw [string]$result.errorCode}
   if($result.schemaVersion-ne'runa2-gate6b-control-caddy-trust/v1'-or$result.passed-ne$true-or$result.scope-ne'CurrentUser\Root'-or
     $result.thumbprint-ne$ExpectedRootThumbprint-or$result.httpsStatus-ne 200-or$result.certificateValidationBypassed-ne$false-or$result.privateValuesIncluded-ne$false){throw 'control-caddy-interactive-result-invalid'}
   $result|ConvertTo-Json -Compress

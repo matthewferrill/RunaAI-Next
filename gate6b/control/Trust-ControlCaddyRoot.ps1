@@ -30,31 +30,29 @@ if($runtime.cutover.phase-eq'closed'){
 }elseif($readiness.authority-ne'shadow'-or$readiness.protectedDataImported-ne$false-or$readiness.productionTrafficChanged-ne$false){throw 'control-caddy-trust-authority-invalid'}
 $actualHash=(Get-FileHash -LiteralPath $rootCertPath -Algorithm SHA256).Hash.ToLowerInvariant()
 $certificate=[Security.Cryptography.X509Certificates.X509Certificate2]::new($rootCertPath)
-$certificateStore=[Security.Cryptography.X509Certificates.X509Store]::new(
-  [Security.Cryptography.X509Certificates.StoreName]::Root,
-  [Security.Cryptography.X509Certificates.StoreLocation]::CurrentUser)
 try{
   $basicConstraints=@($certificate.Extensions|Where-Object{$_-is[Security.Cryptography.X509Certificates.X509BasicConstraintsExtension]})
   if($actualHash-ne$ExpectedRootSha256-or$certificate.Thumbprint-ne$ExpectedRootThumbprint-or
     $certificate.Subject-ne$expectedSubject-or$certificate.Issuer-ne$expectedSubject-or$certificate.HasPrivateKey-or
     $certificate.NotAfter.ToUniversalTime()-lt[DateTime]::UtcNow.AddYears(1)-or$basicConstraints.Count-ne 1-or
     $basicConstraints[0].CertificateAuthority-ne$true){throw 'control-caddy-trust-certificate-invalid'}
-  $certificateStore.Open([Security.Cryptography.X509Certificates.OpenFlags]::ReadWrite)
-  $existing=@($certificateStore.Certificates|Where-Object{$_.Thumbprint-eq$ExpectedRootThumbprint})
+  $existing=@(Get-ChildItem -LiteralPath 'Cert:\CurrentUser\Root'|Where-Object{$_.Thumbprint-eq$ExpectedRootThumbprint})
   if($existing.Count-gt 1){throw 'control-caddy-trust-duplicate'}
   $alreadyTrusted=$existing.Count-eq 1;$imported=$false
   if($alreadyTrusted){
     if([Convert]::ToBase64String($existing[0].RawData)-ne[Convert]::ToBase64String($certificate.RawData)){throw 'control-caddy-trust-store-mismatch'}
   }else{
-    $certificateStore.Add($certificate);$imported=$true
+    & certutil.exe -user -f -addstore Root $rootCertPath *> $null
+    if($LASTEXITCODE-ne 0){throw 'control-caddy-trust-import-failed'}
+    $imported=$true
   }
   try{
-    if(@($certificateStore.Certificates|Where-Object{$_.Thumbprint-eq$ExpectedRootThumbprint}).Count-ne 1){throw 'control-caddy-trust-import-mismatch'}
+    if(@(Get-ChildItem -LiteralPath 'Cert:\CurrentUser\Root'|Where-Object{$_.Thumbprint-eq$ExpectedRootThumbprint}).Count-ne 1){throw 'control-caddy-trust-import-mismatch'}
     $httpsStatus=& curl.exe -sS -o NUL -w '%{http_code}' --max-time 10 "$publicBaseUrl/health/ready" 2>$null
     if($LASTEXITCODE-ne 0-or[string]$httpsStatus-ne'200'){throw 'control-caddy-trust-https-verification-failed'}
   }catch{
-    if($imported){$certificateStore.Remove($certificate)}
+    if($imported){& certutil.exe -user -f -delstore Root $ExpectedRootThumbprint *> $null;if($LASTEXITCODE-ne 0){throw 'control-caddy-trust-rollback-failed'}}
     throw
   }
   [ordered]@{schemaVersion='runa2-gate6b-control-caddy-trust/v1';passed=$true;scope=$trustScope;thumbprint=$ExpectedRootThumbprint;alreadyTrusted=$alreadyTrusted;httpsStatus=200;certificateValidationBypassed=$false;privateValuesIncluded=$false}|ConvertTo-Json -Compress
-}finally{$certificateStore.Close();$certificate.Dispose()}
+}finally{$certificate.Dispose()}

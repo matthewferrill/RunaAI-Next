@@ -3,9 +3,11 @@
 This runbook is intentionally not executable as one unattended command. It separates the reversible
 candidate-only setup from the owner-interactive and protected-data boundary.
 
-Current status (2026-08-22): pre-owner step 1 is complete. The exact Gate 6C browser release is
-running as an empty, non-authoritative Control shadow and is stopped at `verify-recovery-authority`.
-No target user or credential exists, and steps 2-5 below have not run.
+Current status (2026-08-22): all candidate-only and owner-interactive prerequisites are complete. The
+exact Gate 6C release is running as a non-authoritative Control shadow, the seven-step owner ceremony
+is complete with two distinct passkeys, the recurring encrypted backup and distinct-target restore
+proof are current, and the write-freeze preflight passed read-only. No protected record has been
+imported, no freeze is active, no traffic has changed, and the candidate has not been promoted.
 
 ## Before the owner joins
 
@@ -23,9 +25,8 @@ The owner must be present to enroll and witness new target credentials. The cere
 new WebAuthn/passkey, sign-out/sign-in, fresh WebAuthn step-up, session/capability revocation, and a
 second newly enrolled recovery credential. Legacy credential material is never opened or copied.
 
-The current parallel candidate does not yet expose a complete browser OIDC/session ceremony. Do not
-substitute an admin-created credential, bearer token pasted into a command, or an aggregate Keycloak
-row count. A reviewed browser ceremony entry point is required before this step can run.
+This boundary is complete. Its evidence remains a prerequisite only; owner completion does not grant
+the candidate write authority, import authorization, or production traffic.
 
 ## Protected maintenance window
 

@@ -1,6 +1,6 @@
 # RunaAI migration status
 
-Status date: 2026-08-21. This is the living migration handoff for RunaAI-Next. Update it in the same
+Status date: 2026-08-22. This is the living migration handoff for RunaAI-Next. Update it in the same
 commit whenever a gate changes repository direction, authority, implementation status, safety
 boundaries, verification state, or the next planned work.
 
@@ -242,6 +242,15 @@ repository and never push migration work into either source repository.
   named maintenance-window decision before activation. The current hard boundary is the witnessed
   recovery-authority and owner passkey ceremony; synthetic evidence or an admin token cannot
   substitute for witnessed owner sign-in, step-up, revocation, and recovery.
+- Gate 6C target-owner and backup readiness is now complete on Control. The exact running release is
+  `runaai-next-gate6c-readiness-2026-08-22-669139e` at commit `669139e`, artifact `d8a39de1`, and
+  configuration `c0980e45`. The witnessed ceremony is complete at revision 7 with two distinct
+  passwordless credentials. The SYSTEM-owned recurring backup passed under that release, and
+  generation `20260822T0843051927477Z` restored all three databases into distinct disposable targets
+  that were then destroyed. The read-only freeze preflight passed, but no freeze is active. The live
+  readiness result is deliberately `ownerCredentialEnrolled=true` and `authority=shadow`; cutover is
+  still `planned` revision zero, protected data is not imported, production traffic is unchanged, and
+  legacy remains clean at `b4db040`. Owner completion is not candidate promotion.
 
 ## Bootstrap findings
 
@@ -284,7 +293,7 @@ plain-language steward experience, or governed action pathway.
 | 3 | One reversible governed idempotent action | Complete; accepted and merged as `0680cfb` | Complete |
 | 4 | Governed data migration, one domain at a time | Complete; accepted and merged as `2c38dd5`; legacy unchanged | Complete |
 | 5 | Operations, private transport, authentication/authorization, recovery | Complete; accepted and merged as `a986419` | Complete |
-| 6 | Selected-core production cutover and rollback window | Gate 6A accepted; Gate 6B complete; Gate 6C browser shadow deployed and green; no owner, protected import, freeze, or authority change | Witness recovery authority and complete the owner passkey ceremony before protected execution |
+| 6 | Selected-core production cutover and rollback window | Gate 6A accepted; Gate 6B complete; Gate 6C owner and backup prerequisites complete; candidate remains shadow with no protected import, freeze, traffic, or authority change | Explicitly authorize the protected Gate 6C/6D maintenance window |
 | 7 | Deferred extensions | Not started | New baseline and separate approval per extension group |
 
 ## Bootstrap validation
@@ -329,19 +338,17 @@ No dependency was changed during the prerequisite disposition. Full evidence is 
 
 ## Next decision
 
-Gate 6B has completed the infrastructure work: one exact selected-core release is running beside
-legacy on Control as an empty shadow, and its service restart, host restart, dependency failure,
-listener, and encrypted restore behavior are proven. It still has no owner, protected record, write
-authority, or production traffic.
+Gate 6B infrastructure and Gate 6C target-owner/backup prerequisites are complete. The exact release
+`runaai-next-gate6c-readiness-2026-08-22-669139e` runs beside legacy as a shadow. The owner ceremony is
+complete, the recurring encrypted backup and disposable restore proof are current, and the read-only
+freeze preflight passed. These facts do not promote the candidate: legacy remains authoritative,
+cutover remains planned at revision zero, no protected row is imported, no freeze is active, and no
+traffic has changed.
 
-Gate 6C's contract is frozen and its non-protected implementation tranche is green. The private
-browser OIDC/PKCE entry point, encrypted PostgreSQL session store, passkey enrollment actions, exact
-owner binding, and revocation checks are implemented, disposable-tested, and deployed on Control as
-the exact empty shadow release `runaai-next-gate6c-shadow-2026-08-22-ff15c61`. It is stopped before
-recovery-authority verification with zero target users. Prove the recurring backup schedule, then
-present one coordinated owner/maintenance window for new target
-credential enrollment, final backup verification, allowlisted aggregate preflight, selected-write
-freeze, memory-only retained delta, exact reconciliation, and immediate Gate 6D promotion or rollback.
+The next genuine decision is one coordinated protected Gate 6C/6D maintenance window: reverify the
+current facts, activate the temporary whole-legacy-state write deny, perform the owner-context
+four-domain capture and target import, require zero-difference reconciliation, and proceed immediately
+to Gate 6D promotion or target-only rollback before restoring legacy writes.
 E3 remains deferred, E4/device-vault ciphertext is not copied, E5 is absent, and the separate
 approved-knowledge vector index remains skipped. No protected operation is authorized by the Gate 6B
 result or by synthetic Gate 6C implementation.

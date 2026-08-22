@@ -9,14 +9,17 @@ The frozen contract is
 disposable data. Live owner enrollment, protected-store access, write freeze, retained import, and
 promotion are deliberately absent until their explicit maintenance-window boundary.
 
-`GATE6C-PREPARATION-RESULTS-2026-08-21.md` records the first green non-protected tranche and its
-implemented but not-yet-deployed browser OIDC/WebAuthn boundary. `CONTROL-MAINTENANCE-WINDOW.md`
-records the Control sequence and the conservative whole-state write-freeze finding.
+`GATE6C-PREPARATION-RESULTS-2026-08-21.md` records the first green non-protected tranche.
+`GATE6C-OWNER-AND-BACKUP-RESULTS-2026-08-22.md` records the completed target owner ceremony, current
+encrypted backup/restore proof, and the explicit fact that the candidate remains shadow.
+`CONTROL-MAINTENANCE-WINDOW.md` records the remaining protected Control sequence and the conservative
+whole-state write-freeze finding.
 
 The browser boundary uses authorization code plus PKCE, Keycloak application-initiated passkey
 registration, exact product-owner binding, encrypted PostgreSQL sessions, opaque host cookies, and
-online refresh/session revocation. Production configuration remains explicitly disabled until a new
-reviewed shadow release is built; no current Control owner credential or route changed.
+online refresh/session revocation. The reviewed shadow release is now running, and the target owner
+ceremony is complete. This establishes target identity readiness only: no protected record, legacy
+write freeze, production route, or authority transition has occurred.
 
 The exact migration domains are:
 

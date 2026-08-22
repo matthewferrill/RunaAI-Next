@@ -330,6 +330,7 @@ test("Control owner tools bind the exact candidate config and DPAPI user context
   const localhostDeploy = readFileSync(new URL("./control/Deploy-ControlLocalhostShadow.ps1", import.meta.url), "utf8");
   const resumeDeploy = readFileSync(new URL("./control/Deploy-ControlEnrollmentResume.ps1", import.meta.url), "utf8");
   const resumeRebind = readFileSync(new URL("./control/Invoke-ControlOwnerAuthorityRebindAfterEnrollment.ps1", import.meta.url), "utf8");
+  const completedOwnerDeploy = readFileSync(new URL("./control/Deploy-ControlCompletedOwnerReadiness.ps1", import.meta.url), "utf8");
   const flowProof = readFileSync(new URL("./control/Test-ControlOwnerPasskeyFlow.ps1", import.meta.url), "utf8");
   const configureFlow = readFileSync(new URL("./control/Configure-ControlOwnerPasskeyFlow.ps1", import.meta.url), "utf8");
   const restoreFlow = readFileSync(new URL("./control/Restore-ControlOwnerPasskeyFlow.ps1", import.meta.url), "utf8");
@@ -362,6 +363,11 @@ test("Control owner tools bind the exact candidate config and DPAPI user context
   assert.match(resumeDeploy, /rolledBack=\$true/);
   assert.match(resumeRebind, /interrupted-enrollment-recovery-release/);
   assert.match(resumeRebind, /webauthn-passwordless' \}\)\.Count -ne 1/);
+  assert.match(completedOwnerDeploy, /ownerCredentialEnrolled-ne \$true/);
+  assert.match(completedOwnerDeploy, /authority-ne 'shadow'/);
+  assert.match(completedOwnerDeploy, /candidatePromoted=\$false/);
+  assert.match(completedOwnerDeploy, /rolledBack=\$true/);
+  assert.match(completedOwnerDeploy, /Rebind-ControlCompletedOwnerCeremony\.mjs/);
   assert.match(flowProof, /runaai-next-gate6c-flow-proof/);
   assert.match(flowProof, /finally \{/);
   assert.match(flowProof, /Method Delete -Uri "\$base\/admin\/realms\/\$realmName"/);

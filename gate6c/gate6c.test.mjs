@@ -322,6 +322,7 @@ test("Control owner tools bind the exact candidate config and DPAPI user context
   assert.match(operator, /BEGIN ISOLATION LEVEL SERIALIZABLE/);
   assert.match(operator, /verifyReleaseArtifact/);
   assert.match(operator, /--untracked-files=no/);
+  assert.doesNotMatch(operator, /config\.sourceGeneration !== args\["legacy-commit"\]/);
 });
 
 test("browser owner ceremony uses PKCE, exact owner binding, WebAuthn, and opaque sessions", async () => {

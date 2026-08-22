@@ -1,6 +1,7 @@
 # Gate 6B release composition and parallel candidate
 
-Status: implemented and verified at the frozen shadow boundary; see `GATE6B-RESULTS-2026-08-21.md`.
+Status: implemented; all checks except the accepted umbrella Gate 6 host-restart criterion are green.
+See `GATE6B-RESULTS-2026-08-21.md`.
 
 Gate 6B turns the accepted Gate 1 through Gate 6A libraries into one runnable RunaAI release without
 changing legacy authority. It may install and run only as an isolated shadow candidate. Protected

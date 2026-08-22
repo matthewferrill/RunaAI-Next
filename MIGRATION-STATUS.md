@@ -204,7 +204,8 @@ repository and never push migration work into either source repository.
   authority into one fail-closed Node 22.22.0 entry point. It may run on Control only as an isolated
   empty shadow candidate; protected data, owner credentials, selected-write freeze, and traffic
   promotion remain Gate 6C/6D boundaries.
-- Gate 6B is green at its frozen shadow boundary on the exact release
+- Gate 6B is green on every completed check but remains open on the accepted host-restart criterion.
+  The exact running release is
   `runaai-next-selected-core-2026-08-21-77f3017` (`77f3017`). Control now runs candidate-owned
   PostgreSQL 18.6, Keycloak 26.7.2, OpenFGA 1.18.3, Node 22.22.0, and Caddy 2.11.4 with only the exact
   private Caddy bind exposed and every other candidate listener on loopback. The live artifact's
@@ -213,8 +214,10 @@ repository and never push migration work into either source repository.
   Gate 6B and Gate 6 integrations pass 11/11 and 10/10. Legacy Control remains reachable, clean, and
   commit-aligned at `b4db040` on its original loopback listeners. No protected data, owner credential,
   legacy-write freeze, traffic change, or promotion occurred. Recurring protected-data backup and a
-  full host-restart rehearsal are deliberately deferred until an approved Gate 6C/6D maintenance
-  boundary.
+  recurring protected-data backup remains deferred until before Gate 6C import. The accepted umbrella
+  Gate 6 criteria require a host-restart proof; because that briefly interrupts legacy RunaAI, it is
+  now the only Gate 6B blocker and must run in an explicit owner-approved maintenance window before
+  Gate 6C starts.
 
 ## Bootstrap findings
 
@@ -257,7 +260,7 @@ plain-language steward experience, or governed action pathway.
 | 3 | One reversible governed idempotent action | Complete; accepted and merged as `0680cfb` | Complete |
 | 4 | Governed data migration, one domain at a time | Complete; accepted and merged as `2c38dd5`; legacy unchanged | Complete |
 | 5 | Operations, private transport, authentication/authorization, recovery | Complete; accepted and merged as `a986419` | Complete |
-| 6 | Selected-core production cutover and rollback window | Gate 6A accepted; Gate 6B shadow candidate green; Gate 6C protected staging and Gate 6D promotion not started; legacy unchanged | New protected-operation and maintenance gates remain explicit blockers |
+| 6 | Selected-core production cutover and rollback window | Gate 6A accepted; Gate 6B implementation green except required Control host restart; Gate 6C/6D not started; legacy unchanged | Owner-approved host-restart window is the current blocker |
 | 7 | Deferred extensions | Not started | New baseline and separate approval per extension group |
 
 ## Bootstrap validation
@@ -302,20 +305,25 @@ No dependency was changed during the prerequisite disposition. Full evidence is 
 
 ## Next decision
 
-Gate 6B has completed the safe infrastructure work: one exact selected-core release is running beside
-legacy on Control as an empty shadow, and its restart, dependency failure, listener, and encrypted
-restore behavior are proven. It still has no owner, protected record, write authority, or production
-traffic.
+Gate 6B has completed the non-disruptive infrastructure work: one exact selected-core release is
+running beside legacy on Control as an empty shadow, and its service restart, dependency failure,
+listener, and encrypted restore behavior are proven. It still has no owner, protected record, write
+authority, or production traffic. The accepted umbrella Gate 6 criteria additionally require a full
+Control host restart. That proof is pending because it briefly interrupts the unchanged legacy
+service.
 
-The next decision is Gate 6C protected staging. Before opening a protected store, its plan must bind
+The next decision is authorization of the Gate 6B Control host-restart window. Gate 6C must not begin
+until both legacy and candidate return healthy with the exact same identities after that reboot.
+
+After Gate 6B closes, Gate 6C protected staging must bind
 the exact final domains, owner-context backup schedule, target owner re-enrolment, source-write freeze
 boundary, memory-only decrypt/re-encrypt path, exact reconciliation, abort cleanup, and unchanged
 legacy rollback. E3 remains deferred, E4/device-vault ciphertext is not copied, E5 is absent, and the
 separate approved-knowledge vector index remains skipped. No protected operation is authorized by the
 Gate 6B result.
 
-Gate 6D remains a separate maintenance-window decision: host restart rehearsal, final delta under
-write freeze, zero-difference reconciliation, witnessed promotion, one governed validation action,
-one-hour observation, and rollback authority. Qwen3.6 deliberate review, the existing live BGE
+Gate 6D remains a separate maintenance-window decision: final delta under write freeze,
+zero-difference reconciliation, witnessed promotion, one governed validation action, one-hour
+observation, and rollback authority. Qwen3.6 deliberate review, the existing live BGE
 endpoint, broader legacy surfaces, and every Gate 7 extension remain deferred unless separately
 selected.

@@ -394,6 +394,17 @@ test("Control Caddy listeners are pinned to their exact interfaces", async () =>
   assert.match(script, /http:\/\/127\.0\.0\.1:9770 \{\r?\n  bind 127\.0\.0\.1/);
 });
 
+test("Control Caddy trust is exact, user-scoped, strictly verified, and reversible", async () => {
+  const script = await readFile(resolve(import.meta.dirname, "control", "Trust-ControlCaddyRoot.ps1"), "utf8");
+  assert.match(script, /Cert:\\CurrentUser\\Root/);
+  assert.doesNotMatch(script, /Cert:\\LocalMachine\\Root/);
+  assert.match(script, /X509BasicConstraintsExtension/);
+  assert.match(script, /certificateValidationBypassed=\$false/);
+  assert.match(script, /curl\.exe -sS -o NUL -w '%\{http_code\}' --max-time 10/);
+  assert.doesNotMatch(script, /(?:^|\s)(?:-k|--insecure)(?:\s|$)/m);
+  assert.match(script, /if\(\$imported\)\{Remove-Item -LiteralPath/);
+});
+
 test("Control application startup retains logs and permits the full integrity scan", async () => {
   const script = await readFile(resolve(import.meta.dirname, "control", "Register-ControlShadow.ps1"), "utf8");
   assert.match(script, /application\.stdout\.log/);

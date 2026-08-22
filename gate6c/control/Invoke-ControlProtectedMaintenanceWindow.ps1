@@ -39,6 +39,8 @@ if($Mode-eq 'Prepare'){
   if([string]$backupTask.State-ne 'Ready'-or$backupInfo.LastTaskResult-ne 0-or$backupTask.Actions[0].Arguments-notmatch [regex]::Escape($ReleaseId)){throw 'gate6d-preflight-backup-schedule-invalid'}
   $listeners=@(Get-NetTCPConnection -State Listen|Where-Object{$_.LocalPort-in @(9760,9761,9762,9763,9764,9765,9766,9770)})
   if($listeners.Count-ne 8-or@($listeners|Where-Object{$_.LocalPort-ne 9761-and$_.LocalAddress-notin @('127.0.0.1','::1')}).Count-ne 0-or@($listeners|Where-Object{$_.LocalPort-eq 9761-and$_.LocalAddress-ne '192.168.50.169'}).Count-ne 0){throw 'gate6d-preflight-listener-boundary-invalid'}
+  $httpsStatus=& curl.exe -sS -o NUL -w '%{http_code}' --max-time 10 "$($authority.Config.publicBaseUrl)/health/ready" 2>$null
+  if($LASTEXITCODE-ne 0-or[string]$httpsStatus-ne '200'){throw 'gate6d-preflight-private-tls-invalid'}
   if((Get-PSDrive -Name C).Free-lt 5GB){throw 'gate6d-preflight-capacity-invalid'}
   if((Get-Service W32Time).Status-ne 'Running'){throw 'gate6d-preflight-time-service-invalid'}
   $verify=& $node --test (Join-Path $release 'gate6\gate6.test.mjs') (Join-Path $release 'gate6b\gate6b.test.mjs') (Join-Path $release 'gate6c\gate6c.test.mjs') 2>&1;if($LASTEXITCODE-ne 0){throw 'gate6d-preflight-selected-verifier-failed'}

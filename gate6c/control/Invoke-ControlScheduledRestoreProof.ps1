@@ -8,8 +8,20 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 if ([IO.Path]::GetFullPath($Root) -ne 'C:\AI\RunaAI-Next-Candidate') { throw 'candidate-root-invalid' }
 if ($ReleaseId -notmatch '^[A-Za-z0-9._-]{1,100}$') { throw 'candidate-release-id-invalid' }
-$release = Get-Content -Raw -LiteralPath (Join-Path $Root 'config\release.json') | ConvertFrom-Json
-if ($release.releaseId -ne $ReleaseId) { throw 'candidate-release-id-mismatch' }
+$configRoot = [IO.Path]::GetFullPath((Join-Path $Root 'config'))
+$candidate = Get-Content -Raw -LiteralPath (Join-Path $configRoot 'candidate.json') | ConvertFrom-Json
+$manifestRef = [string]$candidate.releaseManifestPath
+if ($manifestRef -notmatch '^[A-Za-z0-9][A-Za-z0-9._-]{0,119}$') { throw 'candidate-release-manifest-ref-invalid' }
+$manifestPath = [IO.Path]::GetFullPath((Join-Path $configRoot $manifestRef))
+if (-not [StringComparer]::OrdinalIgnoreCase.Equals((Split-Path -Parent $manifestPath), $configRoot)) {
+  throw 'candidate-release-manifest-path-invalid'
+}
+$release = Get-Content -Raw -LiteralPath $manifestPath | ConvertFrom-Json
+if ($release.releaseId -ne $ReleaseId -or $release.commit -notmatch '^[a-f0-9]{40}$' -or
+    $release.artifactDigest -notmatch '^[a-f0-9]{64}$') { throw 'candidate-release-id-mismatch' }
+$runtime = Invoke-RestMethod -Uri 'http://127.0.0.1:9760/api/runtime/status' -TimeoutSec 10
+if ($runtime.running.releaseId -ne $release.releaseId -or $runtime.running.commit -ne $release.commit -or
+    $runtime.running.artifactDigest -ne $release.artifactDigest) { throw 'candidate-running-release-mismatch' }
 $pgBin = Join-Path $Root 'tools\postgresql\pgsql\bin'
 $backupRoot = Join-Path $Root 'backups\scheduled'
 $generation = Get-ChildItem -LiteralPath $backupRoot -Directory | Where-Object {

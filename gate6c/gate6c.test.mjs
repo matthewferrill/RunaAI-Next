@@ -270,6 +270,9 @@ test("selected owner inventory fails closed on a possible setting action", () =>
 
 test("Control scheduled backup never writes a plaintext dump", () => {
   const source = readFileSync(new URL("./control/Invoke-ControlScheduledBackup.ps1", import.meta.url), "utf8");
+  assert.match(source, /candidate\.releaseManifestPath/);
+  assert.match(source, /candidate-running-release-mismatch/);
+  assert.doesNotMatch(source, /config\\release\.json/);
   assert.match(source, /RedirectStandardOutput = \$true/);
   assert.match(source, /ProtectedData\]::Protect/);
   assert.match(source, /DataProtectionScope\]::LocalMachine/);
@@ -280,6 +283,9 @@ test("Control scheduled backup never writes a plaintext dump", () => {
 
 test("Control restore proof streams decrypted archives only to distinct targets", () => {
   const source = readFileSync(new URL("./control/Invoke-ControlScheduledRestoreProof.ps1", import.meta.url), "utf8");
+  assert.match(source, /candidate\.releaseManifestPath/);
+  assert.match(source, /candidate-running-release-mismatch/);
+  assert.doesNotMatch(source, /config\\release\.json/);
   assert.match(source, /ProtectedData\]::Unprotect/);
   assert.match(source, /RedirectStandardInput = \$true/);
   assert.match(source, /g6cproof_runa/);
@@ -290,6 +296,9 @@ test("Control restore proof streams decrypted archives only to distinct targets"
 
 test("Control backup schedule is SYSTEM-owned and fail-closed at its capacity", () => {
   const source = readFileSync(new URL("./control/Register-ControlBackupSchedule.ps1", import.meta.url), "utf8");
+  assert.match(source, /candidate\.releaseManifestPath/);
+  assert.match(source, /candidate-running-release-mismatch/);
+  assert.doesNotMatch(source, /config\\release\.json/);
   assert.match(source, /\$taskName = 'ProtectedBackup'/);
   assert.match(source, /UserId 'SYSTEM'/);
   assert.match(source, /-AtStartup/);

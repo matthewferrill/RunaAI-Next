@@ -13,7 +13,7 @@ const uuid = value => /^[a-f0-9]{8}-[a-f0-9]{4}-[1-8][a-f0-9]{3}-[89ab][a-f0-9]{
 function argumentsOf(argv) {
   const names = ["release-root", "config", "expected-release-id", "expected-commit",
     "expected-artifact-digest", "prior-release-id", "prior-commit", "prior-artifact-digest",
-    "reason", "legacy-repo", "legacy-commit"];
+    "prior-config", "reason", "legacy-repo", "legacy-commit"];
   const accepted = new Set(names); const result = {};
   for (let index = 0; index < argv.length; index += 2) {
     const key = String(argv[index] ?? "").replace(/^--/, ""); const value = argv[index + 1];
@@ -98,8 +98,10 @@ async function main(argv) {
     throw coded("gate6c-completed-owner-rebind-pins-invalid", "The release and legacy pins are invalid.");
   }
   const releaseRoot = resolve(args["release-root"]); const configPath = resolve(args.config);
+  const priorConfigPath = resolve(args["prior-config"]);
   if (releaseRoot !== resolve("C:\\AI\\RunaAI-Next-Candidate\\releases", args["expected-release-id"])
-      || configPath !== resolve("C:\\AI\\RunaAI-Next-Candidate\\config\\candidate.json")) {
+      || configPath !== resolve("C:\\AI\\RunaAI-Next-Candidate\\config\\candidate.json")
+      || priorConfigPath !== resolve(dirname(configPath), `candidate.pre-gate6d-${args["expected-commit"].slice(0, 12)}.json`)) {
     throw coded("gate6c-completed-owner-rebind-path-invalid", "The rebind paths are outside the candidate boundary.");
   }
   const legacyRepo = resolve(args["legacy-repo"]);
@@ -113,15 +115,24 @@ async function main(argv) {
     { createEnvelopeCipher }, ceremony, contracts, formats] = await Promise.all([
       imported("gate6b/release-config.mjs"), imported("gate6/release.mjs"), imported("gate6b/artifact.mjs"),
       imported("gate4/envelope.mjs"), imported("gate6c/ceremony.mjs"), imported("gate6c/contracts.mjs"), imported("gate6c/formats.mjs")]);
-  const loaded = await loadReleaseConfig(configPath); const config = loaded.value;
+  const [loaded, priorLoaded] = await Promise.all([loadReleaseConfig(configPath), loadReleaseConfig(priorConfigPath)]);
+  const config = loaded.value; const priorConfig = priorLoaded.value;
   const manifestPath = isAbsolute(config.releaseManifestPath) ? config.releaseManifestPath : resolve(dirname(configPath), config.releaseManifestPath);
   const manifest = assertReleaseManifest(JSON.parse((await readFile(manifestPath, "utf8")).replace(/^\uFEFF/, "")));
+  const priorManifestPath = isAbsolute(priorConfig.releaseManifestPath) ? priorConfig.releaseManifestPath
+    : resolve(dirname(priorConfigPath), priorConfig.releaseManifestPath);
+  const priorManifest = assertReleaseManifest(JSON.parse((await readFile(priorManifestPath, "utf8")).replace(/^\uFEFF/, "")));
   const expectedMode = args.reason === "completed-owner-promotion-candidate" ? "active" : "shadow";
   if (config.mode !== expectedMode || config.keycloak.issuer !== "http://localhost:9762/realms/runaai-next"
       || config.gate6c?.enabled !== true || config.gate6c.expectedPrincipalId !== "matthew-owner"
       || config.gate6c.legacyCommit !== args["legacy-commit"] || manifest.releaseId !== args["expected-release-id"]
       || manifest.commit !== args["expected-commit"] || manifest.artifactDigest !== args["expected-artifact-digest"]
-      || manifest.configurationDigest !== loaded.configurationDigest) {
+      || manifest.configurationDigest !== loaded.configurationDigest || priorConfig.gate6c?.enabled !== true
+      || priorConfig.gate6c.expectedPrincipalId !== "matthew-owner"
+      || priorConfig.gate6c.legacyCommit !== args["legacy-commit"]
+      || priorManifest.releaseId !== args["prior-release-id"] || priorManifest.commit !== args["prior-commit"]
+      || priorManifest.artifactDigest !== args["prior-artifact-digest"]
+      || priorManifest.configurationDigest !== priorLoaded.configurationDigest) {
     throw coded("gate6c-completed-owner-rebind-release-mismatch", "The new promotion-candidate release does not match its reviewed pins.");
   }
   await verifyReleaseArtifact(releaseRoot, manifest.artifactDigest);
@@ -130,12 +141,14 @@ async function main(argv) {
     readSecretReference(config.keyRefs.coreHmac, dirname(configPath))]);
   const cipher = createEnvelopeCipher({ encryptionKey: decodeKey(coreEncryption, "core encryption key"),
     hmacKey: decodeKey(coreHmac, "core HMAC key"), keyId: "runa-core-release-v1" });
-  const base = { schemaVersion: formats.GATE6C_BINDING_VERSION, cutoverId: config.cutoverId,
-    sourceGeneration: config.gate6c.legacyCommit, targetGeneration: config.targetGeneration,
-    participantRefHmac: cipher.digest({ type: "gate6c-owner-participant", principalId: "matthew-owner" }) };
-  const binding = { ...base, releaseId: manifest.releaseId, releaseCommit: manifest.commit,
+  const participantRefHmac = cipher.digest({ type: "gate6c-owner-participant", principalId: "matthew-owner" });
+  const binding = { schemaVersion: formats.GATE6C_BINDING_VERSION, cutoverId: config.cutoverId,
+    sourceGeneration: config.gate6c.legacyCommit, targetGeneration: config.targetGeneration, participantRefHmac,
+    releaseId: manifest.releaseId, releaseCommit: manifest.commit,
     artifactDigest: manifest.artifactDigest };
-  const priorBinding = { ...base, releaseId: args["prior-release-id"], releaseCommit: args["prior-commit"],
+  const priorBinding = { schemaVersion: formats.GATE6C_BINDING_VERSION, cutoverId: priorConfig.cutoverId,
+    sourceGeneration: priorConfig.gate6c.legacyCommit, targetGeneration: priorConfig.targetGeneration, participantRefHmac,
+    releaseId: args["prior-release-id"], releaseCommit: args["prior-commit"],
     artifactDigest: args["prior-artifact-digest"] };
   const subject = process.env.RUNA_GATE6C_OWNER_SUBJECT; delete process.env.RUNA_GATE6C_OWNER_SUBJECT;
   const pg = createRequire(join(releaseRoot, "package.json"))("pg");

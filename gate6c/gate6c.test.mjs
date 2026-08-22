@@ -392,6 +392,7 @@ test("Control owner tools bind the exact candidate config and DPAPI user context
   const configureAmr = readFileSync(new URL("./control/Configure-ControlOwnerPasskeyAmr.ps1", import.meta.url), "utf8");
   const restoreAmr = readFileSync(new URL("./control/Restore-ControlOwnerPasskeyAmr.ps1", import.meta.url), "utf8");
   const rebind = readFileSync(new URL("./control/Rebind-ControlOwnerAuthority.mjs", import.meta.url), "utf8");
+  const completedRebind = readFileSync(new URL("./control/Rebind-ControlCompletedOwnerCeremony.mjs", import.meta.url), "utf8");
   const maintenance = readFileSync(new URL("./control-maintenance.mjs", import.meta.url), "utf8");
   const cutover = readFileSync(new URL("./control/Run-ControlProtectedCutover.mjs", import.meta.url), "utf8");
   const promotionDeploy = readFileSync(new URL("./control/Deploy-ControlPromotionCandidate.ps1", import.meta.url), "utf8");
@@ -481,6 +482,10 @@ test("Control owner tools bind the exact candidate config and DPAPI user context
   assert.match(promotionDeploy, /authority-ne 'shadow'/);
   assert.match(promotionDeploy, /rolledBack=\$true/);
   assert.match(promotionDeploy, /candidate-promotion-rollback-not-clean/);
+  assert.match(promotionDeploy, /--prior-config \$configBackup/);
+  assert.match(completedRebind, /priorConfig\.cutoverId/);
+  assert.match(completedRebind, /priorManifest\.releaseId/);
+  assert.match(completedRebind, /candidate\.pre-gate6d-/);
   assert.match(window, /Set-ControlLegacyWriteFreeze\.ps1/);
   assert.match(window, /for\(\$index=0;\$index-lt 120;\$index\+\+\)/);
   assert.match(window, /Start-Sleep -Seconds 30/);
@@ -768,7 +773,7 @@ test("owner rebind rolls back if both exact ceremony rows are not retained", asy
 
 test("completed owner rebind preserves completion without promoting the candidate", async () => {
   const priorBinding = binding();
-  const nextBinding = { ...binding(), releaseId: "runaai-next-readiness-release",
+  const nextBinding = { ...binding(), cutoverId: "selected-core-retry", releaseId: "runaai-next-readiness-release",
     releaseCommit: "e".repeat(40), artifactDigest: "f".repeat(64) };
   const priorState = ceremony(priorBinding); const currentState = createOwnerCeremonyState(nextBinding);
   const priorDigest = bindingDigest(priorBinding); const nextDigest = bindingDigest(nextBinding);

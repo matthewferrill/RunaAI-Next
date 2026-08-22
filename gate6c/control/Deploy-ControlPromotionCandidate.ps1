@@ -82,7 +82,7 @@ try{Stop-ScheduledTask -TaskPath $taskPath -TaskName 'Application';Wait-PortClos
   if($initial.revision-ne 0-or$initial.complete-ne $false){throw 'candidate-promotion-new-ceremony-not-pristine'}
   $env:RUNA_GATE6C_OWNER_SUBJECT=$subject
   $operator=Join-Path $release 'gate6c\control\Rebind-ControlCompletedOwnerCeremony.mjs'
-  $output=& (Join-Path $release 'runtime\node.exe') $operator --release-root $release --config $config --expected-release-id $ReleaseId --expected-commit $ExpectedCommit --expected-artifact-digest $ExpectedArtifactDigest --prior-release-id $PriorReleaseId --prior-commit $PriorCommit --prior-artifact-digest $PriorArtifactDigest --reason 'completed-owner-promotion-candidate' --legacy-repo $legacy --legacy-commit $legacyCommit 2>&1
+  $output=& (Join-Path $release 'runtime\node.exe') $operator --release-root $release --config $config --expected-release-id $ReleaseId --expected-commit $ExpectedCommit --expected-artifact-digest $ExpectedArtifactDigest --prior-release-id $PriorReleaseId --prior-commit $PriorCommit --prior-artifact-digest $PriorArtifactDigest --prior-config $configBackup --reason 'completed-owner-promotion-candidate' --legacy-repo $legacy --legacy-commit $legacyCommit 2>&1
   $exit=$LASTEXITCODE;Remove-Item Env:RUNA_GATE6C_OWNER_SUBJECT -ErrorAction SilentlyContinue
   if($exit-ne 0){throw 'candidate-promotion-owner-rebind-failed'}
   $readiness=Invoke-RestMethod -Uri 'http://127.0.0.1:9760/api/readiness/status' -TimeoutSec 20;$ceremony=Invoke-RestMethod -Uri 'http://127.0.0.1:9760/api/owner-ceremony/status' -TimeoutSec 20

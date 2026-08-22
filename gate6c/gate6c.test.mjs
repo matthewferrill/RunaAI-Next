@@ -445,6 +445,11 @@ test("Control owner tools bind the exact candidate config and DPAPI user context
   assert.match(cutover, /prerequisite-check/);
   assert.match(cutover, /gate6cd-\$\{step\}-failed/);
   assert.match(cutover, /main\(process\.argv\.slice\(2\)\)\.then/);
+  assert.match(cutover, /writeSync\(1,/);
+  assert.match(cutover, /writeSync\(2,/);
+  assert.match(cutover, /let step = "arguments"/);
+  assert.match(cutover, /gate6cd-context-close-failed/);
+  assert.match(cutover, /gate6cd-operator-timeout/);
   assert.doesNotMatch(cutover, /import\.meta\.url ===/);
   assert.match(cutover, /privateValuesIncluded: false/);
   assert.doesNotMatch(cutover, /console\.log|Write-Output.*password/);

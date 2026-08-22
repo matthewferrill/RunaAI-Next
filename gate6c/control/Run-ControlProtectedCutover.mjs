@@ -1,4 +1,5 @@
 import { createHash, randomBytes } from "node:crypto";
+import { writeSync } from "node:fs";
 import { readFile, stat } from "node:fs/promises";
 import { hostname, userInfo } from "node:os";
 import { dirname, isAbsolute, join, resolve } from "node:path";
@@ -540,22 +541,42 @@ async function closeCutover(context) {
 }
 
 async function main(argv) {
-  const args = argumentsOf(argv); const context = await loadContext(args);
-  const runId = `gate6c-control-${context.manifest.commit.slice(0, 12)}`;
+  let args; let context; let result; let failure; let step = "arguments";
   try {
-    if (args.phase === "prerequisite-check") return prerequisiteCheck(context);
-    if (args.phase === "migrate-promote") return migratePromote(context);
-    if (args.phase === "verify-live") return liveValidate(context);
-    if (args.phase === "close") return closeCutover(context);
-    const result = await rollback(context, runId);
-    return Object.freeze({ schemaVersion: "runa2-gate6d-rollback/v1", passed: true,
-      phase: "rolled-back", targetWasAuthoritative: result.targetWasAuthoritative,
-      legacyModified: false, privateValuesIncluded: false });
-  } finally { await context.close(); }
+    args = argumentsOf(argv); step = "context-load"; context = await loadContext(args);
+    const runId = `gate6c-control-${context.manifest.commit.slice(0, 12)}`; step = args.phase;
+    if (args.phase === "prerequisite-check") result = await prerequisiteCheck(context);
+    else if (args.phase === "migrate-promote") result = await migratePromote(context);
+    else if (args.phase === "verify-live") result = await liveValidate(context);
+    else if (args.phase === "close") result = await closeCutover(context);
+    else {
+      const rolledBack = await rollback(context, runId);
+      result = Object.freeze({ schemaVersion: "runa2-gate6d-rollback/v1", passed: true,
+        phase: "rolled-back", targetWasAuthoritative: rolledBack.targetWasAuthoritative,
+        legacyModified: false, privateValuesIncluded: false });
+    }
+  } catch (error) {
+    failure = /^[a-z0-9-]{1,100}$/.test(String(error?.code ?? "")) ? error
+      : coded(`gate6cd-${step}-failed`, "A protected-cutover operator stage failed closed.");
+  }
+  if (context) {
+    try { await context.close(); }
+    catch { if (!failure) failure = coded("gate6cd-context-close-failed", "The protected-cutover context did not close cleanly."); }
+  }
+  if (failure) throw failure;
+  return result;
 }
 
-main(process.argv.slice(2)).then(result => process.stdout.write(`${JSON.stringify(result)}\n`), error => {
+const lifecycleTimer = setTimeout(() => {
+  writeSync(2, `${JSON.stringify({ schemaVersion: "runa2-gate6cd-error/v1",
+    errorCode: "gate6cd-operator-timeout", privateValuesIncluded: false })}\n`);
+  process.exitCode = 1;
+}, 300_000);
+main(process.argv.slice(2)).then(result => {
+  clearTimeout(lifecycleTimer); writeSync(1, `${JSON.stringify(result)}\n`);
+}, error => {
+  clearTimeout(lifecycleTimer);
   const safe = /^[a-z0-9-]{1,100}$/.test(String(error?.code ?? "")) ? error.code : "gate6cd-protected-cutover-failed";
-  process.stderr.write(`${JSON.stringify({ schemaVersion: "runa2-gate6cd-error/v1", errorCode: safe,
+  writeSync(2, `${JSON.stringify({ schemaVersion: "runa2-gate6cd-error/v1", errorCode: safe,
     privateValuesIncluded: false })}\n`); process.exitCode = 1;
 });

@@ -12,7 +12,7 @@ $ErrorActionPreference='Stop'
 $root='C:\AI\RunaAI-Next-Candidate';$configPath=Join-Path $root 'config\candidate.json'
 $rootCertPath='C:\Windows\System32\config\systemprofile\AppData\Roaming\Caddy\pki\authorities\local\root.crt'
 $expectedSubject='CN=Caddy Local Authority - 2026 ECC Root';$publicBaseUrl='https://192.168.50.169:9761'
-$trustStore='Cert:\CurrentUser\Root'
+$trustScope='CurrentUser\Root'
 if($env:COMPUTERNAME-ne'RUNA-CONTROL'-or[Security.Principal.WindowsIdentity]::GetCurrent().Name-ne'RUNA-CONTROL\Matthew'){throw 'control-caddy-trust-context-invalid'}
 if($ReleaseId-notmatch'^[A-Za-z0-9._-]{1,100}$'-or$ExpectedCommit-notmatch'^[a-f0-9]{40}$'-or
   $ExpectedArtifactDigest-notmatch'^[a-f0-9]{64}$'-or$ExpectedRootSha256-notmatch'^[a-f0-9]{64}$'-or
@@ -30,28 +30,31 @@ if($runtime.cutover.phase-eq'closed'){
 }elseif($readiness.authority-ne'shadow'-or$readiness.protectedDataImported-ne$false-or$readiness.productionTrafficChanged-ne$false){throw 'control-caddy-trust-authority-invalid'}
 $actualHash=(Get-FileHash -LiteralPath $rootCertPath -Algorithm SHA256).Hash.ToLowerInvariant()
 $certificate=[Security.Cryptography.X509Certificates.X509Certificate2]::new($rootCertPath)
+$certificateStore=[Security.Cryptography.X509Certificates.X509Store]::new(
+  [Security.Cryptography.X509Certificates.StoreName]::Root,
+  [Security.Cryptography.X509Certificates.StoreLocation]::CurrentUser)
 try{
   $basicConstraints=@($certificate.Extensions|Where-Object{$_-is[Security.Cryptography.X509Certificates.X509BasicConstraintsExtension]})
   if($actualHash-ne$ExpectedRootSha256-or$certificate.Thumbprint-ne$ExpectedRootThumbprint-or
     $certificate.Subject-ne$expectedSubject-or$certificate.Issuer-ne$expectedSubject-or$certificate.HasPrivateKey-or
     $certificate.NotAfter.ToUniversalTime()-lt[DateTime]::UtcNow.AddYears(1)-or$basicConstraints.Count-ne 1-or
     $basicConstraints[0].CertificateAuthority-ne$true){throw 'control-caddy-trust-certificate-invalid'}
-  $existing=@(Get-ChildItem -LiteralPath $trustStore|Where-Object{$_.Thumbprint-eq$ExpectedRootThumbprint})
+  $certificateStore.Open([Security.Cryptography.X509Certificates.OpenFlags]::ReadWrite)
+  $existing=@($certificateStore.Certificates|Where-Object{$_.Thumbprint-eq$ExpectedRootThumbprint})
   if($existing.Count-gt 1){throw 'control-caddy-trust-duplicate'}
   $alreadyTrusted=$existing.Count-eq 1;$imported=$false
   if($alreadyTrusted){
     if([Convert]::ToBase64String($existing[0].RawData)-ne[Convert]::ToBase64String($certificate.RawData)){throw 'control-caddy-trust-store-mismatch'}
   }else{
-    $added=Import-Certificate -FilePath $rootCertPath -CertStoreLocation $trustStore
-    if($added.Thumbprint-ne$ExpectedRootThumbprint){throw 'control-caddy-trust-import-mismatch'}
-    $imported=$true
+    $certificateStore.Add($certificate);$imported=$true
   }
   try{
+    if(@($certificateStore.Certificates|Where-Object{$_.Thumbprint-eq$ExpectedRootThumbprint}).Count-ne 1){throw 'control-caddy-trust-import-mismatch'}
     $httpsStatus=& curl.exe -sS -o NUL -w '%{http_code}' --max-time 10 "$publicBaseUrl/health/ready" 2>$null
     if($LASTEXITCODE-ne 0-or[string]$httpsStatus-ne'200'){throw 'control-caddy-trust-https-verification-failed'}
   }catch{
-    if($imported){Remove-Item -LiteralPath "$trustStore\$ExpectedRootThumbprint" -Force -ErrorAction Stop}
+    if($imported){$certificateStore.Remove($certificate)}
     throw
   }
-  [ordered]@{schemaVersion='runa2-gate6b-control-caddy-trust/v1';passed=$true;scope='current-user';thumbprint=$ExpectedRootThumbprint;alreadyTrusted=$alreadyTrusted;httpsStatus=200;certificateValidationBypassed=$false;privateValuesIncluded=$false}|ConvertTo-Json -Compress
-}finally{$certificate.Dispose()}
+  [ordered]@{schemaVersion='runa2-gate6b-control-caddy-trust/v1';passed=$true;scope=$trustScope;thumbprint=$ExpectedRootThumbprint;alreadyTrusted=$alreadyTrusted;httpsStatus=200;certificateValidationBypassed=$false;privateValuesIncluded=$false}|ConvertTo-Json -Compress
+}finally{$certificateStore.Close();$certificate.Dispose()}

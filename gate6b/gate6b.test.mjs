@@ -70,6 +70,18 @@ test("readiness remains unenrolled when no Gate 6C ceremony is enabled", async (
   assert.equal(status.authority, "active");
 });
 
+test("readiness reports protected import and traffic only after selected authority is active", async () => {
+  const status = await composeReadinessStatus({
+    application: { async authority() { return { enabled: true }; } },
+    dependencyHealth: async () => ({ ready: true }), configuration: {}, artifact: {},
+    browserCeremony: { async status() { return { complete: true }; } },
+    protectedImportStatus: async () => true,
+  });
+  assert.equal(status.authority, "active");
+  assert.equal(status.protectedDataImported, true);
+  assert.equal(status.productionTrafficChanged, true);
+});
+
 test("active verified general answer is identity and relationship scoped", async () => {
   const { application, calls } = harness();
   const response = await application.answer({ credential: "opaque-token", body: {
@@ -83,12 +95,16 @@ test("active verified general answer is identity and relationship scoped", async
 });
 
 test("unverified general chat is ephemeral and cannot claim a project", async () => {
-  const { application, calls } = harness();
+  let persisted = false;
+  const { application, calls } = harness({ requestCoordinator: {
+    async runOnce() { persisted = true; throw new Error("unverified response must not persist"); },
+  } });
   await application.answer({ body: { requestId: "guest-1", lane: "general", threadId: "guest-thread",
     projectId: "another-project", message: "Hello", history: [], workspace: null } });
   assert.equal(calls.auth.length, 0);
   assert.equal(calls.answers[0].participant.verified, false);
   assert.equal(calls.answers[0].project.projectId, "runa:ephemeral");
+  assert.equal(persisted, false);
 });
 
 test("unverified workspace is denied before an answer service read", async () => {
@@ -223,7 +239,9 @@ test("HTTP owner ceremony redirects through OIDC and sets only an opaque host co
     async status() { return { schemaVersion: "runa2-gate6c-browser-status/v1",
       nextStep: "verify-sign-in", complete: false, privateValuesIncluded: false }; },
     async start(step, options) { calls.push(["start", step, options]); return { redirectUrl: "http://keycloak.test/auth?state=opaque" }; },
-    async callback(input) { calls.push(["callback", input]); return { sessionId: "opaque-session-id" }; },
+    async startValidationSession() { calls.push(["validation-start"]); return { redirectUrl: "http://keycloak.test/auth?state=validation" }; },
+    async callback(input) { calls.push(["callback", input]); return { sessionId: "opaque-session-id",
+      validationSession: input.state === "validation-state" }; },
     async credentialForSession(value) { calls.push(["session", value]); return "PRIVATE_TOKEN"; },
     async revokeAndVerify() { calls.push(["revoke"]); return { revision: 5, nextStep: "enroll-recovery-credential" }; },
   };
@@ -240,6 +258,13 @@ test("HTTP owner ceremony redirects through OIDC and sets only an opaque host co
   const resume = await fetch(`${base}/owner-ceremony/resume-enrollment?step=enroll-primary-credential`, { redirect: "manual" });
   assert.equal(resume.status, 303);
   assert.deepEqual(calls[1], ["start", "enroll-primary-credential", { resumeExisting: true }]);
+  const validation = await fetch(`${base}/gate6d-validation/start`, { redirect: "manual" });
+  assert.equal(validation.status, 303);
+  assert.equal(validation.headers.get("location"), "http://keycloak.test/auth?state=validation");
+  const validationCallback = await fetch(`${base}/owner-ceremony/callback?state=validation-state&code=opaque-code`,
+    { redirect: "manual" });
+  assert.equal(validationCallback.status, 303);
+  assert.equal(validationCallback.headers.get("location"), "/gate6d-validation");
   const callback = await fetch(`${base}/owner-ceremony/callback?state=opaque-state&code=opaque-code`,
     { redirect: "manual" });
   assert.equal(callback.status, 303);
@@ -247,6 +272,11 @@ test("HTTP owner ceremony redirects through OIDC and sets only an opaque host co
   assert.match(retainedCookie, /^__Host-runa_owner_session=opaque-session-id;/);
   assert.match(retainedCookie, /Secure; HttpOnly; SameSite=Strict/);
   assert.doesNotMatch(retainedCookie, /PRIVATE_TOKEN/);
+  const validationStatus = await fetch(`${base}/api/gate6d/session/status`, {
+    headers: { cookie: "__Host-runa_owner_session=opaque-session-id" },
+  });
+  assert.equal(validationStatus.status, 200);
+  assert.equal((await validationStatus.json()).active, true);
   const wrongOrigin = await fetch(`${base}/api/owner-ceremony/revoke`, { method: "POST",
     headers: { origin: "https://wrong.test", cookie: "__Host-runa_owner_session=opaque-session-id" } });
   assert.equal(wrongOrigin.status, 400);
@@ -254,7 +284,8 @@ test("HTTP owner ceremony redirects through OIDC and sets only an opaque host co
     headers: { origin: "https://candidate.test", cookie: "__Host-runa_owner_session=opaque-session-id" } });
   assert.equal(revoked.status, 200);
   assert.equal((await revoked.json()).nextStep, "enroll-recovery-credential");
-  assert.deepEqual(calls.map(call => call[0]), ["start", "start", "callback", "session", "revoke"]);
+  assert.deepEqual(calls.map(call => call[0]), ["start", "start", "validation-start", "callback",
+    "callback", "session", "session", "revoke"]);
 });
 
 test("release artifact verification detects changed and extra files", async t => {

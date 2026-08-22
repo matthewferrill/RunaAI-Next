@@ -41,18 +41,19 @@ async function probe(url, timeoutMs) {
 }
 
 export async function composeReadinessStatus({ application, dependencyHealth, configuration,
-  artifact, browserCeremony = null }) {
-  const [authority, dependencies, ceremony] = await Promise.all([
+  artifact, browserCeremony = null, protectedImportStatus = async () => false }) {
+  const [authority, dependencies, ceremony, protectedDataImported] = await Promise.all([
     application.authority().then(() => "active",
       error => error?.code === "candidate-shadow-authority" ? "shadow" : "unavailable"),
     dependencyHealth(),
     browserCeremony ? browserCeremony.status() : Promise.resolve(null),
+    protectedImportStatus(),
   ]);
   return Object.freeze({ schemaVersion: "runa2-gate6b-shadow-readiness/v1",
     authority, dependencies, configuration, artifact,
-    protectedDataImported: false,
+    protectedDataImported: protectedDataImported === true,
     ownerCredentialEnrolled: ceremony?.complete === true,
-    productionTrafficChanged: false,
+    productionTrafficChanged: authority === "active",
     privateValuesIncluded: false });
 }
 
@@ -180,8 +181,12 @@ export async function createProductionComposition({ loadedConfig, releaseRoot })
       dependencies: Object.freeze({ postgresql, keycloak, openfga, provider }),
       privateValuesIncluded: false });
   };
+  const protectedImportStatus = async () => config.gate6c?.enabled === true
+    && (await pool.query("SELECT EXISTS(SELECT 1 FROM runa_gate6c.runs WHERE status='completed') imported"))
+      .rows[0].imported === true;
   const readinessStatus = () => composeReadinessStatus({ application, dependencyHealth,
-    configuration: safeConfigurationStatus(loadedConfig, telemetryKey), artifact, browserCeremony });
+    configuration: safeConfigurationStatus(loadedConfig, telemetryKey), artifact, browserCeremony,
+    protectedImportStatus });
 
   return Object.freeze({ application, browserCeremony, runtimeStatus, readinessStatus, dependencyHealth,
     releaseManifest: manifest,

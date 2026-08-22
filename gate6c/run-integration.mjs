@@ -14,6 +14,7 @@ import { buildGate6cFinalDeltaPlan, Gate6cFinalDeltaService } from "./migration.
 import { PostgresGate6cStore } from "./adapters/postgres.mjs";
 import { PostgresBrowserCeremonyStore } from "./adapters/postgres-browser.mjs";
 import { BrowserOwnerCeremonyService } from "./browser-ceremony.mjs";
+import { verifyRetainedFinalDelta } from "./control-maintenance.mjs";
 
 const root = path.resolve(import.meta.dirname, "..");
 const outputRoot = path.join(root, "artifacts", "runs", "gate6c-protected-staging");
@@ -137,6 +138,8 @@ try {
   const service = new Gate6cFinalDeltaService({ store, coreCipher, learningCipher, reconciliationKey,
     now: () => nowValue });
   const first = await service.stage(input);
+  const retainedVerification = await verifyRetainedFinalDelta({ plan: prepared, learningSnapshot,
+    store, coreCipher, learningCipher, reconciliationKey, now: nowValue });
   const beforeRestart = await store.audit(projectChatSnapshot.participantId);
   await store.close(); store = null;
   const stoppedForRestart = stopPostgres(); postgresRunning = false;
@@ -170,6 +173,9 @@ try {
   const afterRollback = await store.audit(projectChatSnapshot.participantId);
   const checks = {
     fourDomainsCommitted: first.committed && Object.keys(first.domains).length === 4,
+    retainedRowsReconciled: retainedVerification.exact === true
+      && retainedVerification.approvedKnowledge.sourceActive
+        === retainedVerification.approvedKnowledge.targetActive,
     exactCounts: beforeRestart.projects === projectChatSnapshot.projects.length
       && beforeRestart.chats === projectChatSnapshot.chats.length
       && beforeRestart.learning === learningSnapshot.entries.length

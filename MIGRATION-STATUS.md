@@ -251,6 +251,12 @@ repository and never push migration work into either source repository.
   readiness result is deliberately `ownerCredentialEnrolled=true` and `authority=shadow`; cutover is
   still `planned` revision zero, protected data is not imported, production traffic is unchanged, and
   legacy remains clean at `b4db040`. Owner completion is not candidate promotion.
+- The steward explicitly authorized the protected Gate 6C/6D maintenance window on 2026-08-22. The
+  bounded operator is implemented with exact-pinned promotion-candidate deployment, read-only
+  preflight, whole-state freeze, two-pass four-domain capture, retained-row and approved-knowledge
+  reconciliation, promotion/rollback, fresh passkey live validation, 120-sample one-hour observation,
+  and verified freeze release. Synthetic and disposable verification is green at 292/292 overall,
+  23/23 Gate 6B, and 36/36 Gate 6C; this entry does not claim the live window has run.
 
 ## Bootstrap findings
 
@@ -293,7 +299,7 @@ plain-language steward experience, or governed action pathway.
 | 3 | One reversible governed idempotent action | Complete; accepted and merged as `0680cfb` | Complete |
 | 4 | Governed data migration, one domain at a time | Complete; accepted and merged as `2c38dd5`; legacy unchanged | Complete |
 | 5 | Operations, private transport, authentication/authorization, recovery | Complete; accepted and merged as `a986419` | Complete |
-| 6 | Selected-core production cutover and rollback window | Gate 6A accepted; Gate 6B complete; Gate 6C owner and backup prerequisites complete; candidate remains shadow with no protected import, freeze, traffic, or authority change | Explicitly authorize the protected Gate 6C/6D maintenance window |
+| 6 | Selected-core production cutover and rollback window | Gate 6A accepted; Gate 6B complete; Gate 6C owner and backup prerequisites complete; protected maintenance window authorized and operator verified; candidate remains shadow until execution | Execute the exact-pinned maintenance window; pause only for the fresh passkey validation or a hard failure |
 | 7 | Deferred extensions | Not started | New baseline and separate approval per extension group |
 
 ## Bootstrap validation
@@ -336,7 +342,7 @@ byte, abort, and retry controls. It continues to block production and widened ne
 No dependency was changed during the prerequisite disposition. Full evidence is in
 `gate0/GATE1-PREREQUISITES-2026-08-20.md`.
 
-## Next decision
+## Next operation
 
 Gate 6B infrastructure and Gate 6C target-owner/backup prerequisites are complete. The exact release
 `runaai-next-gate6c-readiness-2026-08-22-669139e` runs beside legacy as a shadow. The owner ceremony is
@@ -345,13 +351,16 @@ freeze preflight passed. These facts do not promote the candidate: legacy remain
 cutover remains planned at revision zero, no protected row is imported, no freeze is active, and no
 traffic has changed.
 
-The next genuine decision is one coordinated protected Gate 6C/6D maintenance window: reverify the
-current facts, activate the temporary whole-legacy-state write deny, perform the owner-context
-four-domain capture and target import, require zero-difference reconciliation, and proceed immediately
-to Gate 6D promotion or target-only rollback before restoring legacy writes.
+The coordinated protected Gate 6C/6D maintenance window is authorized. The operator must reverify the
+current facts, deploy an exact active-mode candidate that remains non-authoritative while cutover is
+planned, activate the temporary whole-legacy-state write deny, perform the owner-context four-domain
+capture and target import, require zero-difference reconciliation, and proceed immediately to Gate 6D
+promotion or target-only rollback before restoring legacy writes. After promotion it pauses for one
+fresh owner passkey login, then performs governed validation, a full-hour observation, final
+reconciliation, close, and freeze release.
 E3 remains deferred, E4/device-vault ciphertext is not copied, E5 is absent, and the separate
-approved-knowledge vector index remains skipped. No protected operation is authorized by the Gate 6B
-result or by synthetic Gate 6C implementation.
+approved-knowledge vector index remains skipped. The maintenance authorization covers only the exact
+selected four-domain operation and does not authorize any deferred store or Gate 7 extension.
 
 Gate 6D remains a separate maintenance-window decision: final delta under write freeze,
 zero-difference reconciliation, witnessed promotion, one governed validation action, one-hour

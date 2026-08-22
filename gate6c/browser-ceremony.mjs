@@ -1,10 +1,11 @@
 import { createHash, randomBytes } from "node:crypto";
-import { advanceOwnerCeremony } from "./ceremony.mjs";
+import { advanceOwnerCeremony, assertOwnerCeremonyComplete } from "./ceremony.mjs";
 import { assertBinding, bindingDigest, digestEvidence } from "./contracts.mjs";
 
 const coded = (code, message) => Object.assign(new Error(message), { code });
 const enrollmentSteps = new Set(["enroll-primary-credential", "enroll-recovery-credential"]);
 const resumePrefix = "resume-existing:";
+const validationCommand = "gate6d-validation";
 const browserSteps = new Set([...enrollmentSteps, "verify-sign-in", "verify-fresh-step-up", "verify-recovery"]);
 const userVerifiedMethods = new Set(["webauthn", "passkey", "fido2", "windows-hello"]);
 const safeCode = value => typeof value === "string" && value.length >= 8 && value.length <= 8_192;
@@ -62,6 +63,20 @@ export class BrowserOwnerCeremonyService {
       action: enrollmentSteps.has(command) && !resumeExisting ? "webauthn-register-passwordless" : null });
     return Object.freeze({ schemaVersion: "runa2-gate6c-browser-start/v1", redirectUrl: url,
       command, privateValuesIncluded: false });
+  }
+
+  async startValidationSession() {
+    const ceremony = await this.store.ceremonyState(this.binding);
+    assertOwnerCeremonyComplete(ceremony, this.binding);
+    const verifier = b64url(this.random(48));
+    const state = b64url(this.random(32));
+    const now = this.now();
+    await this.store.createFlow({ binding: this.binding, state, command: validationCommand,
+      verifier, expiresAt: new Date(now.getTime() + this.flowLifetimeMs).toISOString() });
+    const url = this.oidc.authorizationUrl({ clientId: this.clientId, redirectUri: this.redirectUri,
+      state, codeChallenge: sha256b64(verifier), prompt: "login", maxAge: 0, action: null });
+    return Object.freeze({ schemaVersion: "runa2-gate6d-browser-start/v1", redirectUrl: url,
+      privateValuesIncluded: false });
   }
 
   async callback({ state, code, actionStatus = null }) {
@@ -125,6 +140,10 @@ export class BrowserOwnerCeremonyService {
       accessToken: credential.accessToken, refreshToken: credential.refreshToken,
       authenticatedAt: decision.authenticatedAt,
       expiresAt, method });
+    if (command === validationCommand) {
+      return Object.freeze({ schemaVersion: "runa2-gate6d-browser-callback/v1", sessionId,
+        command, validationSession: true, privateValuesIncluded: false });
+    }
     const evidence = { passed: true, method,
       evidenceDigest: digestEvidence({ command, principalRef: this.binding.participantRefHmac,
         authenticatedAt: decision.authenticatedAt, expiresAt, method,

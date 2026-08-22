@@ -20,6 +20,7 @@ import { BrowserOwnerCeremonyService, MemoryBrowserCeremonyStore } from "./brows
 import { bindOwnerAndVerifyRecoveryAuthority } from "./control/Advance-ControlRecoveryAuthority.mjs";
 import { rebindOwnerRecoveryAuthority } from "./control/Rebind-ControlOwnerAuthority.mjs";
 import { rebindCompletedOwnerCeremony } from "./control/Rebind-ControlCompletedOwnerCeremony.mjs";
+import { bindProtectedSnapshotsToOwner, ownerAggregateInventory } from "./control-maintenance.mjs";
 
 const SOURCE = "b4db04090d8f0df87234fab573b396e7824c5354";
 const TARGET = "77f3017d10f4e4670ad551b3d000cc2569c1dfdb";
@@ -76,6 +77,27 @@ function completeInput({ runId = "gate6c-synthetic-1", key = Buffer.alloc(32, 77
     freezeLease: issueFreezeLease({ binding: authority, leaseId: "freeze-1", now: NOW }),
     inventory: inventory(authority, plan.domains) }, plan, key };
 }
+
+test("protected source snapshots bind explicitly to the enrolled target owner", () => {
+  const source = snapshots();
+  const mapped = bindProtectedSnapshotsToOwner({ ...source, targetParticipantId: "matthew-owner" });
+  assert.equal(mapped.projectChatSnapshot.participantId, "matthew-owner");
+  assert.equal(mapped.learningSnapshot.participantId, "matthew-owner");
+  assert.notEqual(source.projectChatSnapshot.participantId, mapped.projectChatSnapshot.participantId);
+  assert.equal(source.learningSnapshot.participantId, source.projectChatSnapshot.participantId);
+  assert.throws(() => bindProtectedSnapshotsToOwner({ ...source, targetParticipantId: "" }),
+    { code: "gate6c-target-participant-invalid" });
+});
+
+test("final owner inventory contains only the four selected aggregate domains", () => {
+  const authority = binding();
+  const { plan } = completeInput();
+  const retained = ownerAggregateInventory({ binding: authority, domains: plan.domains });
+  assertOwnerAggregateInventory(retained, { binding: authority });
+  assert.deepEqual(Object.keys(retained.domains).sort(),
+    ["action-receipts", "learning-events", "project-chat", "setting"]);
+  assert.equal(retained.privateValuesIncluded, false);
+});
 
 test("authority binding is exact and secret-like fields are refused", () => {
   assert.equal(assertBinding(binding()).releaseCommit, TARGET);
@@ -344,6 +366,10 @@ test("Control owner tools bind the exact candidate config and DPAPI user context
   const configureAmr = readFileSync(new URL("./control/Configure-ControlOwnerPasskeyAmr.ps1", import.meta.url), "utf8");
   const restoreAmr = readFileSync(new URL("./control/Restore-ControlOwnerPasskeyAmr.ps1", import.meta.url), "utf8");
   const rebind = readFileSync(new URL("./control/Rebind-ControlOwnerAuthority.mjs", import.meta.url), "utf8");
+  const maintenance = readFileSync(new URL("./control-maintenance.mjs", import.meta.url), "utf8");
+  const cutover = readFileSync(new URL("./control/Run-ControlProtectedCutover.mjs", import.meta.url), "utf8");
+  const promotionDeploy = readFileSync(new URL("./control/Deploy-ControlPromotionCandidate.ps1", import.meta.url), "utf8");
+  const window = readFileSync(new URL("./control/Invoke-ControlProtectedMaintenanceWindow.ps1", import.meta.url), "utf8");
   assert.match(prepare, /config\\candidate\.json/);
   assert.match(operator, /config\\\\candidate\.json/);
   for (const source of [prepare, clipboard, repair]) {
@@ -404,6 +430,26 @@ test("Control owner tools bind the exact candidate config and DPAPI user context
   assert.match(restoreAmr, /owner-passkey-amr-rollback-safety-state-drift/);
   assert.match(restoreAmr, /passkeyFlowRetained=\$true/);
   assert.doesNotMatch(configureAmr, /Write-Output.*password|Set-Clipboard/);
+  assert.match(maintenance, /GATE6C_REQUIRED_DOMAINS/);
+  assert.match(maintenance, /participantId: targetParticipantId/);
+  assert.match(maintenance, /PostgresAcceptedLearningSource/);
+  assert.match(cutover, /C:\\\\AI\\\\Projects\\\\RunaAI/);
+  assert.match(cutover, /readLegacyProjectChatDomain/);
+  assert.match(cutover, /readProtectedE6Snapshot/);
+  assert.match(cutover, /inspectSelectedContinuity/);
+  assert.match(cutover, /targetParticipantId: context\.config\.gate6c\.expectedPrincipalId/);
+  assert.match(cutover, /activeSessionCredentials/);
+  assert.match(cutover, /rollback\(context, runId\)/);
+  assert.match(cutover, /privateValuesIncluded: false/);
+  assert.doesNotMatch(cutover, /console\.log|Write-Output.*password/);
+  assert.match(promotionDeploy, /candidate\.mode-ne 'active'/);
+  assert.match(promotionDeploy, /authority-ne 'shadow'/);
+  assert.match(promotionDeploy, /rolledBack=\$true/);
+  assert.match(window, /Set-ControlLegacyWriteFreeze\.ps1/);
+  assert.match(window, /for\(\$index=0;\$index-lt 120;\$index\+\+\)/);
+  assert.match(window, /Start-Sleep -Seconds 30/);
+  assert.match(window, /Release-Freeze 'gate6-closed'/);
+  assert.match(window, /Recover/);
 });
 
 test("browser owner ceremony uses PKCE, exact owner binding, WebAuthn, and opaque sessions", async () => {
@@ -486,6 +532,14 @@ test("browser owner ceremony uses PKCE, exact owner binding, WebAuthn, and opaqu
   const recovered = await service.callback({ state: new URL(recovery.redirectUrl).searchParams.get("state"),
     code: "code-three" });
   assert.equal(recovered.nextStep, null);
+  assert.equal((await service.status()).complete, true);
+  const validation = await service.startValidationSession();
+  const validationUrl = new URL(validation.redirectUrl);
+  assert.equal(validationUrl.searchParams.has("kc_action"), false);
+  const validated = await service.callback({ state: validationUrl.searchParams.get("state"),
+    code: "gate6d-validation" });
+  assert.equal(validated.validationSession, true);
+  assert.equal(await service.credentialForSession(validated.sessionId), "PRIVATE_BROWSER_TOKEN_6");
   assert.equal((await service.status()).complete, true);
 });
 

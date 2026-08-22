@@ -53,10 +53,22 @@ function credential(request) {
   return match[1];
 }
 
+async function selectedCredential(request, browserCeremony) {
+  const bearer = credential(request);
+  if (bearer || !browserCeremony) return bearer;
+  const retainedSession = cookie(request, "__Host-runa_owner_session");
+  if (!retainedSession) return null;
+  if (request.headers.origin !== browserCeremony.publicBaseUrl) {
+    throw coded("gate6d-browser-origin-invalid", "The Gate 6D validation origin is invalid.");
+  }
+  return browserCeremony.credentialForSession(retainedSession);
+}
+
 async function staticFile(request, response, staticRoot) {
   const requested = new URL(request.url, "http://127.0.0.1").pathname;
   const relative = requested === "/" ? "index.html"
-    : requested === "/owner-ceremony" ? "owner-ceremony.html" : requested.replace(/^\//, "");
+    : requested === "/owner-ceremony" ? "owner-ceremony.html"
+      : requested === "/gate6d-validation" ? "gate6d-validation.html" : requested.replace(/^\//, "");
   const root = resolve(staticRoot);
   const file = resolve(join(root, normalize(relative)));
   if (file !== root && !file.startsWith(`${root}\\`) && !file.startsWith(`${root}/`)) return false;
@@ -94,6 +106,11 @@ export function createCandidateHttpServer({ application, runtimeStatus, readines
         const started = await browserCeremony.start(url.searchParams.get("step"));
         return redirect(response, started.redirectUrl);
       }
+      if (request.method === "GET" && url.pathname === "/gate6d-validation/start") {
+        if (!browserCeremony) throw coded("gate6c-browser-ceremony-unavailable", "The owner ceremony is unavailable.");
+        const started = await browserCeremony.startValidationSession();
+        return redirect(response, started.redirectUrl);
+      }
       if (request.method === "GET" && url.pathname === "/owner-ceremony/resume-enrollment") {
         if (!browserCeremony) throw coded("gate6c-browser-ceremony-unavailable", "The owner ceremony is unavailable.");
         const started = await browserCeremony.start(url.searchParams.get("step"), { resumeExisting: true });
@@ -103,7 +120,15 @@ export function createCandidateHttpServer({ application, runtimeStatus, readines
         if (!browserCeremony) throw coded("gate6c-browser-ceremony-unavailable", "The owner ceremony is unavailable.");
         const result = await browserCeremony.callback({ state: url.searchParams.get("state"),
           code: url.searchParams.get("code"), actionStatus: url.searchParams.get("kc_action_status") });
-        return redirect(response, "/owner-ceremony", sessionCookie(result.sessionId));
+        return redirect(response, result.validationSession === true ? "/gate6d-validation" : "/owner-ceremony",
+          sessionCookie(result.sessionId));
+      }
+      if (request.method === "GET" && url.pathname === "/api/gate6d/session/status") {
+        const retainedSession = cookie(request, "__Host-runa_owner_session");
+        if (!browserCeremony || !retainedSession) throw coded("gate6c-browser-session-invalid", "The browser session is missing.");
+        await browserCeremony.credentialForSession(retainedSession);
+        return json(response, 200, { schemaVersion: "runa2-gate6d-session-status/v1",
+          active: true, privateValuesIncluded: false });
       }
       if (request.method === "POST" && url.pathname === "/api/owner-ceremony/revoke") {
         if (!browserCeremony) throw coded("gate6c-browser-ceremony-unavailable", "The owner ceremony is unavailable.");
@@ -119,16 +144,16 @@ export function createCandidateHttpServer({ application, runtimeStatus, readines
           revision: ceremony.revision, nextStep: ceremony.nextStep, privateValuesIncluded: false });
       }
       if (request.method === "POST" && url.pathname === "/api/selected/answer") {
-        return json(response, 200, await application.answer({ credential: credential(request), body: await body(request, maxRequestBytes) }));
+        return json(response, 200, await application.answer({ credential: await selectedCredential(request, browserCeremony), body: await body(request, maxRequestBytes) }));
       }
       if (request.method === "POST" && url.pathname === "/api/selected/settings/propose") {
-        return json(response, 200, await application.proposeSetting({ credential: credential(request), body: await body(request, maxRequestBytes) }));
+        return json(response, 200, await application.proposeSetting({ credential: await selectedCredential(request, browserCeremony), body: await body(request, maxRequestBytes) }));
       }
       if (request.method === "POST" && url.pathname === "/api/selected/settings/approve") {
-        return json(response, 200, await application.approveSetting({ credential: credential(request), body: await body(request, maxRequestBytes) }));
+        return json(response, 200, await application.approveSetting({ credential: await selectedCredential(request, browserCeremony), body: await body(request, maxRequestBytes) }));
       }
       if (request.method === "POST" && url.pathname === "/api/selected/settings/decline") {
-        return json(response, 200, await application.declineSetting({ credential: credential(request), body: await body(request, maxRequestBytes) }));
+        return json(response, 200, await application.declineSetting({ credential: await selectedCredential(request, browserCeremony), body: await body(request, maxRequestBytes) }));
       }
       if (request.method === "GET" && await staticFile(request, response, staticRoot)) return;
       return json(response, 404, { schemaVersion: "runa2-gate6b-error/v1", errorCode: "route-not-found", correlationId });

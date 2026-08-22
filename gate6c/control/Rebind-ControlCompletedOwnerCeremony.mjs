@@ -38,7 +38,8 @@ function git(repo, args) {
 export async function rebindCompletedOwnerCeremony({ pool, priorBinding, binding, subject, reason,
   observedAt = new Date().toISOString(), operationId, assertOwnerCeremonyComplete, bindingDigest }) {
   if (!uuid(subject) || !/^control-completed-owner-rebind-[a-f0-9]{12}$/.test(String(operationId))
-      || reason !== "completed-owner-readiness-release" || !Number.isFinite(Date.parse(observedAt))) {
+      || !["completed-owner-readiness-release", "completed-owner-promotion-candidate"].includes(reason)
+      || !Number.isFinite(Date.parse(observedAt))) {
     throw coded("gate6c-completed-owner-rebind-input-invalid", "The exact completed-owner rebind input is invalid.");
   }
   const priorDigest = bindingDigest(priorBinding); const digest = bindingDigest(binding);
@@ -115,12 +116,13 @@ async function main(argv) {
   const loaded = await loadReleaseConfig(configPath); const config = loaded.value;
   const manifestPath = isAbsolute(config.releaseManifestPath) ? config.releaseManifestPath : resolve(dirname(configPath), config.releaseManifestPath);
   const manifest = assertReleaseManifest(JSON.parse((await readFile(manifestPath, "utf8")).replace(/^\uFEFF/, "")));
-  if (config.mode !== "shadow" || config.keycloak.issuer !== "http://localhost:9762/realms/runaai-next"
+  const expectedMode = args.reason === "completed-owner-promotion-candidate" ? "active" : "shadow";
+  if (config.mode !== expectedMode || config.keycloak.issuer !== "http://localhost:9762/realms/runaai-next"
       || config.gate6c?.enabled !== true || config.gate6c.expectedPrincipalId !== "matthew-owner"
       || config.gate6c.legacyCommit !== args["legacy-commit"] || manifest.releaseId !== args["expected-release-id"]
       || manifest.commit !== args["expected-commit"] || manifest.artifactDigest !== args["expected-artifact-digest"]
       || manifest.configurationDigest !== loaded.configurationDigest) {
-    throw coded("gate6c-completed-owner-rebind-release-mismatch", "The new shadow release does not match its reviewed pins.");
+    throw coded("gate6c-completed-owner-rebind-release-mismatch", "The new promotion-candidate release does not match its reviewed pins.");
   }
   await verifyReleaseArtifact(releaseRoot, manifest.artifactDigest);
   const [connectionString, coreEncryption, coreHmac] = await Promise.all([

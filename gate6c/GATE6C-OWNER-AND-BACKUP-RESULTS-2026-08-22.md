@@ -70,18 +70,26 @@ candidate, or changed traffic.
 
 ## Verification
 
-- Full Node suite: **289/289 passed**.
-- Gate 6B focused suite: **22/22 passed**.
-- Gate 6C focused suite: **34/34 passed**.
+- Full Node suite: **292/292 passed**.
+- Gate 6B focused suite: **23/23 passed**.
+- Gate 6C focused suite: **36/36 passed**.
 - All new PowerShell files parse successfully.
 - Candidate tasks: application, Caddy, Keycloak, OpenFGA, and PostgreSQL running; protected backup
   ready with last result zero.
 - Legacy RunaAI: branch `main`, exact commit `b4db040`, tracked worktree clean.
 
-## Remaining approval boundary
+## Authorized next operation
 
-The next operation is the protected Gate 6C/6D maintenance window. It requires explicit steward
-authorization because it temporarily denies writes to the whole legacy state root, opens the four
-approved protected domains in owner context, retains the selected delta in target PostgreSQL, and
-must proceed directly to zero-difference reconciliation plus Gate 6D promotion or immediate rollback.
-Owner completion alone does not authorize any of those operations.
+The steward explicitly authorized the protected Gate 6C/6D maintenance window on 2026-08-22. The
+reviewed operator now separates exact promotion-candidate deployment, non-protected preparation,
+freeze/capture/import/promotion, restart, one fresh passkey validation, full-hour observation, and
+close. It fails closed to target rollback plus legacy-runtime verification and freeze release.
+
+This authorization does not change the evidence above: at this document revision the running release
+is still the non-authoritative shadow, the freeze is inactive, protected data is not imported, and no
+traffic has changed. Actual maintenance-window evidence must replace this paragraph after execution.
+
+The extended disposable verifier now checks decrypted retained rows and active approved-knowledge
+parity in addition to four-domain commit, restart persistence, idempotent replay, private-canary
+absence, encrypted browser-session persistence, and target-only rollback. It passes. The current full
+suite passes **292/292**, Gate 6B passes **23/23**, and Gate 6C passes **36/36**.

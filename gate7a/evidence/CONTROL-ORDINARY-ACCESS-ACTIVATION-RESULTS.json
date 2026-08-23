@@ -1,0 +1,51 @@
+{
+  "schemaVersion": "runa2-gate7a-control-ordinary-activation-result/v1",
+  "observedAt": "2026-08-23T16:14:30.6210121Z",
+  "activeRelease": {
+    "releaseId": "runaai-next-gate7a-lan-ordinary-2026-08-23-130457c",
+    "commit": "130457c82e93ff25652b93e195743344ac30c59d",
+    "artifactDigest": "c0bea33b8af7536b088db908993a81d2e75f0b9803b04f32b544ca96ef803bd8",
+    "manifestDigest": "4c5f5a37dcccddd68ae7c9486c9b9bc57b6ac4a5c72e82dc7c60e2c353b22f67",
+    "configurationDigest": "aa562040b4ba827f38cc892e2af34b65a2ae936dfe58aba3be1cb927212bd165",
+    "artifactFileCount": 29488
+  },
+  "ordinaryAccess": {
+    "clientId": "runaai-next-user",
+    "passwordOnly": true,
+    "publicSelfRegistration": false,
+    "usernameChosenByInvitee": true,
+    "clientSecretRetained": true,
+    "passwordRouteReady": true
+  },
+  "ownerAccess": {
+    "clientChanged": false,
+    "passkeyRouteReady": true,
+    "completedProofReboundToExactRelease": true,
+    "priorCompletedProofRetained": true
+  },
+  "selectedCore": {
+    "authority": "active",
+    "cutoverPhase": "closed",
+    "cutoverRevision": 10,
+    "protectedDataImported": true,
+    "dependenciesReady": true
+  },
+  "omenVerification": {
+    "trustedTls": true,
+    "liveness": true,
+    "applicationRoot": true,
+    "ordinaryPasswordRedirect": true,
+    "ownerPasskeyRedirect": true
+  },
+  "rollback": {
+    "failedClosedAttempts": 4,
+    "successfulAutomaticRollbacks": 4,
+    "exactPredecessorRetained": true,
+    "successfulAttemptRollbackBundleRetained": true
+  },
+  "smtpConfigured": false,
+  "ordinaryUserCreated": false,
+  "legacyModified": false,
+  "protectedProductDataChanged": false,
+  "privateValuesIncluded": false
+}

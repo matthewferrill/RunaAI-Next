@@ -81,7 +81,7 @@ Control operators create or remove only that client and flow, deploy an exact im
 successor with exact predecessor rollback, enroll/apply SMTP configuration with DPAPI CurrentUser
 protection, and issue one short-lived invitation with rollback of the newly created user, principal,
 and isolated chat relation. The focused Gate 7A suite passes 67/67 and the full repository suite passes
-370/370. The current live identity, SMTP, application release, and user state remain unchanged.
+370/370.
 
 Control's Keycloak currently has no SMTP sender configured, so the first distinct ordinary-user
 invitation and verified-email password recovery cannot yet be accepted live. The selected test is a
@@ -120,3 +120,11 @@ successor and predecessor with the parser shipped by each immutable release, whi
 compare their exact shared authority, database, key, and canonical-origin bindings. Native Node stderr
 is also captured under a temporary non-terminating PowerShell preference so only the safe structured
 error code crosses the operator boundary.
+
+The corrected activation subsequently passed. The exact active release is
+`runaai-next-gate7a-lan-ordinary-2026-08-23-130457c`; the ordinary client and password route are ready,
+the owner client is unchanged, the completed owner proof is bound to the exact new release, and the
+selected-core authority and protected data remain unchanged. Omen independently verified trusted TLS,
+liveness, the application root, and both expected login redirects. Full aggregate evidence and the
+remaining SMTP/invitation boundary are recorded in
+`GATE7A-ORDINARY-ACCESS-ACTIVATION-RESULTS-2026-08-23.md`.

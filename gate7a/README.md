@@ -37,3 +37,10 @@ read-only API preflight prepared for the next interactive step. The scripts acce
 through hidden prompts under Matthew's Control identity, retain them only as DPAPI CurrentUser data,
 and cannot change DNS or open the certificate bundle. The current focused Gate 7A suite passes 32/32
 and the full repository suite passes 330/330.
+
+The owner enrollment and read-only Porkbun preflight subsequently passed. Their privacy-safe aggregate
+is `evidence/CONTROL-PORKBUN-CREDENTIAL-READINESS.json`.
+`GATE7A-CERTIFICATE-STAGING-PREP-2026-08-22.md` defines the next bounded step: retrieve and validate the
+Porkbun-managed wildcard bundle into the existing protected Control secrets root without changing DNS,
+listeners, identity, or production. With the four certificate-staging checks included, the current
+focused Gate 7A suite passes 36/36 and the full repository suite passes 334/334.

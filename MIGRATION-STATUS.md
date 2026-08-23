@@ -78,6 +78,12 @@ repository and never push migration work into either source repository.
   type was unavailable. A secret-free owner probe proved DPAPI and restricted-directory writes healthy.
   Enrollment and preflight now load the assembly explicitly before DPAPI use, and unexpected enrollment
   failures report only a safe stage-specific code.
+- The remediated Control-local Porkbun enrollment passed under `RUNA-CONTROL\Matthew`; the credential is
+  retained only as DPAPI CurrentUser data in the existing ACL-restricted candidate secrets root. The
+  authenticated read-only preflight passed for `bridgebuildersai.com` and confirmed zero existing
+  `runa` A/AAAA/CNAME records. No private value was retained in evidence and the SSL bundle remained
+  unopened. Certificate staging is now prepared as a one-shot owner-bound GET-and-validate step with
+  rollback limited to its newly created protected staging directory.
 - No migration gate is approved merely by this bootstrap.
 - Bootstrap documentation and clean-clone validation were reviewed and merged into
   `runa2/integration` as `94ba860`.
@@ -416,7 +422,10 @@ The permanent Gate 7A hostname is now `runa.bridgebuildersai.com`; do not deploy
 preflight and activation plan using Porkbun's authoritative DNS and managed wildcard certificate. It
 requires the steward to create a scoped Porkbun credential, enable API access for
 `bridgebuildersai.com`, and enter the two values only through the hidden Control-local enrollment
-prompts. Off-LAN privacy/ingress and the first
+prompts. Those prerequisites are now complete. The next bounded operation is protected wildcard
+certificate staging; its prepared tooling is green at 36/36 focused Gate 7A checks and 334/334 full
+repository checks, and it must not change DNS, listeners, identity, or production. Off-LAN
+privacy/ingress and the first
 non-owner acceptance fixture remain separate blockers. E3, E4/device-vault recovery,
 the separate approved-knowledge vector index, Qwen3.6 deliberate review, the existing live BGE
 endpoint, broader legacy surfaces, and the user-facing conversational UI remain separately deferred.

@@ -96,3 +96,9 @@ operator attempted to read its `Count` property under strict mode. Normalized re
 zero ordinary clients, zero ordinary flows, no generated secret, unchanged realm policy, and the exact
 prior application release. The operator now array-wraps both empty and single-item client/flow results;
 the focused and full suites remain green before retry.
+
+The second attempt reached the corrected successor and preserved selected-core readiness, but its final
+operator probe expected HTTP 302 while the reviewed application contract intentionally returns HTTP
+303 for every browser sign-in redirect. The exact predecessor and identity state were restored, and no
+ordinary client, flow, or secret remained. The probe now requires the application's tested 303 status
+without changing the application behavior.

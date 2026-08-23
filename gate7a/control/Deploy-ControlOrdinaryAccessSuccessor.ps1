@@ -38,7 +38,7 @@ function Wait-Release([string]$Id){$deadline=[DateTime]::UtcNow.AddMinutes(12);d
 function Get-Redirect([string]$Path){
   $request=[Net.HttpWebRequest]::Create("http://127.0.0.1:9760$Path");$request.AllowAutoRedirect=$false;$request.Timeout=10000
   try{$response=$request.GetResponse()}catch{if($_.Exception.Response){$response=$_.Exception.Response}else{throw}}
-  try{if([int]$response.StatusCode-ne302){throw 'gate7a-ordinary-deploy-route-status-invalid'};[string]$response.Headers['Location']}finally{$response.Close()}
+  try{if([int]$response.StatusCode-ne303){throw 'gate7a-ordinary-deploy-route-status-invalid'};[string]$response.Headers['Location']}finally{$response.Close()}
 }
 
 $pins=@{$archive=$ArchiveSha256;$stagedConfig=$ConfigSha256;$stagedManifest=$ManifestSha256;$stagedLauncher=$LauncherSha256}

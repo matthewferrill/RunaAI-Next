@@ -82,6 +82,11 @@ repository and never push migration work into either source repository.
   ordinary flows, no generated secret, unchanged registration/username policy, and the exact prior
   application release. The operator now array-wraps empty and single-item API results before counting;
   focused 66/66 and full 368/368 validation remain green before retry.
+- The second attempt reached the successor and preserved selected-core readiness, then failed its final
+  route probe because the operator expected HTTP 302 while the tested application contract uses HTTP
+  303 for browser sign-in redirects. Automatic rollback restored the exact predecessor and removed the
+  attempt-created ordinary client, flow, and secret. The probe now requires 303; application behavior
+  is unchanged.
 - The first interactive Porkbun enrollment attempt failed closed with no credential retained. RCA: a
   clean Windows PowerShell 5.1 process had not loaded `System.Security`, so the DPAPI `ProtectedData`
   type was unavailable. A secret-free owner probe proved DPAPI and restricted-directory writes healthy.

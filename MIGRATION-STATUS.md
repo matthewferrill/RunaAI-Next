@@ -71,8 +71,13 @@ repository and never push migration work into either source repository.
   Enrollment is restricted to `RUNA-CONTROL\Matthew`, hidden prompts, the existing ACL-restricted
   candidate secrets directory, and DPAPI CurrentUser. Preflight can call only Porkbun's authenticated
   ping and DNS-retrieval GET endpoints; it cannot open the SSL bundle or mutate DNS. No credential is
-  present in Git or retained evidence. PowerShell syntax validation and all three credential-boundary
-  checks pass; the focused Gate 7A suite is 31/31 and the full repository suite is 329/329.
+  present in Git or retained evidence. PowerShell syntax validation and all four credential-boundary
+  checks pass; the focused Gate 7A suite is 32/32 and the full repository suite is 330/330.
+- The first interactive Porkbun enrollment attempt failed closed with no credential retained. RCA: a
+  clean Windows PowerShell 5.1 process had not loaded `System.Security`, so the DPAPI `ProtectedData`
+  type was unavailable. A secret-free owner probe proved DPAPI and restricted-directory writes healthy.
+  Enrollment and preflight now load the assembly explicitly before DPAPI use, and unexpected enrollment
+  failures report only a safe stage-specific code.
 - No migration gate is approved merely by this bootstrap.
 - Bootstrap documentation and clean-clone validation were reviewed and merged into
   `runa2/integration` as `94ba860`.

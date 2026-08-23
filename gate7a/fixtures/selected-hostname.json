@@ -1,0 +1,32 @@
+{
+  "schemaVersion": "runa2-gate7a-hostname-decision/v1",
+  "approvedHostname": "runa.bridgebuildersai.com",
+  "approvedOrigin": "https://runa.bridgebuildersai.com",
+  "registrableDomain": "bridgebuildersai.com",
+  "dnsAuthority": {
+    "provider": "porkbun",
+    "authoritativeNameServers": [
+      "curitiba.ns.porkbun.com",
+      "fortaleza.ns.porkbun.com",
+      "maceio.ns.porkbun.com",
+      "salvador.ns.porkbun.com"
+    ],
+    "selectedHostRecordState": "absent",
+    "proposedLanRecordType": "A",
+    "proposedLanRecordTarget": "192.168.50.169",
+    "changeApplied": false
+  },
+  "certificate": {
+    "requiredTrust": "public-webpki",
+    "recommendedSource": "porkbun-managed-wildcard-bundle",
+    "installedForSelectedHostname": false,
+    "renewalAutomationRequired": true
+  },
+  "offLan": {
+    "mode": "disabled",
+    "providerSelected": false
+  },
+  "nonOwnerFixtureSelected": false,
+  "liveChangesAuthorized": false,
+  "privateValuesIncluded": false
+}

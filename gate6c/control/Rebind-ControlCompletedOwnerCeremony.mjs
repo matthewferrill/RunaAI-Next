@@ -38,7 +38,8 @@ function git(repo, args) {
 export async function rebindCompletedOwnerCeremony({ pool, priorBinding, binding, subject, reason,
   observedAt = new Date().toISOString(), operationId, assertOwnerCeremonyComplete, bindingDigest }) {
   if (!uuid(subject) || !/^control-completed-owner-rebind-[a-f0-9]{12}$/.test(String(operationId))
-      || !["completed-owner-readiness-release", "completed-owner-promotion-candidate"].includes(reason)
+      || !["completed-owner-readiness-release", "completed-owner-promotion-candidate",
+        "completed-owner-canonical-ingress"].includes(reason)
       || !Number.isFinite(Date.parse(observedAt))) {
     throw coded("gate6c-completed-owner-rebind-input-invalid", "The exact completed-owner rebind input is invalid.");
   }

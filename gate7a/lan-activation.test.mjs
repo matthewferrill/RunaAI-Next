@@ -3,6 +3,8 @@ import { readFile } from "node:fs/promises";
 import test from "node:test";
 
 const script = await readFile(new URL("./control/Invoke-ControlLanActivation.ps1", import.meta.url), "utf8");
+const ownerRebind = await readFile(new URL("./control/Rebind-ControlCompletedOwnerCeremony.mjs", import.meta.url), "utf8");
+const completedRebind = await readFile(new URL("../gate6c/control/Rebind-ControlCompletedOwnerCeremony.mjs", import.meta.url), "utf8");
 
 test("live activation is exact-owner, exact-predecessor, and exact-successor pinned", () => {
   assert.match(script, /RUNA-CONTROL\\Matthew/);
@@ -112,6 +114,20 @@ test("browser-route reconciliation fails with privacy-safe component-specific co
     assert.match(script, new RegExp(`gate7a-activation-${code}`));
   }
   assert.doesNotMatch(script, /throw 'gate7a-activation-browser-route-invalid'/);
+});
+
+test("completed owner proof can be rebound to canonical ingress without promotion", () => {
+  assert.match(ownerRebind, /RUNA-CONTROL/);
+  assert.match(ownerRebind, /userInfo\(\)\.username\.toLowerCase\(\) !== "matthew"/);
+  assert.match(ownerRebind, /completed-owner-canonical-ingress/);
+  assert.match(completedRebind, /completed-owner-canonical-ingress/);
+  assert.match(ownerRebind, /https:\/\/runa\.bridgebuildersai\.com\/auth\/realms\/runaai-next/);
+  assert.match(ownerRebind, /https:\/\/192\.168\.50\.169:9761/);
+  assert.match(ownerRebind, /priorCeremonyRetained/);
+  assert.match(ownerRebind, /authorityChanged: false/);
+  assert.match(ownerRebind, /productionChanged: false/);
+  assert.match(ownerRebind, /legacyModified: false/);
+  assert.match(ownerRebind, /privateValuesIncluded: false/);
 });
 
 test("SameSite Lax is explicit without weakening the other cookie attributes", () => {

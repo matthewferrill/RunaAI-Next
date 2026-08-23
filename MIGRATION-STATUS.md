@@ -76,6 +76,12 @@ repository and never push migration work into either source repository.
   Matthew's separate personal-email account is the selected first non-owner fixture; the personal
   address must not enter Git or retained evidence. A second PC, a phone, off-LAN ingress, certificate
   renewal, and the finished conversational UI remain separate checks.
+- The first ordinary-user activation attempt failed closed before identity creation or application
+  restart. RCA: Windows PowerShell 5.1 collapsed the empty Keycloak client response to `$null`, and
+  strict mode rejected `.Count`. Normalized reconciliation then proved zero ordinary clients, zero
+  ordinary flows, no generated secret, unchanged registration/username policy, and the exact prior
+  application release. The operator now array-wraps empty and single-item API results before counting;
+  focused 66/66 and full 368/368 validation remain green before retry.
 - The first interactive Porkbun enrollment attempt failed closed with no credential retained. RCA: a
   clean Windows PowerShell 5.1 process had not loaded `System.Security`, so the DPAPI `ProtectedData`
   type was unavailable. A secret-free owner probe proved DPAPI and restricted-directory writes healthy.

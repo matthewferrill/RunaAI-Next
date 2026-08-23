@@ -43,7 +43,7 @@ try{
   $priorRealmJson=$realm|ConvertTo-Json -Depth 100 -Compress
   if([bool]$realm.registrationAllowed-ne$false-or[bool]$realm.duplicateEmailsAllowed-ne$false){throw 'gate7a-ordinary-realm-policy-invalid'}
 
-  $clients=Get-Clients $headers;$flows=Get-Flows $headers
+  $clients=@(Get-Clients $headers);$flows=@(Get-Flows $headers)
   $matchingFlows=@($flows|Where-Object{$_.alias-eq$flowAlias})
   $secretExists=Test-Path -LiteralPath $secretPath -PathType Leaf
   $alreadyConfigured=$clients.Count-eq 1-and$matchingFlows.Count-eq 1-and$secretExists
@@ -69,7 +69,7 @@ try{
       redirectUris=@($redirectUri);webOrigins=@($origin);baseUrl=$origin;
       authenticationFlowBindingOverrides=@{browser=$createdFlowId};attributes=@{'pkce.code.challenge.method'='S256'} }
     Invoke-RestMethod -Method Post -Uri "$base/admin/realms/$realmName/clients" -Headers $headers -ContentType 'application/json' -Body ($clientBody|ConvertTo-Json -Depth 10 -Compress)|Out-Null
-    $clients=Get-Clients $headers;if($clients.Count-ne 1){throw 'gate7a-ordinary-client-create-invalid'};$createdClientId=[string]$clients[0].id
+    $clients=@(Get-Clients $headers);if($clients.Count-ne 1){throw 'gate7a-ordinary-client-create-invalid'};$createdClientId=[string]$clients[0].id
     $mappers=@(
       [ordered]@{name='runaai-next-user-audience';protocol='openid-connect';protocolMapper='oidc-audience-mapper';config=[ordered]@{
         'included.client.audience'=$clientId;'id.token.claim'='true';'access.token.claim'='true';'introspection.token.claim'='true'}},
@@ -85,7 +85,7 @@ try{
     $realmChanged=$true
   }
 
-  $verifiedClients=Get-Clients $headers;$verifiedFlows=@((Get-Flows $headers)|Where-Object{$_.alias-eq$flowAlias})
+  $verifiedClients=@(Get-Clients $headers);$verifiedFlows=@((Get-Flows $headers)|Where-Object{$_.alias-eq$flowAlias})
   if($verifiedClients.Count-ne 1-or$verifiedFlows.Count-ne 1){throw 'gate7a-ordinary-access-verification-failed'}
   $verified=$verifiedClients[0];$verifiedExecutions=@(Expand-Response (Invoke-RestMethod -Method Get -Uri "$base/admin/realms/$realmName/authentication/flows/$flowAlias/executions" -Headers $headers))
   $verifiedMappers=@(Expand-Response (Invoke-RestMethod -Method Get -Uri "$base/admin/realms/$realmName/clients/$($verified.id)/protocol-mappers/models" -Headers $headers))

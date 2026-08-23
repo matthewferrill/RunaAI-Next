@@ -124,15 +124,17 @@ try{
   $operator=Join-Path $release 'gate7a\control\Rebind-ControlOrdinaryOwnerSession.mjs'
   if(-not(Test-Path -LiteralPath $operator -PathType Leaf)){throw 'gate7a-ordinary-deploy-owner-rebind-operator-missing'}
   $ownerSubject=Get-OwnerSubject
+  $priorErrorActionPreference=$ErrorActionPreference
   try{
     $env:RUNA_GATE7A_OWNER_SUBJECT=$ownerSubject
+    $ErrorActionPreference='Continue'
     $rebindOutput=& node $operator --release-root $release --successor-config $config `
       --successor-manifest $manifest --expected-release-id $ReleaseId --expected-commit $ExpectedCommit `
       --expected-artifact-digest $ExpectedArtifactDigest --prior-config (Join-Path $rollback 'candidate.json') `
       --prior-manifest (Join-Path $rollback $manifestName) --prior-release-id $PriorReleaseId `
       --prior-commit $PriorCommit --prior-artifact-digest $PriorArtifactDigest 2>&1
     $rebindExit=$LASTEXITCODE
-  }finally{Remove-Item Env:\RUNA_GATE7A_OWNER_SUBJECT -ErrorAction SilentlyContinue;Remove-Variable ownerSubject -ErrorAction SilentlyContinue}
+  }finally{$ErrorActionPreference=$priorErrorActionPreference;Remove-Item Env:\RUNA_GATE7A_OWNER_SUBJECT -ErrorAction SilentlyContinue;Remove-Variable ownerSubject -ErrorAction SilentlyContinue}
   $rebindText=(@($rebindOutput|ForEach-Object{[string]$_})-join"`n").Trim();$rebindErrorCode=$null
   if($rebindExit-ne0){
     try{$rebindError=$rebindText|ConvertFrom-Json

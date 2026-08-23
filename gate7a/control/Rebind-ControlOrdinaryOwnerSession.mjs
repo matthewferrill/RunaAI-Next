@@ -34,12 +34,15 @@ async function main(argv) {
     throw coded("gate7a-ordinary-owner-rebind-context-invalid", "The owner-session rebind must run as Matthew on RUNA-CONTROL.");
   }
   if (!hex40(args["expected-commit"]) || !hex40(args["prior-commit"])
-      || !hex64(args["expected-artifact-digest"]) || !hex64(args["prior-artifact-digest"])) {
+      || !hex64(args["expected-artifact-digest"]) || !hex64(args["prior-artifact-digest"])
+      || !/^[A-Za-z0-9._-]{1,100}$/.test(args["expected-release-id"])
+      || !/^[A-Za-z0-9._-]{1,100}$/.test(args["prior-release-id"])) {
     throw coded("gate7a-ordinary-owner-rebind-pins-invalid", "The owner-session release pins are invalid.");
   }
 
   const root = resolve("C:\\AI\\RunaAI-Next-Candidate");
   const releaseId = args["expected-release-id"]; const releaseRoot = resolve(args["release-root"]);
+  const priorReleaseRoot = resolve(root, "releases", args["prior-release-id"]);
   const rollbackRoot = resolve(root, "secrets", `gate7a-ordinary-rollback-${releaseId}`);
   const successorConfigPath = resolve(args["successor-config"]);
   const successorManifestPath = resolve(args["successor-manifest"]);
@@ -53,16 +56,18 @@ async function main(argv) {
   }
 
   const imported = relative => import(pathToFileURL(join(releaseRoot, relative)).href);
+  const priorImported = relative => import(pathToFileURL(join(priorReleaseRoot, relative)).href);
   const [{ loadReleaseConfig, readSecretReference, decodeKey }, { assertReleaseManifest },
-    { verifyReleaseArtifact }, { createEnvelopeCipher }, ceremony, contracts, formats] = await Promise.all([
+    { verifyReleaseArtifact }, { createEnvelopeCipher }, ceremony, contracts, formats,
+    { loadReleaseConfig: loadPriorReleaseConfig }, { assertReleaseManifest: assertPriorReleaseManifest }] = await Promise.all([
     imported("gate6b/release-config.mjs"), imported("gate6/release.mjs"), imported("gate6b/artifact.mjs"),
     imported("gate4/envelope.mjs"), imported("gate6c/ceremony.mjs"), imported("gate6c/contracts.mjs"),
-    imported("gate6c/formats.mjs")]);
+    imported("gate6c/formats.mjs"), priorImported("gate6b/release-config.mjs"), priorImported("gate6/release.mjs")]);
   const [loaded, priorLoaded] = await Promise.all([
-    loadReleaseConfig(successorConfigPath), loadReleaseConfig(priorConfigPath)]);
+    loadReleaseConfig(successorConfigPath), loadPriorReleaseConfig(priorConfigPath)]);
   const config = loaded.value; const priorConfig = priorLoaded.value;
   const manifest = assertReleaseManifest(JSON.parse((await readFile(successorManifestPath, "utf8")).replace(/^\uFEFF/, "")));
-  const priorManifest = assertReleaseManifest(JSON.parse((await readFile(priorManifestPath, "utf8")).replace(/^\uFEFF/, "")));
+  const priorManifest = assertPriorReleaseManifest(JSON.parse((await readFile(priorManifestPath, "utf8")).replace(/^\uFEFF/, "")));
   const canonicalOrigin = "https://runa.bridgebuildersai.com";
   const canonicalIssuer = `${canonicalOrigin}/auth/realms/runaai-next`;
   const backchannelIssuer = "http://127.0.0.1:9762/realms/runaai-next";

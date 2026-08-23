@@ -111,3 +111,12 @@ identity configuration. The successor now performs the existing audited complete
 route acceptance, retains the prior completed proof, changes no authority or protected product data,
 and treats an exact retry as idempotent. The route probe also unwraps nested HTTP exceptions and emits
 only a privacy-safe error code.
+
+The fourth attempt reached the successor and stopped before owner-proof mutation because the rebind
+operator used the successor's stricter configuration parser on the older predecessor configuration.
+That predecessor correctly has no ordinary-client block. Automatic rollback again restored the exact
+predecessor and removed the attempt-created identity configuration. The operator now validates the
+successor and predecessor with the parser shipped by each immutable release, while continuing to
+compare their exact shared authority, database, key, and canonical-origin bindings. Native Node stderr
+is also captured under a temporary non-terminating PowerShell preference so only the safe structured
+error code crosses the operator boundary.

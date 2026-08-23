@@ -554,10 +554,13 @@ try {
   $wellKnown = Invoke-RestMethod -Uri "$browserIssuer/.well-known/openid-configuration" -TimeoutSec 20
   $start = Invoke-NoRedirect "$canonicalOrigin/session/start"
   $legacy = Invoke-RestMethod -Uri 'https://192.168.50.169:9761/health/live' -TimeoutSec 20
-  if ($live.live -ne $true -or $legacy.live -ne $true -or $wellKnown.issuer -ne $browserIssuer -or
-      $start.statusCode -ne 303 -or
-      $start.location -notmatch '^https://runa\.bridgebuildersai\.com/auth/realms/runaai-next/protocol/openid-connect/auth\?') {
-    throw 'gate7a-activation-browser-route-invalid'
+  if ($live.live -ne $true) { throw 'gate7a-activation-canonical-liveness-invalid' }
+  if ($legacy.live -ne $true) { throw 'gate7a-activation-commissioning-liveness-invalid' }
+  if ($wellKnown.issuer -ne $browserIssuer) { throw 'gate7a-activation-browser-issuer-invalid' }
+  if ($start.statusCode -ne 303) { throw 'gate7a-activation-session-start-status-invalid' }
+  if ($start.location -notmatch
+      '^https://runa\.bridgebuildersai\.com/auth/realms/runaai-next/protocol/openid-connect/auth\?') {
+    throw 'gate7a-activation-session-start-location-invalid'
   }
   $failureStage = 'listener-reconciliation'
   $listeners = @(Get-NetTCPConnection -State Listen)

@@ -57,3 +57,6 @@ The steward subsequently authorized the bounded LAN transaction and `SameSite=La
 `control/Invoke-ControlLanActivation.ps1` performs the exact preflight, DNS, firewall, Caddy,
 Keycloak, immutable-release, and browser-route checks with automatic restoration of the recorded
 predecessor on failure. The retained result is added only after the Control transaction completes.
+`build-lan-projection.mjs --output <new-directory> --release-id <exact-id>` also emits the two
+deterministic Control launchers so the staged release path and Keycloak arguments are reviewed and
+hash-pinned rather than composed during the live transaction.

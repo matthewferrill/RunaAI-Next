@@ -4,7 +4,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import test from "node:test";
 import { loadReleaseConfig } from "../gate6b/release-config.mjs";
-import { createLanReleaseConfig } from "./lan-release.mjs";
+import { createControlLaunchers, createLanReleaseConfig } from "./lan-release.mjs";
 
 const read = path => readFile(new URL(path, import.meta.url), "utf8");
 const clients = await read("../gate6b/clients.mjs");
@@ -60,4 +60,16 @@ test("the exact Control predecessor produces one valid canonical successor and i
   drifted.keycloak.issuer = "https://wrong.example/auth/realms/runaai-next";
   await writeFile(path, JSON.stringify(drifted));
   await assert.rejects(loadReleaseConfig(path), { code: "release-config-gate7a-invalid" });
+});
+
+test("Control launchers bind one exact immutable release and retain private service listeners", () => {
+  const releaseId = "runaai-next-gate7a-lan-2026-08-22-example";
+  const launchers = createControlLaunchers(releaseId);
+  assert.match(launchers.application,
+    new RegExp(`releases\\\\${releaseId}\\\\runtime\\\\node\\.exe`));
+  assert.match(launchers.application, /config\\candidate\.json/);
+  assert.match(launchers.keycloak, /--http-host=127\.0\.0\.1 --http-port=9762/);
+  assert.match(launchers.keycloak,
+    /--hostname=https:\/\/runa\.bridgebuildersai\.com\/auth --hostname-strict=true --proxy-headers=xforwarded/);
+  assert.throws(() => createControlLaunchers("wrong-release"), { code: "gate7a-release-id-invalid" });
 });

@@ -18,7 +18,7 @@
     "test:gate6": "node --test gate6/gate6.test.mjs",
     "test:gate6b": "node --test gate6b/gate6b.test.mjs",
     "test:gate6c": "node --test gate6c/gate6c.test.mjs",
-    "test:gate7a": "node --test gate7a/gate7a.test.mjs gate7a/hostname-decision.test.mjs gate7a/credential-prep.test.mjs",
+    "test:gate7a": "node --test gate7a/gate7a.test.mjs gate7a/hostname-decision.test.mjs gate7a/credential-prep.test.mjs gate7a/certificate-staging.test.mjs",
     "verify:gate0": "node gate0/verify-gate0.mjs",
     "verify:gate1:integration": "node gate1/run-integration.mjs",
     "verify:gate1:models": "node gate1/run-model-validation.mjs",

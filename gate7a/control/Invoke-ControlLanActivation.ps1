@@ -2,6 +2,7 @@
 param(
   [string]$Root = 'C:\AI\RunaAI-Next-Candidate',
   [Parameter(Mandatory)][string]$ReleaseId,
+  [Parameter(Mandatory)][string]$AttemptId,
   [Parameter(Mandatory)][string]$ExpectedCommit,
   [Parameter(Mandatory)][string]$ExpectedArtifactDigest,
   [Parameter(Mandatory)][int]$ExpectedArtifactFileCount,
@@ -216,7 +217,7 @@ function Restore-Predecessor {
         $dnsRecordId = [string]$rollbackMatch[0].id
       }
       $deleteHeaders = @{} + $dnsHeaders
-      $deleteHeaders['Idempotency-Key'] = "runaai-next-gate7a-delete-$ReleaseId"
+      $deleteHeaders['Idempotency-Key'] = "runaai-next-gate7a-delete-$AttemptId"
       $deleted = Invoke-RestMethod -Method Post `
         -Uri "$apiBase/dns/delete/$domain/$dnsRecordId" -Headers $deleteHeaders
       if ($deleted.status -ne 'SUCCESS') { throw 'dns-delete-failed' }
@@ -237,6 +238,7 @@ try {
     throw 'gate7a-activation-root-invalid'
   }
   if ($ReleaseId -notmatch '^runaai-next-gate7a-lan-[A-Za-z0-9._-]{1,70}$' -or
+      $AttemptId -notmatch '^gate7a-attempt-[A-Za-z0-9._-]{1,70}$' -or
       $ExpectedCommit -notmatch '^[a-f0-9]{40}$' -or
       $ExpectedArtifactDigest -notmatch '^[a-f0-9]{64}$' -or
       $ExpectedArtifactFileCount -lt 1) {
@@ -260,7 +262,7 @@ try {
   $caddyPath = Join-Path $Root 'config\Caddyfile'
   $applicationLauncher = Join-Path $Root 'control\Run-Application.ps1'
   $keycloakLauncher = Join-Path $Root 'control\Run-Keycloak.ps1'
-  $rollbackRoot = Join-Path $Root "secrets\gate7a-lan-rollback-$ReleaseId"
+  $rollbackRoot = Join-Path $Root "secrets\gate7a-lan-rollback-$AttemptId"
 
   $failureStage = 'preflight'
   $pins = [ordered]@{
@@ -274,7 +276,7 @@ try {
   foreach ($entry in $pins.GetEnumerator()) {
     if ((Hash $entry.Key) -ne $entry.Value) { throw 'gate7a-activation-staged-hash-mismatch' }
   }
-  foreach ($path in @($releaseRoot,$nextManifestPath,$rollbackRoot)) {
+  foreach ($path in @($nextManifestPath,$rollbackRoot)) {
     if (Test-Path -LiteralPath $path) { throw 'gate7a-activation-new-path-already-exists' }
   }
   $existing443 = Get-NetTCPConnection -State Listen -LocalPort 443 -ErrorAction SilentlyContinue
@@ -335,10 +337,12 @@ try {
   if ($LASTEXITCODE -ne 0) { throw 'gate7a-activation-caddy-validation-failed' }
 
   $failureStage = 'artifact'
-  New-Item -ItemType Directory -Path $releaseRoot | Out-Null
-  $releaseCreated = $true
-  & tar.exe -xzf $archive -C $releaseRoot
-  if ($LASTEXITCODE -ne 0) { throw 'gate7a-activation-release-extract-failed' }
+  if (-not (Test-Path -LiteralPath $releaseRoot -PathType Container)) {
+    New-Item -ItemType Directory -Path $releaseRoot | Out-Null
+    $releaseCreated = $true
+    & tar.exe -xzf $archive -C $releaseRoot
+    if ($LASTEXITCODE -ne 0) { throw 'gate7a-activation-release-extract-failed' }
+  }
   $artifact = Get-Content -LiteralPath (Join-Path $releaseRoot 'artifact-files.json') -Raw | ConvertFrom-Json
   if ($artifact.artifactDigest -ne $ExpectedArtifactDigest -or
       @($artifact.entries).Count -ne $ExpectedArtifactFileCount) {
@@ -407,13 +411,13 @@ try {
   $dryRunBody = [ordered]@{} + $createBody
   $dryRunBody['dryRun'] = $true
   $dryRunHeaders = @{} + $dnsHeaders
-  $dryRunHeaders['Idempotency-Key'] = "runaai-next-gate7a-dry-run-$ReleaseId"
+  $dryRunHeaders['Idempotency-Key'] = "runaai-next-gate7a-dry-run-$AttemptId"
   $dryRun = Invoke-RestMethod -Method Post -Uri "$apiBase/dns/create/$domain" `
     -Headers $dryRunHeaders -ContentType 'application/json' `
     -Body ($dryRunBody | ConvertTo-Json -Compress)
   if ($dryRun.status -ne 'SUCCESS') { throw 'gate7a-activation-dns-dry-run-failed' }
   $createHeaders = @{} + $dnsHeaders
-  $createHeaders['Idempotency-Key'] = "runaai-next-gate7a-apply-$ReleaseId"
+  $createHeaders['Idempotency-Key'] = "runaai-next-gate7a-apply-$AttemptId"
   $createdDns = Invoke-RestMethod -Method Post -Uri "$apiBase/dns/create/$domain" `
     -Headers $createHeaders -ContentType 'application/json' `
     -Body ($createBody | ConvertTo-Json -Compress)
@@ -491,7 +495,7 @@ try {
     param($value) $value.running.releaseId -eq $ReleaseId
   } 12
 
-  $failureStage = 'reconciliation'
+  $failureStage = 'runtime-reconciliation'
   $nextReadiness = Invoke-RestMethod -Uri 'http://127.0.0.1:9760/api/readiness/status' -TimeoutSec 20
   if ($nextRuntime.running.commit -ne $ExpectedCommit -or
       $nextRuntime.running.artifactDigest -ne $ExpectedArtifactDigest -or
@@ -500,6 +504,7 @@ try {
       $nextReadiness.productionTrafficChanged -ne $true) {
     throw 'gate7a-activation-runtime-reconciliation-failed'
   }
+  $failureStage = 'identity-reconciliation'
   $identityCheck = Invoke-RestMethod -Method Get `
     -Uri 'http://127.0.0.1:9762/admin/realms/runaai-next' -Headers $headers
   $clientCheck = @(Expand-Response (Invoke-RestMethod -Method Get `
@@ -515,6 +520,7 @@ try {
       @($clientCheck[0].webOrigins).Count -ne 1 -or $clientCheck[0].webOrigins[0] -ne $canonicalOrigin) {
     throw 'gate7a-activation-identity-reconciliation-failed'
   }
+  $failureStage = 'dns-reconciliation'
   $dnsCheck = Invoke-RestMethod -Method Get -Uri "$apiBase/dns/retrieve/$domain" -Headers $dnsHeaders
   $matching = @($dnsCheck.records | Where-Object {
     [string]$_.id -eq $dnsRecordId -and $_.type -eq 'A' -and
@@ -523,6 +529,7 @@ try {
   if ($dnsCheck.status -ne 'SUCCESS' -or $matching.Count -ne 1) {
     throw 'gate7a-activation-dns-reconciliation-failed'
   }
+  $failureStage = 'dns-resolution'
   $deadline = [DateTime]::UtcNow.AddMinutes(10)
   do {
     Clear-DnsClientCache
@@ -537,6 +544,7 @@ try {
   if ($resolved.Count -ne 1 -or $resolved[0] -ne $privateAddress) {
     throw 'gate7a-activation-dns-resolution-timeout'
   }
+  $failureStage = 'browser-route'
   $live = Invoke-RestMethod -Uri "$canonicalOrigin/health/live" -TimeoutSec 20
   $wellKnown = Invoke-RestMethod -Uri "$browserIssuer/.well-known/openid-configuration" -TimeoutSec 20
   $start = Invoke-NoRedirect "$canonicalOrigin/session/start"
@@ -546,6 +554,7 @@ try {
       $start.location -notmatch '^https://runa\.bridgebuildersai\.com/auth/realms/runaai-next/protocol/openid-connect/auth\?') {
     throw 'gate7a-activation-browser-route-invalid'
   }
+  $failureStage = 'listener-reconciliation'
   $listeners = @(Get-NetTCPConnection -State Listen)
   foreach ($port in @(9760,9762,9763,9764,9765,9766,9770)) {
     $addresses = @($listeners | Where-Object LocalPort -eq $port |
@@ -559,6 +568,7 @@ try {
   if ($publicAddresses.Count -ne 1 -or $publicAddresses[0] -ne $privateAddress) {
     throw 'gate7a-activation-public-listener-boundary-invalid'
   }
+  $failureStage = 'firewall-reconciliation'
   $firewall = Get-NetFirewallRule -DisplayName $firewallName
   $portFilter = $firewall | Get-NetFirewallPortFilter
   $addressFilter = $firewall | Get-NetFirewallAddressFilter
@@ -572,6 +582,7 @@ try {
     passed = $true
     rolledBack = $false
     releaseId = $ReleaseId
+    attemptId = $AttemptId
     commit = $ExpectedCommit
     artifactDigest = $ExpectedArtifactDigest
     canonicalOrigin = $canonicalOrigin

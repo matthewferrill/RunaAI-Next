@@ -69,7 +69,6 @@ async function main(argv) {
   if (config.mode !== "active" || config.publicBaseUrl !== canonicalOrigin
       || config.keycloak.issuer !== canonicalIssuer || config.keycloak.backchannelIssuer !== backchannelIssuer
       || config.gate7a?.enabled !== true || config.gate7a.ordinaryClient?.clientId !== "runaai-next-user"
-      || config.gate7a.predecessorManifestDigest !== priorManifest.manifestDigest
       || config.gate6c?.enabled !== true || config.gate6c.expectedPrincipalId !== "matthew-owner"
       || manifest.releaseId !== releaseId || manifest.commit !== args["expected-commit"]
       || manifest.artifactDigest !== args["expected-artifact-digest"]
@@ -77,6 +76,7 @@ async function main(argv) {
       || priorConfig.mode !== "active" || priorConfig.publicBaseUrl !== canonicalOrigin
       || priorConfig.keycloak.issuer !== canonicalIssuer || priorConfig.keycloak.backchannelIssuer !== backchannelIssuer
       || priorConfig.gate7a?.enabled !== true || priorConfig.gate6c?.enabled !== true
+      || config.gate7a.predecessorManifestDigest !== priorConfig.gate7a.predecessorManifestDigest
       || priorConfig.gate6c.expectedPrincipalId !== "matthew-owner"
       || priorManifest.releaseId !== args["prior-release-id"] || priorManifest.commit !== args["prior-commit"]
       || priorManifest.artifactDigest !== args["prior-artifact-digest"]

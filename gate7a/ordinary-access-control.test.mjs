@@ -71,6 +71,8 @@ test("ordinary successor rebinds only the completed owner proof to exact canonic
   assert.match(ownerRebind, /completed-owner-ordinary-access-release/);
   assert.match(ownerRebind, /runaai-next-user/);
   assert.match(ownerRebind, /https:\/\/runa\.bridgebuildersai\.com/);
+  assert.match(ownerRebind, /config\.gate7a\.predecessorManifestDigest !== priorConfig\.gate7a\.predecessorManifestDigest/);
+  assert.doesNotMatch(ownerRebind, /predecessorManifestDigest !== priorManifest\.manifestDigest/);
   assert.match(ownerRebind, /priorCeremonyRetained/);
   assert.match(ownerRebind, /authorityChanged: false/);
   assert.match(ownerRebind, /protectedProductDataChanged: false/);

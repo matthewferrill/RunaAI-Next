@@ -111,6 +111,11 @@ export function createCandidateHttpServer({ application, runtimeStatus, readines
         const started = await browserCeremony.startValidationSession();
         return redirect(response, started.redirectUrl);
       }
+      if (request.method === "GET" && url.pathname === "/session/start") {
+        if (!browserCeremony) throw coded("gate6c-browser-ceremony-unavailable", "Browser sign-in is unavailable.");
+        const started = await browserCeremony.startSession();
+        return redirect(response, started.redirectUrl);
+      }
       if (request.method === "GET" && url.pathname === "/owner-ceremony/resume-enrollment") {
         if (!browserCeremony) throw coded("gate6c-browser-ceremony-unavailable", "The owner ceremony is unavailable.");
         const started = await browserCeremony.start(url.searchParams.get("step"), { resumeExisting: true });
@@ -122,6 +127,14 @@ export function createCandidateHttpServer({ application, runtimeStatus, readines
           code: url.searchParams.get("code"), actionStatus: url.searchParams.get("kc_action_status") });
         return redirect(response, result.validationSession === true ? "/gate6d-validation" : "/owner-ceremony",
           sessionCookie(result.sessionId));
+      }
+      if (request.method === "GET" && url.pathname === "/session/callback") {
+        if (!browserCeremony) throw coded("gate6c-browser-ceremony-unavailable", "Browser sign-in is unavailable.");
+        const result = await browserCeremony.callback({ state: url.searchParams.get("state"),
+          code: url.searchParams.get("code"), actionStatus: url.searchParams.get("kc_action_status") });
+        const destination = result.regularSession === true ? "/"
+          : result.validationSession === true ? "/gate6d-validation" : "/owner-ceremony";
+        return redirect(response, destination, sessionCookie(result.sessionId));
       }
       if (request.method === "GET" && url.pathname === "/api/gate6d/session/status") {
         const retainedSession = cookie(request, "__Host-runa_owner_session");

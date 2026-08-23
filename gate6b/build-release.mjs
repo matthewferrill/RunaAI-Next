@@ -12,8 +12,10 @@ const coded = (code, message) => Object.assign(new Error(message), { code });
 const root = resolve(import.meta.dirname, "..");
 
 function argumentsOf(argv) {
-  const allowed = new Set(["--output", "--config", "--release-id"]);
+  const allowed = new Set(["--output", "--config", "--release-id", "--manifest-output"]);
   const values = {};
+  if (argv.length % 2 !== 0) throw coded("release-build-arguments-invalid",
+    "Release build arguments must be name/value pairs.");
   for (let index = 0; index < argv.length; index += 2) {
     const name = argv[index];
     const value = argv[index + 1];
@@ -69,7 +71,9 @@ async function main() {
   if (beneath(root, output) || output === root) throw coded("release-build-output-invalid", "The immutable release must be outside the source checkout.");
   await mustNotExist(output, "release-build-output-exists");
   const loadedConfig = await loadReleaseConfig(resolve(args.config));
-  const releaseManifestPath = resolve(loadedConfig.directory, loadedConfig.value.releaseManifestPath);
+  const releaseManifestPath = args["manifest-output"]
+    ? resolve(args["manifest-output"])
+    : resolve(loadedConfig.directory, loadedConfig.value.releaseManifestPath);
   if (beneath(output, releaseManifestPath) || releaseManifestPath === output) {
     throw coded("release-build-manifest-location-invalid", "The release manifest must remain outside the immutable artifact root.");
   }

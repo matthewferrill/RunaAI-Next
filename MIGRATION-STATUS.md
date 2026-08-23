@@ -429,3 +429,10 @@ privacy/ingress and the first
 non-owner acceptance fixture remain separate blockers. E3, E4/device-vault recovery,
 the separate approved-knowledge vector index, Qwen3.6 deliberate review, the existing live BGE
 endpoint, broader legacy surfaces, and the user-facing conversational UI remain separately deferred.
+
+Protected wildcard certificate staging has now passed with 34 complete days remaining; no private
+value entered evidence and no live route changed. The canonical-session successor projection is green
+at 41/41 focused Gate 7A checks and 340/340 full checks. Its exact DNS, TCP 443, Caddy, Keycloak,
+immutable-release, service-restart, rollback, and cookie-policy effects are documented in
+`gate7a/GATE7A-LAN-ACTIVATION-PROJECTION-2026-08-22.md` and remain unexecuted pending explicit live
+authority.

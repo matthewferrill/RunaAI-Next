@@ -597,6 +597,15 @@ test("browser owner ceremony uses PKCE, exact owner binding, WebAuthn, and opaqu
   assert.equal(validated.validationSession, true);
   assert.equal(await service.credentialForSession(validated.sessionId), "PRIVATE_BROWSER_TOKEN_6");
   assert.equal((await service.status()).complete, true);
+  const regular = await service.startSession();
+  const regularUrl = new URL(regular.redirectUrl);
+  assert.equal(regularUrl.searchParams.get("redirect_uri"),
+    "https://192.168.50.20:9761/session/callback");
+  const regularSession = await service.callback({ state: regularUrl.searchParams.get("state"),
+    code: "regular-session" });
+  assert.equal(regularSession.regularSession, true);
+  assert.equal(calls.exchanges.at(-1).redirectUri, "https://192.168.50.20:9761/session/callback");
+  assert.equal(await service.credentialForSession(regularSession.sessionId), "PRIVATE_BROWSER_TOKEN_7");
 });
 
 test("browser owner ceremony rejects password-only and an unbound subject", async () => {

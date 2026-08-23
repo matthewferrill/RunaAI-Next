@@ -44,3 +44,14 @@ is `evidence/CONTROL-PORKBUN-CREDENTIAL-READINESS.json`.
 Porkbun-managed wildcard bundle into the existing protected Control secrets root without changing DNS,
 listeners, identity, or production. With the four certificate-staging checks included, the current
 focused Gate 7A suite passes 36/36 and the full repository suite passes 334/334.
+
+Certificate staging subsequently passed with 34 complete days remaining and no live change. The
+privacy-safe aggregate and interpretation are retained in
+`evidence/CONTROL-CERTIFICATE-STAGING-RESULTS.json` and
+`GATE7A-CERTIFICATE-STAGING-RESULTS-2026-08-22.md`.
+
+`GATE7A-LAN-ACTIVATION-PROJECTION-2026-08-22.md` records the exact immutable successor and bounded
+rollback transaction. Canonical browser/backchannel separation, one exact session callback, and
+closed-cutover successor binding are green at 41/41 focused Gate 7A checks and 340/340 full checks.
+DNS, port 443, Keycloak, the active release, and the cookie policy remain unchanged pending explicit
+live authority.

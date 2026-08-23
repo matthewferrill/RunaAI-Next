@@ -16,6 +16,24 @@ export const keycloakArguments = Object.freeze([
   "--health-enabled=true", "--metrics-enabled=false",
 ]);
 
+export function createControlLaunchers(releaseId) {
+  if (!/^runaai-next-gate7a-lan-[A-Za-z0-9._-]{1,70}$/.test(releaseId)) {
+    throw Object.assign(new Error("The Gate 7A release ID is invalid."),
+      { code: "gate7a-release-id-invalid" });
+  }
+  const root = "C:\\AI\\RunaAI-Next-Candidate";
+  const release = `${root}\\releases\\${releaseId}`;
+  const application = `$root='${root}'
+& '${release}\\runtime\\node.exe' '${release}\\gate6b\\server.mjs' --config '${root}\\config\\candidate.json' 1>> "$root\\logs\\application.stdout.log" 2>> "$root\\logs\\application.stderr.log"
+exit $LASTEXITCODE
+`;
+  const keycloak = `$root='${root}'; $env:JAVA_HOME='${root}\\tools\\java\\jdk-21.0.12+8-jre'; $env:KC_DB='postgres'; $env:KC_DB_URL='jdbc:postgresql://127.0.0.1:9765/keycloak_candidate'; $env:KC_DB_USERNAME='keycloak_candidate'; $env:KC_DB_PASSWORD=[IO.File]::ReadAllText("$root\\secrets\\postgres-keycloak").Trim()
+& '${root}\\tools\\keycloak\\keycloak-26.7.2\\bin\\kc.bat' ${keycloakArguments.join(" ")}
+exit $LASTEXITCODE
+`;
+  return Object.freeze({ application, keycloak });
+}
+
 export const caddyfile = `https://${privateAddress}:9761 {
   bind ${privateAddress}
   tls internal

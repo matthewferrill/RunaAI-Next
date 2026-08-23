@@ -31,7 +31,7 @@ function cookie(request, name) {
 }
 
 const sessionCookie = (value, maximumAge = 900) =>
-  `__Host-runa_owner_session=${value}; Path=/; Max-Age=${maximumAge}; Secure; HttpOnly; SameSite=Strict`;
+  `__Host-runa_owner_session=${value}; Path=/; Max-Age=${maximumAge}; Secure; HttpOnly; SameSite=Lax`;
 
 async function body(request, maximumBytes) {
   const chunks = [];

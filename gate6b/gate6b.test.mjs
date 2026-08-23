@@ -288,7 +288,7 @@ test("HTTP owner ceremony redirects through OIDC and sets only an opaque host co
   assert.equal(callback.status, 303);
   const retainedCookie = callback.headers.get("set-cookie");
   assert.match(retainedCookie, /^__Host-runa_owner_session=opaque-session-id;/);
-  assert.match(retainedCookie, /Secure; HttpOnly; SameSite=Strict/);
+  assert.match(retainedCookie, /Secure; HttpOnly; SameSite=Lax/);
   assert.doesNotMatch(retainedCookie, /PRIVATE_TOKEN/);
   const validationStatus = await fetch(`${base}/api/gate6d/session/status`, {
     headers: { cookie: "__Host-runa_owner_session=opaque-session-id" },

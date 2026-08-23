@@ -35,7 +35,7 @@ files and Keycloak representations, remove only the new firewall rule and new DN
 previous front ends, and verify the existing 9761 route. PostgreSQL, OpenFGA, Home, protected tables,
 the legacy repository, and off-LAN ingress remain untouched.
 
-The ordinary session cookie remains `SameSite=Strict` in the prepared code. The approved synthetic
-contract selected `SameSite=Lax`; changing it is a separate security-boundary decision because Lax
-permits the host-only cookie on top-level cross-site navigation. State-changing routes remain POST-only
-and exact-Origin checked, but the setting will not be weakened without explicit authorization.
+The steward explicitly authorized the synthetic contract's `SameSite=Lax` session policy together
+with this exact LAN activation. The cookie remains host-only, `Secure`, and `HttpOnly`; Lax permits it
+on top-level cross-site navigation while state-changing routes remain POST-only and exact-Origin
+checked. The live transaction verifies that the ordinary callback emits this exact policy.

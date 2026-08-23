@@ -53,5 +53,7 @@ privacy-safe aggregate and interpretation are retained in
 `GATE7A-LAN-ACTIVATION-PROJECTION-2026-08-22.md` records the exact immutable successor and bounded
 rollback transaction. Canonical browser/backchannel separation, one exact session callback, and
 closed-cutover successor binding are green at 41/41 focused Gate 7A checks and 340/340 full checks.
-DNS, port 443, Keycloak, the active release, and the cookie policy remain unchanged pending explicit
-live authority.
+The steward subsequently authorized the bounded LAN transaction and `SameSite=Lax` session policy.
+`control/Invoke-ControlLanActivation.ps1` performs the exact preflight, DNS, firewall, Caddy,
+Keycloak, immutable-release, and browser-route checks with automatic restoration of the recorded
+predecessor on failure. The retained result is added only after the Control transaction completes.

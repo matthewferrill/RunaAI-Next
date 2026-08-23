@@ -139,6 +139,13 @@ function Restore-Predecessor {
         if ($port -ne 443) { throw }
       }
     }
+    if (Test-Path -LiteralPath $nextManifestPath -PathType Leaf) {
+      $failedManifestPath = Join-Path $rollbackRoot 'failed-successor-manifest.json'
+      if (Test-Path -LiteralPath $failedManifestPath) {
+        throw 'failed-successor-manifest-already-retained'
+      }
+      Move-Item -LiteralPath $nextManifestPath -Destination $failedManifestPath
+    }
     Copy-Item -LiteralPath (Join-Path $rollbackRoot 'candidate.json') -Destination $configPath -Force
     Copy-Item -LiteralPath (Join-Path $rollbackRoot 'release-manifest.json') -Destination $priorManifestPath -Force
     Copy-Item -LiteralPath (Join-Path $rollbackRoot 'Caddyfile') -Destination $caddyPath -Force

@@ -13,6 +13,7 @@ test("live activation is exact-owner, exact-predecessor, and exact-successor pin
   assert.match(script, /ExpectedArtifactDigest/);
   assert.match(script, /ExpectedArtifactFileCount/);
   assert.match(script, /verifyReleaseArtifact/);
+  assert.match(script, /--input-type=module -e `\r?\n/);
   assert.match(script, /gate7a-activation-predecessor-drift/);
   assert.match(script, /gate7a-activation-successor-invalid/);
 });

@@ -345,7 +345,7 @@ try {
   }
   Push-Location $releaseRoot
   try {
-    $verification = & (Join-Path $releaseRoot 'runtime\node.exe') --input-type=module -e
+    $verification = & (Join-Path $releaseRoot 'runtime\node.exe') --input-type=module -e `
       "import {readFile} from 'node:fs/promises';import {verifyReleaseArtifact} from './gate6b/artifact.mjs';const a=JSON.parse(await readFile('./artifact-files.json','utf8'));await verifyReleaseArtifact('.',a.artifactDigest);process.stdout.write('verified');"
     if ($LASTEXITCODE -ne 0 -or (($verification | ForEach-Object { [string]$_ }) -join '') -ne 'verified') {
       throw 'gate7a-activation-artifact-verification-failed'

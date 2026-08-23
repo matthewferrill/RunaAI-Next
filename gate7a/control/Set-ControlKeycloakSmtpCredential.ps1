@@ -3,7 +3,6 @@ param(
   [Parameter(Mandatory)][string]$HostName,
   [Parameter(Mandatory)][ValidateRange(1,65535)][int]$Port,
   [Parameter(Mandatory)][string]$From,
-  [Parameter(Mandatory)][string]$Username,
   [ValidateSet('true','false')][string]$StartTls='true',
   [ValidateSet('true','false')][string]$Ssl='false',
   [string]$FromDisplayName='RunaAI',
@@ -16,12 +15,14 @@ if($env:COMPUTERNAME-ne'RUNA-CONTROL'-or[Security.Principal.WindowsIdentity]::Ge
   throw 'gate7a-smtp-enrollment-context-invalid'
 }
 if([IO.Path]::GetFullPath($Root)-ne'C:\AI\RunaAI-Next-Candidate'-or$HostName-notmatch'^[A-Za-z0-9.-]{1,253}$'-or
-  $FromDisplayName.Length-lt 1-or$FromDisplayName.Length-gt 80-or$Username.Length-lt 1-or$Username.Length-gt 254){throw 'gate7a-smtp-enrollment-input-invalid'}
+  $FromDisplayName.Length-lt 1-or$FromDisplayName.Length-gt 80){throw 'gate7a-smtp-enrollment-input-invalid'}
 try{$fromAddress=[Net.Mail.MailAddress]::new($From)}catch{throw 'gate7a-smtp-enrollment-input-invalid'}
 if($fromAddress.Address-ne$From){throw 'gate7a-smtp-enrollment-input-invalid'}
 try{Add-Type -AssemblyName System.Security}catch{throw 'gate7a-smtp-enrollment-assembly-load-failed'}
 $target=Join-Path $Root 'secrets\keycloak-smtp.dpapi'
 if(Test-Path -LiteralPath $target){throw 'gate7a-smtp-enrollment-already-exists'}
+$Username=(Read-Host 'SMTP username').Trim()
+if($Username.Length-lt 1-or$Username.Length-gt 254){throw 'gate7a-smtp-enrollment-input-invalid'}
 $secure=Read-Host 'SMTP password or application password' -AsSecureString
 $pointer=[Runtime.InteropServices.Marshal]::SecureStringToBSTR($secure);$clear=$null;$bytes=$null;$protected=$null
 try{
@@ -43,5 +44,5 @@ try{
 }finally{
   if($pointer-ne[IntPtr]::Zero){[Runtime.InteropServices.Marshal]::ZeroFreeBSTR($pointer)}
   if($bytes){[Array]::Clear($bytes,0,$bytes.Length)};if($protected){[Array]::Clear($protected,0,$protected.Length)}
-  $clear=$null;Remove-Variable secure,payload,bytes,protected -ErrorAction SilentlyContinue
+  $clear=$null;Remove-Variable Username,secure,payload,bytes,protected -ErrorAction SilentlyContinue
 }

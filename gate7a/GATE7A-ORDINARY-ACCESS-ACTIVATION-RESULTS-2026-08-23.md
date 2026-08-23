@@ -47,7 +47,8 @@ Failed extracted releases and rollback evidence remain separate from the success
 ## What remains
 
 Keycloak has no SMTP sender and no ordinary user has been created. Live acceptance therefore remains
-blocked on an approved SMTP account and an owner-entered application password. After SMTP delivery is
+blocked on an approved SMTP account and owner-entered SMTP username/application password. Both values
+are collected interactively on Control and excluded from command history. After SMTP delivery is
 proved, issue one short-lived invitation to Matthew's separate personal email, let the invitee choose
 the username/password, and verify email, login, navigation, logout/revocation, password reset, denial of
 owner/protected actions and data, and unchanged owner passkey administration. The personal email,

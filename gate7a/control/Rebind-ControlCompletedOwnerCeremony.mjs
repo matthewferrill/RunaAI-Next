@@ -117,7 +117,7 @@ async function main(argv) {
   const priorBinding = { ...base, cutoverId: priorConfig.cutoverId, releaseId: priorManifest.releaseId,
     releaseCommit: priorManifest.commit, artifactDigest: priorManifest.artifactDigest };
   const subject = process.env.RUNA_GATE7A_OWNER_SUBJECT; delete process.env.RUNA_GATE7A_OWNER_SUBJECT;
-  const pg = createRequire(import.meta.url)("pg");
+  const pg = createRequire(join(releaseRoot, "package.json"))("pg");
   const pool = new pg.Pool({ connectionString, connectionTimeoutMillis: 2_000, query_timeout: 8_000,
     application_name: "runaai-next-gate7a-owner-rebind" });
   try {

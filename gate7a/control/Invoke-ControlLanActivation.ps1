@@ -510,14 +510,18 @@ try {
   $clientCheck = @(Expand-Response (Invoke-RestMethod -Method Get `
     -Uri 'http://127.0.0.1:9762/admin/realms/runaai-next/clients?clientId=runaai-next' `
     -Headers $headers))
+  if ($clientCheck.Count -ne 1) {
+    throw 'gate7a-activation-identity-reconciliation-failed'
+  }
+  $redirectUris = @($clientCheck[0].redirectUris)
+  $webOrigins = @($clientCheck[0].webOrigins)
   if ($identityCheck.webAuthnPolicyRpId -ne $canonicalHost -or
       $identityCheck.webAuthnPolicyPasswordlessRpId -ne $canonicalHost -or
       $identityCheck.webAuthnPolicyUserVerificationRequirement -ne 'required' -or
       $identityCheck.webAuthnPolicyPasswordlessUserVerificationRequirement -ne 'required' -or
-      $clientCheck.Count -ne 1 -or
-      @($clientCheck[0].redirectUris).Count -ne 1 -or
-      $clientCheck[0].redirectUris[0] -ne "$canonicalOrigin/session/callback" -or
-      @($clientCheck[0].webOrigins).Count -ne 1 -or $clientCheck[0].webOrigins[0] -ne $canonicalOrigin) {
+      $redirectUris.Count -ne 1 -or
+      $redirectUris[0] -ne "$canonicalOrigin/session/callback" -or
+      $webOrigins.Count -ne 1 -or $webOrigins[0] -ne $canonicalOrigin) {
     throw 'gate7a-activation-identity-reconciliation-failed'
   }
   $failureStage = 'dns-reconciliation'

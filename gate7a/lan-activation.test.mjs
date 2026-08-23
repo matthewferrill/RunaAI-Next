@@ -55,6 +55,13 @@ test("Keycloak remains loopback and changes only exact canonical RP, origin, and
   assert.match(script, /webAuthnPolicyPasswordlessUserVerificationRequirement = 'required'/);
   assert.match(script, /redirectUris = @\("\$canonicalOrigin\/session\/callback"\)/);
   assert.match(script, /webOrigins = @\(\$canonicalOrigin\)/);
+  assert.ok(script.indexOf("if ($clientCheck.Count -ne 1)") < script.indexOf("$redirectUris = @($clientCheck[0].redirectUris)"));
+  assert.match(script, /\$redirectUris = @\(\$clientCheck\[0\]\.redirectUris\)/);
+  assert.match(script, /\$webOrigins = @\(\$clientCheck\[0\]\.webOrigins\)/);
+  assert.match(script, /\$redirectUris\[0\] -ne "\$canonicalOrigin\/session\/callback"/);
+  assert.match(script, /\$webOrigins\[0\] -ne \$canonicalOrigin/);
+  assert.doesNotMatch(script, /\$clientCheck\[0\]\.redirectUris\[0\]/);
+  assert.doesNotMatch(script, /\$clientCheck\[0\]\.webOrigins\[0\]/);
   assert.match(script, /browserIssuer/);
 });
 

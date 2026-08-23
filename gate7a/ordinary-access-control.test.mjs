@@ -56,6 +56,8 @@ test("ordinary successor changes only the application release and restores the e
   assert.match(deploy, /Wait-Release \$PriorReleaseId/);
   assert.match(deploy, /selectedCoreAuthorityUnchanged=\$true/);
   assert.match(deploy, /ownerRouteUnchanged=\$true/);
+  assert.match(deploy, /StatusCode-ne303/);
+  assert.doesNotMatch(deploy, /StatusCode-ne302/);
   assert.doesNotMatch(deploy, /Stop-ScheduledTask[^\n]+(?:Postgresql|OpenFga|Keycloak|Caddy|ProtectedBackup)/);
   assert.doesNotMatch(deploy, /C:\\AI\\Projects\\RunaAI(?:['"\\])/);
 });

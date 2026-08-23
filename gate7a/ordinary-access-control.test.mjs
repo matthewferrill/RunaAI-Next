@@ -25,6 +25,8 @@ test("ordinary authentication uses a separate exact password-only Keycloak clien
   assert.match(configure, /\/session\/user\/callback/);
   assert.match(configure, /publicSelfRegistration=\$false/);
   assert.match(configure, /ownerClientChanged=\$false/);
+  assert.match(configure, /\$clients=@\(Get-Clients \$headers\);\$flows=@\(Get-Flows \$headers\)/);
+  assert.match(configure, /\$verifiedClients=@\(Get-Clients \$headers\)/);
 });
 
 test("ordinary-client activation is exact-release pinned, secret-safe, and automatically reversible", () => {

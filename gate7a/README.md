@@ -89,3 +89,10 @@ separate personal-email account for Matthew; its only initial authorization is t
 chat relation. The personal email itself must be supplied only to the hidden/owner-bound invitation
 operator and must not enter Git, retained evidence, or chat. Off-LAN ingress, a second PC, a phone,
 certificate-renewal automation, and the finished conversational UI remain subsequent checks.
+
+The first Control activation attempt on 2026-08-23 stopped before identity creation or application
+restart because Windows PowerShell 5.1 collapsed an empty Keycloak client response to `$null` and the
+operator attempted to read its `Count` property under strict mode. Normalized reconciliation proved
+zero ordinary clients, zero ordinary flows, no generated secret, unchanged realm policy, and the exact
+prior application release. The operator now array-wraps both empty and single-item client/flow results;
+the focused and full suites remain green before retry.

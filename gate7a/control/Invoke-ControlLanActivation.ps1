@@ -486,6 +486,7 @@ try {
   Wait-Json "$backchannelIssuer/.well-known/openid-configuration" {
     param($value) $value.issuer -eq $browserIssuer
   } 5 | Out-Null
+  Get-KeycloakAdminHeaders
   Start-ScheduledTask -TaskPath $taskPath -TaskName 'Caddy'
   Wait-Port 443 3
   Wait-Port 9761 3

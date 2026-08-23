@@ -62,6 +62,12 @@ test("Keycloak remains loopback and changes only exact canonical RP, origin, and
   assert.match(script, /\$webOrigins\[0\] -ne \$canonicalOrigin/);
   assert.doesNotMatch(script, /\$clientCheck\[0\]\.redirectUris\[0\]/);
   assert.doesNotMatch(script, /\$clientCheck\[0\]\.webOrigins\[0\]/);
+  const canonicalIssuerReady = script.indexOf('Wait-Json "$backchannelIssuer/.well-known/openid-configuration"');
+  const refreshedAdminSession = script.indexOf("Get-KeycloakAdminHeaders", canonicalIssuerReady);
+  const identityReconciliation = script.indexOf("$failureStage = 'identity-reconciliation'");
+  assert.ok(canonicalIssuerReady >= 0);
+  assert.ok(refreshedAdminSession > canonicalIssuerReady);
+  assert.ok(refreshedAdminSession < identityReconciliation);
   assert.match(script, /browserIssuer/);
 });
 

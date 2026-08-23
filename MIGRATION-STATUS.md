@@ -67,6 +67,12 @@ repository and never push migration work into either source repository.
   module and with the prior listener boundary unchanged. The focused Gate 7A suite passes 28/28 and the
   full repository suite passes 326/326. No DNS, certificate, credential, identity, listener, protected
   store, or production release changed.
+- Gate 7A's Porkbun credential enrollment and read-only preflight are prepared but have not been run.
+  Enrollment is restricted to `RUNA-CONTROL\Matthew`, hidden prompts, the existing ACL-restricted
+  candidate secrets directory, and DPAPI CurrentUser. Preflight can call only Porkbun's authenticated
+  ping and DNS-retrieval GET endpoints; it cannot open the SSL bundle or mutate DNS. No credential is
+  present in Git or retained evidence. PowerShell syntax validation and all three credential-boundary
+  checks pass; the focused Gate 7A suite is 31/31 and the full repository suite is 329/329.
 - No migration gate is approved merely by this bootstrap.
 - Bootstrap documentation and clean-clone validation were reviewed and merged into
   `runa2/integration` as `94ba860`.
@@ -403,7 +409,9 @@ the full repository suite passes 322/322. No live state changed.
 The permanent Gate 7A hostname is now `runa.bridgebuildersai.com`; do not deploy the reserved
 `runa.example.com` synthetic value. The next operation is a fail-closed LAN-first DNS/certificate
 preflight and activation plan using Porkbun's authoritative DNS and managed wildcard certificate. It
-requires a scoped Porkbun credential protected on Control. Off-LAN privacy/ingress and the first
+requires the steward to create a scoped Porkbun credential, enable API access for
+`bridgebuildersai.com`, and enter the two values only through the hidden Control-local enrollment
+prompts. Off-LAN privacy/ingress and the first
 non-owner acceptance fixture remain separate blockers. E3, E4/device-vault recovery,
 the separate approved-knowledge vector index, Qwen3.6 deliberate review, the existing live BGE
 endpoint, broader legacy surfaces, and the user-facing conversational UI remain separately deferred.

@@ -31,3 +31,9 @@ is a non-secret, non-activating decision projection: it explicitly records that 
 off-LAN ingress, and production remain unchanged. With the four hostname-decision checks included,
 the current focused Gate 7A suite passes 28/28 and the full repository suite passes 326/326. The exact
 non-secret readiness output is retained in `evidence/HOSTNAME-DECISION-RESULTS.json`.
+
+`GATE7A-PORKBUN-CREDENTIAL-PREP-2026-08-22.md` describes the Control-local secret enrollment and
+read-only API preflight prepared for the next interactive step. The scripts accept credentials only
+through hidden prompts under Matthew's Control identity, retain them only as DPAPI CurrentUser data,
+and cannot change DNS or open the certificate bundle. The current focused Gate 7A suite passes 31/31
+and the full repository suite passes 329/329.

@@ -96,6 +96,13 @@ repository and never push migration work into either source repository.
   rebinds only the completed owner proof, retains the prior proof, changes no authority or protected
   product data, is idempotent for an exact retry, and safely unwraps nested HTTP exceptions. Focused
   Gate 7A validation is 67/67 and the full suite is 370/370.
+- The fourth attempt reached the successor and failed closed before owner-proof mutation because the
+  successor's stricter configuration parser rejected the older predecessor configuration, which
+  correctly predates the ordinary-client block. Automatic rollback restored the exact predecessor and
+  removed the attempt-created client, flow, and secret. The rebind operator now validates each config
+  with the parser shipped by its own immutable release while still comparing the exact shared authority,
+  database, key, and canonical-origin bindings. Native Node stderr is captured without letting Windows
+  PowerShell convert a safe structured error into an early terminating error.
 - The first interactive Porkbun enrollment attempt failed closed with no credential retained. RCA: a
   clean Windows PowerShell 5.1 process had not loaded `System.Security`, so the DPAPI `ProtectedData`
   type was unavailable. A secret-free owner probe proved DPAPI and restricted-directory writes healthy.

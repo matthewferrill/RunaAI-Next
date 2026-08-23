@@ -407,7 +407,7 @@ try {
     -Body ($dryRunBody | ConvertTo-Json -Compress)
   if ($dryRun.status -ne 'SUCCESS') { throw 'gate7a-activation-dns-dry-run-failed' }
   $createHeaders = @{} + $dnsHeaders
-  $createHeaders['Idempotency-Key'] = "runaai-next-gate7a-create-$ReleaseId"
+  $createHeaders['Idempotency-Key'] = "runaai-next-gate7a-apply-$ReleaseId"
   $createdDns = Invoke-RestMethod -Method Post -Uri "$apiBase/dns/create/$domain" `
     -Headers $createHeaders -ContentType 'application/json' `
     -Body ($createBody | ConvertTo-Json -Compress)

@@ -24,7 +24,8 @@ test("Porkbun change is one dry-run-first exact private A record with ID-scoped 
   assert.ok(script.indexOf("$dryRun = Invoke-RestMethod") < script.indexOf("$createdDns = Invoke-RestMethod"));
   assert.match(script, /\$dryRunBody\['dryRun'\] = \$true/);
   assert.match(script, /runaai-next-gate7a-dry-run-\$ReleaseId/);
-  assert.match(script, /runaai-next-gate7a-create-\$ReleaseId/);
+  assert.match(script, /runaai-next-gate7a-apply-\$ReleaseId/);
+  assert.doesNotMatch(script, /runaai-next-gate7a-create-\$ReleaseId/);
   assert.match(script, /\$dryRun = Invoke-RestMethod[^\r\n]*`\r?\n\s+-Headers \$dryRunHeaders/);
   assert.match(script, /\$createdDns = Invoke-RestMethod[^\r\n]*`\r?\n\s+-Headers \$createHeaders/);
   assert.match(script, /dns\/delete\/\$domain\/\$dnsRecordId/);

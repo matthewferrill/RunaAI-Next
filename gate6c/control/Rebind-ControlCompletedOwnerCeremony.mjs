@@ -39,7 +39,7 @@ export async function rebindCompletedOwnerCeremony({ pool, priorBinding, binding
   observedAt = new Date().toISOString(), operationId, assertOwnerCeremonyComplete, bindingDigest }) {
   if (!uuid(subject) || !/^control-completed-owner-rebind-[a-f0-9]{12}$/.test(String(operationId))
       || !["completed-owner-readiness-release", "completed-owner-promotion-candidate",
-        "completed-owner-canonical-ingress"].includes(reason)
+        "completed-owner-canonical-ingress", "completed-owner-ordinary-access-release"].includes(reason)
       || !Number.isFinite(Date.parse(observedAt))) {
     throw coded("gate6c-completed-owner-rebind-input-invalid", "The exact completed-owner rebind input is invalid.");
   }
@@ -48,6 +48,13 @@ export async function rebindCompletedOwnerCeremony({ pool, priorBinding, binding
   const client = await pool.connect();
   try {
     await client.query("BEGIN ISOLATION LEVEL SERIALIZABLE");
+    await client.query(`CREATE TABLE IF NOT EXISTS gate6c.owner_release_rebinds (
+      operation_id text PRIMARY KEY,
+      prior_binding_digest text NOT NULL,
+      binding_digest text NOT NULL,
+      reason text NOT NULL,
+      observed_at timestamptz NOT NULL
+    )`);
     const principal = (await client.query(`SELECT oidc_subject,role,age_class,status,record_version
       FROM gate5.principals WHERE principal_id='matthew-owner' FOR UPDATE`)).rows[0];
     if (!principal || principal.oidc_subject !== subject || principal.role !== "primary-steward"
@@ -60,19 +67,27 @@ export async function rebindCompletedOwnerCeremony({ pool, priorBinding, binding
     const prior = rows.find(row => row.binding_digest === priorDigest)?.state_json;
     const current = rows.find(row => row.binding_digest === digest)?.state_json;
     assertOwnerCeremonyComplete(prior, priorBinding);
+    try {
+      assertOwnerCeremonyComplete(current, binding);
+      const retained = (await client.query(`SELECT prior_binding_digest,binding_digest,reason
+        FROM gate6c.owner_release_rebinds WHERE operation_id=$1`, [operationId])).rows[0];
+      if (!retained || retained.prior_binding_digest !== priorDigest || retained.binding_digest !== digest
+          || retained.reason !== reason) {
+        throw coded("gate6c-completed-owner-rebind-audit-mismatch", "The completed rebind audit does not match the retained owner proof.");
+      }
+      await client.query("COMMIT");
+      return Object.freeze({ schemaVersion: "runa2-gate6c-completed-owner-rebind-result/v1", passed: true,
+        priorCeremonyRetained: true, ceremonyRevision: current.revision, ceremonyComplete: true,
+        candidatePromoted: false, alreadyRebound: true, privateValuesIncluded: false });
+    } catch (error) {
+      if (error?.code !== "gate6c-owner-ceremony-incomplete") throw error;
+    }
     if (current?.revision !== 0 || current?.phase !== "planned"
         || current?.nextStep !== "verify-recovery-authority" || current?.complete !== false) {
       throw coded("gate6c-completed-owner-rebind-state-mismatch", "The new release ceremony is not pristine.");
     }
     const next = Object.freeze({ ...structuredClone(prior), bindingDigest: digest });
     assertOwnerCeremonyComplete(next, binding);
-    await client.query(`CREATE TABLE IF NOT EXISTS gate6c.owner_release_rebinds (
-      operation_id text PRIMARY KEY,
-      prior_binding_digest text NOT NULL,
-      binding_digest text NOT NULL,
-      reason text NOT NULL,
-      observed_at timestamptz NOT NULL
-    )`);
     const updated = await client.query(`UPDATE gate6c.owner_ceremonies SET state_json=$2::jsonb,
       updated_at=clock_timestamp() WHERE binding_digest=$1`, [digest, JSON.stringify(next)]);
     if (updated.rowCount !== 1) throw coded("gate6c-completed-owner-rebind-update-failed", "The new release ceremony was not updated exactly once.");

@@ -35,10 +35,45 @@ $changed=$false
 function Hash([string]$Path){if(-not(Test-Path -LiteralPath $Path -PathType Leaf)){throw 'gate7a-ordinary-deploy-staged-file-missing'};(Get-FileHash -LiteralPath $Path -Algorithm SHA256).Hash.ToLowerInvariant()}
 function Wait-PortClosed { $deadline=[DateTime]::UtcNow.AddSeconds(90);do{if(-not(Get-NetTCPConnection -State Listen -LocalPort 9760 -ErrorAction SilentlyContinue)){return};Start-Sleep -Milliseconds 500}until([DateTime]::UtcNow-gt$deadline);throw 'gate7a-ordinary-deploy-stop-timeout' }
 function Wait-Release([string]$Id){$deadline=[DateTime]::UtcNow.AddMinutes(12);do{Start-Sleep -Seconds 2;try{$value=Invoke-RestMethod 'http://127.0.0.1:9760/api/runtime/status' -TimeoutSec 3;if($value.running.releaseId-eq$Id){return $value}}catch{}}until([DateTime]::UtcNow-gt$deadline);throw 'gate7a-ordinary-deploy-start-timeout'}
+function Expand-Response([object]$Response){foreach($item in @($Response)){if($item-is [Array]){foreach($nested in $item){$nested}}elseif($null-ne$item){$item}}}
+function Get-OwnerSubject {
+  $base='http://127.0.0.1:9762';$bootstrap=$null;$adminToken=$null
+  try{
+    $bootstrap=[IO.File]::ReadAllText((Join-Path $Root 'secrets\keycloak-bootstrap')).Trim()
+    $adminToken=(Invoke-RestMethod -Method Post -Uri "$base/realms/master/protocol/openid-connect/token" `
+      -ContentType 'application/x-www-form-urlencoded' -Body @{grant_type='password';client_id='admin-cli';
+        username='candidate-bootstrap';password=$bootstrap}).access_token
+    $users=@(Expand-Response (Invoke-RestMethod -Method Get `
+      -Uri "$base/admin/realms/runaai-next/users?username=matthew-owner&exact=true" `
+      -Headers @{Authorization="Bearer $adminToken"}))
+    if($users.Count-ne1-or$users[0].username-ne'matthew-owner'-or$users[0].enabled-ne$true-or
+      [string]$users[0].id-notmatch'^[0-9a-f-]{36}$'){throw 'gate7a-ordinary-deploy-owner-subject-invalid'}
+    [string]$users[0].id
+  }finally{Remove-Variable bootstrap,adminToken,users -ErrorAction SilentlyContinue}
+}
 function Get-Redirect([string]$Path){
   $request=[Net.HttpWebRequest]::Create("http://127.0.0.1:9760$Path");$request.AllowAutoRedirect=$false;$request.Timeout=10000
-  try{$response=$request.GetResponse()}catch{if($_.Exception.Response){$response=$_.Exception.Response}else{throw}}
-  try{if([int]$response.StatusCode-ne303){throw 'gate7a-ordinary-deploy-route-status-invalid'};[string]$response.Headers['Location']}finally{$response.Close()}
+  try{$response=$request.GetResponse()}catch{
+    $cursor=$_.Exception;$response=$null
+    while($null-ne$cursor-and$null-eq$response){
+      $property=$cursor.PSObject.Properties['Response']
+      if($null-ne$property-and$null-ne$property.Value){$response=$property.Value;break}
+      $cursor=$cursor.InnerException
+    }
+    if($null-eq$response){throw}
+  }
+  try{
+    if([int]$response.StatusCode-ne303){
+      $safeCode=$null
+      try{$reader=[IO.StreamReader]::new($response.GetResponseStream());$body=$reader.ReadToEnd();$reader.Close()
+        $errorBody=$body|ConvertFrom-Json
+        if($errorBody.privateValuesIncluded-eq$false-and[string]$errorBody.errorCode-match'^[a-z0-9-]{1,100}$'){$safeCode=[string]$errorBody.errorCode}
+      }catch{}
+      if($safeCode){throw "gate7a-ordinary-deploy-route-status-invalid:$([int]$response.StatusCode):$safeCode"}
+      throw "gate7a-ordinary-deploy-route-status-invalid:$([int]$response.StatusCode)"
+    }
+    [string]$response.Headers['Location']
+  }finally{$response.Close()}
 }
 
 $pins=@{$archive=$ArchiveSha256;$stagedConfig=$ConfigSha256;$stagedManifest=$ManifestSha256;$stagedLauncher=$LauncherSha256}
@@ -86,13 +121,37 @@ try{
   if($runtime.running.commit-ne$ExpectedCommit-or$runtime.running.artifactDigest-ne$ExpectedArtifactDigest-or
     $runtime.cutover.phase-ne'closed'-or$readiness.authority-ne'active'-or
     $readiness.protectedDataImported-ne$true-or$readiness.productionTrafficChanged-ne$true){throw 'gate7a-ordinary-deploy-readiness-invalid'}
+  $operator=Join-Path $release 'gate7a\control\Rebind-ControlOrdinaryOwnerSession.mjs'
+  if(-not(Test-Path -LiteralPath $operator -PathType Leaf)){throw 'gate7a-ordinary-deploy-owner-rebind-operator-missing'}
+  $ownerSubject=Get-OwnerSubject
+  try{
+    $env:RUNA_GATE7A_OWNER_SUBJECT=$ownerSubject
+    $rebindOutput=& node $operator --release-root $release --successor-config $config `
+      --successor-manifest $manifest --expected-release-id $ReleaseId --expected-commit $ExpectedCommit `
+      --expected-artifact-digest $ExpectedArtifactDigest --prior-config (Join-Path $rollback 'candidate.json') `
+      --prior-manifest (Join-Path $rollback $manifestName) --prior-release-id $PriorReleaseId `
+      --prior-commit $PriorCommit --prior-artifact-digest $PriorArtifactDigest 2>&1
+    $rebindExit=$LASTEXITCODE
+  }finally{Remove-Item Env:\RUNA_GATE7A_OWNER_SUBJECT -ErrorAction SilentlyContinue;Remove-Variable ownerSubject -ErrorAction SilentlyContinue}
+  $rebindText=(@($rebindOutput|ForEach-Object{[string]$_})-join"`n").Trim();$rebindErrorCode=$null
+  if($rebindExit-ne0){
+    try{$rebindError=$rebindText|ConvertFrom-Json
+      if($rebindError.privateValuesIncluded-eq$false-and[string]$rebindError.errorCode-match'^[a-z0-9-]{1,100}$'){$rebindErrorCode=[string]$rebindError.errorCode}
+    }catch{}
+    if($rebindErrorCode){throw "gate7a-ordinary-deploy-owner-rebind-failed:$rebindErrorCode"}
+    throw 'gate7a-ordinary-deploy-owner-rebind-failed'
+  }
+  $rebind=$rebindText|ConvertFrom-Json
+  if($rebind.passed-ne$true-or$rebind.ceremonyComplete-ne$true-or$rebind.priorCeremonyRetained-ne$true-or
+    $rebind.authorityChanged-ne$false-or$rebind.protectedProductDataChanged-ne$false-or
+    $rebind.privateValuesIncluded-ne$false){throw 'gate7a-ordinary-deploy-owner-rebind-invalid'}
   $ordinaryLocation=Get-Redirect '/session/user/start';$ownerLocation=Get-Redirect '/session/start'
   if($ordinaryLocation-notlike'https://runa.bridgebuildersai.com/auth/realms/runaai-next/protocol/openid-connect/auth*'-or
     $ordinaryLocation-notmatch'client_id=runaai-next-user'-or$ordinaryLocation-notmatch'code_challenge='-or
     $ownerLocation-notmatch'client_id=runaai-next(&|$)'){throw 'gate7a-ordinary-deploy-route-invalid'}
   [ordered]@{schemaVersion='runa2-gate7a-control-ordinary-successor/v1';deployed=$true;
     releaseId=$ReleaseId;commit=$ExpectedCommit;artifactDigest=$ExpectedArtifactDigest;
-    selectedCoreAuthorityUnchanged=$true;ownerRouteUnchanged=$true;ordinaryPasswordRouteReady=$true;
+    selectedCoreAuthorityUnchanged=$true;ownerProofRebound=$true;ownerRouteUnchanged=$true;ordinaryPasswordRouteReady=$true;
     rollbackRetained=$true;legacyModified=$false;protectedProductDataChanged=$false;
     privateValuesIncluded=$false}|ConvertTo-Json -Compress
 }catch{

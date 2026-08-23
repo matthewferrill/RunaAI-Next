@@ -80,8 +80,8 @@ encrypted ordinary-session store and cookie, and owner-role denial on the passwo
 Control operators create or remove only that client and flow, deploy an exact immutable application
 successor with exact predecessor rollback, enroll/apply SMTP configuration with DPAPI CurrentUser
 protection, and issue one short-lived invitation with rollback of the newly created user, principal,
-and isolated chat relation. The focused Gate 7A suite passes 66/66 and the full repository suite passes
-368/368. No live identity, SMTP, application release, or user was changed by this repository work.
+and isolated chat relation. The focused Gate 7A suite passes 67/67 and the full repository suite passes
+370/370. The current live identity, SMTP, application release, and user state remain unchanged.
 
 Control's Keycloak currently has no SMTP sender configured, so the first distinct ordinary-user
 invitation and verified-email password recovery cannot yet be accepted live. The selected test is a
@@ -102,3 +102,12 @@ operator probe expected HTTP 302 while the reviewed application contract intenti
 303 for every browser sign-in redirect. The exact predecessor and identity state were restored, and no
 ordinary client, flow, or secret remained. The probe now requires the application's tested 303 status
 without changing the application behavior.
+
+The third attempt proved that the ordinary password route initialized, then failed closed on the owner
+route because the completed owner proof was still intentionally bound to the predecessor immutable
+release. Windows PowerShell's wrapped HTTP exception also hid that safe component error from the
+operator. Automatic rollback restored the exact predecessor and removed the attempt-created ordinary
+identity configuration. The successor now performs the existing audited completed-owner rebind before
+route acceptance, retains the prior completed proof, changes no authority or protected product data,
+and treats an exact retry as idempotent. The route probe also unwraps nested HTTP exceptions and emits
+only a privacy-safe error code.

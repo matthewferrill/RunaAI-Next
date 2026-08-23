@@ -11,6 +11,8 @@ const bounded = z.string().min(1).max(200);
 const service = z.object({ version: bounded, configurationDigest: z.string().regex(/^[a-f0-9]{64}$/) }).strict();
 const gate6c = z.object({ enabled: z.boolean(), legacyCommit: z.string().regex(/^[a-f0-9]{40}$/),
   expectedPrincipalId: z.string().regex(/^[a-z0-9][a-z0-9-]{0,63}$/) }).strict();
+const gate7a = z.object({ enabled: z.literal(true), canonicalOrigin: url,
+  relyingPartyId: bounded, predecessorManifestDigest: z.string().regex(/^[a-f0-9]{64}$/) }).strict();
 const schema = z.object({
   schemaVersion: z.literal("runa2-gate6b-release-config/v1"),
   profile: z.literal("release"),
@@ -24,8 +26,10 @@ const schema = z.object({
   databaseUrlRef: secretRef,
   keyRefs: z.object({ coreEncryption: secretRef, coreHmac: secretRef, learningEncryption: secretRef,
     learningHmac: secretRef, telemetryHmac: secretRef }).strict(),
-  keycloak: z.object({ issuer: url, clientId: bounded, clientCredentialRef: secretRef }).strict(),
+  keycloak: z.object({ issuer: url, backchannelIssuer: url.optional(), clientId: bounded,
+    clientCredentialRef: secretRef }).strict(),
   gate6c: gate6c.optional(),
+  gate7a: gate7a.optional(),
   openfga: z.object({ baseUrl: url, storeId: bounded, modelId: bounded, credentialRef: secretRef }).strict(),
   provider: z.object({ baseUrl: url, modelId: bounded }).strict(),
   services: z.object({ postgresql: service, keycloak: service, openfga: service, caddy: service }).strict(),
@@ -58,6 +62,19 @@ export async function loadReleaseConfig(path) {
   catch (error) { throw coded("release-config-invalid", error.message); }
   if (parsed.limits.upstreamDeadlineMs >= parsed.limits.totalDeadlineMs) {
     throw coded("release-config-invalid", "The upstream deadline must be shorter than the total deadline.");
+  }
+  if (parsed.gate7a?.enabled === true) {
+    let origin;
+    try { origin = new URL(parsed.gate7a.canonicalOrigin); }
+    catch { throw coded("release-config-gate7a-invalid", "The canonical Gate 7A origin is invalid."); }
+    const expectedIssuer = `${origin.origin}/auth/realms/runaai-next`;
+    if (origin.protocol !== "https:" || origin.origin !== parsed.gate7a.canonicalOrigin
+        || origin.hostname !== parsed.gate7a.relyingPartyId || origin.port
+        || parsed.publicBaseUrl !== origin.origin || parsed.keycloak.issuer !== expectedIssuer
+        || parsed.keycloak.backchannelIssuer !== "http://127.0.0.1:9762/realms/runaai-next"
+        || parsed.gate6c?.enabled !== true) {
+      throw coded("release-config-gate7a-invalid", "The Gate 7A origin, issuer, backchannel, RP ID, and owner-session boundary must be exact.");
+    }
   }
   const boundary = releaseBoundary(parsed);
   const checked = validateReleaseBoundary(boundary);

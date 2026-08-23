@@ -1,0 +1,17 @@
+{
+  "schemaVersion": "runa2-gate7a-certificate-staging/v1",
+  "passed": true,
+  "ownerContext": true,
+  "domain": "bridgebuildersai.com",
+  "selectedHostname": "runa.bridgebuildersai.com",
+  "wildcardSanVerified": true,
+  "publicWebPki": true,
+  "minimumRemainingDays": 34,
+  "certificateChainRetained": true,
+  "privateKeyRetainedProtected": true,
+  "dnsChanged": false,
+  "listenerChanged": false,
+  "identityChanged": false,
+  "productionChanged": false,
+  "privateValuesIncluded": false
+}

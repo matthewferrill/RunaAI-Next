@@ -6,6 +6,7 @@ const coded = (code, message) => Object.assign(new Error(message), { code });
 const enrollmentSteps = new Set(["enroll-primary-credential", "enroll-recovery-credential"]);
 const resumePrefix = "resume-existing:";
 const validationCommand = "gate6d-validation";
+const regularSessionCommand = "gate7a-session";
 const browserSteps = new Set([...enrollmentSteps, "verify-sign-in", "verify-fresh-step-up", "verify-recovery"]);
 const userVerifiedMethods = new Set(["webauthn", "passkey", "fido2", "windows-hello"]);
 const safeCode = value => typeof value === "string" && value.length >= 8 && value.length <= 8_192;
@@ -40,7 +41,8 @@ export class BrowserOwnerCeremonyService {
     this.flowLifetimeMs = flowLifetimeMs;
     this.sessionLifetimeMs = sessionLifetimeMs;
     this.stepUpMaximumAgeMs = stepUpMaximumAgeMs;
-    this.redirectUri = `${this.publicBaseUrl}/owner-ceremony/callback`;
+    this.redirectUri = `${this.publicBaseUrl}/session/callback`;
+    this.sessionRedirectUri = this.redirectUri;
   }
 
   async initialize() { await this.store.initialize({ binding: this.binding }); }
@@ -79,6 +81,21 @@ export class BrowserOwnerCeremonyService {
       privateValuesIncluded: false });
   }
 
+  async startSession() {
+    const ceremony = await this.store.ceremonyState(this.binding);
+    assertOwnerCeremonyComplete(ceremony, this.binding);
+    const verifier = b64url(this.random(48));
+    const state = b64url(this.random(32));
+    const now = this.now();
+    await this.store.createFlow({ binding: this.binding, state, command: regularSessionCommand,
+      verifier, expiresAt: new Date(now.getTime() + this.flowLifetimeMs).toISOString() });
+    const url = this.oidc.authorizationUrl({ clientId: this.clientId,
+      redirectUri: this.sessionRedirectUri, state, codeChallenge: sha256b64(verifier),
+      prompt: "login", maxAge: 0, action: null });
+    return Object.freeze({ schemaVersion: "runa2-gate7a-browser-start/v1", redirectUrl: url,
+      privateValuesIncluded: false });
+  }
+
   async callback({ state, code, actionStatus = null }) {
     if (!safeCode(state) || !safeCode(code)) throw coded("gate6c-browser-callback-invalid", "The browser callback is invalid.");
     const now = this.now();
@@ -88,8 +105,9 @@ export class BrowserOwnerCeremonyService {
     if (resumedEnrollment && !enrollmentSteps.has(command)) {
       throw coded("gate6c-browser-resume-invalid", "The interrupted enrollment recovery is invalid.");
     }
+    const callbackUri = command === regularSessionCommand ? this.sessionRedirectUri : this.redirectUri;
     const credential = await this.oidc.exchangeCode({ code, verifier: flow.verifier,
-      clientId: this.clientId, redirectUri: this.redirectUri });
+      clientId: this.clientId, redirectUri: callbackUri });
     if (typeof credential?.accessToken !== "string" || !credential.accessToken
         || typeof credential?.refreshToken !== "string" || !credential.refreshToken) {
       throw coded("gate6c-browser-credential-invalid", "The browser identity exchange returned incomplete credentials.");
@@ -143,6 +161,10 @@ export class BrowserOwnerCeremonyService {
     if (command === validationCommand) {
       return Object.freeze({ schemaVersion: "runa2-gate6d-browser-callback/v1", sessionId,
         command, validationSession: true, privateValuesIncluded: false });
+    }
+    if (command === regularSessionCommand) {
+      return Object.freeze({ schemaVersion: "runa2-gate7a-browser-callback/v1", sessionId,
+        command, regularSession: true, privateValuesIncluded: false });
     }
     const evidence = { passed: true, method,
       evidenceDigest: digestEvidence({ command, principalRef: this.binding.participantRefHmac,

@@ -128,6 +128,7 @@ export async function createProductionComposition({ loadedConfig, releaseRoot })
   const actionService = new Gate3GovernedActionService({ store: actionStore });
 
   const keycloakClient = new KeycloakOnlineClient({ issuer: config.keycloak.issuer,
+    backchannelIssuer: config.keycloak.backchannelIssuer,
     clientId: config.keycloak.clientId, clientCredential: keycloakCredential,
     timeoutMs: config.limits.upstreamDeadlineMs });
   const verifier = new KeycloakVerifier({ client: keycloakClient, principalStore });
@@ -145,10 +146,19 @@ export async function createProductionComposition({ loadedConfig, releaseRoot })
   await cutoverStore.initialize(initialCutover);
   let retainedCutover = await cutoverStore.load();
   if (retainedCutover.releaseManifestDigest !== manifest.manifestDigest) {
-    await cutoverStore.rebindPristineRelease(initialCutover);
-    retainedCutover = await cutoverStore.load();
+    const acceptedPostCutoverRelease = config.gate7a?.enabled === true
+      && retainedCutover.phase === "closed"
+      && retainedCutover.authorityGeneration === config.targetGeneration
+      && retainedCutover.releaseManifestDigest === config.gate7a.predecessorManifestDigest;
+    if (!acceptedPostCutoverRelease) {
+      await cutoverStore.rebindPristineRelease(initialCutover);
+      retainedCutover = await cutoverStore.load();
+    }
   }
   if (retainedCutover.releaseManifestDigest !== manifest.manifestDigest
+      && !(config.gate7a?.enabled === true && retainedCutover.phase === "closed"
+        && retainedCutover.authorityGeneration === config.targetGeneration
+        && retainedCutover.releaseManifestDigest === config.gate7a.predecessorManifestDigest)
       || retainedCutover.sourceGeneration !== config.sourceGeneration
       || retainedCutover.targetGeneration !== config.targetGeneration) {
     throw coded("release-cutover-state-mismatch", "The retained cutover state belongs to another release or authority generation.");
@@ -183,7 +193,8 @@ export async function createProductionComposition({ loadedConfig, releaseRoot })
   const dependencyHealth = async () => {
     const [postgresql, keycloak, openfga, provider] = await Promise.all([
       pool.query("SELECT 1").then(() => true, () => false),
-      probe(`${config.keycloak.issuer}/.well-known/openid-configuration`, config.limits.upstreamDeadlineMs),
+      probe(`${config.keycloak.backchannelIssuer ?? config.keycloak.issuer}/.well-known/openid-configuration`,
+        config.limits.upstreamDeadlineMs),
       probe(`${config.openfga.baseUrl.replace(/\/$/, "")}/healthz`, config.limits.upstreamDeadlineMs),
       probe(`${config.provider.baseUrl.replace(/\/$/, "")}/models`, config.limits.upstreamDeadlineMs),
     ]);

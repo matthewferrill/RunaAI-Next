@@ -9,8 +9,9 @@ async function boundedJson(response, maximumBytes = 128_000) {
 }
 
 export class KeycloakOnlineClient {
-  constructor({ issuer, clientId, clientCredential, timeoutMs = 5_000 }) {
+  constructor({ issuer, backchannelIssuer = issuer, clientId, clientCredential, timeoutMs = 5_000 }) {
     this.issuer = issuer.replace(/\/$/, "");
+    this.backchannelIssuer = backchannelIssuer.replace(/\/$/, "");
     this.clientId = clientId;
     this.clientCredential = clientCredential;
     this.timeoutMs = timeoutMs;
@@ -19,7 +20,7 @@ export class KeycloakOnlineClient {
   async inspect(token) {
     let response;
     try {
-      response = await fetch(`${this.issuer}/protocol/openid-connect/token/introspect`, {
+      response = await fetch(`${this.backchannelIssuer}/protocol/openid-connect/token/introspect`, {
         method: "POST", headers: { "content-type": "application/x-www-form-urlencoded" },
         body: new URLSearchParams({ token, client_id: this.clientId, client_secret: this.clientCredential }),
         signal: AbortSignal.timeout(this.timeoutMs),
@@ -51,7 +52,7 @@ export class KeycloakOnlineClient {
   async exchangeCode({ code, verifier, clientId = this.clientId, redirectUri }) {
     let response;
     try {
-      response = await fetch(`${this.issuer}/protocol/openid-connect/token`, {
+      response = await fetch(`${this.backchannelIssuer}/protocol/openid-connect/token`, {
         method: "POST", headers: { "content-type": "application/x-www-form-urlencoded" },
         body: new URLSearchParams({ grant_type: "authorization_code", code,
           redirect_uri: redirectUri, client_id: clientId, client_secret: this.clientCredential,
@@ -70,7 +71,7 @@ export class KeycloakOnlineClient {
   async revoke(token, tokenType = "refresh_token") {
     let response;
     try {
-      response = await fetch(`${this.issuer}/protocol/openid-connect/revoke`, {
+      response = await fetch(`${this.backchannelIssuer}/protocol/openid-connect/revoke`, {
         method: "POST", headers: { "content-type": "application/x-www-form-urlencoded" },
         body: new URLSearchParams({ token, token_type_hint: tokenType,
           client_id: this.clientId, client_secret: this.clientCredential }),
@@ -84,7 +85,7 @@ export class KeycloakOnlineClient {
   async countPasswordless(token) {
     let response;
     try {
-      response = await fetch(`${this.issuer}/account/credentials?type=webauthn-passwordless&user-credentials=true`, {
+      response = await fetch(`${this.backchannelIssuer}/account/credentials?type=webauthn-passwordless&user-credentials=true`, {
         headers: { authorization: `Bearer ${token}`, accept: "application/json" },
         signal: AbortSignal.timeout(this.timeoutMs),
       });

@@ -249,8 +249,9 @@ test("HTTP owner ceremony redirects through OIDC and sets only an opaque host co
       nextStep: "verify-sign-in", complete: false, privateValuesIncluded: false }; },
     async start(step, options) { calls.push(["start", step, options]); return { redirectUrl: "http://keycloak.test/auth?state=opaque" }; },
     async startValidationSession() { calls.push(["validation-start"]); return { redirectUrl: "http://keycloak.test/auth?state=validation" }; },
+    async startSession() { calls.push(["session-start"]); return { redirectUrl: "http://keycloak.test/auth?state=regular" }; },
     async callback(input) { calls.push(["callback", input]); return { sessionId: "opaque-session-id",
-      validationSession: input.state === "validation-state" }; },
+      validationSession: input.state === "validation-state", regularSession: input.state === "regular-state" }; },
     async credentialForSession(value) { calls.push(["session", value]); return "PRIVATE_TOKEN"; },
     async revokeAndVerify() { calls.push(["revoke"]); return { revision: 5, nextStep: "enroll-recovery-credential" }; },
   };
@@ -274,6 +275,14 @@ test("HTTP owner ceremony redirects through OIDC and sets only an opaque host co
     { redirect: "manual" });
   assert.equal(validationCallback.status, 303);
   assert.equal(validationCallback.headers.get("location"), "/gate6d-validation");
+  const regularStart = await fetch(`${base}/session/start`, { redirect: "manual" });
+  assert.equal(regularStart.status, 303);
+  assert.equal(regularStart.headers.get("location"), "http://keycloak.test/auth?state=regular");
+  const regularCallback = await fetch(`${base}/session/callback?state=regular-state&code=opaque-code`,
+    { redirect: "manual" });
+  assert.equal(regularCallback.status, 303);
+  assert.equal(regularCallback.headers.get("location"), "/");
+  assert.match(regularCallback.headers.get("set-cookie"), /^__Host-runa_owner_session=opaque-session-id;/);
   const callback = await fetch(`${base}/owner-ceremony/callback?state=opaque-state&code=opaque-code`,
     { redirect: "manual" });
   assert.equal(callback.status, 303);
@@ -294,7 +303,7 @@ test("HTTP owner ceremony redirects through OIDC and sets only an opaque host co
   assert.equal(revoked.status, 200);
   assert.equal((await revoked.json()).nextStep, "enroll-recovery-credential");
   assert.deepEqual(calls.map(call => call[0]), ["start", "start", "validation-start", "callback",
-    "callback", "session", "session", "revoke"]);
+    "session-start", "callback", "callback", "session", "session", "revoke"]);
 });
 
 test("release artifact verification detects changed and extra files", async t => {
@@ -313,6 +322,13 @@ test("release artifact verification detects changed and extra files", async t =>
   await writeFile(join(root, "unexpected.txt"), "unexpected\n", "utf8");
   await assert.rejects(verifyReleaseArtifact(root, manifest.artifactDigest),
     error => error.code === "artifact-files-mismatch");
+});
+
+test("release builder can stage the manifest outside the production config directory", async () => {
+  const source = await readFile(resolve(import.meta.dirname, "build-release.mjs"), "utf8");
+  assert.match(source, /"--manifest-output"/);
+  assert.match(source, /args\["manifest-output"\]/);
+  assert.match(source, /mustNotExist\(releaseManifestPath/);
 });
 
 test("release configuration is strict, digest-bound, and retains references only", async t => {
@@ -369,10 +385,12 @@ test("Keycloak and OpenFGA clients use bounded authenticated online decisions", 
   await once(server, "listening");
   t.after(() => server.close());
   const baseUrl = `http://127.0.0.1:${server.address().port}`;
-  const identity = await new KeycloakOnlineClient({ issuer: baseUrl, clientId: "runaai-next",
+  const identity = await new KeycloakOnlineClient({ issuer: "https://runa.example.test/auth/realms/runaai-next",
+    backchannelIssuer: baseUrl, clientId: "runaai-next",
     clientCredential: "PRIVATE_CLIENT_CANARY" }).inspect("PRIVATE_BEARER_CANARY");
   assert.equal(identity.active, true);
   assert.equal(identity.subject, "owner-subject");
+  assert.equal(identity.issuer, "http://issuer");
   assert.equal((await new KeycloakOnlineClient({ issuer: baseUrl, clientId: "runaai-next",
     clientCredential: "PRIVATE_CLIENT_CANARY" }).countPasswordless("PRIVATE_BEARER_CANARY")).count, 1);
   const decision = await new OpenFgaChecker({ baseUrl, storeId: "store", modelId: "model",

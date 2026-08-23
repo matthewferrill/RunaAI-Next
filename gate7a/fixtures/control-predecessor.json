@@ -1,0 +1,56 @@
+{
+  "schemaVersion": "runa2-gate7a-control-predecessor/v1",
+  "observedAt": "2026-08-22",
+  "config": {
+    "schemaVersion": "runa2-gate6b-release-config/v1",
+    "profile": "release",
+    "mode": "active",
+    "bind": { "host": "127.0.0.1", "port": 9760 },
+    "publicBaseUrl": "https://192.168.50.169:9761",
+    "releaseManifestPath": "release.json",
+    "sourceGeneration": "legacy-runaai:control-production",
+    "targetGeneration": "runaai-next:control-candidate",
+    "cutoverId": "runaai-next-selected-core-20260822d",
+    "databaseUrlRef": "file:../secrets/database-url",
+    "keyRefs": {
+      "coreEncryption": "file:../secrets/core-encryption",
+      "coreHmac": "file:../secrets/core-hmac",
+      "learningEncryption": "file:../secrets/learning-encryption",
+      "learningHmac": "file:../secrets/learning-hmac",
+      "telemetryHmac": "file:../secrets/telemetry-hmac"
+    },
+    "keycloak": {
+      "issuer": "http://localhost:9762/realms/runaai-next",
+      "clientId": "runaai-next",
+      "clientCredentialRef": "file:../secrets/keycloak-client"
+    },
+    "gate6c": {
+      "enabled": true,
+      "legacyCommit": "b4db04090d8f0df87234fab573b396e7824c5354",
+      "expectedPrincipalId": "matthew-owner"
+    },
+    "openfga": {
+      "baseUrl": "http://127.0.0.1:9763",
+      "storeId": "01M0K624T1C3R9TVQXDHWWB6WG",
+      "modelId": "01M0K624WGD30C91PV0WWSHXFC",
+      "credentialRef": "file:../secrets/openfga-token"
+    },
+    "provider": {
+      "baseUrl": "http://127.0.0.1:9770/v1",
+      "modelId": "qwen3-coder-30b-a3b-instruct"
+    },
+    "services": {
+      "postgresql": { "version": "18.6", "configurationDigest": "93ccbb869271717ff733ecd1d898624c0c3702213ca283bcd31054b1c29ead65" },
+      "keycloak": { "version": "26.7.2", "configurationDigest": "b940321c6a472606db56101f3efd1383efe1f2337f5d225bbd67b94be4e6ddfb" },
+      "openfga": { "version": "1.18.3", "configurationDigest": "71c83a50bae2d639c961d5cc980201c95fcd120da69e53083cb188213d064f0d" },
+      "caddy": { "version": "2.11.4", "configurationDigest": "3c57e30ed4d12d5952c3406688e2b7d9bffce7b733e2a972961fc93d290b3c89" }
+    },
+    "limits": { "maxRequestBytes": 262144, "totalDeadlineMs": 30000, "upstreamDeadlineMs": 10000 }
+  },
+  "predecessor": {
+    "releaseId": "runaai-next-selected-core-2026-08-21-77f3017",
+    "commit": "77f3017d10f4e4670ad551b3d000cc2569c1dfdb",
+    "manifestDigest": "4167a8268295f8e973486e197845a2c1d3ac3efb0c5af632ae704d371f0f7343"
+  },
+  "privateValuesIncluded": false
+}

@@ -1,6 +1,6 @@
 # RunaAI migration status
 
-Status date: 2026-08-22. This is the living migration handoff for RunaAI-Next. Update it in the same
+Status date: 2026-08-23. This is the living migration handoff for RunaAI-Next. Update it in the same
 commit whenever a gate changes repository direction, authority, implementation status, safety
 boundaries, verification state, or the next planned work.
 
@@ -13,7 +13,7 @@ boundaries, verification state, or the next planned work.
 | RunaAI-Next `main` | Exact inherited RunaLab completion baseline | Stable integration target only after reviewed migration completion |
 | RunaAI-Next `runa2/integration` | Accumulated accepted migration gates | Development integration; not production |
 | Short-lived `runa2/*` gate branches | One approved, measured migration slice | Experimental until validated and approved |
-| Control release `runaai-next-gate6d-promotion-2026-08-22-a886754` | Running selected-core RunaAI application | Production authority for the exact Gate 6 selected core |
+| Control release `runaai-next-gate7a-lan-2026-08-23-fdf6e0a` | Running selected-core RunaAI application at the canonical LAN origin | Production authority for the exact Gate 6 selected core; Gate 7A changes ingress/session topology, not selected-core authority |
 
 The product name is RunaAI. `RunaAI-Next`, `runa2`, and similar labels are repository and branch
 identifiers during migration, not product identities.
@@ -53,26 +53,21 @@ repository and never push migration work into either source repository.
   downloaded, no provider credential was introduced, and no external spending path was activated.
   Candidate PostgreSQL, Keycloak, OpenFGA, Node, and Caddy are retained; only private Caddy TLS is
   exposed, while the other candidate listeners remain loopback-bound.
-- Gate 7A's approved corrective multi-device contract and synthetic foundation are complete. The
-  focused suite passes 24/24 and the full repository suite passes 322/322. The policy requires one
-  permanent WebPKI-trusted HTTPS origin for Omen, other PCs, phones, and approved off-LAN browsers;
-  individual invitation-only principals; user-verified multi-device passkeys; online-revocable
-  encrypted sessions; and fresh OpenFGA-gated step-up for governed work. No DNS, certificate, listener,
-  ingress, credential, protected store, or production release changed. `runa.example.com` is a reserved
-  synthetic fixture, not a selected live hostname.
-- The steward selected `runa.bridgebuildersai.com` as the permanent RunaAI browser hostname on
-  2026-08-22. Its exact origin, external Keycloak issuer, WebAuthn RP ID, and callback are now bound by
-  a non-activating decision projection. Public discovery confirms Porkbun DNS authority and no existing
-  `runa` A/CNAME record. Control still runs the exact Gate 6D Caddy 2.11.4 binary without a Porkbun DNS
-  module and with the prior listener boundary unchanged. The focused Gate 7A suite passes 28/28 and the
-  full repository suite passes 326/326. No DNS, certificate, credential, identity, listener, protected
-  store, or production release changed.
-- Gate 7A's Porkbun credential enrollment and read-only preflight are prepared but have not been run.
-  Enrollment is restricted to `RUNA-CONTROL\Matthew`, hidden prompts, the existing ACL-restricted
-  candidate secrets directory, and DPAPI CurrentUser. Preflight can call only Porkbun's authenticated
-  ping and DNS-retrieval GET endpoints; it cannot open the SSL bundle or mutate DNS. No credential is
-  present in Git or retained evidence. PowerShell syntax validation and all four credential-boundary
-  checks pass; the focused Gate 7A suite is 32/32 and the full repository suite is 330/330.
+- Gate 7A's canonical LAN origin is active at `https://runa.bridgebuildersai.com`. The Porkbun A record
+  resolves to Control's private address, the ordinary WebPKI certificate is trusted from Omen, Caddy is
+  the only new LAN-facing service on TCP 443, and every backend remains loopback-bound. Keycloak now
+  advertises the same-origin `/auth` issuer and `runa.bridgebuildersai.com` RP ID. The session cookie is
+  host-only, `Secure`, `HttpOnly`, and explicitly `SameSite=Lax`; off-LAN ingress remains disabled.
+- The exact active release is `runaai-next-gate7a-lan-2026-08-23-fdf6e0a`, commit `fdf6e0a`, artifact
+  digest `cb3f9600...`. The prior completed owner proof was auditably rebound to that exact release while
+  retaining the predecessor ceremony; the rebind changed neither selected-core authority nor production
+  traffic. The commissioning route remains healthy. Focused Gate 7A validation is 52/52 and the full
+  repository suite is 351/351. Aggregate evidence is in
+  `gate7a/evidence/CONTROL-LAN-ACTIVATION-RESULTS.json`.
+- Gate 7A is not closed. Existing commissioning-origin passkeys are not canonical credentials. The next
+  interactive step is Matthew's canonical-origin passkey enrollment from Omen plus an independent
+  recovery credential, followed by ordinary session/revocation/step-up validation. A second PC, a
+  distinct non-owner user, a phone, off-LAN ingress, and certificate renewal remain separate checks.
 - The first interactive Porkbun enrollment attempt failed closed with no credential retained. RCA: a
   clean Windows PowerShell 5.1 process had not loaded `System.Security`, so the DPAPI `ProtectedData`
   type was unavailable. A secret-free owner probe proved DPAPI and restricted-directory writes healthy.
@@ -81,9 +76,8 @@ repository and never push migration work into either source repository.
 - The remediated Control-local Porkbun enrollment passed under `RUNA-CONTROL\Matthew`; the credential is
   retained only as DPAPI CurrentUser data in the existing ACL-restricted candidate secrets root. The
   authenticated read-only preflight passed for `bridgebuildersai.com` and confirmed zero existing
-  `runa` A/AAAA/CNAME records. No private value was retained in evidence and the SSL bundle remained
-  unopened. Certificate staging is now prepared as a one-shot owner-bound GET-and-validate step with
-  rollback limited to its newly created protected staging directory.
+  `runa` A/AAAA/CNAME records at that time. No private value was retained in evidence. The wildcard
+  certificate was subsequently staged, validated, and activated without exposing its private value.
 - No migration gate is approved merely by this bootstrap.
 - Bootstrap documentation and clean-clone validation were reviewed and merged into
   `runa2/integration` as `94ba860`.
@@ -357,7 +351,7 @@ plain-language steward experience, or governed action pathway.
 | 4 | Governed data migration, one domain at a time | Complete; accepted and merged as `2c38dd5`; legacy unchanged | Complete |
 | 5 | Operations, private transport, authentication/authorization, recovery | Complete; accepted and merged as `a986419` | Complete |
 | 6 | Selected-core production cutover and rollback window | Complete and closed; exact selected-core release is authoritative, observation green, freeze released, legacy rollback healthy | Complete |
-| 7A | Multi-device access foundation | Contract, synthetic implementation, and permanent hostname selection complete; focused 28/28 and full 326/326 green | DNS/certificate activation, off-LAN ingress privacy, and first non-owner fixture remain decision-gated |
+| 7A | Multi-device access foundation | Canonical LAN origin active and independently verified; focused 52/52 and full 351/351 green | Canonical owner/recovery passkeys, representative clients, non-owner fixture, certificate renewal, and off-LAN boundary remain |
 | 7B+ | Deferred UI and extensions | Not started | New baseline and separate approval per extension group |
 
 ## Bootstrap validation
@@ -402,37 +396,20 @@ No dependency was changed during the prerequisite disposition. Full evidence is 
 
 ## Next operation
 
-Gate 6 is closed. The owner can now open the governed production status surface at
-`https://192.168.50.169:9761/`; the exact passkey flow and selected-core routes have already passed
-their witnessed live validation. This release does not yet include a finished conversational/steward
-UI, so the URL is not a normal chat login screen. Operational work should preserve the exact immutable
-release, recurring encrypted backups, private listener boundary, active target authority, and the
-intact legacy rollback path.
+Gate 6 remains closed and the selected-core authority remains active. Gate 7A's canonical LAN origin is
+now live at `https://runa.bridgebuildersai.com`; the old
+`https://192.168.50.169:9761` route is retained only for commissioning and rollback. The canonical
+route has an ordinary trusted certificate and exposes only Caddy on TCP 443 to the Private/LocalSubnet
+boundary. Off-LAN ingress is disabled.
 
-Gate 7A is the approved corrective client-access foundation. Decision 0079 and H2 confirm that Omen,
-additional PCs, distinct users, phones, and eventual off-LAN access were original requirements. The
-current Control-local IP, internal CA, and browser-visible loopback issuer are retained commissioning
-evidence, not the permanent client topology. The synthetic policy now enforces one canonical trusted
-HTTPS origin, same-origin external Keycloak, per-person multi-passkey identity, bounded ingress, and a
-five-client acceptance matrix before the conversational UI is built. Its focused suite passes 24/24;
-the full repository suite passes 322/322. No live state changed.
+The next operation requires the steward at Omen: enroll Matthew's first passkey under the canonical
+RP ID `runa.bridgebuildersai.com`, then enroll/verify an independent recovery credential. After those
+credentials exist, validate ordinary sign-in, bounded `SameSite=Lax` session navigation,
+logout/revocation, and governed step-up. Preserve both commissioning-origin credentials until the new
+canonical credentials pass. This release still does not include a finished conversational/steward UI.
 
-The permanent Gate 7A hostname is now `runa.bridgebuildersai.com`; do not deploy the reserved
-`runa.example.com` synthetic value. The next operation is a fail-closed LAN-first DNS/certificate
-preflight and activation plan using Porkbun's authoritative DNS and managed wildcard certificate. It
-requires the steward to create a scoped Porkbun credential, enable API access for
-`bridgebuildersai.com`, and enter the two values only through the hidden Control-local enrollment
-prompts. Those prerequisites are now complete. The next bounded operation is protected wildcard
-certificate staging; its prepared tooling is green at 36/36 focused Gate 7A checks and 334/334 full
-repository checks, and it must not change DNS, listeners, identity, or production. Off-LAN
-privacy/ingress and the first
-non-owner acceptance fixture remain separate blockers. E3, E4/device-vault recovery,
-the separate approved-knowledge vector index, Qwen3.6 deliberate review, the existing live BGE
-endpoint, broader legacy surfaces, and the user-facing conversational UI remain separately deferred.
-
-Protected wildcard certificate staging has now passed with 34 complete days remaining; no private
-value entered evidence and no live route changed. The canonical-session successor projection is green
-at 41/41 focused Gate 7A checks and 340/340 full checks. Its exact DNS, TCP 443, Caddy, Keycloak,
-immutable-release, service-restart, rollback, and cookie-policy effects are documented in
-`gate7a/GATE7A-LAN-ACTIVATION-PROJECTION-2026-08-22.md` and remain unexecuted pending explicit live
-authority.
+After owner acceptance, continue Gate 7A with a second PC, a distinct non-owner user, a phone, and a
+separately reviewed off-LAN boundary. Certificate renewal remains explicit because the Porkbun
+credential is DPAPI CurrentUser-bound. E3, E4/device-vault recovery, the separate approved-knowledge
+vector index, Qwen3.6 deliberate review, the existing live BGE endpoint, broader legacy surfaces, and
+the user-facing conversational UI remain separately deferred.

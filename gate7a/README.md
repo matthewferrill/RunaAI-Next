@@ -56,7 +56,17 @@ closed-cutover successor binding are green at 41/41 focused Gate 7A checks and 3
 The steward subsequently authorized the bounded LAN transaction and `SameSite=Lax` session policy.
 `control/Invoke-ControlLanActivation.ps1` performs the exact preflight, DNS, firewall, Caddy,
 Keycloak, immutable-release, and browser-route checks with automatic restoration of the recorded
-predecessor on failure. The retained result is added only after the Control transaction completes.
+predecessor on failure. The transaction passed on 2026-08-23 and remains active at
+`https://runa.bridgebuildersai.com`. Its aggregate evidence and fail-closed remediation record are in
+`evidence/CONTROL-LAN-ACTIVATION-RESULTS.json` and
+`GATE7A-LAN-ACTIVATION-RESULTS-2026-08-23.md`. The current focused Gate 7A suite passes 52/52 and the
+full repository suite passes 351/351.
 `build-lan-projection.mjs --output <new-directory> --release-id <exact-id>` also emits the two
 deterministic Control launchers so the staged release path and Keycloak arguments are reviewed and
 hash-pinned rather than composed during the live transaction.
+
+Canonical LAN activation completes only Gate 7A-2's ingress foundation. Matthew's first
+canonical-origin passkey must now be enrolled from Omen, followed by an independent recovery
+credential and the representative client/session checks. Existing commissioning-origin credentials
+remain intact. Off-LAN ingress, the first non-owner fixture, and certificate-renewal automation remain
+separate decisions.

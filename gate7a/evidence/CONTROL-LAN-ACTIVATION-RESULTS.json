@@ -1,0 +1,79 @@
+{
+  "schemaVersion": "runa2-gate7a-control-lan-results/v1",
+  "observedAt": "2026-08-23",
+  "passed": true,
+  "activation": {
+    "attemptId": "gate7a-attempt-20260823-07",
+    "releaseId": "runaai-next-gate7a-lan-2026-08-23-fdf6e0a",
+    "commit": "fdf6e0aedea92917ac3c00de2205311c3f94808a",
+    "artifactDigest": "cb3f9600f855099bdc94f67758990c428146a9c6d2f0dbd163e6021917f216c3",
+    "canonicalOrigin": "https://runa.bridgebuildersai.com",
+    "browserIssuer": "https://runa.bridgebuildersai.com/auth/realms/runaai-next",
+    "relyingPartyId": "runa.bridgebuildersai.com",
+    "sameSite": "Lax",
+    "canonicalHttps": true,
+    "dnsRecordExact": true,
+    "identityReconciled": true,
+    "commissioningRouteRetained": true,
+    "firewallPrivateLocalSubnetOnly": true,
+    "offLanIngressEnabled": false,
+    "rolledBack": false,
+    "rollbackRetained": true
+  },
+  "ownerReleaseBinding": {
+    "passed": true,
+    "priorCeremonyRetained": true,
+    "ceremonyRevision": 7,
+    "ceremonyComplete": true,
+    "authorityChanged": false,
+    "productionChanged": false,
+    "legacyModified": false
+  },
+  "controlVerification": {
+    "cutoverPhase": "closed",
+    "authority": "active",
+    "protectedDataImported": true,
+    "productionTrafficChanged": true,
+    "ownerComplete": true,
+    "ownerRevision": 7,
+    "canonicalListener": {
+      "address": "192.168.50.169",
+      "port": 443
+    },
+    "loopbackPorts": [9760, 9762, 9763, 9764, 9765, 9766, 9770],
+    "commissioningListener": {
+      "address": "192.168.50.169",
+      "port": 9761,
+      "healthy": true
+    },
+    "firewall": {
+      "enabled": true,
+      "profile": "Private",
+      "localPort": 443,
+      "remoteAddress": "LocalSubnet"
+    }
+  },
+  "omenVerification": {
+    "applicationResolverAddress": "192.168.50.169",
+    "canonicalLiveness": true,
+    "browserIssuerExact": true,
+    "certificateTrustedWithoutBypass": true
+  },
+  "publicDnsVerification": {
+    "googleDnsOverHttpsAddress": "192.168.50.169",
+    "cloudflareDnsOverHttpsAddress": "192.168.50.169"
+  },
+  "validation": {
+    "gate7aFocused": {
+      "passed": 52,
+      "failed": 0
+    },
+    "fullRepository": {
+      "passed": 351,
+      "failed": 0
+    }
+  },
+  "protectedDataRewrittenByActivation": false,
+  "legacyModified": false,
+  "privateValuesIncluded": false
+}

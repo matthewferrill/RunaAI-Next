@@ -9,3 +9,7 @@ dl div { display: grid; grid-template-columns: 7rem 1fr; gap: 1rem; padding: .8r
 dt { color: #8e9d93; }
 dd { margin: 0; overflow-wrap: anywhere; }
 .boundary { padding: 1rem; border-left: .25rem solid #d7af69; background: #2c261b; color: #f1dfbd; }
+.actions { display: grid; gap: .75rem; margin-top: 1.5rem; }
+.actions a { padding: .8rem 1rem; border: 1px solid #63816e; border-radius: .65rem; color: #dce9df; text-align: center; text-decoration: none; }
+.actions a:hover, .actions a:focus-visible { border-color: #9fd3b2; background: #1b2a21; }
+.actions a.primary { background: #9fd3b2; color: #102016; font-weight: 700; }

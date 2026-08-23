@@ -135,6 +135,26 @@ export class DerivedActorAuthenticator {
   }
 }
 
+export class MultiClientAuthenticator {
+  constructor(authenticators) {
+    if (!Array.isArray(authenticators) || authenticators.length < 2) {
+      throw coded("identity-client-set-invalid", "At least two bounded identity clients are required.");
+    }
+    this.authenticators = Object.freeze([...authenticators]);
+  }
+  async authenticate(token, options = {}) {
+    const failures = [];
+    for (const authenticator of this.authenticators) {
+      try { return await authenticator.authenticate(token, options); }
+      catch (error) { failures.push(error); }
+    }
+    const unavailable = failures.find(error => ["identity-verifier-unavailable",
+      "identity-introspection-unavailable"].includes(error?.code));
+    if (unavailable) throw unavailable;
+    throw coded("identity-authentication-failed", "No accepted identity client authenticated this session.");
+  }
+}
+
 export class OpenFgaChecker {
   constructor({ baseUrl, storeId, modelId, credential, timeoutMs = 5_000 }) {
     this.baseUrl = baseUrl.replace(/\/$/, "");

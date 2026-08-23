@@ -12,7 +12,13 @@ const service = z.object({ version: bounded, configurationDigest: z.string().reg
 const gate6c = z.object({ enabled: z.boolean(), legacyCommit: z.string().regex(/^[a-f0-9]{40}$/),
   expectedPrincipalId: z.string().regex(/^[a-z0-9][a-z0-9-]{0,63}$/) }).strict();
 const gate7a = z.object({ enabled: z.literal(true), canonicalOrigin: url,
-  relyingPartyId: bounded, predecessorManifestDigest: z.string().regex(/^[a-f0-9]{64}$/) }).strict();
+  relyingPartyId: bounded, predecessorManifestDigest: z.string().regex(/^[a-f0-9]{64}$/),
+  ordinaryClient: z.object({
+    clientId: z.literal("runaai-next-user"),
+    redirectUri: url,
+    clientCredentialRef: secretRef,
+  }).strict(),
+}).strict();
 const schema = z.object({
   schemaVersion: z.literal("runa2-gate6b-release-config/v1"),
   profile: z.literal("release"),
@@ -43,7 +49,10 @@ const sha256 = value => createHash("sha256").update(value).digest("hex");
 
 function releaseBoundary(config) {
   const secretRefs = { databaseUrl: config.databaseUrlRef, ...config.keyRefs,
-    keycloakClient: config.keycloak.clientCredentialRef, openfgaCredential: config.openfga.credentialRef };
+    keycloakClient: config.keycloak.clientCredentialRef,
+    ...(config.gate7a?.ordinaryClient
+      ? { ordinaryKeycloakClient: config.gate7a.ordinaryClient.clientCredentialRef } : {}),
+    openfgaCredential: config.openfga.credentialRef };
   return {
     profile: "release", bindHost: "127.0.0.1", scheme: "https",
     tls: { mode: "internal", clientAuth: "none" }, clientAuthenticationRequired: false,
@@ -72,6 +81,7 @@ export async function loadReleaseConfig(path) {
         || origin.hostname !== parsed.gate7a.relyingPartyId || origin.port
         || parsed.publicBaseUrl !== origin.origin || parsed.keycloak.issuer !== expectedIssuer
         || parsed.keycloak.backchannelIssuer !== "http://127.0.0.1:9762/realms/runaai-next"
+        || parsed.gate7a.ordinaryClient.redirectUri !== `${origin.origin}/session/user/callback`
         || parsed.gate6c?.enabled !== true) {
       throw coded("release-config-gate7a-invalid", "The Gate 7A origin, issuer, backchannel, RP ID, and owner-session boundary must be exact.");
     }
@@ -108,6 +118,8 @@ export function decodeKey(value, name) {
 export function safeConfigurationStatus(loaded, telemetryKey) {
   const secretRefs = { databaseUrl: loaded.value.databaseUrlRef, ...loaded.value.keyRefs,
     keycloakClient: loaded.value.keycloak.clientCredentialRef,
+    ...(loaded.value.gate7a?.ordinaryClient
+      ? { ordinaryKeycloakClient: loaded.value.gate7a.ordinaryClient.clientCredentialRef } : {}),
     openfgaCredential: loaded.value.openfga.credentialRef };
   return Object.freeze({ schemaVersion: "runa2-gate6b-config-status/v1",
     configurationDigest: loaded.configurationDigest,

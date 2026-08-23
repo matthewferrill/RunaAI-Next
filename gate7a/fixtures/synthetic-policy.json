@@ -1,5 +1,5 @@
 {
-  "schemaVersion": "runa2-gate7a-client-access-policy/v1",
+  "schemaVersion": "runa2-gate7a-client-access-policy/v2",
   "canonicalOrigin": "https://runa.example.com",
   "keycloak": {
     "browserIssuer": "https://runa.example.com/auth/realms/runaai-next",
@@ -23,14 +23,22 @@
     "syncedPasskeysAllowed": true,
     "crossDevicePasskeysAllowed": true,
     "ownerMinimumCredentials": 2,
-    "independentRecoveryRequired": true
+    "independentRecoveryRequired": true,
+    "ordinaryUseOptional": true,
+    "protectedActionStepUpRequired": true,
+    "ownerAdministrativeAuthentication": "user-verified-passkey"
   },
   "accounts": {
     "individualPrincipalsRequired": true,
     "sharedAccountsAllowed": false,
     "invitationRequired": true,
     "invitationSingleUse": true,
-    "invitationMaximumMinutes": 10
+    "invitationMaximumMinutes": 10,
+    "usernamePasswordEnabled": true,
+    "passwordSetByUser": true,
+    "verifiedEmailRequired": true,
+    "verifiedEmailPasswordRecovery": true,
+    "ownerOrdinaryTestAccountSeparated": true
   },
   "sessions": {
     "storage": "encrypted-postgresql",

@@ -6,6 +6,7 @@ export const relyingPartyId = "runa.bridgebuildersai.com";
 export const browserIssuer = `${canonicalOrigin}/auth/realms/runaai-next`;
 export const backchannelIssuer = "http://127.0.0.1:9762/realms/runaai-next";
 export const callbackUri = `${canonicalOrigin}/session/callback`;
+export const ordinaryCallbackUri = `${canonicalOrigin}/session/user/callback`;
 export const privateAddress = "192.168.50.169";
 export const caddyBinarySha256 = "5cb9ab71e5756ce72840b8234177a2f40c8b4ab47a806b8e841e2b784e9df62b";
 export const keycloakBinarySha256 = "9935b42ac9f187583da27f484f3027fa0784825e42b11f26cb8753e20a701f09";
@@ -104,6 +105,11 @@ export function createLanReleaseConfig(predecessor) {
       canonicalOrigin,
       relyingPartyId,
       predecessorManifestDigest: predecessor.predecessor.manifestDigest,
+      ordinaryClient: {
+        clientId: "runaai-next-user",
+        redirectUri: ordinaryCallbackUri,
+        clientCredentialRef: "file:../secrets/keycloak-ordinary-client",
+      },
     },
     services: {
       ...current.services,
@@ -123,6 +129,7 @@ export function projectionStatus(predecessor, config) {
     browserIssuer,
     backchannelIssuer,
     callbackUri,
+    ordinaryCallbackUri,
     predecessorManifestDigest: predecessor.predecessor.manifestDigest,
     releaseConfigurationDigest: sha256(canonicalJson(config)),
     caddyConfigurationDigest: config.services.caddy.configurationDigest,

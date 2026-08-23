@@ -27,6 +27,8 @@ test("Gate 7A release configuration binds canonical origin, issuer, RP ID, and p
   assert.match(config, /predecessorManifestDigest/);
   assert.match(config, /http:\/\/127\.0\.0\.1:9762\/realms\/runaai-next/);
   assert.match(config, /release-config-gate7a-invalid/);
+  assert.match(config, /runaai-next-user/);
+  assert.match(config, /\/session\/user\/callback/);
 });
 
 test("a closed promoted authority accepts only its exact reviewed Gate 7A successor", () => {
@@ -43,6 +45,9 @@ test("regular sign-in uses the exact canonical session callback and an opaque se
   assert.match(server, /url\.pathname === "\/session\/callback"/);
   assert.match(server, /__Host-runa_owner_session/);
   assert.match(server, /Secure; HttpOnly; SameSite=Lax/);
+  assert.match(server, /__Host-runa_user_session/);
+  assert.match(server, /url\.pathname === "\/session\/user\/start"/);
+  assert.match(server, /url\.pathname === "\/session\/user\/callback"/);
 });
 
 test("the exact Control predecessor produces one valid canonical successor and issuer drift fails", async t => {
@@ -56,6 +61,9 @@ test("the exact Control predecessor produces one valid canonical successor and i
   assert.equal(loaded.value.publicBaseUrl, "https://runa.bridgebuildersai.com");
   assert.equal(loaded.value.gate7a.predecessorManifestDigest,
     predecessor.predecessor.manifestDigest);
+  assert.equal(loaded.value.gate7a.ordinaryClient.clientId, "runaai-next-user");
+  assert.equal(loaded.value.gate7a.ordinaryClient.redirectUri,
+    "https://runa.bridgebuildersai.com/session/user/callback");
   assert.equal(projectionStatus(predecessor, projected).releaseConfigurationDigest,
     loaded.configurationDigest);
   const drifted = structuredClone(projected);

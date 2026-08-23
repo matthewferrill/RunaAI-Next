@@ -11,7 +11,7 @@ import { SelectedCoreApplication } from "./application.mjs";
 import { assertSelectedAuthority, selectedAuthorityStatus } from "./authority.mjs";
 import { createCandidateHttpServer } from "./http-server.mjs";
 import { ARTIFACT_FILE, buildArtifactManifest, verifyReleaseArtifact } from "./artifact.mjs";
-import { KeycloakOnlineClient, OpenFgaChecker } from "./clients.mjs";
+import { KeycloakOnlineClient, MultiClientAuthenticator, OpenFgaChecker } from "./clients.mjs";
 import { loadReleaseConfig } from "./release-config.mjs";
 import { composeReadinessStatus, protectedImportCompleted } from "./composition.mjs";
 
@@ -404,6 +404,71 @@ test("Keycloak and OpenFGA clients use bounded authenticated online decisions", 
     relation: "chat_ephemeral", object: "project:runa%3Apersonal" });
   assert.doesNotMatch(JSON.stringify(identity), /PRIVATE_/);
   assert.doesNotMatch(JSON.stringify(decision), /PRIVATE_/);
+});
+
+test("HTTP ordinary login is separate from owner administration and supports logout", async t => {
+  const { application } = harness();
+  const calls = [];
+  const ordinarySessions = {
+    publicBaseUrl: "https://candidate.test",
+    async start(method) { calls.push(["start", method]); return { redirectUrl: `http://keycloak.test/${method}` }; },
+    async callback(input) { calls.push(["callback", input]); return { sessionId: "ordinary-session-id" }; },
+    async credentialForSession(value) { calls.push(["session", value]); return "ORDINARY_TOKEN"; },
+    async revoke(value) { calls.push(["revoke", value]); return { revoked: true }; },
+  };
+  const server = createCandidateHttpServer({ application, ordinarySessions,
+    runtimeStatus: async () => ({}), readinessStatus: async () => ({}),
+    dependencyHealth: async () => ({ ready: true }), staticRoot: resolve("gate6b/public") });
+  server.listen(0, "127.0.0.1");
+  await once(server, "listening");
+  t.after(() => server.close());
+  const base = `http://127.0.0.1:${server.address().port}`;
+  const password = await fetch(`${base}/session/user/start`, { redirect: "manual" });
+  assert.equal(password.headers.get("location"), "http://keycloak.test/password");
+  const passkey = await fetch(`${base}/session/user/passkey/start`, { redirect: "manual" });
+  assert.equal(passkey.headers.get("location"), "http://keycloak.test/passkey");
+  const callback = await fetch(`${base}/session/user/callback?state=ordinary-state&code=ordinary-code`,
+    { redirect: "manual" });
+  assert.equal(callback.status, 303);
+  assert.match(callback.headers.get("set-cookie"), /^__Host-runa_user_session=ordinary-session-id;/);
+  assert.match(callback.headers.get("set-cookie"), /Secure; HttpOnly; SameSite=Lax/);
+  const logout = await fetch(`${base}/session/user/logout`, { method: "POST", headers: {
+    origin: "https://candidate.test", cookie: "__Host-runa_user_session=ordinary-session-id" } });
+  assert.equal(logout.status, 200);
+  assert.match(logout.headers.get("set-cookie"), /Max-Age=0/);
+  const ambiguous = await fetch(`${base}/api/selected/answer`, { method: "POST", headers: {
+    origin: "https://candidate.test", "content-type": "application/json",
+    cookie: "__Host-runa_owner_session=owner; __Host-runa_user_session=user" },
+  body: JSON.stringify({ requestId: "ambiguous", lane: "general", threadId: "thread", message: "Hi" }) });
+  assert.equal(ambiguous.status, 400);
+  assert.equal((await ambiguous.json()).errorCode, "gate7a-browser-session-ambiguous");
+  assert.deepEqual(calls.map(call => call[0]), ["start", "start", "callback", "revoke"]);
+});
+
+test("the application accepts either exact identity client without trusting token claims locally", async () => {
+  const calls = [];
+  const composite = new MultiClientAuthenticator([
+    { async authenticate() { calls.push("owner"); throw Object.assign(new Error("wrong audience"), { code: "identity-audience-mismatch" }); } },
+    { async authenticate(token, options) { calls.push("ordinary"); return { token, options, verified: true }; } },
+  ]);
+  const result = await composite.authenticate("opaque-token", { requireOnline: true });
+  assert.deepEqual(calls, ["owner", "ordinary"]);
+  assert.equal(result.verified, true);
+  assert.equal(result.token, "opaque-token");
+  assert.equal(result.options.requireOnline, true);
+});
+
+test("multi-client authentication fails closed and preserves dependency outages", async () => {
+  const unavailable = new MultiClientAuthenticator([
+    { async authenticate() { throw Object.assign(new Error("wrong audience"), { code: "identity-audience-mismatch" }); } },
+    { async authenticate() { throw Object.assign(new Error("down"), { code: "identity-verifier-unavailable" }); } },
+  ]);
+  await assert.rejects(unavailable.authenticate("opaque"), { code: "identity-verifier-unavailable" });
+  const rejected = new MultiClientAuthenticator([
+    { async authenticate() { throw Object.assign(new Error("wrong issuer"), { code: "identity-issuer-mismatch" }); } },
+    { async authenticate() { throw Object.assign(new Error("inactive"), { code: "identity-subject-missing" }); } },
+  ]);
+  await assert.rejects(rejected.authenticate("opaque"), { code: "identity-authentication-failed" });
 });
 
 test("Control Caddy listeners are pinned to their exact interfaces", async () => {

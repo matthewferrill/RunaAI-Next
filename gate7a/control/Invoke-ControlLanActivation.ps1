@@ -398,14 +398,16 @@ try {
 
   $failureStage = 'dns'
   $createBody = [ordered]@{ name=$recordName; type='A'; content=$privateAddress; ttl='600' }
-  $createHeaders = @{} + $dnsHeaders
-  $createHeaders['Idempotency-Key'] = "runaai-next-gate7a-create-$ReleaseId"
   $dryRunBody = [ordered]@{} + $createBody
   $dryRunBody['dryRun'] = $true
+  $dryRunHeaders = @{} + $dnsHeaders
+  $dryRunHeaders['Idempotency-Key'] = "runaai-next-gate7a-dry-run-$ReleaseId"
   $dryRun = Invoke-RestMethod -Method Post -Uri "$apiBase/dns/create/$domain" `
-    -Headers $createHeaders -ContentType 'application/json' `
+    -Headers $dryRunHeaders -ContentType 'application/json' `
     -Body ($dryRunBody | ConvertTo-Json -Compress)
   if ($dryRun.status -ne 'SUCCESS') { throw 'gate7a-activation-dns-dry-run-failed' }
+  $createHeaders = @{} + $dnsHeaders
+  $createHeaders['Idempotency-Key'] = "runaai-next-gate7a-create-$ReleaseId"
   $createdDns = Invoke-RestMethod -Method Post -Uri "$apiBase/dns/create/$domain" `
     -Headers $createHeaders -ContentType 'application/json' `
     -Body ($createBody | ConvertTo-Json -Compress)

@@ -64,10 +64,18 @@ repository and never push migration work into either source repository.
   traffic. The commissioning route remains healthy. Focused Gate 7A validation is 52/52 and the full
   repository suite is 351/351. Aggregate evidence is in
   `gate7a/evidence/CONTROL-LAN-ACTIVATION-RESULTS.json`.
-- Gate 7A is not closed. Existing commissioning-origin passkeys are not canonical credentials. The next
-  interactive step is Matthew's canonical-origin passkey enrollment from Omen plus an independent
-  recovery credential, followed by ordinary session/revocation/step-up validation. A second PC, a
-  distinct non-owner user, a phone, off-LAN ingress, and certificate renewal remain separate checks.
+- Gate 7A is not closed. Canonical-origin owner passkey sign-in has completed and the protected
+  `matthew-owner` path remains passkey-only. The steward approved a separate ordinary-user model:
+  invitation-only enrollment, an individual username/password, verified-email recovery, and an
+  optional passkey for ordinary chat. Public self-registration remains disabled. The local
+  implementation uses a separate exact password-only Keycloak client, separate encrypted sessions,
+  owner-role password denial, an exact automatically reversible application successor, and short-lived
+  rollback-safe invitations. Focused Gate 7A validation is 66/66 and the full repository suite is
+  368/368. It has not yet changed the live release or identity
+  realm. Control currently has no SMTP sender, which blocks live invitation and recovery acceptance.
+  Matthew's separate personal-email account is the selected first non-owner fixture; the personal
+  address must not enter Git or retained evidence. A second PC, a phone, off-LAN ingress, certificate
+  renewal, and the finished conversational UI remain separate checks.
 - The first interactive Porkbun enrollment attempt failed closed with no credential retained. RCA: a
   clean Windows PowerShell 5.1 process had not loaded `System.Security`, so the DPAPI `ProtectedData`
   type was unavailable. A secret-free owner probe proved DPAPI and restricted-directory writes healthy.
@@ -351,7 +359,7 @@ plain-language steward experience, or governed action pathway.
 | 4 | Governed data migration, one domain at a time | Complete; accepted and merged as `2c38dd5`; legacy unchanged | Complete |
 | 5 | Operations, private transport, authentication/authorization, recovery | Complete; accepted and merged as `a986419` | Complete |
 | 6 | Selected-core production cutover and rollback window | Complete and closed; exact selected-core release is authoritative, observation green, freeze released, legacy rollback healthy | Complete |
-| 7A | Multi-device access foundation | Canonical LAN origin active and independently verified; focused 52/52 and full 351/351 green | Canonical owner/recovery passkeys, representative clients, non-owner fixture, certificate renewal, and off-LAN boundary remain |
+| 7A | Multi-device access foundation | Canonical LAN origin and owner passkey path active; separate invitation/password user model locally green at focused 66/66 and full 368/368 | SMTP, ordinary-client deployment, personal-email fixture, representative clients, certificate renewal, and off-LAN boundary remain |
 | 7B+ | Deferred UI and extensions | Not started | New baseline and separate approval per extension group |
 
 ## Bootstrap validation
@@ -402,13 +410,22 @@ now live at `https://runa.bridgebuildersai.com`; the old
 route has an ordinary trusted certificate and exposes only Caddy on TCP 443 to the Private/LocalSubnet
 boundary. Off-LAN ingress is disabled.
 
-The next operation requires the steward at Omen: enroll Matthew's first passkey under the canonical
-RP ID `runa.bridgebuildersai.com`, then enroll/verify an independent recovery credential. After those
-credentials exist, validate ordinary sign-in, bounded `SameSite=Lax` session navigation,
-logout/revocation, and governed step-up. Preserve both commissioning-origin credentials until the new
-canonical credentials pass. This release still does not include a finished conversational/steward UI.
+The next bounded operation is to merge the reviewed ordinary-user implementation, configure the
+separate `runaai-next-user` password-only Keycloak client, and deploy an immutable successor while
+leaving `matthew-owner` and the running selected-core data authority unchanged. Automatic rollback
+must restore the exact current application release and remove only the newly created ordinary client,
+flow, and generated client-secret file.
 
-After owner acceptance, continue Gate 7A with a second PC, a distinct non-owner user, a phone, and a
+Live acceptance then requires an SMTP sender for Keycloak. The SMTP credential must be entered under
+Matthew's Control identity, retained only as DPAPI CurrentUser material, tested without printing any
+private value, and rolled back if realm verification fails. After that, issue one short-lived
+invitation to Matthew's separate personal email, let the invitee choose a username/password and verify
+the address, and validate from Omen: ordinary login, bounded `SameSite=Lax` navigation,
+logout/revocation, password recovery, denial of owner/protected data and actions, and unchanged owner
+passkey administration. Do not put the personal address, password, invitation token, or SMTP secret in
+Git, evidence, or chat.
+
+After the isolated personal account passes, continue Gate 7A with a second PC, a phone, and a
 separately reviewed off-LAN boundary. Certificate renewal remains explicit because the Porkbun
 credential is DPAPI CurrentUser-bound. E3, E4/device-vault recovery, the separate approved-knowledge
 vector index, Qwen3.6 deliberate review, the existing live BGE endpoint, broader legacy surfaces, and

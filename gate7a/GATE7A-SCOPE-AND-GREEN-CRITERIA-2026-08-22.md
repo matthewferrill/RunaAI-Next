@@ -1,6 +1,6 @@
 # Gate 7A multi-device access scope and green criteria
 
-Status: approved corrective access foundation; contract frozen before implementation, 2026-08-22
+Status: approved corrective access foundation; identity section amended by the steward, 2026-08-23
 
 ## Requirement authority
 
@@ -69,13 +69,19 @@ authorized PC / phone browser
 ## Identity, passkey, and session boundary
 
 - Public self-registration is disabled. The owner creates a single-use, expiring invitation for each
-  new person or credential enrollment.
+  new person. The invitation is delivered to a verified email address and expires after ten minutes.
+- The invited person chooses an individual username and password in Keycloak and can use that ordinary
+  credential from any supported browser. Verified email is the password-reset recovery boundary.
+- An ordinary user may add and use a passkey, but a passkey is not required for ordinary chat or
+  research. Password sessions and passkey sessions remain distinguishable identity evidence.
+- The protected `matthew-owner` identity is not the ordinary test identity and cannot use the ordinary
+  password client. Owner and administrator access remains user-verified-passkey-only.
 - Each person may hold multiple passkeys. Platform-bound, synced, hardware, and cross-device passkeys
   are accepted only when Keycloak reports a discoverable credential with user verification.
 - Matthew's normal first credential is enrolled from Omen after the canonical origin exists. At least
   one independent recovery credential must not depend on Omen.
-- Using an unregistered PC may rely on a phone/hardware cross-device passkey; it must not require
-  copying a private key or sharing an account.
+- Using an unregistered PC may use the person's username/password or a phone/hardware cross-device
+  passkey; it must not require copying a private key or sharing an account.
 - Ordinary chat uses a bounded authenticated session. Role changes, lesson approval, recovery,
   credential management, security-policy changes, and governed effects require a fresh passkey
   step-up under the existing authority rules.
@@ -118,7 +124,8 @@ The sealed machine-readable matrix is `fixtures/client-matrix.json`. Every case 
 
 1. standard browser HTTPS succeeds without a warning or private-root installation;
 2. neither navigation nor OIDC redirects expose `localhost`, loopback, a raw IP, or port 9762;
-3. the expected individual principal signs in with a user-verified passkey;
+3. an ordinary household principal signs in with a username/password while owner administration uses
+   a user-verified passkey;
 4. the session survives ordinary navigation and expires/revokes correctly;
 5. project/participant scope is enforced by OpenFGA before protected application work;
 6. logout and credential revocation invalidate the intended sessions without affecting another user;
@@ -139,9 +146,10 @@ The sealed machine-readable matrix is `fixtures/client-matrix.json`. Every case 
 
 - The canonical hostname and certificate method are documented, steward-controlled, renewable, and
   recoverable without exposing Control administrative services.
-- Omen and a second representative device complete passkey sign-in without Control console access.
+- Omen and a second representative device complete ordinary username/password sign-in without Control
+  console access; optional passkey sign-in remains available.
 - A distinct non-owner user proves separate identity, project scope, session, and revocation.
-- A phone completes the same-origin passkey flow without a client certificate or private CA.
+- A phone completes the same-origin ordinary sign-in flow without a client certificate or private CA.
 - One off-LAN PC/phone flow passes through the reviewed remote boundary without changing RP ID.
 - Loss of ingress, Keycloak, OpenFGA, PostgreSQL, or Home fails visibly and does not grant authority.
 - Existing selected-core counts/digests, backups, authority generation, and legacy rollback health remain
@@ -158,7 +166,9 @@ operator path. Do not reverse-migrate protected data, delete the Gate 6 realm, o
 1. The steward-controlled permanent hostname.
 2. The DNS provider and certificate issuance/renewal method.
 3. The off-LAN ingress choice and its privacy/cost disposition.
-4. The first non-owner participant and project-scope acceptance fixture.
+4. A working Keycloak SMTP sender for invitation delivery, verified-email confirmation, and password
+   recovery.
+5. The first non-owner participant and project-scope acceptance fixture.
 
 No domain, DNS, certificate, edge-provider, firewall, credential, or production change is authorized
 merely because the Gate 7A synthetic contract is implemented.

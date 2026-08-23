@@ -1,5 +1,5 @@
 {
-  "schemaVersion": "runa2-gate7a-client-matrix/v1",
+  "schemaVersion": "runa2-gate7a-client-matrix/v2",
   "cases": [
     {
       "id": "owner-omen-lan",
@@ -7,15 +7,17 @@
       "clientClass": "windows-pc",
       "principalClass": "primary-owner",
       "authenticator": "platform-passkey",
-      "freshStepUpRequired": true
+      "optionalPasskeySupported": true,
+      "protectedActionPasskeyRequired": true
     },
     {
       "id": "member-windows-lan",
       "network": "lan",
       "clientClass": "windows-pc",
       "principalClass": "household-member",
-      "authenticator": "platform-or-synced-passkey",
-      "freshStepUpRequired": true
+      "authenticator": "username-password",
+      "optionalPasskeySupported": true,
+      "protectedActionPasskeyRequired": true
     },
     {
       "id": "owner-phone-lan",
@@ -23,7 +25,8 @@
       "clientClass": "phone",
       "principalClass": "primary-owner",
       "authenticator": "platform-or-synced-passkey",
-      "freshStepUpRequired": true
+      "optionalPasskeySupported": true,
+      "protectedActionPasskeyRequired": true
     },
     {
       "id": "owner-pc-off-lan",
@@ -31,22 +34,25 @@
       "clientClass": "windows-pc",
       "principalClass": "primary-owner",
       "authenticator": "platform-or-cross-device-passkey",
-      "freshStepUpRequired": true
+      "optionalPasskeySupported": true,
+      "protectedActionPasskeyRequired": true
     },
     {
       "id": "member-phone-off-lan",
       "network": "off-lan",
       "clientClass": "phone",
       "principalClass": "household-member",
-      "authenticator": "platform-or-synced-passkey",
-      "freshStepUpRequired": true
+      "authenticator": "username-password",
+      "optionalPasskeySupported": true,
+      "protectedActionPasskeyRequired": true
     }
   ],
   "requiredAssertions": [
     "ordinary-browser-trust",
     "canonical-origin-only",
     "external-issuer-only",
-    "user-verified-passkey",
+    "password-ordinary-session",
+    "passkey-protected-step-up",
     "individual-principal",
     "participant-project-scope",
     "opaque-revocable-session",

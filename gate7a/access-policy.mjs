@@ -42,6 +42,9 @@ const policySchema = z.object({
     crossDevicePasskeysAllowed: z.boolean(),
     ownerMinimumCredentials: z.number().int().min(1).max(16),
     independentRecoveryRequired: z.boolean(),
+    ordinaryUseOptional: z.boolean(),
+    protectedActionStepUpRequired: z.boolean(),
+    ownerAdministrativeAuthentication: z.literal("user-verified-passkey"),
   }).strict(),
   accounts: z.object({
     individualPrincipalsRequired: z.boolean(),
@@ -49,6 +52,11 @@ const policySchema = z.object({
     invitationRequired: z.boolean(),
     invitationSingleUse: z.boolean(),
     invitationMaximumMinutes: z.number().int().min(1).max(60),
+    usernamePasswordEnabled: z.boolean(),
+    passwordSetByUser: z.boolean(),
+    verifiedEmailRequired: z.boolean(),
+    verifiedEmailPasswordRecovery: z.boolean(),
+    ownerOrdinaryTestAccountSeparated: z.boolean(),
   }).strict(),
   sessions: z.object({
     storage: z.enum(["encrypted-postgresql", "memory", "browser"]),
@@ -98,11 +106,13 @@ const matrixCase = z.object({
   clientClass: z.enum(["windows-pc", "phone"]),
   principalClass: z.enum(["primary-owner", "household-member"]),
   authenticator: z.enum([
+    "username-password",
     "platform-passkey",
     "platform-or-synced-passkey",
     "platform-or-cross-device-passkey",
   ]),
-  freshStepUpRequired: z.boolean(),
+  optionalPasskeySupported: z.boolean(),
+  protectedActionPasskeyRequired: z.boolean(),
 }).strict();
 
 const matrixSchema = z.object({
@@ -160,14 +170,19 @@ function assertPolicy(parsed) {
   }
   if (parsed.keycloak.publicSelfRegistration || !parsed.accounts.individualPrincipalsRequired
       || parsed.accounts.sharedAccountsAllowed || !parsed.accounts.invitationRequired
-      || !parsed.accounts.invitationSingleUse || parsed.accounts.invitationMaximumMinutes > 10) {
+      || !parsed.accounts.invitationSingleUse || parsed.accounts.invitationMaximumMinutes > 10
+      || !parsed.accounts.usernamePasswordEnabled || !parsed.accounts.passwordSetByUser
+      || !parsed.accounts.verifiedEmailRequired || !parsed.accounts.verifiedEmailPasswordRecovery
+      || !parsed.accounts.ownerOrdinaryTestAccountSeparated) {
     throw coded("gate7a-account-boundary-invalid", "Accounts must be individual and invitation-gated.");
   }
   if (parsed.webauthn.userVerification !== "required"
       || parsed.webauthn.discoverableCredential !== "required"
       || !parsed.webauthn.platformPasskeysAllowed || !parsed.webauthn.syncedPasskeysAllowed
       || !parsed.webauthn.crossDevicePasskeysAllowed || parsed.webauthn.ownerMinimumCredentials < 2
-      || !parsed.webauthn.independentRecoveryRequired) {
+      || !parsed.webauthn.independentRecoveryRequired || !parsed.webauthn.ordinaryUseOptional
+      || !parsed.webauthn.protectedActionStepUpRequired
+      || parsed.webauthn.ownerAdministrativeAuthentication !== "user-verified-passkey") {
     throw coded("gate7a-passkey-boundary-invalid", "The multi-device passkey and recovery policy is incomplete.");
   }
   if (parsed.sessions.storage !== "encrypted-postgresql" || !parsed.sessions.onlineRevocationRequired
@@ -212,7 +227,11 @@ export function validateClientMatrix(input) {
   const ids = parsed.cases.map(item => item.id);
   if (new Set(ids).size !== ids.length || !exact(ids, GATE7A_CLIENT_CASES)
       || !exact(parsed.requiredAssertions, GATE7A_REQUIRED_ASSERTIONS)
-      || parsed.cases.some(item => !item.freshStepUpRequired)) {
+      || parsed.cases.some(item => !item.optionalPasskeySupported || !item.protectedActionPasskeyRequired)
+      || parsed.cases.filter(item => item.principalClass === "household-member")
+        .some(item => item.authenticator !== "username-password")
+      || parsed.cases.filter(item => item.principalClass === "primary-owner")
+        .some(item => item.authenticator === "username-password")) {
     throw coded("gate7a-client-matrix-invalid", "The representative client matrix is incomplete or changed.");
   }
   return deepFreeze(parsed);
@@ -238,6 +257,11 @@ export function createClientAccessReadiness(policyInput, matrixInput) {
     ordinaryBrowserTrust: true,
     privateCaRequired: false,
     publicSelfRegistration: false,
+    ordinaryUsernamePasswordEnabled: true,
+    verifiedEmailPasswordRecovery: true,
+    ordinaryPasskeyOptional: true,
+    protectedActionPasskeyRequired: true,
+    ownerOrdinaryTestAccountSeparated: true,
     individualPrincipalsRequired: true,
     independentRecoveryRequired: true,
     backendLoopbackOnly: true,

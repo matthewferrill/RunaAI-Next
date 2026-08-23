@@ -65,8 +65,27 @@ full repository suite passes 351/351.
 deterministic Control launchers so the staged release path and Keycloak arguments are reviewed and
 hash-pinned rather than composed during the live transaction.
 
-Canonical LAN activation completes only Gate 7A-2's ingress foundation. Matthew's first
-canonical-origin passkey must now be enrolled from Omen, followed by an independent recovery
-credential and the representative client/session checks. Existing commissioning-origin credentials
-remain intact. Off-LAN ingress, the first non-owner fixture, and certificate-renewal automation remain
-separate decisions.
+Canonical LAN activation completed Gate 7A-2's ingress foundation. The owner subsequently completed
+canonical-origin passkey sign-in without weakening the protected owner client.
+
+The steward amended the ordinary-user model on 2026-08-23. `matthew-owner` remains a separate,
+passkey-only administrative identity. Invited household and external users instead choose an
+individual username and password, may add a passkey optionally, and use verified email for password
+recovery. Public self-registration remains disabled. The frozen amendment and rollback boundary are
+in `GATE7A-USER-ACCESS-MODEL-DECISION-2026-08-23.md`; the deterministic v2 result is retained in
+`evidence/USER-ACCESS-MODEL-SYNTHETIC-RESULTS.json`.
+
+The implementation uses a separate password-only `runaai-next-user` Keycloak client, a separate
+encrypted ordinary-session store and cookie, and owner-role denial on the password path. Owner-bound
+Control operators create or remove only that client and flow, deploy an exact immutable application
+successor with exact predecessor rollback, enroll/apply SMTP configuration with DPAPI CurrentUser
+protection, and issue one short-lived invitation with rollback of the newly created user, principal,
+and isolated chat relation. The focused Gate 7A suite passes 66/66 and the full repository suite passes
+368/368. No live identity, SMTP, application release, or user was changed by this repository work.
+
+Control's Keycloak currently has no SMTP sender configured, so the first distinct ordinary-user
+invitation and verified-email password recovery cannot yet be accepted live. The selected test is a
+separate personal-email account for Matthew; its only initial authorization is the isolated personal
+chat relation. The personal email itself must be supplied only to the hidden/owner-bound invitation
+operator and must not enter Git, retained evidence, or chat. Off-LAN ingress, a second PC, a phone,
+certificate-renewal automation, and the finished conversational UI remain subsequent checks.

@@ -38,7 +38,7 @@ test("readiness is deterministic, privacy-safe, and changes no production state"
   assert.equal(first.productionChanged, false);
   assert.equal(first.protectedStoresOpened, false);
   assert.equal(first.privateValuesIncluded, false);
-  assert.doesNotMatch(JSON.stringify(first), /password|privateKey|credentialId|cookieValue|token/i);
+  assert.doesNotMatch(JSON.stringify(first), /"(password|privateKey|credentialId|cookieValue|token)"\s*:/i);
 });
 
 test("synthetic result is bound to exact policy and matrix digests", () => {
@@ -112,6 +112,14 @@ test("public registration, shared accounts, and reusable invitations are rejecte
   rejects(() => validateClientAccessPolicy(invitation), "gate7a-account-boundary-invalid");
 });
 
+test("ordinary accounts require user-set passwords, verified email recovery, and owner separation", () => {
+  for (const field of ["usernamePasswordEnabled", "passwordSetByUser", "verifiedEmailRequired",
+    "verifiedEmailPasswordRecovery", "ownerOrdinaryTestAccountSeparated"]) {
+    const value = clone(policy); value.accounts[field] = false;
+    rejects(() => validateClientAccessPolicy(value), "gate7a-account-boundary-invalid");
+  }
+});
+
 test("passkeys require verified discoverable credentials and independent recovery", () => {
   const verification = clone(policy); verification.webauthn.userVerification = "preferred";
   rejects(() => validateClientAccessPolicy(verification), "gate7a-passkey-boundary-invalid");
@@ -119,6 +127,10 @@ test("passkeys require verified discoverable credentials and independent recover
   rejects(() => validateClientAccessPolicy(recovery), "gate7a-passkey-boundary-invalid");
   const count = clone(policy); count.webauthn.ownerMinimumCredentials = 1;
   rejects(() => validateClientAccessPolicy(count), "gate7a-passkey-boundary-invalid");
+  const optional = clone(policy); optional.webauthn.ordinaryUseOptional = false;
+  rejects(() => validateClientAccessPolicy(optional), "gate7a-passkey-boundary-invalid");
+  const protectedAction = clone(policy); protectedAction.webauthn.protectedActionStepUpRequired = false;
+  rejects(() => validateClientAccessPolicy(protectedAction), "gate7a-passkey-boundary-invalid");
 });
 
 test("platform, synced, and cross-device passkeys remain available for the client matrix", () => {
@@ -182,6 +194,8 @@ test("the representative matrix contains five exact individual client cases", ()
   assert.equal(new Set(value.cases.map(item => item.principalClass)).size, 2);
   assert.equal(new Set(value.cases.map(item => item.network)).size, 2);
   assert.equal(new Set(value.cases.map(item => item.clientClass)).size, 2);
+  assert.equal(value.cases.filter(item => item.principalClass === "household-member")
+    .every(item => item.authenticator === "username-password"), true);
 });
 
 test("missing, duplicate, or changed client cases fail closed", () => {
@@ -189,8 +203,15 @@ test("missing, duplicate, or changed client cases fail closed", () => {
   rejects(() => validateClientMatrix(missing), "gate7a-client-matrix-invalid");
   const duplicate = clone(matrix); duplicate.cases[4].id = duplicate.cases[0].id;
   rejects(() => validateClientMatrix(duplicate), "gate7a-client-matrix-invalid");
-  const changed = clone(matrix); changed.cases[0].freshStepUpRequired = false;
+  const changed = clone(matrix); changed.cases[0].protectedActionPasskeyRequired = false;
   rejects(() => validateClientMatrix(changed), "gate7a-client-matrix-invalid");
+});
+
+test("ordinary member login is password-based while owner administration remains passkey-only", () => {
+  const member = clone(matrix); member.cases.find(item => item.principalClass === "household-member").authenticator = "platform-passkey";
+  rejects(() => validateClientMatrix(member), "gate7a-client-matrix-invalid");
+  const owner = clone(matrix); owner.cases.find(item => item.principalClass === "primary-owner").authenticator = "username-password";
+  rejects(() => validateClientMatrix(owner), "gate7a-client-matrix-invalid");
 });
 
 test("missing matrix assertions fail closed", () => {

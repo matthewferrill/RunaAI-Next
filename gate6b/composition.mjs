@@ -15,7 +15,7 @@ import { createInitialCutoverState } from "../gate6/cutover.mjs";
 import { assertReleaseManifest, releaseRuntimeStatus } from "../gate6/release.mjs";
 import { SelectedCoreApplication } from "./application.mjs";
 import { DerivedActorAuthenticator, KeycloakIntrospector, KeycloakOnlineClient,
-  KeycloakVerifier, OpenFgaChecker } from "./clients.mjs";
+  KeycloakVerifier, MultiClientAuthenticator, OpenFgaChecker } from "./clients.mjs";
 import { PostgresSelectedActionStore } from "./adapters/postgres-action.mjs";
 import { PostgresRequestCoordinator, PostgresSelectedContinuityStore,
   PostgresWorkspaceStore } from "./adapters/postgres-continuity.mjs";
@@ -25,6 +25,8 @@ import { verifyReleaseArtifact } from "./artifact.mjs";
 import { BrowserOwnerCeremonyService } from "../gate6c/browser-ceremony.mjs";
 import { PostgresBrowserCeremonyStore, PostgresPendingCapabilityRevoker } from "../gate6c/adapters/postgres-browser.mjs";
 import { GATE6C_BINDING_VERSION } from "../gate6c/formats.mjs";
+import { OrdinaryBrowserSessionService } from "../gate7a/ordinary-session.mjs";
+import { PostgresOrdinarySessionStore } from "../gate7a/postgres-ordinary-session.mjs";
 
 const coded = (code, message) => Object.assign(new Error(message), { code });
 
@@ -81,7 +83,7 @@ export async function createProductionComposition({ loadedConfig, releaseRoot })
   const artifact = await verifyReleaseArtifact(releaseRoot, manifest.artifactDigest);
 
   const [connectionString, coreEncryption, coreHmac, learningEncryption, learningHmac,
-    telemetryHmac, keycloakCredential, openfgaCredential] = await Promise.all([
+    telemetryHmac, keycloakCredential, ordinaryKeycloakCredential, openfgaCredential] = await Promise.all([
       readSecretReference(config.databaseUrlRef, loadedConfig.directory),
       readSecretReference(config.keyRefs.coreEncryption, loadedConfig.directory),
       readSecretReference(config.keyRefs.coreHmac, loadedConfig.directory),
@@ -89,6 +91,9 @@ export async function createProductionComposition({ loadedConfig, releaseRoot })
       readSecretReference(config.keyRefs.learningHmac, loadedConfig.directory),
       readSecretReference(config.keyRefs.telemetryHmac, loadedConfig.directory),
       readSecretReference(config.keycloak.clientCredentialRef, loadedConfig.directory),
+      config.gate7a?.ordinaryClient
+        ? readSecretReference(config.gate7a.ordinaryClient.clientCredentialRef, loadedConfig.directory)
+        : Promise.resolve(null),
       readSecretReference(config.openfga.credentialRef, loadedConfig.directory),
     ]);
   const coreCipher = createEnvelopeCipher({ encryptionKey: decodeKey(coreEncryption, "core encryption key"),
@@ -135,7 +140,24 @@ export async function createProductionComposition({ loadedConfig, releaseRoot })
   const identityService = new Gate5IdentityService({ verifier,
     introspector: new KeycloakIntrospector(keycloakClient), principalStore,
     issuer: config.keycloak.issuer, audience: config.keycloak.clientId, pseudonymKey: telemetryKey });
-  const authenticator = new DerivedActorAuthenticator({ identityService, verifier, principalStore });
+  const ownerAuthenticator = new DerivedActorAuthenticator({ identityService, verifier, principalStore });
+  let ordinaryKeycloakClient = null;
+  let authenticator = ownerAuthenticator;
+  if (config.gate7a?.ordinaryClient) {
+    ordinaryKeycloakClient = new KeycloakOnlineClient({ issuer: config.keycloak.issuer,
+      backchannelIssuer: config.keycloak.backchannelIssuer,
+      clientId: config.gate7a.ordinaryClient.clientId,
+      clientCredential: ordinaryKeycloakCredential,
+      timeoutMs: config.limits.upstreamDeadlineMs });
+    const ordinaryVerifier = new KeycloakVerifier({ client: ordinaryKeycloakClient, principalStore });
+    const ordinaryIdentity = new Gate5IdentityService({ verifier: ordinaryVerifier,
+      introspector: new KeycloakIntrospector(ordinaryKeycloakClient), principalStore,
+      issuer: config.keycloak.issuer, audience: config.gate7a.ordinaryClient.clientId,
+      pseudonymKey: telemetryKey });
+    authenticator = new MultiClientAuthenticator([ownerAuthenticator,
+      new DerivedActorAuthenticator({ identityService: ordinaryIdentity,
+        verifier: ordinaryVerifier, principalStore })]);
+  }
   const authorizer = new Gate5AuthorizationService({ checker: new OpenFgaChecker({
     baseUrl: config.openfga.baseUrl, storeId: config.openfga.storeId,
     modelId: config.openfga.modelId, credential: openfgaCredential,
@@ -169,6 +191,7 @@ export async function createProductionComposition({ loadedConfig, releaseRoot })
     authenticator, authorizer, requestCoordinator: new PostgresRequestCoordinator({ pool }) });
 
   let browserCeremony = null;
+  let ordinarySessions = null;
   if (config.gate6c?.enabled === true) {
     const binding = { schemaVersion: GATE6C_BINDING_VERSION, cutoverId: config.cutoverId,
       releaseId: manifest.releaseId, releaseCommit: manifest.commit,
@@ -183,6 +206,16 @@ export async function createProductionComposition({ loadedConfig, releaseRoot })
       capabilityRevoker: new PostgresPendingCapabilityRevoker({ pool }),
     });
     await browserCeremony.initialize();
+  }
+  if (config.gate7a?.ordinaryClient && ordinaryKeycloakClient) {
+    ordinarySessions = new OrdinaryBrowserSessionService({
+      store: new PostgresOrdinarySessionStore({ pool, cipher: coreCipher }),
+      passwordOidc: ordinaryKeycloakClient, passkeyOidc: keycloakClient, principalStore,
+      bindingDigest: manifest.manifestDigest, publicBaseUrl: config.publicBaseUrl,
+      passwordClientId: config.gate7a.ordinaryClient.clientId,
+      passkeyClientId: config.keycloak.clientId,
+    });
+    await ordinarySessions.initialize();
   }
 
   const runtimeStatus = async () => {
@@ -208,7 +241,8 @@ export async function createProductionComposition({ loadedConfig, releaseRoot })
     configuration: safeConfigurationStatus(loadedConfig, telemetryKey), artifact, browserCeremony,
     protectedImportStatus });
 
-  return Object.freeze({ application, browserCeremony, runtimeStatus, readinessStatus, dependencyHealth,
+  return Object.freeze({ application, browserCeremony, ordinarySessions,
+    runtimeStatus, readinessStatus, dependencyHealth,
     releaseManifest: manifest,
     async close() { await pool.end(); } });
 }

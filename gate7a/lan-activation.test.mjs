@@ -73,6 +73,8 @@ test("rollback restores exact files and identity, then removes only created ingr
   }
   assert.match(script, /if \(\$firewallCreated\)/);
   assert.match(script, /if \(\$dnsCreated\)/);
+  assert.match(script, /Move-Item -LiteralPath \$nextManifestPath -Destination \$failedManifestPath/);
+  assert.match(script, /failed-successor-manifest\.json/);
   assert.match(script, /identity-restore-reconciliation-failed/);
   assert.match(script, /\$liveChangeStarted/);
   assert.match(script, /rolledBack/);

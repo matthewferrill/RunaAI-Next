@@ -106,6 +106,14 @@ test("a verified immutable release can be reused by a fresh bounded attempt", ()
   }
 });
 
+test("browser-route reconciliation fails with privacy-safe component-specific codes", () => {
+  for (const code of ["canonical-liveness-invalid", "commissioning-liveness-invalid",
+    "browser-issuer-invalid", "session-start-status-invalid", "session-start-location-invalid"]) {
+    assert.match(script, new RegExp(`gate7a-activation-${code}`));
+  }
+  assert.doesNotMatch(script, /throw 'gate7a-activation-browser-route-invalid'/);
+});
+
 test("SameSite Lax is explicit without weakening the other cookie attributes", () => {
   assert.match(script, /gate6b\\http-server\.mjs/);
   assert.match(script, /Secure; HttpOnly; SameSite=Lax/);

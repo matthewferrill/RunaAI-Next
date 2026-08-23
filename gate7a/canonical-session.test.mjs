@@ -42,7 +42,7 @@ test("regular sign-in uses the exact canonical session callback and an opaque se
   assert.match(server, /url\.pathname === "\/session\/start"/);
   assert.match(server, /url\.pathname === "\/session\/callback"/);
   assert.match(server, /__Host-runa_owner_session/);
-  assert.match(server, /Secure; HttpOnly; SameSite=Strict/);
+  assert.match(server, /Secure; HttpOnly; SameSite=Lax/);
 });
 
 test("the exact Control predecessor produces one valid canonical successor and issuer drift fails", async t => {

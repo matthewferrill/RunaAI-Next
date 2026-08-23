@@ -8,7 +8,8 @@ test("live activation is exact-owner, exact-predecessor, and exact-successor pin
   assert.match(script, /RUNA-CONTROL\\Matthew/);
   assert.match(script, /runaai-next-gate6d-promotion-2026-08-22-a886754/);
   assert.match(script, /93f2c9b3ddecec5f552308f973abd10005b9abd47e822baed7dc1427c8fc7b3b/);
-  assert.match(script, /4167a8268295f8e973486e197845a2c1d3ac3efb0c5af632ae704d371f0f7343/);
+  assert.doesNotMatch(script, /4167a8268295f8e973486e197845a2c1d3ac3efb0c5af632ae704d371f0f7343/);
+  assert.match(script, /candidate\.gate7a\.predecessorManifestDigest -ne \$priorRuntimeManifestDigest/);
   assert.match(script, /ExpectedCommit/);
   assert.match(script, /ExpectedArtifactDigest/);
   assert.match(script, /ExpectedArtifactFileCount/);
@@ -65,6 +66,7 @@ test("activation retains the commissioning route and restarts only browser front
 
 test("rollback restores exact files and identity, then removes only created ingress", () => {
   assert.match(script, /function Restore-Predecessor/);
+  assert.match(script, /secrets\\gate7a-lan-rollback-\$ReleaseId/);
   for (const file of ["candidate.json", "release-manifest.json", "Caddyfile",
     "Run-Application.ps1", "Run-Keycloak.ps1", "keycloak-realm.json", "keycloak-client.json"]) {
     assert.match(script, new RegExp(file.replaceAll(".", "\\.")));

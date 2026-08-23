@@ -1,4 +1,5 @@
 import { createHash } from "node:crypto";
+import { canonicalJson } from "../gate4/canonical.mjs";
 
 export const canonicalOrigin = "https://runa.bridgebuildersai.com";
 export const relyingPartyId = "runa.bridgebuildersai.com";
@@ -123,6 +124,7 @@ export function projectionStatus(predecessor, config) {
     backchannelIssuer,
     callbackUri,
     predecessorManifestDigest: predecessor.predecessor.manifestDigest,
+    releaseConfigurationDigest: sha256(canonicalJson(config)),
     caddyConfigurationDigest: config.services.caddy.configurationDigest,
     keycloakConfigurationDigest: config.services.keycloak.configurationDigest,
     dnsChanged: false,

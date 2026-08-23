@@ -4,7 +4,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import test from "node:test";
 import { loadReleaseConfig } from "../gate6b/release-config.mjs";
-import { createControlLaunchers, createLanReleaseConfig } from "./lan-release.mjs";
+import { createControlLaunchers, createLanReleaseConfig, projectionStatus } from "./lan-release.mjs";
 
 const read = path => readFile(new URL(path, import.meta.url), "utf8");
 const clients = await read("../gate6b/clients.mjs");
@@ -56,6 +56,8 @@ test("the exact Control predecessor produces one valid canonical successor and i
   assert.equal(loaded.value.publicBaseUrl, "https://runa.bridgebuildersai.com");
   assert.equal(loaded.value.gate7a.predecessorManifestDigest,
     predecessor.predecessor.manifestDigest);
+  assert.equal(projectionStatus(predecessor, projected).releaseConfigurationDigest,
+    loaded.configurationDigest);
   const drifted = structuredClone(projected);
   drifted.keycloak.issuer = "https://wrong.example/auth/realms/runaai-next";
   await writeFile(path, JSON.stringify(drifted));

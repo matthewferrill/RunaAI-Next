@@ -48,9 +48,9 @@
     "limits": { "maxRequestBytes": 262144, "totalDeadlineMs": 30000, "upstreamDeadlineMs": 10000 }
   },
   "predecessor": {
-    "releaseId": "runaai-next-selected-core-2026-08-21-77f3017",
-    "commit": "77f3017d10f4e4670ad551b3d000cc2569c1dfdb",
-    "manifestDigest": "4167a8268295f8e973486e197845a2c1d3ac3efb0c5af632ae704d371f0f7343"
+    "releaseId": "runaai-next-gate6d-promotion-2026-08-22-a886754",
+    "commit": "a8867543f914cabd997f161950016723355138d2",
+    "manifestDigest": "93f2c9b3ddecec5f552308f973abd10005b9abd47e822baed7dc1427c8fc7b3b"
   },
   "privateValuesIncluded": false
 }

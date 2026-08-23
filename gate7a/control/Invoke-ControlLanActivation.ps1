@@ -29,7 +29,6 @@ $priorReleaseId = 'runaai-next-gate6d-promotion-2026-08-22-a886754'
 $priorCommit = 'a8867543f914cabd997f161950016723355138d2'
 $priorArtifactDigest = '2e1f909941f3021530c83c3d288953f0d3144b8603eb006f8502b32022905235'
 $priorRuntimeManifestDigest = '93f2c9b3ddecec5f552308f973abd10005b9abd47e822baed7dc1427c8fc7b3b'
-$cutoverPredecessorManifestDigest = '4167a8268295f8e973486e197845a2c1d3ac3efb0c5af632ae704d371f0f7343'
 $apiBase = 'https://api.porkbun.com/api/json/v3'
 
 $apiKey = $null
@@ -254,7 +253,7 @@ try {
   $caddyPath = Join-Path $Root 'config\Caddyfile'
   $applicationLauncher = Join-Path $Root 'control\Run-Application.ps1'
   $keycloakLauncher = Join-Path $Root 'control\Run-Keycloak.ps1'
-  $rollbackRoot = Join-Path $Root 'secrets\gate7a-lan-rollback'
+  $rollbackRoot = Join-Path $Root "secrets\gate7a-lan-rollback-$ReleaseId"
 
   $failureStage = 'preflight'
   $pins = [ordered]@{
@@ -306,7 +305,7 @@ try {
       $candidate.keycloak.backchannelIssuer -ne $backchannelIssuer -or
       $candidate.gate7a.enabled -ne $true -or
       $candidate.gate7a.relyingPartyId -ne $canonicalHost -or
-      $candidate.gate7a.predecessorManifestDigest -ne $cutoverPredecessorManifestDigest -or
+      $candidate.gate7a.predecessorManifestDigest -ne $priorRuntimeManifestDigest -or
       $candidate.releaseManifestPath -ne 'gate7a-release.json' -or
       $manifest.releaseId -ne $ReleaseId -or $manifest.commit -ne $ExpectedCommit -or
       $manifest.artifactDigest -ne $ExpectedArtifactDigest) {

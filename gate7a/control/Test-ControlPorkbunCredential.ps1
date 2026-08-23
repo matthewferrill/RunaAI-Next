@@ -19,6 +19,7 @@ try {
     throw 'gate7a-porkbun-owner-context-required'
   }
   if ($Domain -ne 'bridgebuildersai.com') { throw 'gate7a-porkbun-domain-invalid' }
+  Add-Type -AssemblyName System.Security
   $path = Join-Path $Root 'secrets\porkbun-api.dpapi'
   if (-not (Test-Path -LiteralPath $path -PathType Leaf)) {
     throw 'gate7a-porkbun-credential-missing'

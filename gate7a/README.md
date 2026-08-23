@@ -35,5 +35,5 @@ non-secret readiness output is retained in `evidence/HOSTNAME-DECISION-RESULTS.j
 `GATE7A-PORKBUN-CREDENTIAL-PREP-2026-08-22.md` describes the Control-local secret enrollment and
 read-only API preflight prepared for the next interactive step. The scripts accept credentials only
 through hidden prompts under Matthew's Control identity, retain them only as DPAPI CurrentUser data,
-and cannot change DNS or open the certificate bundle. The current focused Gate 7A suite passes 31/31
-and the full repository suite passes 329/329.
+and cannot change DNS or open the certificate bundle. The current focused Gate 7A suite passes 32/32
+and the full repository suite passes 330/330.

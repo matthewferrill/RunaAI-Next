@@ -14,6 +14,7 @@ $apiKey = $null
 $secretKey = $null
 $apiPointer = [IntPtr]::Zero
 $secretPointer = [IntPtr]::Zero
+$failureStage = 'initialization'
 
 function Clear-Bytes([byte[]]$Value) {
   if ($null -ne $Value) { [Array]::Clear($Value, 0, $Value.Length) }
@@ -26,6 +27,9 @@ try {
   }
   if ($Domain -ne 'bridgebuildersai.com') { throw 'gate7a-porkbun-domain-invalid' }
 
+  $failureStage = 'assembly-load'
+  Add-Type -AssemblyName System.Security
+
   $secrets = Join-Path $Root 'secrets'
   if (-not (Test-Path -LiteralPath $secrets -PathType Container)) {
     throw 'gate7a-porkbun-secrets-root-missing'
@@ -33,6 +37,7 @@ try {
   $target = Join-Path $secrets 'porkbun-api.dpapi'
   if (Test-Path -LiteralPath $target) { throw 'gate7a-porkbun-credential-already-enrolled' }
 
+  $failureStage = 'interactive-input'
   $apiSecure = Read-Host 'Porkbun API key' -AsSecureString
   $secretSecure = Read-Host 'Porkbun secret API key' -AsSecureString
   $apiPointer = [Runtime.InteropServices.Marshal]::SecureStringToBSTR($apiSecure)
@@ -43,6 +48,7 @@ try {
     throw 'gate7a-porkbun-credential-format-invalid'
   }
 
+  $failureStage = 'dpapi-protection'
   $payload = [ordered]@{
     schemaVersion = 'runa2-gate7a-porkbun-credential/v1'
     domain = $Domain
@@ -54,12 +60,14 @@ try {
   $protectedBytes = [Security.Cryptography.ProtectedData]::Protect(
     $clearBytes, $entropy, [Security.Cryptography.DataProtectionScope]::CurrentUser)
 
+  $failureStage = 'retention'
   $temporary = "$target.new-$([Guid]::NewGuid().ToString('N'))"
   [IO.File]::WriteAllBytes($temporary, $protectedBytes)
   if (Test-Path -LiteralPath $target) { throw 'gate7a-porkbun-credential-race' }
   Move-Item -LiteralPath $temporary -Destination $target
   $temporary = $null
 
+  $failureStage = 'roundtrip-verification'
   $verifyBytes = [Security.Cryptography.ProtectedData]::Unprotect(
     [IO.File]::ReadAllBytes($target), $entropy, [Security.Cryptography.DataProtectionScope]::CurrentUser)
   $verified = [Text.Encoding]::UTF8.GetString($verifyBytes) | ConvertFrom-Json
@@ -91,7 +99,7 @@ try {
     schemaVersion = 'runa2-gate7a-error/v1'
     errorCode = if ($_.Exception.Message -match '^gate7a-[a-z0-9-]+$') {
       $_.Exception.Message
-    } else { 'gate7a-porkbun-credential-enrollment-failed' }
+    } else { "gate7a-porkbun-credential-$failureStage-failed" }
     privateValuesIncluded = $false
   } | ConvertTo-Json -Compress
   exit 1

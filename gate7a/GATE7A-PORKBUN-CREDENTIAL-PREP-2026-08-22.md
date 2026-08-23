@@ -20,5 +20,17 @@ The scripts are preparation only. They do not enable Porkbun API access for the 
 key, change DNS, retrieve a certificate, install a key, alter a listener, enroll a passkey, or modify
 production.
 
-PowerShell syntax validation passes. The three credential-boundary tests pass, bringing the focused
-Gate 7A suite to 31/31 and the full repository suite to 329/329.
+PowerShell syntax validation passes. After the assembly-load remediation, the four credential-boundary
+tests pass, bringing the focused Gate 7A suite to 32/32 and the full repository suite to 330/330.
+
+## First interactive attempt RCA
+
+The first Control enrollment attempt failed closed before retaining a credential. A clean Windows
+PowerShell 5.1 child process did not automatically load the `System.Security` assembly, so the
+`ProtectedData` type could not be resolved. A separate secret-free owner-context probe proved DPAPI
+CurrentUser round trip and restricted-directory write access were healthy, and confirmed the target
+credential file remained absent.
+
+Both enrollment and preflight now load `System.Security` explicitly before any DPAPI use. Enrollment
+does so before prompting for either key and emits a stage-specific safe error if an unexpected failure
+recurs. No API key or secret from the failed attempt was retained.

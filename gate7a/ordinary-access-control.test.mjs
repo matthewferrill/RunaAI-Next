@@ -10,6 +10,7 @@ const applySmtp = await read("./control/Apply-ControlKeycloakSmtp.ps1");
 const remove = await read("./control/Remove-ControlOrdinaryAccess.ps1");
 const deploy = await read("./control/Deploy-ControlOrdinaryAccessSuccessor.ps1");
 const activate = await read("./control/Invoke-ControlOrdinaryAccessActivation.ps1");
+const ownerRebind = await read("./control/Rebind-ControlOrdinaryOwnerSession.mjs");
 const ordinary = await read("./ordinary-session.mjs");
 const postgres = await read("./postgres-ordinary-session.mjs");
 const release = await read("../gate6b/release-config.mjs");
@@ -56,10 +57,24 @@ test("ordinary successor changes only the application release and restores the e
   assert.match(deploy, /Wait-Release \$PriorReleaseId/);
   assert.match(deploy, /selectedCoreAuthorityUnchanged=\$true/);
   assert.match(deploy, /ownerRouteUnchanged=\$true/);
+  assert.match(deploy, /Rebind-ControlOrdinaryOwnerSession\.mjs/);
+  assert.match(deploy, /RUNA_GATE7A_OWNER_SUBJECT/);
+  assert.match(deploy, /ownerProofRebound=\$true/);
+  assert.match(deploy, /InnerException/);
   assert.match(deploy, /StatusCode-ne303/);
   assert.doesNotMatch(deploy, /StatusCode-ne302/);
   assert.doesNotMatch(deploy, /Stop-ScheduledTask[^\n]+(?:Postgresql|OpenFga|Keycloak|Caddy|ProtectedBackup)/);
   assert.doesNotMatch(deploy, /C:\\AI\\Projects\\RunaAI(?:['"\\])/);
+});
+
+test("ordinary successor rebinds only the completed owner proof to exact canonical release pins", () => {
+  assert.match(ownerRebind, /completed-owner-ordinary-access-release/);
+  assert.match(ownerRebind, /runaai-next-user/);
+  assert.match(ownerRebind, /https:\/\/runa\.bridgebuildersai\.com/);
+  assert.match(ownerRebind, /priorCeremonyRetained/);
+  assert.match(ownerRebind, /authorityChanged: false/);
+  assert.match(ownerRebind, /protectedProductDataChanged: false/);
+  assert.doesNotMatch(ownerRebind, /RUNA_GATE7A_OWNER_SUBJECT.*process\.stdout/);
 });
 
 test("SMTP enrollment is owner-bound DPAPI CurrentUser and network-inert", () => {

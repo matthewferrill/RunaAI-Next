@@ -70,9 +70,9 @@ repository and never push migration work into either source repository.
   optional passkey for ordinary chat. Public self-registration remains disabled. The local
   implementation uses a separate exact password-only Keycloak client, separate encrypted sessions,
   owner-role password denial, an exact automatically reversible application successor, and short-lived
-  rollback-safe invitations. Focused Gate 7A validation is 66/66 and the full repository suite is
-  368/368. It has not yet changed the live release or identity
-  realm. Control currently has no SMTP sender, which blocks live invitation and recovery acceptance.
+  rollback-safe invitations. Focused Gate 7A validation is 67/67 and the full repository suite is
+  370/370. The current live release and identity realm remain unchanged. Control currently has no SMTP
+  sender, which blocks live invitation and recovery acceptance.
   Matthew's separate personal-email account is the selected first non-owner fixture; the personal
   address must not enter Git or retained evidence. A second PC, a phone, off-LAN ingress, certificate
   renewal, and the finished conversational UI remain separate checks.
@@ -81,12 +81,21 @@ repository and never push migration work into either source repository.
   strict mode rejected `.Count`. Normalized reconciliation then proved zero ordinary clients, zero
   ordinary flows, no generated secret, unchanged registration/username policy, and the exact prior
   application release. The operator now array-wraps empty and single-item API results before counting;
-  focused 66/66 and full 368/368 validation remain green before retry.
+  focused and full validation remain green before retry.
 - The second attempt reached the successor and preserved selected-core readiness, then failed its final
   route probe because the operator expected HTTP 302 while the tested application contract uses HTTP
   303 for browser sign-in redirects. Automatic rollback restored the exact predecessor and removed the
   attempt-created ordinary client, flow, and secret. The probe now requires 303; application behavior
   is unchanged.
+- The third attempt proved the ordinary password route initialized, then failed closed because the
+  successor's owner route required the completed owner proof to be bound to that exact immutable
+  release. The proof correctly remained predecessor-bound, and the deployment omitted the audited
+  completed-owner rebind that earlier canonical activation already required. A wrapped Windows
+  PowerShell HTTP exception obscured the safe component error. Automatic rollback restored the exact
+  predecessor and removed the attempt-created client, flow, and secret. The corrected deployment now
+  rebinds only the completed owner proof, retains the prior proof, changes no authority or protected
+  product data, is idempotent for an exact retry, and safely unwraps nested HTTP exceptions. Focused
+  Gate 7A validation is 67/67 and the full suite is 370/370.
 - The first interactive Porkbun enrollment attempt failed closed with no credential retained. RCA: a
   clean Windows PowerShell 5.1 process had not loaded `System.Security`, so the DPAPI `ProtectedData`
   type was unavailable. A secret-free owner probe proved DPAPI and restricted-directory writes healthy.
@@ -370,7 +379,7 @@ plain-language steward experience, or governed action pathway.
 | 4 | Governed data migration, one domain at a time | Complete; accepted and merged as `2c38dd5`; legacy unchanged | Complete |
 | 5 | Operations, private transport, authentication/authorization, recovery | Complete; accepted and merged as `a986419` | Complete |
 | 6 | Selected-core production cutover and rollback window | Complete and closed; exact selected-core release is authoritative, observation green, freeze released, legacy rollback healthy | Complete |
-| 7A | Multi-device access foundation | Canonical LAN origin and owner passkey path active; separate invitation/password user model locally green at focused 66/66 and full 368/368 | SMTP, ordinary-client deployment, personal-email fixture, representative clients, certificate renewal, and off-LAN boundary remain |
+| 7A | Multi-device access foundation | Canonical LAN origin and owner passkey path active; separate invitation/password user model locally green at focused 67/67 and full 370/370 | SMTP, ordinary-client deployment, personal-email fixture, representative clients, certificate renewal, and off-LAN boundary remain |
 | 7B+ | Deferred UI and extensions | Not started | New baseline and separate approval per extension group |
 
 ## Bootstrap validation
@@ -421,8 +430,8 @@ now live at `https://runa.bridgebuildersai.com`; the old
 route has an ordinary trusted certificate and exposes only Caddy on TCP 443 to the Private/LocalSubnet
 boundary. Off-LAN ingress is disabled.
 
-The next bounded operation is to merge the reviewed ordinary-user implementation, configure the
-separate `runaai-next-user` password-only Keycloak client, and deploy an immutable successor while
+The next bounded operation is to merge the completed-owner release-rebind correction, configure the
+separate `runaai-next-user` password-only Keycloak client, and deploy a new immutable successor while
 leaving `matthew-owner` and the running selected-core data authority unchanged. Automatic rollback
 must restore the exact current application release and remove only the newly created ordinary client,
 flow, and generated client-secret file.

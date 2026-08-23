@@ -823,3 +823,36 @@ test("completed owner rebind preserves completion without promoting the candidat
   assert.equal(queries.at(-1).sql, "COMMIT");
   assert.equal(released, true);
 });
+
+test("completed owner rebind is idempotent for the exact retained release audit", async () => {
+  const priorBinding = binding();
+  const nextBinding = { ...binding(), cutoverId: "selected-core-retry", releaseId: "runaai-next-ordinary-release",
+    releaseCommit: "e".repeat(40), artifactDigest: "f".repeat(64) };
+  const priorState = ceremony(priorBinding);
+  const currentState = { ...structuredClone(priorState), bindingDigest: bindingDigest(nextBinding) };
+  const priorDigest = bindingDigest(priorBinding); const nextDigest = bindingDigest(nextBinding);
+  const queries = []; let released = false;
+  const client = { async query(sql) {
+    const normalized = String(sql).replace(/\s+/g, " ").trim(); queries.push(normalized);
+    if (normalized.includes("FROM gate5.principals")) return { rows: [{
+      oidc_subject: "11111111-1111-4111-8111-111111111111", role: "primary-steward",
+      age_class: "adult", status: "active", record_version: 1 }] };
+    if (normalized.includes("FROM gate6c.owner_ceremonies")) return { rows: [
+      { binding_digest: priorDigest, state_json: priorState },
+      { binding_digest: nextDigest, state_json: currentState }] };
+    if (normalized.includes("FROM gate6c.owner_release_rebinds")) return { rows: [{
+      prior_binding_digest: priorDigest, binding_digest: nextDigest,
+      reason: "completed-owner-ordinary-access-release" }] };
+    return { rows: [], rowCount: 1 };
+  }, release() { released = true; } };
+  const result = await rebindCompletedOwnerCeremony({ pool: { async connect() { return client; } },
+    priorBinding, binding: nextBinding, subject: "11111111-1111-4111-8111-111111111111",
+    reason: "completed-owner-ordinary-access-release", observedAt: NOW.toISOString(),
+    operationId: "control-completed-owner-rebind-123456abcdef",
+    assertOwnerCeremonyComplete, bindingDigest });
+  assert.equal(result.alreadyRebound, true);
+  assert.equal(result.ceremonyComplete, true);
+  assert.equal(queries.some(sql => sql.startsWith("UPDATE gate6c.owner_ceremonies")), false);
+  assert.equal(queries.at(-1), "COMMIT");
+  assert.equal(released, true);
+});

@@ -18,7 +18,7 @@
     "test:gate6": "node --test gate6/gate6.test.mjs",
     "test:gate6b": "node --test gate6b/gate6b.test.mjs",
     "test:gate6c": "node --test gate6c/gate6c.test.mjs",
-    "test:gate7a": "node --test gate7a/gate7a.test.mjs",
+    "test:gate7a": "node --test gate7a/gate7a.test.mjs gate7a/hostname-decision.test.mjs",
     "verify:gate0": "node gate0/verify-gate0.mjs",
     "verify:gate1:integration": "node gate1/run-integration.mjs",
     "verify:gate1:models": "node gate1/run-model-validation.mjs",
@@ -31,6 +31,7 @@
     "verify:gate6b:integration": "node gate6b/run-integration.mjs",
     "verify:gate6c:integration": "node gate6c/run-integration.mjs",
     "verify:gate7a:synthetic": "node gate7a/run-synthetic.mjs",
+    "verify:gate7a:hostname": "node gate7a/run-hostname-decision.mjs",
     "build:gate6b:release": "node gate6b/build-release.mjs"
   },
   "keywords": [],

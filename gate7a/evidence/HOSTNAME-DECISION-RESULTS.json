@@ -1,0 +1,24 @@
+{
+  "schemaVersion": "runa2-gate7a-hostname-readiness/v1",
+  "passed": true,
+  "approvedHostname": "runa.bridgebuildersai.com",
+  "canonicalOrigin": "https://runa.bridgebuildersai.com",
+  "browserIssuer": "https://runa.bridgebuildersai.com/auth/realms/runaai-next",
+  "relyingPartyId": "runa.bridgebuildersai.com",
+  "redirectUri": "https://runa.bridgebuildersai.com/session/callback",
+  "dnsProvider": "porkbun",
+  "certificateSourceRecommendation": "porkbun-managed-wildcard-bundle",
+  "hostnameDecisionComplete": true,
+  "omenDirectAccessReady": false,
+  "liveDeploymentReady": false,
+  "remainingBlockers": [
+    "dns-certificate-activation",
+    "off-lan-ingress-privacy",
+    "non-owner-acceptance-fixture"
+  ],
+  "dnsChangeApplied": false,
+  "certificateInstalled": false,
+  "offLanIngressActivated": false,
+  "productionChanged": false,
+  "privateValuesIncluded": false
+}

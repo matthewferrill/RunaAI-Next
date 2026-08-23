@@ -60,6 +60,13 @@ repository and never push migration work into either source repository.
   encrypted sessions; and fresh OpenFGA-gated step-up for governed work. No DNS, certificate, listener,
   ingress, credential, protected store, or production release changed. `runa.example.com` is a reserved
   synthetic fixture, not a selected live hostname.
+- The steward selected `runa.bridgebuildersai.com` as the permanent RunaAI browser hostname on
+  2026-08-22. Its exact origin, external Keycloak issuer, WebAuthn RP ID, and callback are now bound by
+  a non-activating decision projection. Public discovery confirms Porkbun DNS authority and no existing
+  `runa` A/CNAME record. Control still runs the exact Gate 6D Caddy 2.11.4 binary without a Porkbun DNS
+  module and with the prior listener boundary unchanged. The focused Gate 7A suite passes 28/28 and the
+  full repository suite passes 326/326. No DNS, certificate, credential, identity, listener, protected
+  store, or production release changed.
 - No migration gate is approved merely by this bootstrap.
 - Bootstrap documentation and clean-clone validation were reviewed and merged into
   `runa2/integration` as `94ba860`.
@@ -333,7 +340,7 @@ plain-language steward experience, or governed action pathway.
 | 4 | Governed data migration, one domain at a time | Complete; accepted and merged as `2c38dd5`; legacy unchanged | Complete |
 | 5 | Operations, private transport, authentication/authorization, recovery | Complete; accepted and merged as `a986419` | Complete |
 | 6 | Selected-core production cutover and rollback window | Complete and closed; exact selected-core release is authoritative, observation green, freeze released, legacy rollback healthy | Complete |
-| 7A | Multi-device access foundation | Contract and synthetic implementation complete; focused 24/24 and full 322/322 green | Live hostname, DNS/certificate, off-LAN ingress privacy, and first non-owner fixture remain decision-gated |
+| 7A | Multi-device access foundation | Contract, synthetic implementation, and permanent hostname selection complete; focused 28/28 and full 326/326 green | DNS/certificate activation, off-LAN ingress privacy, and first non-owner fixture remain decision-gated |
 | 7B+ | Deferred UI and extensions | Not started | New baseline and separate approval per extension group |
 
 ## Bootstrap validation
@@ -393,8 +400,10 @@ HTTPS origin, same-origin external Keycloak, per-person multi-passkey identity, 
 five-client acceptance matrix before the conversational UI is built. Its focused suite passes 24/24;
 the full repository suite passes 322/322. No live state changed.
 
-The next operation is live Gate 7A planning. It is blocked on the steward-controlled permanent
-hostname, DNS/certificate method, off-LAN privacy/ingress choice, and first non-owner acceptance
-fixture. Do not deploy the reserved `runa.example.com` synthetic value. E3, E4/device-vault recovery,
+The permanent Gate 7A hostname is now `runa.bridgebuildersai.com`; do not deploy the reserved
+`runa.example.com` synthetic value. The next operation is a fail-closed LAN-first DNS/certificate
+preflight and activation plan using Porkbun's authoritative DNS and managed wildcard certificate. It
+requires a scoped Porkbun credential protected on Control. Off-LAN privacy/ingress and the first
+non-owner acceptance fixture remain separate blockers. E3, E4/device-vault recovery,
 the separate approved-knowledge vector index, Qwen3.6 deliberate review, the existing live BGE
 endpoint, broader legacy surfaces, and the user-facing conversational UI remain separately deferred.

@@ -121,6 +121,7 @@ test("completed owner proof can be rebound to canonical ingress without promotio
   assert.match(ownerRebind, /userInfo\(\)\.username\.toLowerCase\(\) !== "matthew"/);
   assert.match(ownerRebind, /completed-owner-canonical-ingress/);
   assert.match(completedRebind, /completed-owner-canonical-ingress/);
+  assert.match(ownerRebind, /createRequire\(join\(releaseRoot, "package\.json"\)\)\("pg"\)/);
   assert.match(ownerRebind, /https:\/\/runa\.bridgebuildersai\.com\/auth\/realms\/runaai-next/);
   assert.match(ownerRebind, /https:\/\/192\.168\.50\.169:9761/);
   assert.match(ownerRebind, /priorCeremonyRetained/);

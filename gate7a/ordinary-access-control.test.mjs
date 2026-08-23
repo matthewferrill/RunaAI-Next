@@ -84,10 +84,12 @@ test("ordinary successor rebinds only the completed owner proof to exact canonic
 
 test("SMTP enrollment is owner-bound DPAPI CurrentUser and network-inert", () => {
   assert.match(enrollSmtp, /RUNA-CONTROL\\Matthew/);
+  assert.match(enrollSmtp, /Read-Host 'SMTP username'/);
   assert.match(enrollSmtp, /Read-Host 'SMTP password or application password' -AsSecureString/);
   assert.match(enrollSmtp, /DataProtectionScope\]::CurrentUser/);
   assert.match(enrollSmtp, /networkCalled=\$false/);
   assert.doesNotMatch(enrollSmtp, /Invoke-RestMethod|Invoke-WebRequest|Set-Clipboard/);
+  assert.doesNotMatch(enrollSmtp, /\[string\]\$Username/);
 });
 
 test("SMTP apply keeps the DPAPI source, verifies exact realm state, and rolls back on failure", () => {

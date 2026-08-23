@@ -1,6 +1,6 @@
 # Gate 7A ordinary-user access model decision
 
-Status: steward approved, implemented locally, live activation pending
+Status: steward approved; ordinary client and immutable application release active; SMTP and first invitation pending
 
 ## Decision
 

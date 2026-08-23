@@ -71,8 +71,10 @@ repository and never push migration work into either source repository.
   implementation uses a separate exact password-only Keycloak client, separate encrypted sessions,
   owner-role password denial, an exact automatically reversible application successor, and short-lived
   rollback-safe invitations. Focused Gate 7A validation is 67/67 and the full repository suite is
-  370/370. The current live release and identity realm remain unchanged. Control currently has no SMTP
-  sender, which blocks live invitation and recovery acceptance.
+  370/370. The exact ordinary-access release `runaai-next-gate7a-lan-ordinary-2026-08-23-130457c`
+  is now active. The separate client and password route reconcile exactly, the owner client is unchanged,
+  and selected-core authority/protected data remain unchanged. Control currently has no SMTP sender,
+  which blocks live invitation and recovery acceptance.
   Matthew's separate personal-email account is the selected first non-owner fixture; the personal
   address must not enter Git or retained evidence. A second PC, a phone, off-LAN ingress, certificate
   renewal, and the finished conversational UI remain separate checks.
@@ -386,7 +388,7 @@ plain-language steward experience, or governed action pathway.
 | 4 | Governed data migration, one domain at a time | Complete; accepted and merged as `2c38dd5`; legacy unchanged | Complete |
 | 5 | Operations, private transport, authentication/authorization, recovery | Complete; accepted and merged as `a986419` | Complete |
 | 6 | Selected-core production cutover and rollback window | Complete and closed; exact selected-core release is authoritative, observation green, freeze released, legacy rollback healthy | Complete |
-| 7A | Multi-device access foundation | Canonical LAN origin and owner passkey path active; separate invitation/password user model locally green at focused 67/67 and full 370/370 | SMTP, ordinary-client deployment, personal-email fixture, representative clients, certificate renewal, and off-LAN boundary remain |
+| 7A | Multi-device access foundation | Canonical LAN origin, owner passkey path, and separate ordinary password client/release active; focused 67/67 and full 370/370 | SMTP, personal-email fixture, representative clients, certificate renewal, and off-LAN boundary remain |
 | 7B+ | Deferred UI and extensions | Not started | New baseline and separate approval per extension group |
 
 ## Bootstrap validation
@@ -437,13 +439,13 @@ now live at `https://runa.bridgebuildersai.com`; the old
 route has an ordinary trusted certificate and exposes only Caddy on TCP 443 to the Private/LocalSubnet
 boundary. Off-LAN ingress is disabled.
 
-The next bounded operation is to merge the completed-owner release-rebind correction, configure the
-separate `runaai-next-user` password-only Keycloak client, and deploy a new immutable successor while
-leaving `matthew-owner` and the running selected-core data authority unchanged. Automatic rollback
-must restore the exact current application release and remove only the newly created ordinary client,
-flow, and generated client-secret file.
+The separate `runaai-next-user` password-only client and immutable ordinary-access successor are now
+active. The owner client is unchanged, its completed proof is bound to the exact release, the selected-
+core authority remains active, protected selected data remains imported, and Omen independently passed
+trusted-TLS/liveness/root and both login-route redirect checks. Aggregate evidence is in
+`gate7a/evidence/CONTROL-ORDINARY-ACCESS-ACTIVATION-RESULTS.json`.
 
-Live acceptance then requires an SMTP sender for Keycloak. The SMTP credential must be entered under
+The next bounded operation requires an SMTP sender for Keycloak. The SMTP credential must be entered under
 Matthew's Control identity, retained only as DPAPI CurrentUser material, tested without printing any
 private value, and rolled back if realm verification fails. After that, issue one short-lived
 invitation to Matthew's separate personal email, let the invitee choose a username/password and verify

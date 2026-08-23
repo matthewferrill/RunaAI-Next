@@ -25,9 +25,11 @@ $backchannelIssuer = 'http://127.0.0.1:9762/realms/runaai-next'
 $privateAddress = '192.168.50.169'
 $taskPath = '\RunaAI-Next\'
 $firewallName = 'RunaAI Next Canonical HTTPS'
-$priorReleaseId = 'runaai-next-selected-core-2026-08-21-77f3017'
-$priorCommit = '77f3017d10f4e4670ad551b3d000cc2569c1dfdb'
-$priorManifestDigest = '4167a8268295f8e973486e197845a2c1d3ac3efb0c5af632ae704d371f0f7343'
+$priorReleaseId = 'runaai-next-gate6d-promotion-2026-08-22-a886754'
+$priorCommit = 'a8867543f914cabd997f161950016723355138d2'
+$priorArtifactDigest = '2e1f909941f3021530c83c3d288953f0d3144b8603eb006f8502b32022905235'
+$priorRuntimeManifestDigest = '93f2c9b3ddecec5f552308f973abd10005b9abd47e822baed7dc1427c8fc7b3b'
+$cutoverPredecessorManifestDigest = '4167a8268295f8e973486e197845a2c1d3ac3efb0c5af632ae704d371f0f7343'
 $apiBase = 'https://api.porkbun.com/api/json/v3'
 
 $apiKey = $null
@@ -139,7 +141,7 @@ function Restore-Predecessor {
       }
     }
     Copy-Item -LiteralPath (Join-Path $rollbackRoot 'candidate.json') -Destination $configPath -Force
-    Copy-Item -LiteralPath (Join-Path $rollbackRoot 'release.json') -Destination $priorManifestPath -Force
+    Copy-Item -LiteralPath (Join-Path $rollbackRoot 'release-manifest.json') -Destination $priorManifestPath -Force
     Copy-Item -LiteralPath (Join-Path $rollbackRoot 'Caddyfile') -Destination $caddyPath -Force
     Copy-Item -LiteralPath (Join-Path $rollbackRoot 'Run-Application.ps1') -Destination $applicationLauncher -Force
     Copy-Item -LiteralPath (Join-Path $rollbackRoot 'Run-Keycloak.ps1') -Destination $keycloakLauncher -Force
@@ -248,7 +250,6 @@ try {
   $stagedApplication = Join-Path $staging 'Run-Application.ps1'
   $stagedKeycloak = Join-Path $staging 'Run-Keycloak.ps1'
   $configPath = Join-Path $Root 'config\candidate.json'
-  $priorManifestPath = Join-Path $Root 'config\release.json'
   $nextManifestPath = Join-Path $Root 'config\gate7a-release.json'
   $caddyPath = Join-Path $Root 'config\Caddyfile'
   $applicationLauncher = Join-Path $Root 'control\Run-Application.ps1'
@@ -283,12 +284,18 @@ try {
   $runtime = Invoke-RestMethod -Uri 'http://127.0.0.1:9760/api/runtime/status' -TimeoutSec 10
   $readiness = Invoke-RestMethod -Uri 'http://127.0.0.1:9760/api/readiness/status' -TimeoutSec 10
   $currentConfig = Get-Content -LiteralPath $configPath -Raw | ConvertFrom-Json
+  if ($currentConfig.releaseManifestPath -ne 'release-gate6d-promotion-a886754.json') {
+    throw 'gate7a-activation-predecessor-manifest-path-drift'
+  }
+  $priorManifestPath = Join-Path (Join-Path $Root 'config') $currentConfig.releaseManifestPath
   $currentManifest = Get-Content -LiteralPath $priorManifestPath -Raw | ConvertFrom-Json
   if ($runtime.running.releaseId -ne $priorReleaseId -or $runtime.running.commit -ne $priorCommit -or
+      $runtime.running.artifactDigest -ne $priorArtifactDigest -or
       $runtime.cutover.phase -ne 'closed' -or
       $runtime.authorityGeneration -ne $currentConfig.targetGeneration -or
-      $currentManifest.manifestDigest -ne $priorManifestDigest -or
-      $readiness.authority -ne 'target' -or $readiness.protectedDataImported -ne $true -or
+      $currentManifest.manifestDigest -ne $priorRuntimeManifestDigest -or
+      $readiness.authority -ne 'active' -or $readiness.protectedDataImported -ne $true -or
+      $readiness.productionTrafficChanged -ne $true -or
       $currentConfig.publicBaseUrl -ne 'https://192.168.50.169:9761') {
     throw 'gate7a-activation-predecessor-drift'
   }
@@ -299,7 +306,7 @@ try {
       $candidate.keycloak.backchannelIssuer -ne $backchannelIssuer -or
       $candidate.gate7a.enabled -ne $true -or
       $candidate.gate7a.relyingPartyId -ne $canonicalHost -or
-      $candidate.gate7a.predecessorManifestDigest -ne $priorManifestDigest -or
+      $candidate.gate7a.predecessorManifestDigest -ne $cutoverPredecessorManifestDigest -or
       $candidate.releaseManifestPath -ne 'gate7a-release.json' -or
       $manifest.releaseId -ne $ReleaseId -or $manifest.commit -ne $ExpectedCommit -or
       $manifest.artifactDigest -ne $ExpectedArtifactDigest) {
@@ -349,7 +356,7 @@ try {
   New-Item -ItemType Directory -Path $rollbackRoot | Out-Null
   Set-Acl -LiteralPath $rollbackRoot -AclObject (Get-Acl -LiteralPath (Join-Path $Root 'secrets'))
   Copy-Item -LiteralPath $configPath -Destination (Join-Path $rollbackRoot 'candidate.json')
-  Copy-Item -LiteralPath $priorManifestPath -Destination (Join-Path $rollbackRoot 'release.json')
+  Copy-Item -LiteralPath $priorManifestPath -Destination (Join-Path $rollbackRoot 'release-manifest.json')
   Copy-Item -LiteralPath $caddyPath -Destination (Join-Path $rollbackRoot 'Caddyfile')
   Copy-Item -LiteralPath $applicationLauncher -Destination (Join-Path $rollbackRoot 'Run-Application.ps1')
   Copy-Item -LiteralPath $keycloakLauncher -Destination (Join-Path $rollbackRoot 'Run-Keycloak.ps1')
@@ -480,8 +487,9 @@ try {
   $nextReadiness = Invoke-RestMethod -Uri 'http://127.0.0.1:9760/api/readiness/status' -TimeoutSec 20
   if ($nextRuntime.running.commit -ne $ExpectedCommit -or
       $nextRuntime.running.artifactDigest -ne $ExpectedArtifactDigest -or
-      $nextRuntime.cutover.phase -ne 'closed' -or $nextReadiness.authority -ne 'target' -or
-      $nextReadiness.protectedDataImported -ne $true) {
+      $nextRuntime.cutover.phase -ne 'closed' -or $nextReadiness.authority -ne 'active' -or
+      $nextReadiness.protectedDataImported -ne $true -or
+      $nextReadiness.productionTrafficChanged -ne $true) {
     throw 'gate7a-activation-runtime-reconciliation-failed'
   }
   $identityCheck = Invoke-RestMethod -Method Get `

@@ -4,7 +4,7 @@ Date: 2026-08-22
 
 ## Prepared exact successor
 
-The non-live projection is bound to the current Control predecessor manifest
+The non-live projection is bound to the closed selected-core cutover predecessor manifest
 `4167a8268295f8e973486e197845a2c1d3ac3efb0c5af632ae704d371f0f7343` and produces:
 
 - canonical origin `https://runa.bridgebuildersai.com`;
@@ -19,6 +19,12 @@ The non-live projection is bound to the current Control predecessor manifest
 The projection retains the current protected-data generation, PostgreSQL, OpenFGA, Control-to-Home
 provider route, selected-core authority, and legacy rollback system. It does not copy, rewrite, or
 reconcile protected data.
+
+The live runtime was reverified immediately before activation as the later Gate 6D promotion release
+`runaai-next-gate6d-promotion-2026-08-22-a886754`, manifest
+`93f2c9b3ddecec5f552308f973abd10005b9abd47e822baed7dc1427c8fc7b3b`. The activation guard pins
+that actual running release while retaining the separate closed-cutover predecessor digest above,
+which is the digest the successor composition contract requires.
 
 ## Live transaction requiring explicit authority
 

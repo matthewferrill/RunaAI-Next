@@ -1,5 +1,6 @@
 import { CHAT_DEADLINE_MS, answerNeedsRetry, boundedHistory, customerMessageFor,
   readJsonResponse } from "./chat-client.mjs";
+import { initializeWorkspaceShell } from "./workspace-shell.mjs";
 
 const byId = id => document.getElementById(id);
 const text = (id, value) => { byId(id).textContent = value; };
@@ -63,6 +64,8 @@ async function initialize() {
       ? "Ordinary chat is available. Protected records and administrative actions remain restricted."
       : "Chat remains unavailable until the selected core reports active authority.");
     if (session.authenticated && session.sessionType === "ordinary" && active) {
+      initializeWorkspaceShell(document);
+      document.body.classList.add("workspace-active");
       welcome.hidden = true;
       chat.hidden = false;
       sessionLabel.hidden = false;

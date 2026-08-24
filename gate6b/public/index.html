@@ -14,7 +14,7 @@
       <button id="logout" class="quiet-button" type="button" hidden>Sign out</button>
     </div>
   </header>
-  <main>
+  <main class="application-main">
     <section id="welcome" class="welcome" aria-labelledby="welcome-title">
       <p class="eyebrow">Private AI, thoughtfully governed</p>
       <h1 id="welcome-title">Welcome to Runa</h1>
@@ -35,23 +35,39 @@
       </details>
     </section>
 
-    <section id="chat" class="chat" aria-labelledby="chat-title" hidden>
-      <div class="chat-heading">
-        <p class="eyebrow">Private chat</p>
-        <h1 id="chat-title">Chat with Runa</h1>
-        <p>Ask questions, brainstorm, draft writing or code, and work with text you paste here. Runa does not have live web access and cannot change files, settings, or systems from this chat.</p>
-      </div>
-      <div id="transcript" class="transcript" aria-live="polite" aria-label="Conversation">
-        <div class="message assistant"><span class="message-label">Runa</span><p>Hi. What would you like to talk about?</p></div>
-      </div>
-      <form id="chat-form" class="composer">
-        <label for="message">Message Runa</label>
-        <textarea id="message" name="message" rows="3" maxlength="4000" placeholder="Type your message…" required></textarea>
-        <div class="composer-footer">
-          <span id="chat-status" role="status">Ready</span>
-          <button id="send" class="primary-button" type="submit">Send</button>
+    <section id="chat" class="workspace-frame" aria-label="Runa workspace" hidden>
+      <aside id="left-rail" class="workspace-rail workspace-rail-left" aria-label="Left workspace panel">
+        <button id="left-rail-toggle" class="rail-toggle" type="button" aria-label="Expand left panel" aria-controls="left-rail-body" aria-expanded="false">
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m9 18 6-6-6-6" /></svg>
+        </button>
+        <div id="left-rail-body" class="workspace-rail-body" aria-hidden="true"></div>
+      </aside>
+      <section class="chat-panel" aria-labelledby="chat-title">
+        <div class="conversation-surface">
+          <div class="chat-heading">
+            <p class="eyebrow">Private chat</p>
+            <h1 id="chat-title">Chat with Runa</h1>
+            <p>Ask questions, brainstorm, draft writing or code, and work with text you paste here. Runa does not have live web access and cannot change files, settings, or systems from this chat.</p>
+          </div>
+          <div id="transcript" class="transcript" aria-live="polite" aria-label="Conversation">
+            <div class="message assistant"><span class="message-label">Runa</span><p>Hi. What would you like to talk about?</p></div>
+          </div>
         </div>
-      </form>
+        <form id="chat-form" class="composer">
+          <label for="message">Message Runa</label>
+          <textarea id="message" name="message" rows="3" maxlength="4000" placeholder="Type your message…" required></textarea>
+          <div class="composer-footer">
+            <span id="chat-status" role="status">Ready</span>
+            <button id="send" class="primary-button" type="submit">Send</button>
+          </div>
+        </form>
+      </section>
+      <aside id="right-rail" class="workspace-rail workspace-rail-right" aria-label="Right workspace panel">
+        <button id="right-rail-toggle" class="rail-toggle" type="button" aria-label="Expand right panel" aria-controls="right-rail-body" aria-expanded="false">
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m9 18 6-6-6-6" /></svg>
+        </button>
+        <div id="right-rail-body" class="workspace-rail-body" aria-hidden="true"></div>
+      </aside>
     </section>
   </main>
   <script type="module" src="/status.js"></script>

@@ -10,12 +10,32 @@ function startTag(html, id) {
   return match[0];
 }
 
+function cssHexToken(styles, name) {
+  const match = styles.match(new RegExp(`--${name}:\\s*(#[0-9a-f]{6})`, "i"));
+  assert.ok(match, `${name} must be a six-digit hex color`);
+  return match[1];
+}
+
+function relativeLuminance(hex) {
+  const channels = hex.match(/[0-9a-f]{2}/gi).map(channel => {
+    const value = Number.parseInt(channel, 16) / 255;
+    return value <= .04045 ? value / 12.92 : ((value + .055) / 1.055) ** 2.4;
+  });
+  return .2126 * channels[0] + .7152 * channels[1] + .0722 * channels[2];
+}
+
+function contrastRatio(first, second) {
+  const lighter = Math.max(relativeLuminance(first), relativeLuminance(second));
+  const darker = Math.min(relativeLuminance(first), relativeLuminance(second));
+  return (lighter + .05) / (darker + .05);
+}
+
 test("the authenticated page reserves an unlabeled left rail, central chat, and unlabeled right rail", async () => {
   const html = await readFile(publicFile("index.html"), "utf8");
-  assert.match(html, /id="chat" class="workspace-shell"/);
+  assert.match(html, /id="chat" class="workspace-frame"/);
   assert.match(html,
-    /<section id="chat" class="workspace-shell"[^>]*>\s*<aside id="left-rail"[\s\S]*?<\/aside>\s*<section class="chat-panel"[\s\S]*?<\/section>\s*<aside id="right-rail"[\s\S]*?<\/aside>\s*<\/section>/,
-    "the two rails and central chat must be direct workspace-shell children in that order");
+    /<section id="chat" class="workspace-frame"[^>]*>\s*<aside id="left-rail"[\s\S]*?<\/aside>\s*<section class="chat-panel"[\s\S]*?<\/section>\s*<aside id="right-rail"[\s\S]*?<\/aside>\s*<\/section>/,
+    "the two rails and central chat must be direct workspace-frame children in that order");
 
   for (const [side, bodyId] of [["left", "left-rail-body"], ["right", "right-rail-body"]]) {
     const toggle = startTag(html, `${side}-rail-toggle`);
@@ -36,24 +56,39 @@ test("the authenticated page reserves an unlabeled left rail, central chat, and 
 
 test("the presentation keeps a fixed workspace, sibling desktop columns, transcript scroll, and visible focus", async () => {
   const styles = await readFile(publicFile("styles.css"), "utf8");
-  assert.match(styles, /\.workspace-shell\s*\{[^}]*grid-template-columns:\s*var\(--left-rail-width\) minmax\(0, 1fr\) var\(--right-rail-width\)/s);
+  assert.match(styles, /\.workspace-frame\s*\{[^}]*grid-template-columns:\s*var\(--left-rail-width\) minmax\(0, 1fr\) var\(--right-rail-width\)/s);
   assert.match(styles, /--left-rail-width:\s*4rem/);
   assert.match(styles, /--right-rail-width:\s*4rem/);
-  assert.match(styles, /\.workspace-shell\.left-expanded\s*\{[^}]*--left-rail-width:/s);
-  assert.match(styles, /\.workspace-shell\.right-expanded\s*\{[^}]*--right-rail-width:/s);
-  assert.match(styles, /\.workspace-shell\s*\{[^}]*height:\s*calc\(100dvh - 4\.5rem\)/s);
+  assert.match(styles, /\.workspace-frame\.left-expanded\s*\{[^}]*--left-rail-width:/s);
+  assert.match(styles, /\.workspace-frame\.right-expanded\s*\{[^}]*--right-rail-width:/s);
+  assert.match(styles, /\.workspace-frame\s*\{[^}]*height:\s*calc\(100dvh - 4\.5rem\)/s);
+  assert.match(styles, /\.workspace-rail-left\s*\{[^}]*grid-column:\s*1/s);
+  assert.match(styles, /\.chat-panel\s*\{[^}]*grid-column:\s*2/s);
+  assert.match(styles, /\.workspace-rail-right\s*\{[^}]*grid-column:\s*3/s);
   assert.match(styles, /\.transcript\s*\{[^}]*overflow-y:\s*auto/s);
   assert.match(styles, /\.rail-toggle:focus-visible/);
   assert.match(styles, /@media\s*\(max-width:\s*760px\)/);
   assert.match(styles, /body\.workspace-active/);
+  assert.ok(contrastRatio(cssHexToken(styles, "workspace-accent"), "#ffffff") >= 4.5,
+    "white Send text must retain normal-text contrast on the accent");
+  assert.ok(contrastRatio(cssHexToken(styles, "workspace-ink-faint"), "#ffffff") >= 4.5,
+    "status and placeholder text must retain normal-text contrast");
+  assert.ok(contrastRatio(cssHexToken(styles, "workspace-field-edge"), "#ffffff") >= 3,
+    "the textarea boundary must retain non-text contrast");
+  assert.match(styles, /\.composer textarea\s*\{[^}]*border:\s*1px solid var\(--workspace-field-edge\)/s);
 });
 
 test("the ordinary-session controller initializes the shell only when active chat is shown", async () => {
   const status = await readFile(publicFile("status.js"), "utf8");
   assert.match(status, /import\s*\{\s*initializeWorkspaceShell\s*\}\s*from\s*"\.\/workspace-shell\.mjs"/);
-  assert.match(status, /initializeWorkspaceShell\(document\)/);
-  assert.match(status,
-    /if \(session\.authenticated && session\.sessionType === "ordinary" && active\) \{[\s\S]*?document\.body\.classList\.add\("workspace-active"\)/);
+  const activeBranch = 'if (session.authenticated && session.sessionType === "ordinary" && active) {';
+  const branchStart = status.indexOf(activeBranch);
+  const shellInitialization = status.indexOf("initializeWorkspaceShell(document)");
+  const nextBranch = status.indexOf("} else if (session.authenticated)", branchStart);
+  assert.notEqual(branchStart, -1);
+  assert.ok(shellInitialization > branchStart, "the shell must not initialize before active ordinary chat is known");
+  assert.ok(shellInitialization < nextBranch, "the shell must initialize inside the active ordinary branch");
+  assert.match(status.slice(branchStart, nextBranch), /document\.body\.classList\.add\("workspace-active"\)/);
 });
 
 class FakeClassList {
@@ -97,27 +132,27 @@ test("rail controls synchronize accessible state independently and Escape collap
   };
 
   return import("../gate6b/public/workspace-shell.mjs").then(({ initializeWorkspaceShell }) => {
-  const controller = initializeWorkspaceShell(root);
-  leftButton.dispatch("click");
-  assert.equal(shell.classList.contains("left-expanded"), true);
-  assert.equal(shell.classList.contains("right-expanded"), false);
-  assert.equal(leftButton.getAttribute("aria-expanded"), "true");
-  assert.equal(leftBody.getAttribute("aria-hidden"), "false");
+    const controller = initializeWorkspaceShell(root);
+    leftButton.dispatch("click");
+    assert.equal(shell.classList.contains("left-expanded"), true);
+    assert.equal(shell.classList.contains("right-expanded"), false);
+    assert.equal(leftButton.getAttribute("aria-expanded"), "true");
+    assert.equal(leftBody.getAttribute("aria-hidden"), "false");
 
-  rightButton.dispatch("click");
-  assert.equal(shell.classList.contains("left-expanded"), true);
-  assert.equal(shell.classList.contains("right-expanded"), true);
-  assert.equal(rightButton.getAttribute("aria-expanded"), "true");
-  assert.equal(rightBody.getAttribute("aria-hidden"), "false");
+    rightButton.dispatch("click");
+    assert.equal(shell.classList.contains("left-expanded"), true);
+    assert.equal(shell.classList.contains("right-expanded"), true);
+    assert.equal(rightButton.getAttribute("aria-expanded"), "true");
+    assert.equal(rightBody.getAttribute("aria-hidden"), "false");
 
-  listeners.get("keydown")({ key: "Escape" });
-  assert.equal(shell.classList.contains("left-expanded"), false);
-  assert.equal(shell.classList.contains("right-expanded"), false);
-  assert.equal(leftButton.getAttribute("aria-expanded"), "false");
-  assert.equal(rightButton.getAttribute("aria-expanded"), "false");
-  assert.equal(leftBody.getAttribute("aria-hidden"), "true");
-  assert.equal(rightBody.getAttribute("aria-hidden"), "true");
-  controller.destroy();
+    listeners.get("keydown")({ key: "Escape" });
+    assert.equal(shell.classList.contains("left-expanded"), false);
+    assert.equal(shell.classList.contains("right-expanded"), false);
+    assert.equal(leftButton.getAttribute("aria-expanded"), "false");
+    assert.equal(rightButton.getAttribute("aria-expanded"), "false");
+    assert.equal(leftBody.getAttribute("aria-hidden"), "true");
+    assert.equal(rightBody.getAttribute("aria-hidden"), "true");
+    controller.destroy();
   });
 });
 

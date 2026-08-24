@@ -88,6 +88,14 @@ repository and never push migration work into either source repository.
   results, retries, continuity, all internal read-only answer lanes, and truthful workspace/code limits.
   No new effect, source picker, web research, code execution, learning activation, protected-owner
   capability, or off-LAN ingress is included.
+- Gate 7B's source correction now passes 389/389 repository tests and all 11 checks in the executable
+  login-to-logout synthetic customer journey. The already-running Control private model passed all
+  five aggregate checks for cold/warm plain chat, evidence-bearing research, evidence-bearing workspace,
+  exact model identity, deterministic role routing, and citation mode. Ordinary chat no longer requires
+  model-generated JSON; incomplete model results are typed, not recorded as completed turns, and receive
+  a customer-safe retry path. The bounded deadline chain is 60 seconds application, 65 seconds browser
+  and provider proxy, and 70 seconds public application proxy. The production successor and canonical
+  browser acceptance remain pending, so Gate 7B is not yet complete.
 - The first ordinary-user activation attempt failed closed before identity creation or application
   restart. RCA: Windows PowerShell 5.1 collapsed the empty Keycloak client response to `$null`, and
   strict mode rejected `.Count`. Normalized reconciliation then proved zero ordinary clients, zero

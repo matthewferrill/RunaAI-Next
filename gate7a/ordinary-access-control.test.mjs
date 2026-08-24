@@ -64,6 +64,8 @@ test("ordinary successor changes only the application release and restores the e
   assert.match(deploy, /Move-Item -LiteralPath "\$caddy\.new" -Destination \$caddy -Force/);
   assert.match(deploy, /Run-Caddy reload \$caddy/);
   assert.match(deploy, /Copy-Item -LiteralPath \(Join-Path \$rollback 'Caddyfile'\) -Destination \$caddy -Force/);
+  assert.match(deploy, /function JsonFacts/);
+  assert.match(deploy, /\$currentFacts\.Count-ne\$candidateFacts\.Count/);
   assert.match(deploy, /gate7a-ordinary-deploy-protected-binding-drift/);
   assert.match(deploy, /applicationAndCaddyChangedTogether=\$true/);
   assert.match(deploy, /selectedCoreAuthorityUnchanged=\$true/);

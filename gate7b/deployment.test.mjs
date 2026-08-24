@@ -53,6 +53,8 @@ test("the Control deployer validates, changes, and restores Caddy inside the app
   assert.match(deploy, /caddy-binary-drift/);
   assert.match(deploy, /RedirectStandardError=\$true/);
   assert.doesNotMatch(deploy, /& \$caddyExe (?:validate|reload)/);
+  assert.match(deploy, /JsonFacts \$currentConfig/);
+  assert.doesNotMatch(deploy, /preservedCandidate\|ConvertTo-Json[^\n]+-ne/);
   assert.match(deploy, /caddy-reload-failed/);
   assert.match(deploy, /caddy-rollback-failed/);
   assert.match(deploy, /applicationAndCaddyChangedTogether=\$true/);

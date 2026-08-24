@@ -93,8 +93,9 @@ repository and never push migration work into either source repository.
   customer turns, general model conversation, honest live-lookup refusal, and continued recovery after
   the prior failures. It also exposed two presentation defects: `.mjs` was served as generic binary data,
   preventing Edge from running the page, and typed audit labels were appended to otherwise valid customer
-  prose. Both are corrected in the exact active release; a short exact-release transcript recheck remains
-  before Gate 7B is closed.
+  prose. Both are corrected in the exact active release. The steward's exact-release recheck returned the
+  correct square root of pi without an audit label and the live-weather limitation without Gate terminology.
+  Gate 7B is complete.
 - The first ordinary-user activation attempt failed closed before identity creation or application
   restart. RCA: Windows PowerShell 5.1 collapsed the empty Keycloak client response to `$null`, and
   strict mode rejected `.Count`. Normalized reconciliation then proved zero ordinary clients, zero
@@ -405,9 +406,9 @@ plain-language steward experience, or governed action pathway.
 | 4 | Governed data migration, one domain at a time | Complete; accepted and merged as `2c38dd5`; legacy unchanged | Complete |
 | 5 | Operations, private transport, authentication/authorization, recovery | Complete; accepted and merged as `a986419` | Complete |
 | 6 | Selected-core production cutover and rollback window | Complete and closed; exact selected-core release is authoritative, observation green, freeze released, legacy rollback healthy | Complete |
-| 7A | Multi-device access foundation | Canonical LAN origin, owner passkey path, SMTP/invitation, separate ordinary password client, and initial chat UI active; complete customer acceptance is pending Gate 7B | Representative clients, certificate renewal, and off-LAN boundary remain |
-| 7B | Complete customer journey through the selected read-only stack | Production path active and sustained Omen chat proven; exact-release transcript recheck pending after final presentation correction | Approved by steward 2026-08-24 |
-| 7C+ | Deferred extensions | Not started | New baseline and separate approval per extension group |
+| 7A | Multi-device access foundation | Canonical LAN origin, owner passkey path, SMTP/invitation, separate ordinary password client, and Omen customer acceptance active | Representative clients, certificate renewal, and off-LAN boundary remain |
+| 7B | Complete customer journey through the selected read-only stack | Complete; production sign-in, sustained chat, safe presentation, exact-release recheck, and rollback evidence green | Approved by steward 2026-08-24; completed 2026-08-24 |
+| 7C+ | Deferred product extensions | Not started; capability inventory and prioritization are next | New baseline and separate decision per extension group |
 
 ## Bootstrap validation
 

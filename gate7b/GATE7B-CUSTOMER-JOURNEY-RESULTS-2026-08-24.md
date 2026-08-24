@@ -1,7 +1,7 @@
 # Gate 7B customer journey results
 
-Status: production path active; sustained ordinary Omen chat proven; one exact-release presentation
-recheck remains before Gate 7B closure.
+Status: complete. Production sign-in, sustained ordinary Omen chat, exact-release presentation,
+failure recovery, logout contracts, and rollback evidence are green.
 
 ## Root cause
 
@@ -91,9 +91,15 @@ UI, or finished mobile/external-user experience. The model prompt also carries o
 the preserved constitutional identity and relationship experience require an explicit next product
 decision. Those are neither defects hidden by this result nor implicitly approved extensions.
 
-## Remaining acceptance
+## Closure evidence
 
-Refresh the canonical page, sign in once because the immutable release binding changed, and repeat the
-weather and square-root-of-pi prompts. The weather response must contain no Gate terminology, and the
-correct numerical answer must contain no audit label. That is the only remaining Gate 7B presentation
-check; broader UI and feature work belongs to separately reviewed product stages.
+After refreshing and signing in against the exact active release, the steward repeated both final
+presentation probes:
+
+- `What is the square root of PI?` returned approximately `1.77245385091` with no answer-gate or audit
+  label.
+- `What is today's weather like in my area?` returned the truthful no-live-web/weather limitation with
+  no Gate, route, migration, or engineering terminology.
+
+Those results close the last Gate 7B check. Broader UI and feature work belongs to separately reviewed
+product stages and is not implied by this completion.

@@ -181,14 +181,26 @@ export class Gate2ReadOnlyService {
         } catch {
           knowledgeDelivery = {};
         }
+        const knowledgeReceipt = approvedKnowledgeReceipt(knowledgeDelivery);
+        if (knowledgeReceipt.errorCode) {
+          response = emptyV1(request, {
+            answer: "Approved knowledge was unavailable, so the request was not sent to the model.",
+            reason: knowledgeReceipt.errorCode,
+            auditCode: knowledgeReceipt.errorCode,
+          });
+        }
       }
+    }
+
+    if (!response) {
       const selectedIndex = request.lane === "workspace"
         ? new ExplicitIndex(this.index, resolvedWorkspace.references)
         : this.index;
       const selectedRecords = request.participant.verified ? this.records : new EphemeralRecordProxy(this.records);
       const provider = providerFor(this.providers, role);
       const advisoryContext = providerAdvisoryFromDelivery(knowledgeDelivery);
-      const slice = new ReadOnlyAnswerSlice({ records: selectedRecords, index: selectedIndex, provider, advisoryContext });
+      const slice = new ReadOnlyAnswerSlice({ records: selectedRecords, index: selectedIndex, provider, advisoryContext,
+        retrievalPolicy: request.lane === "workspace" ? "required" : "conversation-aware" });
       try {
         response = await slice.answer(gate1Request(request));
       } catch (error) {

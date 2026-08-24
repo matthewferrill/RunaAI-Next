@@ -97,6 +97,29 @@ test("general lane preserves grounding, honest misses, session recall, commands,
   });
 });
 
+test("ordinary greetings and conversational repair use chat while workspace sources remain mandatory", async () => {
+  const source = sourceSection({ projectId: projectA, sourceId: "README.md", sectionId: "lines-1-20",
+    content: "The selected workspace fact is blue." });
+  const context = harness({ sources: [source], providers: {
+    chat: new ScriptedProvider({ role: "chat", reply: ({ request, evidence }) => ({
+      answer: evidence.length ? `Workspace: ${evidence[0].content}` : `Conversation: ${request.message}`,
+      citations: evidence.map(item => ({ sourceId: item.sourceId, sectionId: item.sectionId })),
+    }) }),
+    research: new ScriptedProvider({ role: "research" }),
+    code: new ScriptedProvider({ role: "code", reply: ({ evidence }) => ({
+      answer: `Workspace: ${evidence[0].content}`,
+      citations: evidence.map(item => ({ sourceId: item.sourceId, sectionId: item.sectionId })),
+    }) }),
+  } });
+  const greeting = await context.service.answer(request("ordinary-greeting-g2", "Hi Runa!"));
+  assert.equal(greeting.answer, "Conversation: Hi Runa!");
+  assert.equal(greeting.retrieval.skipped, true);
+  const workspace = await context.service.answer(request("workspace-required-g2", "Summarize this", "workspace"));
+  assert.match(workspace.answer, /selected workspace fact is blue/);
+  assert.equal(workspace.retrieval.attempted, true);
+  assert.equal(workspace.citations.length, 1);
+});
+
 test("guarded lane refuses policy/protected requests and records only bounded read-only lookups", async () => {
   const source = sourceSection({ projectId: projectA, sourceId: "runtime", sectionId: "commit",
     content: "The synthetic runtime reports commit abc1234." });

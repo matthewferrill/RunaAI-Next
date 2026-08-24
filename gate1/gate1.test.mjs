@@ -20,20 +20,21 @@ function request(id, message, lane = "general", overrides = {}) {
     project: { projectId: overrides.projectId ?? projectA },
     thread: { threadId: overrides.threadId ?? "synthetic-thread" },
     message,
-    history: [],
+    history: overrides.history ?? [],
     budgets: { deadlineMs: 500, maximumPasses: 8, maximumPassages: 8,
       maximumEvidenceCharacters: 8_000, ...(overrides.budgets ?? {}) },
   };
 }
 
-function harness({ sources = [], references, unavailable = false, degraded = false, provider } = {}) {
+function harness({ sources = [], references, unavailable = false, degraded = false, provider,
+  retrievalPolicy = "required" } = {}) {
   const records = new MemoryRecordStore(sources);
   const index = new MemoryIndex({ references: references ?? sources.map(source => ({
     projectId: source.projectId, sourceId: source.sourceId, sectionId: source.sectionId,
     contentSha256: source.contentSha256,
   })), unavailable, degraded });
   const chosenProvider = provider ?? new ScriptedProvider();
-  const slice = new ReadOnlyAnswerSlice({ records, index, provider: chosenProvider });
+  const slice = new ReadOnlyAnswerSlice({ records, index, provider: chosenProvider, retrievalPolicy });
   const checkpointer = new MemorySaver();
   const workflow = createGate1Workflow({ slice, checkpointer });
   return { records, index, provider: chosenProvider, slice, checkpointer, workflow };
@@ -67,6 +68,35 @@ test("general-honest-miss: an empty project record is explicit and never filled 
   assert.equal(response.completion.reason, "honest-empty");
   assert.equal(context.provider.calls.length, 0);
   assert.deepEqual(response.effects, []);
+});
+
+test("general conversation skips project retrieval and reaches Runa", async () => {
+  const context = harness({ retrievalPolicy: "conversation-aware", provider: new ScriptedProvider({ reply: ({ request, evidence }) => ({
+    answer: request.message === "Hi Runa!" ? "Hi! It is good to hear from you." : "I misunderstood your greeting and routed it incorrectly.",
+    citations: evidence.length ? [{ sourceId: evidence[0].sourceId, sectionId: evidence[0].sectionId }] : [],
+  }) }) });
+  const greeting = await context.slice.answer(request("ordinary-greeting", "Hi Runa!"));
+  assert.equal(greeting.answer, "Hi! It is good to hear from you.");
+  assert.equal(greeting.ground, "no-ground-needed");
+  assert.equal(greeting.retrieval.skipped, true);
+  assert.equal(greeting.retrieval.skipReason, "record-not-applicable");
+  assert.equal(context.index.searches.length, 0);
+  const repair = await context.slice.answer(request("ordinary-repair", "That should be an easy answer, what happened?", "general", {
+    history: [{ role: "user", content: "Hi Runa!" },
+      { role: "assistant", content: "The synthetic project record did not contain evidence that answers that question." }],
+  }));
+  assert.match(repair.answer, /misunderstood/i);
+  assert.equal(context.index.searches.length, 0);
+  assert.equal(context.provider.calls.length, 2);
+});
+
+test("an explicit project question still fails closed on an honest empty record", async () => {
+  const context = harness();
+  const response = await context.slice.answer(request("project-empty-after-routing", "What does the project record say about Aurora?"));
+  assert.equal(response.completion.reason, "honest-empty");
+  assert.equal(response.ground, "record-silent");
+  assert.equal(context.provider.calls.length, 0);
+  assert.equal(context.index.searches.length, 1);
 });
 
 test("general-metaphysical-no-search: non-record questions skip retrieval on 3/3 runs", async () => {

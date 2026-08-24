@@ -117,8 +117,9 @@ test("Gate 4C-3A duplicate execution invokes the provider once and rollback is a
 
   const disabled = harness();
   const prior = await disabled.service.answer(request("disabled", "durability guidance", "guarded"));
-  assert.equal(prior.completion.reason, "honest-empty");
+  assert.equal(prior.completion.reason, "complete");
   assert.equal(prior.approvedKnowledge.reason, "adapter-disabled");
+  assert.equal(disabled.providers.chat.calls.length, 1);
 });
 
 test("Gate 4C-3A distinguishes selection from actual model delivery", async () => {

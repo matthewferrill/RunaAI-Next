@@ -103,7 +103,10 @@ try{
   if((Invoke-RestMethod -Method Post -Uri "$($config.openfga.baseUrl)/stores/$store/check" -Headers $fgaHeaders -ContentType 'application/json' -Body $checkBody -TimeoutSec 10).allowed-ne$true){throw 'gate7a-invitation-openfga-verification-failed'}
 
   $actions=@('VERIFY_EMAIL','UPDATE_PROFILE','UPDATE_PASSWORD')
-  $redirect=[Uri]::EscapeDataString($origin);$actionUri="$base/admin/realms/$realmName/users/$createdUserId/execute-actions-email?client_id=$clientId&redirect_uri=$redirect&lifespan=600"
+  # The setup email does not redirect after required actions. A redirect must
+  # exactly match a client allow-list entry, and the only approved entry is the
+  # OIDC callback route, which is not a valid post-enrollment destination.
+  $actionUri="$base/admin/realms/$realmName/users/$createdUserId/execute-actions-email?lifespan=600"
   Invoke-RestMethod -Method Put -Uri $actionUri -Headers $headers -ContentType 'application/json' -Body ($actions|ConvertTo-Json -Compress)|Out-Null
   Assert-ActiveRelease
   [ordered]@{schemaVersion='runa2-gate7a-control-ordinary-invitation/v1';passed=$true;principalId=$PrincipalId;

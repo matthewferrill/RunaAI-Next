@@ -3,25 +3,56 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>RunaAI parallel candidate</title>
+  <title>RunaAI</title>
   <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
+  <header class="site-header">
+    <a class="brand" href="/" aria-label="RunaAI home"><span class="brand-mark">R</span><span>RunaAI</span></a>
+    <div class="session-controls">
+      <span id="session-label" class="session-label" hidden></span>
+      <button id="logout" class="quiet-button" type="button" hidden>Sign out</button>
+    </div>
+  </header>
   <main>
-    <p class="eyebrow">RunaAI</p>
-    <h1>Parallel candidate</h1>
-    <p id="summary">Checking the candidate's governed release status…</p>
-    <dl>
-      <div><dt>Authority</dt><dd id="authority">Unknown</dd></div>
-      <div><dt>Release</dt><dd id="release">Unknown</dd></div>
-      <div><dt>Scope</dt><dd id="scope">Unknown</dd></div>
-    </dl>
-    <p class="boundary">This candidate cannot read protected data or perform an action while shadow authority is active.</p>
-    <nav class="actions" aria-label="RunaAI sign in">
-      <a class="primary" href="/session/user/start">Sign in with username and password</a>
-      <a href="/session/user/passkey/start">Sign in with a passkey</a>
-      <a href="/session/start">Owner or administrator sign in</a>
-    </nav>
+    <section id="welcome" class="welcome" aria-labelledby="welcome-title">
+      <p class="eyebrow">Private AI, thoughtfully governed</p>
+      <h1 id="welcome-title">Welcome to Runa</h1>
+      <p id="summary" class="summary">Checking service readiness…</p>
+      <p id="boundary" class="boundary">Chat remains unavailable until the selected core reports active authority.</p>
+      <nav id="sign-in-actions" class="actions" aria-label="RunaAI sign in">
+        <a class="primary" href="/session/user/start">Sign in with username and password</a>
+        <a href="/session/user/passkey/start">Sign in with a passkey</a>
+        <a class="admin-link" href="/session/start">Owner or administrator sign in</a>
+      </nav>
+      <details class="release-details">
+        <summary>Service details</summary>
+        <dl>
+          <div><dt>Authority</dt><dd id="authority">Unknown</dd></div>
+          <div><dt>Release</dt><dd id="release">Unknown</dd></div>
+          <div><dt>Scope</dt><dd id="scope">Unknown</dd></div>
+        </dl>
+      </details>
+    </section>
+
+    <section id="chat" class="chat" aria-labelledby="chat-title" hidden>
+      <div class="chat-heading">
+        <p class="eyebrow">Ordinary private chat</p>
+        <h1 id="chat-title">Chat with Runa</h1>
+        <p>Your conversation stays within your isolated personal scope. Protected records and administrative actions are not available here.</p>
+      </div>
+      <div id="transcript" class="transcript" aria-live="polite" aria-label="Conversation">
+        <div class="message assistant"><span class="message-label">Runa</span><p>Hi Matthew. What would you like to talk about?</p></div>
+      </div>
+      <form id="chat-form" class="composer">
+        <label for="message">Message Runa</label>
+        <textarea id="message" name="message" rows="3" maxlength="4000" placeholder="Type your message…" required></textarea>
+        <div class="composer-footer">
+          <span id="chat-status" role="status">Ready</span>
+          <button id="send" class="primary-button" type="submit">Send</button>
+        </div>
+      </form>
+    </section>
   </main>
   <script type="module" src="/status.js"></script>
 </body>

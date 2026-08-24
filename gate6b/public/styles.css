@@ -1,15 +1,57 @@
-:root { color-scheme: dark; font-family: Inter, ui-sans-serif, system-ui, sans-serif; background: #101311; color: #edf3ee; }
-body { min-height: 100vh; margin: 0; display: grid; place-items: center; background: radial-gradient(circle at top, #1d3529, #101311 54%); }
-main { width: min(42rem, calc(100% - 3rem)); padding: 3rem; border: 1px solid #42604f; border-radius: 1.25rem; background: rgba(16, 19, 17, .9); box-shadow: 0 1.5rem 5rem #0008; }
-.eyebrow { color: #9fd3b2; font-weight: 750; letter-spacing: .16em; text-transform: uppercase; }
-h1 { margin: .25rem 0 1rem; font-size: clamp(2rem, 7vw, 4rem); line-height: 1; }
-p { color: #c5d1c8; line-height: 1.6; }
-dl { display: grid; gap: .75rem; margin: 2rem 0; }
-dl div { display: grid; grid-template-columns: 7rem 1fr; gap: 1rem; padding: .8rem 0; border-bottom: 1px solid #2c3b32; }
+:root { color-scheme: dark; font-family: Inter, ui-sans-serif, system-ui, sans-serif; background: #0b100d; color: #f1f6f2; }
+* { box-sizing: border-box; }
+body { min-height: 100vh; margin: 0; background: radial-gradient(circle at 50% -20%, #284635, #101913 46%, #090d0b 100%); }
+button, textarea { font: inherit; }
+.site-header { height: 4.5rem; padding: 0 clamp(1.25rem, 4vw, 3rem); display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #ffffff14; background: #0b100dcc; backdrop-filter: blur(18px); }
+.brand { display: flex; align-items: center; gap: .75rem; color: #f1f6f2; font-weight: 750; letter-spacing: .02em; text-decoration: none; }
+.brand-mark { width: 2.25rem; height: 2.25rem; display: grid; place-items: center; border-radius: .7rem; background: linear-gradient(145deg, #b4e2c2, #6fae83); color: #102016; font-family: Georgia, serif; font-size: 1.3rem; }
+.session-controls { display: flex; align-items: center; gap: 1rem; }
+.session-label { color: #aab9ae; font-size: .9rem; }
+main { width: min(60rem, calc(100% - 2rem)); margin: clamp(2rem, 6vw, 5rem) auto; }
+.welcome, .chat { border: 1px solid #ffffff18; border-radius: 1.5rem; background: #111914e8; box-shadow: 0 1.5rem 5rem #0007; }
+.welcome { width: min(44rem, 100%); margin: 0 auto; padding: clamp(2rem, 7vw, 4rem); }
+.eyebrow { margin: 0 0 .65rem; color: #9fd3b2; font-size: .78rem; font-weight: 800; letter-spacing: .16em; text-transform: uppercase; }
+h1 { margin: 0 0 1rem; font-family: Georgia, Cambria, serif; font-size: clamp(2.3rem, 7vw, 4.5rem); font-weight: 500; line-height: 1; letter-spacing: -.035em; }
+p { color: #c7d2ca; line-height: 1.65; }
+.summary { font-size: 1.08rem; }
+.boundary { margin: 1.5rem 0 0; padding: 1rem 1.15rem; border-left: .22rem solid #7fb792; border-radius: .25rem .65rem .65rem .25rem; background: #19271e; color: #d8e7dc; }
+.actions { display: grid; gap: .75rem; margin-top: 1.75rem; }
+.actions a, .primary-button, .quiet-button { min-height: 2.9rem; padding: .8rem 1rem; border: 1px solid #63816e; border-radius: .75rem; color: #deebe1; background: transparent; text-align: center; text-decoration: none; cursor: pointer; }
+.actions a:hover, .actions a:focus-visible, .quiet-button:hover, .quiet-button:focus-visible { border-color: #a8d8b8; background: #1b2a21; }
+.actions a.primary, .primary-button { border-color: #9fd3b2; background: #9fd3b2; color: #102016; font-weight: 750; }
+.actions a.primary:hover, .primary-button:hover { background: #b7e6c6; }
+.admin-link { margin-top: .25rem; font-size: .9rem; }
+.release-details { margin-top: 1.75rem; color: #92a097; font-size: .88rem; }
+.release-details summary { cursor: pointer; }
+dl { display: grid; gap: .4rem; margin: 1rem 0 0; }
+dl div { display: grid; grid-template-columns: 6rem 1fr; gap: 1rem; padding: .6rem 0; border-bottom: 1px solid #ffffff12; }
 dt { color: #8e9d93; }
 dd { margin: 0; overflow-wrap: anywhere; }
-.boundary { padding: 1rem; border-left: .25rem solid #d7af69; background: #2c261b; color: #f1dfbd; }
-.actions { display: grid; gap: .75rem; margin-top: 1.5rem; }
-.actions a { padding: .8rem 1rem; border: 1px solid #63816e; border-radius: .65rem; color: #dce9df; text-align: center; text-decoration: none; }
-.actions a:hover, .actions a:focus-visible { border-color: #9fd3b2; background: #1b2a21; }
-.actions a.primary { background: #9fd3b2; color: #102016; font-weight: 700; }
+.chat { min-height: calc(100vh - 9rem); display: grid; grid-template-rows: auto minmax(18rem, 1fr) auto; overflow: hidden; }
+.chat-heading { padding: 2rem 2rem 1.25rem; border-bottom: 1px solid #ffffff12; }
+.chat-heading h1 { font-size: clamp(2rem, 5vw, 3.25rem); }
+.chat-heading p:last-child { max-width: 45rem; margin-bottom: 0; }
+.transcript { padding: 2rem; display: flex; flex-direction: column; gap: 1.15rem; overflow-y: auto; }
+.message { width: min(78%, 42rem); padding: 1rem 1.1rem; border: 1px solid #ffffff12; border-radius: 1rem; background: #18231c; }
+.message.user { align-self: flex-end; background: #274332; border-color: #5e8c6d; }
+.message p { margin: .3rem 0 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+.message-label { color: #9fd3b2; font-size: .75rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+.composer { padding: 1.25rem 2rem 1.5rem; border-top: 1px solid #ffffff12; background: #0e1511; }
+.composer label { display: block; margin-bottom: .55rem; color: #aebbb2; font-size: .85rem; }
+.composer textarea { width: 100%; resize: vertical; min-height: 5rem; max-height: 15rem; padding: .9rem 1rem; border: 1px solid #52675a; border-radius: .8rem; outline: none; background: #151f19; color: #f3f8f4; line-height: 1.5; }
+.composer textarea:focus { border-color: #9fd3b2; box-shadow: 0 0 0 .2rem #9fd3b225; }
+.composer-footer { margin-top: .8rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+#chat-status { color: #91a197; font-size: .85rem; }
+.primary-button { min-width: 6rem; }
+.primary-button:disabled, .quiet-button:disabled { opacity: .55; cursor: wait; }
+.quiet-button { min-height: auto; padding: .55rem .8rem; }
+[hidden] { display: none !important; }
+@media (max-width: 640px) {
+  .site-header { padding: 0 1rem; }
+  .session-label { display: none; }
+  main { width: calc(100% - 1rem); margin: .5rem auto; }
+  .welcome, .chat { border-radius: 1rem; }
+  .chat { min-height: calc(100vh - 5.5rem); }
+  .chat-heading, .transcript, .composer { padding-left: 1rem; padding-right: 1rem; }
+  .message { width: 92%; }
+}

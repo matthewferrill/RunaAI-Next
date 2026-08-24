@@ -104,6 +104,22 @@ export function createCandidateHttpServer({ application, runtimeStatus, readines
       }
       if (request.method === "GET" && url.pathname === "/api/runtime/status") return json(response, 200, await runtimeStatus());
       if (request.method === "GET" && url.pathname === "/api/readiness/status") return json(response, 200, await readinessStatus());
+      if (request.method === "GET" && url.pathname === "/api/session/status") {
+        const ownerSession = cookie(request, "__Host-runa_owner_session");
+        const ordinarySession = cookie(request, "__Host-runa_user_session");
+        if (ownerSession && ordinarySession) {
+          throw coded("gate7a-browser-session-ambiguous", "Only one browser identity may be active.");
+        }
+        if (!ownerSession && !ordinarySession) {
+          return json(response, 200, { schemaVersion: "runa2-gate7a-browser-session-status/v1",
+            authenticated: false, sessionType: null, privateValuesIncluded: false });
+        }
+        const sessionService = ordinarySession ? ordinarySessions : browserCeremony;
+        if (!sessionService) throw coded("gate7a-browser-session-unavailable", "The browser session service is unavailable.");
+        await sessionService.credentialForSession(ordinarySession ?? ownerSession);
+        return json(response, 200, { schemaVersion: "runa2-gate7a-browser-session-status/v1",
+          authenticated: true, sessionType: ordinarySession ? "ordinary" : "owner", privateValuesIncluded: false });
+      }
       if (request.method === "GET" && url.pathname === "/api/owner-ceremony/status") {
         if (!browserCeremony) throw coded("gate6c-browser-ceremony-unavailable", "The owner ceremony is unavailable.");
         return json(response, 200, await browserCeremony.status());

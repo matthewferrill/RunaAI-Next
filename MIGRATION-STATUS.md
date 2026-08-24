@@ -13,7 +13,7 @@ boundaries, verification state, or the next planned work.
 | RunaAI-Next `main` | Exact inherited RunaLab completion baseline | Stable integration target only after reviewed migration completion |
 | RunaAI-Next `runa2/integration` | Accumulated accepted migration gates | Development integration; not production |
 | Short-lived `runa2/*` gate branches | One approved, measured migration slice | Experimental until validated and approved |
-| Control release `runaai-next-gate7a-lan-chat-2026-08-24-20039fe` | Running selected-core RunaAI application at the canonical LAN origin | Production authority for the exact selected read-only core; later product capabilities remain separately decision-gated |
+| Control release `runaai-next-gate7a-lan-ui-2026-08-24-9cea964` | Running selected-core RunaAI application at the canonical LAN origin | Production authority for the exact selected read-only core and reviewed three-column shell; later product capabilities remain separately decision-gated |
 
 The product name is RunaAI. `RunaAI-Next`, `runa2`, and similar labels are repository and branch
 identifiers during migration, not product identities.
@@ -110,6 +110,19 @@ repository and never push migration work into either source repository.
   its predecessor remains retained. Full evidence is in
   `gate7c/GATE7C-UI-SHELL-RESULTS-2026-08-24.md`. The steward must review the proportions and visual
   direction before any rail receives a product capability and before this branch is merged.
+- The steward accepted Gate 7C's overall visual direction and requested the first left-rail capability.
+  Gate 7D is frozen and implemented on the dependent `codex/gate7d-chat-code-navigation` branch.
+  It replaces the generic ordinary-member label with a bounded initials avatar and signed-in display
+  name, and adds separate Chat and Code navigation areas. Each area has its own New action, encrypted
+  participant-scoped projects, durable chat-record list, and independent in-memory selection state.
+  PostgreSQL remains the only record authority; the browser gains no local catalog. Code is a distinct
+  deterministic conversational role with no repository, file, terminal, execution, network, learning,
+  or protected-record capability. Focused validation passes 8/8, the full repository suite passes
+  406/406, `git diff --check` passes, and desktop/phone visual checks passed against a disposable
+  loopback preview. Source commits are `27fa026` for frozen criteria, `7b9b3bb` for implementation,
+  and `3ddaee0` for evidence. Control remains on the exact Gate 7C release above; the next blocker is
+  steward authorization for an exact rollback-protected Gate 7D successor projection and activation.
+  Full evidence is in `gate7d/GATE7D-CHAT-CODE-NAVIGATION-RESULTS-2026-08-24.md`.
 - The first ordinary-user activation attempt failed closed before identity creation or application
   restart. RCA: Windows PowerShell 5.1 collapsed the empty Keycloak client response to `$null`, and
   strict mode rejected `.Count`. Normalized reconciliation then proved zero ordinary clients, zero

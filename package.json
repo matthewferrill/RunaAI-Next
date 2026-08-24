@@ -20,6 +20,7 @@
     "test:gate6c": "node --test gate6c/gate6c.test.mjs",
     "test:gate7a": "node --test gate7a/gate7a.test.mjs gate7a/hostname-decision.test.mjs gate7a/credential-prep.test.mjs gate7a/certificate-staging.test.mjs gate7a/canonical-session.test.mjs gate7a/lan-activation.test.mjs gate7a/ordinary-session.test.mjs gate7a/ordinary-access-control.test.mjs",
     "test:gate7b": "node --test gate1/mastra-provider.test.mjs gate7b/customer-journey.test.mjs gate7b/deployment.test.mjs",
+    "test:gate7c": "node --test gate7c/ui-shell.test.mjs",
     "verify:gate7b:customer": "node gate7b/run-customer-journey.mjs",
     "verify:gate0": "node gate0/verify-gate0.mjs",
     "verify:gate1:integration": "node gate1/run-integration.mjs",

@@ -96,6 +96,13 @@ repository and never push migration work into either source repository.
   prose. Both are corrected in the exact active release. The steward's exact-release recheck returned the
   correct square root of pi without an audit label and the live-weather limitation without Gate terminology.
   Gate 7B is complete.
+- Gate 7C is frozen by
+  `gate7c/GATE7C-UI-SHELL-SCOPE-AND-GREEN-CRITERIA-2026-08-24.md`. Its first presentation-only slice
+  restores the familiar RunaAI three-column workspace around the existing ordinary chat: independent
+  empty left and right expansion areas, the central transcript and composer, and no labels, feature
+  wiring, persistence, data access, or production change. The baseline is 32/32 Gate 6B checks and
+  17/17 Gate 7B checks. The steward must review the shell proportions and visual direction before any
+  rail receives a product capability and before this branch is merged or deployed.
 - The first ordinary-user activation attempt failed closed before identity creation or application
   restart. RCA: Windows PowerShell 5.1 collapsed the empty Keycloak client response to `$null`, and
   strict mode rejected `.Count`. Normalized reconciliation then proved zero ordinary clients, zero
@@ -408,7 +415,8 @@ plain-language steward experience, or governed action pathway.
 | 6 | Selected-core production cutover and rollback window | Complete and closed; exact selected-core release is authoritative, observation green, freeze released, legacy rollback healthy | Complete |
 | 7A | Multi-device access foundation | Canonical LAN origin, owner passkey path, SMTP/invitation, separate ordinary password client, and Omen customer acceptance active | Representative clients, certificate renewal, and off-LAN boundary remain |
 | 7B | Complete customer journey through the selected read-only stack | Complete; production sign-in, sustained chat, safe presentation, exact-release recheck, and rollback evidence green | Approved by steward 2026-08-24; completed 2026-08-24 |
-| 7C+ | Deferred product extensions | Not started; capability inventory and prioritization are next | New baseline and separate decision per extension group |
+| 7C | First user-interface shell | Scope and green criteria frozen; implementation isolated on `codex/gate7c-ui-shell` | Steward review required before merge or deployment |
+| 7D+ | Deferred product extensions | Not started; capability inventory and prioritization follow the shell review | New baseline and separate decision per extension group |
 
 ## Bootstrap validation
 
@@ -452,37 +460,14 @@ No dependency was changed during the prerequisite disposition. Full evidence is 
 
 ## Next operation
 
-Complete Gate 7B as one customer journey rather than another isolated chat patch. Prove canonical login,
-ordinary-session entry, sustained multi-turn general chat, stable/current/project/protected prompt classes,
-typed provider failures, retry, refresh/restart continuity, logout, and every internal read-only answer lane
-through one release composition. The browser remains chat-only; guarded/research/workspace/code behavior is
-validated internally and must be described truthfully rather than exposed as a finished code agent. Deploy
-only after the full customer-flow matrix and private-model boundary are green, with the exact active release
-retained for automatic rollback.
+Implement and review Gate 7C as a static authenticated workspace shell. Preserve the working ordinary
+login, chat, retry, logout, and truthful capability boundaries. Add only two independently collapsible,
+empty expansion areas around the central transcript and composer. Do not name or wire product features,
+add browser persistence, read data, activate networking, or deploy this branch. Run focused and full
+verification, then present the wide and narrow shell for steward review before merge.
 
-Gate 6 remains closed and the selected-core authority remains active. Gate 7A's canonical LAN origin is
-now live at `https://runa.bridgebuildersai.com`; the old
-`https://192.168.50.169:9761` route is retained only for commissioning and rollback. The canonical
-route has an ordinary trusted certificate and exposes only Caddy on TCP 443 to the Private/LocalSubnet
-boundary. Off-LAN ingress is disabled.
-
-The separate `runaai-next-user` password-only client and immutable ordinary-access successor are now
-active. The owner client is unchanged, its completed proof is bound to the exact release, the selected-
-core authority remains active, protected selected data remains imported, and Omen independently passed
-trusted-TLS/liveness/root and both login-route redirect checks. Aggregate evidence is in
-`gate7a/evidence/CONTROL-ORDINARY-ACCESS-ACTIVATION-RESULTS.json`.
-
-The next bounded operation requires an SMTP sender for Keycloak. The SMTP credential must be entered under
-Matthew's Control identity, retained only as DPAPI CurrentUser material, tested without printing any
-private value, and rolled back if realm verification fails. After that, issue one short-lived
-invitation to Matthew's separate personal email, let the invitee choose a username/password and verify
-the address, and validate from Omen: ordinary login, bounded `SameSite=Lax` navigation,
-logout/revocation, password recovery, denial of owner/protected data and actions, and unchanged owner
-passkey administration. Do not put the personal address, password, invitation token, or SMTP secret in
-Git, evidence, or chat.
-
-After the isolated personal account passes, continue Gate 7A with a second PC, a phone, and a
-separately reviewed off-LAN boundary. Certificate renewal remains explicit because the Porkbun
-credential is DPAPI CurrentUser-bound. E3, E4/device-vault recovery, the separate approved-knowledge
-vector index, Qwen3.6 deliberate review, the existing live BGE endpoint, broader legacy surfaces, and
-the user-facing conversational UI remain separately deferred.
+Gate 6 remains closed and selected-core production authority remains active at the exact release named
+above. Gate 7A follow-on checks for a second PC, phone, certificate renewal, and separately reviewed
+off-LAN ingress remain independent of the Gate 7C presentation branch. E3, E4/device-vault recovery,
+the separate approved-knowledge vector index, Qwen3.6 deliberate review, the existing live BGE
+endpoint, and broader legacy capabilities also remain separately deferred.

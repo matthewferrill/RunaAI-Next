@@ -7,6 +7,8 @@ const protectedPattern = /\b(device vault|dpapi|windows hello|credential store|p
 const metaphysicalPattern = /\b(god|deity|soul|meaning of life|afterlife)\b/i;
 const policySuspensionPattern = /\b(turn off|disable|suspend|ignore|bypass)\b.{0,40}\b(approval|policy|guard|gate)s?\b/i;
 const crossProjectPattern = /\b(?:other|another) project(?:'s)?\b/i;
+const projectRecordPattern = /\b(project|repository|repo|codebase|workspace|documents?|documentation|files?|folders?|sources?|records?|evidence|facts?|handoff|readme|commits?|branches?|pull requests?|tests?|implementation|configuration|configured|config|settings?|migration|release|deployment|architecture|database|schema|runtime|reranker|dependency|boundary)\b/i;
+const contextualFollowUpPattern = /^\s*(why|how|what|where|when|who|which|that|it|this|can you|could you|explain|tell me more|continue|summarize|what about)\b/i;
 const stopWords = new Set(["a", "an", "and", "does", "explain", "how", "is", "of", "the", "to", "what"]);
 
 function requestTimeoutError() {
@@ -60,6 +62,13 @@ export function deterministicPreflight(message) {
 export function classifyGround(message, evidence, advisoryContext = null) {
   if (metaphysicalPattern.test(message)) return "not-a-question-of-fact";
   return evidence.length || advisoryContext?.lessonCount > 0 ? "record-answers" : "record-silent";
+}
+
+export function requiresProjectRecord(message, history = []) {
+  if (projectRecordPattern.test(String(message))) return true;
+  if (!contextualFollowUpPattern.test(String(message))) return false;
+  const priorUserMessage = [...history].reverse().find(turn => turn?.role === "user")?.content ?? "";
+  return projectRecordPattern.test(String(priorUserMessage));
 }
 
 function baseResponse(request, correlationId) {
@@ -130,12 +139,16 @@ function boundedEvidence(evidence, maximumCharacters) {
 }
 
 export class ReadOnlyAnswerSlice {
-  constructor({ records, index, provider, telemetry = null, advisoryContext = null }) {
+  constructor({ records, index, provider, telemetry = null, advisoryContext = null, retrievalPolicy = "required" }) {
+    if (!["conversation-aware", "required"].includes(retrievalPolicy)) {
+      throw new Error("retrievalPolicy must be conversation-aware or required");
+    }
     this.records = records;
     this.index = index;
     this.provider = provider;
     this.telemetry = telemetry;
     this.advisoryContext = advisoryContext;
+    this.retrievalPolicy = retrievalPolicy;
   }
 
   async answer(rawRequest) {
@@ -177,6 +190,16 @@ export class ReadOnlyAnswerSlice {
       response.retrieval.skipped = true;
       response.retrieval.skipReason = "record-not-applicable";
       response.ground = "not-a-question-of-fact";
+      return parseAnswerResponse(await this.#providerAnswer(request, [], response, deadlineAt));
+    }
+
+    const retrievalRequired = request.lane === "research" || this.retrievalPolicy === "required"
+      || requiresProjectRecord(request.message, request.history);
+    if (!retrievalRequired) {
+      response.retrieval.skipped = true;
+      response.retrieval.skipReason = "record-not-applicable";
+      response.ground = "no-ground-needed";
+      response.auditCodes.push("general-conversation-no-retrieval");
       return parseAnswerResponse(await this.#providerAnswer(request, [], response, deadlineAt));
     }
 
@@ -288,6 +311,7 @@ export class ReadOnlyAnswerSlice {
       }
       const generated = await this.provider.answer({
         request: { lane: request.lane, message: request.message, history: request.history },
+        ground: response.ground,
         advisory: this.advisoryContext ? {
           schemaVersion: this.advisoryContext.schemaVersion,
           label: this.advisoryContext.label,

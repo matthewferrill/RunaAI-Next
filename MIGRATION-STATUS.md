@@ -13,7 +13,7 @@ boundaries, verification state, or the next planned work.
 | RunaAI-Next `main` | Exact inherited RunaLab completion baseline | Stable integration target only after reviewed migration completion |
 | RunaAI-Next `runa2/integration` | Accumulated accepted migration gates | Development integration; not production |
 | Short-lived `runa2/*` gate branches | One approved, measured migration slice | Experimental until validated and approved |
-| Control release `runaai-next-gate7a-lan-2026-08-23-fdf6e0a` | Running selected-core RunaAI application at the canonical LAN origin | Production authority for the exact Gate 6 selected core; Gate 7A changes ingress/session topology, not selected-core authority |
+| Control release `runaai-next-gate7a-lan-chat-2026-08-24-20039fe` | Running selected-core RunaAI application at the canonical LAN origin | Production authority for the exact selected read-only core; later product capabilities remain separately decision-gated |
 
 The product name is RunaAI. `RunaAI-Next`, `runa2`, and similar labels are repository and branch
 identifiers during migration, not product identities.
@@ -58,29 +58,23 @@ repository and never push migration work into either source repository.
   the only new LAN-facing service on TCP 443, and every backend remains loopback-bound. Keycloak now
   advertises the same-origin `/auth` issuer and `runa.bridgebuildersai.com` RP ID. The session cookie is
   host-only, `Secure`, `HttpOnly`, and explicitly `SameSite=Lax`; off-LAN ingress remains disabled.
-- The exact active release is `runaai-next-gate7a-lan-knowledge-2026-08-24-a86f3e4`, commit
-  `a86f3e4b87d697a1ac56dac7bcd5647222157410`, artifact digest `0735176d...`. Authority is active,
-  cutover is closed at revision 10, all four dependencies are ready, the 29,490-file artifact is
+- The exact active release is `runaai-next-gate7a-lan-chat-2026-08-24-20039fe`, commit
+  `20039fefc1f286e963ebbd639e9ca9bc22aaea5b`, artifact digest
+  `7c94f120460b325cc5052d190e9d3a9682528e439af9433bfb495ee0f4c8fda5`. Authority is active,
+  cutover is closed at revision 10, all four dependencies are ready, the 29,499-file artifact is
   verified, the prior release is retained for rollback, and neither legacy nor protected product data
-  changed. The full repository suite passes 375/375 at that commit.
+  changed. The full repository suite passes 393/393 at that commit.
 - Gate 7A is not closed. Canonical-origin owner passkey sign-in has completed and the protected
   `matthew-owner` path remains passkey-only. The steward approved a separate ordinary-user model:
   invitation-only enrollment, an individual username/password, verified-email recovery, and an
   optional passkey for ordinary chat. Public self-registration remains disabled. The local
   implementation uses a separate exact password-only Keycloak client, separate encrypted sessions,
   owner-role password denial, an exact automatically reversible application successor, and short-lived
-  rollback-safe invitations. Focused Gate 7A validation is 67/67 and the full repository suite is
-  370/370. The exact ordinary-access release `runaai-next-gate7a-lan-ordinary-2026-08-23-130457c`
-  is now active. The separate client and password route reconcile exactly, the owner client is unchanged,
-  and selected-core authority/protected data remain unchanged. Control currently has no SMTP sender,
-  which blocks live invitation and recovery acceptance.
-  Matthew's separate personal-email account is the selected first non-owner fixture; the personal
-  address must not enter Git or retained evidence. SMTP, the first ordinary invitation, password setup,
-  ordinary sign-in, and the initial conversational UI are now active. Live customer testing then exposed
-  three cross-stack defects that component tests missed: greetings were forced through project retrieval,
-  optional approved knowledge blocked ordinary chat, and an incomplete provider result leaked a raw JSON
-  parser failure. The first two are deployed; the third proves the customer journey is not yet accepted.
-  A second PC, a phone, off-LAN ingress, and certificate renewal remain separate checks.
+  rollback-safe invitations. Focused Gate 7A validation is 67/67. The separate client and password route
+  reconcile exactly, the owner client is unchanged, and selected-core authority/protected data remain
+  unchanged. SMTP, the first ordinary invitation, password setup, ordinary sign-in, and the initial
+  conversational UI are active. A second PC, a phone, off-LAN ingress, and certificate renewal remain
+  separate checks.
 
 - Gate 7B is now frozen by
   `gate7b/GATE7B-CUSTOMER-JOURNEY-SCOPE-AND-GREEN-CRITERIA-2026-08-24.md`. It replaces symptom-by-symptom
@@ -88,14 +82,19 @@ repository and never push migration work into either source repository.
   results, retries, continuity, all internal read-only answer lanes, and truthful workspace/code limits.
   No new effect, source picker, web research, code execution, learning activation, protected-owner
   capability, or off-LAN ingress is included.
-- Gate 7B's source correction now passes 389/389 repository tests and all 11 checks in the executable
+- Gate 7B's source correction now passes 393/393 repository tests and all 11 checks in the executable
   login-to-logout synthetic customer journey. The already-running Control private model passed all
   five aggregate checks for cold/warm plain chat, evidence-bearing research, evidence-bearing workspace,
   exact model identity, deterministic role routing, and citation mode. Ordinary chat no longer requires
   model-generated JSON; incomplete model results are typed, not recorded as completed turns, and receive
   a customer-safe retry path. The bounded deadline chain is 60 seconds application, 65 seconds browser
-  and provider proxy, and 70 seconds public application proxy. The production successor and canonical
-  browser acceptance remain pending, so Gate 7B is not yet complete.
+  and provider proxy, and 70 seconds public application proxy. The rollback-protected application/Caddy
+  successor is active. Omen live acceptance proved ordinary password sign-in, session entry, ten sustained
+  customer turns, general model conversation, honest live-lookup refusal, and continued recovery after
+  the prior failures. It also exposed two presentation defects: `.mjs` was served as generic binary data,
+  preventing Edge from running the page, and typed audit labels were appended to otherwise valid customer
+  prose. Both are corrected in the exact active release; a short exact-release transcript recheck remains
+  before Gate 7B is closed.
 - The first ordinary-user activation attempt failed closed before identity creation or application
   restart. RCA: Windows PowerShell 5.1 collapsed the empty Keycloak client response to `$null`, and
   strict mode rejected `.Count`. Normalized reconciliation then proved zero ordinary clients, zero
@@ -407,7 +406,7 @@ plain-language steward experience, or governed action pathway.
 | 5 | Operations, private transport, authentication/authorization, recovery | Complete; accepted and merged as `a986419` | Complete |
 | 6 | Selected-core production cutover and rollback window | Complete and closed; exact selected-core release is authoritative, observation green, freeze released, legacy rollback healthy | Complete |
 | 7A | Multi-device access foundation | Canonical LAN origin, owner passkey path, SMTP/invitation, separate ordinary password client, and initial chat UI active; complete customer acceptance is pending Gate 7B | Representative clients, certificate renewal, and off-LAN boundary remain |
-| 7B | Complete customer journey through the selected read-only stack | Green criteria frozen; implementation in progress after three live cross-stack defects | Approved by steward 2026-08-24 |
+| 7B | Complete customer journey through the selected read-only stack | Production path active and sustained Omen chat proven; exact-release transcript recheck pending after final presentation correction | Approved by steward 2026-08-24 |
 | 7C+ | Deferred extensions | Not started | New baseline and separate approval per extension group |
 
 ## Bootstrap validation

@@ -1,5 +1,5 @@
 import { createHash, randomBytes } from "node:crypto";
-import { ReadOnlyAnswerSlice } from "../gate1/core.mjs";
+import { ReadOnlyAnswerSlice, requiresProjectRecord } from "../gate1/core.mjs";
 import { parseGate2AnswerRequest, parseGate2AnswerResponse, GATE2_LANE_CAPABILITIES, GATE2_MODEL_ROLES } from "./contracts.mjs";
 import { approvedKnowledgeReceipt, providerAdvisoryFromDelivery } from "../gate4c/answer-context.mjs";
 
@@ -154,10 +154,12 @@ export class Gate2ReadOnlyService {
 
   async #execute(request) {
     const role = GATE2_MODEL_ROLES[request.lane];
+    const knowledgeRequired = request.lane !== "general" || requiresProjectRecord(request.message, request.history);
     let resolvedWorkspace = { references: [], denied: [] };
     let knowledgeDelivery = null;
     let response = deterministicResponse(request);
-    let knowledgeFallbackReason = response ? "not-evaluated-deterministic-boundary" : "adapter-disabled";
+    let knowledgeFallbackReason = response ? "not-evaluated-deterministic-boundary"
+      : knowledgeRequired ? "adapter-disabled" : "not-applicable-general-conversation";
     if (!response && request.lane === "workspace") {
       resolvedWorkspace = await this.workspaceResolver.resolve(request.project.projectId, request.workspace.sources);
       if (resolvedWorkspace.denied.length) response = emptyV1(request, {
@@ -167,7 +169,7 @@ export class Gate2ReadOnlyService {
       if (response) knowledgeFallbackReason = "not-evaluated-workspace-boundary";
     }
 
-    if (!response) {
+    if (!response && knowledgeRequired) {
       if (this.approvedKnowledge) {
         try {
           knowledgeDelivery = await this.approvedKnowledge.select({

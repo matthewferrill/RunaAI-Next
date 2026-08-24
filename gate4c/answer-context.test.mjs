@@ -88,7 +88,7 @@ test("Gate 4C-3A scopes personal project and capability lessons before provider 
 
 test("Gate 4C-3A rejects fabricated, protected-like, stale, forbidden, and denied delivery", async () => {
   const fake = harness({ adapter: { async select() { return { providerContext: { lessonCount: 1 } }; } } });
-  const fakeResponse = await fake.service.answer(request("fake", "synthetic guidance"));
+  const fakeResponse = await fake.service.answer(request("fake", "synthetic project guidance"));
   assert.equal(fakeResponse.approvedKnowledge.delivered, false);
   assert.equal(fakeResponse.approvedKnowledge.errorCode, "approved-knowledge-delivery-invalid");
   assert.equal(fake.providers.chat.calls.length, 0);

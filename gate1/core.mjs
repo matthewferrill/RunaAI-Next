@@ -352,6 +352,20 @@ export class ReadOnlyAnswerSlice {
         response.auditCodes.push("provider-output-limited");
         return response;
       }
+      const providerFailures = {
+        "provider-output-empty": "Runa returned no completed answer. Please try that message again.",
+        "provider-response-invalid": "Runa returned an incomplete response. Please try that message again.",
+        "provider-shape-invalid": "Runa returned an incomplete response. Please try that message again.",
+        "provider-incomplete": "Runa did not finish the response. Please try that message again.",
+        "provider-transport-failed": "Runa's model is temporarily unavailable. Please try that message again.",
+        "provider-model-mismatch": "Runa's configured model did not match the selected route.",
+      };
+      if (providerFailures[error?.code]) {
+        response.answer = providerFailures[error.code];
+        response.completion = { reason: error.code, timedOut: false, outputLimited: false };
+        response.auditCodes.push(error.code);
+        return response;
+      }
       if (error?.code !== "request-timeout" && error?.code !== "provider-timeout" &&
         error?.name !== "TimeoutError" && error?.name !== "AbortError") throw error;
       if (!response.auditCodes.includes("provider-timeout")) response.auditCodes.push("provider-timeout");

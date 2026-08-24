@@ -254,7 +254,9 @@ test("participant/project isolation and common answer gates apply across all thr
     context.records.sources.set(`${projectA}\u0000a\u0000b`, source);
     context.index.references = [{ ...source }];
     const response = await context.service.answer(request("model-change", "Use identity evidence."));
-    assert.equal(response.completion.reason, "provider-model-mismatch"); assert.equal(response.continuity.turnRecorded, true);
+    assert.equal(response.completion.reason, "provider-model-mismatch");
+    assert.equal(response.continuity.turnRecorded, false);
+    assert.equal(response.continuity.source, "not-recorded-incomplete-answer");
   });
 });
 
@@ -362,7 +364,17 @@ test("failure, telemetry, rollback, and effects boundaries remain visible", asyn
     assert.equal((await timeout.service.answer(request("fail-timeout", "Use failure evidence.", "general", { budgets: { deadlineMs: 100 } }))).completion.reason, "timeout");
     const limitedProvider = { async answer() { const error = new Error("limited"); error.code = "provider-output-limited"; throw error; } };
     const limited = harness({ sources: [source], providers: { chat: limitedProvider, research: new ScriptedProvider({ role: "research" }), code: new ScriptedProvider({ role: "code" }) } });
-    assert.equal((await limited.service.answer(request("fail-limited", "Use failure evidence."))).completion.reason, "output-limited");
+    const limitedResponse = await limited.service.answer(request("fail-limited", "Use failure evidence."));
+    assert.equal(limitedResponse.completion.reason, "output-limited");
+    assert.equal(limitedResponse.continuity.turnRecorded, false);
+    const malformedProvider = { async answer() { const error = new Error("PRIVATE_PARSE_DETAIL");
+      error.code = "provider-response-invalid"; throw error; } };
+    const malformed = harness({ providers: { chat: malformedProvider,
+      research: new ScriptedProvider({ role: "research" }), code: new ScriptedProvider({ role: "code" }) } });
+    const malformedResponse = await malformed.service.answer(request("fail-malformed", "Hello Runa"));
+    assert.equal(malformedResponse.completion.reason, "provider-response-invalid");
+    assert.equal(malformedResponse.continuity.turnRecorded, false);
+    assert.doesNotMatch(JSON.stringify(malformedResponse), /PRIVATE_PARSE_DETAIL/);
   });
   await cover("telemetry-redaction-all-lanes", async () => {
     const captured = [];

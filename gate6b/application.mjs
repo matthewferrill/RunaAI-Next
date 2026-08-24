@@ -16,7 +16,7 @@ const finiteInt = (value, fallback, minimum, maximum) => {
   return number;
 };
 
-function answerRequest(body, participant) {
+function answerRequest(body, participant, totalDeadlineMs) {
   if (!body || typeof body !== "object" || Array.isArray(body)) throw coded("request-invalid", "A JSON request is required.");
   if (!lanes.has(body.lane)) throw coded("request-lane-invalid", "The requested lane is unavailable.");
   const verified = participant.verified === true;
@@ -38,7 +38,7 @@ function answerRequest(body, participant) {
     history: Array.isArray(body.history) ? body.history : [],
     workspace,
     budgets: {
-      deadlineMs: finiteInt(body.budgets?.deadlineMs, 30_000, 100, 30_000),
+      deadlineMs: finiteInt(body.budgets?.deadlineMs, totalDeadlineMs, 100, totalDeadlineMs),
       maximumPasses: finiteInt(body.budgets?.maximumPasses, 8, 1, 12),
       maximumPassages: finiteInt(body.budgets?.maximumPassages, 12, 1, 24),
       maximumEvidenceCharacters: finiteInt(body.budgets?.maximumEvidenceCharacters, 24_000, 128, 48_000),
@@ -53,7 +53,10 @@ function credentialPresent(credential) {
 export class SelectedCoreApplication {
   constructor({ mode = "shadow", targetGeneration, cutoverStatus, answerService, actionService,
     authenticator, authorizer, requestCoordinator = null, now = () => new Date(),
-    stepUpMaxAgeMs = 5 * 60_000 }) {
+    stepUpMaxAgeMs = 5 * 60_000, totalDeadlineMs = 60_000 }) {
+    if (!Number.isInteger(totalDeadlineMs) || totalDeadlineMs < 100 || totalDeadlineMs > 120_000) {
+      throw coded("application-deadline-invalid", "The total answer deadline is outside the release boundary.");
+    }
     this.mode = mode;
     this.targetGeneration = targetGeneration;
     this.cutoverStatus = cutoverStatus;
@@ -64,6 +67,7 @@ export class SelectedCoreApplication {
     this.requestCoordinator = requestCoordinator;
     this.now = now;
     this.stepUpMaxAgeMs = stepUpMaxAgeMs;
+    this.totalDeadlineMs = totalDeadlineMs;
   }
 
   async authority() {
@@ -82,7 +86,7 @@ export class SelectedCoreApplication {
     const projectId = participant.verified ? String(body?.projectId ?? PERSONAL_SCOPE) : EPHEMERAL_SCOPE;
     const decision = await this.authorizer.authorize({ participant, action, resource: `project:${projectId}` });
     if (!decision?.allowed) throw coded(decision?.reason ?? "authorization-denied", "The selected read route was denied.");
-    const request = answerRequest(body, participant);
+    const request = answerRequest(body, participant, this.totalDeadlineMs);
     const run = () => this.answerService.answer(request);
     return this.requestCoordinator && request.participant.verified ? this.requestCoordinator.runOnce({
       operation: "answer", requestId: request.requestId, actorId: request.participant.principalId,

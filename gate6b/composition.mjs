@@ -188,7 +188,8 @@ export async function createProductionComposition({ loadedConfig, releaseRoot })
   const cutoverStatus = () => cutoverStore.load();
   const application = new SelectedCoreApplication({ mode: config.mode,
     targetGeneration: config.targetGeneration, cutoverStatus, answerService, actionService,
-    authenticator, authorizer, requestCoordinator: new PostgresRequestCoordinator({ pool }) });
+    authenticator, authorizer, requestCoordinator: new PostgresRequestCoordinator({ pool }),
+    totalDeadlineMs: config.limits.totalDeadlineMs });
 
   let browserCeremony = null;
   let ordinarySessions = null;

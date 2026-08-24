@@ -4,7 +4,8 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import test from "node:test";
 import { loadReleaseConfig } from "../gate6b/release-config.mjs";
-import { createControlLaunchers, createLanReleaseConfig, projectionStatus } from "./lan-release.mjs";
+import { applicationResponseHeaderTimeout, caddyfile, createControlLaunchers, createLanReleaseConfig,
+  projectionStatus, providerResponseHeaderTimeout } from "./lan-release.mjs";
 
 const read = path => readFile(new URL(path, import.meta.url), "utf8");
 const clients = await read("../gate6b/clients.mjs");
@@ -64,6 +65,12 @@ test("the exact Control predecessor produces one valid canonical successor and i
   assert.equal(loaded.value.gate7a.ordinaryClient.clientId, "runaai-next-user");
   assert.equal(loaded.value.gate7a.ordinaryClient.redirectUri,
     "https://runa.bridgebuildersai.com/session/user/callback");
+  assert.equal(loaded.value.limits.totalDeadlineMs, 60_000);
+  assert.equal(applicationResponseHeaderTimeout, "70s");
+  assert.equal(providerResponseHeaderTimeout, "65s");
+  assert.equal((caddyfile.match(/response_header_timeout 70s/g) ?? []).length, 2);
+  assert.equal((caddyfile.match(/response_header_timeout 65s/g) ?? []).length, 1);
+  assert.equal((caddyfile.match(/response_header_timeout 30s/g) ?? []).length, 1);
   assert.equal(projectionStatus(predecessor, projected).releaseConfigurationDigest,
     loaded.configurationDigest);
   const drifted = structuredClone(projected);

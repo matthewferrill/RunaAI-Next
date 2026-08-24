@@ -103,6 +103,19 @@ test("active verified general answer is identity and relationship scoped", async
   assert.equal(calls.answers[0].participant.principalId, "matthew-owner");
 });
 
+test("the release total deadline is the application ceiling and a client cannot extend it", async () => {
+  const { application, calls } = harness({ totalDeadlineMs: 60_000 });
+  await application.answer({ credential: "opaque-token", body: {
+    requestId: "deadline-exact", lane: "general", threadId: "thread-deadline",
+    message: "Hello", history: [], budgets: { deadlineMs: 60_000 },
+  } });
+  assert.equal(calls.answers[0].budgets.deadlineMs, 60_000);
+  await assert.rejects(application.answer({ credential: "opaque-token", body: {
+    requestId: "deadline-too-high", lane: "general", threadId: "thread-deadline",
+    message: "Hello", history: [], budgets: { deadlineMs: 60_001 },
+  } }), error => error.code === "request-budget-invalid");
+});
+
 test("unverified general chat is ephemeral and cannot claim a project", async () => {
   let persisted = false;
   const { application, calls } = harness({ requestCoordinator: {
@@ -460,13 +473,15 @@ test("the browser UI turns an active ordinary session into a bounded chat screen
   ]);
   assert.match(html, /id="chat"/);
   assert.match(html, /Chat with Runa/);
-  assert.match(html, /Protected records and administrative actions are not available here/);
+  assert.match(html, /does not have live web access/);
   assert.doesNotMatch(html, /cannot read protected data or perform an action while shadow authority is active/);
   assert.match(script, /\/api\/session\/status/);
   assert.match(script, /session\.sessionType === "ordinary"/);
   assert.match(script, /lane: "general"/);
   assert.match(script, /projectId: "runa:personal"/);
-  assert.match(script, /history\.slice\(-24\)/);
+  assert.match(script, /boundedHistory\(history\)/);
+  assert.match(script, /Retry message/);
+  assert.doesNotMatch(script, /error\.message/);
   assert.match(script, /\/session\/user\/logout/);
   assert.doesNotMatch(script, /innerHTML|localStorage|sessionStorage/);
   assert.match(styles, /\.transcript/);

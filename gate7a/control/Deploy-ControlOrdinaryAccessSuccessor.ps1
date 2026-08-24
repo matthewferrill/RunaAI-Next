@@ -38,6 +38,19 @@ $changed=$false
 
 function Hash([string]$Path){if(-not(Test-Path -LiteralPath $Path -PathType Leaf)){throw 'gate7a-ordinary-deploy-staged-file-missing'};(Get-FileHash -LiteralPath $Path -Algorithm SHA256).Hash.ToLowerInvariant()}
 function TextHash([string]$Value){$algorithm=[Security.Cryptography.SHA256]::Create();try{([BitConverter]::ToString($algorithm.ComputeHash([Text.Encoding]::UTF8.GetBytes($Value)))).Replace('-','').ToLowerInvariant()}finally{$algorithm.Dispose()}}
+function Run-Caddy([ValidateSet('validate','reload')][string]$Command,[string]$ConfigPath){
+  $start=[Diagnostics.ProcessStartInfo]::new();$start.FileName=$caddyExe
+  $start.Arguments="$Command --config `"$ConfigPath`" --adapter caddyfile"
+  $start.UseShellExecute=$false;$start.CreateNoWindow=$true
+  $start.RedirectStandardOutput=$true;$start.RedirectStandardError=$true
+  $process=[Diagnostics.Process]::new();$process.StartInfo=$start
+  try{
+    if(-not$process.Start()){throw 'gate7a-ordinary-deploy-caddy-start-failed'}
+    $stdout=$process.StandardOutput.ReadToEndAsync();$stderr=$process.StandardError.ReadToEndAsync()
+    $process.WaitForExit();$stdout.GetAwaiter().GetResult()|Out-Null;$stderr.GetAwaiter().GetResult()|Out-Null
+    $process.ExitCode
+  }finally{$process.Dispose()}
+}
 function Wait-PortClosed { $deadline=[DateTime]::UtcNow.AddSeconds(90);do{if(-not(Get-NetTCPConnection -State Listen -LocalPort 9760 -ErrorAction SilentlyContinue)){return};Start-Sleep -Milliseconds 500}until([DateTime]::UtcNow-gt$deadline);throw 'gate7a-ordinary-deploy-stop-timeout' }
 function Wait-Release([string]$Id){$deadline=[DateTime]::UtcNow.AddMinutes(12);do{Start-Sleep -Seconds 2;try{$value=Invoke-RestMethod 'http://127.0.0.1:9760/api/runtime/status' -TimeoutSec 3;if($value.running.releaseId-eq$Id){return $value}}catch{}}until([DateTime]::UtcNow-gt$deadline);throw 'gate7a-ordinary-deploy-start-timeout'}
 function Expand-Response([object]$Response){foreach($item in @($Response)){if($item-is [Array]){foreach($nested in $item){$nested}}elseif($null-ne$item){$item}}}
@@ -84,8 +97,7 @@ function Get-Redirect([string]$Path){
 $pins=@{$archive=$ArchiveSha256;$stagedConfig=$ConfigSha256;$stagedManifest=$ManifestSha256;$stagedLauncher=$LauncherSha256;$stagedCaddy=$CaddyfileSha256}
 foreach($entry in $pins.GetEnumerator()){if((Hash $entry.Key)-ne$entry.Value){throw 'gate7a-ordinary-deploy-staged-hash-mismatch'}}
 if((Hash $caddyExe)-ne$expectedCaddyBinarySha256){throw 'gate7a-ordinary-deploy-caddy-binary-drift'}
-& $caddyExe validate --config $stagedCaddy --adapter caddyfile *> $null
-if($LASTEXITCODE-ne0){throw 'gate7a-ordinary-deploy-caddy-invalid'}
+if((Run-Caddy validate $stagedCaddy)-ne0){throw 'gate7a-ordinary-deploy-caddy-invalid'}
 foreach($path in @($release,$rollback)){if(Test-Path -LiteralPath $path){throw 'gate7a-ordinary-deploy-new-path-exists'}}
 $beforeRuntime=Invoke-RestMethod 'http://127.0.0.1:9760/api/runtime/status' -TimeoutSec 10
 $beforeReadiness=Invoke-RestMethod 'http://127.0.0.1:9760/api/readiness/status' -TimeoutSec 10
@@ -135,8 +147,7 @@ try{
   Move-Item -LiteralPath "$manifest.new" -Destination $manifest -Force
   Move-Item -LiteralPath "$launcher.new" -Destination $launcher -Force
   Move-Item -LiteralPath "$caddy.new" -Destination $caddy -Force
-  & $caddyExe reload --config $caddy --adapter caddyfile *> $null
-  if($LASTEXITCODE-ne0){throw 'gate7a-ordinary-deploy-caddy-reload-failed'}
+  if((Run-Caddy reload $caddy)-ne0){throw 'gate7a-ordinary-deploy-caddy-reload-failed'}
   Start-ScheduledTask -TaskPath $taskPath -TaskName 'Application';$runtime=Wait-Release $ReleaseId
   $readiness=Invoke-RestMethod 'http://127.0.0.1:9760/api/readiness/status' -TimeoutSec 20
   if($runtime.running.commit-ne$ExpectedCommit-or$runtime.running.artifactDigest-ne$ExpectedArtifactDigest-or
@@ -186,8 +197,7 @@ try{
     Copy-Item -LiteralPath (Join-Path $rollback 'Run-Application.ps1') -Destination $launcher -Force
     Copy-Item -LiteralPath (Join-Path $rollback 'Caddyfile') -Destination $caddy -Force
     $caddyRollbackFailed=$false
-    & $caddyExe reload --config $caddy --adapter caddyfile *> $null
-    if($LASTEXITCODE-ne0){$caddyRollbackFailed=$true}
+    if((Run-Caddy reload $caddy)-ne0){$caddyRollbackFailed=$true}
     Start-ScheduledTask -TaskPath $taskPath -TaskName 'Application';$restored=Wait-Release $PriorReleaseId
     if($restored.running.commit-ne$PriorCommit-or$restored.running.artifactDigest-ne$PriorArtifactDigest){throw 'gate7a-ordinary-deploy-rollback-failed'}
     if($caddyRollbackFailed){throw 'gate7a-ordinary-deploy-caddy-rollback-failed'}

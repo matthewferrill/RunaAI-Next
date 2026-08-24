@@ -436,6 +436,9 @@ test("HTTP ordinary login is separate from owner administration and supports log
   await once(server, "listening");
   t.after(() => server.close());
   const base = `http://127.0.0.1:${server.address().port}`;
+  const chatHelper = await fetch(`${base}/chat-client.mjs`);
+  assert.equal(chatHelper.status, 200);
+  assert.equal(chatHelper.headers.get("content-type"), "text/javascript; charset=utf-8");
   const password = await fetch(`${base}/session/user/start`, { redirect: "manual" });
   assert.equal(password.headers.get("location"), "http://keycloak.test/password");
   const passkey = await fetch(`${base}/session/user/passkey/start`, { redirect: "manual" });

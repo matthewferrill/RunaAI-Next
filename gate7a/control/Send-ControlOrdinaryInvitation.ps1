@@ -54,6 +54,12 @@ try{
   $realm=Invoke-RestMethod -Method Get -Uri "$base/admin/realms/$realmName" -Headers $headers
   if([bool]$realm.registrationAllowed-ne$false-or[bool]$realm.editUsernameAllowed-ne$true-or
     -not[bool]$realm.smtpServer.host-or-not[bool]$realm.smtpServer.from){throw 'gate7a-invitation-email-delivery-unavailable'}
+  $profile=Invoke-RestMethod -Method Get -Uri "$base/admin/realms/$realmName/users/profile" -Headers $headers
+  $requiredProfile=@($profile.attributes|Where-Object{$null-ne$_.required-and@($_.required.roles)-contains'user'}|
+    ForEach-Object{[string]$_.name}|Sort-Object)
+  if(@(Compare-Object -ReferenceObject @('email','firstName','lastName') -DifferenceObject $requiredProfile).Count-ne 0){
+    throw 'gate7a-invitation-user-profile-drift'
+  }
   $clients=@(Expand-Response (Invoke-RestMethod -Method Get -Uri "$base/admin/realms/$realmName/clients?clientId=$clientId" -Headers $headers))
   if($clients.Count-ne 1-or$clients[0].enabled-ne$true-or$clients[0].publicClient-ne$false-or
     @($clients[0].redirectUris).Count-ne 1-or$clients[0].redirectUris[0]-ne"$origin/session/user/callback"){
@@ -67,9 +73,10 @@ try{
     throw 'gate7a-invitation-principal-already-registered'
   }
   $placeholder='invited-'+[Guid]::NewGuid().ToString('N').Substring(0,20)
-  $userBody=[ordered]@{username=$placeholder;email=$Email;enabled=$true;emailVerified=$false;
+  $userBody=[ordered]@{username=$placeholder;email=$Email;firstName='Invited';lastName='Member';enabled=$true;emailVerified=$false;
     requiredActions=@('VERIFY_EMAIL','UPDATE_PROFILE','UPDATE_PASSWORD')}
-  Invoke-RestMethod -Method Post -Uri "$base/admin/realms/$realmName/users" -Headers $headers -ContentType 'application/json' -Body ($userBody|ConvertTo-Json -Depth 8 -Compress)|Out-Null
+  try{Invoke-RestMethod -Method Post -Uri "$base/admin/realms/$realmName/users" -Headers $headers -ContentType 'application/json' -Body ($userBody|ConvertTo-Json -Depth 8 -Compress)|Out-Null}
+  catch{throw 'gate7a-invitation-user-create-rejected'}
   $created=@(Expand-Response (Invoke-RestMethod -Method Get -Uri "$base/admin/realms/$realmName/users?email=$encodedEmail&exact=true" -Headers $headers))
   if($created.Count-ne 1-or$created[0].emailVerified-ne$false-or$created[0].enabled-ne$true){throw 'gate7a-invitation-user-create-invalid'}
   $createdUserId=[string]$created[0].id
@@ -104,5 +111,5 @@ try{
   if($createdUserId-and$token){try{Invoke-RestMethod -Method Delete -Uri "$base/admin/realms/$realmName/users/$createdUserId" -Headers $headers|Out-Null}catch{}}
   throw "gate7a-ordinary-invitation-failed:$failure"
 }finally{
-  $Email=$null;Remove-Variable address,password,token,openfgaToken,dbPassword,headers,fgaHeaders,userBody,writeBody,deleteBody -ErrorAction SilentlyContinue
+  $Email=$null;Remove-Variable address,password,token,openfgaToken,dbPassword,headers,fgaHeaders,userBody,writeBody,deleteBody,profile,requiredProfile -ErrorAction SilentlyContinue
 }

@@ -97,12 +97,16 @@ repository and never push migration work into either source repository.
   correct square root of pi without an audit label and the live-weather limitation without Gate terminology.
   Gate 7B is complete.
 - Gate 7C is frozen by
-  `gate7c/GATE7C-UI-SHELL-SCOPE-AND-GREEN-CRITERIA-2026-08-24.md`. Its first presentation-only slice
-  restores the familiar RunaAI three-column workspace around the existing ordinary chat: independent
-  empty left and right expansion areas, the central transcript and composer, and no labels, feature
-  wiring, persistence, data access, or production change. The baseline is 32/32 Gate 6B checks and
-  17/17 Gate 7B checks. The steward must review the shell proportions and visual direction before any
-  rail receives a product capability and before this branch is merged or deployed.
+  `gate7c/GATE7C-UI-SHELL-SCOPE-AND-GREEN-CRITERIA-2026-08-24.md` and implemented on the isolated
+  `codex/gate7c-ui-shell` review branch at `1490a9b`. The presentation-only slice restores the familiar
+  RunaAI three-column workspace around the existing ordinary chat: independent empty left and right
+  expansion areas, the central transcript and composer, warm Dawn styling, and no labels, feature
+  wiring, persistence, data access, or production change. Gate 7C passes 5/5 focused checks, Gate 6B
+  passes 32/32, Gate 7B passes 17/17, and the full repository suite passes 398/398. Disposable
+  loopback visual checks passed at wide desktop, constrained desktop, and phone widths after correcting
+  mobile grid placement. Full evidence is in `gate7c/GATE7C-UI-SHELL-RESULTS-2026-08-24.md`. The
+  steward must review the proportions and visual direction before any rail receives a product capability
+  and before this branch is merged or deployed.
 - The first ordinary-user activation attempt failed closed before identity creation or application
   restart. RCA: Windows PowerShell 5.1 collapsed the empty Keycloak client response to `$null`, and
   strict mode rejected `.Count`. Normalized reconciliation then proved zero ordinary clients, zero
@@ -460,11 +464,11 @@ No dependency was changed during the prerequisite disposition. Full evidence is 
 
 ## Next operation
 
-Implement and review Gate 7C as a static authenticated workspace shell. Preserve the working ordinary
-login, chat, retry, logout, and truthful capability boundaries. Add only two independently collapsible,
-empty expansion areas around the central transcript and composer. Do not name or wire product features,
-add browser persistence, read data, activate networking, or deploy this branch. Run focused and full
-verification, then present the wide and narrow shell for steward review before merge.
+Review Gate 7C's static authenticated workspace shell on `codex/gate7c-ui-shell`. Evaluate only the
+three-column proportions, warm visual direction, independent collapse behavior, and narrow-screen panel
+treatment. The implementation and automated verification are complete, but no product capability should
+be named or wired and the branch must not be merged or deployed until the steward accepts this visual
+foundation.
 
 Gate 6 remains closed and selected-core production authority remains active at the exact release named
 above. Gate 7A follow-on checks for a second PC, phone, certificate renewal, and separately reviewed

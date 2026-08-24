@@ -1,6 +1,6 @@
 # RunaAI migration status
 
-Status date: 2026-08-23. This is the living migration handoff for RunaAI-Next. Update it in the same
+Status date: 2026-08-24. This is the living migration handoff for RunaAI-Next. Update it in the same
 commit whenever a gate changes repository direction, authority, implementation status, safety
 boundaries, verification state, or the next planned work.
 
@@ -58,12 +58,11 @@ repository and never push migration work into either source repository.
   the only new LAN-facing service on TCP 443, and every backend remains loopback-bound. Keycloak now
   advertises the same-origin `/auth` issuer and `runa.bridgebuildersai.com` RP ID. The session cookie is
   host-only, `Secure`, `HttpOnly`, and explicitly `SameSite=Lax`; off-LAN ingress remains disabled.
-- The exact active release is `runaai-next-gate7a-lan-2026-08-23-fdf6e0a`, commit `fdf6e0a`, artifact
-  digest `cb3f9600...`. The prior completed owner proof was auditably rebound to that exact release while
-  retaining the predecessor ceremony; the rebind changed neither selected-core authority nor production
-  traffic. The commissioning route remains healthy. Focused Gate 7A validation is 52/52 and the full
-  repository suite is 351/351. Aggregate evidence is in
-  `gate7a/evidence/CONTROL-LAN-ACTIVATION-RESULTS.json`.
+- The exact active release is `runaai-next-gate7a-lan-knowledge-2026-08-24-a86f3e4`, commit
+  `a86f3e4b87d697a1ac56dac7bcd5647222157410`, artifact digest `0735176d...`. Authority is active,
+  cutover is closed at revision 10, all four dependencies are ready, the 29,490-file artifact is
+  verified, the prior release is retained for rollback, and neither legacy nor protected product data
+  changed. The full repository suite passes 375/375 at that commit.
 - Gate 7A is not closed. Canonical-origin owner passkey sign-in has completed and the protected
   `matthew-owner` path remains passkey-only. The steward approved a separate ordinary-user model:
   invitation-only enrollment, an individual username/password, verified-email recovery, and an
@@ -76,8 +75,27 @@ repository and never push migration work into either source repository.
   and selected-core authority/protected data remain unchanged. Control currently has no SMTP sender,
   which blocks live invitation and recovery acceptance.
   Matthew's separate personal-email account is the selected first non-owner fixture; the personal
-  address must not enter Git or retained evidence. A second PC, a phone, off-LAN ingress, certificate
-  renewal, and the finished conversational UI remain separate checks.
+  address must not enter Git or retained evidence. SMTP, the first ordinary invitation, password setup,
+  ordinary sign-in, and the initial conversational UI are now active. Live customer testing then exposed
+  three cross-stack defects that component tests missed: greetings were forced through project retrieval,
+  optional approved knowledge blocked ordinary chat, and an incomplete provider result leaked a raw JSON
+  parser failure. The first two are deployed; the third proves the customer journey is not yet accepted.
+  A second PC, a phone, off-LAN ingress, and certificate renewal remain separate checks.
+
+- Gate 7B is now frozen by
+  `gate7b/GATE7B-CUSTOMER-JOURNEY-SCOPE-AND-GREEN-CRITERIA-2026-08-24.md`. It replaces symptom-by-symptom
+  chat repair with one login-to-logout acceptance unit covering sustained ordinary chat, safe provider
+  results, retries, continuity, all internal read-only answer lanes, and truthful workspace/code limits.
+  No new effect, source picker, web research, code execution, learning activation, protected-owner
+  capability, or off-LAN ingress is included.
+- Gate 7B's source correction now passes 389/389 repository tests and all 11 checks in the executable
+  login-to-logout synthetic customer journey. The already-running Control private model passed all
+  five aggregate checks for cold/warm plain chat, evidence-bearing research, evidence-bearing workspace,
+  exact model identity, deterministic role routing, and citation mode. Ordinary chat no longer requires
+  model-generated JSON; incomplete model results are typed, not recorded as completed turns, and receive
+  a customer-safe retry path. The bounded deadline chain is 60 seconds application, 65 seconds browser
+  and provider proxy, and 70 seconds public application proxy. The production successor and canonical
+  browser acceptance remain pending, so Gate 7B is not yet complete.
 - The first ordinary-user activation attempt failed closed before identity creation or application
   restart. RCA: Windows PowerShell 5.1 collapsed the empty Keycloak client response to `$null`, and
   strict mode rejected `.Count`. Normalized reconciliation then proved zero ordinary clients, zero
@@ -388,8 +406,9 @@ plain-language steward experience, or governed action pathway.
 | 4 | Governed data migration, one domain at a time | Complete; accepted and merged as `2c38dd5`; legacy unchanged | Complete |
 | 5 | Operations, private transport, authentication/authorization, recovery | Complete; accepted and merged as `a986419` | Complete |
 | 6 | Selected-core production cutover and rollback window | Complete and closed; exact selected-core release is authoritative, observation green, freeze released, legacy rollback healthy | Complete |
-| 7A | Multi-device access foundation | Canonical LAN origin, owner passkey path, and separate ordinary password client/release active; focused 67/67 and full 370/370 | SMTP, personal-email fixture, representative clients, certificate renewal, and off-LAN boundary remain |
-| 7B+ | Deferred UI and extensions | Not started | New baseline and separate approval per extension group |
+| 7A | Multi-device access foundation | Canonical LAN origin, owner passkey path, SMTP/invitation, separate ordinary password client, and initial chat UI active; complete customer acceptance is pending Gate 7B | Representative clients, certificate renewal, and off-LAN boundary remain |
+| 7B | Complete customer journey through the selected read-only stack | Green criteria frozen; implementation in progress after three live cross-stack defects | Approved by steward 2026-08-24 |
+| 7C+ | Deferred extensions | Not started | New baseline and separate approval per extension group |
 
 ## Bootstrap validation
 
@@ -432,6 +451,14 @@ No dependency was changed during the prerequisite disposition. Full evidence is 
 `gate0/GATE1-PREREQUISITES-2026-08-20.md`.
 
 ## Next operation
+
+Complete Gate 7B as one customer journey rather than another isolated chat patch. Prove canonical login,
+ordinary-session entry, sustained multi-turn general chat, stable/current/project/protected prompt classes,
+typed provider failures, retry, refresh/restart continuity, logout, and every internal read-only answer lane
+through one release composition. The browser remains chat-only; guarded/research/workspace/code behavior is
+validated internally and must be described truthfully rather than exposed as a finished code agent. Deploy
+only after the full customer-flow matrix and private-model boundary are green, with the exact active release
+retained for automatic rollback.
 
 Gate 6 remains closed and the selected-core authority remains active. Gate 7A's canonical LAN origin is
 now live at `https://runa.bridgebuildersai.com`; the old

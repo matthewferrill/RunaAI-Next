@@ -8,6 +8,8 @@ export const backchannelIssuer = "http://127.0.0.1:9762/realms/runaai-next";
 export const callbackUri = `${canonicalOrigin}/session/callback`;
 export const ordinaryCallbackUri = `${canonicalOrigin}/session/user/callback`;
 export const privateAddress = "192.168.50.169";
+export const applicationResponseHeaderTimeout = "70s";
+export const providerResponseHeaderTimeout = "65s";
 export const caddyBinarySha256 = "5cb9ab71e5756ce72840b8234177a2f40c8b4ab47a806b8e841e2b784e9df62b";
 export const keycloakBinarySha256 = "9935b42ac9f187583da27f484f3027fa0784825e42b11f26cb8753e20a701f09";
 
@@ -46,7 +48,7 @@ export const caddyfile = `https://${privateAddress}:9761 {
     lb_retries 0
     transport http {
       dial_timeout 10s
-      response_header_timeout 30s
+      response_header_timeout ${applicationResponseHeaderTimeout}
     }
   }
 }
@@ -70,7 +72,7 @@ ${canonicalOrigin} {
       lb_retries 0
       transport http {
         dial_timeout 10s
-        response_header_timeout 30s
+        response_header_timeout ${applicationResponseHeaderTimeout}
       }
     }
   }
@@ -81,7 +83,7 @@ http://127.0.0.1:9770 {
     lb_retries 0
     transport http {
       dial_timeout 10s
-      response_header_timeout 30s
+      response_header_timeout ${providerResponseHeaderTimeout}
     }
   }
 }
@@ -118,6 +120,7 @@ export function createLanReleaseConfig(predecessor) {
       keycloak: { ...current.services.keycloak,
         configurationDigest: sha256(keycloakArguments.join("\0") + keycloakBinarySha256) },
     },
+    limits: { ...current.limits, totalDeadlineMs: 60_000 },
   });
 }
 

@@ -15,7 +15,7 @@ export const AnswerRequestSchema = z.object({
     content: z.string().max(8_000),
   }).strict()).max(24),
   budgets: z.object({
-    deadlineMs: z.number().int().min(100).max(30_000),
+    deadlineMs: z.number().int().min(100).max(120_000),
     maximumPasses: z.number().int().min(1).max(12),
     maximumPassages: z.number().int().min(1).max(24),
     maximumEvidenceCharacters: z.number().int().min(128).max(48_000),

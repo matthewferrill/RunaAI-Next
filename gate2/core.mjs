@@ -225,7 +225,13 @@ export class Gate2ReadOnlyService {
     response.lane = request.lane;
     if (response.model.role !== "not-invoked") response.model.role = role;
     const gates = applyCommonAnswerGates(response, request);
-    const continuityResult = await this.continuity.recordAnswer(request, response);
+    const incompleteReasons = new Set(["timeout", "output-limited", "provider-output-empty",
+      "provider-response-invalid", "provider-shape-invalid", "provider-incomplete",
+      "provider-transport-failed", "provider-model-mismatch", "provider-role-mismatch",
+      "provider-role-unavailable"]);
+    const continuityResult = incompleteReasons.has(response.completion.reason)
+      ? { turnRecorded: false, source: "not-recorded-incomplete-answer" }
+      : await this.continuity.recordAnswer(request, response);
     const continuityStatus = await this.continuity.status();
     const dependency = await this.statusProvider({ request, response });
     response.workspace = request.lane === "workspace" ? {

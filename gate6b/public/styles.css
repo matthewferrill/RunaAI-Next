@@ -34,6 +34,7 @@ dd { margin: 0; overflow-wrap: anywhere; }
 .transcript { padding: 2rem; display: flex; flex-direction: column; gap: 1.15rem; overflow-y: auto; }
 .message { width: min(78%, 42rem); padding: 1rem 1.1rem; border: 1px solid #ffffff12; border-radius: 1rem; background: #18231c; }
 .message.user { align-self: flex-end; background: #274332; border-color: #5e8c6d; }
+.message.failed { border-color: #c28a61; }
 .message p { margin: .3rem 0 0; white-space: pre-wrap; overflow-wrap: anywhere; }
 .message-label { color: #9fd3b2; font-size: .75rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
 .composer { padding: 1.25rem 2rem 1.5rem; border-top: 1px solid #ffffff12; background: #0e1511; }
@@ -43,6 +44,7 @@ dd { margin: 0; overflow-wrap: anywhere; }
 .composer-footer { margin-top: .8rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
 #chat-status { color: #91a197; font-size: .85rem; }
 .primary-button { min-width: 6rem; }
+.retry-button { margin-top: .75rem; padding: .45rem .7rem; border: 1px solid #d7ad88; border-radius: .55rem; color: #f3dfcf; background: transparent; cursor: pointer; }
 .primary-button:disabled, .quiet-button:disabled { opacity: .55; cursor: wait; }
 .quiet-button { min-height: auto; padding: .55rem .8rem; }
 [hidden] { display: none !important; }

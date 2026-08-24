@@ -1,3 +1,6 @@
+import { CHAT_DEADLINE_MS, answerNeedsRetry, boundedHistory, customerMessageFor,
+  readJsonResponse } from "./chat-client.mjs";
+
 const byId = id => document.getElementById(id);
 const text = (id, value) => { byId(id).textContent = value; };
 const welcome = byId("welcome");
@@ -22,6 +25,21 @@ function appendMessage(role, content) {
   item.append(label, body);
   transcript.append(item);
   item.scrollIntoView({ block: "end", behavior: "smooth" });
+  return item;
+}
+
+function addRetry(item, content) {
+  item.classList.add("failed");
+  const retry = document.createElement("button");
+  retry.className = "retry-button";
+  retry.type = "button";
+  retry.textContent = "Retry message";
+  retry.addEventListener("click", () => {
+    message.value = content;
+    message.focus();
+    retry.remove();
+  }, { once: true });
+  item.append(retry);
 }
 
 async function initialize() {
@@ -65,28 +83,39 @@ form.addEventListener("submit", async event => {
   event.preventDefault();
   const content = message.value.trim();
   if (!content || send.disabled) return;
-  appendMessage("user", content);
+  const userItem = appendMessage("user", content);
   message.value = "";
   send.disabled = true;
   text("chat-status", "Runa is thinking…");
   try {
-    const response = await fetch("/api/selected/answer", {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ requestId: `web-${crypto.randomUUID()}`, lane: "general",
-        threadId, projectId: "runa:personal", message: content, history: history.slice(-24) }),
-    });
-    const result = await response.json();
-    if (!response.ok || typeof result.answer !== "string") {
-      throw new Error(typeof result.errorCode === "string" ? result.errorCode : "chat-request-failed");
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), CHAT_DEADLINE_MS);
+    let result;
+    try {
+      const response = await fetch("/api/selected/answer", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        signal: controller.signal,
+        body: JSON.stringify({ requestId: `web-${crypto.randomUUID()}`, lane: "general",
+          threadId, projectId: "runa:personal", message: content, history: boundedHistory(history) }),
+      });
+      result = await readJsonResponse(response);
+    } finally { clearTimeout(timer); }
+    if (answerNeedsRetry(result)) {
+      appendMessage("assistant", result.answer);
+      addRetry(userItem, content);
+      text("chat-status", "Message not completed — retry available");
+      return;
     }
-    history.push({ role: "user", content: content.slice(0, 8000) },
-      { role: "assistant", content: result.answer.slice(0, 8000) });
+    history.push({ role: "user", content: content.slice(0, 8_000) },
+      { role: "assistant", content: result.answer.slice(0, 8_000) });
     appendMessage("assistant", result.answer);
     text("chat-status", "Ready");
   } catch (error) {
-    appendMessage("assistant", `I could not complete that message (${error.message}). Please try again.`);
-    text("chat-status", "Message not completed");
+    const code = error?.name === "AbortError" ? "chat-request-timeout" : error?.code;
+    appendMessage("assistant", customerMessageFor(code));
+    addRetry(userItem, content);
+    text("chat-status", "Message not completed — retry available");
   } finally {
     send.disabled = false;
     message.focus();
@@ -113,4 +142,3 @@ logout.addEventListener("click", async () => {
 });
 
 await initialize();
-

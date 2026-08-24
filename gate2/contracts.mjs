@@ -21,7 +21,7 @@ export const Gate2AnswerRequestSchema = z.object({
   history: z.array(historyTurn).max(24),
   workspace: z.nullable(z.object({ sources: z.array(sourceLocator).min(1).max(6) }).strict()).default(null),
   budgets: z.object({
-    deadlineMs: z.number().int().min(100).max(30_000),
+    deadlineMs: z.number().int().min(100).max(120_000),
     maximumPasses: z.number().int().min(1).max(12),
     maximumPassages: z.number().int().min(1).max(24),
     maximumEvidenceCharacters: z.number().int().min(128).max(48_000),

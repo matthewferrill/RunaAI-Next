@@ -93,6 +93,8 @@ test("general lane preserves grounding, honest misses, session recall, commands,
     const response = await context.service.answer(request("general-current", "What is today's local weather?"));
     assert.equal(response.completion.reason, "current-source-required");
     assert.ok(response.auditCodes.includes("external-network-not-used"));
+    assert.match(response.answer, /don't have live web or weather access/i);
+    assert.doesNotMatch(response.answer, /Gate 2|slice|route/i);
     assert.equal(response.status.provider, "unknown"); assert.equal(response.status.reranker, "unknown");
   });
 });
@@ -229,6 +231,7 @@ test("participant/project isolation and common answer gates apply across all thr
       const response = await context.service.answer(request(`gate-${lane}`, "Give the synthetic result.", lane));
       assert.ok(response.gates.codes.includes(`answer-gates-executed:${lane}`));
       assert.ok(response.auditCodes.includes("unsupported-numeric-claim"));
+      assert.doesNotMatch(response.answer, /Answer gate:|unsupported-numeric-claim/);
     }
   });
   await cover("cross-lane-context-budget", async () => {

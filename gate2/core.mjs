@@ -79,7 +79,7 @@ class EphemeralRecordProxy {
 
 function deterministicResponse(request) {
   if (protectedPattern.test(request.message)) return emptyV1(request, {
-    answer: "That protected source is outside this synthetic read-only gate.",
+    answer: "That protected information is not available in this chat.",
     reason: "protected-source-denied", auditCode: "protected-source-denied",
   });
   if (sessionRecallPattern.test(request.message)) {
@@ -90,11 +90,11 @@ function deterministicResponse(request) {
     });
   }
   if (currentLookupPattern.test(request.message)) return emptyV1(request, {
-    answer: "A current source would be needed; this Gate 2 slice has no external or live lookup capability.",
+    answer: "I don't have live web or weather access in this chat, so I can't verify current information.",
     reason: "current-source-required", auditCode: "external-network-not-used",
   });
   if (effectRequestPattern.test(request.message)) return emptyV1(request, {
-    answer: "This Gate 2 route is read-only and cannot perform, approve, or learn from that effect.",
+    answer: "This chat is read-only and cannot perform that action, approve it, or learn from it.",
     reason: "effect-not-available", auditCode: "effects-empty-enforced",
   });
   return null;
@@ -116,10 +116,7 @@ function applyCommonAnswerGates(response, request) {
   if (unsupportedNumber && !request.message.includes(unsupportedNumber) && response.citations.length === 0) {
     codes.push("unsupported-numeric-claim");
   }
-  if (codes.length > 1) {
-    response.answer += `\n\nAnswer gate: ${codes.slice(1).join(", ")}.`;
-    for (const code of codes.slice(1)) if (!response.auditCodes.includes(code)) response.auditCodes.push(code);
-  }
+  for (const code of codes.slice(1)) if (!response.auditCodes.includes(code)) response.auditCodes.push(code);
   return { executed: true, codes };
 }
 
@@ -163,7 +160,7 @@ export class Gate2ReadOnlyService {
     if (!response && request.lane === "workspace") {
       resolvedWorkspace = await this.workspaceResolver.resolve(request.project.projectId, request.workspace.sources);
       if (resolvedWorkspace.denied.length) response = emptyV1(request, {
-        answer: "The requested source belongs to another project and was denied before model delivery.",
+        answer: "That information belongs to another project and is not available in this chat.",
         reason: "workspace-cross-project-denied", auditCode: "workspace-cross-project-denied",
       });
       if (response) knowledgeFallbackReason = "not-evaluated-workspace-boundary";
@@ -186,7 +183,7 @@ export class Gate2ReadOnlyService {
         const knowledgeReceipt = approvedKnowledgeReceipt(knowledgeDelivery);
         if (knowledgeReceipt.errorCode) {
           response = emptyV1(request, {
-            answer: "Approved knowledge was unavailable, so the request was not sent to the model.",
+            answer: "The information needed to answer that project question is temporarily unavailable.",
             reason: knowledgeReceipt.errorCode,
             auditCode: knowledgeReceipt.errorCode,
           });
@@ -207,12 +204,12 @@ export class Gate2ReadOnlyService {
         response = await slice.answer(gate1Request(request));
       } catch (error) {
         if (!["provider-model-mismatch", "provider-role-unavailable"].includes(error?.code)) throw error;
-        response = emptyV1(request, { answer: "The configured provider identity did not match the deterministic route.",
+        response = emptyV1(request, { answer: "Runa could not complete that message because the selected model was unavailable.",
           reason: error.code, auditCode: error.code, ground: "record-silent" });
         if (advisoryContext) response.auditCodes.push("approved-knowledge-delivered");
       }
       if (response.model.role !== "not-invoked" && response.model.role !== role) {
-        response.answer = "The provider returned under a role that did not match the deterministic application route.";
+        response.answer = "Runa could not complete that message because the selected model was unavailable.";
         response.completion.reason = "provider-role-mismatch";
         response.auditCodes.push("provider-role-mismatch");
         response.model.role = role;

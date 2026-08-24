@@ -43,18 +43,18 @@ export function planResearchPasses(question, maximumPasses) {
 export function deterministicPreflight(message) {
   if (protectedPattern.test(message)) return {
     code: "protected-source-denied",
-    answer: "That source is protected and is not available to this read-only migration slice.",
+    answer: "That protected information is not available in this chat.",
   };
   if (crossProjectPattern.test(message)) return {
     code: "cross-project-request-denied",
-    answer: "This request is scoped to the trusted project in its request envelope; another project's record is not available.",
+    answer: "That information belongs to another project and is not available in this chat.",
   };
   if (policySuspensionPattern.test(message)) return {
     code: "effect-policy-suspension-denied",
-    answer: "The approval boundary is deterministic and remains active. Tell me the underlying goal and I can help with its read-only portion.",
+    answer: "Approval safeguards remain active. Tell me the underlying goal and I can help with its read-only portion.",
   };
   if (/^\s*\//.test(message)) return {
-    code: "unknown-command", answer: "That command is not available in this migration slice.",
+    code: "unknown-command", answer: "That command is not available in this chat.",
   };
   return null;
 }
@@ -231,7 +231,7 @@ export class ReadOnlyAnswerSlice {
       response.retrieval.degraded = true;
       response.retrieval.unavailable = [String(error?.code ?? "retrieval-unavailable")];
       response.retrieval.omissions = ["Synthetic retrieval dependency was unavailable; this is not an empty-record result."];
-      response.answer = "I could not check the synthetic project record because its retrieval dependency was unavailable.";
+      response.answer = "I couldn't check the project information because that source is temporarily unavailable.";
       response.ground = "record-silent";
       response.completion.reason = "dependency-unavailable";
       response.auditCodes.push("retrieval-dependency-unavailable");
@@ -294,8 +294,8 @@ export class ReadOnlyAnswerSlice {
     if (!evidence.length && (!this.advisoryContext || response.auditCodes.includes("retrieved-instruction-denied"))) {
       const instructionDenied = response.auditCodes.includes("retrieved-instruction-denied");
       response.answer = instructionDenied
-        ? "The retrieved source was withheld because it contained instructions that could alter authority or invoke a tool."
-        : "The synthetic project record did not contain evidence that answers that question.";
+        ? "I couldn't use that source because it contained unsafe instructions."
+        : "The available project information does not answer that question.";
       response.completion.reason = instructionDenied ? "retrieved-instruction-denied" : "honest-empty";
       if (!instructionDenied) response.auditCodes.push("record-silent");
       return parseAnswerResponse(response);
@@ -340,7 +340,7 @@ export class ReadOnlyAnswerSlice {
       response.completion.outputLimited = generated.outputLimited === true;
       response.completion.reason = generated.outputLimited ? "output-limited" : "complete";
       if (checked.unknown.length) {
-        response.answer += "\n\nCitation check: one or more references were not present in the supplied evidence.";
+        response.answer += "\n\nI couldn't verify one or more references in that answer.";
         response.completion.reason = "citation-unverified";
         response.auditCodes.push("unknown-citation");
       }
@@ -358,7 +358,7 @@ export class ReadOnlyAnswerSlice {
         "provider-shape-invalid": "Runa returned an incomplete response. Please try that message again.",
         "provider-incomplete": "Runa did not finish the response. Please try that message again.",
         "provider-transport-failed": "Runa's model is temporarily unavailable. Please try that message again.",
-        "provider-model-mismatch": "Runa's configured model did not match the selected route.",
+        "provider-model-mismatch": "Runa's selected model is temporarily unavailable. Please try that message again.",
       };
       if (providerFailures[error?.code]) {
         response.answer = providerFailures[error.code];

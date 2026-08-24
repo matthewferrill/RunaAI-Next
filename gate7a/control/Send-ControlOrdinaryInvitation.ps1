@@ -55,7 +55,14 @@ try{
   if([bool]$realm.registrationAllowed-ne$false-or[bool]$realm.editUsernameAllowed-ne$true-or
     -not[bool]$realm.smtpServer.host-or-not[bool]$realm.smtpServer.from){throw 'gate7a-invitation-email-delivery-unavailable'}
   $profile=Invoke-RestMethod -Method Get -Uri "$base/admin/realms/$realmName/users/profile" -Headers $headers
-  $requiredProfile=@($profile.attributes|Where-Object{$null-ne$_.required-and@($_.required.roles)-contains'user'}|
+  $requiredProfile=@($profile.attributes|Where-Object{
+    $requiredProperty=$_.PSObject.Properties['required']
+    if($null-eq$requiredProperty-or$null-eq$requiredProperty.Value){$false}
+    else{
+      $rolesProperty=$requiredProperty.Value.PSObject.Properties['roles']
+      $null-ne$rolesProperty-and@($rolesProperty.Value)-contains'user'
+    }
+  }|
     ForEach-Object{[string]$_.name}|Sort-Object)
   if(@(Compare-Object -ReferenceObject @('email','firstName','lastName') -DifferenceObject $requiredProfile).Count-ne 0){
     throw 'gate7a-invitation-user-profile-drift'

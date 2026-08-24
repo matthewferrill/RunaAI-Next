@@ -114,6 +114,8 @@ test("a single-use invitation creates an isolated ordinary principal and no owne
   assert.match(invitation, /usernameSetByInvitee=\$true/);
   assert.match(invitation, /Invitation email:/);
   assert.match(invitation, /users\/profile/);
+  assert.match(invitation, /PSObject\.Properties\['required'\]/);
+  assert.match(invitation, /PSObject\.Properties\['roles'\]/);
   assert.match(invitation, /gate7a-invitation-user-profile-drift/);
   assert.match(invitation, /firstName='Invited';lastName='Member'/);
   assert.match(invitation, /gate7a-invitation-user-create-rejected/);

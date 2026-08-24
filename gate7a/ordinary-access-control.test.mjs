@@ -107,6 +107,8 @@ test("SMTP apply keeps the DPAPI source, verifies exact realm state, and rolls b
 test("a single-use invitation creates an isolated ordinary principal and no owner authority", () => {
   for (const action of ["VERIFY_EMAIL", "UPDATE_PROFILE", "UPDATE_PASSWORD"]) assert.match(invitation, new RegExp(action));
   assert.match(invitation, /lifespan=600/);
+  assert.match(invitation, /execute-actions-email\?lifespan=600/);
+  assert.doesNotMatch(invitation, /execute-actions-email\?client_id=.*redirect_uri=/);
   assert.match(invitation, /'adult-member','adult','active'/);
   assert.match(invitation, /relation='chat_ephemeral'/);
   assert.match(invitation, /ownerIdentityChanged=\$false/);

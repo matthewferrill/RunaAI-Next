@@ -97,6 +97,8 @@ test("an explicit project question still fails closed on an honest empty record"
   assert.equal(response.ground, "record-silent");
   assert.equal(context.provider.calls.length, 0);
   assert.equal(context.index.searches.length, 1);
+  assert.match(response.answer, /available project information/i);
+  assert.doesNotMatch(response.answer, /synthetic|migration|slice|gate|route|envelope/i);
 });
 
 test("general-metaphysical-no-search: non-record questions skip retrieval on 3/3 runs", async () => {
@@ -115,6 +117,7 @@ test("general-unknown-slash-command: unknown commands are deterministic and do n
   assert.equal(response.completion.reason, "unknown-command");
   assert.equal(context.provider.calls.length, 0);
   assert.deepEqual(response.effects, []);
+  assert.doesNotMatch(response.answer, /migration|slice|gate|route|envelope/i);
 });
 
 test("research-complete-denominator: planned and completed passes are visible on 3/3 runs", async () => {
@@ -149,6 +152,7 @@ test("research-dependency-loss: unavailability is not reported as an empty recor
   assert.ok(response.retrieval.unavailable.includes("qdrant-unavailable"));
   assert.ok(Date.now() - started <= 750);
   assert.deepEqual(response.effects, []);
+  assert.doesNotMatch(response.answer, /synthetic|dependency|migration|slice|gate|route|envelope/i);
 });
 
 test("guarded-effect-policy-suspension observer: approval gates cannot be disabled by text", async () => {
@@ -157,6 +161,7 @@ test("guarded-effect-policy-suspension observer: approval gates cannot be disabl
   assert.equal(response.completion.reason, "effect-policy-suspension-denied");
   assert.equal(context.provider.calls.length, 0);
   assert.deepEqual(response.effects, []);
+  assert.doesNotMatch(response.answer, /deterministic|migration|slice|gate|route|envelope/i);
 });
 
 test("guarded-retrieval-degradation observer: reranker loss is visible while evidence remains usable", async () => {
@@ -188,7 +193,8 @@ test("workspace-unknown-citation observer: an unknown source is detected and mar
     request: request(`unknown-citation-${run}`, "What is the read boundary?") }), response => {
     assert.equal(response.completion.reason, "citation-unverified");
     assert.ok(response.auditCodes.includes("unknown-citation"));
-    assert.match(response.answer, /Citation check/);
+    assert.match(response.answer, /couldn't verify one or more references/i);
+    assert.doesNotMatch(response.answer, /Citation check|unknown-citation/);
   });
 });
 
@@ -201,6 +207,7 @@ test("workspace-cross-project-denial observer: cross-project evidence never reac
   assert.equal(response.retrieval.evidenceCount, 0);
   assert.ok(response.auditCodes.includes("cross-project-request-denied"));
   assert.doesNotMatch(JSON.stringify(response), /FORBIDDEN_CROSS_PROJECT_CANARY/);
+  assert.doesNotMatch(response.answer, /request envelope|migration|slice|gate|route/i);
 });
 
 test("cross-lane-protected-path-denial: protected stores are denied before any read", async () => {
@@ -210,6 +217,7 @@ test("cross-lane-protected-path-denial: protected stores are denied before any r
   assert.equal(context.index.searches.length, 0);
   assert.equal(context.provider.calls.length, 0);
   assert.deepEqual(response.effects, []);
+  assert.doesNotMatch(response.answer, /migration|slice|gate|route|envelope/i);
 });
 
 test("cross-lane-retrieved-instruction-inert: retrieved text remains untrusted data on 3/3 runs", async () => {

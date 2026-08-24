@@ -432,6 +432,13 @@ test("HTTP ordinary login is separate from owner administration and supports log
   assert.equal(callback.status, 303);
   assert.match(callback.headers.get("set-cookie"), /^__Host-runa_user_session=ordinary-session-id;/);
   assert.match(callback.headers.get("set-cookie"), /Secure; HttpOnly; SameSite=Lax/);
+  const anonymousStatus = await fetch(`${base}/api/session/status`);
+  assert.deepEqual(await anonymousStatus.json(), { schemaVersion: "runa2-gate7a-browser-session-status/v1",
+    authenticated: false, sessionType: null, privateValuesIncluded: false });
+  const ordinaryStatus = await fetch(`${base}/api/session/status`, { headers: {
+    cookie: "__Host-runa_user_session=ordinary-session-id" } });
+  assert.deepEqual(await ordinaryStatus.json(), { schemaVersion: "runa2-gate7a-browser-session-status/v1",
+    authenticated: true, sessionType: "ordinary", privateValuesIncluded: false });
   const logout = await fetch(`${base}/session/user/logout`, { method: "POST", headers: {
     origin: "https://candidate.test", cookie: "__Host-runa_user_session=ordinary-session-id" } });
   assert.equal(logout.status, 200);
@@ -442,7 +449,27 @@ test("HTTP ordinary login is separate from owner administration and supports log
   body: JSON.stringify({ requestId: "ambiguous", lane: "general", threadId: "thread", message: "Hi" }) });
   assert.equal(ambiguous.status, 400);
   assert.equal((await ambiguous.json()).errorCode, "gate7a-browser-session-ambiguous");
-  assert.deepEqual(calls.map(call => call[0]), ["start", "start", "callback", "revoke"]);
+  assert.deepEqual(calls.map(call => call[0]), ["start", "start", "callback", "session", "revoke"]);
+});
+
+test("the browser UI turns an active ordinary session into a bounded chat screen", async () => {
+  const [html, script, styles] = await Promise.all([
+    readFile(resolve(import.meta.dirname, "public", "index.html"), "utf8"),
+    readFile(resolve(import.meta.dirname, "public", "status.js"), "utf8"),
+    readFile(resolve(import.meta.dirname, "public", "styles.css"), "utf8"),
+  ]);
+  assert.match(html, /id="chat"/);
+  assert.match(html, /Chat with Runa/);
+  assert.match(html, /Protected records and administrative actions are not available here/);
+  assert.doesNotMatch(html, /cannot read protected data or perform an action while shadow authority is active/);
+  assert.match(script, /\/api\/session\/status/);
+  assert.match(script, /session\.sessionType === "ordinary"/);
+  assert.match(script, /lane: "general"/);
+  assert.match(script, /projectId: "runa:personal"/);
+  assert.match(script, /history\.slice\(-24\)/);
+  assert.match(script, /\/session\/user\/logout/);
+  assert.doesNotMatch(script, /innerHTML|localStorage|sessionStorage/);
+  assert.match(styles, /\.transcript/);
 });
 
 test("the application accepts either exact identity client without trusting token claims locally", async () => {

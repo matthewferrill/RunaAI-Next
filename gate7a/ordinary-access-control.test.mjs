@@ -50,11 +50,20 @@ test("ordinary-client activation is exact-release pinned, secret-safe, and autom
 test("ordinary successor changes only the application release and restores the exact predecessor on failure", () => {
   for (const pin of ["ExpectedCommit", "ExpectedArtifactDigest", "ExpectedArtifactFileCount",
     "PriorReleaseId", "PriorCommit", "PriorArtifactDigest", "ArchiveSha256", "ConfigSha256",
-    "ManifestSha256", "LauncherSha256"]) assert.match(deploy, new RegExp(pin));
+    "ManifestSha256", "LauncherSha256", "CaddyfileSha256"]) assert.match(deploy, new RegExp(pin));
   assert.match(deploy, /gate7a-ordinary-rollback-\$ReleaseId/);
   assert.match(deploy, /Copy-Item -LiteralPath \(Join-Path \$rollback 'candidate\.json'\) -Destination \$config -Force/);
   assert.match(deploy, /Copy-Item -LiteralPath \(Join-Path \$rollback \$manifestName\) -Destination \$manifest -Force/);
   assert.match(deploy, /Wait-Release \$PriorReleaseId/);
+  assert.match(deploy, /caddy\.exe';\$rollback/);
+  assert.match(deploy, /validate --config \$stagedCaddy --adapter caddyfile/);
+  assert.ok(deploy.indexOf("validate --config $stagedCaddy") < deploy.indexOf("New-Item -ItemType Directory -Path $release"));
+  assert.match(deploy, /Copy-Item -LiteralPath \$caddy -Destination \(Join-Path \$rollback 'Caddyfile'\)/);
+  assert.match(deploy, /Move-Item -LiteralPath "\$caddy\.new" -Destination \$caddy -Force/);
+  assert.match(deploy, /reload --config \$caddy --adapter caddyfile/);
+  assert.match(deploy, /Copy-Item -LiteralPath \(Join-Path \$rollback 'Caddyfile'\) -Destination \$caddy -Force/);
+  assert.match(deploy, /gate7a-ordinary-deploy-protected-binding-drift/);
+  assert.match(deploy, /applicationAndCaddyChangedTogether=\$true/);
   assert.match(deploy, /selectedCoreAuthorityUnchanged=\$true/);
   assert.match(deploy, /ownerRouteUnchanged=\$true/);
   assert.match(deploy, /Rebind-ControlOrdinaryOwnerSession\.mjs/);

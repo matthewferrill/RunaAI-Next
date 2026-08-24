@@ -124,6 +124,37 @@ export function createLanReleaseConfig(predecessor) {
   });
 }
 
+export function createCustomerJourneyReleaseConfig(currentConfig) {
+  const current = structuredClone(currentConfig);
+  return Object.freeze({
+    ...current,
+    services: {
+      ...current.services,
+      caddy: { ...current.services.caddy,
+        configurationDigest: sha256(caddyfile + caddyBinarySha256) },
+    },
+    limits: { ...current.limits, totalDeadlineMs: 60_000 },
+  });
+}
+
+export function customerJourneyProjectionStatus(currentConfig, config) {
+  const preserved = structuredClone(config);
+  preserved.services.caddy.configurationDigest = currentConfig.services.caddy.configurationDigest;
+  preserved.limits.totalDeadlineMs = currentConfig.limits.totalDeadlineMs;
+  return Object.freeze({
+    schemaVersion: "runa2-gate7b-customer-journey-projection/v1",
+    releaseConfigurationDigest: sha256(canonicalJson(config)),
+    caddyConfigurationDigest: config.services.caddy.configurationDigest,
+    applicationDeadlineMs: config.limits.totalDeadlineMs,
+    priorConfigurationPreserved: canonicalJson(preserved) === canonicalJson(currentConfig),
+    authorityChanged: false,
+    identityChanged: false,
+    protectedProductDataChanged: false,
+    productionChanged: false,
+    privateValuesIncluded: false,
+  });
+}
+
 export function projectionStatus(predecessor, config) {
   return Object.freeze({
     schemaVersion: "runa2-gate7a-lan-projection/v1",

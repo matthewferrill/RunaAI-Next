@@ -11,6 +11,7 @@ param(
   [Parameter(Mandatory)][string]$ConfigSha256,
   [Parameter(Mandatory)][string]$ManifestSha256,
   [Parameter(Mandatory)][string]$LauncherSha256,
+  [Parameter(Mandatory)][string]$CaddyfileSha256,
   [string]$Root='C:\AI\RunaAI-Next-Candidate'
 )
 
@@ -22,17 +23,21 @@ if($env:COMPUTERNAME-ne'RUNA-CONTROL'-or[Security.Principal.WindowsIdentity]::Ge
 }
 if([IO.Path]::GetFullPath($Root)-ne'C:\AI\RunaAI-Next-Candidate'-or$ExpectedArtifactFileCount-lt 1){throw 'gate7a-ordinary-deploy-pin-invalid'}
 foreach($value in @($ExpectedCommit,$PriorCommit)){if($value-notmatch'^[a-f0-9]{40}$'){throw 'gate7a-ordinary-deploy-pin-invalid'}}
-foreach($value in @($ExpectedArtifactDigest,$PriorArtifactDigest,$ArchiveSha256,$ConfigSha256,$ManifestSha256,$LauncherSha256)){if($value-notmatch'^[a-f0-9]{64}$'){throw 'gate7a-ordinary-deploy-pin-invalid'}}
+foreach($value in @($ExpectedArtifactDigest,$PriorArtifactDigest,$ArchiveSha256,$ConfigSha256,$ManifestSha256,$LauncherSha256,$CaddyfileSha256)){if($value-notmatch'^[a-f0-9]{64}$'){throw 'gate7a-ordinary-deploy-pin-invalid'}}
 foreach($value in @($ReleaseId,$PriorReleaseId)){if($value-notmatch'^[A-Za-z0-9._-]{1,100}$'){throw 'gate7a-ordinary-deploy-pin-invalid'}}
 
 $staging=Join-Path $Root "staging\$ReleaseId";$release=Join-Path $Root "releases\$ReleaseId"
 $archive=Join-Path $staging 'release.tar.gz';$stagedConfig=Join-Path $staging 'candidate.json'
 $stagedManifest=Join-Path $staging $manifestName;$stagedLauncher=Join-Path $staging 'Run-Application.ps1'
+$stagedCaddy=Join-Path $staging 'Caddyfile'
 $config=Join-Path $Root 'config\candidate.json';$manifest=Join-Path $Root "config\$manifestName"
-$launcher=Join-Path $Root 'control\Run-Application.ps1';$rollback=Join-Path $Root "secrets\gate7a-ordinary-rollback-$ReleaseId"
+$launcher=Join-Path $Root 'control\Run-Application.ps1';$caddy=Join-Path $Root 'config\Caddyfile'
+$caddyExe=Join-Path $Root 'tools\caddy\caddy.exe';$rollback=Join-Path $Root "secrets\gate7a-ordinary-rollback-$ReleaseId"
+$expectedCaddyBinarySha256='5cb9ab71e5756ce72840b8234177a2f40c8b4ab47a806b8e841e2b784e9df62b'
 $changed=$false
 
 function Hash([string]$Path){if(-not(Test-Path -LiteralPath $Path -PathType Leaf)){throw 'gate7a-ordinary-deploy-staged-file-missing'};(Get-FileHash -LiteralPath $Path -Algorithm SHA256).Hash.ToLowerInvariant()}
+function TextHash([string]$Value){$algorithm=[Security.Cryptography.SHA256]::Create();try{([BitConverter]::ToString($algorithm.ComputeHash([Text.Encoding]::UTF8.GetBytes($Value)))).Replace('-','').ToLowerInvariant()}finally{$algorithm.Dispose()}}
 function Wait-PortClosed { $deadline=[DateTime]::UtcNow.AddSeconds(90);do{if(-not(Get-NetTCPConnection -State Listen -LocalPort 9760 -ErrorAction SilentlyContinue)){return};Start-Sleep -Milliseconds 500}until([DateTime]::UtcNow-gt$deadline);throw 'gate7a-ordinary-deploy-stop-timeout' }
 function Wait-Release([string]$Id){$deadline=[DateTime]::UtcNow.AddMinutes(12);do{Start-Sleep -Seconds 2;try{$value=Invoke-RestMethod 'http://127.0.0.1:9760/api/runtime/status' -TimeoutSec 3;if($value.running.releaseId-eq$Id){return $value}}catch{}}until([DateTime]::UtcNow-gt$deadline);throw 'gate7a-ordinary-deploy-start-timeout'}
 function Expand-Response([object]$Response){foreach($item in @($Response)){if($item-is [Array]){foreach($nested in $item){$nested}}elseif($null-ne$item){$item}}}
@@ -76,8 +81,11 @@ function Get-Redirect([string]$Path){
   }finally{$response.Close()}
 }
 
-$pins=@{$archive=$ArchiveSha256;$stagedConfig=$ConfigSha256;$stagedManifest=$ManifestSha256;$stagedLauncher=$LauncherSha256}
+$pins=@{$archive=$ArchiveSha256;$stagedConfig=$ConfigSha256;$stagedManifest=$ManifestSha256;$stagedLauncher=$LauncherSha256;$stagedCaddy=$CaddyfileSha256}
 foreach($entry in $pins.GetEnumerator()){if((Hash $entry.Key)-ne$entry.Value){throw 'gate7a-ordinary-deploy-staged-hash-mismatch'}}
+if((Hash $caddyExe)-ne$expectedCaddyBinarySha256){throw 'gate7a-ordinary-deploy-caddy-binary-drift'}
+& $caddyExe validate --config $stagedCaddy --adapter caddyfile *> $null
+if($LASTEXITCODE-ne0){throw 'gate7a-ordinary-deploy-caddy-invalid'}
 foreach($path in @($release,$rollback)){if(Test-Path -LiteralPath $path){throw 'gate7a-ordinary-deploy-new-path-exists'}}
 $beforeRuntime=Invoke-RestMethod 'http://127.0.0.1:9760/api/runtime/status' -TimeoutSec 10
 $beforeReadiness=Invoke-RestMethod 'http://127.0.0.1:9760/api/readiness/status' -TimeoutSec 10
@@ -93,8 +101,16 @@ if($currentConfig.releaseManifestPath-ne$manifestName-or$candidate.releaseManife
   $candidate.gate7a.ordinaryClient.clientId-ne'runaai-next-user'-or
   $candidate.gate7a.ordinaryClient.redirectUri-ne'https://runa.bridgebuildersai.com/session/user/callback'-or
   $candidate.gate7a.ordinaryClient.clientCredentialRef-ne'file:../secrets/keycloak-ordinary-client'-or
+  [int]$candidate.limits.totalDeadlineMs-ne60000-or
+  $candidate.services.caddy.configurationDigest-ne(TextHash ([IO.File]::ReadAllText($stagedCaddy)+$expectedCaddyBinarySha256))-or
   $releaseFacts.releaseId-ne$ReleaseId-or$releaseFacts.commit-ne$ExpectedCommit-or
   $releaseFacts.artifactDigest-ne$ExpectedArtifactDigest){throw 'gate7a-ordinary-deploy-successor-invalid'}
+$preservedCandidate=Get-Content -Raw -LiteralPath $stagedConfig|ConvertFrom-Json
+$preservedCandidate.limits.totalDeadlineMs=$currentConfig.limits.totalDeadlineMs
+$preservedCandidate.services.caddy.configurationDigest=$currentConfig.services.caddy.configurationDigest
+if(($preservedCandidate|ConvertTo-Json -Depth 100 -Compress)-ne($currentConfig|ConvertTo-Json -Depth 100 -Compress)){
+  throw 'gate7a-ordinary-deploy-protected-binding-drift'
+}
 if(-not(Test-Path -LiteralPath (Join-Path $Root 'secrets\keycloak-ordinary-client') -PathType Leaf)){throw 'gate7a-ordinary-deploy-client-secret-missing'}
 
 New-Item -ItemType Directory -Path $release|Out-Null
@@ -107,15 +123,20 @@ Set-Acl -LiteralPath $rollback -AclObject (Get-Acl -LiteralPath (Join-Path $Root
 Copy-Item -LiteralPath $config -Destination (Join-Path $rollback 'candidate.json')
 Copy-Item -LiteralPath $manifest -Destination (Join-Path $rollback $manifestName)
 Copy-Item -LiteralPath $launcher -Destination (Join-Path $rollback 'Run-Application.ps1')
+Copy-Item -LiteralPath $caddy -Destination (Join-Path $rollback 'Caddyfile')
 Copy-Item -LiteralPath $stagedConfig -Destination "$config.new"
 Copy-Item -LiteralPath $stagedManifest -Destination "$manifest.new"
 Copy-Item -LiteralPath $stagedLauncher -Destination "$launcher.new"
+Copy-Item -LiteralPath $stagedCaddy -Destination "$caddy.new"
 
 try{
-  Stop-ScheduledTask -TaskPath $taskPath -TaskName 'Application';Wait-PortClosed
+  Stop-ScheduledTask -TaskPath $taskPath -TaskName 'Application';Wait-PortClosed;$changed=$true
   Move-Item -LiteralPath "$config.new" -Destination $config -Force
   Move-Item -LiteralPath "$manifest.new" -Destination $manifest -Force
-  Move-Item -LiteralPath "$launcher.new" -Destination $launcher -Force;$changed=$true
+  Move-Item -LiteralPath "$launcher.new" -Destination $launcher -Force
+  Move-Item -LiteralPath "$caddy.new" -Destination $caddy -Force
+  & $caddyExe reload --config $caddy --adapter caddyfile *> $null
+  if($LASTEXITCODE-ne0){throw 'gate7a-ordinary-deploy-caddy-reload-failed'}
   Start-ScheduledTask -TaskPath $taskPath -TaskName 'Application';$runtime=Wait-Release $ReleaseId
   $readiness=Invoke-RestMethod 'http://127.0.0.1:9760/api/readiness/status' -TimeoutSec 20
   if($runtime.running.commit-ne$ExpectedCommit-or$runtime.running.artifactDigest-ne$ExpectedArtifactDigest-or
@@ -153,7 +174,7 @@ try{
     $ownerLocation-notmatch'client_id=runaai-next(&|$)'){throw 'gate7a-ordinary-deploy-route-invalid'}
   [ordered]@{schemaVersion='runa2-gate7a-control-ordinary-successor/v1';deployed=$true;
     releaseId=$ReleaseId;commit=$ExpectedCommit;artifactDigest=$ExpectedArtifactDigest;
-    selectedCoreAuthorityUnchanged=$true;ownerProofRebound=$true;ownerRouteUnchanged=$true;ordinaryPasswordRouteReady=$true;
+    selectedCoreAuthorityUnchanged=$true;ownerProofRebound=$true;ownerRouteUnchanged=$true;ordinaryPasswordRouteReady=$true;applicationAndCaddyChangedTogether=$true;
     rollbackRetained=$true;legacyModified=$false;protectedProductDataChanged=$false;
     privateValuesIncluded=$false}|ConvertTo-Json -Compress
 }catch{
@@ -163,8 +184,13 @@ try{
     Copy-Item -LiteralPath (Join-Path $rollback 'candidate.json') -Destination $config -Force
     Copy-Item -LiteralPath (Join-Path $rollback $manifestName) -Destination $manifest -Force
     Copy-Item -LiteralPath (Join-Path $rollback 'Run-Application.ps1') -Destination $launcher -Force
+    Copy-Item -LiteralPath (Join-Path $rollback 'Caddyfile') -Destination $caddy -Force
+    $caddyRollbackFailed=$false
+    & $caddyExe reload --config $caddy --adapter caddyfile *> $null
+    if($LASTEXITCODE-ne0){$caddyRollbackFailed=$true}
     Start-ScheduledTask -TaskPath $taskPath -TaskName 'Application';$restored=Wait-Release $PriorReleaseId
     if($restored.running.commit-ne$PriorCommit-or$restored.running.artifactDigest-ne$PriorArtifactDigest){throw 'gate7a-ordinary-deploy-rollback-failed'}
+    if($caddyRollbackFailed){throw 'gate7a-ordinary-deploy-caddy-rollback-failed'}
   }
   throw "gate7a-ordinary-deploy-failed:$failure"
-}finally{Remove-Item -LiteralPath "$config.new","$manifest.new","$launcher.new" -Force -ErrorAction SilentlyContinue}
+}finally{Remove-Item -LiteralPath "$config.new","$manifest.new","$launcher.new","$caddy.new" -Force -ErrorAction SilentlyContinue}

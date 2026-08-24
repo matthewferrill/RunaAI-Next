@@ -40,7 +40,7 @@ function request(id, message, lane = "general", overrides = {}) {
 }
 
 function harness({ sources = [], unavailable = false, degraded = false, providers = null,
-  continuity = null, telemetry = null } = {}) {
+  continuity = null, telemetry = null, approvedKnowledge = null } = {}) {
   const records = new MemoryRecordStore(sources);
   const index = new MemoryIndex({ unavailable, degraded, references: sources.map(source => ({
     projectId: source.projectId, sourceId: source.sourceId, sectionId: source.sectionId,
@@ -58,7 +58,7 @@ function harness({ sources = [], unavailable = false, degraded = false, provider
   };
   const resolver = new MemoryWorkspaceResolver(sources);
   const service = new Gate2ReadOnlyService({ records, index, providers: selectedProviders,
-    continuity: store, workspaceResolver: resolver, telemetry });
+    continuity: store, workspaceResolver: resolver, telemetry, approvedKnowledge });
   const checkpointer = new MemorySaver();
   const workflow = createGate2Workflow({ service, checkpointer });
   return { records, index, continuity: store, providers: selectedProviders, resolver, service, checkpointer, workflow };
@@ -118,6 +118,28 @@ test("ordinary greetings and conversational repair use chat while workspace sour
   assert.match(workspace.answer, /selected workspace fact is blue/);
   assert.equal(workspace.retrieval.attempted, true);
   assert.equal(workspace.citations.length, 1);
+});
+
+test("ordinary general conversation does not depend on the approved-knowledge store", async () => {
+  let selections = 0;
+  const approvedKnowledge = {
+    async select() {
+      selections += 1;
+      throw Object.assign(new Error("synthetic unavailable source"), { code: "approved-knowledge-source-unavailable" });
+    },
+  };
+  const context = harness({ approvedKnowledge });
+  const greeting = await context.service.answer(request("ordinary-no-knowledge", "Hi Runa!"));
+  assert.equal(greeting.completion.reason, "complete");
+  assert.equal(greeting.approvedKnowledge.reason, "not-applicable-general-conversation");
+  assert.equal(greeting.approvedKnowledge.errorCode, null);
+  assert.equal(selections, 0);
+  assert.equal(context.providers.chat.calls.length, 1);
+
+  const governed = await context.service.answer(request("project-needs-knowledge", "What does this project say?"));
+  assert.equal(governed.completion.reason, "approved-knowledge-delivery-invalid");
+  assert.equal(selections, 1);
+  assert.equal(context.providers.chat.calls.length, 1);
 });
 
 test("guarded lane refuses policy/protected requests and records only bounded read-only lookups", async () => {

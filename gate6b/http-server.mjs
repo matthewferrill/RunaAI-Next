@@ -5,6 +5,7 @@ import { extname, join, normalize, resolve } from "node:path";
 import { randomBytes } from "node:crypto";
 
 const mime = new Map([[".html", "text/html; charset=utf-8"], [".js", "text/javascript; charset=utf-8"],
+  [".mjs", "text/javascript; charset=utf-8"],
   [".css", "text/css; charset=utf-8"], [".svg", "image/svg+xml"]]);
 const coded = (code, message) => Object.assign(new Error(message), { code });
 

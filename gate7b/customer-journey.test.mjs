@@ -52,7 +52,8 @@ test("the customer surface is generic, truthful, retryable, and does not expose 
     readFile(new URL("../gate6b/public/index.html", import.meta.url), "utf8"),
     readFile(new URL("../gate6b/public/status.js", import.meta.url), "utf8"),
   ]);
-  assert.match(html, /Ask questions, brainstorm, draft writing or code/);
+  assert.match(html, /Ask questions, brainstorm, draft writing/);
+  assert.match(script, /Discuss, explain, and draft code/);
   assert.match(html, /does not have live web access/);
   assert.match(html, /cannot change files, settings, or systems/);
   assert.doesNotMatch(html, /Hi Matthew/);

@@ -93,7 +93,7 @@ function deterministicResponse(request) {
     answer: "I don't have live web or weather access in this chat, so I can't verify current information.",
     reason: "current-source-required", auditCode: "external-network-not-used",
   });
-  if (effectRequestPattern.test(request.message)) return emptyV1(request, {
+  if (request.lane !== "code" && effectRequestPattern.test(request.message)) return emptyV1(request, {
     answer: "This chat is read-only and cannot perform that action, approve it, or learn from it.",
     reason: "effect-not-available", auditCode: "effects-empty-enforced",
   });

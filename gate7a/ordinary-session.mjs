@@ -1,4 +1,5 @@
 import { createHash, randomBytes } from "node:crypto";
+import { publicProfileFromClaims } from "../gate6b/clients.mjs";
 
 const coded = (code, message) => Object.assign(new Error(message), { code });
 const b64url = value => Buffer.from(value).toString("base64url");
@@ -111,6 +112,16 @@ export class OrdinaryBrowserSessionService {
   async credentialForSession(sessionId) {
     if (!safeCode(sessionId)) throw coded("gate7a-ordinary-session-invalid", "The ordinary browser session is invalid.");
     return this.store.sessionCredential({ bindingDigest: this.bindingDigest, sessionId, now: this.now() });
+  }
+
+  async profileForSession(sessionId) {
+    if (!safeCode(sessionId)) throw coded("gate7a-ordinary-session-invalid", "The ordinary browser session is invalid.");
+    const retained = await this.store.sessionCredentials({ bindingDigest: this.bindingDigest,
+      sessionId, now: this.now() });
+    const oidc = retained.clientId === this.passwordClientId ? this.passwordOidc : this.passkeyOidc;
+    const decision = await oidc.inspect(retained.accessToken);
+    if (decision.active !== true) throw coded("gate7a-ordinary-session-invalid", "The ordinary identity session is no longer active.");
+    return decision.publicProfile ?? publicProfileFromClaims({}, retained.principalId);
   }
 
   async revoke(sessionId) {

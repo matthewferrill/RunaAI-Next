@@ -2,6 +2,28 @@ import { randomBytes } from "node:crypto";
 
 const coded = (code, message) => Object.assign(new Error(message), { code });
 
+const boundedProfileText = value => {
+  const text = typeof value === "string" ? value.replace(/\s+/g, " ").trim() : "";
+  return text && text.length <= 120 && !/[\u0000-\u001f\u007f]/.test(text) ? text : null;
+};
+
+function initialsFor(displayName) {
+  const parts = String(displayName).split(/[\s._@+-]+/).filter(Boolean);
+  const selected = parts.length > 1 ? [parts[0], parts.at(-1)] : parts.slice(0, 1);
+  return selected.map(part => part.match(/[\p{L}\p{N}]/u)?.[0] ?? "").join("").toUpperCase().slice(0, 2) || "R";
+}
+
+export function publicProfileFromClaims(claims, fallbackPrincipalId = null) {
+  const combined = boundedProfileText([claims?.given_name, claims?.family_name]
+    .map(boundedProfileText).filter(Boolean).join(" "));
+  const fallback = fallbackPrincipalId === null ? null : boundedProfileText(String(fallbackPrincipalId).split(/[-_.]+/)
+    .filter(Boolean).map(part => `${part[0]?.toUpperCase() ?? ""}${part.slice(1)}`).join(" "));
+  const displayName = boundedProfileText(claims?.name) ?? combined
+    ?? boundedProfileText(claims?.preferred_username) ?? fallback;
+  if (!displayName) return null;
+  return Object.freeze({ displayName, initials: initialsFor(displayName) });
+}
+
 async function boundedJson(response, maximumBytes = 128_000) {
   const text = await response.text();
   if (Buffer.byteLength(text, "utf8") > maximumBytes) throw coded("dependency-output-limited", "A dependency response exceeded its byte ceiling.");
@@ -36,6 +58,7 @@ export class KeycloakOnlineClient {
       authenticatedAt: Number.isFinite(authenticated) ? new Date(authenticated * 1000).toISOString() : "invalid",
       expiresAt: Number.isFinite(expires) ? new Date(expires * 1000).toISOString() : "invalid",
       methods: Object.freeze(Array.isArray(value.amr) ? value.amr.filter(item => typeof item === "string") : []),
+      publicProfile: publicProfileFromClaims(value),
     });
   }
 
@@ -43,7 +66,7 @@ export class KeycloakOnlineClient {
     prompt = "login", maxAge = 0, action = null }) {
     const url = new URL(`${this.issuer}/protocol/openid-connect/auth`);
     url.search = new URLSearchParams({ response_type: "code", client_id: clientId,
-      redirect_uri: redirectUri, scope: "openid", state, code_challenge: codeChallenge,
+      redirect_uri: redirectUri, scope: "openid profile", state, code_challenge: codeChallenge,
       code_challenge_method: "S256", prompt, max_age: String(maxAge) }).toString();
     if (action) url.searchParams.set("kc_action", action);
     return url.toString();

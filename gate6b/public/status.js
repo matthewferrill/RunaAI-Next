@@ -12,8 +12,26 @@ const form = byId("chat-form");
 const message = byId("message");
 const send = byId("send");
 const transcript = byId("transcript");
-const history = [];
-const threadId = `web-${crypto.randomUUID()}`;
+const projectForm = byId("project-form");
+const projectName = byId("project-name");
+const experiences = Object.freeze(["chat", "code"]);
+const states = Object.fromEntries(experiences.map(experience => [experience, {
+  threadId: `web-${experience}-${crypto.randomUUID()}`,
+  projectId: "runa:personal", projectName: null, activeChatId: null, history: [],
+}]));
+const catalogs = Object.fromEntries(experiences.map(experience => [experience, { projects: [], chats: [] }]));
+let activeExperience = "chat";
+
+const workspaceHeaders = Object.freeze({ "content-type": "application/json", "x-runa-workspace": "1" });
+const activeState = () => states[activeExperience];
+const greeting = () => activeExperience === "code"
+  ? "Hi. What would you like to design, understand, or draft in code?"
+  : "Hi. What would you like to talk about?";
+
+function resetTranscript() {
+  transcript.replaceChildren();
+  appendMessage("assistant", greeting());
+}
 
 function appendMessage(role, content) {
   const item = document.createElement("div");
@@ -43,6 +61,142 @@ function addRetry(item, content) {
   item.append(retry);
 }
 
+async function workspaceJson(path, payload) {
+  const response = await fetch(path, { method: "POST", headers: workspaceHeaders,
+    body: JSON.stringify(payload) });
+  const value = await response.json().catch(() => null);
+  if (!response.ok || !value) throw Object.assign(new Error("workspace request failed"), {
+    code: typeof value?.errorCode === "string" ? value.errorCode : "candidate-request-failed",
+  });
+  return value;
+}
+
+function navigationButton(label, { selected = false, onClick }) {
+  const item = document.createElement("li");
+  const button = document.createElement("button");
+  button.type = "button";
+  button.textContent = label;
+  button.classList.toggle("selected", selected);
+  button.addEventListener("click", onClick);
+  item.append(button);
+  return item;
+}
+
+function updateExperiencePresentation() {
+  const code = activeExperience === "code";
+  for (const experience of experiences) {
+    const selected = experience === activeExperience;
+    const tab = byId(`${experience}-tab`);
+    tab.classList.toggle("selected", selected);
+    tab.setAttribute("aria-selected", String(selected));
+    tab.tabIndex = selected ? 0 : -1;
+  }
+  text("records-heading", code ? "Code chat records" : "Chat records");
+  byId("record-list").setAttribute("aria-label", code ? "Code chat records" : "Chat records");
+  text("experience-eyebrow", code ? "Private code chat" : "Private chat");
+  text("chat-title", code ? "Code with Runa" : "Chat with Runa");
+  text("experience-description", code
+    ? "Discuss, explain, and draft code in a separate private workspace. Runa cannot access files, run code, or change systems from this chat."
+    : "Ask questions, brainstorm, draft writing, and work with text you paste here. Runa does not have live web access and cannot change files, settings, or systems from this chat.");
+  message.placeholder = code ? "Ask about or draft code…" : "Type your message…";
+}
+
+function renderNavigation() {
+  const catalog = catalogs[activeExperience];
+  const state = activeState();
+  const projectList = byId("project-list");
+  const recordList = byId("record-list");
+  projectList.replaceChildren(...catalog.projects.map(project => navigationButton(project.displayName, {
+    selected: state.projectId === project.projectId,
+    onClick: () => startNew(project.projectId, project.displayName),
+  })));
+  const visibleChats = state.projectId === "runa:personal" ? catalog.chats
+    : catalog.chats.filter(item => item.projectId === state.projectId);
+  recordList.replaceChildren(...visibleChats.map(item => navigationButton(item.title, {
+    selected: state.activeChatId === item.chatId,
+    onClick: () => loadChat(item.chatId),
+  })));
+  byId("project-empty").hidden = catalog.projects.length > 0;
+  byId("record-empty").hidden = visibleChats.length > 0;
+  text("record-empty", state.projectId === "runa:personal"
+    ? `No ${activeExperience === "code" ? "code " : ""}chat records yet`
+    : "No chat records in this project yet");
+}
+
+async function refreshNavigation(experience = activeExperience) {
+  try {
+    const catalog = await workspaceJson("/api/selected/navigation/query", { experience });
+    catalogs[experience] = { projects: catalog.projects ?? [], chats: catalog.chats ?? [] };
+    if (experience === activeExperience) {
+      text("navigation-status", "");
+      renderNavigation();
+    }
+  } catch {
+    if (experience === activeExperience) text("navigation-status", "Records are temporarily unavailable");
+  }
+}
+
+function startNew(projectId = "runa:personal", selectedProjectName = null) {
+  const state = activeState();
+  state.threadId = `web-${activeExperience}-${crypto.randomUUID()}`;
+  state.projectId = projectId;
+  state.projectName = selectedProjectName;
+  state.activeChatId = null;
+  state.history = [];
+  resetTranscript();
+  renderNavigation();
+  text("chat-status", selectedProjectName ? `New chat in ${selectedProjectName}` : "Ready");
+  message.focus();
+}
+
+async function selectExperience(experience) {
+  if (!experiences.includes(experience) || experience === activeExperience) return;
+  activeExperience = experience;
+  projectForm.hidden = true;
+  projectName.value = "";
+  updateExperiencePresentation();
+  const state = activeState();
+  resetTranscript();
+  for (const turn of state.history) appendMessage(turn.role, turn.content);
+  renderNavigation();
+  await refreshNavigation(experience);
+  text("chat-status", state.projectName ? `Ready in ${state.projectName}` : "Ready");
+  message.focus();
+}
+
+async function loadChat(chatId) {
+  text("navigation-status", "Loading…");
+  setNavigationDisabled(true);
+  send.disabled = true;
+  try {
+    const record = await workspaceJson("/api/selected/chat/read", { experience: activeExperience, chatId });
+    const state = activeState();
+    state.threadId = record.chatId;
+    state.projectId = record.projectId ?? "runa:personal";
+    state.projectName = catalogs[activeExperience].projects
+      .find(project => project.projectId === record.projectId)?.displayName ?? null;
+    state.activeChatId = record.chatId;
+    state.history = record.turns.flatMap(turn => [
+      { role: "user", content: turn.user }, { role: "assistant", content: turn.assistant },
+    ]);
+    transcript.replaceChildren();
+    for (const turn of state.history) appendMessage(turn.role, turn.content);
+    renderNavigation();
+    text("navigation-status", "");
+    text("chat-status", state.projectName ? `Ready in ${state.projectName}` : "Ready");
+    message.focus();
+  } catch {
+    text("navigation-status", "That record could not be loaded");
+  } finally {
+    setNavigationDisabled(false);
+    send.disabled = false;
+  }
+}
+
+function setNavigationDisabled(disabled) {
+  for (const button of document.querySelectorAll("#left-rail-body button")) button.disabled = disabled;
+}
+
 async function initialize() {
   try {
     const [runtimeResponse, readinessResponse, sessionResponse] = await Promise.all([
@@ -64,17 +218,23 @@ async function initialize() {
       ? "Ordinary chat is available. Protected records and administrative actions remain restricted."
       : "Chat remains unavailable until the selected core reports active authority.");
     if (session.authenticated && session.sessionType === "ordinary" && active) {
-      initializeWorkspaceShell(document);
+      const wide = window.matchMedia?.("(min-width: 761px)").matches === true;
+      initializeWorkspaceShell(document, { initialLeftExpanded: wide });
       document.body.classList.add("workspace-active");
       welcome.hidden = true;
       chat.hidden = false;
       sessionLabel.hidden = false;
-      sessionLabel.textContent = "Ordinary member";
+      text("session-avatar", session.profile?.initials ?? "R");
+      text("session-name", session.profile?.displayName ?? "Runa member");
       logout.hidden = false;
+      updateExperiencePresentation();
+      renderNavigation();
+      await refreshNavigation();
       message.focus();
     } else if (session.authenticated) {
       sessionLabel.hidden = false;
-      sessionLabel.textContent = "Protected owner session";
+      text("session-avatar", "R");
+      text("session-name", "Protected owner session");
     }
   } catch {
     text("summary", "Runa's service status is unavailable. No authority is inferred.");
@@ -82,13 +242,60 @@ async function initialize() {
   }
 }
 
+for (const experience of experiences) {
+  const tab = byId(`${experience}-tab`);
+  tab.addEventListener("click", () => selectExperience(experience));
+  tab.addEventListener("keydown", event => {
+    if (!["ArrowLeft", "ArrowRight"].includes(event.key)) return;
+    event.preventDefault();
+    const next = experience === "chat" ? "code" : "chat";
+    byId(`${next}-tab`).focus();
+    selectExperience(next);
+  });
+}
+byId("new-chat").addEventListener("click", () => startNew());
+byId("new-project").addEventListener("click", () => {
+  projectForm.hidden = false;
+  projectName.focus();
+});
+byId("cancel-project").addEventListener("click", () => {
+  projectForm.hidden = true;
+  projectName.value = "";
+});
+
+projectForm.addEventListener("submit", async event => {
+  event.preventDefault();
+  const displayName = projectName.value.replace(/\s+/g, " ").trim();
+  if (!displayName) return;
+  text("navigation-status", "Creating project…");
+  setNavigationDisabled(true);
+  send.disabled = true;
+  try {
+    const result = await workspaceJson("/api/selected/projects", {
+      requestId: `web-project-${crypto.randomUUID()}`, experience: activeExperience, displayName,
+    });
+    projectForm.hidden = true;
+    projectName.value = "";
+    await refreshNavigation();
+    startNew(result.projectId, result.displayName);
+  } catch {
+    text("navigation-status", "Project could not be created");
+  } finally {
+    setNavigationDisabled(false);
+    send.disabled = false;
+  }
+});
+
 form.addEventListener("submit", async event => {
   event.preventDefault();
   const content = message.value.trim();
   if (!content || send.disabled) return;
+  const state = activeState();
+  const submittedExperience = activeExperience;
   const userItem = appendMessage("user", content);
   message.value = "";
   send.disabled = true;
+  setNavigationDisabled(true);
   text("chat-status", "Runa is thinking…");
   try {
     const controller = new AbortController();
@@ -96,11 +303,11 @@ form.addEventListener("submit", async event => {
     let result;
     try {
       const response = await fetch("/api/selected/answer", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        signal: controller.signal,
-        body: JSON.stringify({ requestId: `web-${crypto.randomUUID()}`, lane: "general",
-          threadId, projectId: "runa:personal", message: content, history: boundedHistory(history) }),
+        method: "POST", headers: { "content-type": "application/json" }, signal: controller.signal,
+        body: JSON.stringify({ requestId: `web-${crypto.randomUUID()}`,
+          lane: submittedExperience === "code" ? "code" : "general", experience: submittedExperience,
+          threadId: state.threadId, projectId: state.projectId, message: content,
+          history: boundedHistory(state.history) }),
       });
       result = await readJsonResponse(response);
     } finally { clearTimeout(timer); }
@@ -110,10 +317,12 @@ form.addEventListener("submit", async event => {
       text("chat-status", "Message not completed — retry available");
       return;
     }
-    history.push({ role: "user", content: content.slice(0, 8_000) },
+    state.history.push({ role: "user", content: content.slice(0, 8_000) },
       { role: "assistant", content: result.answer.slice(0, 8_000) });
+    state.activeChatId = state.threadId;
     appendMessage("assistant", result.answer);
-    text("chat-status", "Ready");
+    text("chat-status", state.projectName ? `Ready in ${state.projectName}` : "Ready");
+    await refreshNavigation(submittedExperience);
   } catch (error) {
     const code = error?.name === "AbortError" ? "chat-request-timeout" : error?.code;
     appendMessage("assistant", customerMessageFor(code));
@@ -121,6 +330,7 @@ form.addEventListener("submit", async event => {
     text("chat-status", "Message not completed — retry available");
   } finally {
     send.disabled = false;
+    setNavigationDisabled(false);
     message.focus();
   }
 });

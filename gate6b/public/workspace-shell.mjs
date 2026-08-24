@@ -1,6 +1,6 @@
 const SIDES = Object.freeze(["left", "right"]);
 
-export function initializeWorkspaceShell(root = document) {
+export function initializeWorkspaceShell(root = document, { initialLeftExpanded = false } = {}) {
   const shell = root.getElementById("chat");
   if (!shell) return { collapseAll() {}, destroy() {} };
 
@@ -19,6 +19,7 @@ export function initializeWorkspaceShell(root = document) {
     rail.button.setAttribute("aria-expanded", String(expanded));
     rail.button.setAttribute("aria-label", `${expanded ? "Collapse" : "Expand"} ${side} panel`);
     rail.body.setAttribute("aria-hidden", String(!expanded));
+    rail.body.inert = !expanded;
   }
 
   function collapseAll() {
@@ -36,6 +37,7 @@ export function initializeWorkspaceShell(root = document) {
   };
   root.addEventListener("keydown", onKeydown);
   collapseAll();
+  if (initialLeftExpanded) setExpanded("left", true);
 
   return {
     collapseAll,

@@ -10,7 +10,10 @@
   <header class="site-header">
     <a class="brand" href="/" aria-label="RunaAI home"><span class="brand-mark">R</span><span>RunaAI</span></a>
     <div class="session-controls">
-      <span id="session-label" class="session-label" hidden></span>
+      <span id="session-label" class="session-person" hidden>
+        <span id="session-avatar" class="session-avatar" aria-hidden="true">R</span>
+        <span id="session-name" class="session-name">Runa member</span>
+      </span>
       <button id="logout" class="quiet-button" type="button" hidden>Sign out</button>
     </div>
   </header>
@@ -40,14 +43,47 @@
         <button id="left-rail-toggle" class="rail-toggle" type="button" aria-label="Expand left panel" aria-controls="left-rail-body" aria-expanded="false">
           <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m9 18 6-6-6-6" /></svg>
         </button>
-        <div id="left-rail-body" class="workspace-rail-body" aria-hidden="true"></div>
+        <div id="left-rail-body" class="workspace-rail-body navigation-rail" aria-hidden="true">
+          <div class="experience-tabs" role="tablist" aria-label="Work area">
+            <button id="chat-tab" class="experience-tab selected" type="button" role="tab" aria-selected="true" aria-controls="conversation-surface" data-experience="chat">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5.5h14v10H9l-4 3v-13Z" /></svg>
+              <span>Chat</span>
+            </button>
+            <button id="code-tab" class="experience-tab" type="button" role="tab" aria-selected="false" aria-controls="conversation-surface" tabindex="-1" data-experience="code">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m8 8-4 4 4 4M16 8l4 4-4 4m-2.5-10-3 12" /></svg>
+              <span>Code</span>
+            </button>
+          </div>
+          <button id="new-chat" class="navigation-action navigation-action-primary" type="button">
+            <span aria-hidden="true">+</span><span>New</span>
+          </button>
+          <section class="navigation-section" aria-labelledby="projects-heading">
+            <div class="navigation-section-heading">
+              <h2 id="projects-heading">Projects</h2>
+              <button id="new-project" class="icon-text-button" type="button" aria-label="Create project">+ Project</button>
+            </div>
+            <form id="project-form" class="project-form" hidden>
+              <label for="project-name">Project name</label>
+              <input id="project-name" name="projectName" maxlength="120" autocomplete="off" required>
+              <div><button type="submit">Create</button><button id="cancel-project" type="button">Cancel</button></div>
+            </form>
+            <p id="project-empty" class="navigation-empty">No projects yet</p>
+            <ul id="project-list" class="navigation-list" aria-label="Projects"></ul>
+          </section>
+          <section class="navigation-section navigation-records" aria-labelledby="records-heading">
+            <div class="navigation-section-heading"><h2 id="records-heading">Chat records</h2></div>
+            <p id="record-empty" class="navigation-empty">No chat records yet</p>
+            <ul id="record-list" class="navigation-list" aria-label="Chat records"></ul>
+          </section>
+          <p id="navigation-status" class="navigation-status" role="status"></p>
+        </div>
       </aside>
       <section class="chat-panel" aria-labelledby="chat-title">
-        <div class="conversation-surface">
+        <div id="conversation-surface" class="conversation-surface" role="tabpanel" aria-label="Runa conversation">
           <div class="chat-heading">
-            <p class="eyebrow">Private chat</p>
+            <p id="experience-eyebrow" class="eyebrow">Private chat</p>
             <h1 id="chat-title">Chat with Runa</h1>
-            <p>Ask questions, brainstorm, draft writing or code, and work with text you paste here. Runa does not have live web access and cannot change files, settings, or systems from this chat.</p>
+            <p id="experience-description">Ask questions, brainstorm, draft writing, and work with text you paste here. Runa does not have live web access and cannot change files, settings, or systems from this chat.</p>
           </div>
           <div id="transcript" class="transcript" aria-live="polite" aria-label="Conversation">
             <div class="message assistant"><span class="message-label">Runa</span><p>Hi. What would you like to talk about?</p></div>

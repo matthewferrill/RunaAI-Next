@@ -88,7 +88,7 @@ export class PostgresOrdinarySessionStore {
 
   async sessionCredentials({ bindingDigest, sessionId, now }) {
     const sessionDigest = this.cipher.digest({ type: "gate7a-ordinary-browser-session", sessionId });
-    const row = (await this.pool.query(`SELECT client_id,private_envelope,expires_at,revoked_at
+    const row = (await this.pool.query(`SELECT principal_id,client_id,private_envelope,expires_at,revoked_at
       FROM gate7a.browser_sessions WHERE session_digest=$1 AND binding_digest=$2`,
     [sessionDigest, bindingDigest])).rows[0];
     if (!row || row.revoked_at || new Date(row.expires_at).getTime() <= now.getTime()) {
@@ -96,7 +96,7 @@ export class PostgresOrdinarySessionStore {
     }
     const privateValue = this.cipher.decrypt(context("gate7a-ordinary-browser-session", sessionDigest, "private"), row.private_envelope);
     if (privateValue.sessionId !== sessionId) throw coded("gate7a-ordinary-session-invalid", "The ordinary browser session binding is invalid.");
-    return { ...privateValue, clientId: row.client_id };
+    return { ...privateValue, principalId: row.principal_id, clientId: row.client_id };
   }
 
   async sessionCredential(input) { return (await this.sessionCredentials(input)).accessToken; }

@@ -30,7 +30,7 @@ function contrastRatio(first, second) {
   return (lighter + .05) / (darker + .05);
 }
 
-test("the authenticated page reserves an unlabeled left rail, central chat, and unlabeled right rail", async () => {
+test("the authenticated page preserves the left rail, central chat, and empty right rail", async () => {
   const html = await readFile(publicFile("index.html"), "utf8");
   assert.match(html, /id="chat" class="workspace-frame"/);
   assert.match(html,
@@ -44,14 +44,11 @@ test("the authenticated page reserves an unlabeled left rail, central chat, and 
     assert.match(toggle, new RegExp(`aria-controls="${bodyId}"`));
     assert.match(toggle, /aria-expanded="false"/);
   }
-  assert.match(html, /id="left-rail-body"[^>]+aria-hidden="true"[^>]*><\/div>/);
+  assert.match(html, /id="left-rail-body"[^>]+aria-hidden="true"/);
   assert.match(html, /id="right-rail-body"[^>]+aria-hidden="true"[^>]*><\/div>/);
-
-  const left = html.indexOf('id="left-rail"');
-  const center = html.indexOf('class="chat-panel"');
   const right = html.indexOf('id="right-rail"');
-  const railMarkup = `${html.slice(left, center)}\n${html.slice(right, html.indexOf("</section>", right))}`;
-  assert.doesNotMatch(railMarkup, /Projects|Research|Sources|Settings|Memory|Actions|History/i);
+  const rightMarkup = html.slice(right, html.indexOf("</aside>", right));
+  assert.doesNotMatch(rightMarkup, /Projects|Research|Sources|Settings|Memory|Actions|History/i);
 });
 
 test("the presentation keeps a fixed workspace, sibling desktop columns, transcript scroll, and visible focus", async () => {
@@ -83,7 +80,7 @@ test("the ordinary-session controller initializes the shell only when active cha
   assert.match(status, /import\s*\{\s*initializeWorkspaceShell\s*\}\s*from\s*"\.\/workspace-shell\.mjs"/);
   const activeBranch = 'if (session.authenticated && session.sessionType === "ordinary" && active) {';
   const branchStart = status.indexOf(activeBranch);
-  const shellInitialization = status.indexOf("initializeWorkspaceShell(document)");
+  const shellInitialization = status.indexOf("initializeWorkspaceShell(document,");
   const nextBranch = status.indexOf("} else if (session.authenticated)", branchStart);
   assert.notEqual(branchStart, -1);
   assert.ok(shellInitialization > branchStart, "the shell must not initialize before active ordinary chat is known");

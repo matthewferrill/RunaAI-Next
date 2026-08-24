@@ -480,9 +480,9 @@ test("the browser UI turns an active ordinary session into a bounded chat screen
   assert.doesNotMatch(html, /cannot read protected data or perform an action while shadow authority is active/);
   assert.match(script, /\/api\/session\/status/);
   assert.match(script, /session\.sessionType === "ordinary"/);
-  assert.match(script, /lane: "general"/);
-  assert.match(script, /projectId: "runa:personal"/);
-  assert.match(script, /boundedHistory\(history\)/);
+  assert.match(script, /submittedExperience === "code" \? "code" : "general"/);
+  assert.match(script, /projectId: state\.projectId/);
+  assert.match(script, /boundedHistory\(state\.history\)/);
   assert.match(script, /Retry message/);
   assert.doesNotMatch(script, /error\.message/);
   assert.match(script, /\/session\/user\/logout/);

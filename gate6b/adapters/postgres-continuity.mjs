@@ -13,11 +13,24 @@ const lockKey = value => {
 
 function routeFor(lane) {
   return { general: "general-chat", guarded: "guarded-chat", research: "research-chat",
-    workspace: "workspace-chat" }[lane] ?? "general-chat";
+    workspace: "workspace-chat", code: "code-chat" }[lane] ?? "general-chat";
 }
 
 function safeTitle(value) {
   return String(value ?? "").replace(/\s+/g, " ").trim().slice(0, 120) || "Untitled chat";
+}
+
+const experiences = new Set(["chat", "code"]);
+const codeRoutes = new Set(["workspace-chat", "code-chat"]);
+
+export function classifyExperience({ explicit = null, routes = [], projectExperience = null } = {}) {
+  if (experiences.has(explicit)) return explicit;
+  if (routes.some(route => codeRoutes.has(route))) return "code";
+  return experiences.has(projectExperience) ? projectExperience : "chat";
+}
+
+function privateContext(kind, participantId, recordId) {
+  return { recordType: kind, participantId, recordId, field: "private-payload" };
 }
 
 export class PostgresSelectedContinuityStore {
@@ -62,6 +75,110 @@ export class PostgresSelectedContinuityStore {
       protectedStoresOpened: false, rollbackAvailable: true, ...row };
   }
 
+  async navigation(participantId, experience) {
+    if (!experiences.has(experience)) throw coded("request-experience-invalid", "Chat or Code experience is required.");
+    const [projectRows, chatRows, routeRows] = await Promise.all([
+      this.pool.query(`SELECT project_id,project_type,status,updated_at,private_payload_envelope
+        FROM runa_core.projects WHERE participant_id=$1 AND status='managed'
+        ORDER BY updated_at DESC,project_id LIMIT 200`, [participantId]),
+      this.pool.query(`SELECT chat_id,project_id,turn_count,updated_at,title_envelope
+        FROM runa_core.chats WHERE participant_id=$1 AND NOT archived
+        ORDER BY updated_at DESC,chat_id LIMIT 200`, [participantId]),
+      this.pool.query(`SELECT turns.chat_id,chats.project_id,array_agg(DISTINCT turns.route ORDER BY turns.route) routes
+        FROM runa_core.chat_turns turns JOIN runa_core.chats chats
+          ON chats.participant_id=turns.participant_id AND chats.chat_id=turns.chat_id
+        WHERE turns.participant_id=$1 GROUP BY turns.chat_id,chats.project_id`, [participantId]),
+    ]);
+    const routes = new Map(routeRows.rows.map(row => [row.chat_id, row.routes ?? []]));
+    const projects = projectRows.rows.map(row => {
+      const value = this.cipher.decrypt(privateContext("project", participantId, row.project_id), row.private_payload_envelope);
+      return { projectId: row.project_id, displayName: safeTitle(value.displayName),
+        explicitExperience: experiences.has(value.experience) ? value.experience : null,
+        projectType: row.project_type, updatedAt: new Date(row.updated_at).toISOString() };
+    });
+    const codeProjectIds = new Set(routeRows.rows.filter(row => row.project_id
+      && row.routes?.some(route => codeRoutes.has(route))).map(row => row.project_id));
+    const projectExperiences = new Map(projects.map(project => [project.projectId,
+      classifyExperience({ explicit: project.explicitExperience,
+        routes: codeProjectIds.has(project.projectId) ? ["code-chat"] : [] })]));
+    const chats = chatRows.rows.map(row => {
+      const value = this.cipher.decrypt(privateContext("chat", participantId, row.chat_id), row.title_envelope);
+      return { chatId: row.chat_id, projectId: row.project_id, title: safeTitle(value.title),
+        experience: classifyExperience({ explicit: value.experience, routes: routes.get(row.chat_id) ?? [],
+          projectExperience: row.project_id ? projectExperiences.get(row.project_id) : null }),
+        turnCount: row.turn_count, updatedAt: new Date(row.updated_at).toISOString() };
+    });
+    const selectedProjects = projects.map(({ explicitExperience, projectType: _projectType, ...project }) => ({
+      ...project, experience: projectExperiences.get(project.projectId),
+    })).filter(project => project.experience === experience);
+    const selectedProjectIds = new Set(selectedProjects.map(project => project.projectId));
+    const selectedChats = chats.filter(chat => chat.experience === experience
+      && (!chat.projectId || selectedProjectIds.has(chat.projectId)));
+    return Object.freeze({ schemaVersion: "runa2-navigation/v1", experience,
+      projects: Object.freeze(selectedProjects), chats: Object.freeze(selectedChats) });
+  }
+
+  async createProject({ participantId, requestId, experience, displayName }) {
+    if (!experiences.has(experience)) throw coded("request-experience-invalid", "Chat or Code experience is required.");
+    const projectId = `project-${experience}-${sha256(`${participantId}\0${requestId}`).slice(0, 32)}`;
+    const now = this.now().toISOString();
+    const privateData = { displayName, experience };
+    const publicData = { projectId, schemaVersion: "runa2-user-project/v1", projectType: "personal-project",
+      status: "managed", registeredAt: now, updatedAt: now, memoryEnabled: false };
+    const envelope = this.cipher.encrypt(privateContext("project", participantId, projectId), privateData);
+    await this.pool.query(`INSERT INTO runa_core.projects
+      (project_id,participant_id,schema_version,project_type,status,registered_at,updated_at,memory_enabled,
+       private_payload_envelope,payload_hmac,locator_hmac,source_content_hmac)
+      VALUES($1,$2,$3,$4,'managed',$5,$5,false,$6::jsonb,$7,$8,$9)
+      ON CONFLICT(participant_id,project_id) DO NOTHING`, [projectId, participantId,
+      publicData.schemaVersion, publicData.projectType, now, JSON.stringify(envelope), envelope.contentHmac,
+      this.cipher.digest({ domain: "project-chat", kind: "project", locator: `project:${projectId}` }),
+      this.cipher.digest({ domain: "project-chat", kind: "project", locator: `project:${projectId}`,
+        publicData, privateData })]);
+    const retained = (await this.pool.query(`SELECT status,private_payload_envelope,updated_at
+      FROM runa_core.projects WHERE participant_id=$1 AND project_id=$2`, [participantId, projectId])).rows[0];
+    if (!retained || retained.status !== "managed") throw coded("project-create-failed", "The personal project was not retained.");
+    const privateValue = this.cipher.decrypt(privateContext("project", participantId, projectId), retained.private_payload_envelope);
+    if (privateValue.displayName !== displayName || privateValue.experience !== experience) {
+      throw coded("request-id-conflict", "The project request id is bound to different input.");
+    }
+    return Object.freeze({ schemaVersion: "runa2-project-created/v1", projectId,
+      displayName, experience, updatedAt: new Date(retained.updated_at).toISOString() });
+  }
+
+  async readChat(participantId, chatId, experience) {
+    if (!experiences.has(experience)) throw coded("request-experience-invalid", "Chat or Code experience is required.");
+    const row = (await this.pool.query(`SELECT chat_id,project_id,turn_count,archived,updated_at,title_envelope
+      FROM runa_core.chats WHERE participant_id=$1 AND chat_id=$2`, [participantId, chatId])).rows[0];
+    if (!row || row.archived) throw coded("chat-not-found", "The selected chat was not found.");
+    const title = this.cipher.decrypt(privateContext("chat", participantId, chatId), row.title_envelope);
+    let projectExperience = null;
+    if (row.project_id) {
+      const project = (await this.pool.query(`SELECT status,private_payload_envelope FROM runa_core.projects
+        WHERE participant_id=$1 AND project_id=$2`, [participantId, row.project_id])).rows[0];
+      if (!project || project.status !== "managed") throw coded("project-not-found", "The selected managed project was not found.");
+      const privateProject = this.cipher.decrypt(privateContext("project", participantId, row.project_id), project.private_payload_envelope);
+      const projectRoutes = privateProject.experience ? [] : (await this.pool.query(`SELECT DISTINCT turns.route
+        FROM runa_core.chats chats JOIN runa_core.chat_turns turns
+          ON turns.participant_id=chats.participant_id AND turns.chat_id=chats.chat_id
+        WHERE chats.participant_id=$1 AND chats.project_id=$2`, [participantId, row.project_id])).rows.map(item => item.route);
+      projectExperience = classifyExperience({ explicit: privateProject.experience, routes: projectRoutes });
+    }
+    const turnRows = (await this.pool.query(`SELECT turn_ordinal,occurred_at,route,content_envelope
+      FROM runa_core.chat_turns WHERE participant_id=$1 AND chat_id=$2 ORDER BY turn_ordinal`,
+    [participantId, chatId])).rows;
+    const retainedExperience = classifyExperience({ explicit: title.experience,
+      routes: turnRows.map(turn => turn.route), projectExperience });
+    if (retainedExperience !== experience) throw coded("chat-experience-denied", "The selected chat belongs to another experience.");
+    const turns = turnRows.map(row => ({ turnOrdinal: row.turn_ordinal,
+      occurredAt: new Date(row.occurred_at).toISOString(), route: row.route,
+      ...this.cipher.decrypt(privateContext("chat-turn", participantId,
+        `turn:${chatId}:${row.turn_ordinal}`), row.content_envelope) }));
+    return Object.freeze({ schemaVersion: "runa2-chat-record/v1", chatId, projectId: row.project_id,
+      title: safeTitle(title.title), experience, turnCount: row.turn_count,
+      updatedAt: new Date(row.updated_at).toISOString(), turns: Object.freeze(turns) });
+  }
+
   async recordAnswer(request, response) {
     if (!request.participant.verified) return { turnRecorded: false, source: "ephemeral-unverified" };
     const participantId = request.participant.principalId;
@@ -81,12 +198,29 @@ export class PostgresSelectedContinuityStore {
         return { turnRecorded: false, source: this.adapterName };
       }
       if (projectId !== null) {
-        const project = (await client.query("SELECT participant_id,status FROM runa_core.projects WHERE participant_id=$1 AND project_id=$2", [participantId, projectId])).rows[0];
+        const project = (await client.query("SELECT participant_id,status,private_payload_envelope FROM runa_core.projects WHERE participant_id=$1 AND project_id=$2", [participantId, projectId])).rows[0];
         if (!project || project.status !== "managed") throw coded("project-not-found", "The selected managed project was not found.");
+        const privateProject = this.cipher.decrypt(privateContext("project", participantId, projectId), project.private_payload_envelope);
+        const projectRoutes = privateProject.experience ? [] : (await client.query(`SELECT DISTINCT turns.route
+          FROM runa_core.chats chats JOIN runa_core.chat_turns turns
+            ON turns.participant_id=chats.participant_id AND turns.chat_id=chats.chat_id
+          WHERE chats.participant_id=$1 AND chats.project_id=$2`, [participantId, projectId])).rows.map(row => row.route);
+        if (classifyExperience({ explicit: privateProject.experience, routes: projectRoutes }) !== request.experience) {
+          throw coded("project-experience-denied", "The selected project belongs to another experience.");
+        }
       }
-      const current = (await client.query(`SELECT participant_id,project_id,turn_count FROM runa_core.chats
+      const current = (await client.query(`SELECT participant_id,project_id,turn_count,title_envelope FROM runa_core.chats
         WHERE participant_id=$1 AND chat_id=$2 FOR UPDATE`, [participantId, request.thread.threadId])).rows[0];
       if (current && current.project_id !== projectId) throw coded("chat-scope-denied", "The chat belongs to another project scope.");
+      if (current) {
+        const privateChat = this.cipher.decrypt(privateContext("chat", participantId, request.thread.threadId), current.title_envelope);
+        const routeRows = (await client.query(`SELECT route FROM runa_core.chat_turns
+          WHERE participant_id=$1 AND chat_id=$2`, [participantId, request.thread.threadId])).rows;
+        if (classifyExperience({ explicit: privateChat.experience,
+          routes: routeRows.map(row => row.route) }) !== request.experience) {
+          throw coded("chat-experience-denied", "The chat belongs to another experience.");
+        }
+      }
       if (!current) await this.#insertChat(client, request, projectId);
       const ordinal = current?.turn_count ?? 0;
       await this.#insertTurn(client, request, response, ordinal);
@@ -110,7 +244,7 @@ export class PostgresSelectedContinuityStore {
   async #insertChat(client, request, projectId) {
     const participantId = request.participant.principalId;
     const chatId = request.thread.threadId;
-    const privateData = { title: safeTitle(request.message) };
+    const privateData = { title: safeTitle(request.message), experience: request.experience };
     const now = this.now().toISOString();
     const publicData = { chatId, projectId, parentChatId: null, branchFromTurn: null, turnCount: 0,
       archived: false, unread: false, createdAt: now, updatedAt: now };

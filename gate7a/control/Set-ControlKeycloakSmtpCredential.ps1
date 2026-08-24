@@ -20,7 +20,17 @@ try{$fromAddress=[Net.Mail.MailAddress]::new($From)}catch{throw 'gate7a-smtp-enr
 if($fromAddress.Address-ne$From){throw 'gate7a-smtp-enrollment-input-invalid'}
 try{Add-Type -AssemblyName System.Security}catch{throw 'gate7a-smtp-enrollment-assembly-load-failed'}
 $target=Join-Path $Root 'secrets\keycloak-smtp.dpapi'
+$aclReference=Join-Path $Root 'secrets\keycloak-client'
 if(Test-Path -LiteralPath $target){throw 'gate7a-smtp-enrollment-already-exists'}
+if(-not(Test-Path -LiteralPath $aclReference -PathType Leaf)){throw 'gate7a-smtp-enrollment-acl-reference-missing'}
+
+function Get-AccessRuleSignature([object]$Acl){
+  @($Acl.Access|ForEach-Object{
+    @([string]$_.IdentityReference.Value,[string]$_.AccessControlType,[int64]$_.FileSystemRights,
+      [string]$_.InheritanceFlags,[string]$_.PropagationFlags,[bool]$_.IsInherited)-join'|'
+  }|Sort-Object)
+}
+
 $Username=(Read-Host 'SMTP username').Trim()
 if($Username.Length-lt 1-or$Username.Length-gt 254){throw 'gate7a-smtp-enrollment-input-invalid'}
 $secure=Read-Host 'SMTP password or application password' -AsSecureString
@@ -34,7 +44,11 @@ try{
   $bytes=[Text.Encoding]::UTF8.GetBytes(($payload|ConvertTo-Json -Compress))
   $protected=[Security.Cryptography.ProtectedData]::Protect($bytes,$null,[Security.Cryptography.DataProtectionScope]::CurrentUser)
   [IO.File]::WriteAllBytes($target,$protected)
-  Set-Acl -LiteralPath $target -AclObject (Get-Acl -LiteralPath (Join-Path $Root 'secrets\keycloak-client'))
+  $expectedAcl=@(Get-AccessRuleSignature (Get-Acl -LiteralPath $aclReference))
+  $actualAcl=@(Get-AccessRuleSignature (Get-Acl -LiteralPath $target))
+  if(@(Compare-Object -ReferenceObject $expectedAcl -DifferenceObject $actualAcl).Count-ne 0){
+    throw 'gate7a-smtp-enrollment-acl-invalid'
+  }
   [ordered]@{schemaVersion='runa2-gate7a-smtp-enrollment/v1';passed=$true;dpapiScope='CurrentUser';
     credentialRetained=$true;networkCalled=$false;identityChanged=$false;productionChanged=$false;
     privateValuesIncluded=$false}|ConvertTo-Json -Compress
@@ -44,5 +58,5 @@ try{
 }finally{
   if($pointer-ne[IntPtr]::Zero){[Runtime.InteropServices.Marshal]::ZeroFreeBSTR($pointer)}
   if($bytes){[Array]::Clear($bytes,0,$bytes.Length)};if($protected){[Array]::Clear($protected,0,$protected.Length)}
-  $clear=$null;Remove-Variable Username,secure,payload,bytes,protected -ErrorAction SilentlyContinue
+  $clear=$null;Remove-Variable Username,secure,payload,bytes,protected,expectedAcl,actualAcl -ErrorAction SilentlyContinue
 }

@@ -87,6 +87,10 @@ test("SMTP enrollment is owner-bound DPAPI CurrentUser and network-inert", () =>
   assert.match(enrollSmtp, /Read-Host 'SMTP username'/);
   assert.match(enrollSmtp, /Read-Host 'SMTP password or application password' -AsSecureString/);
   assert.match(enrollSmtp, /DataProtectionScope\]::CurrentUser/);
+  assert.match(enrollSmtp, /Get-AccessRuleSignature/);
+  assert.match(enrollSmtp, /Compare-Object -ReferenceObject \$expectedAcl -DifferenceObject \$actualAcl/);
+  assert.match(enrollSmtp, /gate7a-smtp-enrollment-acl-invalid/);
+  assert.doesNotMatch(enrollSmtp, /Set-Acl/);
   assert.match(enrollSmtp, /networkCalled=\$false/);
   assert.doesNotMatch(enrollSmtp, /Invoke-RestMethod|Invoke-WebRequest|Set-Clipboard/);
   assert.doesNotMatch(enrollSmtp, /\[string\]\$Username/);

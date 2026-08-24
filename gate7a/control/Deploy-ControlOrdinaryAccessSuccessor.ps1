@@ -51,6 +51,26 @@ function Run-Caddy([ValidateSet('validate','reload')][string]$Command,[string]$C
     $process.ExitCode
   }finally{$process.Dispose()}
 }
+function JsonFacts([object]$Value){
+  $facts=@{}
+  function Add-Facts([object]$Node,[string]$Path){
+    if($null-eq$Node){$facts["$Path#type"]='null';return}
+    if($Node-is[Management.Automation.PSCustomObject]){
+      $facts["$Path#type"]='object'
+      foreach($property in @($Node.PSObject.Properties)){
+        Add-Facts $property.Value "$Path.$($property.Name)"
+      }
+      return
+    }
+    if($Node-is[Collections.IEnumerable]-and$Node-isnot[string]){
+      $items=@($Node);$facts["$Path#type"]="array:$($items.Count)"
+      for($index=0;$index-lt$items.Count;$index++){Add-Facts $items[$index] "$Path[$index]"}
+      return
+    }
+    $facts["$Path#type"]='scalar';$facts[$Path]=$Node|ConvertTo-Json -Compress
+  }
+  Add-Facts $Value '$';$facts
+}
 function Wait-PortClosed { $deadline=[DateTime]::UtcNow.AddSeconds(90);do{if(-not(Get-NetTCPConnection -State Listen -LocalPort 9760 -ErrorAction SilentlyContinue)){return};Start-Sleep -Milliseconds 500}until([DateTime]::UtcNow-gt$deadline);throw 'gate7a-ordinary-deploy-stop-timeout' }
 function Wait-Release([string]$Id){$deadline=[DateTime]::UtcNow.AddMinutes(12);do{Start-Sleep -Seconds 2;try{$value=Invoke-RestMethod 'http://127.0.0.1:9760/api/runtime/status' -TimeoutSec 3;if($value.running.releaseId-eq$Id){return $value}}catch{}}until([DateTime]::UtcNow-gt$deadline);throw 'gate7a-ordinary-deploy-start-timeout'}
 function Expand-Response([object]$Response){foreach($item in @($Response)){if($item-is [Array]){foreach($nested in $item){$nested}}elseif($null-ne$item){$item}}}
@@ -120,8 +140,12 @@ if($currentConfig.releaseManifestPath-ne$manifestName-or$candidate.releaseManife
 $preservedCandidate=Get-Content -Raw -LiteralPath $stagedConfig|ConvertFrom-Json
 $preservedCandidate.limits.totalDeadlineMs=$currentConfig.limits.totalDeadlineMs
 $preservedCandidate.services.caddy.configurationDigest=$currentConfig.services.caddy.configurationDigest
-if(($preservedCandidate|ConvertTo-Json -Depth 100 -Compress)-ne($currentConfig|ConvertTo-Json -Depth 100 -Compress)){
-  throw 'gate7a-ordinary-deploy-protected-binding-drift'
+$currentFacts=JsonFacts $currentConfig;$candidateFacts=JsonFacts $preservedCandidate
+if($currentFacts.Count-ne$candidateFacts.Count){throw 'gate7a-ordinary-deploy-protected-binding-drift'}
+foreach($entry in $currentFacts.GetEnumerator()){
+  if(-not$candidateFacts.ContainsKey($entry.Key)-or$candidateFacts[$entry.Key]-ne$entry.Value){
+    throw 'gate7a-ordinary-deploy-protected-binding-drift'
+  }
 }
 if(-not(Test-Path -LiteralPath (Join-Path $Root 'secrets\keycloak-ordinary-client') -PathType Leaf)){throw 'gate7a-ordinary-deploy-client-secret-missing'}
 

@@ -68,7 +68,7 @@ try{
   }
   $placeholder='invited-'+[Guid]::NewGuid().ToString('N').Substring(0,20)
   $userBody=[ordered]@{username=$placeholder;email=$Email;enabled=$true;emailVerified=$false;
-    requiredActions=@('VERIFY_EMAIL','UPDATE_PROFILE','UPDATE_PASSWORD');attributes=@{runa_principal_id=@($PrincipalId)}}
+    requiredActions=@('VERIFY_EMAIL','UPDATE_PROFILE','UPDATE_PASSWORD')}
   Invoke-RestMethod -Method Post -Uri "$base/admin/realms/$realmName/users" -Headers $headers -ContentType 'application/json' -Body ($userBody|ConvertTo-Json -Depth 8 -Compress)|Out-Null
   $created=@(Expand-Response (Invoke-RestMethod -Method Get -Uri "$base/admin/realms/$realmName/users?email=$encodedEmail&exact=true" -Headers $headers))
   if($created.Count-ne 1-or$created[0].emailVerified-ne$false-or$created[0].enabled-ne$true){throw 'gate7a-invitation-user-create-invalid'}

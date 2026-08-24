@@ -51,6 +51,8 @@ test("the Control deployer validates, changes, and restores Caddy inside the app
   const deploy = await readFile(new URL("../gate7a/control/Deploy-ControlOrdinaryAccessSuccessor.ps1", import.meta.url), "utf8");
   assert.match(deploy, /CaddyfileSha256/);
   assert.match(deploy, /caddy-binary-drift/);
+  assert.match(deploy, /RedirectStandardError=\$true/);
+  assert.doesNotMatch(deploy, /& \$caddyExe (?:validate|reload)/);
   assert.match(deploy, /caddy-reload-failed/);
   assert.match(deploy, /caddy-rollback-failed/);
   assert.match(deploy, /applicationAndCaddyChangedTogether=\$true/);

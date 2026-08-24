@@ -56,11 +56,13 @@ test("ordinary successor changes only the application release and restores the e
   assert.match(deploy, /Copy-Item -LiteralPath \(Join-Path \$rollback \$manifestName\) -Destination \$manifest -Force/);
   assert.match(deploy, /Wait-Release \$PriorReleaseId/);
   assert.match(deploy, /caddy\.exe';\$rollback/);
-  assert.match(deploy, /validate --config \$stagedCaddy --adapter caddyfile/);
-  assert.ok(deploy.indexOf("validate --config $stagedCaddy") < deploy.indexOf("New-Item -ItemType Directory -Path $release"));
+  assert.match(deploy, /function Run-Caddy/);
+  assert.match(deploy, /RedirectStandardError=\$true/);
+  assert.match(deploy, /Run-Caddy validate \$stagedCaddy/);
+  assert.ok(deploy.indexOf("Run-Caddy validate $stagedCaddy") < deploy.indexOf("New-Item -ItemType Directory -Path $release"));
   assert.match(deploy, /Copy-Item -LiteralPath \$caddy -Destination \(Join-Path \$rollback 'Caddyfile'\)/);
   assert.match(deploy, /Move-Item -LiteralPath "\$caddy\.new" -Destination \$caddy -Force/);
-  assert.match(deploy, /reload --config \$caddy --adapter caddyfile/);
+  assert.match(deploy, /Run-Caddy reload \$caddy/);
   assert.match(deploy, /Copy-Item -LiteralPath \(Join-Path \$rollback 'Caddyfile'\) -Destination \$caddy -Force/);
   assert.match(deploy, /gate7a-ordinary-deploy-protected-binding-drift/);
   assert.match(deploy, /applicationAndCaddyChangedTogether=\$true/);

@@ -113,6 +113,10 @@ test("a single-use invitation creates an isolated ordinary principal and no owne
   assert.match(invitation, /passwordSetByInvitee=\$true/);
   assert.match(invitation, /usernameSetByInvitee=\$true/);
   assert.match(invitation, /Invitation email:/);
+  assert.match(invitation, /users\/profile/);
+  assert.match(invitation, /gate7a-invitation-user-profile-drift/);
+  assert.match(invitation, /firstName='Invited';lastName='Member'/);
+  assert.match(invitation, /gate7a-invitation-user-create-rejected/);
   assert.match(invitation, /principal_id,oidc_subject/);
   assert.match(invitation, /\$PrincipalId','\$createdUserId/);
   assert.doesNotMatch(invitation, /runa_principal_id/);

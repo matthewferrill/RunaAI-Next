@@ -1,6 +1,6 @@
 # Gate 7C UI shell results
 
-Status: implemented and verified on the isolated review branch; steward visual review is pending.
+Status: implemented, verified, and active on Control for steward visual review.
 
 ## Exact scope
 
@@ -9,6 +9,8 @@ Status: implemented and verified on the isolated review branch; steward visual r
 - UI implementation: `1490a9bb23a6e8ae0729def2d8ca827b72a23a90`
   (`Build the Gate 7C three-column UI shell`).
 - Review branch: `codex/gate7c-ui-shell`.
+- Active release: `runaai-next-gate7a-lan-ui-2026-08-24-9cea964` at
+  `9cea964073523023bafb7a54d3f911f5cafa3c31`.
 
 The implementation restores the useful shape of the legacy RunaAI workspace without porting its old
 application architecture. The existing chat remains in the center. Empty, visually unlabeled rails
@@ -60,14 +62,35 @@ Visual testing exposed one mobile grid-placement defect before commit; explicit 
 it, and the phone checks then passed. The temporary preview process was stopped, its file was removed,
 and its loopback port was verified closed.
 
+## Control activation and reconciliation
+
+The steward authorized the rollback-protected Control deployment after reviewing the implementation
+summary. The immutable successor contained 29,503 files, no secrets, and no protected data. It was
+accepted with these exact identities:
+
+- release: `runaai-next-gate7a-lan-ui-2026-08-24-9cea964`;
+- commit: `9cea964073523023bafb7a54d3f911f5cafa3c31`;
+- artifact digest: `137dd471978f9762f9e337814023245345b1e9579606cfaf2aed3dbd7f4cedd5`;
+- manifest digest: `15b47ed97a8b61796966f7078aa9acdd5f84c204609200a68160bd0c407d5174`;
+- release-configuration digest: `b1d1f9cb5e8524f8318fa428bfe0d107747b4996647f8f6111cba65746b75020`.
+
+The release-configuration digest and all service configuration identities remained unchanged from the
+predecessor. Post-deployment reconciliation reported active authority, closed cutover revision 10, all
+four dependencies ready, the exact artifact verified, protected-data import still present, owner proof
+rebound, and both owner and ordinary-password routes ready. The canonical HTTPS root serves the new
+three-column markup and `workspace-shell.mjs`. The prior release
+`runaai-next-gate7a-lan-chat-2026-08-24-20039fe` remains retained for rollback.
+
 ## Boundaries and rollback
 
-No production release, Control service, identity setting, authority state, data, model, network ingress,
-or protected record changed. No feature has been assigned to either rail. Rollback is a Git revert of
-the Gate 7C implementation or deletion of the isolated branch; there is no state or data recovery step.
+Production changed only to the exact immutable application artifact; Caddy was reloaded with its
+unchanged verified configuration inside the same rollback boundary. No identity setting, authority state,
+product data, model, network ingress, legacy repository, or protected record changed. No feature has been
+assigned to either rail. The predecessor artifact and exact configuration are retained, so rollback does
+not require state or data recovery.
 
 ## Review gate
 
 The steward reviews the proportions, warm visual direction, collapse behavior, and phone treatment.
-Nothing should be named or integrated into the rails, and this branch should not be merged or deployed,
-until that visual direction is accepted.
+Nothing should be named or integrated into the rails, and this branch should not be merged, until that
+visual direction is accepted.

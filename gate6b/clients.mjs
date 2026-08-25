@@ -2,10 +2,43 @@ import { randomBytes } from "node:crypto";
 
 const coded = (code, message) => Object.assign(new Error(message), { code });
 
+const boundedProfileText = value => {
+  const text = typeof value === "string" ? value.replace(/\s+/g, " ").trim() : "";
+  return text && text.length <= 120 && !/[\u0000-\u001f\u007f]/.test(text) ? text : null;
+};
+
+function initialsFor(displayName) {
+  const parts = String(displayName).split(/[\s._@+-]+/).filter(Boolean);
+  const selected = parts.length > 1 ? [parts[0], parts.at(-1)] : parts.slice(0, 1);
+  return selected.map(part => part.match(/[\p{L}\p{N}]/u)?.[0] ?? "").join("").toUpperCase().slice(0, 2) || "R";
+}
+
+export function publicProfileFromClaims(claims, fallbackPrincipalId = null) {
+  const combined = boundedProfileText([claims?.given_name, claims?.family_name]
+    .map(boundedProfileText).filter(Boolean).join(" "));
+  const fallback = fallbackPrincipalId === null ? null : boundedProfileText(String(fallbackPrincipalId).split(/[-_.]+/)
+    .filter(Boolean).map(part => `${part[0]?.toUpperCase() ?? ""}${part.slice(1)}`).join(" "));
+  const displayName = boundedProfileText(claims?.name) ?? combined
+    ?? boundedProfileText(claims?.preferred_username) ?? fallback;
+  if (!displayName) return null;
+  return Object.freeze({ displayName, initials: initialsFor(displayName) });
+}
+
 async function boundedJson(response, maximumBytes = 128_000) {
   const text = await response.text();
   if (Buffer.byteLength(text, "utf8") > maximumBytes) throw coded("dependency-output-limited", "A dependency response exceeded its byte ceiling.");
   try { return text ? JSON.parse(text) : {}; } catch { throw coded("dependency-response-invalid", "A dependency returned invalid JSON."); }
+}
+
+function tokenCredential(value, code, message) {
+  if (typeof value.access_token !== "string" || !value.access_token.length
+      || typeof value.refresh_token !== "string" || !value.refresh_token.length) {
+    throw coded(code, message);
+  }
+  const refreshExpiresInSeconds = Number(value.refresh_expires_in);
+  return Object.freeze({ accessToken: value.access_token, refreshToken: value.refresh_token,
+    refreshExpiresInSeconds: Number.isFinite(refreshExpiresInSeconds) && refreshExpiresInSeconds > 0
+      ? refreshExpiresInSeconds : null });
 }
 
 export class KeycloakOnlineClient {
@@ -36,6 +69,7 @@ export class KeycloakOnlineClient {
       authenticatedAt: Number.isFinite(authenticated) ? new Date(authenticated * 1000).toISOString() : "invalid",
       expiresAt: Number.isFinite(expires) ? new Date(expires * 1000).toISOString() : "invalid",
       methods: Object.freeze(Array.isArray(value.amr) ? value.amr.filter(item => typeof item === "string") : []),
+      publicProfile: publicProfileFromClaims(value),
     });
   }
 
@@ -43,7 +77,7 @@ export class KeycloakOnlineClient {
     prompt = "login", maxAge = 0, action = null }) {
     const url = new URL(`${this.issuer}/protocol/openid-connect/auth`);
     url.search = new URLSearchParams({ response_type: "code", client_id: clientId,
-      redirect_uri: redirectUri, scope: "openid", state, code_challenge: codeChallenge,
+      redirect_uri: redirectUri, scope: "openid profile", state, code_challenge: codeChallenge,
       code_challenge_method: "S256", prompt, max_age: String(maxAge) }).toString();
     if (action) url.searchParams.set("kc_action", action);
     return url.toString();
@@ -61,11 +95,24 @@ export class KeycloakOnlineClient {
     } catch { throw coded("identity-code-exchange-unavailable", "Browser identity exchange is unavailable."); }
     if (!response.ok) throw coded("identity-code-exchange-rejected", "Browser identity exchange was rejected.");
     const value = await boundedJson(response);
-    if (typeof value.access_token !== "string" || !value.access_token.length
-        || typeof value.refresh_token !== "string" || !value.refresh_token.length) {
-      throw coded("identity-code-exchange-invalid", "Browser identity exchange returned no access credential.");
-    }
-    return Object.freeze({ accessToken: value.access_token, refreshToken: value.refresh_token });
+    return tokenCredential(value, "identity-code-exchange-invalid",
+      "Browser identity exchange returned no access credential.");
+  }
+
+  async refresh({ refreshToken, clientId = this.clientId }) {
+    let response;
+    try {
+      response = await fetch(`${this.backchannelIssuer}/protocol/openid-connect/token`, {
+        method: "POST", headers: { "content-type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams({ grant_type: "refresh_token", refresh_token: refreshToken,
+          client_id: clientId, client_secret: this.clientCredential }),
+        signal: AbortSignal.timeout(this.timeoutMs),
+      });
+    } catch { throw coded("identity-refresh-unavailable", "Browser identity renewal is unavailable."); }
+    if (!response.ok) throw coded("identity-refresh-rejected", "Browser identity renewal was rejected.");
+    const value = await boundedJson(response);
+    return tokenCredential(value, "identity-refresh-invalid",
+      "Browser identity renewal returned incomplete credentials.");
   }
 
   async revoke(token, tokenType = "refresh_token") {

@@ -18,6 +18,23 @@ function provider(reply) {
     modelId, role: "chat", agent }) };
 }
 
+function codeProvider(draft, verificationReplies) {
+  const draftCalls = [];
+  const verificationCalls = [];
+  const replies = [...verificationReplies];
+  const agent = { async generate(prompt, options) {
+    draftCalls.push({ prompt: JSON.parse(prompt), options });
+    return result(draft);
+  } };
+  const verifierAgent = { async generate(prompt, options) {
+    verificationCalls.push({ prompt: JSON.parse(prompt), options });
+    return result(replies.shift() ?? "");
+  } };
+  return { draftCalls, verificationCalls,
+    provider: new MastraAnswerProvider({ baseURL: "http://127.0.0.1:1/v1",
+      modelId, role: "code", agent, verifierAgent }) };
+}
+
 const input = evidence => ({ request: { lane: "general", message: "Hello", history: [] },
   ground: evidence.length ? "record-answers" : "no-ground-needed", advisory: null, evidence });
 const options = { deadlineMs: 2_000, maximumOutputBytes: 16_000 };
@@ -56,5 +73,98 @@ for (const [name, reply, code] of [
     assert.doesNotMatch(error.message, /PRIVATE_PROVIDER_DETAIL/);
     return true;
   });
+});
+
+test("standalone Code replaces an irrelevant draft only after the correction verifies", async () => {
+  const context = codeProvider("Yes. A = 64 and B = 12, so the answer is 76.", [
+    JSON.stringify({ accepted: false, reason: "stale numeric context",
+      correctedAnswer: "function addNumbers(a, b) { return a + b; }" }),
+    JSON.stringify({ accepted: true, reason: "current request answered", correctedAnswer: null }),
+  ]);
+  const answer = await context.provider.answer({
+    request: { lane: "general", message: "Write a JavaScript function that adds two numbers.", history: [] },
+    ground: "no-ground-needed", advisory: null, evidence: [],
+  }, options);
+  assert.equal(answer.answer, "function addNumbers(a, b) { return a + b; }");
+  assert.deepEqual(answer.outputVerification, { executed: true, corrected: true });
+  assert.equal(context.verificationCalls.length, 2);
+  assert.equal(context.verificationCalls[0].prompt.currentRequest,
+    "Write a JavaScript function that adds two numbers.");
+  assert.equal(context.verificationCalls[0].prompt.schemaVersion,
+    "runa2-code-response-verification/v2");
+});
+
+test("standalone Code rejects 76 and verifies 26 against the retained current turn", async () => {
+  const history = [
+    { role: "user", content: "Write a JavaScript function that adds two numbers." },
+    { role: "assistant", content: "function addNumbers(a, b) { return a + b; }" },
+  ];
+  const context = codeProvider("76", [
+    JSON.stringify({ accepted: false, reason: "incorrect arithmetic", correctedAnswer: "26" }),
+    JSON.stringify({ accepted: true, reason: "correct arithmetic", correctedAnswer: null }),
+  ]);
+  const answer = await context.provider.answer({
+    request: { lane: "general", message: "Run the program using a = 14 and b = 12.", history },
+    ground: "no-ground-needed", advisory: null, evidence: [],
+  }, options);
+  assert.equal(answer.answer, "26");
+  assert.deepEqual(answer.outputVerification, { executed: true, corrected: true });
+  assert.equal("conversationHistory" in context.verificationCalls[0].prompt, false);
+  assert.equal("priorAssistantResponses" in context.verificationCalls[0].prompt, false);
+});
+
+test("standalone Code verifier excludes a previous numeric request from the current turn", async () => {
+  const history = [
+    { role: "user", content: "Write a JavaScript function that adds two numbers." },
+    { role: "assistant", content: "function addNumbers(a, b) { return a + b; }" },
+    { role: "user", content: "Run the program using a = 14 and b = 12." },
+    { role: "assistant", content: "console.log(addNumbers(14, 12)); // Output: 26" },
+  ];
+  const context = codeProvider("console.log(addNumbers(15, 15)); // Output: 30", [
+    JSON.stringify({ accepted: true, reason: "current values and arithmetic are correct", correctedAnswer: null }),
+  ]);
+  const answer = await context.provider.answer({
+    request: { lane: "general", message: "Run the program using a = 15 and b = 15.", history },
+    ground: "no-ground-needed", advisory: null, evidence: [],
+  }, options);
+  assert.match(answer.answer, /30/);
+  assert.equal(context.verificationCalls.length, 1);
+  assert.equal(context.verificationCalls[0].prompt.currentRequest,
+    "Run the program using a = 15 and b = 15.");
+  assert.equal(JSON.stringify(context.verificationCalls[0].prompt).includes(
+    "Run the program using a = 14 and b = 12."), false);
+  assert.deepEqual(Object.keys(context.verificationCalls[0].prompt), [
+    "schemaVersion", "currentRequest", "candidateAnswer",
+  ]);
+});
+
+test("standalone Code accepts a relevant consistent draft with one verification", async () => {
+  const context = codeProvider("Using 14 and 12, the result is 26.", [
+    JSON.stringify({ accepted: true, reason: "correct arithmetic", correctedAnswer: null }),
+  ]);
+  const answer = await context.provider.answer({
+    request: { lane: "general", message: "Add 14 and 12.", history: [] },
+    ground: "no-ground-needed", advisory: null, evidence: [],
+  }, options);
+  assert.equal(answer.answer, "Using 14 and 12, the result is 26.");
+  assert.deepEqual(answer.outputVerification, { executed: true, corrected: false });
+  assert.equal(context.verificationCalls.length, 1);
+});
+
+test("standalone Code fails retryably when verification is malformed or cannot verify a correction", async () => {
+  const malformed = codeProvider("76", ["not-json"]);
+  await assert.rejects(malformed.provider.answer({
+    request: { lane: "general", message: "Add 14 and 12.", history: [] },
+    ground: "no-ground-needed", advisory: null, evidence: [],
+  }, options), { code: "provider-response-invalid" });
+
+  const rejectedCorrection = codeProvider("76", [
+    JSON.stringify({ accepted: false, reason: "incorrect", correctedAnswer: "26" }),
+    JSON.stringify({ accepted: false, reason: "still inconsistent", correctedAnswer: null }),
+  ]);
+  await assert.rejects(rejectedCorrection.provider.answer({
+    request: { lane: "general", message: "Add 14 and 12.", history: [] },
+    ground: "no-ground-needed", advisory: null, evidence: [],
+  }, options), { code: "provider-response-invalid" });
 });
 

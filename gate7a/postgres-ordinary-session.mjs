@@ -75,11 +75,11 @@ export class PostgresOrdinarySessionStore {
   }
 
   async saveSession({ bindingDigest, sessionId, principalId, subject, accessToken, refreshToken,
-    authenticatedAt, expiresAt, method, clientId }) {
+    accessExpiresAt, authenticatedAt, expiresAt, method, clientId }) {
     const sessionDigest = this.cipher.digest({ type: "gate7a-ordinary-browser-session", sessionId });
     const subjectRef = this.cipher.digest({ type: "gate7a-ordinary-oidc-subject", subject });
     const envelope = this.cipher.encrypt(context("gate7a-ordinary-browser-session", sessionDigest, "private"),
-      { sessionId, accessToken, refreshToken });
+      { sessionId, subject, accessToken, refreshToken, accessExpiresAt });
     await this.pool.query(`INSERT INTO gate7a.browser_sessions
       (session_digest,binding_digest,principal_id,subject_ref,method,client_id,authenticated_at,expires_at,private_envelope)
       VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9::jsonb)`, [sessionDigest, bindingDigest, principalId,
@@ -88,7 +88,7 @@ export class PostgresOrdinarySessionStore {
 
   async sessionCredentials({ bindingDigest, sessionId, now }) {
     const sessionDigest = this.cipher.digest({ type: "gate7a-ordinary-browser-session", sessionId });
-    const row = (await this.pool.query(`SELECT client_id,private_envelope,expires_at,revoked_at
+    const row = (await this.pool.query(`SELECT principal_id,method,client_id,private_envelope,expires_at,revoked_at
       FROM gate7a.browser_sessions WHERE session_digest=$1 AND binding_digest=$2`,
     [sessionDigest, bindingDigest])).rows[0];
     if (!row || row.revoked_at || new Date(row.expires_at).getTime() <= now.getTime()) {
@@ -96,10 +96,43 @@ export class PostgresOrdinarySessionStore {
     }
     const privateValue = this.cipher.decrypt(context("gate7a-ordinary-browser-session", sessionDigest, "private"), row.private_envelope);
     if (privateValue.sessionId !== sessionId) throw coded("gate7a-ordinary-session-invalid", "The ordinary browser session binding is invalid.");
-    return { ...privateValue, clientId: row.client_id };
+    return { ...privateValue, principalId: row.principal_id, method: row.method,
+      clientId: row.client_id, expiresAt: new Date(row.expires_at).toISOString() };
   }
 
   async sessionCredential(input) { return (await this.sessionCredentials(input)).accessToken; }
+
+  async updateSessionCredentials({ bindingDigest, sessionId, previousRefreshToken, accessToken,
+    refreshToken, accessExpiresAt, subject, now }) {
+    const sessionDigest = this.cipher.digest({ type: "gate7a-ordinary-browser-session", sessionId });
+    const client = await this.pool.connect();
+    try {
+      await client.query("BEGIN ISOLATION LEVEL SERIALIZABLE");
+      const row = (await client.query(`SELECT private_envelope,expires_at,revoked_at
+        FROM gate7a.browser_sessions WHERE session_digest=$1 AND binding_digest=$2 FOR UPDATE`,
+      [sessionDigest, bindingDigest])).rows[0];
+      if (!row || row.revoked_at || new Date(row.expires_at).getTime() <= now.getTime()) {
+        throw coded("gate7a-ordinary-session-invalid", "The ordinary browser session is missing, expired, or revoked.");
+      }
+      const privateValue = this.cipher.decrypt(
+        context("gate7a-ordinary-browser-session", sessionDigest, "private"), row.private_envelope);
+      if (privateValue.sessionId !== sessionId || privateValue.refreshToken !== previousRefreshToken
+          || privateValue.subject !== subject) {
+        throw coded("gate7a-ordinary-session-refresh-conflict", "The ordinary browser session changed during renewal.");
+      }
+      const envelope = this.cipher.encrypt(
+        context("gate7a-ordinary-browser-session", sessionDigest, "private"),
+        { ...privateValue, accessToken, refreshToken, accessExpiresAt, subject });
+      await client.query(`UPDATE gate7a.browser_sessions SET private_envelope=$3::jsonb
+        WHERE binding_digest=$1 AND session_digest=$2`,
+      [bindingDigest, sessionDigest, JSON.stringify(envelope)]);
+      await client.query("COMMIT");
+      return true;
+    } catch (error) {
+      await client.query("ROLLBACK").catch(() => {});
+      throw error;
+    } finally { client.release(); }
+  }
 
   async revokeSession({ bindingDigest, sessionId, now }) {
     const sessionDigest = this.cipher.digest({ type: "gate7a-ordinary-browser-session", sessionId });

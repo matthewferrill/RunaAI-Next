@@ -147,6 +147,10 @@ test("ordinary sessions have separate encrypted storage and owner roles cannot u
   assert.match(postgres, /CREATE SCHEMA IF NOT EXISTS gate7a/);
   assert.match(postgres, /private_envelope jsonb NOT NULL/);
   assert.match(postgres, /cipher\.encrypt/);
+  assert.match(postgres, /updateSessionCredentials/);
+  assert.match(postgres, /BEGIN ISOLATION LEVEL SERIALIZABLE/);
+  assert.match(postgres, /FOR UPDATE/);
+  assert.match(postgres, /SET private_envelope=\$3::jsonb/);
   assert.match(ordinary, /passwordRoles = new Set\(\["adult-member", "minor-member", "guest"\]\)/);
   assert.match(ordinary, /gate7a-ordinary-role-denied/);
   assert.match(release, /ordinaryKeycloakClient/);

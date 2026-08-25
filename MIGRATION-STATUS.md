@@ -1,6 +1,6 @@
 # RunaAI migration status
 
-Status date: 2026-08-24. This is the living migration handoff for RunaAI-Next. Update it in the same
+Status date: 2026-08-25. This is the living migration handoff for RunaAI-Next. Update it in the same
 commit whenever a gate changes repository direction, authority, implementation status, safety
 boundaries, verification state, or the next planned work.
 
@@ -13,7 +13,7 @@ boundaries, verification state, or the next planned work.
 | RunaAI-Next `main` | Exact inherited RunaLab completion baseline | Stable integration target only after reviewed migration completion |
 | RunaAI-Next `runa2/integration` | Accumulated accepted migration gates | Development integration; not production |
 | Short-lived `runa2/*` gate branches | One approved, measured migration slice | Experimental until validated and approved |
-| Control release `runaai-next-gate7a-lan-chat-2026-08-24-20039fe` | Running selected-core RunaAI application at the canonical LAN origin | Production authority for the exact selected read-only core; later product capabilities remain separately decision-gated |
+| Control release `runaai-next-gate7a-lan-chat-code-2026-08-25-65b907b` | Running selected-core RunaAI application at the canonical LAN origin | Production authority for the exact selected read-only core and reviewed Chat/Code navigation; later product capabilities remain separately decision-gated |
 
 The product name is RunaAI. `RunaAI-Next`, `runa2`, and similar labels are repository and branch
 identifiers during migration, not product identities.
@@ -58,12 +58,13 @@ repository and never push migration work into either source repository.
   the only new LAN-facing service on TCP 443, and every backend remains loopback-bound. Keycloak now
   advertises the same-origin `/auth` issuer and `runa.bridgebuildersai.com` RP ID. The session cookie is
   host-only, `Secure`, `HttpOnly`, and explicitly `SameSite=Lax`; off-LAN ingress remains disabled.
-- The exact active release is `runaai-next-gate7a-lan-chat-2026-08-24-20039fe`, commit
-  `20039fefc1f286e963ebbd639e9ca9bc22aaea5b`, artifact digest
-  `7c94f120460b325cc5052d190e9d3a9682528e439af9433bfb495ee0f4c8fda5`. Authority is active,
-  cutover is closed at revision 10, all four dependencies are ready, the 29,499-file artifact is
-  verified, the prior release is retained for rollback, and neither legacy nor protected product data
-  changed. The full repository suite passes 393/393 at that commit.
+- The exact active release is `runaai-next-gate7a-lan-chat-code-2026-08-25-65b907b`, commit
+  `65b907b30fc58dcc1aac46edb8dce773018371d3`, artifact digest
+  `bb02e17fa50f602ce255f0bb5a6d95b295190259acc3c4549f2494251f4657d2`, and manifest digest
+  `ee24e7f36c468ae87e223f8ae9a6971449479e99bfe085c13959297e1a30b5df`. Authority is active,
+  cutover is closed, all four dependencies are ready, and the 29,506-file artifact is verified. The
+  exact Gate 7C predecessor is retained for rollback; configuration digest, identity, legacy, and
+  protected product data are unchanged. The exact commit suite passes 406/406.
 - Gate 7A is not closed. Canonical-origin owner passkey sign-in has completed and the protected
   `matthew-owner` path remains passkey-only. The steward approved a separate ordinary-user model:
   invitation-only enrollment, an individual username/password, verified-email recovery, and an
@@ -93,9 +94,69 @@ repository and never push migration work into either source repository.
   customer turns, general model conversation, honest live-lookup refusal, and continued recovery after
   the prior failures. It also exposed two presentation defects: `.mjs` was served as generic binary data,
   preventing Edge from running the page, and typed audit labels were appended to otherwise valid customer
-  prose. Both are corrected in the exact active release. The steward's exact-release recheck returned the
+  prose. Both are corrected in the Gate 7B exact release. The steward's exact-release recheck returned the
   correct square root of pi without an audit label and the live-weather limitation without Gate terminology.
   Gate 7B is complete.
+- Gate 7C is frozen by
+  `gate7c/GATE7C-UI-SHELL-SCOPE-AND-GREEN-CRITERIA-2026-08-24.md` and implemented on the isolated
+  `codex/gate7c-ui-shell` review branch at `1490a9b`. The presentation-only slice restores the familiar
+  RunaAI three-column workspace around the existing ordinary chat: independent empty left and right
+  expansion areas, the central transcript and composer, warm Dawn styling, and no labels, feature
+  wiring, persistence, or data access. Gate 7C passes 5/5 focused checks, Gate 6B
+  passes 32/32, Gate 7B passes 17/17, and the full repository suite passes 398/398. Disposable
+  loopback visual checks passed at wide desktop, constrained desktop, and phone widths after correcting
+  mobile grid placement. The exact rollback-protected successor is now active on Control as the release
+  named above; its configuration digest is unchanged, owner proof and both login routes reconciled, and
+  its predecessor remains retained. Full evidence is in
+  `gate7c/GATE7C-UI-SHELL-RESULTS-2026-08-24.md`. The steward accepted the proportions and visual
+  direction before Gate 7D added the first rail capability.
+- The steward accepted Gate 7C's overall visual direction and requested the first left-rail capability.
+  Gate 7D is frozen and implemented on the dependent `codex/gate7d-chat-code-navigation` branch.
+  It replaces the generic ordinary-member label with a bounded initials avatar and signed-in display
+  name, and adds separate Chat and Code navigation areas. Each area has its own New action, encrypted
+  participant-scoped projects, durable chat-record list, and independent in-memory selection state.
+  PostgreSQL remains the only record authority; the browser gains no local catalog. Code is a distinct
+  deterministic conversational role with no repository, file, terminal, execution, network, learning,
+  or protected-record capability. Focused validation passes 8/8, the full repository suite passes
+  406/406, `git diff --check` passes, and desktop/phone visual checks passed against a disposable
+  loopback preview. Source commits are `27fa026` for frozen criteria, `7b9b3bb` for implementation,
+  `3ddaee0` for source evidence, `fa1ac32` for rollback-window live validation, and `65b907b` for exact
+  successor launcher binding. The corrected exact release is active on Control. Authority, protected
+  data, identity, Caddy configuration, network exposure, model configuration, and legacy RunaAI remain
+  unchanged. The retained Gate 7C release is the automatic application rollback target. Full evidence
+  is in `gate7d/GATE7D-CHAT-CODE-NAVIGATION-RESULTS-2026-08-24.md`; the remaining Gate 7D decision is
+  ordinary-user live review followed by a separate merge decision. The first live review passed fresh
+  ordinary sign-in, new Chat creation, exact record reopening, switching between retained chats, and
+  continued history, but blocked merge on five end-to-end defects: a generic `test` false-positive in
+  project-intent routing, approved-knowledge failures retained as completed turns, standalone Code
+  incorrectly requiring project knowledge, and an ordinary session capped by the short-lived access
+  token despite retaining a refresh credential. A separate current-message relevance failure repeated
+  the prior Italy answer for a France question. The bounded correction is frozen in
+  `gate7d/GATE7D-END-TO-END-FLOW-CORRECTION-SCOPE-AND-GREEN-CRITERIA-2026-08-25.md`; the active release
+  remains unmerged and no model or protected authority changed.
+- The first correction successor fixed Chat routing, failed-turn retention, standalone Code routing,
+  current-message instructions, and ordinary-session renewal. Live Chat then passed, while Code
+  invented `64/12` context and returned `76` for the retained `14+12` follow-up. Direct private-model
+  probes ruled out request replay, Caddy caching, role drift, and a consistently bad endpoint; the
+  remaining defect was unverified model-output relevance and arithmetic consistency. Standalone Code
+  received a bounded second-pass response review, and any correction had to verify before retention.
+  That successor passed the opening and retained `14+12=26` live checks but failed twice on the next
+  `15+15` request. Exact replay proved the draft was correctly `30` while the verifier promoted the
+  previous `14+12` turn into current authority and proposed `26`; fail-closed re-verification prevented
+  that stale correction from being retained. The verifier now receives only the current request and
+  candidate answer, while conversation continuity remains with the drafting provider. Source and exact-
+  Control suites pass 423/423. The exact active release at `e10e3db` accepted `15+15=30` 3/3, rejected
+  stale `14+12=26` 3/3, and passed the integrated active-release history smoke 3/3. The `16adbca`
+  predecessor is retained for automatic rollback. Ordinary-browser acceptance then returned
+  `15+15=30`, `115+25=140`, a correct new four-parameter program, and the retained composite result
+  `25` without an incomplete response or stale values. Gate 7D is accepted for merge.
+- Gate 7D's first exact activation attempt failed closed because its staged launcher was still bound to
+  Gate 7C while its manifest named Gate 7D. Artifact verification rejected the mismatch and the guarded
+  operator automatically restored the exact Gate 7C release and readiness state. The corrected operator
+  now rejects a predecessor-bound launcher before creating release or rollback paths. The second attempt
+  used a newly generated successor-bound launcher, activated the exact commit and artifact, reconciled
+  owner and ordinary login routes, and validated every required live HTML and controller marker before
+  reporting success. No protected or private values were retained in the evidence.
 - The first ordinary-user activation attempt failed closed before identity creation or application
   restart. RCA: Windows PowerShell 5.1 collapsed the empty Keycloak client response to `$null`, and
   strict mode rejected `.Count`. Normalized reconciliation then proved zero ordinary clients, zero
@@ -408,7 +469,9 @@ plain-language steward experience, or governed action pathway.
 | 6 | Selected-core production cutover and rollback window | Complete and closed; exact selected-core release is authoritative, observation green, freeze released, legacy rollback healthy | Complete |
 | 7A | Multi-device access foundation | Canonical LAN origin, owner passkey path, SMTP/invitation, separate ordinary password client, and Omen customer acceptance active | Representative clients, certificate renewal, and off-LAN boundary remain |
 | 7B | Complete customer journey through the selected read-only stack | Complete; production sign-in, sustained chat, safe presentation, exact-release recheck, and rollback evidence green | Approved by steward 2026-08-24; completed 2026-08-24 |
-| 7C+ | Deferred product extensions | Not started; capability inventory and prioritization are next | New baseline and separate decision per extension group |
+| 7C | First user-interface shell | Complete and superseded on Control by the Gate 7D presentation release | Source integration remains part of the Gate 7D review chain |
+| 7D | Identity-aware Chat/Code navigation and end-to-end flow correction | Accepted; current-turn verifier successor active on Control at `e10e3db`; source and exact-Control suites 423/423; ordinary-browser current-turn sequence passed | Merge the reviewed correction chain into `runa2/integration` |
+| 7E+ | Deferred product extensions | Not started; capability inventory and prioritization follow Gate 7D acceptance | New baseline and separate decision per extension group |
 
 ## Bootstrap validation
 
@@ -452,37 +515,12 @@ No dependency was changed during the prerequisite disposition. Full evidence is 
 
 ## Next operation
 
-Complete Gate 7B as one customer journey rather than another isolated chat patch. Prove canonical login,
-ordinary-session entry, sustained multi-turn general chat, stable/current/project/protected prompt classes,
-typed provider failures, retry, refresh/restart continuity, logout, and every internal read-only answer lane
-through one release composition. The browser remains chat-only; guarded/research/workspace/code behavior is
-validated internally and must be described truthfully rather than exposed as a finished code agent. Deploy
-only after the full customer-flow matrix and private-model boundary are green, with the exact active release
-retained for automatic rollback.
+Merge the accepted Gate 7D correction chain into `runa2/integration`, verify the exact remote merge,
+and rerun the full repository suite from the merged integration commit. The active Control release and
+its exact application rollback predecessor remain unchanged by the source merge.
 
-Gate 6 remains closed and the selected-core authority remains active. Gate 7A's canonical LAN origin is
-now live at `https://runa.bridgebuildersai.com`; the old
-`https://192.168.50.169:9761` route is retained only for commissioning and rollback. The canonical
-route has an ordinary trusted certificate and exposes only Caddy on TCP 443 to the Private/LocalSubnet
-boundary. Off-LAN ingress is disabled.
-
-The separate `runaai-next-user` password-only client and immutable ordinary-access successor are now
-active. The owner client is unchanged, its completed proof is bound to the exact release, the selected-
-core authority remains active, protected selected data remains imported, and Omen independently passed
-trusted-TLS/liveness/root and both login-route redirect checks. Aggregate evidence is in
-`gate7a/evidence/CONTROL-ORDINARY-ACCESS-ACTIVATION-RESULTS.json`.
-
-The next bounded operation requires an SMTP sender for Keycloak. The SMTP credential must be entered under
-Matthew's Control identity, retained only as DPAPI CurrentUser material, tested without printing any
-private value, and rolled back if realm verification fails. After that, issue one short-lived
-invitation to Matthew's separate personal email, let the invitee choose a username/password and verify
-the address, and validate from Omen: ordinary login, bounded `SameSite=Lax` navigation,
-logout/revocation, password recovery, denial of owner/protected data and actions, and unchanged owner
-passkey administration. Do not put the personal address, password, invitation token, or SMTP secret in
-Git, evidence, or chat.
-
-After the isolated personal account passes, continue Gate 7A with a second PC, a phone, and a
-separately reviewed off-LAN boundary. Certificate renewal remains explicit because the Porkbun
-credential is DPAPI CurrentUser-bound. E3, E4/device-vault recovery, the separate approved-knowledge
-vector index, Qwen3.6 deliberate review, the existing live BGE endpoint, broader legacy surfaces, and
-the user-facing conversational UI remain separately deferred.
+Gate 6 remains closed and selected-core production authority remains active at the exact release named
+above. Gate 7A follow-on checks for a second PC, phone, certificate renewal, and separately reviewed
+off-LAN ingress remain independent of the Gate 7C presentation branch. E3, E4/device-vault recovery,
+the separate approved-knowledge vector index, Qwen3.6 deliberate review, the existing live BGE
+endpoint, and broader legacy capabilities also remain separately deferred.

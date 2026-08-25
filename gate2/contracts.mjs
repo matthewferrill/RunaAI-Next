@@ -13,7 +13,8 @@ const sourceLocator = z.object({
 export const Gate2AnswerRequestSchema = z.object({
   schemaVersion: z.literal("runa2-answer-request/v2"),
   requestId: boundedId,
-  lane: z.enum(["general", "research", "guarded", "workspace"]),
+  lane: z.enum(["general", "research", "guarded", "workspace", "code"]),
+  experience: z.enum(["chat", "code"]).default("chat"),
   participant: z.object({ principalId: boundedId, verified: z.boolean() }).strict(),
   project: z.object({ projectId: boundedId }).strict(),
   thread: z.object({ threadId: boundedId }).strict(),
@@ -60,7 +61,7 @@ export const Gate2AnswerResponseSchema = z.object({
   participantId: boundedId,
   projectId: boundedId,
   threadId: boundedId,
-  lane: z.enum(["general", "research", "guarded", "workspace"]),
+  lane: z.enum(["general", "research", "guarded", "workspace", "code"]),
   answer: z.string(),
   ground: z.enum(["record-answers", "record-silent", "not-a-question-of-fact", "no-ground-needed"]),
   retrieval: z.object({
@@ -109,6 +110,7 @@ export const GATE2_MODEL_ROLES = Object.freeze({
   guarded: "chat",
   research: "research",
   workspace: "code",
+  code: "code",
 });
 
 export const GATE2_LANE_CAPABILITIES = Object.freeze({
@@ -116,4 +118,5 @@ export const GATE2_LANE_CAPABILITIES = Object.freeze({
   guarded: Object.freeze(["chat", "guarded-read-only"]),
   research: Object.freeze(["research"]),
   workspace: Object.freeze(["code", "workspace-read"]),
+  code: Object.freeze(["code"]),
 });

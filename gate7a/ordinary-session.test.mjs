@@ -32,6 +32,48 @@ function harness({ role = "adult-member", passwordOidc = oidc({ method: "passwor
   return { service, store };
 }
 
+async function expiringHarness({ refreshed = {}, refreshFailure = null, sessionLifetimeMs } = {}) {
+  let clock = new Date(NOW);
+  let refreshes = 0;
+  const issuer = "https://runa.example.com/auth/realms/runaai-next";
+  const client = {
+    issuer,
+    authorizationUrl(input) { return `https://id.example.test/password?state=${input.state}&client_id=${input.clientId}`; },
+    async exchangeCode() { return { accessToken: "access-1", refreshToken: "refresh-1",
+      refreshExpiresInSeconds: 8 * 60 * 60 }; },
+    async refresh() {
+      refreshes += 1;
+      if (refreshFailure && (typeof refreshFailure !== "function" || refreshFailure(refreshes))) {
+        throw Object.assign(new Error("synthetic refresh failure"), { code: typeof refreshFailure === "string"
+          ? refreshFailure : "identity-refresh-unavailable" });
+      }
+      return { accessToken: "access-2", refreshToken: "refresh-2", refreshExpiresInSeconds: 7 * 60 * 60 };
+    },
+    async inspect(token) {
+      if (token === "access-1") return { active: clock.getTime() < NOW.getTime() + 60_000,
+        issuer, audience: [clients.password], subject: "member-subject", authenticatedAt: NOW.toISOString(),
+        expiresAt: new Date(NOW.getTime() + 60_000).toISOString(), methods: ["pwd"] };
+      return { active: true, issuer, audience: [clients.password], subject: "member-subject",
+        authenticatedAt: NOW.toISOString(), expiresAt: new Date(clock.getTime() + 60 * 60_000).toISOString(),
+        methods: ["pwd"], ...refreshed };
+    },
+    async revoke() {},
+  };
+  const store = new MemoryOrdinarySessionStore();
+  const service = new OrdinaryBrowserSessionService({ store, passwordOidc: client,
+    passkeyOidc: oidc({ method: "passkey" }), principalStore: { async bySubject() {
+      return { principalId: "personal-test", role: "adult-member", ageClass: "adult", status: "active" };
+    } }, bindingDigest, publicBaseUrl: "https://runa.example.com", passwordClientId: clients.password,
+    passkeyClientId: clients.passkey, now: () => clock, random: size => Buffer.alloc(size, 11),
+    ...(sessionLifetimeMs ? { sessionLifetimeMs } : {}) });
+  await service.initialize();
+  const started = await service.start("password");
+  const result = await service.callback({ state: new URL(started.redirectUrl).searchParams.get("state"),
+    code: "ordinary-code" });
+  return { service, store, result, advance(ms) { clock = new Date(NOW.getTime() + ms); },
+    refreshCount() { return refreshes; } };
+}
+
 test("a distinct ordinary member signs in with a username and password", async () => {
   const { service } = harness();
   await service.initialize();
@@ -87,4 +129,89 @@ test("logout revokes both the provider token and the retained browser session", 
   assert.equal((await service.revoke(result.sessionId)).revoked, true);
   await assert.rejects(service.credentialForSession(result.sessionId),
     { code: "gate7a-ordinary-session-invalid" });
+});
+
+test("an ordinary session refreshes one expired access token without extending its absolute lifetime", async () => {
+  let clock = new Date(NOW);
+  let refreshes = 0;
+  const issuer = "https://runa.example.com/auth/realms/runaai-next";
+  const client = {
+    issuer,
+    authorizationUrl(input) { return `https://id.example.test/password?state=${input.state}&client_id=${input.clientId}`; },
+    async exchangeCode() { return { accessToken: "access-1", refreshToken: "refresh-1",
+      refreshExpiresInSeconds: 8 * 60 * 60 }; },
+    async refresh({ refreshToken }) {
+      assert.equal(refreshToken, "refresh-1");
+      refreshes += 1;
+      return { accessToken: "access-2", refreshToken: "refresh-2", refreshExpiresInSeconds: 7 * 60 * 60 };
+    },
+    async inspect(token) {
+      const second = token === "access-2";
+      return { active: second || clock.getTime() < NOW.getTime() + 60_000, issuer,
+        audience: [clients.password], subject: "member-subject", authenticatedAt: NOW.toISOString(),
+        expiresAt: new Date(second ? clock.getTime() + 60 * 60_000 : NOW.getTime() + 60_000).toISOString(),
+        methods: ["pwd"] };
+    },
+    async revoke() {},
+  };
+  const store = new MemoryOrdinarySessionStore();
+  const service = new OrdinaryBrowserSessionService({ store, passwordOidc: client,
+    passkeyOidc: oidc({ method: "passkey" }), principalStore: { async bySubject() {
+      return { principalId: "personal-test", role: "adult-member", ageClass: "adult", status: "active" };
+    } }, bindingDigest, publicBaseUrl: "https://runa.example.com", passwordClientId: clients.password,
+    passkeyClientId: clients.passkey, now: () => clock, random: size => Buffer.alloc(size, 9) });
+  await service.initialize();
+  const started = await service.start("password");
+  const result = await service.callback({ state: new URL(started.redirectUrl).searchParams.get("state"),
+    code: "ordinary-code" });
+  const retainedBefore = await store.sessionCredentials({ bindingDigest, sessionId: result.sessionId, now: clock });
+  assert.equal(retainedBefore.expiresAt, new Date(NOW.getTime() + 8 * 60 * 60_000).toISOString());
+  clock = new Date(NOW.getTime() + 2 * 60_000);
+  const credentials = await Promise.all([
+    service.credentialForSession(result.sessionId), service.credentialForSession(result.sessionId),
+  ]);
+  assert.deepEqual(credentials, ["access-2", "access-2"]);
+  assert.equal(refreshes, 1);
+  const retainedAfter = await store.sessionCredentials({ bindingDigest, sessionId: result.sessionId, now: clock });
+  assert.equal(retainedAfter.refreshToken, "refresh-2");
+  assert.equal(retainedAfter.expiresAt, retainedBefore.expiresAt);
+});
+
+test("renewal fails closed when issuer, audience, subject, or authentication method changes", async t => {
+  for (const [name, refreshed] of [
+    ["issuer", { issuer: "https://wrong.example.test/realm" }],
+    ["audience", { audience: ["wrong-client"] }],
+    ["subject", { subject: "different-member" }],
+    ["method", { methods: ["webauthn"] }],
+  ]) await t.test(name, async () => {
+    const context = await expiringHarness({ refreshed });
+    context.advance(2 * 60_000);
+    await assert.rejects(context.service.credentialForSession(context.result.sessionId),
+      { code: "gate7a-ordinary-session-invalid" });
+    await assert.rejects(context.store.sessionCredentials({ bindingDigest,
+      sessionId: context.result.sessionId, now: new Date(NOW.getTime() + 2 * 60_000) }),
+    { code: "gate7a-ordinary-session-invalid" });
+  });
+});
+
+test("rejected renewal fails closed while a transient outage remains retryable", async () => {
+  const rejected = await expiringHarness({ refreshFailure: "identity-refresh-rejected" });
+  rejected.advance(2 * 60_000);
+  await assert.rejects(rejected.service.credentialForSession(rejected.result.sessionId),
+    { code: "gate7a-ordinary-session-invalid" });
+
+  const transient = await expiringHarness({ refreshFailure: count => count === 1 });
+  transient.advance(2 * 60_000);
+  await assert.rejects(transient.service.credentialForSession(transient.result.sessionId),
+    { code: "identity-refresh-unavailable" });
+  assert.equal(await transient.service.credentialForSession(transient.result.sessionId), "access-2");
+  assert.equal(transient.refreshCount(), 2);
+});
+
+test("the absolute ordinary-session ceiling blocks renewal", async () => {
+  const context = await expiringHarness({ sessionLifetimeMs: 5 * 60_000 });
+  context.advance(6 * 60_000);
+  await assert.rejects(context.service.credentialForSession(context.result.sessionId),
+    { code: "gate7a-ordinary-session-invalid" });
+  assert.equal(context.refreshCount(), 0);
 });

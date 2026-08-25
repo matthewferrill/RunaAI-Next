@@ -1,0 +1,47 @@
+{
+  "schemaVersion": "runa2-gate7d-control-activation/v1",
+  "status": "active",
+  "release": {
+    "releaseId": "runaai-next-gate7a-lan-chat-code-2026-08-25-65b907b",
+    "commit": "65b907b30fc58dcc1aac46edb8dce773018371d3",
+    "artifactDigest": "bb02e17fa50f602ce255f0bb5a6d95b295190259acc3c4549f2494251f4657d2",
+    "configurationDigest": "b1d1f9cb5e8524f8318fa428bfe0d107747b4996647f8f6111cba65746b75020",
+    "manifestDigest": "ee24e7f36c468ae87e223f8ae9a6971449479e99bfe085c13959297e1a30b5df",
+    "artifactFileCount": 29506
+  },
+  "failedAttempt": {
+    "releaseId": "runaai-next-gate7d-chat-code-2026-08-25-fa1ac32",
+    "errorCode": "gate7a-ordinary-deploy-start-timeout",
+    "rootCause": "staged-launcher-bound-to-predecessor-release",
+    "artifactVerificationRejectedMismatch": true,
+    "automaticRollbackCompleted": true,
+    "exactPredecessorRestored": true,
+    "protectedProductDataChanged": false,
+    "identityChanged": false,
+    "networkChanged": false
+  },
+  "activation": {
+    "deployed": true,
+    "selectedCoreAuthorityUnchanged": true,
+    "ownerProofRebound": true,
+    "ownerRouteUnchanged": true,
+    "ordinaryPasswordRouteReady": true,
+    "applicationAndCaddyChangedTogether": true,
+    "rollbackRetained": true,
+    "legacyModified": false,
+    "protectedProductDataChanged": false
+  },
+  "postActivation": {
+    "cutover": "closed",
+    "authority": "active",
+    "protectedDataImported": true,
+    "pageStatus": 200,
+    "moduleStatus": 200,
+    "moduleContentType": "text/javascript; charset=utf-8",
+    "allPageMarkers": true,
+    "allModuleMarkers": true,
+    "exactCommitTestsPassed": 406,
+    "exactCommitTestsFailed": 0
+  },
+  "privateValuesIncluded": false
+}

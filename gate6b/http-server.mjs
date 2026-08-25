@@ -117,9 +117,13 @@ export function createCandidateHttpServer({ application, runtimeStatus, readines
         }
         const sessionService = ordinarySession ? ordinarySessions : browserCeremony;
         if (!sessionService) throw coded("gate7a-browser-session-unavailable", "The browser session service is unavailable.");
-        await sessionService.credentialForSession(ordinarySession ?? ownerSession);
+        const profile = ordinarySession && typeof sessionService.profileForSession === "function"
+          ? await sessionService.profileForSession(ordinarySession)
+          : null;
+        if (!profile) await sessionService.credentialForSession(ordinarySession ?? ownerSession);
         return json(response, 200, { schemaVersion: "runa2-gate7a-browser-session-status/v1",
-          authenticated: true, sessionType: ordinarySession ? "ordinary" : "owner", privateValuesIncluded: false });
+          authenticated: true, sessionType: ordinarySession ? "ordinary" : "owner",
+          ...(profile ? { profile } : {}), privateValuesIncluded: false });
       }
       if (request.method === "GET" && url.pathname === "/api/owner-ceremony/status") {
         if (!browserCeremony) throw coded("gate6c-browser-ceremony-unavailable", "The owner ceremony is unavailable.");
@@ -209,6 +213,29 @@ export function createCandidateHttpServer({ application, runtimeStatus, readines
       }
       if (request.method === "POST" && url.pathname === "/api/selected/answer") {
         return json(response, 200, await application.answer({ credential: await selectedCredential(request, browserCeremony, ordinarySessions), body: await body(request, maxRequestBytes) }));
+      }
+      if (request.method === "POST" && url.pathname === "/api/selected/navigation/query") {
+        if (request.headers["x-runa-workspace"] !== "1") throw coded("workspace-request-invalid", "The workspace request marker is missing.");
+        const input = await body(request, maxRequestBytes);
+        return json(response, 200, await application.navigation({
+          credential: await selectedCredential(request, browserCeremony, ordinarySessions),
+          experience: input.experience,
+        }));
+      }
+      if (request.method === "POST" && url.pathname === "/api/selected/projects") {
+        if (request.headers["x-runa-workspace"] !== "1") throw coded("workspace-request-invalid", "The workspace request marker is missing.");
+        return json(response, 200, await application.createProject({
+          credential: await selectedCredential(request, browserCeremony, ordinarySessions),
+          body: await body(request, maxRequestBytes),
+        }));
+      }
+      if (request.method === "POST" && url.pathname === "/api/selected/chat/read") {
+        if (request.headers["x-runa-workspace"] !== "1") throw coded("workspace-request-invalid", "The workspace request marker is missing.");
+        const input = await body(request, maxRequestBytes);
+        return json(response, 200, await application.readChat({
+          credential: await selectedCredential(request, browserCeremony, ordinarySessions),
+          chatId: input.chatId, experience: input.experience,
+        }));
       }
       if (request.method === "POST" && url.pathname === "/api/selected/settings/propose") {
         return json(response, 200, await application.proposeSetting({ credential: await selectedCredential(request, browserCeremony, ordinarySessions), body: await body(request, maxRequestBytes) }));

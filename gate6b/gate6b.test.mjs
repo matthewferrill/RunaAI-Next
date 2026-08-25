@@ -389,6 +389,9 @@ test("Keycloak and OpenFGA clients use bounded authenticated online decisions", 
     if (request.url.endsWith("/token/introspect")) response.end(JSON.stringify({ active: true,
       iss: "http://issuer", aud: ["runaai-next"], sub: "owner-subject", auth_time: 1_787_339_880,
       exp: 1_787_343_600, amr: ["webauthn"] }));
+    else if (request.url.endsWith("/token")) response.end(JSON.stringify({
+      access_token: "ROTATED_ACCESS", refresh_token: "ROTATED_REFRESH", refresh_expires_in: 28_800,
+    }));
     else if (request.url.startsWith("/account/credentials")) response.end(JSON.stringify([{
       type: "webauthn-passwordless", userCredentialMetadatas: [{ credential: { id: "not-retained" } }],
     }]));
@@ -417,6 +420,12 @@ test("Keycloak and OpenFGA clients use bounded authenticated online decisions", 
     relation: "chat_ephemeral", object: "project:runa%3Apersonal" });
   assert.doesNotMatch(JSON.stringify(identity), /PRIVATE_/);
   assert.doesNotMatch(JSON.stringify(decision), /PRIVATE_/);
+  const refreshed = await new KeycloakOnlineClient({ issuer: baseUrl, clientId: "runaai-next-user",
+    clientCredential: "PRIVATE_CLIENT_CANARY" }).refresh({ refreshToken: "PRIVATE_REFRESH_CANARY" });
+  assert.deepEqual(refreshed, { accessToken: "ROTATED_ACCESS", refreshToken: "ROTATED_REFRESH",
+    refreshExpiresInSeconds: 28_800 });
+  assert.match(calls.at(-1).body, /grant_type=refresh_token/);
+  assert.match(calls.at(-1).body, /refresh_token=PRIVATE_REFRESH_CANARY/);
 });
 
 test("HTTP ordinary login is separate from owner administration and supports logout", async t => {
@@ -480,9 +489,9 @@ test("the browser UI turns an active ordinary session into a bounded chat screen
   assert.doesNotMatch(html, /cannot read protected data or perform an action while shadow authority is active/);
   assert.match(script, /\/api\/session\/status/);
   assert.match(script, /session\.sessionType === "ordinary"/);
-  assert.match(script, /lane: "general"/);
-  assert.match(script, /projectId: "runa:personal"/);
-  assert.match(script, /boundedHistory\(history\)/);
+  assert.match(script, /submittedExperience === "code" \? "code" : "general"/);
+  assert.match(script, /projectId: state\.projectId/);
+  assert.match(script, /boundedHistory\(state\.history\)/);
   assert.match(script, /Retry message/);
   assert.doesNotMatch(script, /error\.message/);
   assert.match(script, /\/session\/user\/logout/);

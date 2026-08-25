@@ -140,8 +140,61 @@ test("ordinary general conversation does not depend on the approved-knowledge st
 
   const governed = await context.service.answer(request("project-needs-knowledge", "What does this project say?"));
   assert.equal(governed.completion.reason, "approved-knowledge-delivery-invalid");
+  assert.equal(governed.continuity.turnRecorded, false);
   assert.equal(selections, 1);
   assert.equal(context.providers.chat.calls.length, 1);
+});
+
+test("the observed Chat sequence and standalone Code bypass project knowledge", async () => {
+  let selections = 0;
+  const approvedKnowledge = { async select() { selections += 1; throw new Error("must not be selected"); } };
+  const providers = {
+    chat: new ScriptedProvider({ role: "chat", reply: ({ request }) => ({
+      answer: `Chat current: ${request.message}`, citations: [],
+    }) }),
+    research: new ScriptedProvider({ role: "research" }),
+    code: new ScriptedProvider({ role: "code", reply: ({ request }) => ({
+      answer: `Code current: ${request.message}`, citations: [],
+      outputVerification: { executed: true, corrected: false },
+    }) }),
+  };
+  const context = harness({ approvedKnowledge, providers });
+  const opening = "This chat is a test. I'm going to see if I can reopen it after it is saved.";
+  const first = await context.service.answer(request("observed-chat-opening", opening));
+  assert.equal(first.answer, `Chat current: ${opening}`);
+  const followup = await context.service.answer(request("observed-chat-followup",
+    "That's ok. Lets try an actual question.", "general", { history: [
+      { role: "user", content: opening }, { role: "assistant", content: first.answer },
+    ] }));
+  assert.equal(followup.answer, "Chat current: That's ok. Lets try an actual question.");
+  const code = await context.service.answer(request("observed-standalone-code",
+    "Write a JavaScript function that adds two numbers.", "code"));
+  assert.equal(code.answer, "Code current: Write a JavaScript function that adds two numbers.");
+  assert.equal(code.model.role, "code");
+  assert.equal(code.approvedKnowledge.reason, "not-applicable-code-conversation");
+  assert.ok(code.auditCodes.includes("code-response-verification-executed"));
+  assert.ok(!code.auditCodes.includes("code-response-corrected-and-reverified"));
+  assert.equal(selections, 0);
+  assert.equal(context.providers.chat.calls.length, 2);
+  assert.equal(context.providers.code.calls.length, 1);
+});
+
+test("consecutive topics preserve each current message without request replay", async () => {
+  const provider = new ScriptedProvider({ role: "chat", reply: ({ request }) => ({
+    answer: request.message.includes("France") ? "Paris" : "Rome", citations: [],
+  }) });
+  const context = harness({ providers: { chat: provider, research: new ScriptedProvider({ role: "research" }),
+    code: new ScriptedProvider({ role: "code" }) } });
+  const italy = await context.service.answer(request("topic-italy", "What is the capital of Italy?"));
+  const france = await context.service.answer(request("topic-france", "What is the capital of France?", "general", {
+    history: [{ role: "user", content: "What is the capital of Italy?" },
+      { role: "assistant", content: italy.answer }],
+  }));
+  assert.equal(italy.requestId, "topic-italy");
+  assert.equal(france.requestId, "topic-france");
+  assert.equal(france.answer, "Paris");
+  assert.deepEqual(provider.calls.map(call => call.request.message),
+    ["What is the capital of Italy?", "What is the capital of France?"]);
 });
 
 test("guarded lane refuses policy/protected requests and records only bounded read-only lookups", async () => {
@@ -356,18 +409,18 @@ test("durability keeps duplicate/restart behavior exact across Gate 2 lanes", as
 test("failure, telemetry, rollback, and effects boundaries remain visible", async () => {
   await cover("failure-states-distinct", async () => {
     const empty = harness();
-    assert.equal((await empty.service.answer(request("fail-empty", "Unknown synthetic fact."))).completion.reason, "honest-empty");
+    assert.equal((await empty.service.answer(request("fail-empty", "What does this project say about the unknown synthetic fact?"))).completion.reason, "honest-empty");
     const unavailable = harness({ unavailable: true });
-    assert.equal((await unavailable.service.answer(request("fail-unavailable", "Where is synthetic evidence?"))).completion.reason, "dependency-unavailable");
+    assert.equal((await unavailable.service.answer(request("fail-unavailable", "Where is the current project evidence?"))).completion.reason, "dependency-unavailable");
     const source = sourceSection({ projectId: projectA, sourceId: "failure", sectionId: "answer", content: "Synthetic failure evidence." });
     const degraded = harness({ sources: [source], degraded: true });
-    assert.equal((await degraded.service.answer(request("fail-degraded", "Use failure evidence."))).retrieval.degraded, true);
+    assert.equal((await degraded.service.answer(request("fail-degraded", "Use the current project evidence about failure."))).retrieval.degraded, true);
     const timeout = harness({ sources: [source], providers: { chat: new ScriptedProvider({ role: "chat", delayMs: 300 }),
       research: new ScriptedProvider({ role: "research" }), code: new ScriptedProvider({ role: "code" }) } });
-    assert.equal((await timeout.service.answer(request("fail-timeout", "Use failure evidence.", "general", { budgets: { deadlineMs: 100 } }))).completion.reason, "timeout");
+    assert.equal((await timeout.service.answer(request("fail-timeout", "Use the current project evidence about failure.", "general", { budgets: { deadlineMs: 100 } }))).completion.reason, "timeout");
     const limitedProvider = { async answer() { const error = new Error("limited"); error.code = "provider-output-limited"; throw error; } };
     const limited = harness({ sources: [source], providers: { chat: limitedProvider, research: new ScriptedProvider({ role: "research" }), code: new ScriptedProvider({ role: "code" }) } });
-    const limitedResponse = await limited.service.answer(request("fail-limited", "Use failure evidence."));
+    const limitedResponse = await limited.service.answer(request("fail-limited", "Use the current project evidence about failure."));
     assert.equal(limitedResponse.completion.reason, "output-limited");
     assert.equal(limitedResponse.continuity.turnRecorded, false);
     const malformedProvider = { async answer() { const error = new Error("PRIVATE_PARSE_DETAIL");

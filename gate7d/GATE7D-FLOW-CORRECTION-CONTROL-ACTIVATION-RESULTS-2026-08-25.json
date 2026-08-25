@@ -1,0 +1,50 @@
+{
+  "schemaVersion": "runa2-gate7d-flow-correction-control-activation/v1",
+  "status": "active-live-acceptance-pending",
+  "release": {
+    "releaseId": "runaai-next-gate7d-flow-correction-2026-08-25-c5c8e31",
+    "commit": "c5c8e31cdf422fe02873091fee21efadb521bcbc",
+    "artifactDigest": "9fccfd51723234b18c3b74eec5ccd367ebb035726003ef305861483faa891023",
+    "artifactFileCount": 29509,
+    "configurationDigest": "b1d1f9cb5e8524f8318fa428bfe0d107747b4996647f8f6111cba65746b75020",
+    "manifestDigest": "10f833da594c3000f202fedc8925c0d26cacd6f4b6043506766565af9bfc3c07"
+  },
+  "predecessor": {
+    "releaseId": "runaai-next-gate7a-lan-chat-code-2026-08-25-65b907b",
+    "commit": "65b907b30fc58dcc1aac46edb8dce773018371d3",
+    "artifactDigest": "bb02e17fa50f602ce255f0bb5a6d95b295190259acc3c4549f2494251f4657d2",
+    "retainedAsAutomaticRollback": true
+  },
+  "sourceVerification": {
+    "controlCheckoutClean": true,
+    "testsPassed": 418,
+    "testsFailed": 0,
+    "testsSkipped": 0
+  },
+  "activation": {
+    "deployed": true,
+    "selectedCoreAuthorityUnchanged": true,
+    "ownerProofRebound": true,
+    "ownerRouteUnchanged": true,
+    "ordinaryPasswordRouteReady": true,
+    "applicationAndCaddyChangedTogether": true,
+    "rollbackRetained": true,
+    "legacyModified": false,
+    "protectedProductDataChanged": false
+  },
+  "postActivation": {
+    "cutover": "closed",
+    "authority": "active",
+    "dependenciesReady": true,
+    "protectedDataImported": true,
+    "artifactVerified": true,
+    "pageStatus": 200,
+    "moduleStatus": 200,
+    "moduleJavaScript": true,
+    "missingPageMarkers": 0,
+    "missingModuleMarkers": 0,
+    "tlsValidated": true,
+    "sourceWorktreesClean": true
+  },
+  "privateValuesIncluded": false
+}

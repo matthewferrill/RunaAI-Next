@@ -1,4 +1,5 @@
 import { createHash, randomBytes } from "node:crypto";
+import { publicProfileFromClaims } from "../gate6b/clients.mjs";
 
 const coded = (code, message) => Object.assign(new Error(message), { code });
 const b64url = value => Buffer.from(value).toString("base64url");
@@ -42,6 +43,7 @@ export class OrdinaryBrowserSessionService {
     this.sessionLifetimeMs = sessionLifetimeMs;
     this.authenticationMaximumAgeMs = authenticationMaximumAgeMs;
     this.redirectUri = `${this.publicBaseUrl}/session/user/callback`;
+    this.refreshes = new Map();
   }
 
   async initialize() { await this.store.initialize({ bindingDigest: this.bindingDigest }); }
@@ -98,19 +100,87 @@ export class OrdinaryBrowserSessionService {
       await oidc.revoke(credential.refreshToken).catch(() => {});
       throw coded("gate7a-ordinary-credential-expired", "The ordinary identity credential is expired.");
     }
-    const expiresAt = new Date(Math.min(tokenExpiry, now.getTime() + this.sessionLifetimeMs)).toISOString();
+    const refreshLifetimeMs = Number.isFinite(credential.refreshExpiresInSeconds)
+      ? credential.refreshExpiresInSeconds * 1_000 : this.sessionLifetimeMs;
+    const expiresAt = new Date(now.getTime() + Math.min(refreshLifetimeMs, this.sessionLifetimeMs)).toISOString();
     const sessionId = b64url(this.random(32));
     await this.store.saveSession({ bindingDigest: this.bindingDigest, sessionId,
       principalId: principal.principalId, subject: decision.subject,
       accessToken: credential.accessToken, refreshToken: credential.refreshToken,
-      authenticatedAt: decision.authenticatedAt, expiresAt, method, clientId });
+      accessExpiresAt: decision.expiresAt, authenticatedAt: decision.authenticatedAt,
+      expiresAt, method, clientId });
     return Object.freeze({ schemaVersion: "runa2-gate7a-ordinary-session-callback/v1",
       sessionId, principalId: principal.principalId, method, privateValuesIncluded: false });
   }
 
   async credentialForSession(sessionId) {
     if (!safeCode(sessionId)) throw coded("gate7a-ordinary-session-invalid", "The ordinary browser session is invalid.");
-    return this.store.sessionCredential({ bindingDigest: this.bindingDigest, sessionId, now: this.now() });
+    const running = this.refreshes.get(sessionId);
+    if (running) return running;
+    const refresh = this.#credentialForSession(sessionId);
+    this.refreshes.set(sessionId, refresh);
+    try { return await refresh; }
+    finally { if (this.refreshes.get(sessionId) === refresh) this.refreshes.delete(sessionId); }
+  }
+
+  async #credentialForSession(sessionId) {
+    const now = this.now();
+    const retained = await this.store.sessionCredentials({ bindingDigest: this.bindingDigest, sessionId, now });
+    const oidc = retained.clientId === this.passwordClientId ? this.passwordOidc : this.passkeyOidc;
+    const accessExpiry = Date.parse(retained.accessExpiresAt);
+    if (Number.isFinite(accessExpiry) && accessExpiry > now.getTime()) return retained.accessToken;
+
+    if (!Number.isFinite(accessExpiry)) {
+      const current = await oidc.inspect(retained.accessToken);
+      if (current.active === true) return retained.accessToken;
+      if (typeof retained.subject !== "string" || !retained.subject) {
+        await this.store.revokeSession({ bindingDigest: this.bindingDigest, sessionId, now });
+        throw coded("gate7a-ordinary-session-invalid", "The ordinary browser session must be renewed by signing in again.");
+      }
+    }
+
+    let credential;
+    try { credential = await oidc.refresh({ refreshToken: retained.refreshToken, clientId: retained.clientId }); }
+    catch (error) {
+      if (["identity-refresh-rejected", "identity-refresh-invalid"].includes(error?.code)) {
+        await this.store.revokeSession({ bindingDigest: this.bindingDigest, sessionId, now });
+        throw coded("gate7a-ordinary-session-invalid", "The ordinary browser session could not be renewed.");
+      }
+      throw error;
+    }
+    let decision;
+    try { decision = await oidc.inspect(credential.accessToken); }
+    catch (error) { await oidc.revoke(credential.refreshToken).catch(() => {}); throw error; }
+    const expectedMethod = retained.method === "password" ? "password" : "passkey";
+    const method = selectedMethod(decision.methods, expectedMethod);
+    const tokenExpiry = Date.parse(decision.expiresAt);
+    if (decision.active !== true || decision.issuer !== oidc.issuer
+        || !Array.isArray(decision.audience) || !decision.audience.includes(retained.clientId)
+        || decision.subject !== retained.subject || method !== retained.method
+        || !Number.isFinite(tokenExpiry) || tokenExpiry <= now.getTime()) {
+      await oidc.revoke(credential.refreshToken).catch(() => {});
+      await this.store.revokeSession({ bindingDigest: this.bindingDigest, sessionId, now });
+      throw coded("gate7a-ordinary-session-invalid", "The renewed ordinary identity did not match the retained session.");
+    }
+    await this.store.updateSessionCredentials({ bindingDigest: this.bindingDigest, sessionId,
+      previousRefreshToken: retained.refreshToken, accessToken: credential.accessToken,
+      refreshToken: credential.refreshToken, accessExpiresAt: decision.expiresAt,
+      subject: decision.subject, now });
+    return credential.accessToken;
+  }
+
+  async profileForSession(sessionId) {
+    if (!safeCode(sessionId)) throw coded("gate7a-ordinary-session-invalid", "The ordinary browser session is invalid.");
+    const accessToken = await this.credentialForSession(sessionId);
+    const retained = await this.store.sessionCredentials({ bindingDigest: this.bindingDigest,
+      sessionId, now: this.now() });
+    const oidc = retained.clientId === this.passwordClientId ? this.passwordOidc : this.passkeyOidc;
+    const decision = await oidc.inspect(accessToken);
+    if (decision.active !== true || (retained.subject && decision.subject !== retained.subject)) {
+      await this.store.revokeSession({ bindingDigest: this.bindingDigest, sessionId, now: this.now() });
+      throw coded("gate7a-ordinary-session-invalid", "The ordinary identity session is no longer active.");
+    }
+    return decision.publicProfile ?? publicProfileFromClaims({}, retained.principalId);
   }
 
   async revoke(sessionId) {
@@ -157,6 +227,16 @@ export class MemoryOrdinarySessionStore {
   async sessionCredentials({ bindingDigest, sessionId, now }) {
     await this.sessionCredential({ bindingDigest, sessionId, now });
     return structuredClone(this.sessions.get(sessionId));
+  }
+  async updateSessionCredentials({ bindingDigest, sessionId, previousRefreshToken, accessToken,
+    refreshToken, accessExpiresAt, subject, now }) {
+    const value = this.sessions.get(sessionId);
+    if (!value || value.bindingDigest !== bindingDigest || value.revokedAt
+        || Date.parse(value.expiresAt) <= now.getTime() || value.refreshToken !== previousRefreshToken) {
+      throw coded("gate7a-ordinary-session-refresh-conflict", "The ordinary browser session changed during renewal.");
+    }
+    Object.assign(value, { accessToken, refreshToken, accessExpiresAt, subject });
+    return true;
   }
   async revokeSession({ bindingDigest, sessionId, now }) {
     const value = this.sessions.get(sessionId);

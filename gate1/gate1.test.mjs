@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { createServer } from "node:http";
 import test from "node:test";
 import { MemorySaver } from "@langchain/langgraph";
-import { ReadOnlyAnswerSlice, sourceSection } from "./core.mjs";
+import { ReadOnlyAnswerSlice, requiresProjectRecord, sourceSection } from "./core.mjs";
 import { MemoryIndex, MemoryRecordStore, ScriptedProvider } from "./adapters/memory.mjs";
 import { QdrantDerivedIndex, WindowedBgeReranker } from "./adapters/qdrant.mjs";
 import { createGate1Telemetry } from "./telemetry.mjs";
@@ -88,6 +88,17 @@ test("general conversation skips project retrieval and reaches Runa", async () =
   assert.match(repair.answer, /misunderstood/i);
   assert.equal(context.index.searches.length, 0);
   assert.equal(context.provider.calls.length, 2);
+});
+
+test("ordinary mentions of a chat test do not become project-record intent", () => {
+  const opening = "This chat is a test. I'm going to see if I can reopen it after it is saved.";
+  assert.equal(requiresProjectRecord(opening), false);
+  assert.equal(requiresProjectRecord("That's ok. Lets try an actual question.", [
+    { role: "user", content: opening },
+    { role: "assistant", content: "A temporary dependency message." },
+  ]), false);
+  assert.equal(requiresProjectRecord("What does this project say about Aurora?"), true);
+  assert.equal(requiresProjectRecord("Where is the reranker configured?"), true);
 });
 
 test("an explicit project question still fails closed on an honest empty record", async () => {

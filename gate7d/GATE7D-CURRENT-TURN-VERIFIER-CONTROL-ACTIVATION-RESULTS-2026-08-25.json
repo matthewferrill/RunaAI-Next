@@ -1,6 +1,6 @@
 {
   "schemaVersion": "runa2-gate7d-current-turn-verifier-control-activation/v1",
-  "status": "accepted-merge-pending",
+  "status": "merged",
   "release": {
     "releaseId": "runaai-next-gate7d-current-turn-2026-08-25-e10e3db",
     "commit": "e10e3db097d894d1f00b389921ceab0decaff24c",
@@ -63,6 +63,17 @@
     "incompleteResponseObserved": false,
     "stalePriorValuesObserved": false,
     "acceptedForMerge": true
+  },
+  "sourceMerge": {
+    "completed": true,
+    "base": "runa2/integration",
+    "mergeCommit": "3d95e503d6e56b61c16324eba650ef0c8161b5fa",
+    "integrationTree": "9ccd5d98ff337397e689109b887e4eac23c2d645",
+    "acceptedBranchTreeMatched": true,
+    "postMergeTestsPassed": 423,
+    "postMergeTestsFailed": 0,
+    "sourceBranchRetained": true,
+    "controlChangedByMerge": false
   },
   "privateValuesIncluded": false
 }

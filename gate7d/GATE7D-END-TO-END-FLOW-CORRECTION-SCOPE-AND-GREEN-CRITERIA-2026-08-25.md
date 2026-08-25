@@ -1,8 +1,9 @@
 # Gate 7D end-to-end flow correction scope and green criteria
 
 Status: frozen from ordinary-user live review on 2026-08-25, amended by the repeatable current-turn
-verifier failure, and accepted through the ordinary browser after correction. The active Gate 7D
-successor retains its exact predecessor as the automatic application rollback target until merge.
+verifier failure, accepted through the ordinary browser after correction, and merged into
+`runa2/integration` as `3d95e503d6e56b61c16324eba650ef0c8161b5fa`. The active Gate 7D successor
+retains its exact predecessor as the automatic application rollback target.
 
 ## Why this correction exists
 

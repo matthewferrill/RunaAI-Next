@@ -149,7 +149,9 @@ repository and never push migration work into either source repository.
   stale `14+12=26` 3/3, and passed the integrated active-release history smoke 3/3. The `16adbca`
   predecessor is retained for automatic rollback. Ordinary-browser acceptance then returned
   `15+15=30`, `115+25=140`, a correct new four-parameter program, and the retained composite result
-  `25` without an incomplete response or stale values. Gate 7D is accepted for merge.
+  `25` without an incomplete response or stale values. Gate 7D merged into `runa2/integration` as
+  `3d95e503d6e56b61c16324eba650ef0c8161b5fa`. The merged tree exactly matched the accepted branch,
+  the full post-merge suite passed 423/423, and the source branch remains retained.
 - Gate 7D's first exact activation attempt failed closed because its staged launcher was still bound to
   Gate 7C while its manifest named Gate 7D. Artifact verification rejected the mismatch and the guarded
   operator automatically restored the exact Gate 7C release and readiness state. The corrected operator
@@ -470,7 +472,7 @@ plain-language steward experience, or governed action pathway.
 | 7A | Multi-device access foundation | Canonical LAN origin, owner passkey path, SMTP/invitation, separate ordinary password client, and Omen customer acceptance active | Representative clients, certificate renewal, and off-LAN boundary remain |
 | 7B | Complete customer journey through the selected read-only stack | Complete; production sign-in, sustained chat, safe presentation, exact-release recheck, and rollback evidence green | Approved by steward 2026-08-24; completed 2026-08-24 |
 | 7C | First user-interface shell | Complete and superseded on Control by the Gate 7D presentation release | Source integration remains part of the Gate 7D review chain |
-| 7D | Identity-aware Chat/Code navigation and end-to-end flow correction | Accepted; current-turn verifier successor active on Control at `e10e3db`; source and exact-Control suites 423/423; ordinary-browser current-turn sequence passed | Merge the reviewed correction chain into `runa2/integration` |
+| 7D | Identity-aware Chat/Code navigation and end-to-end flow correction | Complete; accepted and merged as `3d95e50`; current-turn verifier successor active on Control at `e10e3db`; post-merge and exact-Control suites 423/423 | Complete |
 | 7E+ | Deferred product extensions | Not started; capability inventory and prioritization follow Gate 7D acceptance | New baseline and separate decision per extension group |
 
 ## Bootstrap validation
@@ -515,9 +517,10 @@ No dependency was changed during the prerequisite disposition. Full evidence is 
 
 ## Next operation
 
-Merge the accepted Gate 7D correction chain into `runa2/integration`, verify the exact remote merge,
-and rerun the full repository suite from the merged integration commit. The active Control release and
-its exact application rollback predecessor remain unchanged by the source merge.
+Gate 7D is complete. Begin Gate 7E only after choosing the next bounded product slice from the deferred
+capability inventory. UI refinement, real code-work capabilities, live weather/web access, attachments,
+additional project functions, model bakeoffs, and off-LAN access remain separate decisions. The active
+Control release and its exact application rollback predecessor remain unchanged by the source merge.
 
 Gate 6 remains closed and selected-core production authority remains active at the exact release named
 above. Gate 7A follow-on checks for a second PC, phone, certificate renewal, and separately reviewed

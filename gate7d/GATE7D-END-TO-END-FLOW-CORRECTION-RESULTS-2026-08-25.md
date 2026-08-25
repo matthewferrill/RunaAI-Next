@@ -2,8 +2,8 @@
 
 Status: implementation, exact-Control verification, and the third rollback-protected correction
 activation are complete. Control runs `runaai-next-gate7d-current-turn-2026-08-25-e10e3db` at
-`e10e3db097d894d1f00b389921ceab0decaff24c`. The ordinary-user Code retest is green and Gate 7D is
-accepted for merge.
+`e10e3db097d894d1f00b389921ceab0decaff24c`. The ordinary-user Code retest is green and Gate 7D was
+merged into `runa2/integration` as `3d95e503d6e56b61c16324eba650ef0c8161b5fa`.
 
 ## Observed root causes
 
@@ -84,6 +84,7 @@ bounded renewal path.
 | Current-turn verifier contract | correct complete `15+15=30` accepted 3/3; stale `14+12=26` rejected 3/3 |
 | Active successor integrated smoke | exact user-supplied history returned `15+15=30` with verification receipt 3/3 |
 | Ordinary-browser current-turn acceptance | `15+15=30`, `115+25=140`, new four-parameter program, and retained `2+3`, divisor `2`, multiplier `10` result `25` all passed |
+| Post-merge integration tree | exact tree matched the accepted branch; complete suite passed 423/423 |
 | `git diff --check` | passed |
 
 The focused coverage includes the exact observed Chat phrase and follow-up, explicit project routing,
@@ -128,3 +129,12 @@ activated, the same browser session returned:
 No incomplete-response retry or stale prior values appeared. This satisfies the last Gate 7D browser
 criterion and authorizes the reviewed correction chain for merge. Model/provider changes and real
 code-work capabilities remain separate later decisions.
+
+## Source merge
+
+The accepted branch was a clean descendant of the current remote integration branch. The configured
+protections reported it clean and mergeable, and the source merge completed as
+`3d95e503d6e56b61c16324eba650ef0c8161b5fa` without deleting the reviewed source branch. The merged
+integration tree hash was exactly `9ccd5d98ff337397e689109b887e4eac23c2d645`, identical to the
+accepted branch tree, and the full post-merge suite passed 423/423. This source merge did not restart
+Control, change protected data, or alter the retained application rollback release.

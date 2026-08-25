@@ -6,6 +6,7 @@ import { canonicalJson, sha256 } from "../gate4/canonical.mjs";
 import { buildReleaseManifest } from "../gate6/release.mjs";
 import { ARTIFACT_FILE, buildArtifactManifest, verifyReleaseArtifact } from "./artifact.mjs";
 import { loadReleaseConfig } from "./release-config.mjs";
+import { stageSandboxRuntime } from "./sandbox-runtime.mjs";
 
 const run = promisify(execFile);
 const coded = (code, message) => Object.assign(new Error(message), { code });
@@ -87,6 +88,8 @@ async function main() {
     errorOnExist: true, force: false });
   await mkdir(resolve(output, "runtime"), { recursive: true });
   await copyFile(process.execPath, resolve(output, "runtime", "node.exe"));
+  await stageSandboxRuntime({ sourceRoot: root, nodeModulesRoot: nodeModules,
+    destinationRoot: output });
 
   const artifact = await buildArtifactManifest(output);
   await writeFile(resolve(output, ARTIFACT_FILE), `${canonicalJson(artifact)}\n`, { encoding: "utf8", flag: "wx" });

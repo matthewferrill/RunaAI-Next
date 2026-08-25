@@ -343,9 +343,9 @@ export class ReadOnlyAnswerSlice {
       response.model = generated.model;
       response.completion.outputLimited = generated.outputLimited === true;
       response.completion.reason = generated.outputLimited ? "output-limited" : "complete";
-      if (generated.outputVerification?.executed === true) {
-        response.auditCodes.push("code-response-verification-executed");
-        if (generated.outputVerification.corrected === true) {
+      if (generated.responseCheck?.performed === true) {
+        response.auditCodes.push("code-response-check-performed");
+        if (generated.responseCheck.corrected === true) {
           response.auditCodes.push("code-response-corrected-and-reverified");
         }
       }

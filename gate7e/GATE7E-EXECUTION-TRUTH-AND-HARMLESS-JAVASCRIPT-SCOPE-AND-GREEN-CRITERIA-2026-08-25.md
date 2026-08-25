@@ -16,11 +16,13 @@ The model may draft source or describe an expected result. It cannot authorize e
 
 ## Selected runtime boundary
 
-The host boundary is Microsoft MXC `0.8.0`, pinned by package lock, using the local Windows ProcessContainer backend. The guest language runtime is QuickJS Emscripten `0.32.0`, also pinned.
+The outer host containment layer is Microsoft MXC `0.8.0`, pinned by package lock, using the local Windows ProcessContainer backend. The guest language runtime is QuickJS Emscripten `0.32.0`, also pinned. The immutable release builds a compact `sandbox-runtime` containing only the runner and the pinned QuickJS packages; the MXC read grant does not cover the application release tree or its full dependency tree.
 
 This choice is intentionally local-first. It does not add a hosted sandbox, Docker, Hyper-V, a persistent service, or a new network path. Control was inspected read-only before selection: Windows 11 build 26200 exposes the ProcessContainer API, while Docker, Hyper-V, Containers, and Windows Sandbox are not enabled.
 
-Node's permission model and `node:vm` are not accepted as the security boundary. Node documents its permission model as a safety belt rather than protection against malicious code. MXC supplies the operating-system boundary; QuickJS supplies a second language-runtime boundary and bounded memory/stack/interrupt controls.
+Node's permission model and `node:vm` are not accepted as the security boundary. Node documents its permission model as a safety belt rather than protection against malicious code. QuickJS-in-WebAssembly is the primary no-host-capability boundary: no filesystem, network, process, environment, module loader, worker, or other host object is exposed to evaluated code. MXC adds operating-system containment around that host process, while Node permissions add another fail-closed layer.
+
+Microsoft describes MXC 0.8 as an early preview and explicitly says it must not yet be treated as a security boundary by itself. Runa therefore does not rely on MXC alone or describe its current policy as independently sufficient. A real startup execution must pass through the combined pinned QuickJS, Node-permission, and MXC stack before a release can start. A support probe alone is insufficient.
 
 ## 7E-0 contract
 
@@ -49,7 +51,7 @@ The first executable slice is exactly:
 - stdin closed immediately;
 - empty explicitly supplied guest environment apart from the bounded source payload and fixed protocol fields;
 - default-deny network, including internet, LAN, inbound, and host loopback;
-- default-deny filesystem, with read-only grants only for the pinned runner, pinned interpreter assets, and Node runtime needed to start the guest;
+- default-deny filesystem, with read-only grants only for the compact pinned runner/interpreter directory and the Node runtime directory needed to start the guest;
 - no writable filesystem grant;
 - no repository, project, attachment, credential, secret, clipboard, GUI, learning, setting, or protected-store access;
 - disposable policy and identity cleanup after exit.
@@ -62,7 +64,7 @@ The ordinary-user Run action is execution intent, not a protected-action approva
 - Existing Gate 7D Code remains conversational and read-only before this change.
 - The complete baseline suite passes.
 - The sandbox dependency versions and integrity hashes are pinned.
-- The selected host reports a supported MXC ProcessContainer tier; unsupported or warning states fail closed until explicitly accepted by the runner policy.
+- The selected host reports a supported MXC ProcessContainer tier and completes an actual harmless startup execution; unsupported, unreviewed-warning, or launch-failure states fail closed.
 
 Baseline observed in the isolated worktree: **423/423 passed**.
 
@@ -73,7 +75,7 @@ Baseline observed in the isolated worktree: **423/423 passed**.
 - No response, audit code, UI label, or field uses `executed` to mean that a model response check ran.
 - Drafted or predicted output is visibly and structurally `not-executed`.
 - An execution receipt cannot be supplied through a model response or ordinary answer request.
-- Replayed request IDs cannot bind to changed source.
+- Within one running application process, replayed request IDs return the same receipt and cannot bind to changed source. No durable execution/output ledger is introduced by this slice; after a process restart, a repeated harmless request may run again.
 
 ### Isolation
 
@@ -88,6 +90,7 @@ Baseline observed in the isolated worktree: **423/423 passed**.
 - output beyond the ceiling is discarded as a failed, output-limited run; partial output is not presented as a successful result.
 - syntax/runtime errors are bounded and do not expose host paths, environment, secrets, or implementation diagnostics.
 - the sandbox capability probe fails closed when the required backend or restrictions are unavailable.
+- application startup fails before serving traffic unless the complete sandbox returns the exact typed preflight result.
 
 ### Integration
 
@@ -101,6 +104,17 @@ Baseline observed in the isolated worktree: **423/423 passed**.
 ## Explicit non-claims
 
 This gate does not claim a terminal, package manager, repository workspace, dependency installation, persistent files, network access, multi-file programs, Git, deployment, background jobs, or broad agentic coding. It does not complete the broader Code roadmap or decide the post-Gemma capability set.
+
+Execution receipts and output are returned to the current browser request but are not written to chat continuity in this slice. Reloading a chat therefore restores the original drafted answer, not a historical claim that its code ran. Durable execution history is a later, separately governed decision.
+
+## Primary references
+
+- [Node.js permission model](https://nodejs.org/download/release/v22.22.0/docs/api/permissions.html)
+- [Microsoft MXC repository and preview warning](https://github.com/microsoft/mxc)
+- [MXC policy schema](https://github.com/microsoft/mxc/blob/main/docs/schema.md)
+- [MXC host preparation](https://github.com/microsoft/mxc/blob/main/docs/host-prep.md)
+- [MXC operating-system support](https://github.com/microsoft/mxc/blob/main/docs/process-container/os-version-support.md)
+- [QuickJS Emscripten](https://github.com/justjake/quickjs-emscripten)
 
 ## Rollback
 

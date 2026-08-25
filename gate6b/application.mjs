@@ -58,7 +58,8 @@ function credentialPresent(credential) {
 
 export class SelectedCoreApplication {
   constructor({ mode = "shadow", targetGeneration, cutoverStatus, answerService, actionService,
-    authenticator, authorizer, continuity = null, requestCoordinator = null, now = () => new Date(),
+    authenticator, authorizer, continuity = null, requestCoordinator = null, codeExecution = null,
+    now = () => new Date(),
     stepUpMaxAgeMs = 5 * 60_000, totalDeadlineMs = 60_000 }) {
     if (!Number.isInteger(totalDeadlineMs) || totalDeadlineMs < 100 || totalDeadlineMs > 120_000) {
       throw coded("application-deadline-invalid", "The total answer deadline is outside the release boundary.");
@@ -72,6 +73,7 @@ export class SelectedCoreApplication {
     this.authorizer = authorizer;
     this.continuity = continuity;
     this.requestCoordinator = requestCoordinator;
+    this.codeExecution = codeExecution;
     this.now = now;
     this.stepUpMaxAgeMs = stepUpMaxAgeMs;
     this.totalDeadlineMs = totalDeadlineMs;
@@ -133,6 +135,35 @@ export class SelectedCoreApplication {
     const retainedChatId = String(chatId ?? "").trim();
     if (!retainedChatId || retainedChatId.length > 160) throw coded("chat-id-invalid", "A bounded chat id is required.");
     return this.#continuity().readChat(participant.principalId, retainedChatId, this.#experience(experience));
+  }
+
+  async executeCode({ credential, body }) {
+    await this.authority();
+    if (!this.codeExecution) throw coded("sandbox-unavailable", "Harmless JavaScript execution is unavailable.");
+    const participant = await this.#personalParticipant(credential);
+    if (body?.experience !== "code" || body?.language !== "javascript") {
+      throw coded("request-experience-invalid", "This route accepts JavaScript from the Code experience only.");
+    }
+    const requestId = String(body?.requestId ?? "").trim();
+    const threadId = String(body?.threadId ?? "").trim();
+    const projectId = String(body?.projectId ?? PERSONAL_SCOPE).trim();
+    if (!requestId || requestId.length > 160 || !threadId || threadId.length > 160) {
+      throw coded("request-id-invalid", "Bounded request and thread identifiers are required.");
+    }
+    if (!/^[^\u0000-\u001f\u007f]{1,160}$/.test(projectId)) {
+      throw coded("request-project-invalid", "A bounded project scope is required.");
+    }
+    return this.codeExecution.execute({
+      schemaVersion: "runa2-code-execution-request/v1",
+      requestId,
+      participant: { principalId: participant.principalId, verified: true },
+      project: { projectId },
+      thread: { threadId },
+      experience: "code",
+      language: "javascript",
+      source: typeof body?.source === "string" ? body.source : "",
+      origin: { type: "authenticated-user-run-action" },
+    });
   }
 
   async proposeSetting({ credential, body }) {

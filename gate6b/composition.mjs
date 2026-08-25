@@ -27,6 +27,7 @@ import { PostgresBrowserCeremonyStore, PostgresPendingCapabilityRevoker } from "
 import { GATE6C_BINDING_VERSION } from "../gate6c/formats.mjs";
 import { OrdinaryBrowserSessionService } from "../gate7a/ordinary-session.mjs";
 import { PostgresOrdinarySessionStore } from "../gate7a/postgres-ordinary-session.mjs";
+import { HarmlessJavascriptExecutionService, MxcJavascriptExecutor } from "../gate7e/mxc-javascript-executor.mjs";
 
 const coded = (code, message) => Object.assign(new Error(message), { code });
 
@@ -81,6 +82,15 @@ export async function createProductionComposition({ loadedConfig, releaseRoot })
     throw coded("release-entrypoint-mismatch", "The release manifest names another application entry point.");
   }
   const artifact = await verifyReleaseArtifact(releaseRoot, manifest.artifactDigest);
+  const javascriptExecutor = new MxcJavascriptExecutor({
+    runtimeRoot: resolve(releaseRoot, "sandbox-runtime"),
+    runnerPath: resolve(releaseRoot, "sandbox-runtime", "quickjs-child.mjs"),
+    nodeExecutable: resolve(releaseRoot, "runtime", "node.exe"),
+  });
+  const sandboxPreflight = await javascriptExecutor.preflight();
+  if (!sandboxPreflight.ready) {
+    throw coded("sandbox-preflight-failed", "The harmless JavaScript sandbox did not pass startup validation.");
+  }
 
   const [connectionString, coreEncryption, coreHmac, learningEncryption, learningHmac,
     telemetryHmac, keycloakCredential, ordinaryKeycloakCredential, openfgaCredential] = await Promise.all([
@@ -131,6 +141,7 @@ export async function createProductionComposition({ loadedConfig, releaseRoot })
     statusProvider: () => ({ provider: "private-openai-compatible", retrieval: "postgres-direct",
       reranker: "explicit-window-not-required-for-explicit-source-set" }) });
   const actionService = new Gate3GovernedActionService({ store: actionStore });
+  const codeExecution = new HarmlessJavascriptExecutionService({ executor: javascriptExecutor });
 
   const keycloakClient = new KeycloakOnlineClient({ issuer: config.keycloak.issuer,
     backchannelIssuer: config.keycloak.backchannelIssuer,
@@ -189,6 +200,7 @@ export async function createProductionComposition({ loadedConfig, releaseRoot })
   const application = new SelectedCoreApplication({ mode: config.mode,
     targetGeneration: config.targetGeneration, cutoverStatus, answerService, actionService,
     authenticator, authorizer, continuity, requestCoordinator: new PostgresRequestCoordinator({ pool }),
+    codeExecution,
     totalDeadlineMs: config.limits.totalDeadlineMs });
 
   let browserCeremony = null;
@@ -233,8 +245,8 @@ export async function createProductionComposition({ loadedConfig, releaseRoot })
       probe(`${config.provider.baseUrl.replace(/\/$/, "")}/models`, config.limits.upstreamDeadlineMs),
     ]);
     return Object.freeze({ schemaVersion: "runa2-gate6b-dependency-health/v1",
-      ready: postgresql && keycloak && openfga && provider,
-      dependencies: Object.freeze({ postgresql, keycloak, openfga, provider }),
+      ready: postgresql && keycloak && openfga && provider && sandboxPreflight.ready,
+      dependencies: Object.freeze({ postgresql, keycloak, openfga, provider, sandbox: sandboxPreflight.ready }),
       privateValuesIncluded: false });
   };
   const protectedImportStatus = () => protectedImportCompleted(pool, config.gate6c?.enabled);

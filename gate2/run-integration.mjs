@@ -237,7 +237,7 @@ try {
     protectedStoresNeverOpened: ["general", "research", "guarded", "workspace", "workspace-denied", "unverified"]
       .every(name => outcomes[name].response.status.protectedStoresOpened === false),
     answerGatesAcrossLanes: ["general", "research", "guarded", "workspace"]
-      .every(name => outcomes[name].response.gates.executed === true),
+      .every(name => outcomes[name].response.gates.performed === true),
     providerCallsBounded: providerChatCalls === 10,
     durableCountsExact: database.gate1_requests === 9 && database.gate1_turns === 9 &&
       database.gate2_requests === 10 && database.gate2_turns === 11 && database.chats === 10,

@@ -2,6 +2,7 @@ import { createHash, randomBytes } from "node:crypto";
 import { ReadOnlyAnswerSlice, requiresProjectRecord } from "../gate1/core.mjs";
 import { parseGate2AnswerRequest, parseGate2AnswerResponse, GATE2_LANE_CAPABILITIES, GATE2_MODEL_ROLES } from "./contracts.mjs";
 import { approvedKnowledgeReceipt, providerAdvisoryFromDelivery } from "../gate4c/answer-context.mjs";
+import { answerExecutionStamp } from "../gate7e/contracts.mjs";
 
 const sha256 = value => createHash("sha256").update(String(value)).digest("hex");
 const protectedPattern = /\b(device vault|dpapi|windows hello|credential store|private key|machine[- ]bound ciphertext)\b/i;
@@ -107,7 +108,7 @@ function citationStatus(response) {
 }
 
 function applyCommonAnswerGates(response, request) {
-  const codes = [`answer-gates-executed:${request.lane}`];
+  const codes = [`answer-checks-performed:${request.lane}`];
   if (response.auditCodes.includes("unknown-citation")) codes.push("citation-unknown-visible");
   if (/\bI (?:checked|looked up|ran)\b/i.test(response.answer) && !response.retrieval.attempted) {
     codes.push("claimed-lookup-without-receipt");
@@ -117,7 +118,7 @@ function applyCommonAnswerGates(response, request) {
     codes.push("unsupported-numeric-claim");
   }
   for (const code of codes.slice(1)) if (!response.auditCodes.includes(code)) response.auditCodes.push(code);
-  return { executed: true, codes };
+  return { performed: true, codes };
 }
 
 function providerFor(providers, role) {
@@ -244,6 +245,7 @@ export class Gate2ReadOnlyService {
       citationStatus: citationStatus(response),
     } : null;
     response.gates = gates;
+    response.execution = answerExecutionStamp(request.lane);
     response.status = {
       lane: request.lane,
       modelRole: role,

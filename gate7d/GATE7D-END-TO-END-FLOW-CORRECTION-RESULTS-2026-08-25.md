@@ -1,8 +1,9 @@
 # Gate 7D end-to-end flow correction results
 
-Status: implementation, exact-Control verification, and rollback-protected successor activation are
-complete. Control runs `runaai-next-gate7d-flow-correction-2026-08-25-c5c8e31` at
-`c5c8e31cdf422fe02873091fee21efadb521bcbc`. Ordinary-user live acceptance and merge remain pending.
+Status: implementation, exact-Control verification, and the second rollback-protected correction
+activation are complete. Control runs `runaai-next-gate7d-code-verification-2026-08-25-16adbca` at
+`16adbcaa936cce38d16bdb12fe255a3e441b9c05`. The final ordinary-user Code retest and merge remain
+pending.
 
 ## Observed root causes
 
@@ -20,6 +21,13 @@ complete. Control runs `runaai-next-gate7d-flow-correction-2026-08-25-c5c8e31` a
 5. Every browser send already had a fresh request identifier. The Italy-to-France failure was not
    request replay; it remained a response-relevance defect made more likely by failed-turn history and
    by a model instruction that did not explicitly prioritize the current message.
+6. Live Code subsequently proved that reaching the correct provider was insufficient. A fresh request
+   invented prior `64/12` context, and the retained post-login follow-up with `14/12` returned `76`.
+   The exact endpoint answered the standalone request correctly in six of six isolated probes, and
+   Caddy was a stateless reverse proxy with no response cache. Replays also showed the model could emit
+   code that calculates `26` while still stating `76`. The evidence therefore supports a model-output
+   relevance/consistency failure, not request replay, gateway cache, provider-role drift, or a reason to
+   switch models before completing the current stack.
 
 ## Implemented correction
 
@@ -34,6 +42,11 @@ complete. Control runs `runaai-next-gate7d-flow-correction-2026-08-25-c5c8e31` a
 - The provider instruction now names `input.request.message` as the current request and forbids
   answering an earlier question in its place. Deterministic tests prove ordering and fresh request
   identities; only live acceptance can prove model response relevance.
+- Standalone Code now performs a separate bounded response verification against the current request
+  and only the relevant retained conversation. Irrelevant prior values, contradictory results, and
+  arithmetic inconsistency are rejected. A proposed correction is returned only after a second
+  verification; malformed, rejected, or unverifiable results remain retryable and unrecorded. This is
+  a response-relevance/consistency guard, not code execution or a claim of formal code correctness.
 - Ordinary sessions keep one bounded absolute lifetime, rotate encrypted access and refresh
   credentials when the access credential expires, serialize concurrent renewal, and preserve the
   original release binding and session identifier. Renewal verifies issuer, audience, subject,
@@ -53,9 +66,11 @@ bounded renewal path.
 
 | Check | Result |
 | --- | --- |
-| Focused Gate 1, provider, Gate 2, Gate 6B, Gate 7A, Gate 7B, and Gate 7D suite | 174/174 passed |
-| Complete repository suite | 418/418 passed; 0 failed, skipped, or cancelled |
-| Exact commit complete suite on Control | 418/418 passed; 0 failed or skipped |
+| Focused provider and Gate 2 suite after Code correction | 24/24 passed |
+| Complete repository suite | 422/422 passed; 0 failed, skipped, or cancelled |
+| Exact commit complete suite on Control | 422/422 passed; 0 failed or skipped |
+| Isolated private endpoint: standalone opening | 6/6 correct before implementation |
+| Exact source and active-release Code smoke | Opening function and retained `14+12=26` follow-up passed; verification receipts present |
 | `git diff --check` | passed |
 
 The focused coverage includes the exact observed Chat phrase and follow-up, explicit project routing,
@@ -66,12 +81,13 @@ expiry, transient retry, refresh rejection, issuer/audience/subject/method misma
 online profile verification, logout, existing navigation, origin enforcement, participant/project
 isolation, record reopening, and rollback contracts.
 
-## Control activation
+## Control activations
 
-The exact immutable successor has artifact digest
-`9fccfd51723234b18c3b74eec5ccd367ebb035726003ef305861483faa891023`, 29,509 artifact files,
+The first flow-correction successor at `c5c8e31` remained the automatic rollback target while the Code
+failure was diagnosed. The second exact immutable successor has artifact digest
+`7285f2b2b04018b47cc47c16e8a7843ff186403f25d644f8ff02f95a187073ae`, 29,510 artifact files,
 configuration digest `b1d1f9cb5e8524f8318fa428bfe0d107747b4996647f8f6111cba65746b75020`, and manifest
-digest `10f833da594c3000f202fedc8925c0d26cacd6f4b6043506766565af9bfc3c07`.
+digest `bb0d2d2d7aab54c6dd00a49ae3dc6a817ff7c4823249dba43c3f8e213a8e0647`.
 
 The guarded deployer verified every staged hash, the immutable artifact, active predecessor pins,
 unchanged protected configuration, Keycloak owner binding, ordinary and owner routes, selected-core
@@ -81,21 +97,18 @@ commit and artifact running, canonical HTTPS status 200, JavaScript status 200, 
 markers, trusted TLS, and clean correction, integration, and legacy checkouts.
 
 The selected-core authority, imported data, identity policy, model, service identities, network
-exposure, and legacy checkout did not change. The previous Gate 7D immutable release remains the
-automatic application rollback target. Aggregate evidence is retained in
-`gate7d/GATE7D-FLOW-CORRECTION-CONTROL-ACTIVATION-RESULTS-2026-08-25.json`.
+exposure, and legacy checkout did not change. The first flow-correction release remains the automatic
+application rollback target. Aggregate evidence is retained in
+`gate7d/GATE7D-CODE-VERIFICATION-CONTROL-ACTIVATION-RESULTS-2026-08-25.json`.
 
 ## Remaining acceptance gate
 
-Repeat at the canonical origin:
+The ordinary-user report passed Chat creation, reopening, switching, Italy-to-France relevance, and
+logout/fresh sign-in. Repeat only the failed Code path at the canonical origin in a new Code record:
 
-1. fresh ordinary password sign-in and Chat greeting;
-2. the exact `This chat is a test` sequence without a project-knowledge error;
-3. standalone Code: `Write a JavaScript function that adds two numbers.`;
-4. old-record reopening plus switching back to the new record;
-5. Italy followed immediately by France, with a relevant answer to each;
-6. an access-token renewal while the same browser session remains usable; and
-7. logout and fresh sign-in.
+1. `Write a JavaScript function that adds two numbers.` must return the requested function without
+   invented `64/12` context; and
+2. `Run the program using a = 14 and b = 12.` must return `26`, not `76`.
 
 Merge remains blocked until that live result is recorded. Model/provider changes and real code-work
 capabilities remain separate later decisions.

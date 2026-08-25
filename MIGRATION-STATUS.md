@@ -127,13 +127,23 @@ repository and never push migration work into either source repository.
   is in `gate7d/GATE7D-CHAT-CODE-NAVIGATION-RESULTS-2026-08-24.md`; the remaining Gate 7D decision is
   ordinary-user live review followed by a separate merge decision. The first live review passed fresh
   ordinary sign-in, new Chat creation, exact record reopening, switching between retained chats, and
-  continued history, but blocked merge on four end-to-end defects: a generic `test` false-positive in
+  continued history, but blocked merge on five end-to-end defects: a generic `test` false-positive in
   project-intent routing, approved-knowledge failures retained as completed turns, standalone Code
   incorrectly requiring project knowledge, and an ordinary session capped by the short-lived access
   token despite retaining a refresh credential. A separate current-message relevance failure repeated
   the prior Italy answer for a France question. The bounded correction is frozen in
   `gate7d/GATE7D-END-TO-END-FLOW-CORRECTION-SCOPE-AND-GREEN-CRITERIA-2026-08-25.md`; the active release
   remains unmerged and no model or protected authority changed.
+- The first correction successor fixed Chat routing, failed-turn retention, standalone Code routing,
+  current-message instructions, and ordinary-session renewal. Live Chat then passed, while Code
+  invented `64/12` context and returned `76` for the retained `14+12` follow-up. Direct private-model
+  probes ruled out request replay, Caddy caching, role drift, and a consistently bad endpoint; the
+  remaining defect was unverified model-output relevance and arithmetic consistency. Standalone Code
+  now receives a bounded second-pass response review, and any correction must itself verify before it
+  can be retained. Source and exact-Control suites pass 422/422. The exact active release at `16adbca`
+  passed both the opening function and retained `14+12=26` smoke through the unchanged private model.
+  It is active with the prior correction retained for automatic rollback; only the ordinary-user Code
+  retest and merge remain.
 - Gate 7D's first exact activation attempt failed closed because its staged launcher was still bound to
   Gate 7C while its manifest named Gate 7D. Artifact verification rejected the mismatch and the guarded
   operator automatically restored the exact Gate 7C release and readiness state. The corrected operator
@@ -454,7 +464,7 @@ plain-language steward experience, or governed action pathway.
 | 7A | Multi-device access foundation | Canonical LAN origin, owner passkey path, SMTP/invitation, separate ordinary password client, and Omen customer acceptance active | Representative clients, certificate renewal, and off-LAN boundary remain |
 | 7B | Complete customer journey through the selected read-only stack | Complete; production sign-in, sustained chat, safe presentation, exact-release recheck, and rollback evidence green | Approved by steward 2026-08-24; completed 2026-08-24 |
 | 7C | First user-interface shell | Complete and superseded on Control by the Gate 7D presentation release | Source integration remains part of the Gate 7D review chain |
-| 7D | Identity-aware Chat/Code navigation and end-to-end flow correction | Correction successor active on Control at `c5c8e31`; source and exact-Control suites 418/418; live acceptance pending | Merge remains gated by ordinary-user live acceptance |
+| 7D | Identity-aware Chat/Code navigation and end-to-end flow correction | Code-verification successor active on Control at `16adbca`; source and exact-Control suites 422/422; active-release smoke passed | Merge remains gated by the ordinary-user Code retest |
 | 7E+ | Deferred product extensions | Not started; capability inventory and prioritization follow Gate 7D acceptance | New baseline and separate decision per extension group |
 
 ## Bootstrap validation

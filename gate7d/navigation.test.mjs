@@ -200,10 +200,11 @@ test("private navigation HTTP reads remain POST-only, exact-origin, marked, and 
 });
 
 test("the authenticated shell contains identity, separate Chat and Code controls, and functional record actions", async () => {
-  const [html, script, styles, server] = await Promise.all([
+  const [html, script, styles, server, deployer] = await Promise.all([
     readFile(publicFile("index.html"), "utf8"), readFile(publicFile("status.js"), "utf8"),
     readFile(publicFile("styles.css"), "utf8"),
     readFile(new URL("../gate6b/http-server.mjs", import.meta.url), "utf8"),
+    readFile(new URL("../gate7a/control/Deploy-ControlOrdinaryAccessSuccessor.ps1", import.meta.url), "utf8"),
   ]);
   assert.match(html, /id="session-avatar"/);
   assert.match(html, /id="session-name"/);
@@ -223,4 +224,12 @@ test("the authenticated shell contains identity, separate Chat and Code controls
   assert.match(styles, /\.session-avatar/);
   assert.match(server, /request\.method === "POST" && url\.pathname === "\/api\/selected\/navigation\/query"/);
   assert.match(server, /request\.headers\["x-runa-workspace"\] !== "1"/);
+  assert.match(deployer, /gate7d-chat-code-navigation/);
+  assert.match(deployer, /gate7a-ordinary-deploy-gate7d-presentation-invalid/);
+  assert.match(deployer, /gate7a-ordinary-deploy-gate7d-controller-invalid/);
+  const validation = deployer.indexOf("if($ExpectedUiContract-eq'gate7d-chat-code-navigation')");
+  const success = deployer.indexOf("schemaVersion='runa2-gate7a-control-ordinary-successor/v1'");
+  const rollback = deployer.lastIndexOf("}catch{");
+  assert.ok(validation > 0 && validation < success && success < rollback,
+    "Gate 7D live presentation validation must remain inside the automatic rollback boundary");
 });

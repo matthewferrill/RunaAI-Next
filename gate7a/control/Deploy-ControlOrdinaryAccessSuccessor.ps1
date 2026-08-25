@@ -12,6 +12,7 @@ param(
   [Parameter(Mandatory)][string]$ManifestSha256,
   [Parameter(Mandatory)][string]$LauncherSha256,
   [Parameter(Mandatory)][string]$CaddyfileSha256,
+  [ValidateSet('none','gate7d-chat-code-navigation')][string]$ExpectedUiContract='none',
   [string]$Root='C:\AI\RunaAI-Next-Candidate'
 )
 
@@ -207,6 +208,20 @@ try{
   if($ordinaryLocation-notlike'https://runa.bridgebuildersai.com/auth/realms/runaai-next/protocol/openid-connect/auth*'-or
     $ordinaryLocation-notmatch'client_id=runaai-next-user'-or$ordinaryLocation-notmatch'code_challenge='-or
     $ownerLocation-notmatch'client_id=runaai-next(&|$)'){throw 'gate7a-ordinary-deploy-route-invalid'}
+  if($ExpectedUiContract-eq'gate7d-chat-code-navigation'){
+    $page=Invoke-WebRequest -UseBasicParsing -Uri 'https://runa.bridgebuildersai.com/' -TimeoutSec 20
+    $module=Invoke-WebRequest -UseBasicParsing -Uri 'https://runa.bridgebuildersai.com/status.js' -TimeoutSec 20
+    $requiredPage=@('id="session-avatar"','id="session-name"','id="chat-tab"','id="code-tab"',
+      'id="new-chat"','id="new-project"','id="project-list"','id="record-list"','id="right-rail-body"')
+    $requiredModule=@('/api/selected/navigation/query','/api/selected/chat/read','/api/selected/projects',
+      'submittedExperience === "code" ? "code" : "general"')
+    if([int]$page.StatusCode-ne200-or[int]$module.StatusCode-ne200-or
+      [string]$module.Headers['Content-Type']-notmatch'^(?:text|application)/(?:java|ecma)script'){
+      throw 'gate7a-ordinary-deploy-gate7d-presentation-invalid'
+    }
+    foreach($marker in $requiredPage){if(-not$page.Content.Contains($marker)){throw 'gate7a-ordinary-deploy-gate7d-presentation-invalid'}}
+    foreach($marker in $requiredModule){if(-not$module.Content.Contains($marker)){throw 'gate7a-ordinary-deploy-gate7d-controller-invalid'}}
+  }
   [ordered]@{schemaVersion='runa2-gate7a-control-ordinary-successor/v1';deployed=$true;
     releaseId=$ReleaseId;commit=$ExpectedCommit;artifactDigest=$ExpectedArtifactDigest;
     selectedCoreAuthorityUnchanged=$true;ownerProofRebound=$true;ownerRouteUnchanged=$true;ordinaryPasswordRouteReady=$true;applicationAndCaddyChangedTogether=$true;

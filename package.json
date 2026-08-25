@@ -22,6 +22,7 @@
     "test:gate7b": "node --test gate1/mastra-provider.test.mjs gate7b/customer-journey.test.mjs gate7b/deployment.test.mjs",
     "test:gate7c": "node --test gate7c/ui-shell.test.mjs",
     "test:gate7d": "node --test gate7d/navigation.test.mjs",
+    "test:gate7e": "node --test gate7e/gate7e.test.mjs",
     "verify:gate7b:customer": "node gate7b/run-customer-journey.mjs",
     "verify:gate0": "node gate0/verify-gate0.mjs",
     "verify:gate1:integration": "node gate1/run-integration.mjs",
@@ -56,11 +57,13 @@
     "@mastra/mcp": "^1.16.0",
     "@mastra/memory": "^1.26.2",
     "@mastra/rag": "^2.5.0",
+    "@microsoft/mxc-sdk": "0.8.0",
     "@opentelemetry/api": "1.9.1",
     "@opentelemetry/exporter-trace-otlp-http": "0.221.0",
     "@opentelemetry/sdk-node": "0.221.0",
     "ai": "^7.0.67",
     "pg": "8.23.0",
+    "quickjs-emscripten": "0.32.0",
     "zod": "^4.4.3"
   }
 }

@@ -1,6 +1,7 @@
 import { CHAT_DEADLINE_MS, answerNeedsRetry, boundedHistory, customerMessageFor,
   readJsonResponse } from "./chat-client.mjs";
 import { initializeWorkspaceShell } from "./workspace-shell.mjs";
+import { executionOutput, javascriptSource } from "./code-execution.mjs";
 
 const byId = id => document.getElementById(id);
 const text = (id, value) => { byId(id).textContent = value; };
@@ -33,7 +34,37 @@ function resetTranscript() {
   appendMessage("assistant", greeting());
 }
 
-function appendMessage(role, content) {
+async function runJavascript({ item, source, state }) {
+  const button = item.querySelector(".run-button");
+  const badge = item.querySelector(".execution-badge");
+  item.querySelector(".execution-output")?.remove();
+  button.disabled = true;
+  badge.textContent = "Running in sandbox…";
+  text("chat-status", "Running harmless JavaScript in the isolated sandbox…");
+  try {
+    const receipt = await workspaceJson("/api/selected/code/execute", {
+      requestId: `web-exec-${crypto.randomUUID()}`,
+      experience: "code", language: "javascript", source,
+      threadId: state.threadId, projectId: state.projectId,
+    });
+    badge.textContent = receipt.status === "executed" ? "Ran in sandbox" : "Not executed";
+    badge.dataset.status = receipt.status;
+    const output = document.createElement("pre");
+    output.className = "execution-output";
+    output.textContent = executionOutput(receipt);
+    item.append(output);
+    button.textContent = "Run again";
+    button.disabled = false;
+    text("chat-status", receipt.status === "executed" ? "Sandbox run complete" : "Sandbox stopped safely");
+  } catch {
+    badge.textContent = "Not executed";
+    badge.dataset.status = "unavailable";
+    button.disabled = false;
+    text("chat-status", "Sandbox is temporarily unavailable");
+  }
+}
+
+function appendMessage(role, content, { codeDraft = false, state = null } = {}) {
   const item = document.createElement("div");
   item.className = `message ${role}`;
   const label = document.createElement("span");
@@ -42,6 +73,25 @@ function appendMessage(role, content) {
   const body = document.createElement("p");
   body.textContent = content;
   item.append(label, body);
+  if (role === "assistant" && codeDraft) {
+    const controls = document.createElement("div");
+    controls.className = "execution-controls";
+    const badge = document.createElement("span");
+    badge.className = "execution-badge";
+    badge.dataset.status = "not-executed";
+    badge.textContent = "Draft — not run";
+    controls.append(badge);
+    const source = javascriptSource(content);
+    if (source && state) {
+      const run = document.createElement("button");
+      run.type = "button";
+      run.className = "run-button";
+      run.textContent = "Run in sandbox";
+      run.addEventListener("click", () => runJavascript({ item, source, state }));
+      controls.append(run);
+    }
+    item.append(controls);
+  }
   transcript.append(item);
   item.scrollIntoView({ block: "end", behavior: "smooth" });
   return item;
@@ -96,7 +146,7 @@ function updateExperiencePresentation() {
   text("experience-eyebrow", code ? "Private code chat" : "Private chat");
   text("chat-title", code ? "Code with Runa" : "Chat with Runa");
   text("experience-description", code
-    ? "Discuss, explain, and draft code in a separate private workspace. Runa cannot access files, run code, or change systems from this chat."
+    ? "Discuss, explain, and draft code in a separate private workspace. JavaScript drafts are not run until you choose Run in sandbox. The sandbox cannot access your files, network, or systems."
     : "Ask questions, brainstorm, draft writing, and work with text you paste here. Runa does not have live web access and cannot change files, settings, or systems from this chat.");
   message.placeholder = code ? "Ask about or draft code…" : "Type your message…";
 }
@@ -157,7 +207,9 @@ async function selectExperience(experience) {
   updateExperiencePresentation();
   const state = activeState();
   resetTranscript();
-  for (const turn of state.history) appendMessage(turn.role, turn.content);
+  for (const turn of state.history) appendMessage(turn.role, turn.content, {
+    codeDraft: activeExperience === "code" && turn.role === "assistant", state,
+  });
   renderNavigation();
   await refreshNavigation(experience);
   text("chat-status", state.projectName ? `Ready in ${state.projectName}` : "Ready");
@@ -180,7 +232,9 @@ async function loadChat(chatId) {
       { role: "user", content: turn.user }, { role: "assistant", content: turn.assistant },
     ]);
     transcript.replaceChildren();
-    for (const turn of state.history) appendMessage(turn.role, turn.content);
+    for (const turn of state.history) appendMessage(turn.role, turn.content, {
+      codeDraft: activeExperience === "code" && turn.role === "assistant", state,
+    });
     renderNavigation();
     text("navigation-status", "");
     text("chat-status", state.projectName ? `Ready in ${state.projectName}` : "Ready");
@@ -320,7 +374,10 @@ form.addEventListener("submit", async event => {
     state.history.push({ role: "user", content: content.slice(0, 8_000) },
       { role: "assistant", content: result.answer.slice(0, 8_000) });
     state.activeChatId = state.threadId;
-    appendMessage("assistant", result.answer);
+    appendMessage("assistant", result.answer, {
+      codeDraft: submittedExperience === "code" && result.execution?.status === "not-executed",
+      state,
+    });
     text("chat-status", state.projectName ? `Ready in ${state.projectName}` : "Ready");
     await refreshNavigation(submittedExperience);
   } catch (error) {

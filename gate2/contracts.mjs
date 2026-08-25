@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { AnswerExecutionStampSchema } from "../gate7e/contracts.mjs";
 
 const boundedId = z.string().trim().min(1).max(160);
 const historyTurn = z.object({
@@ -84,7 +85,8 @@ export const Gate2AnswerResponseSchema = z.object({
   trace: z.object({ correlationId: z.string().min(16).max(128) }).strict(),
   effects: z.tuple([]),
   auditCodes: z.array(z.string()),
-  gates: z.object({ executed: z.boolean(), codes: z.array(z.string()) }).strict(),
+  gates: z.object({ performed: z.boolean(), codes: z.array(z.string()) }).strict(),
+  execution: AnswerExecutionStampSchema,
   status: z.object({
     lane: z.string(), modelRole: z.string(), provider: z.string(), retrieval: z.string(),
     reranker: z.string(), chatAdapter: z.string(), projectAdapter: z.string(), settingsAdapter: z.string(),

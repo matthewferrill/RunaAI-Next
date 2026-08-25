@@ -101,11 +101,11 @@ for (const testCase of cases) {
       laneAndRole: response.lane === testCase.lane && response.status.modelRole === testCase.role,
       noEffects: response.effects.length === 0,
       protectedStoresClosed: response.status.protectedStoresOpened === false,
-      gatesExecuted: response.gates.executed === true,
+      checksPerformed: response.gates.performed === true,
       modelIdentity: response.model.modelId === modelIds[testCase.role],
       citationsRecognized: testCase.lane === "code"
         ? response.citations.length === 0
-          && response.auditCodes.includes("code-response-verification-executed")
+          && response.auditCodes.includes("code-response-check-performed")
         : response.citations.length > 0 && !response.auditCodes.includes("unknown-citation"),
       workspaceBounded: testCase.lane !== "workspace" ||
         (response.workspace.extraReads === 0 && response.workspace.resolvedSources === 1),

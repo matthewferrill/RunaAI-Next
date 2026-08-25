@@ -699,6 +699,61 @@ body.workspace-active .primary-button:hover { filter: brightness(1.07); }
   cursor: pointer;
 }
 
+.execution-controls {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: .6rem;
+  margin-top: .75rem;
+}
+
+.execution-badge {
+  border: 1px solid #c6b78c;
+  border-radius: 999px;
+  color: #695a2e;
+  font-size: .78rem;
+  font-weight: 700;
+  padding: .25rem .55rem;
+}
+
+.execution-badge[data-status="executed"] {
+  border-color: #7ba89a;
+  color: #286653;
+}
+
+.execution-badge[data-status="failed"],
+.execution-badge[data-status="timed-out"],
+.execution-badge[data-status="output-limited"],
+.execution-badge[data-status="unavailable"] {
+  border-color: #c28a61;
+  color: #874628;
+}
+
+.run-button {
+  background: var(--workspace-accent, #316c67);
+  border: 0;
+  border-radius: .6rem;
+  color: white;
+  cursor: pointer;
+  font: inherit;
+  font-size: .82rem;
+  font-weight: 700;
+  padding: .42rem .72rem;
+}
+
+.run-button:disabled { cursor: wait; opacity: .65; }
+
+.execution-output {
+  background: #17201f;
+  border-radius: .7rem;
+  color: #eef7f3;
+  margin: .75rem 0 0;
+  max-height: 18rem;
+  overflow: auto;
+  padding: .8rem;
+  white-space: pre-wrap;
+}
+
 .primary-button:disabled, .quiet-button:disabled { opacity: .55; cursor: wait; }
 .quiet-button { min-height: auto; padding: .55rem .8rem; }
 [hidden] { display: none !important; }

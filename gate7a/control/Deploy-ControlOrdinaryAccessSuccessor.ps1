@@ -12,7 +12,7 @@ param(
   [Parameter(Mandatory)][string]$ManifestSha256,
   [Parameter(Mandatory)][string]$LauncherSha256,
   [Parameter(Mandatory)][string]$CaddyfileSha256,
-  [ValidateSet('none','gate7d-chat-code-navigation')][string]$ExpectedUiContract='none',
+  [ValidateSet('none','gate7d-chat-code-navigation','gate7e-harmless-javascript')][string]$ExpectedUiContract='none',
   [string]$Root='C:\AI\RunaAI-Next-Candidate'
 )
 
@@ -214,7 +214,10 @@ try{
   if($ordinaryLocation-notlike'https://runa.bridgebuildersai.com/auth/realms/runaai-next/protocol/openid-connect/auth*'-or
     $ordinaryLocation-notmatch'client_id=runaai-next-user'-or$ordinaryLocation-notmatch'code_challenge='-or
     $ownerLocation-notmatch'client_id=runaai-next(&|$)'){throw 'gate7a-ordinary-deploy-route-invalid'}
-  if($ExpectedUiContract-eq'gate7d-chat-code-navigation'){
+  $requiresNavigationValidation=$false
+  if($ExpectedUiContract-eq'gate7d-chat-code-navigation'){$requiresNavigationValidation=$true}
+  if($ExpectedUiContract-eq'gate7e-harmless-javascript'){$requiresNavigationValidation=$true}
+  if($requiresNavigationValidation){
     $page=Invoke-WebRequest -UseBasicParsing -Uri 'https://runa.bridgebuildersai.com/' -TimeoutSec 20
     $module=Invoke-WebRequest -UseBasicParsing -Uri 'https://runa.bridgebuildersai.com/status.js' -TimeoutSec 20
     $requiredPage=@('id="session-avatar"','id="session-name"','id="chat-tab"','id="code-tab"',
@@ -228,10 +231,22 @@ try{
     foreach($marker in $requiredPage){if(-not$page.Content.Contains($marker)){throw 'gate7a-ordinary-deploy-gate7d-presentation-invalid'}}
     foreach($marker in $requiredModule){if(-not$module.Content.Contains($marker)){throw 'gate7a-ordinary-deploy-gate7d-controller-invalid'}}
   }
+  $javascriptSandboxReady=$false
+  if($ExpectedUiContract-eq'gate7e-harmless-javascript'){
+    $helper=Invoke-WebRequest -UseBasicParsing -Uri 'https://runa.bridgebuildersai.com/code-execution.mjs' -TimeoutSec 20
+    $health=Invoke-RestMethod 'http://127.0.0.1:9760/health/ready' -TimeoutSec 20
+    $requiredExecutionModule=@('/api/selected/code/execute','Draft — not run','Ran in sandbox')
+    $requiredExecutionHelper=@('javascriptSource','executionOutput','No partial output was returned')
+    if([int]$helper.StatusCode-ne200-or[string]$helper.Headers['Content-Type']-notmatch'^(?:text|application)/(?:java|ecma)script'-or
+      $health.ready-ne$true-or$health.dependencies.sandbox-ne$true){throw 'gate7a-ordinary-deploy-gate7e-sandbox-invalid'}
+    foreach($marker in $requiredExecutionModule){if(-not$module.Content.Contains($marker)){throw 'gate7a-ordinary-deploy-gate7e-controller-invalid'}}
+    foreach($marker in $requiredExecutionHelper){if(-not$helper.Content.Contains($marker)){throw 'gate7a-ordinary-deploy-gate7e-helper-invalid'}}
+    $javascriptSandboxReady=$true
+  }
   [ordered]@{schemaVersion='runa2-gate7a-control-ordinary-successor/v1';deployed=$true;
     releaseId=$ReleaseId;commit=$ExpectedCommit;artifactDigest=$ExpectedArtifactDigest;
     selectedCoreAuthorityUnchanged=$true;ownerProofRebound=$true;ownerRouteUnchanged=$true;ordinaryPasswordRouteReady=$true;applicationAndCaddyChangedTogether=$true;
-    rollbackRetained=$true;legacyModified=$false;protectedProductDataChanged=$false;
+    rollbackRetained=$true;legacyModified=$false;protectedProductDataChanged=$false;javascriptSandboxReady=$javascriptSandboxReady;
     privateValuesIncluded=$false}|ConvertTo-Json -Compress
 }catch{
   $failure=$_.Exception.Message

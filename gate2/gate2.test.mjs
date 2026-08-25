@@ -155,7 +155,7 @@ test("the observed Chat sequence and standalone Code bypass project knowledge", 
     research: new ScriptedProvider({ role: "research" }),
     code: new ScriptedProvider({ role: "code", reply: ({ request }) => ({
       answer: `Code current: ${request.message}`, citations: [],
-      outputVerification: { executed: true, corrected: false },
+      responseCheck: { performed: true, corrected: false },
     }) }),
   };
   const context = harness({ approvedKnowledge, providers });
@@ -171,8 +171,12 @@ test("the observed Chat sequence and standalone Code bypass project knowledge", 
     "Write a JavaScript function that adds two numbers.", "code"));
   assert.equal(code.answer, "Code current: Write a JavaScript function that adds two numbers.");
   assert.equal(code.model.role, "code");
+  assert.deepEqual(code.execution, {
+    schemaVersion: "runa2-answer-execution-stamp/v1", status: "not-executed",
+    reason: "code-draft-only", sourceSha256: null, receiptId: null, systemStamped: true,
+  });
   assert.equal(code.approvedKnowledge.reason, "not-applicable-code-conversation");
-  assert.ok(code.auditCodes.includes("code-response-verification-executed"));
+  assert.ok(code.auditCodes.includes("code-response-check-performed"));
   assert.ok(!code.auditCodes.includes("code-response-corrected-and-reverified"));
   assert.equal(selections, 0);
   assert.equal(context.providers.chat.calls.length, 2);
@@ -215,7 +219,7 @@ test("guarded lane refuses policy/protected requests and records only bounded re
     const context = harness({ sources: [source] });
     const response = await context.service.answer(request("guard-lookup", "Which synthetic commit is the test runtime reporting?", "guarded"));
     assert.equal(response.model.role, "chat"); assert.equal(context.index.searches.length, 1);
-    assert.equal(context.providers.chat.calls.length, 1); assert.equal(response.gates.executed, true);
+    assert.equal(context.providers.chat.calls.length, 1); assert.equal(response.gates.performed, true);
   });
   await cover("guarded-retrieval-degradation", async () => {
     const context = harness({ sources: [source], degraded: true });
@@ -282,7 +286,9 @@ test("participant/project isolation and common answer gates apply across all thr
     const context = harness({ sources: [source], providers });
     for (const lane of ["general", "guarded", "workspace"]) {
       const response = await context.service.answer(request(`gate-${lane}`, "Give the synthetic result.", lane));
-      assert.ok(response.gates.codes.includes(`answer-gates-executed:${lane}`));
+      assert.ok(response.gates.codes.includes(`answer-checks-performed:${lane}`));
+      assert.equal(response.execution.status, "not-executed");
+      assert.equal(response.execution.reason, lane === "code" ? "code-draft-only" : "answer-only");
       assert.ok(response.auditCodes.includes("unsupported-numeric-claim"));
       assert.doesNotMatch(response.answer, /Answer gate:|unsupported-numeric-claim/);
     }

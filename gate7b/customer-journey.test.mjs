@@ -24,6 +24,16 @@ test("the browser accepts a complete typed answer and bounds conversational hist
   assert.ok(bounded.every(turn => turn.content.length <= 8_000));
 });
 
+test("approved-knowledge delivery failures remain retryable browser failures", () => {
+  assert.equal(answerNeedsRetry({
+    completion: { reason: "approved-knowledge-source-unavailable" },
+    approvedKnowledge: { errorCode: "approved-knowledge-source-unavailable" },
+  }), true);
+  const refreshOutage = customerMessageFor("identity-refresh-unavailable");
+  assert.match(refreshOutage, /renew your sign-in/i);
+  assert.doesNotMatch(refreshOutage, /session has ended/i);
+});
+
 test("empty, malformed, failed, and timed-out responses never expose parser or provider details", async () => {
   for (const [response, code] of [
     [new Response("", { status: 502 }), "chat-response-empty"],

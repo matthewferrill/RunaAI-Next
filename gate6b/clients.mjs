@@ -30,6 +30,17 @@ async function boundedJson(response, maximumBytes = 128_000) {
   try { return text ? JSON.parse(text) : {}; } catch { throw coded("dependency-response-invalid", "A dependency returned invalid JSON."); }
 }
 
+function tokenCredential(value, code, message) {
+  if (typeof value.access_token !== "string" || !value.access_token.length
+      || typeof value.refresh_token !== "string" || !value.refresh_token.length) {
+    throw coded(code, message);
+  }
+  const refreshExpiresInSeconds = Number(value.refresh_expires_in);
+  return Object.freeze({ accessToken: value.access_token, refreshToken: value.refresh_token,
+    refreshExpiresInSeconds: Number.isFinite(refreshExpiresInSeconds) && refreshExpiresInSeconds > 0
+      ? refreshExpiresInSeconds : null });
+}
+
 export class KeycloakOnlineClient {
   constructor({ issuer, backchannelIssuer = issuer, clientId, clientCredential, timeoutMs = 5_000 }) {
     this.issuer = issuer.replace(/\/$/, "");
@@ -84,11 +95,24 @@ export class KeycloakOnlineClient {
     } catch { throw coded("identity-code-exchange-unavailable", "Browser identity exchange is unavailable."); }
     if (!response.ok) throw coded("identity-code-exchange-rejected", "Browser identity exchange was rejected.");
     const value = await boundedJson(response);
-    if (typeof value.access_token !== "string" || !value.access_token.length
-        || typeof value.refresh_token !== "string" || !value.refresh_token.length) {
-      throw coded("identity-code-exchange-invalid", "Browser identity exchange returned no access credential.");
-    }
-    return Object.freeze({ accessToken: value.access_token, refreshToken: value.refresh_token });
+    return tokenCredential(value, "identity-code-exchange-invalid",
+      "Browser identity exchange returned no access credential.");
+  }
+
+  async refresh({ refreshToken, clientId = this.clientId }) {
+    let response;
+    try {
+      response = await fetch(`${this.backchannelIssuer}/protocol/openid-connect/token`, {
+        method: "POST", headers: { "content-type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams({ grant_type: "refresh_token", refresh_token: refreshToken,
+          client_id: clientId, client_secret: this.clientCredential }),
+        signal: AbortSignal.timeout(this.timeoutMs),
+      });
+    } catch { throw coded("identity-refresh-unavailable", "Browser identity renewal is unavailable."); }
+    if (!response.ok) throw coded("identity-refresh-rejected", "Browser identity renewal was rejected.");
+    const value = await boundedJson(response);
+    return tokenCredential(value, "identity-refresh-invalid",
+      "Browser identity renewal returned incomplete credentials.");
   }
 
   async revoke(token, tokenType = "refresh_token") {

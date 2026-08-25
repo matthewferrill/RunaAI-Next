@@ -7,7 +7,8 @@ const protectedPattern = /\b(device vault|dpapi|windows hello|credential store|p
 const metaphysicalPattern = /\b(god|deity|soul|meaning of life|afterlife)\b/i;
 const policySuspensionPattern = /\b(turn off|disable|suspend|ignore|bypass)\b.{0,40}\b(approval|policy|guard|gate)s?\b/i;
 const crossProjectPattern = /\b(?:other|another) project(?:'s)?\b/i;
-const projectRecordPattern = /\b(project|repository|repo|codebase|workspace|documents?|documentation|files?|folders?|sources?|records?|evidence|facts?|handoff|readme|commits?|branches?|pull requests?|tests?|implementation|configuration|configured|config|settings?|migration|release|deployment|architecture|database|schema|runtime|reranker|dependency|boundary)\b/i;
+const strongProjectArtifactPattern = /\b(repository|repo|codebase|workspace|handoff|readme|commits?|branches?|pull requests?|reranker)\b/i;
+const scopedProjectReferencePattern = /\b(?:this|the|my|our|selected|current)\s+(?:project|documents?|documentation|files?|folders?|sources?|records?|evidence|implementation|configuration|config|settings?|migration|release|deployment|architecture|database|schema|runtime|dependency|boundary)\b/i;
 const contextualFollowUpPattern = /^\s*(why|how|what|where|when|who|which|that|it|this|can you|could you|explain|tell me more|continue|summarize|what about)\b/i;
 const stopWords = new Set(["a", "an", "and", "does", "explain", "how", "is", "of", "the", "to", "what"]);
 
@@ -65,10 +66,12 @@ export function classifyGround(message, evidence, advisoryContext = null) {
 }
 
 export function requiresProjectRecord(message, history = []) {
-  if (projectRecordPattern.test(String(message))) return true;
+  const hasProjectReference = value => strongProjectArtifactPattern.test(String(value))
+    || scopedProjectReferencePattern.test(String(value));
+  if (hasProjectReference(message)) return true;
   if (!contextualFollowUpPattern.test(String(message))) return false;
   const priorUserMessage = [...history].reverse().find(turn => turn?.role === "user")?.content ?? "";
-  return projectRecordPattern.test(String(priorUserMessage));
+  return hasProjectReference(priorUserMessage);
 }
 
 function baseResponse(request, correlationId) {
@@ -140,8 +143,8 @@ function boundedEvidence(evidence, maximumCharacters) {
 
 export class ReadOnlyAnswerSlice {
   constructor({ records, index, provider, telemetry = null, advisoryContext = null, retrievalPolicy = "required" }) {
-    if (!["conversation-aware", "required"].includes(retrievalPolicy)) {
-      throw new Error("retrievalPolicy must be conversation-aware or required");
+    if (!["conversation-aware", "none", "required"].includes(retrievalPolicy)) {
+      throw new Error("retrievalPolicy must be conversation-aware, none, or required");
     }
     this.records = records;
     this.index = index;
@@ -194,12 +197,13 @@ export class ReadOnlyAnswerSlice {
     }
 
     const retrievalRequired = request.lane === "research" || this.retrievalPolicy === "required"
-      || requiresProjectRecord(request.message, request.history);
+      || (this.retrievalPolicy !== "none" && requiresProjectRecord(request.message, request.history));
     if (!retrievalRequired) {
       response.retrieval.skipped = true;
       response.retrieval.skipReason = "record-not-applicable";
       response.ground = "no-ground-needed";
-      response.auditCodes.push("general-conversation-no-retrieval");
+      response.auditCodes.push(this.retrievalPolicy === "none"
+        ? "code-conversation-no-retrieval" : "general-conversation-no-retrieval");
       return parseAnswerResponse(await this.#providerAnswer(request, [], response, deadlineAt));
     }
 

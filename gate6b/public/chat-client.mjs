@@ -14,6 +14,8 @@ const friendlyErrors = Object.freeze({
   "cutover-authority-unavailable": "Runa's service is temporarily unavailable.",
   "gate7a-browser-session-ambiguous": "More than one sign-in session is active. Sign out and sign in again.",
   "gate7a-ordinary-session-invalid": "Your session has ended. Sign in again to continue.",
+  "identity-refresh-rejected": "Your session has ended. Sign in again to continue.",
+  "identity-refresh-unavailable": "Runa could not renew your sign-in just now.",
   "identity-token-invalid": "Your session has ended. Sign in again to continue.",
   "request-timeout": "Runa took too long to respond.",
 });
@@ -44,7 +46,8 @@ export function customerMessageFor(code) {
 }
 
 export function answerNeedsRetry(answer) {
-  return retryableCompletionReasons.has(answer?.completion?.reason);
+  return retryableCompletionReasons.has(answer?.completion?.reason)
+    || typeof answer?.approvedKnowledge?.errorCode === "string";
 }
 
 export function boundedHistory(history) {

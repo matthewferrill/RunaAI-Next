@@ -59,7 +59,7 @@ test("Gate 4C-3A delivers distinct advisory context through every read-only answ
     const source = lane === "workspace" ? sourceSection({ projectId: project, sourceId: "README.md", sectionId: "one",
       content: "Synthetic workspace evidence." }) : null;
     const context = harness({ payloads, sources: source ? [source] : [] });
-    const response = await context.service.answer(request(`lane-${lane}`, "Explain the synthetic deployment boundary.", lane));
+    const response = await context.service.answer(request(`lane-${lane}`, "Explain the current project deployment boundary.", lane));
     const provider = context.providers[lane === "workspace" ? "code" : lane === "research" ? "research" : "chat"];
     assert.equal(response.approvedKnowledge.delivered, true);
     assert.equal(response.approvedKnowledge.deliveryProvesCompliance, false);
@@ -74,8 +74,8 @@ test("Gate 4C-3A delivers distinct advisory context through every read-only answ
 
 test("Gate 4C-3A scopes personal project and capability lessons before provider delivery", async () => {
   const personal = approvedEvent("personal", { lesson: "synthetic preference boundary", scope: "personal", scopeId: participant });
-  assert.equal((await harness({ payloads: personal }).service.answer(request("personal-ok", "preference boundary"))).approvedKnowledge.delivered, true);
-  assert.equal((await harness({ payloads: personal }).service.answer(request("personal-anon", "preference boundary", "general", { verified: false }))).approvedKnowledge.delivered, false);
+  assert.equal((await harness({ payloads: personal }).service.answer(request("personal-ok", "What does this project say about my preference boundary?"))).approvedKnowledge.delivered, true);
+  assert.equal((await harness({ payloads: personal }).service.answer(request("personal-anon", "What does this project say about my preference boundary?", "general", { verified: false }))).approvedKnowledge.delivered, false);
 
   const projectLesson = approvedEvent("project", { lesson: "synthetic repository boundary", scope: "project", scopeId: project });
   assert.equal((await harness({ payloads: projectLesson }).service.answer(request("project-wrong", "repository boundary", "guarded", { projectId: otherProject }))).approvedKnowledge.delivered, false);
@@ -88,17 +88,17 @@ test("Gate 4C-3A scopes personal project and capability lessons before provider 
 
 test("Gate 4C-3A rejects fabricated, protected-like, stale, forbidden, and denied delivery", async () => {
   const fake = harness({ adapter: { async select() { return { providerContext: { lessonCount: 1 } }; } } });
-  const fakeResponse = await fake.service.answer(request("fake", "synthetic project guidance"));
+  const fakeResponse = await fake.service.answer(request("fake", "What does this project say about synthetic guidance?"));
   assert.equal(fakeResponse.approvedKnowledge.delivered, false);
   assert.equal(fakeResponse.approvedKnowledge.errorCode, "approved-knowledge-delivery-invalid");
   assert.equal(fake.providers.chat.calls.length, 0);
 
   const protectedAdapter = knowledge([], { protectedLike: true });
-  const protectedResponse = await harness({ adapter: protectedAdapter }).service.answer(request("protected-like", "protected boundary guidance"));
+  const protectedResponse = await harness({ adapter: protectedAdapter }).service.answer(request("protected-like", "What does this project say about protected boundary guidance?"));
   assert.equal(protectedResponse.approvedKnowledge.errorCode, "approved-knowledge-source-not-synthetic");
 
   const forbidden = approvedEvent("forbidden", { lesson: "synthetic production deployment", mustNotApply: ["when production is active"] });
-  assert.equal((await harness({ payloads: forbidden }).service.answer(request("forbidden", "production deployment when production is active"))).approvedKnowledge.delivered, false);
+  assert.equal((await harness({ payloads: forbidden }).service.answer(request("forbidden", "What does the current project say about production deployment when production is active?"))).approvedKnowledge.delivered, false);
 
   const deniedContext = harness({ payloads: approvedEvent("denied", { lesson: "synthetic device vault guidance" }) });
   const denied = await deniedContext.service.answer(request("denied", "Read the device vault guidance.", "guarded"));
@@ -126,7 +126,7 @@ test("Gate 4C-3A distinguishes selection from actual model delivery", async () =
   const payloads = approvedEvent("unavailable", { lesson: "synthetic unavailable dependency guidance" });
   const context = harness({ payloads });
   context.service.index.unavailable = true;
-  const response = await context.service.answer(request("unavailable", "unavailable dependency guidance"));
+  const response = await context.service.answer(request("unavailable", "What does the current project say about unavailable dependency guidance?"));
   assert.equal(response.completion.reason, "dependency-unavailable");
   assert.equal(response.approvedKnowledge.selectedCount, 1);
   assert.equal(response.approvedKnowledge.delivered, false);

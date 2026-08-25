@@ -151,12 +151,14 @@ export class Gate2ReadOnlyService {
 
   async #execute(request) {
     const role = GATE2_MODEL_ROLES[request.lane];
-    const knowledgeRequired = request.lane !== "general" || requiresProjectRecord(request.message, request.history);
+    const knowledgeRequired = ["research", "guarded", "workspace"].includes(request.lane)
+      || (request.lane === "general" && requiresProjectRecord(request.message, request.history));
     let resolvedWorkspace = { references: [], denied: [] };
     let knowledgeDelivery = null;
     let response = deterministicResponse(request);
     let knowledgeFallbackReason = response ? "not-evaluated-deterministic-boundary"
-      : knowledgeRequired ? "adapter-disabled" : "not-applicable-general-conversation";
+      : knowledgeRequired ? "adapter-disabled"
+        : request.lane === "code" ? "not-applicable-code-conversation" : "not-applicable-general-conversation";
     if (!response && request.lane === "workspace") {
       resolvedWorkspace = await this.workspaceResolver.resolve(request.project.projectId, request.workspace.sources);
       if (resolvedWorkspace.denied.length) response = emptyV1(request, {
@@ -199,7 +201,8 @@ export class Gate2ReadOnlyService {
       const provider = providerFor(this.providers, role);
       const advisoryContext = providerAdvisoryFromDelivery(knowledgeDelivery);
       const slice = new ReadOnlyAnswerSlice({ records: selectedRecords, index: selectedIndex, provider, advisoryContext,
-        retrievalPolicy: request.lane === "workspace" ? "required" : "conversation-aware" });
+        retrievalPolicy: request.lane === "workspace" ? "required"
+          : request.lane === "code" ? "none" : "conversation-aware" });
       try {
         response = await slice.answer(gate1Request(request));
       } catch (error) {
@@ -222,11 +225,14 @@ export class Gate2ReadOnlyService {
     response.lane = request.lane;
     if (response.model.role !== "not-invoked") response.model.role = role;
     const gates = applyCommonAnswerGates(response, request);
+    const knowledgeReceipt = approvedKnowledgeReceipt(knowledgeDelivery, knowledgeFallbackReason, {
+      delivered: response.auditCodes.includes("approved-knowledge-delivered"),
+    });
     const incompleteReasons = new Set(["timeout", "output-limited", "provider-output-empty",
       "provider-response-invalid", "provider-shape-invalid", "provider-incomplete",
       "provider-transport-failed", "provider-model-mismatch", "provider-role-mismatch",
       "provider-role-unavailable"]);
-    const continuityResult = incompleteReasons.has(response.completion.reason)
+    const continuityResult = incompleteReasons.has(response.completion.reason) || Boolean(knowledgeReceipt.errorCode)
       ? { turnRecorded: false, source: "not-recorded-incomplete-answer" }
       : await this.continuity.recordAnswer(request, response);
     const continuityStatus = await this.continuity.status();
@@ -255,9 +261,7 @@ export class Gate2ReadOnlyService {
       turnRecorded: continuityResult.turnRecorded === true,
       source: continuityResult.source,
     };
-    response.approvedKnowledge = approvedKnowledgeReceipt(knowledgeDelivery, knowledgeFallbackReason, {
-      delivered: response.auditCodes.includes("approved-knowledge-delivered"),
-    });
+    response.approvedKnowledge = knowledgeReceipt;
     response.effects = [];
     return parseGate2AnswerResponse(response);
   }

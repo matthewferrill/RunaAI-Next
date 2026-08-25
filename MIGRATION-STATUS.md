@@ -125,7 +125,15 @@ repository and never push migration work into either source repository.
   data, identity, Caddy configuration, network exposure, model configuration, and legacy RunaAI remain
   unchanged. The retained Gate 7C release is the automatic application rollback target. Full evidence
   is in `gate7d/GATE7D-CHAT-CODE-NAVIGATION-RESULTS-2026-08-24.md`; the remaining Gate 7D decision is
-  ordinary-user live review followed by a separate merge decision.
+  ordinary-user live review followed by a separate merge decision. The first live review passed fresh
+  ordinary sign-in, new Chat creation, exact record reopening, switching between retained chats, and
+  continued history, but blocked merge on four end-to-end defects: a generic `test` false-positive in
+  project-intent routing, approved-knowledge failures retained as completed turns, standalone Code
+  incorrectly requiring project knowledge, and an ordinary session capped by the short-lived access
+  token despite retaining a refresh credential. A separate current-message relevance failure repeated
+  the prior Italy answer for a France question. The bounded correction is frozen in
+  `gate7d/GATE7D-END-TO-END-FLOW-CORRECTION-SCOPE-AND-GREEN-CRITERIA-2026-08-25.md`; the active release
+  remains unmerged and no model or protected authority changed.
 - Gate 7D's first exact activation attempt failed closed because its staged launcher was still bound to
   Gate 7C while its manifest named Gate 7D. Artifact verification rejected the mismatch and the guarded
   operator automatically restored the exact Gate 7C release and readiness state. The corrected operator

@@ -147,8 +147,9 @@ repository and never push migration work into either source repository.
   candidate answer, while conversation continuity remains with the drafting provider. Source and exact-
   Control suites pass 423/423. The exact active release at `e10e3db` accepted `15+15=30` 3/3, rejected
   stale `14+12=26` 3/3, and passed the integrated active-release history smoke 3/3. The `16adbca`
-  predecessor is retained for automatic rollback; only the ordinary-browser `15+15` retest and merge
-  remain.
+  predecessor is retained for automatic rollback. Ordinary-browser acceptance then returned
+  `15+15=30`, `115+25=140`, a correct new four-parameter program, and the retained composite result
+  `25` without an incomplete response or stale values. Gate 7D is accepted for merge.
 - Gate 7D's first exact activation attempt failed closed because its staged launcher was still bound to
   Gate 7C while its manifest named Gate 7D. Artifact verification rejected the mismatch and the guarded
   operator automatically restored the exact Gate 7C release and readiness state. The corrected operator
@@ -469,7 +470,7 @@ plain-language steward experience, or governed action pathway.
 | 7A | Multi-device access foundation | Canonical LAN origin, owner passkey path, SMTP/invitation, separate ordinary password client, and Omen customer acceptance active | Representative clients, certificate renewal, and off-LAN boundary remain |
 | 7B | Complete customer journey through the selected read-only stack | Complete; production sign-in, sustained chat, safe presentation, exact-release recheck, and rollback evidence green | Approved by steward 2026-08-24; completed 2026-08-24 |
 | 7C | First user-interface shell | Complete and superseded on Control by the Gate 7D presentation release | Source integration remains part of the Gate 7D review chain |
-| 7D | Identity-aware Chat/Code navigation and end-to-end flow correction | Current-turn verifier successor active on Control at `e10e3db`; source and exact-Control suites 423/423; exact `15+15=30` active-release smoke passed 3/3 | Merge remains gated by the ordinary-browser `15+15` retest |
+| 7D | Identity-aware Chat/Code navigation and end-to-end flow correction | Accepted; current-turn verifier successor active on Control at `e10e3db`; source and exact-Control suites 423/423; ordinary-browser current-turn sequence passed | Merge the reviewed correction chain into `runa2/integration` |
 | 7E+ | Deferred product extensions | Not started; capability inventory and prioritization follow Gate 7D acceptance | New baseline and separate decision per extension group |
 
 ## Bootstrap validation
@@ -514,10 +515,9 @@ No dependency was changed during the prerequisite disposition. Full evidence is 
 
 ## Next operation
 
-At `https://runa.bridgebuildersai.com`, repeat the last failed ordinary Code message against the active
-correction successor: `Run the program using a = 15 and b = 15.` It must return `30` without the
-incomplete-response retry. The rest of the ordinary-user acceptance sequence is already green. Do not
-merge the review chain until that final browser result is recorded.
+Merge the accepted Gate 7D correction chain into `runa2/integration`, verify the exact remote merge,
+and rerun the full repository suite from the merged integration commit. The active Control release and
+its exact application rollback predecessor remain unchanged by the source merge.
 
 Gate 6 remains closed and selected-core production authority remains active at the exact release named
 above. Gate 7A follow-on checks for a second PC, phone, certificate renewal, and separately reviewed

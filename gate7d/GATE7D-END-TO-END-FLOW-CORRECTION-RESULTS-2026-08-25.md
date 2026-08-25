@@ -2,8 +2,8 @@
 
 Status: implementation, exact-Control verification, and the third rollback-protected correction
 activation are complete. Control runs `runaai-next-gate7d-current-turn-2026-08-25-e10e3db` at
-`e10e3db097d894d1f00b389921ceab0decaff24c`. The final ordinary-user `15 + 15` Code retest and merge
-remain pending.
+`e10e3db097d894d1f00b389921ceab0decaff24c`. The ordinary-user Code retest is green and Gate 7D is
+accepted for merge.
 
 ## Observed root causes
 
@@ -83,6 +83,7 @@ bounded renewal path.
 | Original verifier replay for `15+15` | correct draft 3/3; stale `14+12` correction proposed 3/3, confirming RCA |
 | Current-turn verifier contract | correct complete `15+15=30` accepted 3/3; stale `14+12=26` rejected 3/3 |
 | Active successor integrated smoke | exact user-supplied history returned `15+15=30` with verification receipt 3/3 |
+| Ordinary-browser current-turn acceptance | `15+15=30`, `115+25=140`, new four-parameter program, and retained `2+3`, divisor `2`, multiplier `10` result `25` all passed |
 | `git diff --check` | passed |
 
 The focused coverage includes the exact observed Chat phrase and follow-up, explicit project routing,
@@ -113,10 +114,17 @@ exposure, and legacy checkout did not change. The second correction release rema
 application rollback target. Aggregate evidence is retained in
 `gate7d/GATE7D-CURRENT-TURN-VERIFIER-CONTROL-ACTIVATION-RESULTS-2026-08-25.json`.
 
-## Remaining acceptance gate
+## Ordinary-browser acceptance
 
-The ordinary-user report already passed Chat creation, reopening, switching, Italy-to-France relevance,
-logout/fresh sign-in, the Code opening, and retained `14 + 12 = 26`. Repeat only the last failed message
-at the canonical origin: `Run the program using a = 15 and b = 15.` It must return `30`, not `26`, and
-must not surface the incomplete-response retry. Merge remains blocked until that ordinary-browser result
-is recorded. Model/provider changes and real code-work capabilities remain separate later decisions.
+The ordinary-user report passed Chat creation, reopening, switching, Italy-to-France relevance,
+logout/fresh sign-in, the Code opening, and retained `14 + 12 = 26`. After the current-turn successor
+activated, the same browser session returned:
+
+- `15 + 15 = 30`;
+- `115 + 25 = 140`;
+- a new JavaScript `calculate(a, b, divisor, multiplier)` program with correct examples; and
+- `((2 + 3) / 2) * 10 = 25` in the retained follow-up.
+
+No incomplete-response retry or stale prior values appeared. This satisfies the last Gate 7D browser
+criterion and authorizes the reviewed correction chain for merge. Model/provider changes and real
+code-work capabilities remain separate later decisions.

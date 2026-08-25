@@ -1,8 +1,8 @@
 # Gate 7D end-to-end flow correction scope and green criteria
 
-Status: frozen from ordinary-user live review on 2026-08-25 and amended by the repeatable current-turn
-verifier failure observed during acceptance. The active Gate 7D correction remains unmerged and
-retains its exact predecessor as the automatic application rollback target.
+Status: frozen from ordinary-user live review on 2026-08-25, amended by the repeatable current-turn
+verifier failure, and accepted through the ordinary browser after correction. The active Gate 7D
+successor retains its exact predecessor as the automatic application rollback target until merge.
 
 ## Why this correction exists
 

@@ -1,6 +1,6 @@
 {
   "schemaVersion": "runa2-gate7d-current-turn-verifier-control-activation/v1",
-  "status": "active-ordinary-browser-retest-pending",
+  "status": "accepted-merge-pending",
   "release": {
     "releaseId": "runaai-next-gate7d-current-turn-2026-08-25-e10e3db",
     "commit": "e10e3db097d894d1f00b389921ceab0decaff24c",
@@ -53,6 +53,16 @@
     "controlCorrectionClean": true,
     "controlIntegrationClean": true,
     "legacyClean": true
+  },
+  "ordinaryBrowserAcceptance": {
+    "completed": true,
+    "fifteenPlusFifteen": 30,
+    "oneHundredFifteenPlusTwentyFive": 140,
+    "newFourParameterProgramReturned": true,
+    "retainedCompositeResult": 25,
+    "incompleteResponseObserved": false,
+    "stalePriorValuesObserved": false,
+    "acceptedForMerge": true
   },
   "privateValuesIncluded": false
 }

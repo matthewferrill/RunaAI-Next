@@ -9,13 +9,12 @@ const { MxcJavascriptExecutor } = await import(pathToFileURL(resolve("gate7e/mxc
 
 const source = "console.log(115 + 25)";
 const variants = [
-  ["source-only", config => config.process.env],
+  ["one-custom-variable", () => ["RUNA2_TEST=value"]],
   ["unset", () => undefined],
   ["empty", () => []],
-  ["system-root", config => ["SystemRoot=C:\\Windows", ...config.process.env]],
-  ["windows-root", config => ["SystemRoot=C:\\Windows", "WINDIR=C:\\Windows", ...config.process.env]],
-  ["windows-baseline", config => ["SystemDrive=C:", "SystemRoot=C:\\Windows", "WINDIR=C:\\Windows",
-    ...config.process.env]],
+  ["system-root", () => ["SystemRoot=C:\\Windows"]],
+  ["windows-root", () => ["SystemRoot=C:\\Windows", "WINDIR=C:\\Windows"]],
+  ["windows-baseline", () => ["SystemDrive=C:", "SystemRoot=C:\\Windows", "WINDIR=C:\\Windows"]],
 ];
 
 function request(name) {

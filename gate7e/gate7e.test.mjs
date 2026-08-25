@@ -14,7 +14,7 @@ import { executionOutput, javascriptSource } from "../gate6b/public/code-executi
 import { stageSandboxRuntime } from "../gate6b/sandbox-runtime.mjs";
 import { parseCodeExecutionRequest } from "./contracts.mjs";
 import { HarmlessJavascriptExecutionService, MemoryExecutionCoordinator,
-  MxcJavascriptExecutor } from "./mxc-javascript-executor.mjs";
+  MxcJavascriptExecutor, createTransientSource } from "./mxc-javascript-executor.mjs";
 
 const sha256 = value => createHash("sha256").update(value).digest("hex");
 const request = (overrides = {}) => ({
@@ -110,8 +110,43 @@ test("only a typed successful sandbox result receives executed status", async ()
   assert.equal(capture.options.usePty, false);
   assert.match(capture.config.process.commandLine, /--permission/);
   assert.match(capture.config.process.commandLine, /--allow-fs-read=/);
-  const encodedSource = capture.config.process.env.find(value => value.startsWith("RUNA2_SOURCE_BASE64URL="));
-  assert.equal(Buffer.from(encodedSource.split("=")[1], "base64url").toString("utf8"), source);
+  assert.equal(Object.hasOwn(capture.config.process, "env"), false);
+  assert.equal(capture.config.process.commandLine.includes(source), false);
+  assert.match(capture.config.process.commandLine, /--source-file=/);
+  assert.match(capture.config.process.commandLine, new RegExp(`--source-sha256=${sha256(source)}`));
+  const transientPath = capture.policy.filesystem.readonlyPaths[2];
+  assert.match(capture.config.process.commandLine, new RegExp(transientPath.replace(/[\\^$.*+?()[\]{}|]/g, "\\$&")));
+  await assert.rejects(readFile(transientPath));
+  assert.equal(receipt.isolation.environment, "empty");
+  assert.equal(receipt.isolation.filesystem, "read-only-runtime-and-transient-source");
+});
+
+test("transient source transport is exclusive, exact, and removed before return", async () => {
+  const source = "console.log('private draft')";
+  const transport = await createTransientSource({ source, sourceSha256: sha256(source) });
+  assert.equal(await readFile(transport.sourcePath, "utf8"), source);
+  await transport.cleanup();
+  await assert.rejects(readFile(transport.sourcePath));
+});
+
+test("source transport and cleanup failures fail closed without output", async () => {
+  const completed = { stdout: marker({ status: "completed", stdout: "30\n", stderr: "",
+    errorCode: null, hostVersion: process.version }), exitCode: 0 };
+  const transportFailure = new Error("transport failed");
+  transportFailure.code = "sandbox-source-transport-failed";
+  const unavailable = await new MxcJavascriptExecutor({ sdk: fakeSdk(completed, {}),
+    sourceTransport: async () => { throw transportFailure; } }).execute(request({ requestId: "transport-failed" }));
+  assert.equal(unavailable.status, "unavailable");
+  assert.equal(unavailable.errorCode, "sandbox-source-transport-failed");
+  assert.equal(unavailable.output.combinedBytes, 0);
+
+  const cleanupFailed = await new MxcJavascriptExecutor({ sdk: fakeSdk(completed, {}),
+    sourceTransport: async ({ sourceSha256 }) => ({ sourcePath: resolve("transient-source.js"),
+      sourceSha256, async cleanup() { throw new Error("cleanup failed"); } })
+  }).execute(request({ requestId: "cleanup-failed" }));
+  assert.equal(cleanupFailed.status, "unavailable");
+  assert.equal(cleanupFailed.errorCode, "sandbox-cleanup-failed");
+  assert.equal(cleanupFailed.output.combinedBytes, 0);
 });
 
 test("missing typed evidence and parent output overflow fail closed without partial output", async () => {
@@ -209,22 +244,43 @@ test("the browser extracts one exact bounded JavaScript draft and labels output 
   assert.match(executionOutput({ status: "failed", output: { stdout: "", stderr: "" } }), /did not run/);
 });
 
-async function runQuickJsChild(source) {
+async function runQuickJsChild(source, { storedSource = source, digest = sha256(source),
+  removeBeforeRun = false, permissionModel = false } = {}) {
   const runner = resolve("gate7e/quickjs-child.mjs");
-  const child = spawn(process.execPath, [runner], { stdio: ["ignore", "pipe", "pipe"], env: {
-    RUNA2_SOURCE_BASE64URL: Buffer.from(source).toString("base64url"),
-    RUNA2_SOURCE_SHA256: sha256(source),
-  } });
-  let stdout = ""; let stderr = "";
-  child.stdout.on("data", chunk => { stdout += chunk; });
-  child.stderr.on("data", chunk => { stderr += chunk; });
-  const [exitCode] = await once(child, "close");
-  const encoded = stdout.trim().replace(/^RUNA2_EXECUTION_RESULT:/, "");
-  return { exitCode, stderr, result: JSON.parse(Buffer.from(encoded, "base64url").toString("utf8")) };
+  const transport = await createTransientSource({ source: storedSource, sourceSha256: digest });
+  try {
+    if (removeBeforeRun) await transport.cleanup();
+    const args = permissionModel ? ["--permission", `--allow-fs-read=${resolve(".")}`,
+      `--allow-fs-read=${transport.sourcePath}`] : [];
+    args.push(runner, `--source-file=${transport.sourcePath}`, `--source-sha256=${digest}`);
+    const child = spawn(process.execPath, args, { stdio: ["ignore", "pipe", "pipe"], env: {} });
+    let stdout = ""; let stderr = "";
+    child.stdout.on("data", chunk => { stdout += chunk; });
+    child.stderr.on("data", chunk => { stderr += chunk; });
+    const [exitCode] = await once(child, "close");
+    const encoded = stdout.trim().replace(/^RUNA2_EXECUTION_RESULT:/, "");
+    return { exitCode, stderr, result: JSON.parse(Buffer.from(encoded, "base64url").toString("utf8")) };
+  } finally {
+    await transport.cleanup();
+  }
 }
 
+test("the QuickJS child rejects missing, changed, and oversized transient source", async () => {
+  const source = "console.log(30)";
+  for (const result of [
+    await runQuickJsChild(source, { removeBeforeRun: true }),
+    await runQuickJsChild(source, { storedSource: "console.log(31)" }),
+    await runQuickJsChild("x".repeat(8_001)),
+  ]) {
+    assert.equal(result.exitCode, 2);
+    assert.equal(result.result.status, "runtime-error");
+    assert.equal(result.result.errorCode, "sandbox-source-invalid");
+    assert.equal(result.result.stdout, "");
+  }
+});
+
 test("the QuickJS child computes real output and exposes no Node, file, or network APIs", async () => {
-  const arithmetic = await runQuickJsChild("console.log(((2 + 3) / 2) * 10)");
+  const arithmetic = await runQuickJsChild("console.log(((2 + 3) / 2) * 10)", { permissionModel: true });
   assert.equal(arithmetic.exitCode, 0);
   assert.equal(arithmetic.result.status, "completed");
   assert.equal(arithmetic.result.stdout, "25\n");
@@ -297,12 +353,15 @@ test("MXC runs the pinned child or exposes the exact host-preparation blocker an
   } else {
     assert.equal(receipt.status, "unavailable");
     assert.equal(receipt.errorCode, "sandbox-start-failed");
-    assert.match(diagnostics, /Failed to apply DACL ACEs|DACL fallback requires write-DAC permission/);
+    const directDaclBlocker = /Failed to apply DACL ACEs|DACL fallback requires write-DAC permission/.test(diagnostics);
+    const drivePreparationBlocker = receipt.exitCode === 0xC0000142
+      && (support.isolationWarnings ?? []).some(warning => warning.includes("prepare-system-drive"));
+    assert.equal(directDaclBlocker || drivePreparationBlocker, true);
     assert.equal(receipt.output.combinedBytes, 0);
   }
   assert.equal(receipt.isolation.provider, "microsoft-mxc");
   assert.equal(receipt.isolation.network, "deny-all");
-  assert.equal(receipt.isolation.filesystem, "read-only-runtime-only");
+  assert.equal(receipt.isolation.filesystem, "read-only-runtime-and-transient-source");
 });
 
 test("public code execution wiring and the compact release runtime preserve the boundary", async () => {

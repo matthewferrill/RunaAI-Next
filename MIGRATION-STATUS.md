@@ -13,7 +13,7 @@ boundaries, verification state, or the next planned work.
 | RunaAI-Next `main` | Exact inherited RunaLab completion baseline | Stable integration target only after reviewed migration completion |
 | RunaAI-Next `runa2/integration` | Accumulated accepted migration gates | Development integration; not production |
 | Short-lived `runa2/*` gate branches | One approved, measured migration slice | Experimental until validated and approved |
-| Control release `runaai-next-gate7a-lan-chat-code-2026-08-25-65b907b` | Running selected-core RunaAI application at the canonical LAN origin | Production authority for the exact selected read-only core and reviewed Chat/Code navigation; later product capabilities remain separately decision-gated |
+| Control release `runaai-next-gate7d-current-turn-2026-08-25-e10e3db` | Running selected-core RunaAI application at the canonical LAN origin | Production authority for the exact selected read-only core and reviewed Chat/Code navigation; later product capabilities remain separately decision-gated |
 
 The product name is RunaAI. `RunaAI-Next`, `runa2`, and similar labels are repository and branch
 identifiers during migration, not product identities.
@@ -58,13 +58,12 @@ repository and never push migration work into either source repository.
   the only new LAN-facing service on TCP 443, and every backend remains loopback-bound. Keycloak now
   advertises the same-origin `/auth` issuer and `runa.bridgebuildersai.com` RP ID. The session cookie is
   host-only, `Secure`, `HttpOnly`, and explicitly `SameSite=Lax`; off-LAN ingress remains disabled.
-- The exact active release is `runaai-next-gate7a-lan-chat-code-2026-08-25-65b907b`, commit
-  `65b907b30fc58dcc1aac46edb8dce773018371d3`, artifact digest
-  `bb02e17fa50f602ce255f0bb5a6d95b295190259acc3c4549f2494251f4657d2`, and manifest digest
-  `ee24e7f36c468ae87e223f8ae9a6971449479e99bfe085c13959297e1a30b5df`. Authority is active,
-  cutover is closed, all four dependencies are ready, and the 29,506-file artifact is verified. The
-  exact Gate 7C predecessor is retained for rollback; configuration digest, identity, legacy, and
-  protected product data are unchanged. The exact commit suite passes 406/406.
+- The exact active release is `runaai-next-gate7d-current-turn-2026-08-25-e10e3db`, commit
+  `e10e3db097d894d1f00b389921ceab0decaff24c`, and artifact digest
+  `53cd635b046ea0b47ca4eaa2505104a28bc27982238f0a8a6033940d007a1e8d`. Authority remains active,
+  cutover is closed, and all four dependencies are ready. The retained predecessor remains the
+  automatic application rollback target; configuration, identity, legacy, and protected product data
+  are unchanged. This active release predates Gate 7E and has no executable-code capability.
 - Gate 7A is not closed. Canonical-origin owner passkey sign-in has completed and the protected
   `matthew-owner` path remains passkey-only. The steward approved a separate ordinary-user model:
   invitation-only enrollment, an individual username/password, verified-email recovery, and an
@@ -159,6 +158,14 @@ repository and never push migration work into either source repository.
   used a newly generated successor-bound launcher, activated the exact commit and artifact, reconciled
   owner and ordinary login routes, and validated every required live HTML and controller marker before
   reporting success. No protected or private values were retained in the evidence.
+- Gate 7E-0 / 7E-1 was accepted as a bounded extension: truthful drafted-versus-executed status and one
+  harmless, authenticated, ordinary-user JavaScript Run action. The source implementation merged into
+  `runa2/integration` as `f092d358a18f0ec0b6c2eaaeaf9a057b1d7f6d68`; it does not add network,
+  packages, repositories, persistent files, Git, terminal access, or broader Code work. Control then
+  exposed an MXC custom-environment compatibility defect. The corrective branch removes that channel,
+  uses one digest-bound read-only transient source file, and passes 439/439 in an isolated Control
+  worktree at `b116371`. The disposable real sandbox remains fail-closed at the exact official
+  `prepare-system-drive-required` prerequisite; no host preparation or production activation has run.
 - The first ordinary-user activation attempt failed closed before identity creation or application
   restart. RCA: Windows PowerShell 5.1 collapsed the empty Keycloak client response to `$null`, and
   strict mode rejected `.Count`. Normalized reconciliation then proved zero ordinary clients, zero
@@ -473,7 +480,8 @@ plain-language steward experience, or governed action pathway.
 | 7B | Complete customer journey through the selected read-only stack | Complete; production sign-in, sustained chat, safe presentation, exact-release recheck, and rollback evidence green | Approved by steward 2026-08-24; completed 2026-08-24 |
 | 7C | First user-interface shell | Complete and superseded on Control by the Gate 7D presentation release | Source integration remains part of the Gate 7D review chain |
 | 7D | Identity-aware Chat/Code navigation and end-to-end flow correction | Complete; accepted and merged as `3d95e50`; current-turn verifier successor active on Control at `e10e3db`; post-merge and exact-Control suites 423/423 | Complete |
-| 7E+ | Deferred product extensions | Not started; capability inventory and prioritization follow Gate 7D acceptance | New baseline and separate decision per extension group |
+| 7E-0/1 | Truthful execution status and harmless bounded JavaScript Run | Source merged; Control transport correction 439/439; production inactive pending official host preparation, real preflight, rollback deployment, and customer Run test | Separate approval for the host-wide preparation and successor activation |
+| 7E+ | Broader product extensions | Deferred until after the separately reviewed Gemma bakeoff/burn-in | New baseline and separate decision per extension group |
 
 ## Bootstrap validation
 
@@ -517,10 +525,13 @@ No dependency was changed during the prerequisite disposition. Full evidence is 
 
 ## Next operation
 
-Gate 7D is complete. Begin Gate 7E only after choosing the next bounded product slice from the deferred
-capability inventory. UI refinement, real code-work capabilities, live weather/web access, attachments,
-additional project functions, model bakeoffs, and off-LAN access remain separate decisions. The active
-Control release and its exact application rollback predecessor remain unchanged by the source merge.
+Gate 7E's corrective source is green. The next decision is whether to run the official, reversible
+`wxc-host-prep prepare-system-drive` on Control. If approved, rerun the complete real sandbox preflight;
+only a true QuickJS result may proceed to the separately rollback-protected successor activation and
+ordinary-user customer Run test. A failed preflight stops before release construction. UI refinement,
+broader code-work capabilities, live weather/web access, attachments, additional project functions,
+model bakeoffs, and off-LAN access remain separate decisions. The active Control release and its exact
+application rollback predecessor remain unchanged by the Gate 7E source work.
 
 Gate 6 remains closed and selected-core production authority remains active at the exact release named
 above. Gate 7A follow-on checks for a second PC, phone, certificate renewal, and separately reviewed

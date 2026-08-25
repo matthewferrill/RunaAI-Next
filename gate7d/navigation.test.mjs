@@ -227,6 +227,11 @@ test("the authenticated shell contains identity, separate Chat and Code controls
   assert.match(deployer, /gate7d-chat-code-navigation/);
   assert.match(deployer, /gate7a-ordinary-deploy-gate7d-presentation-invalid/);
   assert.match(deployer, /gate7a-ordinary-deploy-gate7d-controller-invalid/);
+  assert.match(deployer, /gate7a-ordinary-deploy-launcher-binding-invalid/);
+  const launcherBinding = deployer.indexOf("$launcherText=[IO.File]::ReadAllText($stagedLauncher)");
+  const firstMutation = deployer.indexOf("New-Item -ItemType Directory -Path $release");
+  assert.ok(launcherBinding > 0 && launcherBinding < firstMutation,
+    "the staged launcher must name the successor before a release or rollback path can be created");
   const validation = deployer.indexOf("if($ExpectedUiContract-eq'gate7d-chat-code-navigation')");
   const success = deployer.indexOf("schemaVersion='runa2-gate7a-control-ordinary-successor/v1'");
   const rollback = deployer.lastIndexOf("}catch{");

@@ -138,6 +138,12 @@ if($currentConfig.releaseManifestPath-ne$manifestName-or$candidate.releaseManife
   $candidate.services.caddy.configurationDigest-ne(TextHash ([IO.File]::ReadAllText($stagedCaddy)+$expectedCaddyBinarySha256))-or
   $releaseFacts.releaseId-ne$ReleaseId-or$releaseFacts.commit-ne$ExpectedCommit-or
   $releaseFacts.artifactDigest-ne$ExpectedArtifactDigest){throw 'gate7a-ordinary-deploy-successor-invalid'}
+$launcherText=[IO.File]::ReadAllText($stagedLauncher)
+if(-not$launcherText.Contains((Join-Path $release 'runtime\node.exe'))-or
+  -not$launcherText.Contains((Join-Path $release 'gate6b\server.mjs'))-or
+  $launcherText.Contains($PriorReleaseId)){
+  throw 'gate7a-ordinary-deploy-launcher-binding-invalid'
+}
 $preservedCandidate=Get-Content -Raw -LiteralPath $stagedConfig|ConvertFrom-Json
 $preservedCandidate.limits.totalDeadlineMs=$currentConfig.limits.totalDeadlineMs
 $preservedCandidate.services.caddy.configurationDigest=$currentConfig.services.caddy.configurationDigest

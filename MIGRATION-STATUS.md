@@ -139,11 +139,16 @@ repository and never push migration work into either source repository.
   invented `64/12` context and returned `76` for the retained `14+12` follow-up. Direct private-model
   probes ruled out request replay, Caddy caching, role drift, and a consistently bad endpoint; the
   remaining defect was unverified model-output relevance and arithmetic consistency. Standalone Code
-  now receives a bounded second-pass response review, and any correction must itself verify before it
-  can be retained. Source and exact-Control suites pass 422/422. The exact active release at `16adbca`
-  passed both the opening function and retained `14+12=26` smoke through the unchanged private model.
-  It is active with the prior correction retained for automatic rollback; only the ordinary-user Code
-  retest and merge remain.
+  received a bounded second-pass response review, and any correction had to verify before retention.
+  That successor passed the opening and retained `14+12=26` live checks but failed twice on the next
+  `15+15` request. Exact replay proved the draft was correctly `30` while the verifier promoted the
+  previous `14+12` turn into current authority and proposed `26`; fail-closed re-verification prevented
+  that stale correction from being retained. The verifier now receives only the current request and
+  candidate answer, while conversation continuity remains with the drafting provider. Source and exact-
+  Control suites pass 423/423. The exact active release at `e10e3db` accepted `15+15=30` 3/3, rejected
+  stale `14+12=26` 3/3, and passed the integrated active-release history smoke 3/3. The `16adbca`
+  predecessor is retained for automatic rollback; only the ordinary-browser `15+15` retest and merge
+  remain.
 - Gate 7D's first exact activation attempt failed closed because its staged launcher was still bound to
   Gate 7C while its manifest named Gate 7D. Artifact verification rejected the mismatch and the guarded
   operator automatically restored the exact Gate 7C release and readiness state. The corrected operator
@@ -464,7 +469,7 @@ plain-language steward experience, or governed action pathway.
 | 7A | Multi-device access foundation | Canonical LAN origin, owner passkey path, SMTP/invitation, separate ordinary password client, and Omen customer acceptance active | Representative clients, certificate renewal, and off-LAN boundary remain |
 | 7B | Complete customer journey through the selected read-only stack | Complete; production sign-in, sustained chat, safe presentation, exact-release recheck, and rollback evidence green | Approved by steward 2026-08-24; completed 2026-08-24 |
 | 7C | First user-interface shell | Complete and superseded on Control by the Gate 7D presentation release | Source integration remains part of the Gate 7D review chain |
-| 7D | Identity-aware Chat/Code navigation and end-to-end flow correction | Code-verification successor active on Control at `16adbca`; source and exact-Control suites 422/422; active-release smoke passed | Merge remains gated by the ordinary-user Code retest |
+| 7D | Identity-aware Chat/Code navigation and end-to-end flow correction | Current-turn verifier successor active on Control at `e10e3db`; source and exact-Control suites 423/423; exact `15+15=30` active-release smoke passed 3/3 | Merge remains gated by the ordinary-browser `15+15` retest |
 | 7E+ | Deferred product extensions | Not started; capability inventory and prioritization follow Gate 7D acceptance | New baseline and separate decision per extension group |
 
 ## Bootstrap validation
@@ -509,10 +514,10 @@ No dependency was changed during the prerequisite disposition. Full evidence is 
 
 ## Next operation
 
-At `https://runa.bridgebuildersai.com`, complete the ordinary-user acceptance sequence for the active
-correction successor: fresh password sign-in, ordinary Chat, standalone Code, record reopening,
-Italy-to-France topic relevance, access-token renewal, logout, and fresh sign-in. Do not merge the review
-chain until that result is green.
+At `https://runa.bridgebuildersai.com`, repeat the last failed ordinary Code message against the active
+correction successor: `Run the program using a = 15 and b = 15.` It must return `30` without the
+incomplete-response retry. The rest of the ordinary-user acceptance sequence is already green. Do not
+merge the review chain until that final browser result is recorded.
 
 Gate 6 remains closed and selected-core production authority remains active at the exact release named
 above. Gate 7A follow-on checks for a second PC, phone, certificate renewal, and separately reviewed

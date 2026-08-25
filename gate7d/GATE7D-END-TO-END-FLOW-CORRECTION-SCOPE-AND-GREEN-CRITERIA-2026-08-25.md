@@ -1,7 +1,8 @@
 # Gate 7D end-to-end flow correction scope and green criteria
 
-Status: frozen from ordinary-user live review on 2026-08-25. The active Gate 7D release remains
-unmerged and retains Gate 7C as its automatic application rollback target.
+Status: frozen from ordinary-user live review on 2026-08-25 and amended by the repeatable current-turn
+verifier failure observed during acceptance. The active Gate 7D correction remains unmerged and
+retains its exact predecessor as the automatic application rollback target.
 
 ## Why this correction exists
 
@@ -23,7 +24,13 @@ switching between retained chats, and continued history. It also exposed five re
    `26`. The already-running private endpoint answered the standalone request correctly in six of six
    isolated probes, while replaying the retained bad draft showed that prompt wording/order alone does
    not guarantee current-request arithmetic consistency. This is a release-blocking Code response
-   relevance and consistency defect, not evidence of request-ID replay or a reason to switch models.
+    relevance and consistency defect, not evidence of request-ID replay or a reason to switch models.
+6. The first response verifier allowed the opening and `14 + 12 = 26` turns, but the next retained
+   request `Run the program using a = 15 and b = 15` failed retryably twice. Exact transient replay
+   proved the drafting model returned `30` on every run. The verifier instead treated the previous
+   `14 + 12` turn as the current request and proposed `26`; correction re-verification rejected that
+   stale proposal. The fail-closed result prevented a wrong answer from being retained, but the
+   verifier's history input made an ordinary valid turn unavailable.
 
 The same live Chat sequence also returned the previous Italy answer to a new France question. The
 request path already uses a fresh request identifier for each send, so the correction must preserve
@@ -52,10 +59,13 @@ tests alone.
    absolute session expiry, and fail closed when refresh is rejected or identity changes.
 8. Make transient identity-refresh unavailability retryable without misreporting it as a completed chat
    turn or silently converting it into a new login authority.
-9. Add a bounded, history-aware but current-request-led verification pass to standalone Code responses.
-   It must reject irrelevant prior values, contradictory results, and arithmetic inconsistent with the
-   current request. A corrected response may be returned only after a second independent verification;
-   otherwise the turn fails retryably and is not retained.
+9. Add a bounded current-turn verification pass to standalone Code responses. Conversation continuity
+   remains exclusively with the drafting provider; the verifier receives only the current request and
+   candidate answer, so earlier transcript text cannot become competing verification authority. It must
+   reject mismatched values, contradictory results, and arithmetic inconsistent with the current
+   request. A corrected response may be returned only after a second independent verification;
+   otherwise the turn fails retryably and is not retained. Because Code has no executor, correct code
+   plus a correct deterministic expected output may satisfy a run request without claiming execution.
 
 ## Explicit exclusions
 
@@ -94,3 +104,6 @@ tests alone.
     context. Its retained follow-up with `a = 14` and `b = 12` must return `26`, must not return `76`, and
     both accepted turns must carry the Code verification receipt. A rejected or unverifiable Code draft
     must remain retryable and unrecorded.
+12. A subsequent retained request with `a = 15` and `b = 15` must return `30` and a verification receipt,
+    not reuse `14/12`, return `26`, or surface the incomplete-response retry. Exact model replay must
+    accept the correct current-turn answer and reject the stale prior-turn answer in every repetition.

@@ -1,0 +1,58 @@
+{
+  "schemaVersion": "runa2-gate7d-current-turn-verifier-control-activation/v1",
+  "status": "active-ordinary-browser-retest-pending",
+  "release": {
+    "releaseId": "runaai-next-gate7d-current-turn-2026-08-25-e10e3db",
+    "commit": "e10e3db097d894d1f00b389921ceab0decaff24c",
+    "artifactDigest": "53cd635b046ea0b47ca4eaa2505104a28bc27982238f0a8a6033940d007a1e8d",
+    "artifactFileCount": 29511,
+    "configurationDigest": "b1d1f9cb5e8524f8318fa428bfe0d107747b4996647f8f6111cba65746b75020",
+    "manifestDigest": "787c98f5de951006d08d2420e779c948c9c5e40f2d8c3f286024548fe06c03b1"
+  },
+  "predecessor": {
+    "releaseId": "runaai-next-gate7d-code-verification-2026-08-25-16adbca",
+    "commit": "16adbcaa936cce38d16bdb12fe255a3e441b9c05",
+    "artifactDigest": "7285f2b2b04018b47cc47c16e8a7843ff186403f25d644f8ff02f95a187073ae",
+    "retainedAsAutomaticRollback": true
+  },
+  "rootCause": {
+    "draftCorrectRepetitions": 3,
+    "verifierPromotedPreviousTurnRepetitions": 3,
+    "badCorrectionRetained": false,
+    "classification": "prior-transcript-promoted-to-verification-authority"
+  },
+  "sourceVerification": {
+    "localTestsPassed": 423,
+    "controlTestsPassed": 423,
+    "testsFailed": 0,
+    "testsSkipped": 0,
+    "correctCurrentTurnAccepted": "3/3",
+    "stalePriorTurnRejected": "3/3"
+  },
+  "activation": {
+    "deployed": true,
+    "selectedCoreAuthorityUnchanged": true,
+    "ownerProofRebound": true,
+    "ownerRouteUnchanged": true,
+    "ordinaryPasswordRouteReady": true,
+    "rollbackRetained": true,
+    "legacyModified": false,
+    "protectedProductDataChanged": false
+  },
+  "postActivation": {
+    "cutover": "closed",
+    "authority": "active",
+    "dependenciesReady": true,
+    "protectedDataImported": true,
+    "artifactVerified": true,
+    "pageStatus": 200,
+    "moduleStatus": 200,
+    "activeReleaseExactHistorySmoke": "3/3",
+    "codeVerificationReceiptPresent": true,
+    "localCorrectionClean": true,
+    "controlCorrectionClean": true,
+    "controlIntegrationClean": true,
+    "legacyClean": true
+  },
+  "privateValuesIncluded": false
+}

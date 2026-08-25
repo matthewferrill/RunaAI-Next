@@ -1,9 +1,9 @@
 # Gate 7D end-to-end flow correction results
 
-Status: implementation, exact-Control verification, and the second rollback-protected correction
-activation are complete. Control runs `runaai-next-gate7d-code-verification-2026-08-25-16adbca` at
-`16adbcaa936cce38d16bdb12fe255a3e441b9c05`. The final ordinary-user Code retest and merge remain
-pending.
+Status: implementation, exact-Control verification, and the third rollback-protected correction
+activation are complete. Control runs `runaai-next-gate7d-current-turn-2026-08-25-e10e3db` at
+`e10e3db097d894d1f00b389921ceab0decaff24c`. The final ordinary-user `15 + 15` Code retest and merge
+remain pending.
 
 ## Observed root causes
 
@@ -28,6 +28,13 @@ pending.
    code that calculates `26` while still stating `76`. The evidence therefore supports a model-output
    relevance/consistency failure, not request replay, gateway cache, provider-role drift, or a reason to
    switch models before completing the current stack.
+7. The first verifier then passed the opening and `14 + 12 = 26` live turns but failed twice on the next
+   `15 + 15` request. A transient exact replay produced the correct draft (`30`) 3/3 while the verifier
+   misidentified the earlier `14 + 12` turn as current and proposed `26` 3/3. Correction re-verification
+   rejected that stale proposal, so the application correctly retained no bad turn and showed Retry.
+   A reduced prompt that retained only prior assistant responses still promoted an old code comment to
+   competing authority. The defect was therefore verifier input authority, not draft generation,
+   malformed JSON, timeout, storage, routing, or gateway behavior.
 
 ## Implemented correction
 
@@ -42,11 +49,13 @@ pending.
 - The provider instruction now names `input.request.message` as the current request and forbids
   answering an earlier question in its place. Deterministic tests prove ordering and fresh request
   identities; only live acceptance can prove model response relevance.
-- Standalone Code now performs a separate bounded response verification against the current request
-  and only the relevant retained conversation. Irrelevant prior values, contradictory results, and
-  arithmetic inconsistency are rejected. A proposed correction is returned only after a second
-  verification; malformed, rejected, or unverifiable results remain retryable and unrecorded. This is
-  a response-relevance/consistency guard, not code execution or a claim of formal code correctness.
+- Standalone Code now performs a separate bounded response verification against only the current
+  request and candidate answer. The drafting provider retains bounded conversation continuity; the
+  verifier receives no prior transcript capable of becoming competing authority. Mismatched values,
+  contradictory results, and arithmetic inconsistency are rejected. A proposed correction is returned
+  only after a second verification; malformed, rejected, or unverifiable results remain retryable and
+  unrecorded. The contract explicitly recognizes correct code plus a deterministic expected output
+  without claiming actual execution or formal code correctness.
 - Ordinary sessions keep one bounded absolute lifetime, rotate encrypted access and refresh
   credentials when the access credential expires, serialize concurrent renewal, and preserve the
   original release binding and session identifier. Renewal verifies issuer, audience, subject,
@@ -66,11 +75,14 @@ bounded renewal path.
 
 | Check | Result |
 | --- | --- |
-| Focused provider and Gate 2 suite after Code correction | 24/24 passed |
-| Complete repository suite | 422/422 passed; 0 failed, skipped, or cancelled |
-| Exact commit complete suite on Control | 422/422 passed; 0 failed or skipped |
+| Focused provider suite after current-turn correction | 13/13 passed |
+| Complete repository suite | 423/423 passed; 0 failed, skipped, or cancelled |
+| Exact commit complete suite on Control with required Node 22.22.0 | 423/423 passed; 0 failed or skipped |
 | Isolated private endpoint: standalone opening | 6/6 correct before implementation |
 | Exact source and active-release Code smoke | Opening function and retained `14+12=26` follow-up passed; verification receipts present |
+| Original verifier replay for `15+15` | correct draft 3/3; stale `14+12` correction proposed 3/3, confirming RCA |
+| Current-turn verifier contract | correct complete `15+15=30` accepted 3/3; stale `14+12=26` rejected 3/3 |
+| Active successor integrated smoke | exact user-supplied history returned `15+15=30` with verification receipt 3/3 |
 | `git diff --check` | passed |
 
 The focused coverage includes the exact observed Chat phrase and follow-up, explicit project routing,
@@ -83,11 +95,11 @@ isolation, record reopening, and rollback contracts.
 
 ## Control activations
 
-The first flow-correction successor at `c5c8e31` remained the automatic rollback target while the Code
-failure was diagnosed. The second exact immutable successor has artifact digest
-`7285f2b2b04018b47cc47c16e8a7843ff186403f25d644f8ff02f95a187073ae`, 29,510 artifact files,
-configuration digest `b1d1f9cb5e8524f8318fa428bfe0d107747b4996647f8f6111cba65746b75020`, and manifest
-digest `bb0d2d2d7aab54c6dd00a49ae3dc6a817ff7c4823249dba43c3f8e213a8e0647`.
+The second correction release at `16adbca` remained the exact automatic rollback target while the
+current-turn failure was diagnosed. The third exact immutable successor has artifact digest
+`53cd635b046ea0b47ca4eaa2505104a28bc27982238f0a8a6033940d007a1e8d`, 29,511 artifact files,
+configuration digest `b1d1f9cb5e8524f8318fa428bfe0d107747b4996647f8f6111cba65746b75020`, and manifest digest
+`787c98f5de951006d08d2420e779c948c9c5e40f2d8c3f286024548fe06c03b1`.
 
 The guarded deployer verified every staged hash, the immutable artifact, active predecessor pins,
 unchanged protected configuration, Keycloak owner binding, ordinary and owner routes, selected-core
@@ -97,18 +109,14 @@ commit and artifact running, canonical HTTPS status 200, JavaScript status 200, 
 markers, trusted TLS, and clean correction, integration, and legacy checkouts.
 
 The selected-core authority, imported data, identity policy, model, service identities, network
-exposure, and legacy checkout did not change. The first flow-correction release remains the automatic
+exposure, and legacy checkout did not change. The second correction release remains the exact automatic
 application rollback target. Aggregate evidence is retained in
-`gate7d/GATE7D-CODE-VERIFICATION-CONTROL-ACTIVATION-RESULTS-2026-08-25.json`.
+`gate7d/GATE7D-CURRENT-TURN-VERIFIER-CONTROL-ACTIVATION-RESULTS-2026-08-25.json`.
 
 ## Remaining acceptance gate
 
-The ordinary-user report passed Chat creation, reopening, switching, Italy-to-France relevance, and
-logout/fresh sign-in. Repeat only the failed Code path at the canonical origin in a new Code record:
-
-1. `Write a JavaScript function that adds two numbers.` must return the requested function without
-   invented `64/12` context; and
-2. `Run the program using a = 14 and b = 12.` must return `26`, not `76`.
-
-Merge remains blocked until that live result is recorded. Model/provider changes and real code-work
-capabilities remain separate later decisions.
+The ordinary-user report already passed Chat creation, reopening, switching, Italy-to-France relevance,
+logout/fresh sign-in, the Code opening, and retained `14 + 12 = 26`. Repeat only the last failed message
+at the canonical origin: `Run the program using a = 15 and b = 15.` It must return `30`, not `26`, and
+must not surface the incomplete-response retry. Merge remains blocked until that ordinary-browser result
+is recorded. Model/provider changes and real code-work capabilities remain separate later decisions.

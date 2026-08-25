@@ -343,6 +343,12 @@ export class ReadOnlyAnswerSlice {
       response.model = generated.model;
       response.completion.outputLimited = generated.outputLimited === true;
       response.completion.reason = generated.outputLimited ? "output-limited" : "complete";
+      if (generated.outputVerification?.executed === true) {
+        response.auditCodes.push("code-response-verification-executed");
+        if (generated.outputVerification.corrected === true) {
+          response.auditCodes.push("code-response-corrected-and-reverified");
+        }
+      }
       if (checked.unknown.length) {
         response.answer += "\n\nI couldn't verify one or more references in that answer.";
         response.completion.reason = "citation-unverified";

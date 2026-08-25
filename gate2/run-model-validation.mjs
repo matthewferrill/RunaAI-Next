@@ -48,6 +48,18 @@ const cases = [
     message: "Summarize the explicit synthetic workspace source.",
     workspace: { sources: [{ sourceId: "workspace", sectionId: "explicit" }] },
     quality: response => /explicit|extra read|source/i.test(response.answer) },
+  { id: "standalone-code-current-request", lane: "code", role: "code",
+    message: "Write a JavaScript function that adds two numbers.",
+    quality: response => /function\s+addNumbers|(?:a\s*,\s*b)\s*=>/i.test(response.answer)
+      && /return\s+a\s*\+\s*b/i.test(response.answer)
+      && !/\b(?:64|76)\b/.test(response.answer) },
+  { id: "standalone-code-retained-followup", lane: "code", role: "code",
+    message: "Run the program using a = 14 and b = 12.",
+    history: [
+      { role: "user", content: "Write a JavaScript function that adds two numbers." },
+      { role: "assistant", content: "function addNumbers(a, b) { return a + b; }" },
+    ],
+    quality: response => /\b26\b/.test(response.answer) && !/\b76\b/.test(response.answer) },
 ];
 
 const providers = Object.fromEntries(Object.entries(modelIds).map(([role, modelId]) => [role,
@@ -72,7 +84,7 @@ for (const testCase of cases) {
       project: { projectId },
       thread: { threadId: `model-${testCase.id}-${repetition}` },
       message: testCase.message,
-      history: [],
+      history: testCase.history ?? [],
       workspace: testCase.workspace ?? null,
       budgets: { deadlineMs: 30_000, maximumPasses: 8, maximumPassages: 8,
         maximumEvidenceCharacters: 8_000 },
@@ -91,7 +103,10 @@ for (const testCase of cases) {
       protectedStoresClosed: response.status.protectedStoresOpened === false,
       gatesExecuted: response.gates.executed === true,
       modelIdentity: response.model.modelId === modelIds[testCase.role],
-      citationsRecognized: response.citations.length > 0 && !response.auditCodes.includes("unknown-citation"),
+      citationsRecognized: testCase.lane === "code"
+        ? response.citations.length === 0
+          && response.auditCodes.includes("code-response-verification-executed")
+        : response.citations.length > 0 && !response.auditCodes.includes("unknown-citation"),
       workspaceBounded: testCase.lane !== "workspace" ||
         (response.workspace.extraReads === 0 && response.workspace.resolvedSources === 1),
     } : {};

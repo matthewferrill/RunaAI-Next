@@ -155,6 +155,7 @@ test("the observed Chat sequence and standalone Code bypass project knowledge", 
     research: new ScriptedProvider({ role: "research" }),
     code: new ScriptedProvider({ role: "code", reply: ({ request }) => ({
       answer: `Code current: ${request.message}`, citations: [],
+      outputVerification: { executed: true, corrected: false },
     }) }),
   };
   const context = harness({ approvedKnowledge, providers });
@@ -171,6 +172,8 @@ test("the observed Chat sequence and standalone Code bypass project knowledge", 
   assert.equal(code.answer, "Code current: Write a JavaScript function that adds two numbers.");
   assert.equal(code.model.role, "code");
   assert.equal(code.approvedKnowledge.reason, "not-applicable-code-conversation");
+  assert.ok(code.auditCodes.includes("code-response-verification-executed"));
+  assert.ok(!code.auditCodes.includes("code-response-corrected-and-reverified"));
   assert.equal(selections, 0);
   assert.equal(context.providers.chat.calls.length, 2);
   assert.equal(context.providers.code.calls.length, 1);

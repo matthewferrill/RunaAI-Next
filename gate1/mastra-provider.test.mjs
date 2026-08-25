@@ -90,7 +90,8 @@ test("standalone Code replaces an irrelevant draft only after the correction ver
   assert.equal(context.verificationCalls.length, 2);
   assert.equal(context.verificationCalls[0].prompt.currentRequest,
     "Write a JavaScript function that adds two numbers.");
-  assert.deepEqual(context.verificationCalls[0].prompt.conversationHistory, []);
+  assert.equal(context.verificationCalls[0].prompt.schemaVersion,
+    "runa2-code-response-verification/v2");
 });
 
 test("standalone Code rejects 76 and verifies 26 against the retained current turn", async () => {
@@ -108,7 +109,33 @@ test("standalone Code rejects 76 and verifies 26 against the retained current tu
   }, options);
   assert.equal(answer.answer, "26");
   assert.deepEqual(answer.outputVerification, { executed: true, corrected: true });
-  assert.deepEqual(context.verificationCalls[0].prompt.conversationHistory, history);
+  assert.equal("conversationHistory" in context.verificationCalls[0].prompt, false);
+  assert.equal("priorAssistantResponses" in context.verificationCalls[0].prompt, false);
+});
+
+test("standalone Code verifier excludes a previous numeric request from the current turn", async () => {
+  const history = [
+    { role: "user", content: "Write a JavaScript function that adds two numbers." },
+    { role: "assistant", content: "function addNumbers(a, b) { return a + b; }" },
+    { role: "user", content: "Run the program using a = 14 and b = 12." },
+    { role: "assistant", content: "console.log(addNumbers(14, 12)); // Output: 26" },
+  ];
+  const context = codeProvider("console.log(addNumbers(15, 15)); // Output: 30", [
+    JSON.stringify({ accepted: true, reason: "current values and arithmetic are correct", correctedAnswer: null }),
+  ]);
+  const answer = await context.provider.answer({
+    request: { lane: "general", message: "Run the program using a = 15 and b = 15.", history },
+    ground: "no-ground-needed", advisory: null, evidence: [],
+  }, options);
+  assert.match(answer.answer, /30/);
+  assert.equal(context.verificationCalls.length, 1);
+  assert.equal(context.verificationCalls[0].prompt.currentRequest,
+    "Run the program using a = 15 and b = 15.");
+  assert.equal(JSON.stringify(context.verificationCalls[0].prompt).includes(
+    "Run the program using a = 14 and b = 12."), false);
+  assert.deepEqual(Object.keys(context.verificationCalls[0].prompt), [
+    "schemaVersion", "currentRequest", "candidateAnswer",
+  ]);
 });
 
 test("standalone Code accepts a relevant consistent draft with one verification", async () => {

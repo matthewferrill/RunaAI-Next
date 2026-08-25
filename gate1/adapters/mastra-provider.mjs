@@ -66,11 +66,13 @@ export class MastraAnswerProvider {
       maxRetries: 0,
       instructions: [
         "You are a strict Code response verifier.",
-        "currentRequest is the only request to answer; conversationHistory is context only.",
-        "Compare candidateAnswer with currentRequest and only the relevant program or definitions in conversationHistory.",
+        "currentRequest is the only request to answer.",
+        "Compare candidateAnswer only with currentRequest.",
+        "No earlier conversation is included because it is not verification authority.",
         "Check current-request relevance, numeric-value retention, contradictions, and arithmetic.",
+        "There is no code execution tool. For a run request, correct code plus a correct deterministic expected output is acceptable; never require or claim actual execution.",
         "Return exactly one JSON object with accepted as a boolean, reason as a short string, and correctedAnswer as a string or null.",
-        "If rejected, correctedAnswer must directly answer currentRequest using relevant prior code, contain no discussion of the rejected draft, and be null only if the request truly cannot be answered from currentRequest plus conversationHistory.",
+        "If rejected, correctedAnswer must directly answer currentRequest, contain no discussion of the rejected draft, and be null only if the request truly cannot be answered from currentRequest and candidateAnswer.",
         "Do not describe hidden reasoning.",
       ].join(" "),
     }) : null;
@@ -141,10 +143,9 @@ export class MastraAnswerProvider {
   async #verifyCode(request, candidateAnswer, deadlineAt, maximumOutputBytes) {
     const verify = async answer => {
       const prompt = JSON.stringify({
-        schemaVersion: "runa2-code-response-verification/v1",
-        conversationHistory: request.history,
-        candidateAnswer: answer,
+        schemaVersion: "runa2-code-response-verification/v2",
         currentRequest: request.message,
+        candidateAnswer: answer,
       });
       const result = await this.#generate(this.verifierAgent, prompt, deadlineAt,
         Math.max(768, this.maxOutputTokens));

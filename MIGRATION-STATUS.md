@@ -454,7 +454,7 @@ plain-language steward experience, or governed action pathway.
 | 7A | Multi-device access foundation | Canonical LAN origin, owner passkey path, SMTP/invitation, separate ordinary password client, and Omen customer acceptance active | Representative clients, certificate renewal, and off-LAN boundary remain |
 | 7B | Complete customer journey through the selected read-only stack | Complete; production sign-in, sustained chat, safe presentation, exact-release recheck, and rollback evidence green | Approved by steward 2026-08-24; completed 2026-08-24 |
 | 7C | First user-interface shell | Complete and superseded on Control by the Gate 7D presentation release | Source integration remains part of the Gate 7D review chain |
-| 7D | Identity-aware Chat/Code navigation and end-to-end flow correction | Prior navigation release active; correction source verified 418/418 at `be6d0cd`; rollback-protected successor and live acceptance pending | Approved correction is in progress; merge remains gated by live acceptance |
+| 7D | Identity-aware Chat/Code navigation and end-to-end flow correction | Correction successor active on Control at `c5c8e31`; source and exact-Control suites 418/418; live acceptance pending | Merge remains gated by ordinary-user live acceptance |
 | 7E+ | Deferred product extensions | Not started; capability inventory and prioritization follow Gate 7D acceptance | New baseline and separate decision per extension group |
 
 ## Bootstrap validation
@@ -499,9 +499,8 @@ No dependency was changed during the prerequisite disposition. Full evidence is 
 
 ## Next operation
 
-Push the source-verified Gate 7D correction branch, build and verify one exact immutable successor, and
-activate it through the existing ordinary-access deployer with the current Gate 7D release as its automatic
-application rollback target. Live acceptance must repeat ordinary Chat, standalone Code, record reopening,
+At `https://runa.bridgebuildersai.com`, complete the ordinary-user acceptance sequence for the active
+correction successor: fresh password sign-in, ordinary Chat, standalone Code, record reopening,
 Italy-to-France topic relevance, access-token renewal, logout, and fresh sign-in. Do not merge the review
 chain until that result is green.
 

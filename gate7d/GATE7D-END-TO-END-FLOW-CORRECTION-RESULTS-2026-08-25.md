@@ -1,9 +1,8 @@
 # Gate 7D end-to-end flow correction results
 
-Status: implementation and synthetic verification complete at
-`be6d0cd9274e9f622e5fa3eb9aa81aabb060ccf4`. Control still runs the exact prior Gate 7D release
-`runaai-next-gate7a-lan-chat-code-2026-08-25-65b907b`; no successor activation or merge is claimed by
-this result.
+Status: implementation, exact-Control verification, and rollback-protected successor activation are
+complete. Control runs `runaai-next-gate7d-flow-correction-2026-08-25-c5c8e31` at
+`c5c8e31cdf422fe02873091fee21efadb521bcbc`. Ordinary-user live acceptance and merge remain pending.
 
 ## Observed root causes
 
@@ -56,6 +55,7 @@ bounded renewal path.
 | --- | --- |
 | Focused Gate 1, provider, Gate 2, Gate 6B, Gate 7A, Gate 7B, and Gate 7D suite | 174/174 passed |
 | Complete repository suite | 418/418 passed; 0 failed, skipped, or cancelled |
+| Exact commit complete suite on Control | 418/418 passed; 0 failed or skipped |
 | `git diff --check` | passed |
 
 The focused coverage includes the exact observed Chat phrase and follow-up, explicit project routing,
@@ -66,10 +66,28 @@ expiry, transient retry, refresh rejection, issuer/audience/subject/method misma
 online profile verification, logout, existing navigation, origin enforcement, participant/project
 isolation, record reopening, and rollback contracts.
 
+## Control activation
+
+The exact immutable successor has artifact digest
+`9fccfd51723234b18c3b74eec5ccd367ebb035726003ef305861483faa891023`, 29,509 artifact files,
+configuration digest `b1d1f9cb5e8524f8318fa428bfe0d107747b4996647f8f6111cba65746b75020`, and manifest
+digest `10f833da594c3000f202fedc8925c0d26cacd6f4b6043506766565af9bfc3c07`.
+
+The guarded deployer verified every staged hash, the immutable artifact, active predecessor pins,
+unchanged protected configuration, Keycloak owner binding, ordinary and owner routes, selected-core
+authority, protected import, public presentation contract, and rollback readiness before success. An
+independent post-check confirmed closed cutover, active authority, all dependencies ready, the exact
+commit and artifact running, canonical HTTPS status 200, JavaScript status 200, all page/controller
+markers, trusted TLS, and clean correction, integration, and legacy checkouts.
+
+The selected-core authority, imported data, identity policy, model, service identities, network
+exposure, and legacy checkout did not change. The previous Gate 7D immutable release remains the
+automatic application rollback target. Aggregate evidence is retained in
+`gate7d/GATE7D-FLOW-CORRECTION-CONTROL-ACTIVATION-RESULTS-2026-08-25.json`.
+
 ## Remaining acceptance gate
 
-After exact source verification, activate one rollback-protected successor whose automatic application
-rollback target is the currently active Gate 7D release. Then repeat at the canonical origin:
+Repeat at the canonical origin:
 
 1. fresh ordinary password sign-in and Chat greeting;
 2. the exact `This chat is a test` sequence without a project-knowledge error;

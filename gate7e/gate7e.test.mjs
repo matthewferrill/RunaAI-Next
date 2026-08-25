@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import { EventEmitter, once } from "node:events";
-import { cp, copyFile, mkdir, mkdtemp, readFile, readdir, rm } from "node:fs/promises";
+import { cp, copyFile, mkdir, mkdtemp, readFile, readdir, realpath, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { spawn } from "node:child_process";
@@ -251,6 +251,7 @@ async function runQuickJsChild(source, { storedSource = source, digest = sha256(
   try {
     if (removeBeforeRun) await transport.cleanup();
     const args = permissionModel ? ["--permission", `--allow-fs-read=${resolve(".")}`,
+      `--allow-fs-read=${await realpath(resolve("node_modules"))}`,
       `--allow-fs-read=${transport.sourcePath}`] : [];
     args.push(runner, `--source-file=${transport.sourcePath}`, `--source-sha256=${digest}`);
     const child = spawn(process.execPath, args, { stdio: ["ignore", "pipe", "pipe"], env: {} });

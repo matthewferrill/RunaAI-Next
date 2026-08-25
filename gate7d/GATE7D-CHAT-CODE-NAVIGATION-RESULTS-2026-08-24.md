@@ -1,16 +1,18 @@
 # Gate 7D Chat and Code navigation results
 
-Status: implemented and verified in source. Control and production remain unchanged pending the
-separate rollback-protected release review.
+Status: active on Control after exact rollback-protected activation and independent reconciliation.
+Merge remains a separate decision after ordinary-user live review.
 
 ## Exact scope
 
 - Parent Gate 7C source: `fc8e5480957471d8b28bad370ac0c383bcb856f0`.
 - Frozen scope and green criteria: `27fa026b60d9cd430cee7cd344ae8a9e353ecf48`.
 - Navigation implementation: `7b9b3bbcdaae03193edcef37b84bfe7d175415f5`.
+- Deployment validation was hardened at `fa1ac32b1002b89b7c32e0876ca4e8114acb0871` so the live UI
+  contract is checked inside the automatic-rollback window.
+- Successor launcher binding was hardened at `65b907b30fc58dcc1aac46edb8dce773018371d3`.
 - Review branch: `codex/gate7d-chat-code-navigation`.
-- Active Control release remains the Gate 7C release
-  `runaai-next-gate7a-lan-ui-2026-08-24-9cea964`.
+- Active Control release: `runaai-next-gate7a-lan-chat-code-2026-08-25-65b907b`.
 
 Gate 7D adds the first useful content to the reviewed three-column shell. It does not port the old
 RunaAI application architecture. The center remains the ordinary private conversation surface, the
@@ -52,6 +54,7 @@ was added.
 | --- | --- |
 | `npm run test:gate7d` | 8/8 passed |
 | `npm test` | 406/406 passed; 0 failed or skipped |
+| Exact commit suite on Control | 406/406 passed; 0 failed or skipped |
 | `git diff --check` | passed |
 
 The focused tests cover bounded identity projection, online session identity, explicit and legacy
@@ -79,11 +82,40 @@ The browser-control skill made the desktop and phone review operate against the 
 including tab switching and the project form, rather than relying only on source inspection. The
 temporary preview process was stopped and its helper file was removed before commit.
 
+## Control activation and reconciliation
+
+The exact activated release is:
+
+- release: `runaai-next-gate7a-lan-chat-code-2026-08-25-65b907b`;
+- commit: `65b907b30fc58dcc1aac46edb8dce773018371d3`;
+- artifact digest: `bb02e17fa50f602ce255f0bb5a6d95b295190259acc3c4549f2494251f4657d2`;
+- configuration digest: `b1d1f9cb5e8524f8318fa428bfe0d107747b4996647f8f6111cba65746b75020`;
+- manifest digest: `ee24e7f36c468ae87e223f8ae9a6971449479e99bfe085c13959297e1a30b5df`;
+- artifact files: 29,506.
+
+The first exact activation candidate, `runaai-next-gate7d-chat-code-2026-08-25-fa1ac32`, failed closed.
+Its staged launcher was byte-identical to the Gate 7C launcher and therefore started the predecessor
+release against the successor manifest. Artifact verification rejected the mismatch, the readiness
+deadline expired, and the deployment operator automatically restored the exact Gate 7C release,
+configuration, launcher, Caddyfile, authority, and readiness state. No protected data, identity,
+network, or legacy state changed. The operator now rejects any staged launcher that does not name the
+exact successor release, runtime, and entry point before it creates a release or rollback path.
+
+The corrected activation passed all guarded checks. It started the exact commit and artifact, closed
+cutover with selected-core authority active, confirmed the protected import, rebound the already
+completed owner proof without changing authority, preserved the owner passkey and ordinary password
+routes, and validated the public HTML and JavaScript contract before success. An independent post-check
+returned HTTP 200 for both the canonical page and `status.js`, JavaScript MIME, every required identity,
+Chat/Code, New, Project, project-list, record-list, and right-rail marker, and all required authenticated
+navigation and deterministic role-routing markers. The exact aggregate activation evidence is retained
+in `gate7d/GATE7D-CONTROL-ACTIVATION-RESULTS-2026-08-25.json`.
+
 ## Boundaries and rollback
 
-No Control service, production traffic, PostgreSQL row, protected record, identity setting, network
-configuration, model, legacy RunaAI checkout, or active release changed. Source rollback is reverting
-the Gate 7D implementation commit or discarding this dependent branch.
+Control's application release and production traffic now use the exact Gate 7D artifact. Selected-core
+authority, PostgreSQL data, protected records, identity settings, Caddy configuration, network exposure,
+model configuration, and the legacy RunaAI checkout did not change. Source rollback is reverting the
+Gate 7D commits; the retained application rollback target is the exact Gate 7C immutable release.
 
 A later application rollback must preserve any ordinary projects and completed chats created after
 deployment; those are user-owned authoritative records, not disposable release state. Because Gate 7D
@@ -93,7 +125,7 @@ rollback target.
 
 ## Review gate
 
-The next step is to prepare and review one exact Gate 7D immutable-release projection against the
-current Control predecessor. Control deployment requires the steward's separate authorization and must
-automatically restore Gate 7C if preflight, activation, readiness, identity, navigation, or chat
-reconciliation fails. Merge remains a separate decision after live ordinary-user validation.
+The remaining Gate 7D decision is ordinary-user live review at the canonical origin: verify the signed-in
+identity, separate Chat and Code lists, New behavior, project creation, record reopening, and continued
+ordinary conversation. Merge remains a separate decision after that review. Code remains conversation
+only; repository access, files, execution, tools, and external networking require later gated designs.

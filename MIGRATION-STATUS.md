@@ -1,6 +1,6 @@
 # RunaAI migration status
 
-Status date: 2026-08-24. This is the living migration handoff for RunaAI-Next. Update it in the same
+Status date: 2026-08-25. This is the living migration handoff for RunaAI-Next. Update it in the same
 commit whenever a gate changes repository direction, authority, implementation status, safety
 boundaries, verification state, or the next planned work.
 
@@ -13,7 +13,7 @@ boundaries, verification state, or the next planned work.
 | RunaAI-Next `main` | Exact inherited RunaLab completion baseline | Stable integration target only after reviewed migration completion |
 | RunaAI-Next `runa2/integration` | Accumulated accepted migration gates | Development integration; not production |
 | Short-lived `runa2/*` gate branches | One approved, measured migration slice | Experimental until validated and approved |
-| Control release `runaai-next-gate7a-lan-ui-2026-08-24-9cea964` | Running selected-core RunaAI application at the canonical LAN origin | Production authority for the exact selected read-only core and reviewed three-column shell; later product capabilities remain separately decision-gated |
+| Control release `runaai-next-gate7a-lan-chat-code-2026-08-25-65b907b` | Running selected-core RunaAI application at the canonical LAN origin | Production authority for the exact selected read-only core and reviewed Chat/Code navigation; later product capabilities remain separately decision-gated |
 
 The product name is RunaAI. `RunaAI-Next`, `runa2`, and similar labels are repository and branch
 identifiers during migration, not product identities.
@@ -58,13 +58,13 @@ repository and never push migration work into either source repository.
   the only new LAN-facing service on TCP 443, and every backend remains loopback-bound. Keycloak now
   advertises the same-origin `/auth` issuer and `runa.bridgebuildersai.com` RP ID. The session cookie is
   host-only, `Secure`, `HttpOnly`, and explicitly `SameSite=Lax`; off-LAN ingress remains disabled.
-- The exact active release is `runaai-next-gate7a-lan-ui-2026-08-24-9cea964`, commit
-  `9cea964073523023bafb7a54d3f911f5cafa3c31`, artifact digest
-  `137dd471978f9762f9e337814023245345b1e9579606cfaf2aed3dbd7f4cedd5`, and manifest digest
-  `15b47ed97a8b61796966f7078aa9acdd5f84c204609200a68160bd0c407d5174`. Authority is active,
-  cutover is closed at revision 10, all four dependencies are ready, and the 29,503-file artifact is
-  verified. The predecessor is retained for rollback; configuration, identity, legacy, and protected
-  product data are unchanged. The full repository suite passes 398/398 at that commit.
+- The exact active release is `runaai-next-gate7a-lan-chat-code-2026-08-25-65b907b`, commit
+  `65b907b30fc58dcc1aac46edb8dce773018371d3`, artifact digest
+  `bb02e17fa50f602ce255f0bb5a6d95b295190259acc3c4549f2494251f4657d2`, and manifest digest
+  `ee24e7f36c468ae87e223f8ae9a6971449479e99bfe085c13959297e1a30b5df`. Authority is active,
+  cutover is closed, all four dependencies are ready, and the 29,506-file artifact is verified. The
+  exact Gate 7C predecessor is retained for rollback; configuration digest, identity, legacy, and
+  protected product data are unchanged. The exact commit suite passes 406/406.
 - Gate 7A is not closed. Canonical-origin owner passkey sign-in has completed and the protected
   `matthew-owner` path remains passkey-only. The steward approved a separate ordinary-user model:
   invitation-only enrollment, an individual username/password, verified-email recovery, and an
@@ -108,8 +108,8 @@ repository and never push migration work into either source repository.
   mobile grid placement. The exact rollback-protected successor is now active on Control as the release
   named above; its configuration digest is unchanged, owner proof and both login routes reconciled, and
   its predecessor remains retained. Full evidence is in
-  `gate7c/GATE7C-UI-SHELL-RESULTS-2026-08-24.md`. The steward must review the proportions and visual
-  direction before any rail receives a product capability and before this branch is merged.
+  `gate7c/GATE7C-UI-SHELL-RESULTS-2026-08-24.md`. The steward accepted the proportions and visual
+  direction before Gate 7D added the first rail capability.
 - The steward accepted Gate 7C's overall visual direction and requested the first left-rail capability.
   Gate 7D is frozen and implemented on the dependent `codex/gate7d-chat-code-navigation` branch.
   It replaces the generic ordinary-member label with a bounded initials avatar and signed-in display
@@ -120,9 +120,19 @@ repository and never push migration work into either source repository.
   or protected-record capability. Focused validation passes 8/8, the full repository suite passes
   406/406, `git diff --check` passes, and desktop/phone visual checks passed against a disposable
   loopback preview. Source commits are `27fa026` for frozen criteria, `7b9b3bb` for implementation,
-  and `3ddaee0` for evidence. Control remains on the exact Gate 7C release above; the next blocker is
-  steward authorization for an exact rollback-protected Gate 7D successor projection and activation.
-  Full evidence is in `gate7d/GATE7D-CHAT-CODE-NAVIGATION-RESULTS-2026-08-24.md`.
+  `3ddaee0` for source evidence, `fa1ac32` for rollback-window live validation, and `65b907b` for exact
+  successor launcher binding. The corrected exact release is active on Control. Authority, protected
+  data, identity, Caddy configuration, network exposure, model configuration, and legacy RunaAI remain
+  unchanged. The retained Gate 7C release is the automatic application rollback target. Full evidence
+  is in `gate7d/GATE7D-CHAT-CODE-NAVIGATION-RESULTS-2026-08-24.md`; the remaining Gate 7D decision is
+  ordinary-user live review followed by a separate merge decision.
+- Gate 7D's first exact activation attempt failed closed because its staged launcher was still bound to
+  Gate 7C while its manifest named Gate 7D. Artifact verification rejected the mismatch and the guarded
+  operator automatically restored the exact Gate 7C release and readiness state. The corrected operator
+  now rejects a predecessor-bound launcher before creating release or rollback paths. The second attempt
+  used a newly generated successor-bound launcher, activated the exact commit and artifact, reconciled
+  owner and ordinary login routes, and validated every required live HTML and controller marker before
+  reporting success. No protected or private values were retained in the evidence.
 - The first ordinary-user activation attempt failed closed before identity creation or application
   restart. RCA: Windows PowerShell 5.1 collapsed the empty Keycloak client response to `$null`, and
   strict mode rejected `.Count`. Normalized reconciliation then proved zero ordinary clients, zero

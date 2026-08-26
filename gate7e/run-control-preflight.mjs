@@ -1,11 +1,12 @@
 import { copyFile, mkdir, mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { join, resolve } from "node:path";
 import { getPlatformSupport } from "@microsoft/mxc-sdk";
 import { stageSandboxRuntime } from "../gate6b/sandbox-runtime.mjs";
 import { MxcJavascriptExecutor } from "./mxc-javascript-executor.mjs";
 
-const root = await mkdtemp(join(tmpdir(), "runa2-gate7e-control-preflight-"));
+const temporaryParent = process.platform === "win32" ? resolve(process.cwd(), "..") : tmpdir();
+const root = await mkdtemp(join(temporaryParent, "runa2-gate7e-control-preflight-"));
 let diagnostic = null;
 try {
   if (process.platform !== "win32" || process.version !== "v22.22.0") {
@@ -27,7 +28,8 @@ try {
   const nodeExecutable = join(runtimeRoot, "node.exe");
   await copyFile(process.execPath, nodeExecutable);
   const executor = new MxcJavascriptExecutor({ runtimeRoot: sandboxRoot,
-    runnerPath: join(sandboxRoot, "quickjs-child.mjs"), nodeExecutable });
+    runnerPath: join(sandboxRoot, "quickjs-child.mjs"), nodeExecutable,
+    temporaryRoot: root });
   const preflight = await executor.preflight();
   if (preflight.ready !== true || preflight.receipt.status !== "executed"
       || preflight.receipt.output.stdout !== "runa2-sandbox-ready\n") {

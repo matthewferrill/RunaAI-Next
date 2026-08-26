@@ -113,6 +113,12 @@ enable Win32k startup compatibility only if generated-policy tests prove all rem
 stay active and QuickJS continues to expose no GUI host object. The execution receipt must state that
 restricted compatibility mode rather than claim that UI is wholly denied.
 
+The SYSTEM task profile temp tree is not an accepted transient-source parent because the selected
+AppContainer cannot traverse that profile ancestry. Production uses an application-owned transient root
+beside `config`, outside every immutable release. Each request still gets one exclusively created private
+subdirectory and exact source file; MXC and Node receive only a read grant to that file, and the request
+subdirectory is removed before any receipt returns.
+
 After successful reconciliation:
 
 1. MXC's read-only support probe must no longer report `prepare-system-drive-required`.

@@ -91,12 +91,14 @@ function boundedError(error) {
 export class MxcJavascriptExecutor {
   constructor({ runtimeRoot = resolve(import.meta.dirname, ".."),
     runnerPath = resolve(import.meta.dirname, "quickjs-child.mjs"), nodeExecutable = process.execPath,
+    temporaryRoot = tmpdir(),
     sdk = { createConfigFromPolicy, getPlatformSupport, spawnSandboxFromConfig },
     sourceTransport = createTransientSource,
     now = () => Date.now() } = {}) {
     this.runtimeRoot = resolve(runtimeRoot);
     this.runnerPath = resolve(runnerPath);
     this.nodeExecutable = resolve(nodeExecutable);
+    this.temporaryRoot = resolve(temporaryRoot);
     this.sdk = sdk;
     this.sourceTransport = sourceTransport;
     this.now = now;
@@ -117,7 +119,8 @@ export class MxcJavascriptExecutor {
     let cleanupFailed = false;
     try {
       support = supportFor(this.sdk);
-      sourceTransport = await this.sourceTransport({ source: request.source, sourceSha256 });
+      sourceTransport = await this.sourceTransport({ source: request.source, sourceSha256,
+        temporaryRoot: this.temporaryRoot });
       const config = this.sdk.createConfigFromPolicy({
         version: "0.8.0-alpha",
         filesystem: { readonlyPaths: [this.runtimeRoot, dirname(this.nodeExecutable), sourceTransport.sourcePath],

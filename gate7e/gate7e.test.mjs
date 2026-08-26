@@ -140,10 +140,14 @@ test("the Windows-compatible MXC policy retains every enforceable job UI restric
 
 test("transient source transport is exclusive, exact, and removed before return", async () => {
   const source = "console.log('private draft')";
-  const transport = await createTransientSource({ source, sourceSha256: sha256(source) });
-  assert.equal(await readFile(transport.sourcePath, "utf8"), source);
-  await transport.cleanup();
-  await assert.rejects(readFile(transport.sourcePath));
+  const temporaryRoot = await mkdtemp(join(tmpdir(), "runa2-gate7e-transport-root-"));
+  try {
+    const transport = await createTransientSource({ source, sourceSha256: sha256(source), temporaryRoot });
+    assert.equal(transport.sourcePath.startsWith(temporaryRoot), true);
+    assert.equal(await readFile(transport.sourcePath, "utf8"), source);
+    await transport.cleanup();
+    await assert.rejects(readFile(transport.sourcePath));
+  } finally { await rm(temporaryRoot, { recursive: true, force: true }); }
 });
 
 test("source transport and cleanup failures fail closed without output", async () => {
@@ -399,6 +403,8 @@ test("public code execution wiring and the compact release runtime preserve the 
   assert.match(styles, /\.execution-badge/);
   assert.match(server, /request\.method === "POST" && url\.pathname === "\/api\/selected\/code\/execute"/);
   assert.match(composition, /runtimeRoot: resolve\(releaseRoot, "sandbox-runtime"\)/);
+  assert.match(composition, /"transient", "javascript"/);
+  assert.match(composition, /temporaryRoot: javascriptTransientRoot/);
   assert.match(composition, /runnerPath: resolve\(releaseRoot, "sandbox-runtime", "quickjs-child\.mjs"\)/);
   assert.match(composition, /ready: postgresql && keycloak && openfga && provider && sandboxPreflight\.ready/);
   assert.match(builder, /stageSandboxRuntime\(\{ sourceRoot: root, nodeModulesRoot: nodeModules,/);
@@ -447,6 +453,7 @@ test("the Control repair is target-only, fail-closed, and preserves descendant D
   assert.match(systemPreflight, /privateValuesIncluded=\$false/);
   assert.doesNotMatch(systemPreflight, /Write-Output \$stdoutText|Write-Output \$stderrText/);
   assert.match(preflight, /destinationRoot: root/);
+  assert.match(preflight, /temporaryRoot: root/);
   assert.match(preflight, /receipt\.status !== "executed"/);
   assert.match(preflight, /arithmetic\.output\.stdout !== "140\\n"/);
   assert.match(preflight, /sandboxExitCode: preflight\.receipt\.exitCode/);

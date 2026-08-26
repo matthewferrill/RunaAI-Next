@@ -1,4 +1,4 @@
-import { readFile } from "node:fs/promises";
+import { mkdir, readFile } from "node:fs/promises";
 import { isAbsolute, resolve } from "node:path";
 import pg from "pg";
 import { MastraAnswerProvider } from "../gate1/adapters/mastra-provider.mjs";
@@ -82,10 +82,13 @@ export async function createProductionComposition({ loadedConfig, releaseRoot })
     throw coded("release-entrypoint-mismatch", "The release manifest names another application entry point.");
   }
   const artifact = await verifyReleaseArtifact(releaseRoot, manifest.artifactDigest);
+  const javascriptTransientRoot = resolve(loadedConfig.directory, "..", "transient", "javascript");
+  await mkdir(javascriptTransientRoot, { recursive: true });
   const javascriptExecutor = new MxcJavascriptExecutor({
     runtimeRoot: resolve(releaseRoot, "sandbox-runtime"),
     runnerPath: resolve(releaseRoot, "sandbox-runtime", "quickjs-child.mjs"),
     nodeExecutable: resolve(releaseRoot, "runtime", "node.exe"),
+    temporaryRoot: javascriptTransientRoot,
   });
   const sandboxPreflight = await javascriptExecutor.preflight();
   if (!sandboxPreflight.ready) {

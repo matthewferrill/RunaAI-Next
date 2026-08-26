@@ -40,6 +40,11 @@ command-line protocol fields; source content is not present in the command line,
 or diagnostic output. Missing, changed, oversized, or digest-mismatched source fails closed, and cleanup
 failure suppresses output and execution status.
 
+The SYSTEM-context Control probe also proved that the scheduled-task profile temp ancestry is not
+traversable by the selected AppContainer. Production therefore uses a retained, application-owned empty
+transient root outside immutable releases. Each request still creates and removes its own private child
+directory and grants the guest read-only access to only the exact source file.
+
 MXC is defense in depth, not the sole security boundary. Microsoft marks MXC as an early preview and says its current profiles should not be treated as security boundaries. Node likewise describes its permission model as a safety belt rather than protection against malicious code. Runa therefore relies first on the no-host-capability QuickJS context, then adds Node permissions and MXC containment. Application startup requires an exact real execution through all three layers; a support report alone is not enough.
 
 ## Fixed harmless envelope

@@ -1,0 +1,13 @@
+{
+  "schemaVersion": "runa2-gate7f1-stub-result/v1",
+  "passed": true,
+  "corpusSha256": "bbbc7bf6232015391cce144804691fb0433e9f34b00f493b55a12c893198edf3",
+  "cases": 35,
+  "runs": 105,
+  "categories": 8,
+  "rawResponsesRetained": false,
+  "modelCalled": false,
+  "networkCalled": false,
+  "productionChanged": false,
+  "privateValuesIncluded": false
+}

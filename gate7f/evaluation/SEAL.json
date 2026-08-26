@@ -1,0 +1,16 @@
+{
+  "schemaVersion": "runa2-gate7f1-seal/v1",
+  "sealedAt": "2026-08-26T00:00:00.000Z",
+  "corpusCanonicalSha256": "bbbc7bf6232015391cce144804691fb0433e9f34b00f493b55a12c893198edf3",
+  "files": {
+    "gate7f/evaluation/corpus.json": "cae700fc4d976a8c8885934ac8231981eef1e54525b99788fed331412c4c2983",
+    "gate7f/evaluation/contracts.mjs": "6f55299051817b313188cba8350984025a98b9e2f491dc65791096ed6f2e7ab0",
+    "gate7f/evaluation/grader.mjs": "3d796c85c89037b4bf58ff80b45df52f914dd9a7568f0607b67fda9cd9929abb",
+    "gate7f/evaluation/prompt.mjs": "ba5265ea6d1e6a2d73db15f9e2ec80c3657a8cc80b22875dc7abc694080fc2d3",
+    "gate7f/GATE7F1-GEMMA-INCUMBENT-BURNIN-PREREGISTRATION-2026-08-26.md": "10ec3bc7e28a8b54dcf509765735e2fdd342afe0b61acfe5ad972733d90e0187"
+  },
+  "modelDownloaded": false,
+  "modelCalled": false,
+  "networkCalledByEvaluationPackage": false,
+  "productionChanged": false
+}

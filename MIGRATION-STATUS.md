@@ -185,6 +185,15 @@ repository and never push migration work into either source repository.
   autopilot without a real filesystem, process, network, provider, model, protected-data, or production
   effect. It is not browser-wired or deployed. Full evidence is in
   `gate7f/GATE7F0-INERT-AGENT-FOUNDATION-RESULTS-2026-08-26.md`.
+- Gate 7F-1 is preregistered and sealed before any model output. The exact first new arm is Google's
+  first-party Apache-2.0 Gemma 4 26B A4B instruction-tuned QAT Q4_0 GGUF; Gemma 4 31B is an exact
+  conditional quality arm, and the installed Qwen3 Coder remains the mandatory incumbent rerun. The
+  deterministic corpus contains 35 cases repeated three times, with hard all-attempt gates for
+  current-turn relevance, authority boundaries, and execution honesty. Focused validation passes
+  11/11, the complete 105/105 offline stub denominator passes, the five-file seal passes, and the full
+  repository suite passes 480/480 across 462 subtests. No model was downloaded, loaded, called, or
+  selected. Full evidence is in
+  `gate7f/GATE7F1-OFFLINE-PREREGISTRATION-RESULTS-2026-08-26.md`.
 - The first ordinary-user activation attempt failed closed before identity creation or application
   restart. RCA: Windows PowerShell 5.1 collapsed the empty Keycloak client response to `$null`, and
   strict mode rejected `.Count`. Normalized reconciliation then proved zero ordinary clients, zero
@@ -500,7 +509,7 @@ plain-language steward experience, or governed action pathway.
 | 7C | First user-interface shell | Complete and superseded on Control by the Gate 7D presentation release | Source integration remains part of the Gate 7D review chain |
 | 7D | Identity-aware Chat/Code navigation and end-to-end flow correction | Complete; accepted and merged as `3d95e50`; current-turn verifier successor active on Control at `e10e3db`; post-merge and exact-Control suites 423/423 | Complete |
 | 7E-0/1 | Truthful execution status and harmless bounded JavaScript Run | Complete; exact successor active and ordinary-browser acceptance green; local, Control, and active-runtime suites 441/441 | Complete |
-| 7F | Conversational Agent Mode with selectable approval profiles | 7F-0 inert foundation implemented and locally green; no real tool, model, UI, or production authority | 7F-1 model/corpus preregistration precedes any model download or burn-in |
+| 7F | Conversational Agent Mode with selectable approval profiles | 7F-0 inert foundation green; 7F-1 exact candidates/corpus/grader sealed offline; no real tool, model call, UI, or production authority | Separate authorization for pinned Gemma 4 26B download and Home-only live burn-in |
 | 7F+ | Broader product extensions | Model-independent foundation precedes Gemma/incumbent agent burn-in; effectful activation follows accepted model and capability gates | New baseline and separate decision per extension group |
 
 ## Bootstrap validation
@@ -545,11 +554,12 @@ No dependency was changed during the prerequisite disposition. Full evidence is 
 
 ## Next operation
 
-Gate 7F-0 is locally complete and its inert harness is reproducible. The next product gate is Gate 7F-1:
-preregister the exact Gemma and incumbent artifacts, terms, runtime parameters, sealed Agent Mode corpus,
-metrics, and thresholds before any model download or live evaluation. The bake-off selects model roles;
-it does not itself authorize a model switch or tool activation. The first effectful capability set,
-disposable-project execution,
+Gate 7F-0 is locally complete, and Gate 7F-1 has sealed the exact candidate artifacts, terms, runtime
+parameters, Agent Mode corpus, metrics, and thresholds. The next operation requires separate protected
+authority: hash the existing incumbent/runtime on Home, download and verify only the pinned Gemma 4 26B
+A4B artifact, then run the two Home-only arms without changing production routing. Gemma 4 31B opens only
+if the frozen conditional rule is met. The bake-off selects model roles; it does not itself authorize a
+model switch or tool activation. The first effectful capability set, disposable-project execution,
 retained-project use, and each later capability group remain separate approval gates. UI refinement, live
 weather/web access, attachments, additional project functions, and off-LAN access also remain separate
 decisions. The active Control release and its exact Gate 7D rollback predecessor remain unchanged by this

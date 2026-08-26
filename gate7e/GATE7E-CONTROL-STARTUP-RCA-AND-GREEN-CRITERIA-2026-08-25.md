@@ -62,8 +62,12 @@ cannot authorize execution or alter the envelope.
 - The child rejects a missing, empty, oversized, changed, or digest-mismatched source file.
 - The parent attempts cleanup on every path. Cleanup failure suppresses output and returns a bounded
   fail-closed receipt rather than reporting execution success.
-- Existing no-network, no-child-process, no-worker, no-stdin, UI-denied, deadline, memory, stack, and output
-  limits remain unchanged.
+- Existing no-network, no-child-process, no-worker, no-stdin, deadline, memory, stack, and output limits
+  remain unchanged. Control burn-in later proved that Node 22 exits with `0xC0000142` when MXC applies
+  `DisallowWin32kSystemCalls`. The corrected outer policy enables Win32k startup compatibility while keeping
+  MXC container UI-object isolation, clipboard denial, input-injection denial, desktop/system-control denial,
+  system-settings denial, and IME denial. QuickJS still receives no GUI host object, so evaluated user source
+  has no GUI capability.
 - Unit/adversarial tests prove the exact config, exclusive file lifecycle, cleanup on success and failure,
   and absence of source content from the command line and receipt.
 - The complete repository suite remains green.

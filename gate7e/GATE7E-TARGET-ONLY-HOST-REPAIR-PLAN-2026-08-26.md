@@ -107,6 +107,12 @@ exists. The transaction proves that this repair causes no new descendant change.
 
 ## Real sandbox and release gates
 
+Control's SYSTEM-context preflight established an additional host compatibility condition: MXC's Win32k
+kill switch prevents the pinned Node runtime from initializing (`0xC0000142`). The production policy may
+enable Win32k startup compatibility only if generated-policy tests prove all remaining MXC job UI limits
+stay active and QuickJS continues to expose no GUI host object. The execution receipt must state that
+restricted compatibility mode rather than claim that UI is wholly denied.
+
 After successful reconciliation:
 
 1. MXC's read-only support probe must no longer report `prepare-system-drive-required`.

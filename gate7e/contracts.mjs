@@ -72,7 +72,7 @@ export const CodeExecutionReceiptSchema = z.object({
     filesystem: z.literal("read-only-runtime-and-transient-source"),
     network: z.literal("deny-all"),
     environment: z.literal("empty"),
-    ui: z.literal("denied"),
+    ui: z.literal("win32k-compatible-job-restricted"),
   }).strict(),
   limits: executionLimits,
   output: executionOutput,

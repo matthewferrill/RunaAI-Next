@@ -20,12 +20,18 @@ The reviewed source slice and the Control startup correction are implemented and
 
 The inner evaluator is QuickJS Emscripten `0.32.0`. Evaluated code receives only bounded `console.log`, `console.info`, `console.warn`, and `console.error` functions. It receives no Node process, module loader, filesystem, environment, network, worker, clipboard, GUI, credential, protected-store, or project-store capability.
 
-The outer process uses Node `22.22.0` permissions and Microsoft MXC `0.8.0` ProcessContainer policy with deny-all network, denied UI, closed stdin, no guest environment, no writable path, and read-only grants limited to:
+The outer process uses Node `22.22.0` permissions and Microsoft MXC `0.8.0` ProcessContainer policy with deny-all network, closed stdin, no guest environment, no writable path, and read-only grants limited to:
 
 1. a compact immutable `sandbox-runtime` containing the runner and pinned QuickJS packages; and
 2. the immutable Node runtime directory; and
 3. one unique transient exact-source file created exclusively by the trusted parent and removed before
    any receipt returns.
+
+Control burn-in on 2026-08-26 proved that Node exits with `0xC0000142` under MXC's Win32k kill switch. The
+corrective policy therefore enables Win32k startup compatibility while retaining container UI-object
+isolation, clipboard and input-injection denial, desktop/system-control and system-settings denial, and IME
+denial. This changes the outer receipt from `ui: denied` to `ui: win32k-compatible-job-restricted`; it does
+not expose a GUI object or any other host capability to evaluated QuickJS source.
 
 The original merged implementation used MXC's custom environment array to carry source and digest.
 Control proved that any non-empty custom array fails before child startup with Win32 `0x800700CB`.

@@ -124,7 +124,10 @@ export class MxcJavascriptExecutor {
           readwritePaths: [], deniedPaths: [], clearPolicyOnExit: true },
         network: { egress: { default: "deny" },
           ingress: { default: "deny", hostLoopback: "deny" } },
-        ui: { allowWindows: false, clipboard: "none", allowInputInjection: false },
+        // Node 22 calls Win32k during Windows startup. Keep the MXC job-object UI
+        // restrictions and expose no GUI host object to QuickJS, but do not apply
+        // the incompatible DisallowWin32kSystemCalls process mitigation.
+        ui: { allowWindows: true, clipboard: "none", allowInputInjection: false },
         timeoutMs: WALL_CLOCK_MS,
       }, "process", `runa2-js-${randomUUID()}`);
       config.fallback = { allowDaclMutation: true };
@@ -229,7 +232,7 @@ export class MxcJavascriptExecutor {
         host: "node", hostVersion },
       isolation: { provider: "microsoft-mxc", packageVersion: "0.8.0", method: "processcontainer",
         tier: support.isolationTier, filesystem: "read-only-runtime-and-transient-source", network: "deny-all",
-        environment: "empty", ui: "denied" },
+        environment: "empty", ui: "win32k-compatible-job-restricted" },
       limits: { sourceBytes: Buffer.byteLength(request.source, "utf8"), maximumSourceBytes: SOURCE_LIMIT,
         wallClockMs: WALL_CLOCK_MS, quickJsDeadlineMs: QUICKJS_DEADLINE_MS,
         maximumOutputBytes: OUTPUT_LIMIT, quickJsMemoryBytes: MEMORY_LIMIT,

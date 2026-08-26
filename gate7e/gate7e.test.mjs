@@ -105,7 +105,8 @@ test("only a typed successful sandbox result receives executed status", async ()
   assert.deepEqual(capture.policy.filesystem.readwritePaths, []);
   assert.equal(capture.policy.network.egress.default, "deny");
   assert.equal(capture.policy.network.ingress.hostLoopback, "deny");
-  assert.equal(capture.policy.ui.allowWindows, false);
+  assert.deepEqual(capture.policy.ui,
+    { allowWindows: true, clipboard: "none", allowInputInjection: false });
   assert.deepEqual(capture.config.fallback, { allowDaclMutation: true });
   assert.equal(capture.options.usePty, false);
   assert.match(capture.config.process.commandLine, /--permission/);
@@ -119,6 +120,22 @@ test("only a typed successful sandbox result receives executed status", async ()
   await assert.rejects(readFile(transientPath));
   assert.equal(receipt.isolation.environment, "empty");
   assert.equal(receipt.isolation.filesystem, "read-only-runtime-and-transient-source");
+  assert.equal(receipt.isolation.ui, "win32k-compatible-job-restricted");
+});
+
+test("the Windows-compatible MXC policy retains every enforceable job UI restriction", () => {
+  const config = createConfigFromPolicy({
+    version: "0.8.0-alpha",
+    ui: { allowWindows: true, clipboard: "none", allowInputInjection: false },
+  }, "process", "runa2-ui-policy-proof");
+  assert.deepEqual(config.ui,
+    { disable: false, clipboard: "none", injection: false });
+  assert.deepEqual(config.processContainer.ui, {
+    isolation: "container",
+    desktopSystemControl: false,
+    systemSettings: "none",
+    ime: false,
+  });
 });
 
 test("transient source transport is exclusive, exact, and removed before return", async () => {

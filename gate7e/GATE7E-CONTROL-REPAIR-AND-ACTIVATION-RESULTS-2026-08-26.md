@@ -125,21 +125,17 @@ redirects, public page/controller/helper markers, and sandbox readiness. Its rol
 The rejected immutable release and its rollback evidence remain inactive for audit; neither is a valid
 deployment source for later work.
 
-## Remaining customer acceptance
+## Ordinary-browser acceptance
 
-Automated production validation is complete. The agent-controlled browser proved the landing page and
-ordinary username/password route, but had no existing ordinary-user credential and the external Chrome
-connection was unavailable. The last acceptance therefore requires the existing ordinary user to:
+The existing ordinary user completed the final acceptance from the deployed Code experience. The supplied
+screenshots show the exact requested JavaScript draft `console.log(115 + 25);`, the pre-execution label
+**Draft — not run**, the explicit **Run in sandbox** control, the post-execution label **Ran in sandbox**,
+the exact output `140`, and the composer status **Sandbox run complete**.
 
-1. sign in normally at `https://runa.bridgebuildersai.com/`;
-2. open **Code** and request one JavaScript block containing `console.log(115 + 25)`;
-3. confirm the draft is labelled **Draft — not run** before execution;
-4. select **Run in sandbox**; and
-5. confirm the badge changes to **Ran in sandbox** and the exact output is `140`.
-
-Any absent button, session loop, non-`140` output, dishonest label, or partial output is a failed customer
-acceptance and must not be waived. It does not automatically roll back an otherwise healthy release; the
-retained predecessor permits a deliberate rollback if the failure is reproduced as a release defect.
+The test therefore proves the customer-visible distinction between a model-authored draft and real
+execution through the deployed harmless envelope. It also proves that the ordinary authenticated session,
+Code lane, execution route, sandbox receipt, output presentation, and retry affordance work together in the
+active release. Ordinary-browser acceptance is complete.
 
 ## Deferred scope
 

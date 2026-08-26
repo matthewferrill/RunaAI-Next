@@ -1,6 +1,6 @@
 {
   "schemaVersion": "runa2-gate7e-control-repair-and-activation/v1",
-  "status": "active-awaiting-ordinary-browser-acceptance",
+  "status": "active-accepted",
   "release": {
     "releaseId": "runaai-next-gate7a-lan-gate7e-2026-08-26-747aabc",
     "commit": "747aabc03b291badf4f8a16743a7bd019d384451",
@@ -60,8 +60,12 @@
     "protectedProductDataChanged": false
   },
   "ordinaryBrowserAcceptance": {
-    "completed": false,
-    "reason": "agent browser had no ordinary credential and external Chrome was unavailable",
+    "completed": true,
+    "sourceRequested": "console.log(115 + 25);",
+    "observedOutput": 140,
+    "observedDraftLabel": "Draft — not run",
+    "observedExecutionLabel": "Ran in sandbox",
+    "sandboxRunComplete": true,
     "expectedOutput": 140,
     "requiredDraftLabel": "Draft — not run",
     "requiredExecutionLabel": "Ran in sandbox"

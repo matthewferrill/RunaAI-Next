@@ -145,7 +145,7 @@ $arguments=@('-NoProfile','-ExecutionPolicy','Bypass','-File',('"{0}"'-f$PSComma
   '-ExpectedDaclSha256',$ExpectedDaclSha256,'-ExpectedCurrentNonDaclSha256',$ExpectedCurrentNonDaclSha256,
   '-ExpectedTargetNonDaclSha256',$ExpectedTargetNonDaclSha256,'-ExpectedTargetControlFlags',$ExpectedTargetControlFlags,
   '-ExpectedPriorReleaseId',$ExpectedPriorReleaseId,'-ExpectedPriorCommit',$ExpectedPriorCommit,
-  '-TargetId',$TargetId,'-ReleaseId',$ReleaseId,
+  '-TargetId',$TargetId,'-ReleaseId',('"{0}"'-f$ReleaseId),
   '-Root',('"{0}"'-f$rootPath),'-TaskName',$TaskName,'-Worker','-ResultPath',('"{0}"'-f$ResultPath))-join' '
 $action=New-ScheduledTaskAction -Execute 'powershell.exe' -Argument $arguments
 $principal=New-ScheduledTaskPrincipal -UserId 'SYSTEM' -LogonType ServiceAccount -RunLevel Highest

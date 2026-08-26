@@ -82,10 +82,24 @@ function childResult(stdout) {
 function boundedError(error) {
   const known = new Set(["sandbox-isolation-unavailable", "sandbox-isolation-warning-unreviewed",
     "sandbox-ui-isolation-unavailable", "sandbox-start-failed",
+    "sandbox-start-filesystem-lstat-denied", "sandbox-start-module-unavailable",
+    "sandbox-start-permission-option-invalid",
     "sandbox-result-invalid", "sandbox-output-limited", "sandbox-timeout", "sandbox-runtime-error",
     "sandbox-runtime-unavailable", "sandbox-memory-limit", "sandbox-source-invalid",
     "sandbox-source-transport-failed", "sandbox-cleanup-failed"]);
   return known.has(error?.code) ? error.code : "sandbox-unavailable";
+}
+
+function startupError(stderr) {
+  const value = String(stderr);
+  if (/(?:EPERM|EACCES).*lstat/i.test(value)) return "sandbox-start-filesystem-lstat-denied";
+  if (/ERR_MODULE_NOT_FOUND|Cannot find (?:package|module)/i.test(value)) {
+    return "sandbox-start-module-unavailable";
+  }
+  if (/bad option|unknown option|not allowed in NODE_OPTIONS/i.test(value)) {
+    return "sandbox-start-permission-option-invalid";
+  }
+  return "sandbox-start-failed";
 }
 
 export class MxcJavascriptExecutor {
@@ -183,7 +197,7 @@ export class MxcJavascriptExecutor {
         errorCode = "sandbox-timeout";
       } else {
         if (outcome.exitCode !== 0 && !String(outcome.stdout).includes(RESULT_MARKER)) {
-          throw coded("sandbox-start-failed", "The sandbox process did not start successfully.");
+          throw coded(startupError(outcome.stderr), "The sandbox process did not start successfully.");
         }
         const result = childResult(outcome.stdout);
         hostVersion = result.hostVersion;

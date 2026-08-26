@@ -178,6 +178,12 @@ test("missing typed evidence and parent output overflow fail closed without part
   assert.equal(unavailable.errorCode, "sandbox-start-failed");
   assert.equal(unavailable.output.combinedBytes, 0);
 
+  const lstatDenied = await new MxcJavascriptExecutor({ sdk: fakeSdk({
+    stdout: "", stderr: "Error: EPERM: operation not permitted, lstat 'private-path'", exitCode: 1,
+  }, {}) }).execute(request({ requestId: "startup-lstat-denied" }));
+  assert.equal(lstatDenied.errorCode, "sandbox-start-filesystem-lstat-denied");
+  assert.equal(JSON.stringify(lstatDenied).includes("private-path"), false);
+
   const limited = await new MxcJavascriptExecutor({ sdk: fakeSdk({
     stdout: "x".repeat(161_000), exitCode: 0,
   }, {}) }).execute(request({ requestId: "execution-output-limit" }));

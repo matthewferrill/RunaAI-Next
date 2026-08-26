@@ -167,7 +167,8 @@ export class MxcJavascriptExecutor {
         temporaryRoot: this.temporaryRoot });
       const config = this.sdk.createConfigFromPolicy({
         version: "0.8.0-alpha",
-        filesystem: { readonlyPaths: [this.runtimeRoot, dirname(this.nodeExecutable), sourceTransport.sourcePath],
+        filesystem: { readonlyPaths: [this.runtimeRoot, dirname(this.nodeExecutable),
+          dirname(sourceTransport.sourcePath), sourceTransport.sourcePath],
           readwritePaths: [], deniedPaths: [], clearPolicyOnExit: true },
         network: { egress: { default: "deny" },
           ingress: { default: "deny", hostLoopback: "deny" } },
@@ -280,7 +281,7 @@ export class MxcJavascriptExecutor {
       runtime: { engine: "quickjs", package: "quickjs-emscripten", packageVersion: "0.32.0",
         host: "node", hostVersion },
       isolation: { provider: "microsoft-mxc", packageVersion: "0.8.0", method: "processcontainer",
-        tier: support.isolationTier, filesystem: "read-only-runtime-and-transient-source", network: "deny-all",
+        tier: support.isolationTier, filesystem: "read-only-runtime-and-private-source-directory", network: "deny-all",
         environment: "empty", ui: "win32k-compatible-job-restricted" },
       limits: { sourceBytes: Buffer.byteLength(request.source, "utf8"), maximumSourceBytes: SOURCE_LIMIT,
         wallClockMs: WALL_CLOCK_MS, quickJsDeadlineMs: QUICKJS_DEADLINE_MS,

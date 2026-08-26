@@ -1,4 +1,5 @@
 import { copyFile, mkdir, mkdtemp, rm } from "node:fs/promises";
+import { randomUUID } from "node:crypto";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { getPlatformSupport } from "@microsoft/mxc-sdk";
@@ -6,7 +7,8 @@ import { stageSandboxRuntime } from "../gate6b/sandbox-runtime.mjs";
 import { MxcJavascriptExecutor } from "./mxc-javascript-executor.mjs";
 
 const temporaryParent = process.platform === "win32" ? resolve(process.cwd(), "..") : tmpdir();
-const root = await mkdtemp(join(temporaryParent, "runa2-gate7e-control-preflight-"));
+const nodeRuntimeRoot = await mkdtemp(join(temporaryParent, "runa2-gate7e-node-"));
+let sandboxRoot = null;
 let diagnostic = null;
 try {
   if (process.platform !== "win32" || process.version !== "v22.22.0") {
@@ -21,15 +23,14 @@ try {
       { code: "control-preflight-host-unprepared" });
   }
 
-  const runtimeRoot = join(root, "runtime");
-  const sandboxRoot = await stageSandboxRuntime({ sourceRoot: process.cwd(),
-    nodeModulesRoot: join(process.cwd(), "node_modules"), destinationRoot: root });
-  await mkdir(runtimeRoot, { recursive: true });
-  const nodeExecutable = join(runtimeRoot, "node.exe");
+  sandboxRoot = await stageSandboxRuntime({ sourceRoot: process.cwd(),
+    nodeModulesRoot: join(process.cwd(), "node_modules"), destinationRoot: temporaryParent,
+    directoryName: `runa2-gate7e-sandbox-${randomUUID()}` });
+  const nodeExecutable = join(nodeRuntimeRoot, "node.exe");
   await copyFile(process.execPath, nodeExecutable);
   const executor = new MxcJavascriptExecutor({ runtimeRoot: sandboxRoot,
     runnerPath: join(sandboxRoot, "quickjs-child.mjs"), nodeExecutable,
-    temporaryRoot: root });
+    temporaryRoot: temporaryParent });
   const preflight = await executor.preflight();
   if (preflight.ready !== true || preflight.receipt.status !== "executed"
       || preflight.receipt.output.stdout !== "runa2-sandbox-ready\n") {
@@ -81,5 +82,6 @@ try {
   })}\n`);
   process.exitCode = 1;
 } finally {
-  await rm(root, { recursive: true, force: true, maxRetries: 3, retryDelay: 50 });
+  if (sandboxRoot) await rm(sandboxRoot, { recursive: true, force: true, maxRetries: 3, retryDelay: 50 });
+  await rm(nodeRuntimeRoot, { recursive: true, force: true, maxRetries: 3, retryDelay: 50 });
 }

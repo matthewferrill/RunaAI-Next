@@ -24,8 +24,9 @@ The outer process uses Node `22.22.0` permissions and Microsoft MXC `0.8.0` Proc
 
 1. a compact immutable `sandbox-runtime` containing the runner and pinned QuickJS packages; and
 2. the immutable Node runtime directory; and
-3. one unique transient exact-source file created exclusively by the trusted parent and removed before
-   any receipt returns.
+3. one unique private transient directory containing only the exact source file, created exclusively by
+   the trusted parent and removed before any receipt returns. Node's permission grant remains limited to
+   the exact source file.
 
 Control burn-in on 2026-08-26 proved that Node exits with `0xC0000142` under MXC's Win32k kill switch. The
 corrective policy therefore enables Win32k startup compatibility while retaining container UI-object

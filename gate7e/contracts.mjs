@@ -69,7 +69,7 @@ export const CodeExecutionReceiptSchema = z.object({
     packageVersion: z.literal("0.8.0"),
     method: z.literal("processcontainer"),
     tier: z.enum(["base-container", "appcontainer-bfs", "appcontainer-dacl", "unavailable"]),
-    filesystem: z.literal("read-only-runtime-and-transient-source"),
+    filesystem: z.literal("read-only-runtime-and-private-source-directory"),
     network: z.literal("deny-all"),
     environment: z.literal("empty"),
     ui: z.literal("win32k-compatible-job-restricted"),

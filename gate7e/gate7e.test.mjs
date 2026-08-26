@@ -115,11 +115,13 @@ test("only a typed successful sandbox result receives executed status", async ()
   assert.equal(capture.config.process.commandLine.includes(source), false);
   assert.match(capture.config.process.commandLine, /--source-file=/);
   assert.match(capture.config.process.commandLine, new RegExp(`--source-sha256=${sha256(source)}`));
-  const transientPath = capture.policy.filesystem.readonlyPaths[2];
+  const transientDirectory = capture.policy.filesystem.readonlyPaths[2];
+  const transientPath = capture.policy.filesystem.readonlyPaths[3];
+  assert.equal(transientPath.startsWith(transientDirectory), true);
   assert.match(capture.config.process.commandLine, new RegExp(transientPath.replace(/[\\^$.*+?()[\]{}|]/g, "\\$&")));
   await assert.rejects(readFile(transientPath));
   assert.equal(receipt.isolation.environment, "empty");
-  assert.equal(receipt.isolation.filesystem, "read-only-runtime-and-transient-source");
+  assert.equal(receipt.isolation.filesystem, "read-only-runtime-and-private-source-directory");
   assert.equal(receipt.isolation.ui, "win32k-compatible-job-restricted");
 });
 
@@ -326,6 +328,9 @@ test("the staged guest runtime contains only the runner and pinned QuickJS packa
   assert.deepEqual((await readdir(join(sandboxRoot, "node_modules"))).sort(),
     ["@jitl", "quickjs-emscripten", "quickjs-emscripten-core"]);
   assert.equal((await readFile(join(sandboxRoot, "quickjs-child.mjs"), "utf8")).includes("getQuickJS"), true);
+  await assert.rejects(stageSandboxRuntime({ sourceRoot: resolve("."), nodeModulesRoot: resolve("node_modules"),
+    destinationRoot, directoryName: "..\\escape" }),
+  { code: "sandbox-runtime-directory-invalid" });
 });
 
 test("the QuickJS child stops runaway time and output without returning partial data", async () => {
@@ -390,7 +395,7 @@ test("MXC runs the pinned child or exposes the exact host-preparation blocker an
   }
   assert.equal(receipt.isolation.provider, "microsoft-mxc");
   assert.equal(receipt.isolation.network, "deny-all");
-  assert.equal(receipt.isolation.filesystem, "read-only-runtime-and-transient-source");
+  assert.equal(receipt.isolation.filesystem, "read-only-runtime-and-private-source-directory");
 });
 
 test("public code execution wiring and the compact release runtime preserve the boundary", async () => {
@@ -468,8 +473,8 @@ test("the Control repair is target-only, fail-closed, and preserves descendant D
   assert.match(systemPreflight, /Unregister-ScheduledTask/);
   assert.match(systemPreflight, /privateValuesIncluded=\$false/);
   assert.doesNotMatch(systemPreflight, /Write-Output \$stdoutText|Write-Output \$stderrText/);
-  assert.match(preflight, /destinationRoot: root/);
-  assert.match(preflight, /temporaryRoot: root/);
+  assert.match(preflight, /destinationRoot: temporaryParent/);
+  assert.match(preflight, /temporaryRoot: temporaryParent/);
   assert.match(preflight, /receipt\.status !== "executed"/);
   assert.match(preflight, /arithmetic\.output\.stdout !== "140\\n"/);
   assert.match(preflight, /sandboxExitCode: preflight\.receipt\.exitCode/);

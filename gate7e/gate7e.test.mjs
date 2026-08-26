@@ -424,6 +424,10 @@ test("public code execution wiring and the compact release runtime preserve the 
   assert.match(stager, /\["quickjs-emscripten", "quickjs-emscripten-core", "@jitl"\]/);
   assert.match(deployer, /gate7e-harmless-javascript/);
   assert.match(deployer, /health\.dependencies\.sandbox-ne\$true/);
+  assert.match(deployer, /Assert-PreparedReleaseDirectory/);
+  assert.match(deployer, /AllRestrictedApplicationPackagesExactCount-ne1/);
+  assert.match(deployer, /gate7a-ordinary-deploy-prepared-release-not-empty/);
+  assert.match(deployer, /if\(-not\$preparedRelease\)\{New-Item -ItemType Directory -Path \$release/);
   assert.doesNotMatch(`${script}\n${helper}`, /innerHTML|localStorage|sessionStorage/);
 });
 

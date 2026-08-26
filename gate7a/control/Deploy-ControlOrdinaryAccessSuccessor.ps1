@@ -36,8 +36,23 @@ $launcher=Join-Path $Root 'control\Run-Application.ps1';$caddy=Join-Path $Root '
 $caddyExe=Join-Path $Root 'tools\caddy\caddy.exe';$rollback=Join-Path $Root "secrets\gate7a-ordinary-rollback-$ReleaseId"
 $expectedCaddyBinarySha256='5cb9ab71e5756ce72840b8234177a2f40c8b4ab47a806b8e841e2b784e9df62b'
 $changed=$false
+$preparedRelease=$ExpectedUiContract-eq'gate7e-harmless-javascript'
 
 function Hash([string]$Path){if(-not(Test-Path -LiteralPath $Path -PathType Leaf)){throw 'gate7a-ordinary-deploy-staged-file-missing'};(Get-FileHash -LiteralPath $Path -Algorithm SHA256).Hash.ToLowerInvariant()}
+function Assert-PreparedReleaseDirectory {
+  if(-not(Test-Path -LiteralPath $release -PathType Container)){throw 'gate7a-ordinary-deploy-prepared-release-missing'}
+  if(@(Get-ChildItem -LiteralPath $release -Force).Count-ne0){throw 'gate7a-ordinary-deploy-prepared-release-not-empty'}
+  $targetOnlySource=Join-Path $PSScriptRoot '..\..\gate7e\control\TargetOnlyAcl.cs'
+  if(-not(Test-Path -LiteralPath $targetOnlySource -PathType Leaf)){throw 'gate7a-ordinary-deploy-prepared-release-verifier-missing'}
+  if(-not('RunaAI.Next.Gate7E.TargetOnlyAcl'-as[type])){Add-Type -Path $targetOnlySource}
+  $facts=[RunaAI.Next.Gate7E.TargetOnlyAcl]::Inspect($release)
+  if($facts.AllApplicationPackagesExactCount-ne1-or
+    $facts.AllRestrictedApplicationPackagesExactCount-ne1-or
+    $facts.AllApplicationPackagesConflictCount-ne0-or
+    $facts.AllRestrictedApplicationPackagesConflictCount-ne0){
+    throw 'gate7a-ordinary-deploy-prepared-release-acl-invalid'
+  }
+}
 function TextHash([string]$Value){$algorithm=[Security.Cryptography.SHA256]::Create();try{([BitConverter]::ToString($algorithm.ComputeHash([Text.Encoding]::UTF8.GetBytes($Value)))).Replace('-','').ToLowerInvariant()}finally{$algorithm.Dispose()}}
 function Run-Caddy([ValidateSet('validate','reload')][string]$Command,[string]$ConfigPath){
   $start=[Diagnostics.ProcessStartInfo]::new();$start.FileName=$caddyExe
@@ -119,7 +134,9 @@ $pins=@{$archive=$ArchiveSha256;$stagedConfig=$ConfigSha256;$stagedManifest=$Man
 foreach($entry in $pins.GetEnumerator()){if((Hash $entry.Key)-ne$entry.Value){throw 'gate7a-ordinary-deploy-staged-hash-mismatch'}}
 if((Hash $caddyExe)-ne$expectedCaddyBinarySha256){throw 'gate7a-ordinary-deploy-caddy-binary-drift'}
 if((Run-Caddy validate $stagedCaddy)-ne0){throw 'gate7a-ordinary-deploy-caddy-invalid'}
-foreach($path in @($release,$rollback)){if(Test-Path -LiteralPath $path){throw 'gate7a-ordinary-deploy-new-path-exists'}}
+if(Test-Path -LiteralPath $rollback){throw 'gate7a-ordinary-deploy-new-path-exists'}
+if($preparedRelease){Assert-PreparedReleaseDirectory}
+elseif(Test-Path -LiteralPath $release){throw 'gate7a-ordinary-deploy-new-path-exists'}
 $beforeRuntime=Invoke-RestMethod 'http://127.0.0.1:9760/api/runtime/status' -TimeoutSec 10
 $beforeReadiness=Invoke-RestMethod 'http://127.0.0.1:9760/api/readiness/status' -TimeoutSec 10
 if($beforeRuntime.running.releaseId-ne$PriorReleaseId-or$beforeRuntime.running.commit-ne$PriorCommit-or
@@ -156,7 +173,7 @@ foreach($entry in $currentFacts.GetEnumerator()){
 }
 if(-not(Test-Path -LiteralPath (Join-Path $Root 'secrets\keycloak-ordinary-client') -PathType Leaf)){throw 'gate7a-ordinary-deploy-client-secret-missing'}
 
-New-Item -ItemType Directory -Path $release|Out-Null
+if(-not$preparedRelease){New-Item -ItemType Directory -Path $release|Out-Null}
 & tar.exe -xzf $archive -C $release
 if($LASTEXITCODE-ne0){throw 'gate7a-ordinary-deploy-extract-failed'}
 $artifact=Get-Content -Raw -LiteralPath (Join-Path $release 'artifact-files.json')|ConvertFrom-Json

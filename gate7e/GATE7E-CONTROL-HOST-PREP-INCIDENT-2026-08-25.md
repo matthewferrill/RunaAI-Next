@@ -90,6 +90,12 @@ Recommendation: choose **A** unless harmless local execution is schedule-critica
 choose **B** only with an independent review of the ACL operator and a disposable-host rehearsal before
 Control.
 
+## Steward decision
+
+On 2026-08-26 the steward selected option **B** and authorized design, implementation, testing, Control
+reconciliation, Gate 7E deployment, and complete documentation. The frozen implementation and rollback
+contract is `GATE7E-TARGET-ONLY-HOST-REPAIR-PLAN-2026-08-26.md`.
+
 ## Primary evidence
 
 - [Microsoft MXC host preparation](https://github.com/microsoft/mxc/blob/main/docs/host-prep.md)

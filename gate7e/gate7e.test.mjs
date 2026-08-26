@@ -395,10 +395,11 @@ test("public code execution wiring and the compact release runtime preserve the 
 test("the Control repair is target-only, fail-closed, and preserves descendant DACL bytes", {
   timeout: 30_000,
 }, async t => {
-  const [source, rehearsal, operator, preflight] = await Promise.all([
+  const [source, rehearsal, operator, systemPreflight, preflight] = await Promise.all([
     readFile(resolve("gate7e/control/TargetOnlyAcl.cs"), "utf8"),
     readFile(resolve("gate7e/control/Test-TargetOnlyAcl.ps1"), "utf8"),
     readFile(resolve("gate7e/control/Invoke-ControlTargetOnlyHostRepair.ps1"), "utf8"),
+    readFile(resolve("gate7e/control/Invoke-ControlSystemPreflight.ps1"), "utf8"),
     readFile(resolve("gate7e/run-control-preflight.mjs"), "utf8"),
   ]);
   assert.match(source, /SetFileSecurityW/);
@@ -421,6 +422,13 @@ test("the Control repair is target-only, fail-closed, and preserves descendant D
   assert.match(operator, /target-only-critical-path-drift/);
   assert.match(operator, /RecoverAndReconcile/);
   assert.match(operator, /RequirePrivilegedControlTests/);
+  assert.match(systemPreflight, /NT AUTHORITY\\SYSTEM/);
+  assert.match(systemPreflight, /process\.version/);
+  assert.match(systemPreflight, /v22\.22\.0/);
+  assert.match(systemPreflight, /Get-ScheduledTaskInfo/);
+  assert.match(systemPreflight, /Unregister-ScheduledTask/);
+  assert.match(systemPreflight, /privateValuesIncluded=\$false/);
+  assert.doesNotMatch(systemPreflight, /Write-Output \$stdoutText|Write-Output \$stderrText/);
   assert.match(preflight, /destinationRoot: root/);
   assert.match(preflight, /receipt\.status !== "executed"/);
   assert.match(preflight, /arithmetic\.output\.stdout !== "140\\n"/);

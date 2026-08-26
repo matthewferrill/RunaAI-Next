@@ -1,5 +1,7 @@
 import { createHash, randomUUID } from "node:crypto";
-import { dirname, resolve } from "node:path";
+import { mkdtemp, rm, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { dirname, join, resolve } from "node:path";
 import { createConfigFromPolicy, getPlatformSupport, spawnSandboxFromConfig } from "@microsoft/mxc-sdk";
 import { parseCodeExecutionReceipt, parseCodeExecutionRequest } from "./contracts.mjs";
 
@@ -19,6 +21,24 @@ const acceptedDaclWarnings = [
 const sha256 = value => createHash("sha256").update(String(value)).digest("hex");
 const coded = (code, message) => Object.assign(new Error(message), { code });
 const quote = value => `"${String(value).replaceAll('"', '\\"')}"`;
+
+async function createTransientSource({ source, sourceSha256, temporaryRoot = tmpdir(),
+  filesystem = { mkdtemp, rm, writeFile } } = {}) {
+  let directory = null;
+  try {
+    directory = await filesystem.mkdtemp(join(resolve(temporaryRoot), "runa2-gate7e-source-"));
+    const sourcePath = join(directory, "source.js");
+    await filesystem.writeFile(sourcePath, source, { encoding: "utf8", flag: "wx", mode: 0o600 });
+    return Object.freeze({ sourcePath, sourceSha256,
+      cleanup: () => filesystem.rm(directory, { recursive: true, force: true, maxRetries: 3, retryDelay: 50 }) });
+  } catch (error) {
+    if (directory) {
+      try { await filesystem.rm(directory, { recursive: true, force: true, maxRetries: 3, retryDelay: 50 }); }
+      catch {}
+    }
+    throw coded("sandbox-source-transport-failed", "The transient source transport could not be created.");
+  }
+}
 
 function supportFor(sdk) {
   const support = sdk.getPlatformSupport();
@@ -63,7 +83,8 @@ function boundedError(error) {
   const known = new Set(["sandbox-isolation-unavailable", "sandbox-isolation-warning-unreviewed",
     "sandbox-ui-isolation-unavailable", "sandbox-start-failed",
     "sandbox-result-invalid", "sandbox-output-limited", "sandbox-timeout", "sandbox-runtime-error",
-    "sandbox-runtime-unavailable", "sandbox-memory-limit", "sandbox-source-invalid"]);
+    "sandbox-runtime-unavailable", "sandbox-memory-limit", "sandbox-source-invalid",
+    "sandbox-source-transport-failed", "sandbox-cleanup-failed"]);
   return known.has(error?.code) ? error.code : "sandbox-unavailable";
 }
 
@@ -71,11 +92,13 @@ export class MxcJavascriptExecutor {
   constructor({ runtimeRoot = resolve(import.meta.dirname, ".."),
     runnerPath = resolve(import.meta.dirname, "quickjs-child.mjs"), nodeExecutable = process.execPath,
     sdk = { createConfigFromPolicy, getPlatformSupport, spawnSandboxFromConfig },
+    sourceTransport = createTransientSource,
     now = () => Date.now() } = {}) {
     this.runtimeRoot = resolve(runtimeRoot);
     this.runnerPath = resolve(runnerPath);
     this.nodeExecutable = resolve(nodeExecutable);
     this.sdk = sdk;
+    this.sourceTransport = sourceTransport;
     this.now = now;
   }
 
@@ -90,11 +113,14 @@ export class MxcJavascriptExecutor {
     let stdout = "";
     let stderr = "";
     let hostVersion = process.version;
+    let sourceTransport = null;
+    let cleanupFailed = false;
     try {
       support = supportFor(this.sdk);
+      sourceTransport = await this.sourceTransport({ source: request.source, sourceSha256 });
       const config = this.sdk.createConfigFromPolicy({
         version: "0.8.0-alpha",
-        filesystem: { readonlyPaths: [this.runtimeRoot, dirname(this.nodeExecutable)],
+        filesystem: { readonlyPaths: [this.runtimeRoot, dirname(this.nodeExecutable), sourceTransport.sourcePath],
           readwritePaths: [], deniedPaths: [], clearPolicyOnExit: true },
         network: { egress: { default: "deny" },
           ingress: { default: "deny", hostLoopback: "deny" } },
@@ -104,12 +130,11 @@ export class MxcJavascriptExecutor {
       config.fallback = { allowDaclMutation: true };
       config.process.commandLine = [quote(this.nodeExecutable), "--permission",
         `--allow-fs-read=${quote(this.runtimeRoot)}`, "--max-old-space-size=64",
-        "--max-semi-space-size=1", "--no-warnings", quote(this.runnerPath)].join(" ");
+        `--allow-fs-read=${quote(sourceTransport.sourcePath)}`, "--max-semi-space-size=1",
+        "--no-warnings", quote(this.runnerPath),
+        `--source-file=${quote(sourceTransport.sourcePath)}`, `--source-sha256=${sourceSha256}`].join(" ");
       config.process.cwd = dirname(this.runnerPath);
-      config.process.env = [
-        `RUNA2_SOURCE_BASE64URL=${Buffer.from(request.source, "utf8").toString("base64url")}`,
-        `RUNA2_SOURCE_SHA256=${sourceSha256}`,
-      ];
+      delete config.process.env;
       const child = this.sdk.spawnSandboxFromConfig(config, { usePty: false }, dirname(this.runnerPath));
       child.stdin?.on("error", () => {});
       child.stdin?.end();
@@ -170,6 +195,17 @@ export class MxcJavascriptExecutor {
     } catch (error) {
       status = "unavailable";
       errorCode = boundedError(error);
+    } finally {
+      if (sourceTransport) {
+        try { await sourceTransport.cleanup(); }
+        catch { cleanupFailed = true; }
+      }
+    }
+    if (cleanupFailed) {
+      status = "unavailable";
+      errorCode = "sandbox-cleanup-failed";
+      stdout = "";
+      stderr = "";
     }
     const combinedBytes = Buffer.byteLength(stdout, "utf8") + Buffer.byteLength(stderr, "utf8");
     if (combinedBytes > OUTPUT_LIMIT) {
@@ -192,8 +228,8 @@ export class MxcJavascriptExecutor {
       runtime: { engine: "quickjs", package: "quickjs-emscripten", packageVersion: "0.32.0",
         host: "node", hostVersion },
       isolation: { provider: "microsoft-mxc", packageVersion: "0.8.0", method: "processcontainer",
-        tier: support.isolationTier, filesystem: "read-only-runtime-only", network: "deny-all",
-        environment: "explicit-minimal", ui: "denied" },
+        tier: support.isolationTier, filesystem: "read-only-runtime-and-transient-source", network: "deny-all",
+        environment: "empty", ui: "denied" },
       limits: { sourceBytes: Buffer.byteLength(request.source, "utf8"), maximumSourceBytes: SOURCE_LIMIT,
         wallClockMs: WALL_CLOCK_MS, quickJsDeadlineMs: QUICKJS_DEADLINE_MS,
         maximumOutputBytes: OUTPUT_LIMIT, quickJsMemoryBytes: MEMORY_LIMIT,
@@ -263,4 +299,4 @@ export class HarmlessJavascriptExecutionService {
 }
 
 export { MemoryExecutionCoordinator, SOURCE_LIMIT, OUTPUT_LIMIT, WALL_CLOCK_MS,
-  QUICKJS_DEADLINE_MS, MEMORY_LIMIT, STACK_LIMIT };
+  QUICKJS_DEADLINE_MS, MEMORY_LIMIT, STACK_LIMIT, createTransientSource };

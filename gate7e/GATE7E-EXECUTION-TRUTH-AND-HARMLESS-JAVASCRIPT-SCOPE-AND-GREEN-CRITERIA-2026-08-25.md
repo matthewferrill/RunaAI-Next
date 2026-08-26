@@ -49,10 +49,14 @@ The first executable slice is exactly:
 - 16 MiB QuickJS allocation limit and 512 KiB QuickJS stack limit;
 - one guest process, with Node child processes and workers denied;
 - stdin closed immediately;
-- empty explicitly supplied guest environment apart from the bounded source payload and fixed protocol fields;
+- no supplied or inherited guest environment;
 - default-deny network, including internet, LAN, inbound, and host loopback;
-- default-deny filesystem, with read-only grants only for the compact pinned runner/interpreter directory and the Node runtime directory needed to start the guest;
+- default-deny filesystem, with read-only grants only for the compact pinned runner/interpreter directory,
+  the Node runtime directory needed to start the guest, and one unique transient exact-source file;
 - no writable filesystem grant;
+- the trusted parent creates that source file exclusively, passes only its generated path and digest as
+  fixed protocol fields, and removes it before returning any receipt; the source itself is absent from
+  the process command line, guest environment, receipt, and diagnostics;
 - no repository, project, attachment, credential, secret, clipboard, GUI, learning, setting, or protected-store access;
 - disposable policy and identity cleanup after exit.
 

@@ -1,4 +1,5 @@
 import { createHash } from "node:crypto";
+import { readFileSync } from "node:fs";
 import { getQuickJS } from "quickjs-emscripten";
 
 const RESULT_MARKER = "RUNA2_EXECUTION_RESULT:";
@@ -8,10 +9,10 @@ const MEMORY_LIMIT = 16 * 1024 * 1024;
 const STACK_LIMIT = 512 * 1024;
 const QUICKJS_DEADLINE_MS = 1_200;
 
-const sourceEncoded = process.env.RUNA2_SOURCE_BASE64URL ?? "";
-const expectedDigest = process.env.RUNA2_SOURCE_SHA256 ?? "";
-delete process.env.RUNA2_SOURCE_BASE64URL;
-delete process.env.RUNA2_SOURCE_SHA256;
+const sourcePathArgument = process.argv.find(value => value.startsWith("--source-file="));
+const sourceDigestArgument = process.argv.find(value => value.startsWith("--source-sha256="));
+const sourcePath = sourcePathArgument?.slice("--source-file=".length) ?? "";
+const expectedDigest = sourceDigestArgument?.slice("--source-sha256=".length) ?? "";
 
 function emit(value) {
   process.stdout.write(`${RESULT_MARKER}${Buffer.from(JSON.stringify({ ...value,
@@ -30,15 +31,20 @@ function safeText(value) {
 
 let source;
 try {
-  source = Buffer.from(sourceEncoded, "base64url").toString("utf8");
+  const encoded = readFileSync(sourcePath);
+  if (!encoded.length || encoded.length > SOURCE_LIMIT || !/^[a-f0-9]{64}$/.test(expectedDigest)) {
+    throw new Error("source-invalid");
+  }
+  const actualDigest = createHash("sha256").update(encoded).digest("hex");
+  if (actualDigest !== expectedDigest) throw new Error("source-invalid");
+  source = new TextDecoder("utf-8", { fatal: true }).decode(encoded);
 } catch {
   emit({ status: "runtime-error", stdout: "", stderr: "", errorCode: "sandbox-source-invalid" });
   process.exit(2);
 }
 
 const sourceBytes = Buffer.byteLength(source, "utf8");
-const actualDigest = createHash("sha256").update(source).digest("hex");
-if (!sourceBytes || sourceBytes > SOURCE_LIMIT || actualDigest !== expectedDigest) {
+if (!sourceBytes || sourceBytes > SOURCE_LIMIT) {
   emit({ status: "runtime-error", stdout: "", stderr: "", errorCode: "sandbox-source-invalid" });
   process.exit(2);
 }

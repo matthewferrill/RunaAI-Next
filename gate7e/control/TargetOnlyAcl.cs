@@ -477,6 +477,21 @@ namespace RunaAI.Next.Gate7E
             throw new InvalidOperationException("target-control-flags-not-inferred");
         }
 
+        public static string NonDaclHashForControlFlagsForRecovery(
+            string path,
+            int controlFlags)
+        {
+            if (controlFlags < 0 || controlFlags > UInt16.MaxValue)
+            {
+                throw new ArgumentException("target-control-flags-invalid", "controlFlags");
+            }
+            RawSecurityDescriptor descriptor = ReadDescriptor(path);
+            string owner = descriptor.Owner == null ? "" : descriptor.Owner.Value;
+            string group = descriptor.Group == null ? "" : descriptor.Group.Value;
+            string candidate = owner + "\0" + group + "\0" + controlFlags.ToString("x8");
+            return HashBytes(Encoding.UTF8.GetBytes(candidate));
+        }
+
         public static DaclState ApplyControlFlagsForTestOnly(string path, int targetControlFlags)
         {
             if (targetControlFlags < 0 || targetControlFlags > UInt16.MaxValue)

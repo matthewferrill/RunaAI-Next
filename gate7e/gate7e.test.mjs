@@ -453,7 +453,9 @@ test("the Control repair is target-only, fail-closed, and preserves descendant D
   assert.match(operator, /target-only-critical-path-drift/);
   assert.match(operator, /RecoverAndReconcile/);
   assert.match(operator, /RequirePrivilegedControlTests/);
-  assert.match(ancestorRepair, /\$target='C:\\AI'/);
+  assert.match(ancestorRepair, /ValidateSet\('AiRoot','CandidateRoot','StagingRoot','ReleasesRoot','Release','TransientRoot','JavascriptTransientRoot'\)/);
+  assert.match(ancestorRepair, /'AiRoot'\{'C:\\AI'\}/);
+  assert.match(ancestorRepair, /ancestor-release-id-invalid/);
   assert.match(ancestorRepair, /RecoverAndEnsureHostPreparation/);
   assert.match(ancestorRepair, /ancestor-critical-path-drift/);
   assert.match(ancestorRepair, /RestoreDaclAndControlFlags/);

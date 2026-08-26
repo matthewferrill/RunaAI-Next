@@ -8,6 +8,9 @@ param(
   [Parameter(Mandatory)][int]$ExpectedTargetControlFlags,
   [Parameter(Mandatory)][string]$ExpectedPriorReleaseId,
   [Parameter(Mandatory)][string]$ExpectedPriorCommit,
+  [ValidateSet('AiRoot','CandidateRoot','StagingRoot','ReleasesRoot','Release','TransientRoot','JavascriptTransientRoot')]
+  [string]$TargetId='AiRoot',
+  [string]$ReleaseId='',
   [string]$Root='C:\AI\RunaAI-Next-Candidate',
   [string]$TaskName='Gate7E-SandboxAncestorRepair',
   [switch]$Worker,
@@ -16,11 +19,19 @@ param(
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference='Stop'
-$target='C:\AI'
 $rootPath=[IO.Path]::GetFullPath($Root)
 $sourcePath=[IO.Path]::GetFullPath($SourceRoot)
 $operatorSource=Join-Path $sourcePath 'gate7e\control\TargetOnlyAcl.cs'
 $taskPath='\RunaAI-Next\'
+$target=switch($TargetId){
+  'AiRoot'{'C:\AI'}
+  'CandidateRoot'{$rootPath}
+  'StagingRoot'{Join-Path $rootPath 'staging'}
+  'ReleasesRoot'{Join-Path $rootPath 'releases'}
+  'Release'{if($ReleaseId-notmatch'^[A-Za-z0-9._-]{1,100}$'){throw 'ancestor-release-id-invalid'};Join-Path $rootPath "releases\$ReleaseId"}
+  'TransientRoot'{Join-Path $rootPath 'transient'}
+  'JavascriptTransientRoot'{Join-Path $rootPath 'transient\javascript'}
+}
 
 function Valid-Hash([string]$Value){$Value-match'^[a-f0-9]{64}$'}
 function Write-ExclusiveJson([string]$Path,[object]$Value){
@@ -38,6 +49,7 @@ function Critical-Paths{@(
 function Critical-Hashes{
   $values=[ordered]@{}
   foreach($path in Critical-Paths){
+    if([IO.Path]::GetFullPath($path)-eq[IO.Path]::GetFullPath($target)){continue}
     if(-not(Test-Path -LiteralPath $path -PathType Container)){throw 'ancestor-critical-path-missing'}
     $values[$path]=[RunaAI.Next.Gate7E.TargetOnlyAcl]::HashDacl($path)
   }
@@ -66,8 +78,8 @@ if($Worker){
     $before=Inspect-Target
     if($before.DaclSha256-ne$ExpectedDaclSha256-or
       $before.NonDaclSha256-ne$ExpectedCurrentNonDaclSha256-or
-      $before.AllApplicationPackagesExactCount-ne0-or
-      $before.AllRestrictedApplicationPackagesExactCount-ne0-or
+      $before.AllApplicationPackagesExactCount-notin@(0,1)-or
+      $before.AllRestrictedApplicationPackagesExactCount-ne$before.AllApplicationPackagesExactCount-or
       $before.AllApplicationPackagesConflictCount-ne0-or
       $before.AllRestrictedApplicationPackagesConflictCount-ne0){throw 'ancestor-starting-state-invalid'}
     $snapshot=[RunaAI.Next.Gate7E.TargetOnlyAcl]::ReadDaclBytes($target)
@@ -88,7 +100,7 @@ if($Worker){
     }
     $criticalAfter=Critical-Hashes
     foreach($path in Critical-Paths){if($criticalBefore[$path]-ne$criticalAfter[$path]){throw 'ancestor-critical-path-drift'}}
-    $record=[ordered]@{schemaVersion='runa2-gate7e-sandbox-ancestor-repair/v1';passed=$true;
+    $record=[ordered]@{schemaVersion='runa2-gate7e-sandbox-ancestor-repair/v1';passed=$true;targetId=$TargetId;
       systemContext=$true;targetChanged=$mutation.Changed;addedTupleCount=$mutation.AddedCount;
       firstTupleCount=$after.AllApplicationPackagesExactCount;
       secondTupleCount=$after.AllRestrictedApplicationPackagesExactCount;
@@ -133,6 +145,7 @@ $arguments=@('-NoProfile','-ExecutionPolicy','Bypass','-File',('"{0}"'-f$PSComma
   '-ExpectedDaclSha256',$ExpectedDaclSha256,'-ExpectedCurrentNonDaclSha256',$ExpectedCurrentNonDaclSha256,
   '-ExpectedTargetNonDaclSha256',$ExpectedTargetNonDaclSha256,'-ExpectedTargetControlFlags',$ExpectedTargetControlFlags,
   '-ExpectedPriorReleaseId',$ExpectedPriorReleaseId,'-ExpectedPriorCommit',$ExpectedPriorCommit,
+  '-TargetId',$TargetId,'-ReleaseId',$ReleaseId,
   '-Root',('"{0}"'-f$rootPath),'-TaskName',$TaskName,'-Worker','-ResultPath',('"{0}"'-f$ResultPath))-join' '
 $action=New-ScheduledTaskAction -Execute 'powershell.exe' -Argument $arguments
 $principal=New-ScheduledTaskPrincipal -UserId 'SYSTEM' -LogonType ServiceAccount -RunLevel Highest

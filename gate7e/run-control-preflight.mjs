@@ -6,6 +6,7 @@ import { stageSandboxRuntime } from "../gate6b/sandbox-runtime.mjs";
 import { MxcJavascriptExecutor } from "./mxc-javascript-executor.mjs";
 
 const root = await mkdtemp(join(tmpdir(), "runa2-gate7e-control-preflight-"));
+let diagnostic = null;
 try {
   if (process.platform !== "win32" || process.version !== "v22.22.0") {
     throw Object.assign(new Error("The exact Windows Node runtime is required."),
@@ -30,6 +31,13 @@ try {
   const preflight = await executor.preflight();
   if (preflight.ready !== true || preflight.receipt.status !== "executed"
       || preflight.receipt.output.stdout !== "runa2-sandbox-ready\n") {
+    diagnostic = Object.freeze({
+      receiptStatus: preflight.receipt.status,
+      sandboxErrorCode: preflight.receipt.errorCode,
+      sandboxExitCode: preflight.receipt.exitCode,
+      isolationTier: preflight.receipt.isolation.tier,
+      combinedBytes: preflight.receipt.output.combinedBytes,
+    });
     throw Object.assign(new Error("The exact startup program did not execute."),
       { code: "control-preflight-startup-failed" });
   }
@@ -66,6 +74,7 @@ try {
     schemaVersion: "runa2-gate7e-control-real-preflight-error/v1",
     errorCode: /^[a-z0-9-]{1,100}$/.test(error?.code ?? "")
       ? error.code : "control-real-preflight-failed",
+    diagnostic,
     privateValuesIncluded: false,
   })}\n`);
   process.exitCode = 1;

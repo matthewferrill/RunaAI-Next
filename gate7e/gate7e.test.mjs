@@ -432,6 +432,9 @@ test("the Control repair is target-only, fail-closed, and preserves descendant D
   assert.match(preflight, /destinationRoot: root/);
   assert.match(preflight, /receipt\.status !== "executed"/);
   assert.match(preflight, /arithmetic\.output\.stdout !== "140\\n"/);
+  assert.match(preflight, /sandboxExitCode: preflight\.receipt\.exitCode/);
+  assert.match(preflight, /combinedBytes: preflight\.receipt\.output\.combinedBytes/);
+  assert.doesNotMatch(preflight, /diagnostic[^\n]*stdout|diagnostic[^\n]*stderr/);
 
   if (process.platform !== "win32") {
     t.skip("The exact DACL regression requires Windows.");

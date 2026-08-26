@@ -36,6 +36,7 @@ if($Worker){
     tempUnderWindows=([IO.Path]::GetTempPath().StartsWith('C:\Windows\Temp',[StringComparison]::OrdinalIgnoreCase))
     processExitCode=$null
     preflight=$null
+    preflightDiagnostic=$null
     errorCode=$null
     privateValuesIncluded=$false
   }
@@ -83,6 +84,9 @@ if($Worker){
           if($failure.privateValuesIncluded-eq$false-and
             [string]$failure.errorCode-match'^[a-z0-9-]{1,100}$'){
             $receipt.errorCode=[string]$failure.errorCode
+            if($failure.schemaVersion-eq'runa2-gate7e-control-real-preflight-error/v1'){
+              $receipt.preflightDiagnostic=$failure.diagnostic
+            }
           }
         }catch{}
       }

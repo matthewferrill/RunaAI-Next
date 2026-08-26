@@ -407,12 +407,20 @@ test("the Control repair is target-only, fail-closed, and preserves descendant D
   assert.match(source, /S-1-15-2-1/);
   assert.match(source, /S-1-15-2-2/);
   assert.match(source, /target-sid-conflict/);
+  assert.match(source, /OwnershipSha256/);
+  assert.match(source, /DaclProtected/);
+  assert.match(source, /DaclDefaulted/);
+  assert.match(source, /ProtectedDaclSecurityInformation/);
+  assert.match(source, /RecoverAndEnsureHostPreparation/);
+  assert.match(source, /RestoreDaclAndControlFlags/);
   assert.match(source, /RollBackOrThrow/);
   assert.doesNotMatch(`${source}\n${operator}`, /SetNamedSecurityInfoW|Set-Acl|\bicacls\b|wxc-host-prep/);
   assert.equal(operator.includes("$systemDriveRoot = 'C:\\'"), true);
   assert.match(operator, /RUNA-CONTROL\\Matthew/);
   assert.match(operator, /NT AUTHORITY\\SYSTEM/);
   assert.match(operator, /target-only-critical-path-drift/);
+  assert.match(operator, /RecoverAndReconcile/);
+  assert.match(operator, /RequirePrivilegedControlTests/);
   assert.match(preflight, /destinationRoot: root/);
   assert.match(preflight, /receipt\.status !== "executed"/);
   assert.match(preflight, /arithmetic\.output\.stdout !== "140\\n"/);
@@ -443,6 +451,9 @@ test("the Control repair is target-only, fail-closed, and preserves descendant D
     exactRestore: true,
     conflictRejected: true,
     duplicateRejected: true,
+    privilegedControlTestsRun: false,
+    protectedDaclPreserved: null,
+    metadataRecoveryPassed: null,
     descendantDaclStable: true,
     privateValuesIncluded: false,
   });

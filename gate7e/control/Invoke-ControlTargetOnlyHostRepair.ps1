@@ -1,6 +1,6 @@
 [CmdletBinding()]
 param(
-  [Parameter(Mandatory)][ValidateSet('Rehearse','Reconcile')][string]$Mode,
+  [Parameter(Mandatory)][ValidateSet('Rehearse','Reconcile','RecoverAndReconcile')][string]$Mode,
   [Parameter(Mandatory)][string]$ExpectedCommit,
   [Parameter(Mandatory)][string]$ExpectedRootDaclSha256,
   [Parameter(Mandatory)][string]$ExpectedScriptSha256,
@@ -8,6 +8,9 @@ param(
   [Parameter(Mandatory)][string]$ExpectedTestSha256,
   [Parameter(Mandatory)][string]$ExpectedPriorReleaseId,
   [Parameter(Mandatory)][string]$ExpectedPriorCommit,
+  [string]$ExpectedCurrentNonDaclSha256 = 'not-required',
+  [string]$ExpectedTargetNonDaclSha256 = 'not-required',
+  [int]$ExpectedTargetControlFlags = -1,
   [string]$Root = 'C:\AI\RunaAI-Next-Candidate',
   [switch]$Worker,
   [string]$ResultPath
@@ -27,6 +30,12 @@ foreach ($value in @($ExpectedRootDaclSha256, $ExpectedScriptSha256,
     $ExpectedSourceSha256, $ExpectedTestSha256)) {
   if ($value -notmatch '^[a-f0-9]{64}$') { throw 'target-only-host-repair-pin-invalid' }
 }
+if ($Mode -eq 'RecoverAndReconcile' -and (
+    $ExpectedCurrentNonDaclSha256 -notmatch '^[a-f0-9]{64}$' -or
+    $ExpectedTargetNonDaclSha256 -notmatch '^[a-f0-9]{64}$' -or
+    $ExpectedTargetControlFlags -lt 0 -or $ExpectedTargetControlFlags -gt [UInt16]::MaxValue)) {
+  throw 'target-only-host-repair-pin-invalid'
+}
 $taskPath = '\RunaAI-Next\'
 $taskName = "Gate7E-TargetOnly-$Mode-$($ExpectedCommit.Substring(0,7))"
 $stage = Join-Path $Root "staging\gate7e-target-only-host-repair-$($ExpectedCommit.Substring(0,7))"
@@ -43,7 +52,12 @@ function Safe-Code([System.Management.Automation.ErrorRecord]$Record) {
   $text = $Record.Exception.ToString()
   foreach ($code in @(
     'target-dacl-hash-mismatch', 'target-sid-conflict', 'target-sid-duplicate',
-    'target-dacl-postcondition-failed', 'target-only-dacl-write-failed',
+    'target-dacl-tuple-postcondition-failed', 'target-ownership-postcondition-failed',
+    'target-dacl-control-postcondition-failed', 'target-only-dacl-write-failed',
+    'target-recovery-starting-state-mismatch', 'target-recovery-metadata-postcondition-failed',
+    'target-control-restore-starting-state-mismatch', 'target-control-restore-postcondition-failed',
+    'automatic-control-rollback-verification-failed',
+    'target-only-control-mutation-and-rollback-failed',
     'automatic-rollback-verification-failed', 'target-only-mutation-and-rollback-failed',
     'snapshot-restore-postcondition-failed', 'snapshot-restore-metadata-drift',
     'target-only-rehearsal-invalid', 'target-only-critical-path-drift',
@@ -116,6 +130,8 @@ if ((Hash $scriptPath) -ne $ExpectedScriptSha256 -or
 if ($Worker) {
   $record = $null
   $snapshot = $null
+  $snapshotNonDacl = $null
+  $snapshotControlFlags = $null
   $mutationApplied = $false
   $rollbackRestored = $false
   try {
@@ -128,7 +144,8 @@ if ($Worker) {
 
     if ($Mode -eq 'Rehearse') {
       $testOutput = & 'C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe' `
-        -NoProfile -NonInteractive -ExecutionPolicy Bypass -File $testPath 2>&1
+        -NoProfile -NonInteractive -ExecutionPolicy Bypass -File $testPath `
+        -RequirePrivilegedControlTests 2>&1
       $testExit = $LASTEXITCODE
       $testText = (@($testOutput | ForEach-Object { [string]$_ }) -join "`n").Trim()
       if ($testExit -ne 0) { throw 'target-only-rehearsal-invalid' }
@@ -136,6 +153,9 @@ if ($Worker) {
       if ($testResult.passed -ne $true -or $testResult.descendantDaclStable -ne $true -or
           $testResult.exactRestore -ne $true -or $testResult.conflictRejected -ne $true -or
           $testResult.duplicateRejected -ne $true -or
+          $testResult.protectedDaclPreserved -ne $true -or
+          $testResult.metadataRecoveryPassed -ne $true -or
+          $testResult.privilegedControlTestsRun -ne $true -or
           $testResult.privateValuesIncluded -ne $false) {
         throw 'target-only-rehearsal-invalid'
       }
@@ -147,6 +167,8 @@ if ($Worker) {
         descendantDaclStable = $true
         conflictRejected = $true
         duplicateRejected = $true
+        protectedDaclPreserved = $true
+        metadataRecoveryPassed = $true
         productionChanged = $false
         privateValuesIncluded = $false
       }
@@ -160,20 +182,44 @@ if ($Worker) {
           $before.AllRestrictedApplicationPackagesConflictCount -ne 0) {
         throw 'target-only-root-starting-state-invalid'
       }
+      if ($Mode -eq 'RecoverAndReconcile' -and
+          $before.NonDaclSha256 -ne $ExpectedCurrentNonDaclSha256) {
+        throw 'target-recovery-starting-state-mismatch'
+      }
       $snapshot = [RunaAI.Next.Gate7E.TargetOnlyAcl]::ReadDaclBytes($systemDriveRoot)
+      $snapshotNonDacl = $before.NonDaclSha256
+      $snapshotControlFlags = $before.ControlFlagsValue
       $criticalBefore = Critical-Hashes
-      $mutation = [RunaAI.Next.Gate7E.TargetOnlyAcl]::EnsureHostPreparation(
-        $systemDriveRoot,
-        $ExpectedRootDaclSha256
-      )
+      if ($Mode -eq 'RecoverAndReconcile') {
+        $mutation = [RunaAI.Next.Gate7E.TargetOnlyAcl]::RecoverAndEnsureHostPreparation(
+          $systemDriveRoot,
+          $ExpectedRootDaclSha256,
+          $ExpectedCurrentNonDaclSha256,
+          $ExpectedTargetControlFlags,
+          $ExpectedTargetNonDaclSha256
+        )
+      } else {
+        $mutation = [RunaAI.Next.Gate7E.TargetOnlyAcl]::EnsureHostPreparation(
+          $systemDriveRoot,
+          $ExpectedRootDaclSha256
+        )
+      }
       $mutationApplied = $mutation.Changed
       $after = Inspect-Root
       if ($after.AllApplicationPackagesExactCount -ne 1 -or
           $after.AllRestrictedApplicationPackagesExactCount -ne 1 -or
           $after.AllApplicationPackagesConflictCount -ne 0 -or
           $after.AllRestrictedApplicationPackagesConflictCount -ne 0 -or
-          $after.NonDaclSha256 -ne $before.NonDaclSha256) {
-        throw 'target-only-root-final-state-invalid'
+          $after.OwnershipSha256 -ne $before.OwnershipSha256 -or
+          $after.DaclProtected -ne $before.DaclProtected -or
+          $after.DaclDefaulted -ne $before.DaclDefaulted) {
+        if ($Mode -ne 'RecoverAndReconcile') { throw 'target-only-root-final-state-invalid' }
+      }
+      if ($Mode -eq 'RecoverAndReconcile' -and (
+          $after.NonDaclSha256 -ne $ExpectedTargetNonDaclSha256 -or
+          $after.ControlFlagsValue -ne $ExpectedTargetControlFlags -or
+          $after.OwnershipSha256 -ne $before.OwnershipSha256)) {
+        throw 'target-recovery-metadata-postcondition-failed'
       }
       $criticalAfter = Critical-Hashes
       foreach ($path in Critical-Paths) {
@@ -192,27 +238,40 @@ if ($Worker) {
         descendantSampleCount = $criticalAfter.Count
         descendantDaclStable = $true
         rollbackRequired = $false
+        metadataRecovered = $Mode -eq 'RecoverAndReconcile'
         productionApplicationChanged = $false
         privateValuesIncluded = $false
       }
     }
   } catch {
     $failureCode = Safe-Code $_
-    if ($Mode -eq 'Reconcile' -and $snapshot) {
+    if ($Mode -ne 'Rehearse' -and $snapshot) {
       try {
         Load-Operator
-        $currentHash = [RunaAI.Next.Gate7E.TargetOnlyAcl]::HashDacl($systemDriveRoot)
-        if ($currentHash -ne $ExpectedRootDaclSha256) {
+        $current = Inspect-Root
+        if ($Mode -eq 'RecoverAndReconcile' -and (
+            $current.DaclSha256 -ne $ExpectedRootDaclSha256 -or
+            $current.NonDaclSha256 -ne $snapshotNonDacl)) {
+          [RunaAI.Next.Gate7E.TargetOnlyAcl]::RestoreDaclAndControlFlags(
+            $systemDriveRoot,
+            $current.DaclSha256,
+            $current.NonDaclSha256,
+            $snapshot,
+            $snapshotControlFlags,
+            $snapshotNonDacl
+          ) | Out-Null
+        } elseif ($current.DaclSha256 -ne $ExpectedRootDaclSha256) {
           [RunaAI.Next.Gate7E.TargetOnlyAcl]::RestoreDacl(
             $systemDriveRoot,
-            $currentHash,
+            $current.DaclSha256,
             $snapshot
           ) | Out-Null
         }
         $restored = Inspect-Root
         $rollbackRestored = $restored.DaclSha256 -eq $ExpectedRootDaclSha256 -and
           $restored.AllApplicationPackagesExactCount -eq 1 -and
-          $restored.AllRestrictedApplicationPackagesExactCount -eq 0
+          $restored.AllRestrictedApplicationPackagesExactCount -eq 0 -and
+          ($Mode -ne 'RecoverAndReconcile' -or $restored.NonDaclSha256 -eq $snapshotNonDacl)
       } catch {
         $failureCode = 'target-only-reconciliation-and-rollback-failed'
       }
@@ -254,6 +313,10 @@ if ($rootState.DaclSha256 -ne $ExpectedRootDaclSha256 -or
     $rootState.AllRestrictedApplicationPackagesConflictCount -ne 0) {
   throw 'target-only-root-starting-state-invalid'
 }
+if ($Mode -eq 'RecoverAndReconcile' -and
+    $rootState.NonDaclSha256 -ne $ExpectedCurrentNonDaclSha256) {
+  throw 'target-recovery-starting-state-mismatch'
+}
 
 $ResultPath = Join-Path $stage ("result-$($Mode.ToLowerInvariant()).json")
 if (Test-Path -LiteralPath $ResultPath) { throw 'target-only-result-path-exists' }
@@ -269,6 +332,9 @@ $arguments = @(
   '-ExpectedTestSha256', $ExpectedTestSha256,
   '-ExpectedPriorReleaseId', $ExpectedPriorReleaseId,
   '-ExpectedPriorCommit', $ExpectedPriorCommit,
+  '-ExpectedCurrentNonDaclSha256', $ExpectedCurrentNonDaclSha256,
+  '-ExpectedTargetNonDaclSha256', $ExpectedTargetNonDaclSha256,
+  '-ExpectedTargetControlFlags', $ExpectedTargetControlFlags,
   '-Root', ('"' + $Root + '"'),
   '-Worker',
   '-ResultPath', ('"' + $ResultPath + '"')

@@ -13,6 +13,10 @@ namespace RunaAI.Next.Gate7E
     {
         public string DaclSha256 { get; internal set; }
         public string NonDaclSha256 { get; internal set; }
+        public string OwnershipSha256 { get; internal set; }
+        public bool DaclProtected { get; internal set; }
+        public bool DaclDefaulted { get; internal set; }
+        public int ControlFlagsValue { get; internal set; }
         public int AceCount { get; internal set; }
         public int AllApplicationPackagesExactCount { get; internal set; }
         public int AllRestrictedApplicationPackagesExactCount { get; internal set; }
@@ -38,6 +42,8 @@ namespace RunaAI.Next.Gate7E
         private const uint OwnerSecurityInformation = 0x00000001;
         private const uint GroupSecurityInformation = 0x00000002;
         private const uint DaclSecurityInformation = 0x00000004;
+        private const uint UnprotectedDaclSecurityInformation = 0x20000000;
+        private const uint ProtectedDaclSecurityInformation = 0x80000000;
         private const int ErrorInsufficientBuffer = 122;
 
         [DllImport("advapi32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
@@ -83,6 +89,10 @@ namespace RunaAI.Next.Gate7E
             DaclState state = new DaclState();
             state.DaclSha256 = HashBytes(SerializeAcl(dacl));
             state.NonDaclSha256 = HashNonDacl(descriptor);
+            state.OwnershipSha256 = HashOwnership(descriptor);
+            state.DaclProtected = (descriptor.ControlFlags & ControlFlags.DiscretionaryAclProtected) != 0;
+            state.DaclDefaulted = (descriptor.ControlFlags & ControlFlags.DiscretionaryAclDefaulted) != 0;
+            state.ControlFlagsValue = (int)descriptor.ControlFlags;
             state.AceCount = dacl.Count;
             CountTargetAces(dacl, state);
             return state;
@@ -132,11 +142,11 @@ namespace RunaAI.Next.Gate7E
                 if (after.AllApplicationPackagesExactCount != 1
                     || after.AllRestrictedApplicationPackagesExactCount != 1
                     || after.AllApplicationPackagesConflictCount != 0
-                    || after.AllRestrictedApplicationPackagesConflictCount != 0
-                    || !String.Equals(after.NonDaclSha256, before.NonDaclSha256, StringComparison.Ordinal))
+                    || after.AllRestrictedApplicationPackagesConflictCount != 0)
                 {
-                    throw new InvalidOperationException("target-dacl-postcondition-failed");
+                    throw new InvalidOperationException("target-dacl-tuple-postcondition-failed");
                 }
+                ValidateStableTargetMetadata(before, after);
                 return new DaclMutation
                 {
                     Changed = true,
@@ -149,6 +159,80 @@ namespace RunaAI.Next.Gate7E
             catch (Exception mutationError)
             {
                 RollBackOrThrow(path, beforeBytes, beforeHash, mutationError);
+                throw;
+            }
+        }
+
+        public static DaclMutation RecoverAndEnsureHostPreparation(
+            string path,
+            string expectedDaclSha256,
+            string expectedCurrentNonDaclSha256,
+            int targetControlFlags,
+            string expectedTargetNonDaclSha256)
+        {
+            ValidateExpectedHash(expectedDaclSha256);
+            ValidateExpectedHash(expectedCurrentNonDaclSha256);
+            ValidateExpectedHash(expectedTargetNonDaclSha256);
+            if (targetControlFlags < 0 || targetControlFlags > UInt16.MaxValue)
+            {
+                throw new ArgumentException("target-control-flags-invalid", "targetControlFlags");
+            }
+            string fullPath = ValidateDirectory(path);
+            byte[] beforeBytes = ReadDaclBytes(fullPath);
+            string beforeHash = HashBytes(beforeBytes);
+            DaclState before = Inspect(fullPath);
+            if (!String.Equals(beforeHash, expectedDaclSha256, StringComparison.OrdinalIgnoreCase)
+                || !String.Equals(before.NonDaclSha256, expectedCurrentNonDaclSha256,
+                    StringComparison.OrdinalIgnoreCase))
+            {
+                throw new InvalidOperationException("target-recovery-starting-state-mismatch");
+            }
+            ValidateNoConflictsOrDuplicates(before);
+            int missing = (before.AllApplicationPackagesExactCount == 0 ? 1 : 0)
+                + (before.AllRestrictedApplicationPackagesExactCount == 0 ? 1 : 0);
+            RawAcl changed = CloneAcl(beforeBytes, missing);
+            int insertionIndex = FirstInheritedIndex(changed);
+            if (before.AllApplicationPackagesExactCount == 0)
+            {
+                changed.InsertAce(insertionIndex++, HostPreparationAce(AllApplicationPackagesSid));
+            }
+            if (before.AllRestrictedApplicationPackagesExactCount == 0)
+            {
+                changed.InsertAce(insertionIndex, HostPreparationAce(AllRestrictedApplicationPackagesSid));
+            }
+
+            try
+            {
+                WriteDaclWithFlags(fullPath, changed, (ControlFlags)targetControlFlags, true);
+                DaclState after = Inspect(fullPath);
+                if (after.AllApplicationPackagesExactCount != 1
+                    || after.AllRestrictedApplicationPackagesExactCount != 1
+                    || after.AllApplicationPackagesConflictCount != 0
+                    || after.AllRestrictedApplicationPackagesConflictCount != 0)
+                {
+                    throw new InvalidOperationException("target-dacl-tuple-postcondition-failed");
+                }
+                if (!String.Equals(after.OwnershipSha256, before.OwnershipSha256,
+                    StringComparison.Ordinal)
+                    || !String.Equals(after.NonDaclSha256, expectedTargetNonDaclSha256,
+                        StringComparison.OrdinalIgnoreCase)
+                    || after.ControlFlagsValue != targetControlFlags)
+                {
+                    throw new InvalidOperationException("target-recovery-metadata-postcondition-failed");
+                }
+                return new DaclMutation
+                {
+                    Changed = missing != 0 || before.ControlFlagsValue != targetControlFlags,
+                    AddedCount = missing,
+                    RemovedCount = 0,
+                    Before = before,
+                    After = after
+                };
+            }
+            catch (Exception mutationError)
+            {
+                RollBackDaclAndFlagsOrThrow(fullPath, beforeBytes, beforeHash,
+                    before.ControlFlagsValue, before.NonDaclSha256, mutationError);
                 throw;
             }
         }
@@ -199,11 +283,11 @@ namespace RunaAI.Next.Gate7E
                 if (after.AllApplicationPackagesExactCount != 0
                     || after.AllRestrictedApplicationPackagesExactCount != 0
                     || after.AllApplicationPackagesConflictCount != 0
-                    || after.AllRestrictedApplicationPackagesConflictCount != 0
-                    || !String.Equals(after.NonDaclSha256, before.NonDaclSha256, StringComparison.Ordinal))
+                    || after.AllRestrictedApplicationPackagesConflictCount != 0)
                 {
-                    throw new InvalidOperationException("target-dacl-postcondition-failed");
+                    throw new InvalidOperationException("target-dacl-tuple-postcondition-failed");
                 }
+                ValidateStableTargetMetadata(before, after);
                 return new DaclMutation
                 {
                     Changed = true,
@@ -249,10 +333,7 @@ namespace RunaAI.Next.Gate7E
                     throw new InvalidOperationException("snapshot-restore-postcondition-failed");
                 }
                 DaclState after = Inspect(path);
-                if (!String.Equals(after.NonDaclSha256, before.NonDaclSha256, StringComparison.Ordinal))
-                {
-                    throw new InvalidOperationException("snapshot-restore-metadata-drift");
-                }
+                ValidateStableTargetMetadata(before, after);
                 return new DaclMutation
                 {
                     Changed = !String.Equals(currentHash, snapshotHash, StringComparison.Ordinal),
@@ -265,6 +346,65 @@ namespace RunaAI.Next.Gate7E
             catch (Exception mutationError)
             {
                 RollBackOrThrow(path, currentBytes, currentHash, mutationError);
+                throw;
+            }
+        }
+
+        public static DaclMutation RestoreDaclAndControlFlags(
+            string path,
+            string expectedCurrentDaclSha256,
+            string expectedCurrentNonDaclSha256,
+            byte[] snapshotDacl,
+            int targetControlFlags,
+            string expectedTargetNonDaclSha256)
+        {
+            ValidateExpectedHash(expectedCurrentDaclSha256);
+            ValidateExpectedHash(expectedCurrentNonDaclSha256);
+            ValidateExpectedHash(expectedTargetNonDaclSha256);
+            if (snapshotDacl == null || snapshotDacl.Length < 8
+                || targetControlFlags < 0 || targetControlFlags > UInt16.MaxValue)
+            {
+                throw new ArgumentException("snapshot-control-restore-invalid");
+            }
+            string fullPath = ValidateDirectory(path);
+            byte[] currentBytes = ReadDaclBytes(fullPath);
+            DaclState before = Inspect(fullPath);
+            if (!String.Equals(before.DaclSha256, expectedCurrentDaclSha256,
+                    StringComparison.OrdinalIgnoreCase)
+                || !String.Equals(before.NonDaclSha256, expectedCurrentNonDaclSha256,
+                    StringComparison.OrdinalIgnoreCase))
+            {
+                throw new InvalidOperationException("target-control-restore-starting-state-mismatch");
+            }
+            string snapshotHash = HashBytes(snapshotDacl);
+            try
+            {
+                WriteDaclWithFlags(fullPath, new RawAcl(snapshotDacl, 0),
+                    (ControlFlags)targetControlFlags, true);
+                DaclState after = Inspect(fullPath);
+                if (!String.Equals(after.DaclSha256, snapshotHash, StringComparison.Ordinal)
+                    || !String.Equals(after.NonDaclSha256, expectedTargetNonDaclSha256,
+                        StringComparison.OrdinalIgnoreCase)
+                    || after.ControlFlagsValue != targetControlFlags
+                    || !String.Equals(after.OwnershipSha256, before.OwnershipSha256,
+                        StringComparison.Ordinal))
+                {
+                    throw new InvalidOperationException("target-control-restore-postcondition-failed");
+                }
+                return new DaclMutation
+                {
+                    Changed = !String.Equals(before.DaclSha256, snapshotHash, StringComparison.Ordinal)
+                        || before.ControlFlagsValue != targetControlFlags,
+                    AddedCount = 0,
+                    RemovedCount = 0,
+                    Before = before,
+                    After = after
+                };
+            }
+            catch (Exception mutationError)
+            {
+                RollBackDaclAndFlagsOrThrow(fullPath, currentBytes, before.DaclSha256,
+                    before.ControlFlagsValue, before.NonDaclSha256, mutationError);
                 throw;
             }
         }
@@ -309,11 +449,62 @@ namespace RunaAI.Next.Gate7E
             {
                 DaclSha256 = HashBytes(SerializeAcl(dacl)),
                 NonDaclSha256 = "test-only",
+                OwnershipSha256 = "test-only",
                 AceCount = dacl.Count
             };
             CountTargetAces(dacl, state);
             ValidateNoConflictsOrDuplicates(state);
             return state;
+        }
+
+        public static int InferControlFlagsForNonDaclHashForRecovery(
+            string path,
+            string expectedNonDaclSha256)
+        {
+            ValidateExpectedHash(expectedNonDaclSha256);
+            RawSecurityDescriptor descriptor = ReadDescriptor(path);
+            string owner = descriptor.Owner == null ? "" : descriptor.Owner.Value;
+            string group = descriptor.Group == null ? "" : descriptor.Group.Value;
+            for (int value = 0; value <= UInt16.MaxValue; value++)
+            {
+                string candidate = owner + "\0" + group + "\0" + value.ToString("x8");
+                if (String.Equals(HashBytes(Encoding.UTF8.GetBytes(candidate)),
+                    expectedNonDaclSha256, StringComparison.OrdinalIgnoreCase))
+                {
+                    return value;
+                }
+            }
+            throw new InvalidOperationException("target-control-flags-not-inferred");
+        }
+
+        public static DaclState ApplyControlFlagsForTestOnly(string path, int targetControlFlags)
+        {
+            if (targetControlFlags < 0 || targetControlFlags > UInt16.MaxValue)
+            {
+                throw new ArgumentException("test-control-flags-invalid", "targetControlFlags");
+            }
+            string fullPath = ValidateDirectory(path);
+            byte[] beforeDacl = ReadDaclBytes(fullPath);
+            DaclState before = Inspect(fullPath);
+            try
+            {
+                WriteDaclWithFlags(fullPath, new RawAcl(beforeDacl, 0),
+                    (ControlFlags)targetControlFlags, true);
+                DaclState after = Inspect(fullPath);
+                if (!String.Equals(after.DaclSha256, before.DaclSha256, StringComparison.Ordinal)
+                    || after.DaclProtected != (((ControlFlags)targetControlFlags
+                        & ControlFlags.DiscretionaryAclProtected) != 0))
+                {
+                    throw new InvalidOperationException("test-control-flags-postcondition-failed");
+                }
+                return after;
+            }
+            catch (Exception mutationError)
+            {
+                RollBackDaclAndFlagsOrThrow(fullPath, beforeDacl, before.DaclSha256,
+                    before.ControlFlagsValue, before.NonDaclSha256, mutationError);
+                throw;
+            }
         }
 
         private static RawSecurityDescriptor ReadDescriptor(string path)
@@ -339,15 +530,40 @@ namespace RunaAI.Next.Gate7E
         private static void WriteDacl(string path, RawAcl dacl)
         {
             string fullPath = ValidateDirectory(path);
+            RawSecurityDescriptor current = ReadDescriptor(fullPath);
+            WriteDaclWithFlags(fullPath, dacl, current.ControlFlags, false);
+        }
+
+        private static void WriteDaclWithFlags(
+            string fullPath,
+            RawAcl dacl,
+            ControlFlags requestedFlags,
+            bool forceProtectionDirective)
+        {
+            ControlFlags descriptorFlags = ControlFlags.DiscretionaryAclPresent
+                | (requestedFlags & (ControlFlags.DiscretionaryAclDefaulted
+                    | ControlFlags.DiscretionaryAclAutoInheritRequired
+                    | ControlFlags.DiscretionaryAclAutoInherited
+                    | ControlFlags.DiscretionaryAclProtected));
             RawSecurityDescriptor descriptor = new RawSecurityDescriptor(
-                ControlFlags.DiscretionaryAclPresent,
+                descriptorFlags,
                 null,
                 null,
                 null,
                 dacl);
             byte[] binary = new byte[descriptor.BinaryLength];
             descriptor.GetBinaryForm(binary, 0);
-            if (!SetFileSecurityW(fullPath, DaclSecurityInformation, binary))
+            uint information = DaclSecurityInformation;
+            bool protectedDacl = (descriptorFlags & ControlFlags.DiscretionaryAclProtected) != 0;
+            if (protectedDacl)
+            {
+                information |= ProtectedDaclSecurityInformation;
+            }
+            else if (forceProtectionDirective)
+            {
+                information |= UnprotectedDaclSecurityInformation;
+            }
+            if (!SetFileSecurityW(fullPath, information, binary))
             {
                 throw new Win32Exception(Marshal.GetLastWin32Error(), "target-only-dacl-write-failed");
             }
@@ -445,6 +661,19 @@ namespace RunaAI.Next.Gate7E
             }
         }
 
+        private static void ValidateStableTargetMetadata(DaclState before, DaclState after)
+        {
+            if (!String.Equals(after.OwnershipSha256, before.OwnershipSha256, StringComparison.Ordinal))
+            {
+                throw new InvalidOperationException("target-ownership-postcondition-failed");
+            }
+            if (after.DaclProtected != before.DaclProtected
+                || after.DaclDefaulted != before.DaclDefaulted)
+            {
+                throw new InvalidOperationException("target-dacl-control-postcondition-failed");
+            }
+        }
+
         private static void ValidateExpectedHash(string value)
         {
             if (String.IsNullOrWhiteSpace(value) || value.Length != 64)
@@ -506,6 +735,13 @@ namespace RunaAI.Next.Gate7E
             return HashBytes(Encoding.UTF8.GetBytes(value));
         }
 
+        private static string HashOwnership(RawSecurityDescriptor descriptor)
+        {
+            string owner = descriptor.Owner == null ? "" : descriptor.Owner.Value;
+            string group = descriptor.Group == null ? "" : descriptor.Group.Value;
+            return HashBytes(Encoding.UTF8.GetBytes(owner + "\0" + group));
+        }
+
         private static void RollBackOrThrow(
             string path,
             byte[] rollbackDacl,
@@ -524,6 +760,37 @@ namespace RunaAI.Next.Gate7E
             {
                 throw new InvalidOperationException(
                     "target-only-mutation-and-rollback-failed",
+                    new AggregateException(mutationError, rollbackError));
+            }
+        }
+
+
+        private static void RollBackDaclAndFlagsOrThrow(
+            string path,
+            byte[] rollbackDacl,
+            string expectedRollbackDaclHash,
+            int rollbackControlFlags,
+            string expectedRollbackNonDaclHash,
+            Exception mutationError)
+        {
+            try
+            {
+                WriteDaclWithFlags(path, new RawAcl(rollbackDacl, 0),
+                    (ControlFlags)rollbackControlFlags, true);
+                DaclState restored = Inspect(path);
+                if (!String.Equals(restored.DaclSha256, expectedRollbackDaclHash,
+                        StringComparison.Ordinal)
+                    || !String.Equals(restored.NonDaclSha256, expectedRollbackNonDaclHash,
+                        StringComparison.Ordinal)
+                    || restored.ControlFlagsValue != rollbackControlFlags)
+                {
+                    throw new InvalidOperationException("automatic-control-rollback-verification-failed");
+                }
+            }
+            catch (Exception rollbackError)
+            {
+                throw new InvalidOperationException(
+                    "target-only-control-mutation-and-rollback-failed",
                     new AggregateException(mutationError, rollbackError));
             }
         }

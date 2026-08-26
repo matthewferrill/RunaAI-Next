@@ -1,5 +1,5 @@
 [CmdletBinding()]
-param()
+param([switch]$RequirePrivilegedControlTests)
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
@@ -29,9 +29,12 @@ try {
   $conflictChild = Join-Path $conflictParent 'existing-child'
   $duplicateParent = Join-Path $root 'duplicate-parent'
   $duplicateChild = Join-Path $duplicateParent 'existing-child'
+  $protectedParent = Join-Path $root 'protected-parent'
+  $protectedChild = Join-Path $protectedParent 'existing-child'
   New-Item -ItemType Directory -Path $child -Force | Out-Null
   New-Item -ItemType Directory -Path $conflictChild -Force | Out-Null
   New-Item -ItemType Directory -Path $duplicateChild -Force | Out-Null
+  New-Item -ItemType Directory -Path $protectedChild -Force | Out-Null
 
   $parentBaseline = [RunaAI.Next.Gate7E.TargetOnlyAcl]::ReadDaclBytes($parent)
   $parentBaselineHash = [RunaAI.Next.Gate7E.TargetOnlyAcl]::HashDacl($parent)
@@ -152,6 +155,72 @@ try {
   Assert-Bytes ([RunaAI.Next.Gate7E.TargetOnlyAcl]::ReadDaclBytes($duplicateChild)) $duplicateChildBaseline `
     'target-only-test-duplicate-child-changed'
 
+  $protectedDaclPreserved = $null
+  $metadataRecoveryPassed = $null
+  if ($RequirePrivilegedControlTests) {
+    $protectedChildBaseline = [RunaAI.Next.Gate7E.TargetOnlyAcl]::ReadDaclBytes($protectedChild)
+    $unprotectedState = [RunaAI.Next.Gate7E.TargetOnlyAcl]::Inspect($protectedParent)
+    [RunaAI.Next.Gate7E.TargetOnlyAcl]::ApplyControlFlagsForTestOnly(
+    $protectedParent,
+    ($unprotectedState.ControlFlagsValue -bor 4096)
+    ) | Out-Null
+    $protectedBaseline = [RunaAI.Next.Gate7E.TargetOnlyAcl]::ReadDaclBytes($protectedParent)
+    $protectedBefore = [RunaAI.Next.Gate7E.TargetOnlyAcl]::Inspect($protectedParent)
+    Assert-Equal $protectedBefore.DaclProtected $true 'target-only-test-protection-setup-failed'
+    $protectedApply = [RunaAI.Next.Gate7E.TargetOnlyAcl]::EnsureHostPreparation(
+    $protectedParent,
+    $protectedBefore.DaclSha256
+    )
+    Assert-Equal $protectedApply.After.DaclProtected $true 'target-only-test-protection-cleared'
+    Assert-Equal $protectedApply.After.DaclDefaulted $protectedBefore.DaclDefaulted `
+    'target-only-test-defaulted-flag-changed'
+    Assert-Equal $protectedApply.After.OwnershipSha256 $protectedBefore.OwnershipSha256 `
+    'target-only-test-protected-ownership-changed'
+    Assert-Bytes ([RunaAI.Next.Gate7E.TargetOnlyAcl]::ReadDaclBytes($protectedChild)) $protectedChildBaseline `
+    'target-only-test-protected-apply-propagated'
+    [RunaAI.Next.Gate7E.TargetOnlyAcl]::RestoreDacl(
+    $protectedParent,
+    [RunaAI.Next.Gate7E.TargetOnlyAcl]::HashDacl($protectedParent),
+    $protectedBaseline
+    ) | Out-Null
+    Assert-Bytes ([RunaAI.Next.Gate7E.TargetOnlyAcl]::ReadDaclBytes($protectedChild)) $protectedChildBaseline `
+    'target-only-test-protected-restore-propagated'
+
+    $protectedRestored = [RunaAI.Next.Gate7E.TargetOnlyAcl]::Inspect($protectedParent)
+    $driftFlags = $protectedRestored.ControlFlagsValue -band (-bnot (4096 -bor 1024))
+    $drifted = [RunaAI.Next.Gate7E.TargetOnlyAcl]::ApplyControlFlagsForTestOnly(
+    $protectedParent,
+    $driftFlags
+    )
+    Assert-Equal $drifted.DaclSha256 $protectedRestored.DaclSha256 `
+    'target-only-test-recovery-dacl-setup-changed'
+    $recovered = [RunaAI.Next.Gate7E.TargetOnlyAcl]::RecoverAndEnsureHostPreparation(
+    $protectedParent,
+    $drifted.DaclSha256,
+    $drifted.NonDaclSha256,
+    $protectedRestored.ControlFlagsValue,
+    $protectedRestored.NonDaclSha256
+    )
+    Assert-Equal $recovered.After.ControlFlagsValue $protectedRestored.ControlFlagsValue `
+    'target-only-test-control-flags-not-recovered'
+    Assert-Equal $recovered.After.NonDaclSha256 $protectedRestored.NonDaclSha256 `
+    'target-only-test-metadata-not-recovered'
+    Assert-Equal $recovered.After.AllRestrictedApplicationPackagesExactCount 1 `
+    'target-only-test-recovery-tuple-missing'
+    Assert-Bytes ([RunaAI.Next.Gate7E.TargetOnlyAcl]::ReadDaclBytes($protectedChild)) $protectedChildBaseline `
+    'target-only-test-recovery-propagated'
+    [RunaAI.Next.Gate7E.TargetOnlyAcl]::RestoreDaclAndControlFlags(
+    $protectedParent,
+    $recovered.After.DaclSha256,
+    $recovered.After.NonDaclSha256,
+    $protectedBaseline,
+    $protectedRestored.ControlFlagsValue,
+    $protectedRestored.NonDaclSha256
+    ) | Out-Null
+    $protectedDaclPreserved = $true
+    $metadataRecoveryPassed = $true
+  }
+
   [ordered]@{
     schemaVersion = 'runa2-gate7e-target-only-acl-test/v1'
     passed = $true
@@ -161,17 +230,23 @@ try {
     exactRestore = $true
     conflictRejected = $true
     duplicateRejected = $true
+    privilegedControlTestsRun = [bool]$RequirePrivilegedControlTests
+    protectedDaclPreserved = $protectedDaclPreserved
+    metadataRecoveryPassed = $metadataRecoveryPassed
     descendantDaclStable = $true
     privateValuesIncluded = $false
   } | ConvertTo-Json -Compress
 } catch {
+  $safeFailure = [regex]::Match($_.Exception.ToString(), 'target-[a-z0-9-]{1,100}')
   [ordered]@{
     schemaVersion = 'runa2-gate7e-target-only-acl-test-error/v1'
-    errorCode = if ($_.Exception.Message -match '^[a-z0-9-]{1,100}$') {
-      $_.Exception.Message
+    errorCode = if ($safeFailure.Success) {
+      $safeFailure.Value
     } else {
       'target-only-acl-test-failed'
     }
+    exceptionType = $_.Exception.GetType().Name
+    failureLine = $_.InvocationInfo.ScriptLineNumber
     privateValuesIncluded = $false
   } | ConvertTo-Json -Compress | Write-Error
   exit 1

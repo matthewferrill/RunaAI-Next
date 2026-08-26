@@ -23,6 +23,7 @@
     "test:gate7c": "node --test gate7c/ui-shell.test.mjs",
     "test:gate7d": "node --test gate7d/navigation.test.mjs",
     "test:gate7e": "node --test gate7e/gate7e.test.mjs",
+    "test:gate7f": "node --test gate7f/gate7f.test.mjs",
     "verify:gate7b:customer": "node gate7b/run-customer-journey.mjs",
     "verify:gate0": "node gate0/verify-gate0.mjs",
     "verify:gate1:integration": "node gate1/run-integration.mjs",
@@ -36,6 +37,7 @@
     "verify:gate6b:integration": "node gate6b/run-integration.mjs",
     "verify:gate6c:integration": "node gate6c/run-integration.mjs",
     "verify:gate7a:synthetic": "node gate7a/run-synthetic.mjs",
+    "verify:gate7f:synthetic": "node gate7f/run-synthetic.mjs",
     "verify:gate7a:hostname": "node gate7a/run-hostname-decision.mjs",
     "build:gate6b:release": "node gate6b/build-release.mjs"
   },

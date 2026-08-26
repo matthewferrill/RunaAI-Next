@@ -252,7 +252,8 @@ try{
   if($ExpectedUiContract-eq'gate7e-harmless-javascript'){
     $helper=Invoke-WebRequest -UseBasicParsing -Uri 'https://runa.bridgebuildersai.com/code-execution.mjs' -TimeoutSec 20
     $health=Invoke-RestMethod 'http://127.0.0.1:9760/health/ready' -TimeoutSec 20
-    $requiredExecutionModule=@('/api/selected/code/execute','Draft — not run','Ran in sandbox')
+    $requiredExecutionModule=@('/api/selected/code/execute','javascriptSource(content)',
+      'executionOutput(receipt)','receipt.status === "executed" ? "Ran in sandbox" : "Not executed"')
     $requiredExecutionHelper=@('javascriptSource','executionOutput','No partial output was returned')
     if([int]$helper.StatusCode-ne200-or[string]$helper.Headers['Content-Type']-notmatch'^(?:text|application)/(?:java|ecma)script'-or
       $health.ready-ne$true-or$health.dependencies.sandbox-ne$true){throw 'gate7a-ordinary-deploy-gate7e-sandbox-invalid'}

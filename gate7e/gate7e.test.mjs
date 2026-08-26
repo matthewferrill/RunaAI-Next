@@ -391,3 +391,62 @@ test("public code execution wiring and the compact release runtime preserve the 
   assert.match(deployer, /health\.dependencies\.sandbox-ne\$true/);
   assert.doesNotMatch(`${script}\n${helper}`, /innerHTML|localStorage|sessionStorage/);
 });
+
+test("the Control repair is target-only, fail-closed, and preserves descendant DACL bytes", {
+  timeout: 30_000,
+}, async t => {
+  const [source, rehearsal, operator, preflight] = await Promise.all([
+    readFile(resolve("gate7e/control/TargetOnlyAcl.cs"), "utf8"),
+    readFile(resolve("gate7e/control/Test-TargetOnlyAcl.ps1"), "utf8"),
+    readFile(resolve("gate7e/control/Invoke-ControlTargetOnlyHostRepair.ps1"), "utf8"),
+    readFile(resolve("gate7e/run-control-preflight.mjs"), "utf8"),
+  ]);
+  assert.match(source, /SetFileSecurityW/);
+  assert.match(source, /DaclSecurityInformation/);
+  assert.match(source, /HostPreparationMask = 0x00120088/);
+  assert.match(source, /S-1-15-2-1/);
+  assert.match(source, /S-1-15-2-2/);
+  assert.match(source, /target-sid-conflict/);
+  assert.match(source, /RollBackOrThrow/);
+  assert.doesNotMatch(`${source}\n${operator}`, /SetNamedSecurityInfoW|Set-Acl|\bicacls\b|wxc-host-prep/);
+  assert.equal(operator.includes("$systemDriveRoot = 'C:\\'"), true);
+  assert.match(operator, /RUNA-CONTROL\\Matthew/);
+  assert.match(operator, /NT AUTHORITY\\SYSTEM/);
+  assert.match(operator, /target-only-critical-path-drift/);
+  assert.match(preflight, /destinationRoot: root/);
+  assert.match(preflight, /receipt\.status !== "executed"/);
+  assert.match(preflight, /arithmetic\.output\.stdout !== "140\\n"/);
+
+  if (process.platform !== "win32") {
+    t.skip("The exact DACL regression requires Windows.");
+    return;
+  }
+  const temporaryEntries = async () => new Set((await readdir(tmpdir()))
+    .filter(name => name.startsWith("runa2-gate7e-acl-")));
+  const before = await temporaryEntries();
+  const child = spawn("C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe", [
+    "-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass", "-File",
+    resolve("gate7e/control/Test-TargetOnlyAcl.ps1"),
+  ], { stdio: ["ignore", "pipe", "pipe"] });
+  let stdout = ""; let stderr = "";
+  child.stdout.on("data", chunk => { stdout += chunk; });
+  child.stderr.on("data", chunk => { stderr += chunk; });
+  const [exitCode] = await once(child, "close");
+  assert.equal(exitCode, 0, stderr);
+  const result = JSON.parse(stdout.trim());
+  assert.deepEqual(result, {
+    schemaVersion: "runa2-gate7e-target-only-acl-test/v1",
+    passed: true,
+    applyCount: 2,
+    idempotent: true,
+    exactRemoval: true,
+    exactRestore: true,
+    conflictRejected: true,
+    duplicateRejected: true,
+    descendantDaclStable: true,
+    privateValuesIncluded: false,
+  });
+  const after = await temporaryEntries();
+  assert.deepEqual(after, before);
+  assert.match(rehearsal, /Remove-Item -LiteralPath \$fullRoot -Recurse -Force/);
+});

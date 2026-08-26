@@ -88,7 +88,8 @@ function boundedError(error) {
     "sandbox-start-ancestor-path-denied", "sandbox-start-ancestor-1-denied",
     "sandbox-start-ancestor-2-denied", "sandbox-start-ancestor-3-denied",
     "sandbox-start-ancestor-4-denied", "sandbox-start-ancestor-5-denied",
-    "sandbox-start-ancestor-6-denied",
+    "sandbox-start-ancestor-6-denied", "sandbox-start-temporary-root-denied",
+    "sandbox-start-source-parent-denied",
     "sandbox-result-invalid", "sandbox-output-limited", "sandbox-timeout", "sandbox-runtime-error",
     "sandbox-runtime-unavailable", "sandbox-memory-limit", "sandbox-source-invalid",
     "sandbox-source-transport-failed", "sandbox-cleanup-failed"]);
@@ -107,6 +108,8 @@ function startupError(stderr, { runtimeRoot, nodeExecutable, sourcePath, tempora
     if (denied) {
       if (sameOrBeneath(runtimeRoot, denied)) return "sandbox-start-runtime-path-denied";
       if (sameOrBeneath(dirname(nodeExecutable), denied)) return "sandbox-start-node-path-denied";
+      if (resolve(denied) === resolve(dirname(sourcePath))) return "sandbox-start-source-parent-denied";
+      if (resolve(denied) === resolve(temporaryRoot)) return "sandbox-start-temporary-root-denied";
       if (sameOrBeneath(temporaryRoot, denied) || sameOrBeneath(dirname(sourcePath), denied)) {
         return "sandbox-start-transient-path-denied";
       }

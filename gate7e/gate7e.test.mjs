@@ -425,10 +425,11 @@ test("public code execution wiring and the compact release runtime preserve the 
 test("the Control repair is target-only, fail-closed, and preserves descendant DACL bytes", {
   timeout: 30_000,
 }, async t => {
-  const [source, rehearsal, operator, systemPreflight, preflight] = await Promise.all([
+  const [source, rehearsal, operator, ancestorRepair, systemPreflight, preflight] = await Promise.all([
     readFile(resolve("gate7e/control/TargetOnlyAcl.cs"), "utf8"),
     readFile(resolve("gate7e/control/Test-TargetOnlyAcl.ps1"), "utf8"),
     readFile(resolve("gate7e/control/Invoke-ControlTargetOnlyHostRepair.ps1"), "utf8"),
+    readFile(resolve("gate7e/control/Invoke-ControlSandboxAncestorRepair.ps1"), "utf8"),
     readFile(resolve("gate7e/control/Invoke-ControlSystemPreflight.ps1"), "utf8"),
     readFile(resolve("gate7e/run-control-preflight.mjs"), "utf8"),
   ]);
@@ -452,6 +453,12 @@ test("the Control repair is target-only, fail-closed, and preserves descendant D
   assert.match(operator, /target-only-critical-path-drift/);
   assert.match(operator, /RecoverAndReconcile/);
   assert.match(operator, /RequirePrivilegedControlTests/);
+  assert.match(ancestorRepair, /\$target='C:\\AI'/);
+  assert.match(ancestorRepair, /RecoverAndEnsureHostPreparation/);
+  assert.match(ancestorRepair, /ancestor-critical-path-drift/);
+  assert.match(ancestorRepair, /RestoreDaclAndControlFlags/);
+  assert.match(ancestorRepair, /Unregister-ScheduledTask/);
+  assert.doesNotMatch(ancestorRepair, /Set-Acl|\bicacls\b|SetNamedSecurityInfoW/);
   assert.match(systemPreflight, /NT AUTHORITY\\SYSTEM/);
   assert.match(systemPreflight, /process\.version/);
   assert.match(systemPreflight, /v22\.22\.0/);

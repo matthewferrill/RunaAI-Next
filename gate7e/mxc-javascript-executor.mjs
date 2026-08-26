@@ -1,7 +1,7 @@
 import { createHash, randomUUID } from "node:crypto";
 import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { dirname, join, resolve } from "node:path";
+import { dirname, join, relative, resolve } from "node:path";
 import { createConfigFromPolicy, getPlatformSupport, spawnSandboxFromConfig } from "@microsoft/mxc-sdk";
 import { parseCodeExecutionReceipt, parseCodeExecutionRequest } from "./contracts.mjs";
 
@@ -83,16 +83,35 @@ function boundedError(error) {
   const known = new Set(["sandbox-isolation-unavailable", "sandbox-isolation-warning-unreviewed",
     "sandbox-ui-isolation-unavailable", "sandbox-start-failed",
     "sandbox-start-filesystem-lstat-denied", "sandbox-start-module-unavailable",
-    "sandbox-start-permission-option-invalid",
+    "sandbox-start-permission-option-invalid", "sandbox-start-runtime-path-denied",
+    "sandbox-start-node-path-denied", "sandbox-start-transient-path-denied",
+    "sandbox-start-ancestor-path-denied",
     "sandbox-result-invalid", "sandbox-output-limited", "sandbox-timeout", "sandbox-runtime-error",
     "sandbox-runtime-unavailable", "sandbox-memory-limit", "sandbox-source-invalid",
     "sandbox-source-transport-failed", "sandbox-cleanup-failed"]);
   return known.has(error?.code) ? error.code : "sandbox-unavailable";
 }
 
-function startupError(stderr) {
+function sameOrBeneath(parent, child) {
+  const value = relative(resolve(parent), resolve(child));
+  return value === "" || (!value.startsWith("..") && !value.includes(":"));
+}
+
+function startupError(stderr, { runtimeRoot, nodeExecutable, sourcePath, temporaryRoot }) {
   const value = String(stderr);
-  if (/(?:EPERM|EACCES).*lstat/i.test(value)) return "sandbox-start-filesystem-lstat-denied";
+  if (/(?:EPERM|EACCES).*lstat/i.test(value)) {
+    const denied = /lstat\s+['"]([^'"]+)['"]/i.exec(value)?.[1];
+    if (denied) {
+      if (sameOrBeneath(runtimeRoot, denied)) return "sandbox-start-runtime-path-denied";
+      if (sameOrBeneath(dirname(nodeExecutable), denied)) return "sandbox-start-node-path-denied";
+      if (sameOrBeneath(temporaryRoot, denied) || sameOrBeneath(dirname(sourcePath), denied)) {
+        return "sandbox-start-transient-path-denied";
+      }
+      if ([runtimeRoot, nodeExecutable, sourcePath, temporaryRoot]
+        .some(target => sameOrBeneath(denied, target))) return "sandbox-start-ancestor-path-denied";
+    }
+    return "sandbox-start-filesystem-lstat-denied";
+  }
   if (/ERR_MODULE_NOT_FOUND|Cannot find (?:package|module)/i.test(value)) {
     return "sandbox-start-module-unavailable";
   }
@@ -197,7 +216,9 @@ export class MxcJavascriptExecutor {
         errorCode = "sandbox-timeout";
       } else {
         if (outcome.exitCode !== 0 && !String(outcome.stdout).includes(RESULT_MARKER)) {
-          throw coded(startupError(outcome.stderr), "The sandbox process did not start successfully.");
+          throw coded(startupError(outcome.stderr, { runtimeRoot: this.runtimeRoot,
+            nodeExecutable: this.nodeExecutable, sourcePath: sourceTransport.sourcePath,
+            temporaryRoot: this.temporaryRoot }), "The sandbox process did not start successfully.");
         }
         const result = childResult(outcome.stdout);
         hostVersion = result.hostVersion;

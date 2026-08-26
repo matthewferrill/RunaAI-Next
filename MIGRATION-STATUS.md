@@ -164,8 +164,12 @@ repository and never push migration work into either source repository.
   packages, repositories, persistent files, Git, terminal access, or broader Code work. Control then
   exposed an MXC custom-environment compatibility defect. The corrective branch removes that channel,
   uses one digest-bound read-only transient source file, and passes 439/439 in an isolated Control
-  worktree at `b116371`. The disposable real sandbox remains fail-closed at the exact official
-  `prepare-system-drive-required` prerequisite; no host preparation or production activation has run.
+  worktree at `b116371`. The separately authorized released host-preparation attempt then exposed MXC issue
+  648: the drive-root prepare and unprepare paths can normalize descendant ACLs and appear to hang. The
+  bounded attempt was stopped after the first of two exact metadata-only root ACEs was added. All temporary
+  tasks, processes, and scripts were removed; one non-inheriting `S-1-15-2-1` root ACE remains; no
+  production activation ran. Further host writes are stopped pending the target-only decision recorded in
+  `gate7e/GATE7E-CONTROL-HOST-PREP-INCIDENT-2026-08-25.md`.
 - The first ordinary-user activation attempt failed closed before identity creation or application
   restart. RCA: Windows PowerShell 5.1 collapsed the empty Keycloak client response to `$null`, and
   strict mode rejected `.Count`. Normalized reconciliation then proved zero ordinary clients, zero
@@ -480,7 +484,7 @@ plain-language steward experience, or governed action pathway.
 | 7B | Complete customer journey through the selected read-only stack | Complete; production sign-in, sustained chat, safe presentation, exact-release recheck, and rollback evidence green | Approved by steward 2026-08-24; completed 2026-08-24 |
 | 7C | First user-interface shell | Complete and superseded on Control by the Gate 7D presentation release | Source integration remains part of the Gate 7D review chain |
 | 7D | Identity-aware Chat/Code navigation and end-to-end flow correction | Complete; accepted and merged as `3d95e50`; current-turn verifier successor active on Control at `e10e3db`; post-merge and exact-Control suites 423/423 | Complete |
-| 7E-0/1 | Truthful execution status and harmless bounded JavaScript Run | Source merged; Control transport correction 439/439; production inactive pending official host preparation, real preflight, rollback deployment, and customer Run test | Separate approval for the host-wide preparation and successor activation |
+| 7E-0/1 | Truthful execution status and harmless bounded JavaScript Run | Source merged; Control transport correction 439/439; production inactive; released MXC host-prep stopped on upstream drive-root propagation defect with one metadata-only root ACE retained | Decide whether to wait for Microsoft, build an independently reviewed target-only operator, or defer Gate 7E |
 | 7E+ | Broader product extensions | Deferred until after the separately reviewed Gemma bakeoff/burn-in | New baseline and separate decision per extension group |
 
 ## Bootstrap validation
@@ -525,10 +529,12 @@ No dependency was changed during the prerequisite disposition. Full evidence is 
 
 ## Next operation
 
-Gate 7E's corrective source is green. The next decision is whether to run the official, reversible
-`wxc-host-prep prepare-system-drive` on Control. If approved, rerun the complete real sandbox preflight;
-only a true QuickJS result may proceed to the separately rollback-protected successor activation and
-ordinary-user customer Run test. A failed preflight stops before release construction. UI refinement,
+Gate 7E's corrective source is green, but the released MXC prepare and unprepare paths are not safe to run
+again on Control while upstream issue 648 remains unresolved. The next decision is whether to wait for a
+released Microsoft target-only fix, build and independently review a repository-owned target-only ACL
+operator, or defer Gate 7E. Only a true QuickJS result after that resolution may proceed to the separately
+rollback-protected successor activation and ordinary-user customer Run test. A failed preflight stops
+before release construction. UI refinement,
 broader code-work capabilities, live weather/web access, attachments, additional project functions,
 model bakeoffs, and off-LAN access remain separate decisions. The active Control release and its exact
 application rollback predecessor remain unchanged by the Gate 7E source work.

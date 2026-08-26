@@ -30,7 +30,9 @@ Two independent startup blockers were reproduced:
    system-drive root.
 
 The earlier Control test therefore failed closed correctly, but it did not reach QuickJS and cannot serve
-as activation evidence. No host-preparation command has been run and no production release has changed.
+as activation evidence. A later separately authorized host-preparation attempt exposed the released MXC
+drive-root propagation defect recorded in
+`GATE7E-CONTROL-HOST-PREP-INCIDENT-2026-08-25.md`. No production release changed.
 
 ## Corrective design boundary
 
@@ -65,24 +67,26 @@ cannot authorize execution or alter the envelope.
 - Unit/adversarial tests prove the exact config, exclusive file lifecycle, cleanup on success and failure,
   and absence of source content from the command line and receipt.
 - The complete repository suite remains green.
-- Control must pass the real compact-runtime MXC/Node/QuickJS smoke test after separately authorized official
-  host preparation and before any successor release is built or activated.
+- Control must pass the real compact-runtime MXC/Node/QuickJS smoke test after a separately reviewed,
+  target-only host-preparation resolution and before any successor release is built or activated.
 
-## Host-preparation decision gate
+## Host-preparation incident and revised decision gate
 
-The next host action is not inferred from this document. It requires separate authorization because
-`wxc-host-prep prepare-system-drive` performs a persistent host-wide DACL change at `C:\`. Microsoft states
-that it adds two non-inheriting, minimum-rights metadata ACEs, grants no directory listing, file data read,
-or write access, is idempotent, and has the tuple-precise inverse `unprepare-system-drive`.
+The separately authorized released host-preparation command was attempted and stopped after it failed to
+complete and left one of its two exact root ACEs. Microsoft issue 648 now explains the observed behavior:
+the released prepare and unprepare paths can propagate ACL normalization into descendants and appear to
+hang. Its target-only correction is still draft pull request 649. All temporary tasks, processes, and
+scripts were removed; production remains unchanged; one non-inheriting metadata-only root ACE remains.
 
-After that decision, the sequence is: apply the exact official preparation, rerun the disposable real
-smoke test, require the complete suite to pass on Control, then request the existing rollback-protected
-successor activation and customer Run test. A failed smoke test stops before release construction.
+No released host-preparation or inverse command may be rerun. The next host action requires the explicit
+choice documented in `GATE7E-CONTROL-HOST-PREP-INCIDENT-2026-08-25.md`: wait for a released upstream
+target-only fix, build and independently review a repository-owned target-only operator, or defer Gate 7E.
 
 ## Primary evidence
 
 - [Microsoft MXC host preparation](https://github.com/microsoft/mxc/blob/main/docs/host-prep.md)
 - [Microsoft MXC environment/startup issue 483](https://github.com/microsoft/mxc/issues/483)
+- [Microsoft MXC drive-root propagation issue 648](https://github.com/microsoft/mxc/issues/648)
+- [Draft Microsoft MXC target-only fix 649](https://github.com/microsoft/mxc/pull/649)
 - [Microsoft MXC policy schema](https://github.com/microsoft/mxc/blob/main/docs/schema.md)
 - `gate7e/run-mxc-environment-diagnostic.mjs`
-

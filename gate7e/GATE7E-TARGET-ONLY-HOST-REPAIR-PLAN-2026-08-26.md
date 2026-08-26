@@ -4,6 +4,10 @@ Date: 2026-08-26
 Branch: `codex/gate7e-control-environment-fix`
 Starting commit: `bad50a3476e655d18a5a64677c16d7970c772c31`
 
+Status: completed on Control at `747aabc03b291badf4f8a16743a7bd019d384451`. The exact results,
+including the automatically rolled-back first activation and corrected successor, are recorded in
+`GATE7E-CONTROL-REPAIR-AND-ACTIVATION-RESULTS-2026-08-26.md`.
+
 ## Authorization and objective
 
 The steward authorized design, implementation, testing, Control reconciliation, Gate 7E deployment, and

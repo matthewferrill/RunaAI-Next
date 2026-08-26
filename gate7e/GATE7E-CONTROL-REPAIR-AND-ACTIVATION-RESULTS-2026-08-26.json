@@ -1,0 +1,70 @@
+{
+  "schemaVersion": "runa2-gate7e-control-repair-and-activation/v1",
+  "status": "active-awaiting-ordinary-browser-acceptance",
+  "release": {
+    "releaseId": "runaai-next-gate7a-lan-gate7e-2026-08-26-747aabc",
+    "commit": "747aabc03b291badf4f8a16743a7bd019d384451",
+    "artifactDigest": "248aaee4f7855c83fe94a2855e156d2321dee3721c06535afbca87a3f3e86167",
+    "artifactFileCount": 30036,
+    "configurationDigest": "b1d1f9cb5e8524f8318fa428bfe0d107747b4996647f8f6111cba65746b75020",
+    "manifestDigest": "ace0da7d8a4858ac28c472a213b799e4945511ebf02b649855e0ba9187286d08"
+  },
+  "rolledBackCandidate": {
+    "releaseId": "runaai-next-gate7a-lan-gate7e-2026-08-26-2690aef",
+    "commit": "2690aeffbfd1f63fc383340576ab7159d06195d0",
+    "errorCode": "gate7a-ordinary-deploy-gate7e-controller-invalid",
+    "predecessorRestoredExactly": true,
+    "retainedInactiveForAudit": true
+  },
+  "hostRepair": {
+    "targetOnly": true,
+    "systemDriveControlFlags": 36868,
+    "ancestorControlFlags": 32772,
+    "exactTupleCountPerSid": 1,
+    "conflictingTupleCount": 0,
+    "sampledDescendantDaclStable": true,
+    "repairTasksRetained": 0
+  },
+  "realExecution": {
+    "systemContext": true,
+    "startupExecuted": true,
+    "arithmeticExecuted": true,
+    "arithmeticResult": 140,
+    "isolationTier": "appcontainer-dacl",
+    "network": "deny-all",
+    "filesystem": "read-only-runtime-and-private-source-directory",
+    "effects": []
+  },
+  "verification": {
+    "localTestsPassed": 441,
+    "controlTestsPassed": 441,
+    "activeRuntimeTestsPassed": 441,
+    "testsFailed": 0,
+    "dependenciesReady": true,
+    "javascriptSandboxReady": true,
+    "canonicalPageStatus": 200,
+    "controllerStatus": 200,
+    "executionHelperStatus": 200,
+    "javascriptTransientEmpty": true
+  },
+  "activation": {
+    "deployed": true,
+    "cutover": "closed",
+    "authority": "active",
+    "protectedDataImported": true,
+    "selectedCoreAuthorityUnchanged": true,
+    "ownerProofRebound": true,
+    "ordinaryPasswordRouteReady": true,
+    "rollbackRetained": true,
+    "legacyModified": false,
+    "protectedProductDataChanged": false
+  },
+  "ordinaryBrowserAcceptance": {
+    "completed": false,
+    "reason": "agent browser had no ordinary credential and external Chrome was unavailable",
+    "expectedOutput": 140,
+    "requiredDraftLabel": "Draft — not run",
+    "requiredExecutionLabel": "Ran in sandbox"
+  },
+  "privateValuesIncluded": false
+}

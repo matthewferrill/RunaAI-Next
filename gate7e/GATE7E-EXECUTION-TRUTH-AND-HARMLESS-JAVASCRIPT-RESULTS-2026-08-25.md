@@ -1,5 +1,10 @@
 # Gate 7E-0 / 7E-1 results: execution truth and harmless JavaScript
 
+> Current status, 2026-08-26: the host prerequisite was corrected with the reviewed target-only
+> operator, real Control execution passed, and the rollback-protected Gate 7E successor was activated.
+> The historical pre-activation result below remains accurate for its 2026-08-25 observation point. See
+> `GATE7E-CONTROL-REPAIR-AND-ACTIVATION-RESULTS-2026-08-26.md` for current evidence.
+
 Date: 2026-08-25  
 Base: `runa2/integration` at `57018fcb293a09daaba484e855f2d401f380a468`  
 Implementation branch: `codex/gate7e-execution-truth-sandbox`

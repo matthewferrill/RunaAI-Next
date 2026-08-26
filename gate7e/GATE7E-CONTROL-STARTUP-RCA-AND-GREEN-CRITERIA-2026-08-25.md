@@ -1,5 +1,10 @@
 # Gate 7E Control startup RCA and corrective green criteria
 
+> Resolution, 2026-08-26: every corrective criterion in this document passed on Control. The active
+> successor uses private transient source transport, restricted Win32k-compatible MXC policy, and exact
+> target-only ancestor preparation. See
+> `GATE7E-CONTROL-REPAIR-AND-ACTIVATION-RESULTS-2026-08-26.md`.
+
 Date: 2026-08-25  
 Base: `runa2/integration` at `f092d358a18f0ec0b6c2eaaeaf9a057b1d7f6d68`
 

@@ -1,5 +1,10 @@
 # Gate 7E Control host-preparation incident and decision
 
+> Resolution, 2026-08-26: the released MXC prepare/unprepare path was not retried. A repository-owned
+> target-only native operator reconciled the root tuple pair and the required application ancestors with
+> descendant DACL samples byte-stable. Gate 7E is now active. See
+> `GATE7E-CONTROL-REPAIR-AND-ACTIVATION-RESULTS-2026-08-26.md`.
+
 Date: 2026-08-25
 Corrective branch: `codex/gate7e-control-environment-fix`
 Source base: `f092d358a18f0ec0b6c2eaaeaf9a057b1d7f6d68`

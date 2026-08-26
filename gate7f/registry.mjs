@@ -16,4 +16,3 @@ export const AGENT_CAPABILITY_REGISTRY = Object.freeze(Object.fromEntries(
 export function agentCapability(capabilityId) {
   return AGENT_CAPABILITY_REGISTRY[capabilityId] ?? null;
 }
-

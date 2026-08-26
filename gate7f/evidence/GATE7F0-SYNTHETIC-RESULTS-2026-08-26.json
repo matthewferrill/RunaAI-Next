@@ -1,0 +1,20 @@
+{
+  "schemaVersion": "runa2-gate7f0-synthetic-result/v1",
+  "passed": true,
+  "profileResults": {
+    "readOnly": "denied",
+    "askEveryTime": "pending-approval",
+    "safeAutopilot": "executed"
+  },
+  "restartReplaySameReceipt": true,
+  "rollbackSecondReceipt": true,
+  "finalRevision": 4,
+  "receiptCount": 3,
+  "environmentKind": "synthetic-memory",
+  "realFilesystemUsed": false,
+  "processStarted": false,
+  "networkCalled": false,
+  "modelCalled": false,
+  "productionChanged": false,
+  "privateValuesIncluded": false
+}

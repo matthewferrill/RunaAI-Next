@@ -36,4 +36,3 @@ test adapter, not a public audit format or production store.
 PostgreSQL and LangGraph remain the selected production authorities. Gate 7F-1 will use this foundation as
 the inert agent workload for the separately preregistered Gemma/incumbent burn-in; no model is selected or
 activated here.
-

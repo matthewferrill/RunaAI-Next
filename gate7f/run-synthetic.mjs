@@ -87,4 +87,3 @@ const result = {
 
 process.stdout.write(`${JSON.stringify(result)}\n`);
 if (!result.passed) process.exitCode = 1;
-

@@ -176,6 +176,15 @@ repository and never push migration work into either source repository.
   incumbent burn-in against that realistic harness, and activate broader project effects only after a
   model role and exact capability set pass their own gates. The direction and non-authorization boundary
   are recorded in `gate7f/GATE7F-RUNA-AGENT-MODE-DIRECTION-AND-SEQUENCING-2026-08-26.md`.
+- Gate 7F-0 is implemented and locally green on the isolated `codex/gate7f-agent-foundation` branch.
+  The model-independent control plane covers project-scoped tasks, a closed synthetic capability
+  registry, deterministic approval profiles, exact proposals, remembered allow/deny choices,
+  executor-issued receipts, idempotency, restart continuity, scoped audit, and separately governed
+  rollback. Focused validation passes 28/28 and the full repository suite passes 469/469 across 451
+  subtests. The aggregate synthetic journey passes denial, approval, restart replay, rollback, and safe
+  autopilot without a real filesystem, process, network, provider, model, protected-data, or production
+  effect. It is not browser-wired or deployed. Full evidence is in
+  `gate7f/GATE7F0-INERT-AGENT-FOUNDATION-RESULTS-2026-08-26.md`.
 - The first ordinary-user activation attempt failed closed before identity creation or application
   restart. RCA: Windows PowerShell 5.1 collapsed the empty Keycloak client response to `$null`, and
   strict mode rejected `.Count`. Normalized reconciliation then proved zero ordinary clients, zero
@@ -491,7 +500,7 @@ plain-language steward experience, or governed action pathway.
 | 7C | First user-interface shell | Complete and superseded on Control by the Gate 7D presentation release | Source integration remains part of the Gate 7D review chain |
 | 7D | Identity-aware Chat/Code navigation and end-to-end flow correction | Complete; accepted and merged as `3d95e50`; current-turn verifier successor active on Control at `e10e3db`; post-merge and exact-Control suites 423/423 | Complete |
 | 7E-0/1 | Truthful execution status and harmless bounded JavaScript Run | Complete; exact successor active and ordinary-browser acceptance green; local, Control, and active-runtime suites 441/441 | Complete |
-| 7F | Conversational Agent Mode with selectable approval profiles | Product direction and sequencing accepted; implementation not started | Review and approve the 7F-0 contracts and inert-foundation gate before implementation |
+| 7F | Conversational Agent Mode with selectable approval profiles | 7F-0 inert foundation implemented and locally green; no real tool, model, UI, or production authority | 7F-1 model/corpus preregistration precedes any model download or burn-in |
 | 7F+ | Broader product extensions | Model-independent foundation precedes Gemma/incumbent agent burn-in; effectful activation follows accepted model and capability gates | New baseline and separate decision per extension group |
 
 ## Bootstrap validation
@@ -536,15 +545,11 @@ No dependency was changed during the prerequisite disposition. Full evidence is 
 
 ## Next operation
 
-Gate 7E is active and ordinary-browser accepted. The next product gate is 7F-0: freeze and review the
-model-independent Agent Mode contracts for project workspaces, typed capabilities, selectable approval
-profiles, deterministic policy, execution receipts, audit, continuity, and rollback. Any implementation
-must initially use synthetic/disposable state and inert or read-only tools, with no production project
-effect possible.
-
-After the inert harness is reproducible, preregister and run the separately reviewed Gemma and incumbent
-agent burn-in against that real workload. The bake-off selects model roles; it does not itself authorize a
-model switch or tool activation. The first effectful capability set, disposable-project execution,
+Gate 7F-0 is locally complete and its inert harness is reproducible. The next product gate is Gate 7F-1:
+preregister the exact Gemma and incumbent artifacts, terms, runtime parameters, sealed Agent Mode corpus,
+metrics, and thresholds before any model download or live evaluation. The bake-off selects model roles;
+it does not itself authorize a model switch or tool activation. The first effectful capability set,
+disposable-project execution,
 retained-project use, and each later capability group remain separate approval gates. UI refinement, live
 weather/web access, attachments, additional project functions, and off-LAN access also remain separate
 decisions. The active Control release and its exact Gate 7D rollback predecessor remain unchanged by this

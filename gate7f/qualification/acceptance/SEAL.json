@@ -5,18 +5,18 @@
   "files": [
     {
       "path": "gate7f/GATE7F-QUALIFICATION-AUTHORIZATION-AND-CRITERIA-2026-08-27.md",
-      "bytes": 8495,
-      "sha256": "21a4f97193b297f0756e4e40e344e854b0c771ad0eba58a4c485157dc908534c"
+      "bytes": 8377,
+      "sha256": "623c52fb907c3708ebbc50ec63e47235019d38a5dce8e754701d276055ebd034"
     },
     {
       "path": "gate7f/contracts.mjs",
-      "bytes": 11519,
-      "sha256": "6f2df637177857c344401c137fa38ede6586610281de6445084c631c553c9af3"
+      "bytes": 11245,
+      "sha256": "8ad0e09b67652939d0aec3c7d55f3494528efa629ad20496463c94f10c8d213c"
     },
     {
       "path": "gate7f/evaluation/contracts.mjs",
-      "bytes": 5784,
-      "sha256": "a9e25d34c8894c83dd10e514c8a50872bdee96603157053aa93068041fc4b6aa"
+      "bytes": 5665,
+      "sha256": "6f55299051817b313188cba8350984025a98b9e2f491dc65791096ed6f2e7ab0"
     },
     {
       "path": "package-lock.json",

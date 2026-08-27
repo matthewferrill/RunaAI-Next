@@ -542,7 +542,7 @@ plain-language steward experience, or governed action pathway.
 | 7C | First user-interface shell | Complete and superseded on Control by the Gate 7D presentation release | Source integration remains part of the Gate 7D review chain |
 | 7D | Identity-aware Chat/Code navigation and end-to-end flow correction | Complete; accepted and merged as `3d95e50`; current-turn verifier successor active on Control at `e10e3db`; post-merge and exact-Control suites 423/423 | Complete |
 | 7E-0/1 | Truthful execution status and harmless bounded JavaScript Run | Complete; exact successor active and ordinary-browser acceptance green; local, Control, and active-runtime suites 441/441 | Complete |
-| 7F | Conversational Agent Mode with selectable approval profiles | Matched qualification: both functional sets and independent blind adjudication complete; Qwen one-hour arm verified; Gemma endurance in progress; neither meets every frozen role threshold | Finish endurance/provenance and publish role recommendation; no model switch or effectful activation |
+| 7F | Conversational Agent Mode with selectable approval profiles | Matched qualification complete: 256 requests and one-hour endurance per model; independent blind review and provenance complete; 755/755 repository tests; neither meets a complete frozen role threshold | Gemma is the stronger development candidate; fix and requalify the bounded workflow before any model switch or effectful activation |
 | 7F+ | Broader product extensions | Model-independent foundation precedes Gemma/incumbent agent burn-in; effectful activation follows accepted model and capability gates | New baseline and separate decision per extension group |
 
 ## Bootstrap validation
@@ -594,13 +594,14 @@ role criteria before implementation: independent fresh cases/review, shared cont
 and authority corrections, matched synthetic end-to-end runs, and an initial one-hour soak per model.
 Production routing and protected data remain unchanged. Human input is reserved for human-only testing.
 
-The coordinated qualification is now sealed and running. The first `RUN-SEAL.json` arm completed
+The coordinated qualification is complete. The first `RUN-SEAL.json` arm completed
 Qwen's 117 quality requests but stopped safely on a GPU boundary before integration/soak; its exact
 failing sample was not retained, so heat remains the leading explanation rather than a proven exact
-sample. That capture and seal are preserved. Both models now restart under the identical temporary
+sample. That capture and seal are preserved. Both models completed under the identical temporary
 160-W/GPU envelope in `gate7f/qualification/RUN-SEAL-POWER-V2.json`, with unchanged 85-C cutoff,
 new unsafe-sample retention, exact UUID/power telemetry, cool starts, and required verified restoration to
-260 W afterward. No answers were inspected to tune this environmental change. These are repeated
+260 W afterward; restoration was verified by the operator and a separate final Home read. No answers
+were inspected to tune this environmental change. These are repeated
 acceptance inputs, not a newly unseen holdout. Details are in `THERMAL-RESEAL-2026-08-27.md`.
 The design and diagnostic findings are in
 `gate7f/qualification/QUALIFICATION-FREEZE-2026-08-27.md`. Both models completed the 42 protocol
@@ -610,9 +611,11 @@ application parser retains its limits. Dropped second-system state was not repro
 state probes. Exact task grants, effect-time policy checks and receipt-bound state now cover the
 independently found synthetic authority races. These corrections are not production Agent Mode.
 
-Both 117-request acceptance sets and eight actual synthetic application round-trip requests per model
-are complete. Qwen's 256-request full arm and one-hour endurance evidence passed independent source and
-measurement checks. Gemma's one-hour endurance arm is still running under the identical controls.
+Both 117-request acceptance sets, eight actual synthetic application round-trip requests and 131-request
+one-hour endurance arms per model are complete: 256 requests each, no provider failures or incomplete
+responses, and verified unload. Both full arms passed independent source and measurement checks.
+Final Home status confirms no model left loaded and original 260-W GPU settings. Control's final
+runtime/health records match its initial baseline; production routing and release remain unchanged.
 Independent blinded grading and adjudication of all 234 responses are retained in qualification's
 `initial-judgments` and `results` directories; initial records are not overwritten. All semantic
 ambiguities are resolved; an underspecified source-label comparator remains an explicit measurement
@@ -621,9 +624,20 @@ and Candidate-B as Qwen. Gemma is stronger on this bounded conversational/static
 passes every frozen complete-role threshold. Both have three repeated critical model failures of
 different kinds. No current candidate is promoted.
 
-The next operation is to finish Gemma's endurance arm, verify owned unload and original power restoration,
-bind final captures to the original review snapshots/packets/judgments, and publish the operational and
-role recommendation. The original partial v1 and complete v2 records are preserved. V2 recorded
+The final source-bound composition verifies both complete captures against the original review
+snapshots, anonymous packets and final independent judgments; no semantic regrading is involved.
+The evidence-backed recommendation, hardware limits, retained-source paths and read-only reproduction
+command are in `gate7f/GATE7F-QUALIFICATION-RESULTS-2026-08-27.md`. Final regression validation is
+755/755 tests with all original/new seals and initial judgment hashes intact.
+
+The next work is a bounded workflow successor: finish model-independent grant/revocation enforcement
+and truthful receipt presentation across every tool path, address exact-proposal and calculation
+reliability, prospectively correct the source-label specification, then qualify the changed workflow
+on newly sealed independent cases. Carry Gemma forward as the stronger development candidate; neither
+model is approved for a production switch or broader autonomous work by these results. Keep the
+accepted production route and harmless sandbox unchanged until the successor's applicable gates pass.
+
+The original partial v1 and complete v2 records are preserved. V2 recorded
 105 observations per model with zero cutoffs; its verifier accepted them, but later review found
 missing provenance bindings, now covered by 85 independent mutation/sequence checks in qualification.
 Its role findings remain historical, not a substituted final model selection. Keep production routing

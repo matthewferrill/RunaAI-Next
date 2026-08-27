@@ -1,0 +1,52 @@
+{
+    "powerRestored":  true,
+    "arms":  [
+                 {
+                     "exitCode":  0,
+                     "result":  {
+                                    "schemaVersion":  "runa2-qualification-capture-result/v1",
+                                    "candidate":  "incumbent",
+                                    "phase":  "acceptance-power-v2",
+                                    "startedAt":  "2026-08-27T17:52:04.210Z",
+                                    "endedAt":  "2026-08-27T18:57:50.513Z",
+                                    "passed":  true,
+                                    "failure":  null,
+                                    "observed":  256,
+                                    "cleanupVerified":  true,
+                                    "ownershipAmbiguous":  false,
+                                    "modelKey":  "qwen3-coder-30b-a3b-instruct",
+                                    "configSha256":  "cbf5fe1426acdc624c6f3a33abd5ebe5486fc247441b0f05996dd4ef8ab4986b",
+                                    "modelContentExecuted":  false,
+                                    "productionRoutingChanged":  false,
+                                    "protectedDataIncluded":  false
+                                },
+                     "candidate":  "incumbent"
+                 },
+                 {
+                     "exitCode":  0,
+                     "result":  {
+                                    "schemaVersion":  "runa2-qualification-capture-result/v1",
+                                    "candidate":  "gemma26",
+                                    "phase":  "acceptance-power-v2",
+                                    "startedAt":  "2026-08-27T19:00:05.282Z",
+                                    "endedAt":  "2026-08-27T20:07:12.463Z",
+                                    "passed":  true,
+                                    "failure":  null,
+                                    "observed":  256,
+                                    "cleanupVerified":  true,
+                                    "ownershipAmbiguous":  false,
+                                    "modelKey":  "gemma-4-26b-a4b-it-qat",
+                                    "configSha256":  "cbf5fe1426acdc624c6f3a33abd5ebe5486fc247441b0f05996dd4ef8ab4986b",
+                                    "modelContentExecuted":  false,
+                                    "productionRoutingChanged":  false,
+                                    "protectedDataIncluded":  false
+                                },
+                     "candidate":  "gemma26"
+                 }
+             ],
+    "failure":  null,
+    "productionRoutingChanged":  false,
+    "schemaVersion":  "runa2-qualification-controlled-power/v1",
+    "time":  "2026-08-27T20:07:12.7718936Z",
+    "privateValuesIncluded":  false
+}

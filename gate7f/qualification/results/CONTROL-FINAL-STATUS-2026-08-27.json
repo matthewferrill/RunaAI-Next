@@ -1,0 +1,66 @@
+{
+  "schemaVersion": "runa2-qualification-control-final-status/v1",
+  "time": "2026-08-27T20:08:00.3389115Z",
+  "runtime": {
+    "schemaVersion": "runa2-gate6-runtime-status/v1",
+    "running": {
+      "commit": "747aabc03b291badf4f8a16743a7bd019d384451",
+      "artifactDigest": "248aaee4f7855c83fe94a2855e156d2321dee3721c06535afbca87a3f3e86167",
+      "releaseId": "runaai-next-gate7a-lan-gate7e-2026-08-26-747aabc",
+      "applicationEntryPoint": "gate6b/server.mjs"
+    },
+    "selectedScopeVersion": "runa2-selected-core/2026-08-21",
+    "manifestDigest": "ace0da7d8a4858ac28c472a213b799e4945511ebf02b649855e0ba9187286d08",
+    "authorityGeneration": "runaai-next:control-candidate",
+    "cutover": {
+      "phase": "closed",
+      "revision": 10
+    },
+    "model": {
+      "provider": "private-openai-compatible",
+      "modelId": "qwen3-coder-30b-a3b-instruct",
+      "configurationDigest": "3e89ac3d65d6565ecc91664b6926133ce257a07b750689f98fbb0d0942e08f30"
+    },
+    "services": [
+      {
+        "name": "caddy",
+        "version": "2.11.4",
+        "configurationDigest": "f9da5b0dda5d1048503c967c41bf48fc557d2e2d987e648fa679b54e49518e54"
+      },
+      {
+        "name": "keycloak",
+        "version": "26.7.2",
+        "configurationDigest": "6450c4c8af95643b896c8cdf0f0e0d3a462ad0912a2b06ab0a48266d5814304b"
+      },
+      {
+        "name": "openfga",
+        "version": "1.18.3",
+        "configurationDigest": "71c83a50bae2d639c961d5cc980201c95fcd120da69e53083cb188213d064f0d"
+      },
+      {
+        "name": "postgresql",
+        "version": "18.6",
+        "configurationDigest": "93ccbb869271717ff733ecd1d898624c0c3702213ca283bcd31054b1c29ead65"
+      }
+    ],
+    "privateValuesIncluded": false
+  },
+  "health": {
+    "schemaVersion": "runa2-gate6b-dependency-health/v1",
+    "ready": true,
+    "dependencies": {
+      "postgresql": true,
+      "keycloak": true,
+      "openfga": true,
+      "provider": true,
+      "sandbox": true
+    },
+    "privateValuesIncluded": false
+  },
+  "repository": {
+    "branch": "runa2/integration",
+    "commit": "f092d358a18f0ec0b6c2eaaeaf9a057b1d7f6d68",
+    "changes": []
+  },
+  "privateValuesIncluded": false
+}

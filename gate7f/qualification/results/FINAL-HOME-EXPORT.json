@@ -1,0 +1,53 @@
+{
+  "schemaVersion": "runa2-qualification-home-export/v1",
+  "host": "RUNA-HOME",
+  "time": "2026-08-27T20:07:58.095Z",
+  "files": {
+    "power-before.json": {
+      "bytes": 975,
+      "sha256": "9c0872b16d21d9d1e64a2fe1fa6ec97c9a2edce2f3bb5f7f4ea3e35151a0dea8"
+    },
+    "power-applied.json": {
+      "bytes": 838,
+      "sha256": "25b6deef32fd6e717b609d74691136a35d0566b92ddcf989dc9a93250c6918f4"
+    },
+    "power-result.json": {
+      "bytes": 2855,
+      "sha256": "dc156e1a946e8358ea2c3e02de14c21ae1a2facfcca275d719c0d8e17af15eee"
+    },
+    "qualification/capture-incumbent/events.jsonl": {
+      "bytes": 3505790,
+      "sha256": "1b7e1159ff5e9ac4f840ae1368289db452cfc389220a487bb11fe482652beeb4"
+    },
+    "qualification/capture-incumbent/result.json": {
+      "bytes": 559,
+      "sha256": "114cf5998be5ce099b08cab72aedc3ee2bda70301e2c233ce010fde4bcb9708d"
+    },
+    "qualification/capture-gemma26/events.jsonl": {
+      "bytes": 3533549,
+      "sha256": "b6551bae3cf51c348afdf9bb6cedf7b70ff7d819ab0f3eb1d2bddf5b3da82319"
+    },
+    "qualification/capture-gemma26/result.json": {
+      "bytes": 551,
+      "sha256": "d164bb506a455e4f73a282ded048315f1d719c5977960a15f369ad04dc9e8495"
+    }
+  },
+  "packageManifestSha256": "d54cfb2ade6ba912328889566449b4647ac752ff8deffa221cc1f4d5040db91a",
+  "operatorPowerRestored": true,
+  "operatorFailure": null,
+  "captureResults": [
+    {
+      "candidate": "incumbent",
+      "passed": true,
+      "observed": 256,
+      "cleanupVerified": true
+    },
+    {
+      "candidate": "gemma26",
+      "passed": true,
+      "observed": 256,
+      "cleanupVerified": true
+    }
+  ],
+  "answersPrinted": false
+}

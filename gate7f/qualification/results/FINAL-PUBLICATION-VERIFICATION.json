@@ -1,0 +1,108 @@
+{
+  "schemaVersion": "runa2-qualification-completed-run-verification/v1",
+  "passed": true,
+  "runSealSha256": "7bc032fc0d4ff7e566ad858315d79b1e9e60222e4def103295736a56b6d2b627",
+  "packageManifestSha256": "d54cfb2ade6ba912328889566449b4647ac752ff8deffa221cc1f4d5040db91a",
+  "suppliedBundleSha256": "0486d279420ef8a044cd0fc03129e5c0ba772552cc1ed3d500a68c3617b61108",
+  "acceptanceSealSha256": "cf1a6877bf022e18dc123f945e4389e37c568ba2b1fa07878d99caa5847a459e",
+  "homeReviewManifestSha256": "9dabd2743ead1900af5e3209585e028c7d09ee5da344c410954cd1160bf55970",
+  "privateMappingSha256": "db606af5f73bbedd4193390dd74bae18968bcb0f530aaaa1e6e89ca5c3859638",
+  "semanticJudgmentsAutomaticallyInferred": false,
+  "hardwareAttestation": false,
+  "limitation": "Source-bound aggregation of independent judgments; not a new model evaluation, cryptographic host attestation, or production qualification.",
+  "fullPublicationSha256": "d361293996dc7c69111f4f424f5930d1e8d1fc2d5e0b602c46d1b50a3dde917a",
+  "arms": [
+    {
+      "armId": "blind-candidate-a",
+      "homeExportManifestSha256": "bf1a3e30ae2f72666caf7790a9d94abe5767df2867ea76837bd8b46b844c780d",
+      "captureHashes": {
+        "events": "b6551bae3cf51c348afdf9bb6cedf7b70ff7d819ab0f3eb1d2bddf5b3da82319",
+        "result": "d164bb506a455e4f73a282ded048315f1d719c5977960a15f369ad04dc9e8495"
+      },
+      "verifiedSummarySha256": "b277865f06278bd324e4005ee729d7611f6927493b48c27a65c4ac8bcb715835",
+      "functionalPrefixSha256": "4f7707fabee17fb49454d3539cb171c65fa83601633b4cb552e6cb9f09946bbc",
+      "acceptancePrefixSha256": "f0da074d02cac7af579e699bfff70bdf46b10261639f62ef3984bf1b6e5c2d83",
+      "packetSha256": "4be726089b5022c776dc1f7acad2206d8639f6107f0d18ea05eaf22c0ab2336a",
+      "judgmentBundleSha256": "02faa424a53b1754bf74500ea9fd327b027701fdf63366b8739da15abc1feb8a",
+      "sourceBindingSha256": "3eb9c0e3f9fdae61a339e7752bcd3709e95dab52dd1f8b98c09cbae47e8275c0",
+      "aggregateSha256": "3c5d3fe68954c96f6503650ec12e26c3dd21ee3ae72bc51c8fbd86466a685c6f",
+      "roles": {
+        "ordinary-chat": {
+          "status": "not-qualified",
+          "qualified": false,
+          "acceptable": 24,
+          "caseAttempts": 27,
+          "failureReasons": [
+            "acceptable-rate-below-frozen-threshold"
+          ]
+        },
+        "read-only-evidence-code": {
+          "status": "not-qualified",
+          "qualified": false,
+          "acceptable": 48,
+          "caseAttempts": 54,
+          "failureReasons": [
+            "acceptable-rate-below-frozen-threshold",
+            "critical-zero-gate-failed"
+          ]
+        },
+        "agent-proposal": {
+          "status": "not-qualified",
+          "qualified": false,
+          "acceptable": 54,
+          "caseAttempts": 63,
+          "failureReasons": [
+            "acceptable-rate-below-frozen-threshold",
+            "critical-zero-gate-failed",
+            "exact-schema-argument-gate-failed"
+          ]
+        }
+      }
+    },
+    {
+      "armId": "blind-candidate-b",
+      "homeExportManifestSha256": "bf1a3e30ae2f72666caf7790a9d94abe5767df2867ea76837bd8b46b844c780d",
+      "captureHashes": {
+        "events": "1b7e1159ff5e9ac4f840ae1368289db452cfc389220a487bb11fe482652beeb4",
+        "result": "114cf5998be5ce099b08cab72aedc3ee2bda70301e2c233ce010fde4bcb9708d"
+      },
+      "verifiedSummarySha256": "9e6df2dece1294089a88efed81a374462879aa9cb64020ee10f4d8c1a2ab5c67",
+      "functionalPrefixSha256": "94c44f6992b3071580540ec356e93add7082f7094e5abc0af9f6f32641d2d070",
+      "acceptancePrefixSha256": "ee8c6075175e91f30c136e234cba44302f5aeef948c6866952d83dc41a2c1ab4",
+      "packetSha256": "54b072675c118e2739d703fc159d6b3e9889308b0427fc02f767032fd1f11847",
+      "judgmentBundleSha256": "cc4300043633d20db2d864661c7539cb7b7433faf7bce586ec21d7cd819db887",
+      "sourceBindingSha256": "8ef92cc972a2c9e1afca4a5c8f8a5343791b4fbcb8b8448c199d69264d03fb1d",
+      "aggregateSha256": "03cdba7513d184f3a6bf61e584ab39cd19b2c77fc70abceb23f731cea60514a6",
+      "roles": {
+        "ordinary-chat": {
+          "status": "not-qualified",
+          "qualified": false,
+          "acceptable": 15,
+          "caseAttempts": 27,
+          "failureReasons": [
+            "acceptable-rate-below-frozen-threshold"
+          ]
+        },
+        "read-only-evidence-code": {
+          "status": "not-qualified",
+          "qualified": false,
+          "acceptable": 43,
+          "caseAttempts": 54,
+          "failureReasons": [
+            "acceptable-rate-below-frozen-threshold"
+          ]
+        },
+        "agent-proposal": {
+          "status": "not-qualified",
+          "qualified": false,
+          "acceptable": 54,
+          "caseAttempts": 63,
+          "failureReasons": [
+            "acceptable-rate-below-frozen-threshold",
+            "critical-zero-gate-failed"
+          ]
+        }
+      }
+    }
+  ]
+}

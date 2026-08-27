@@ -1,0 +1,40 @@
+{
+  "schemaVersion": "runa2-qualification-home-final-status/v1",
+  "time": "2026-08-27T20:07:58.3765144Z",
+  "host": "RUNA-HOME",
+  "identity": "RUNA-HOME\\codex-audit",
+  "loadedModelInstances": 0,
+  "gpus": [
+    {
+      "index": 0,
+      "uuid": "GPU-15ea3e34-292b-3333-5e43-e5b133f9a30c",
+      "name": "Quadro RTX 6000",
+      "powerLimitWatts": 260,
+      "temperatureC": 47,
+      "memoryUsedMiB": 1572,
+      "memoryTotalMiB": 23040
+    },
+    {
+      "index": 1,
+      "uuid": "GPU-1f2f6459-b688-3466-5b49-a65c538be843",
+      "name": "Quadro RTX 6000",
+      "powerLimitWatts": 260,
+      "temperatureC": 40,
+      "memoryUsedMiB": 0,
+      "memoryTotalMiB": 23040
+    }
+  ],
+  "listeners": [
+    {
+      "LocalAddress": "0.0.0.0",
+      "LocalPort": 8412,
+      "OwningProcess": 3312
+    },
+    {
+      "LocalAddress": "0.0.0.0",
+      "LocalPort": 1234,
+      "OwningProcess": 14568
+    }
+  ],
+  "privateValuesIncluded": false
+}

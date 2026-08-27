@@ -201,8 +201,17 @@ repository and never push migration work into either source repository.
   synthetic evidence, telemetry, and unload afterward. Control and production routing must remain
   unchanged. The execution plan is `gate7f/GATE7F1-HOME-EXECUTION-PLAN-2026-08-27.md`; the initial
   read-only Home preflight found no LM Studio instance loaded. The exact download is now verified.
-  The Home capture operator passes 12/12 focused tests and the complete repository passes 492/492;
-  the original five-file seal is unchanged. The burn-in remains pending live capture, not accepted.
+  Home capture is complete to the sealed stop condition, not accepted as a model comparison: each arm
+  retained 66 complete observations, then hit the 256-token cap on the first execution-honesty case.
+  Both exact instances were unloaded, GPU memory returned to its prior baseline, all nine raw evidence
+  transfer hashes match, and the original five-file seal is unchanged. The selected runtime was the
+  already-installed Vulkan 2.28.2; an initial unscored CUDA-manifest mismatch was retained and corrected
+  before any scored output, without changing runtime settings. Focused capture/metadata/summary tests
+  pass 17/17 and the complete repository passes 497/497 across 479 subtests. Numeric/keyword grading
+  defects and an incomplete model-facing nested JSON contract prevent a clean role-selection result;
+  genuine model-layer authority confusion is recorded separately. Full evidence and the proposed
+  decision to correct/reseal the evaluation are in
+  `gate7f/GATE7F1-HOME-BURNIN-RESULTS-2026-08-27.md`. No Control or production change was made.
 - The first ordinary-user activation attempt failed closed before identity creation or application
   restart. RCA: Windows PowerShell 5.1 collapsed the empty Keycloak client response to `$null`, and
   strict mode rejected `.Count`. Normalized reconciliation then proved zero ordinary clients, zero
@@ -518,7 +527,7 @@ plain-language steward experience, or governed action pathway.
 | 7C | First user-interface shell | Complete and superseded on Control by the Gate 7D presentation release | Source integration remains part of the Gate 7D review chain |
 | 7D | Identity-aware Chat/Code navigation and end-to-end flow correction | Complete; accepted and merged as `3d95e50`; current-turn verifier successor active on Control at `e10e3db`; post-merge and exact-Control suites 423/423 | Complete |
 | 7E-0/1 | Truthful execution status and harmless bounded JavaScript Run | Complete; exact successor active and ordinary-browser acceptance green; local, Control, and active-runtime suites 441/441 | Complete |
-| 7F | Conversational Agent Mode with selectable approval profiles | 7F-0 inert foundation green; 7F-1 original seal intact, authorized exact Gemma download verified, Home capture operator green | Run the authorized Home-only comparison; no production role selection or activation |
+| 7F | Conversational Agent Mode with selectable approval profiles | 7F-0 inert foundation green; Gemma downloaded/hash-verified; both Home arms stopped at 66/105 and unloaded; original seal intact | Decide on corrected/resealed evaluation and rerun; no eligible model comparison or production activation |
 | 7F+ | Broader product extensions | Model-independent foundation precedes Gemma/incumbent agent burn-in; effectful activation follows accepted model and capability gates | New baseline and separate decision per extension group |
 
 ## Bootstrap validation
@@ -563,12 +572,13 @@ No dependency was changed during the prerequisite disposition. Full evidence is 
 
 ## Next operation
 
-Gate 7F-0 is locally complete, and Gate 7F-1 has sealed the exact candidate artifacts, terms, runtime
-parameters, Agent Mode corpus, metrics, and thresholds. The steward authorized the Home operation on
-2026-08-27; the incumbent/runtime hashes and exact Gemma download are verified. The next operation is
-the two Home-only arms, with exact-instance unload and no production-routing change. Gemma 4 31B opens only
-if the frozen conditional rule is met. The bake-off selects model roles; it does not itself authorize a
-model switch or tool activation. The first effectful capability set, disposable-project execution,
+Gate 7F-0 is locally complete. The authorized Gate 7F-1 Home operation verified the exact artifacts,
+ran both arms separately, retained synthetic evidence, and unloaded both after the sealed cutoff at
+66/105 complete observations each. The original seal and production routing are unchanged. The next
+decision is whether to correct the numeric/keyword grader and model-facing JSON contract, freeze an
+adequate output budget in a new evaluation version, and rerun both Home-only arms. Do not reinterpret
+partial grades as model selection or open the 31B arm on these defective/incomplete results. The bake-off
+does not itself authorize a model switch or tool activation. The first effectful capability set, disposable-project execution,
 retained-project use, and each later capability group remain separate approval gates. UI refinement, live
 weather/web access, attachments, additional project functions, and off-LAN access also remain separate
 decisions. The active Control release and its exact Gate 7D rollback predecessor remain unchanged by this

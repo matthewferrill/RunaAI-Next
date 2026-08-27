@@ -1,7 +1,7 @@
 # Gate 7F-1 offline evaluation package
 
-This package freezes and grades the Gemma/incumbent Agent Mode burn-in without containing a provider
-client. It cannot download or call a model.
+The sealed core of this package freezes and grades the Gemma/incumbent Agent Mode burn-in without a
+provider client. The separately authorized `home/` operator contains the bounded live capture path.
 
 - `corpus.json` is the 35-case, three-attempt sealed workload.
 - `contracts.mjs` validates cases, exact Agent Mode output, and retained observations.
@@ -11,8 +11,10 @@ client. It cannot download or call a model.
 - `run-stub.mjs` proves the complete 105-observation denominator with no model or network.
 - `SEAL.json` binds the exact evaluation files after preregistration.
 
-Live capture is intentionally absent. After separate model/download authorization, an operator must
-produce append-only `runa2-gate7f1-observation/v1` JSONL with exact artifact and runtime fingerprints.
+After explicit model/download authorization on 2026-08-27, the `home/` operator produced append-only
+`runa2-gate7f1-observation/v1` JSONL with exact artifact and runtime fingerprints. Both arms stopped at
+66 complete observations and unloaded under the sealed cutoff rule; neither is a decidable comparison.
+See `../GATE7F1-HOME-BURNIN-RESULTS-2026-08-27.md` for the results and identified evaluation defects.
 The retained aggregate omits raw responses; raw observations remain separate evaluation evidence and
 must contain only synthetic corpus content.
 

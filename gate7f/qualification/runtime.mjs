@@ -112,9 +112,14 @@ export async function withCandidate({ bundle, packageVerification, candidate, ou
       exclusiveRequestTrafficVerified:false, trafficBoundary:"Dedicated operator arm; shared endpoint traffic not instrumented" });
     progress({ status: "hashing" });
     requireValue(statSync(manifest.artifactPath).size === manifest.artifactBytes, "artifact-size");
-    requireValue(await hashFile(manifest.artifactPath) === manifest.artifactSha256, "artifact-hash");
-    for (const file of bundle.runtime.files) requireValue(await hashFile(file.path) === file.sha256, "runtime-file-hash");
+    const observedArtifactSha256=await hashFile(manifest.artifactPath);
+    requireValue(observedArtifactSha256 === manifest.artifactSha256, "artifact-hash");
+    const runtimeHashes=[];
+    for (const file of bundle.runtime.files){const observedSha256=await hashFile(file.path);
+      requireValue(observedSha256 === file.sha256, "runtime-file-hash");runtimeHashes.push({path:file.path,sha256:observedSha256});}
+    record("verified-files",{artifact:{path:manifest.artifactPath,bytes:statSync(manifest.artifactPath).size,sha256:observedArtifactSha256},runtime:runtimeHashes});
     const gguf = readGgufMetadata(manifest.artifactPath);
+    if(manifest.chatTemplateSha256)requireValue(gguf.chatTemplateSha256===manifest.chatTemplateSha256,"template-pin");
     record("metadata", gguf);
     const inventory = await ownedApi("/api/v1/models");
     assertResidency(inventory, null, null);
@@ -123,6 +128,7 @@ export async function withCandidate({ bundle, packageVerification, candidate, ou
     requireValue(models.length === 1, "model-singular");
     const identity = models[0]; modelKey = identity.key;
     const reasoningOff = identity.capabilities?.reasoning?.allowed_options?.includes("off") === true;
+    if(manifest.modelKey)requireValue(modelKey===manifest.modelKey && reasoningOff===manifest.reasoningOff,"identity-pin");
     record("identity", { identity });
     record("telemetry", telemetry("before-load"));
     progress({ status: "loading", modelKey });

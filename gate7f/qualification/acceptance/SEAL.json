@@ -1,0 +1,72 @@
+{
+  "schemaVersion": "runa2-gate7f-qualification-acceptance-seal/v1",
+  "evaluatorRole": "independent-corpus-designer-and-anonymous-response-judge",
+  "createdBeforeAcceptanceInference": true,
+  "files": [
+    {
+      "path": "gate7f/GATE7F-QUALIFICATION-AUTHORIZATION-AND-CRITERIA-2026-08-27.md",
+      "bytes": 8495,
+      "sha256": "21a4f97193b297f0756e4e40e344e854b0c771ad0eba58a4c485157dc908534c"
+    },
+    {
+      "path": "gate7f/contracts.mjs",
+      "bytes": 11519,
+      "sha256": "6f2df637177857c344401c137fa38ede6586610281de6445084c631c553c9af3"
+    },
+    {
+      "path": "gate7f/evaluation/contracts.mjs",
+      "bytes": 5784,
+      "sha256": "a9e25d34c8894c83dd10e514c8a50872bdee96603157053aa93068041fc4b6aa"
+    },
+    {
+      "path": "package-lock.json",
+      "bytes": 224034,
+      "sha256": "2b443060beac09e89779ab2e4b60a22e7bf89e26880f14d0d4cdc04db9d8328e"
+    },
+    {
+      "path": "gate7f/qualification/acceptance/tools.mjs",
+      "bytes": 2283,
+      "sha256": "f3fd84f9b26c97ec1777898b97d395df210a151484c56791e6efbdf7aa5e093c"
+    },
+    {
+      "path": "gate7f/qualification/acceptance/corpus.mjs",
+      "bytes": 29417,
+      "sha256": "3750fbfb00358c71e32ca9736486beb4bc94cf5139436143c714425099416753"
+    },
+    {
+      "path": "gate7f/qualification/acceptance/inputs.mjs",
+      "bytes": 757,
+      "sha256": "c5fc4d3b1a3e1f8a7a1e6d40d070d9b7d110d4ffb132b62c9fad4e506cb69a94"
+    },
+    {
+      "path": "gate7f/qualification/acceptance/checks.mjs",
+      "bytes": 5034,
+      "sha256": "d8138dfb0dc691085131991857a4654477aecd71caa429fb824b2d4251470d53"
+    },
+    {
+      "path": "gate7f/qualification/acceptance/validate.mjs",
+      "bytes": 2539,
+      "sha256": "4ccc8dbaa3578d2fbdc4a05f77595286c676b72929e1f33e49c5a80307138c2f"
+    },
+    {
+      "path": "gate7f/qualification/acceptance/seal.mjs",
+      "bytes": 2161,
+      "sha256": "34057c44868b403a91d6a8fa6f23f198539c15a8001a3b366a887b27f965e345"
+    },
+    {
+      "path": "gate7f/qualification/acceptance/acceptance.test.mjs",
+      "bytes": 8467,
+      "sha256": "daf0b7fdf2404f2bafefb2e84f5a089cd0893dd277b65d0abefcb81fb978b835"
+    },
+    {
+      "path": "gate7f/qualification/acceptance/RUBRIC.md",
+      "bytes": 8100,
+      "sha256": "15a5ec61b404eb386340a2b172fa5d638c6728e5bf99db3d533967f6de4697f4"
+    },
+    {
+      "path": "gate7f/qualification/acceptance/README.md",
+      "bytes": 3125,
+      "sha256": "495317d6f02ae7cbe966688d5d336888f755f0bbddd315f8b29b6f02038cbb35"
+    }
+  ]
+}

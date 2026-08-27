@@ -57,8 +57,17 @@ export function telemetry(label) {
       utilizationPercent: Number(p[4]), temperatureC: Number(p[5]), powerWatts: Number(p[6]) };
   });
   const sample = { label, freeMemoryBytes: freemem(), totalMemoryBytes: totalmem(), gpus };
-  assertTelemetry(sample);
+  validateTelemetry(sample);
   return sample;
+}
+export function validateTelemetry(sample){
+  assertTelemetry(sample);
+  requireValue(Number.isFinite(sample.freeMemoryBytes)&&Number.isFinite(sample.totalMemoryBytes)
+    &&sample.totalMemoryBytes>0&&sample.freeMemoryBytes<=sample.totalMemoryBytes,"host-telemetry-invalid");
+  requireValue(new Set(sample.gpus.map(gpu=>gpu.index)).size===2&&sample.gpus.every(gpu=>[0,1].includes(gpu.index)
+    &&Number.isFinite(gpu.usedMemoryMiB)&&gpu.usedMemoryMiB>=0
+    &&Number.isFinite(gpu.utilizationPercent)&&gpu.utilizationPercent>=0&&gpu.utilizationPercent<=100
+    &&gpu.temperatureC>=0&&Number.isFinite(gpu.powerWatts)&&gpu.powerWatts>=0),"gpu-telemetry-invalid");
 }
 export function monitorTick({record,sample,abort}){
   try{record("telemetry",sample("periodic"));}
@@ -83,7 +92,8 @@ export function validateResponse(value, model, instance, runtime, endpoint) {
   if (endpoint === "/api/v0/chat/completions") {
     requireValue(value.runtime?.name === runtime.name && value.runtime?.version === runtime.version, "runtime-drift");
     requireValue(value.model_info?.context_length === 32768, "response-context");
-    requireValue(Number.isFinite(value.stats?.tokens_per_second) && Number.isFinite(value.stats?.time_to_first_token), "metrics-missing");
+    requireValue(Number.isFinite(value.stats?.tokens_per_second) && value.stats.tokens_per_second>=0
+      && Number.isFinite(value.stats?.time_to_first_token) && value.stats.time_to_first_token>=0, "metrics-missing");
   }
   return { content: msg.content ?? null, toolCalls: calls, finishReason: choice.finish_reason,
     completionTokens: value.usage.completion_tokens, promptTokens: value.usage.prompt_tokens ?? null,
@@ -142,6 +152,7 @@ export async function withCandidate({ bundle, packageVerification, candidate, ou
     requireValue(typeof loaded.instance_id === "string", "instance-missing");
     instance = loaded.instance_id;
     record("load", { request: loadRequest, response: loaded, elapsedMs: Date.now() - t });
+    requireValue(loaded.status==="loaded","load-incomplete");
     assertLoadEnvelope(loaded.load_config, gguf.chatTemplateSha256);
     const resident = assertResidency(await ownedApi("/api/v1/models"), modelKey, instance);
     fingerprint = digest(resident.config);
@@ -175,8 +186,9 @@ export async function withCandidate({ bundle, packageVerification, candidate, ou
     controller.signal.throwIfAborted();
     passed = true;
   } catch (error) {
+    abort("qualification-arm-stopped");
     failure = /^(qualification|gate7f1)-[a-z0-9-]+$/.test(error.message) ? error.message : "qualification-operator-failed";
-    record("failure", { code: failure, errorClass: error.name });
+    try{record("failure", { code: failure, errorClass: error.name });}catch{/* Cleanup still runs if the sink failed. */}
   } finally {
     clearTimeout(deadline);clearInterval(monitor);
     process.removeListener("SIGINT",onSignal);process.removeListener("SIGTERM",onSignal);

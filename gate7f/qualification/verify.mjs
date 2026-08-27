@@ -1,6 +1,6 @@
 import {isDeepStrictEqual} from "node:util";
-import {hash,requireValue,validateResponse} from "./runtime.mjs";
-import {assertLoadEnvelope,assertTelemetry,digest} from "../evaluation/v2/capture-contract.mjs";
+import {hash,requireValue,validateResponse,validateTelemetry} from "./runtime.mjs";
+import {assertLoadEnvelope,digest} from "../evaluation/v2/capture-contract.mjs";
 const check=(ok,code)=>requireValue(ok,"evidence-"+code);
 const same=(actual,expected,code)=>check(isDeepStrictEqual(actual,expected),code);
 const jsonHash=value=>hash(JSON.stringify(value,null,2)+"\n");
@@ -23,6 +23,7 @@ export function verifyCapture({packageManifest,packageManifestSha256,bundle,even
   same(source.source,bundle.source,"source");same(source.manifest,candidate,"artifact");same(source.runtime,bundle.runtime,"runtime");
   same(source.packageVerification,{manifest:packageManifest,sha256:packageManifestSha256},"package-event");
   check(source.phase===bundle.source.kind && result.phase===source.phase,"phase");
+  check(Number.isInteger(source.armTimeoutMs)&&source.armTimeoutMs>0&&source.armTimeoutMs<=10800000,"arm-deadline");
   check(events[0]===source,"source-order");
   const verified=one("verified-files");
   same(verified.artifact,{path:candidate.artifactPath,bytes:candidate.artifactBytes,sha256:candidate.artifactSha256},"verified-artifact");
@@ -39,12 +40,13 @@ export function verifyCapture({packageManifest,packageManifestSha256,bundle,even
   const load=one("load"),residentRow=one("resident"),resident=residentRow.resident;
   same(load.request,{model:candidate.modelKey,context_length:32768,flash_attention:true,offload_kv_cache_to_gpu:true,echo_load_config:true},"load-request");
   const instance=load.response?.instance_id;check(typeof instance==="string"&&instance.length>0,"instance");
+  check(load.response.status==="loaded","load-incomplete");
   assertLoadEnvelope(load.response.load_config,candidate.chatTemplateSha256);
   check(resident.modelKey===candidate.modelKey &&resident.id===instance,"resident-identity");
   for(const key of ["context_length","flash_attention","offload_kv_cache_to_gpu","speculative_draft_mtp","speculative_draft_simple","speculative_draft_model"])
     same(resident.config?.[key],load.response.load_config[key],"resident-envelope");
   const configSha256=digest(resident.config);check(residentRow.configSha256===configSha256,"resident-digest");
-  check(index(metadata)<index(load)&&index(load)<index(residentRow),"load-order");
+  check(index(metadata)<index(one("identity"))&&index(one("identity"))<index(load)&&index(load)<index(residentRow),"load-order");
   const requests=rows("request"),responses=rows("response"),observations=rows("observation");
   check(requests.length===expectedSchedule.length&&responses.length===requests.length&&observations.length===requests.length,"denominator");
   const ids=expectedSchedule.map(item=>item.id);check(new Set(ids).size===ids.length,"schedule-duplicates");
@@ -67,10 +69,18 @@ export function verifyCapture({packageManifest,packageManifestSha256,bundle,even
   check(observations.every(row=>index(row)<index(cleanup)),"cleanup-order");
   check(!events.some(row=>["failure","request-failure","telemetry-failure","cleanup-failure","ownership-ambiguous"].includes(row.type)),"failure-row");
   const samples=rows("telemetry");check(samples.length>=3,"telemetry-missing");
-  for(const sample of samples)assertTelemetry(sample);
-  for(const label of ["before-load","after-load","after-unload"])check(samples.some(row=>row.label===label),"telemetry-phase");
+  for(const sample of samples)validateTelemetry(sample);
+  const beforeLoad=samples.find(row=>row.label==="before-load"),afterLoad=samples.find(row=>row.label==="after-load"),afterUnload=samples.find(row=>row.label==="after-unload");
+  check(beforeLoad&&afterLoad&&afterUnload&&index(beforeLoad)<index(load)&&index(afterLoad)>index(load)
+    &&index(afterUnload)>index(cleanup),"telemetry-phase");
+  for(const request of requests){
+    const before=samples.find(row=>row.label===request.id),after=samples.find(row=>row.label===request.id+":after");
+    check(before&&after&&index(before)<index(request)&&index(after)>index(responses.find(row=>row.id===request.id)),"request-telemetry");
+  }
   const start=Date.parse(result.startedAt),end=Date.parse(result.endedAt);
   check(Number.isFinite(start)&&Number.isFinite(end)&&end>=start&&end-start<=source.armTimeoutMs+180000,"duration");
+  const sampleTimes=[start,...samples.map(row=>Date.parse(row.time)),end];
+  check(sampleTimes.every((time,i)=>i===0||time-sampleTimes[i-1]<=30000),"telemetry-gap");
   let previous=start;
   for(const row of events){const time=Date.parse(row.time);check(Number.isFinite(time)&&time>=previous&&time<=end,"event-time");previous=time;}
   check(result.schemaVersion==="runa2-qualification-capture-result/v1"&&result.passed===true&&result.failure===null

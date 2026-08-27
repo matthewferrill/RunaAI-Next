@@ -1,7 +1,7 @@
 import {readFileSync} from "node:fs";
 import path from "node:path";
 import {fileURLToPath} from "node:url";
-import {buildRequest} from "./adapter.mjs";
+import {APPLICATION_OUTPUT_SCHEMA,buildRequest} from "./adapter.mjs";
 import {requireValue,verifyPackage,withCandidate} from "./runtime.mjs";
 const here=path.dirname(fileURLToPath(import.meta.url));
 const state={projectId:"diagnostic",profile:"ask-every-time",workspaceRevision:9,executionReceipt:null,
@@ -16,6 +16,9 @@ if(process.argv[1] && path.resolve(process.argv[1])===fileURLToPath(import.meta.
   const packageVerification=await verifyPackage(here),bundle=JSON.parse(readFileSync(path.join(here,"bundle.json"),"utf8"));
   const result=await withCandidate({bundle,packageVerification,candidate:process.argv[2],phase:bundle.source.kind,
     outputDir:path.join(here,"adapter-diagnostics-"+process.argv[2])},async({invoke})=>{
+      const rejected=buildRequest(adapterDiagnostics[0]);
+      rejected.request.response_format.json_schema.schema=APPLICATION_OUTPUT_SCHEMA;
+      await invoke({id:"large-maxlength-control:1",...rejected,allowDiagnosticHttpError:true});
       for(const item of adapterDiagnostics)for(let attempt=1;attempt<=3;attempt++)
         await invoke({id:item.id+":"+attempt,...buildRequest(item),allowDiagnosticHttpError:true});
     });

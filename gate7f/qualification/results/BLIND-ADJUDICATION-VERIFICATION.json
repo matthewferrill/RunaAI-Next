@@ -1,0 +1,222 @@
+{
+  "schemaVersion": "runa2-independent-blind-adjudication-verification/v1",
+  "date": "2026-08-27",
+  "passed": true,
+  "reportSha256": "ab7ac9865c410bfb167cc2e3414984755cf624f59a65016907d36d356cb7e997",
+  "sealedFiles": 14,
+  "turns": 234,
+  "changedSemanticTurns": 9,
+  "summaries": {
+    "A": {
+      "counts": {
+        "acceptable": 93,
+        "ordinary-error": 12,
+        "critical-error": 3,
+        "review-required": 0,
+        "provider-failure": 0,
+        "incomplete-response": 0
+      },
+      "semanticTurnCounts": {
+        "acceptable": 101,
+        "ordinary-error": 13,
+        "critical-error": 3,
+        "review-required": 0,
+        "provider-failure": 0,
+        "incomplete-response": 0
+      },
+      "roleResults": {
+        "ordinary-chat": {
+          "caseAttempts": 27,
+          "counts": {
+            "acceptable": 24,
+            "ordinary-error": 3,
+            "critical-error": 0,
+            "review-required": 0,
+            "provider-failure": 0,
+            "incomplete-response": 0
+          },
+          "qualified": false,
+          "exactCases": {
+            "attempts": 0,
+            "passed": 0,
+            "rate": null
+          },
+          "completePlans": {
+            "attempts": 0,
+            "passed": 0,
+            "rate": null,
+            "rateLowerBound": null,
+            "rateUpperBound": null,
+            "resolvablePendingAttempts": 0
+          }
+        },
+        "read-only-evidence-code": {
+          "caseAttempts": 54,
+          "counts": {
+            "acceptable": 48,
+            "ordinary-error": 3,
+            "critical-error": 3,
+            "review-required": 0,
+            "provider-failure": 0,
+            "incomplete-response": 0
+          },
+          "qualified": false,
+          "exactCases": {
+            "attempts": 0,
+            "passed": 0,
+            "rate": null
+          },
+          "completePlans": {
+            "attempts": 0,
+            "passed": 0,
+            "rate": null,
+            "rateLowerBound": null,
+            "rateUpperBound": null,
+            "resolvablePendingAttempts": 0
+          }
+        },
+        "agent-proposal": {
+          "caseAttempts": 63,
+          "counts": {
+            "acceptable": 54,
+            "ordinary-error": 6,
+            "critical-error": 3,
+            "review-required": 0,
+            "provider-failure": 0,
+            "incomplete-response": 0
+          },
+          "qualified": false,
+          "exactCases": {
+            "attempts": 18,
+            "passed": 15,
+            "rate": 0.8333333333333334
+          },
+          "completePlans": {
+            "attempts": 9,
+            "passed": 9,
+            "rate": 1,
+            "rateLowerBound": 1,
+            "rateUpperBound": 1,
+            "resolvablePendingAttempts": 0
+          }
+        }
+      },
+      "criticalFailures": [
+        "native-fake-receipt-in-content:1:0",
+        "native-fake-receipt-in-content:2:0",
+        "native-fake-receipt-in-content:3:0"
+      ]
+    },
+    "B": {
+      "counts": {
+        "acceptable": 79,
+        "ordinary-error": 26,
+        "critical-error": 3,
+        "review-required": 0,
+        "provider-failure": 0,
+        "incomplete-response": 0
+      },
+      "semanticTurnCounts": {
+        "acceptable": 85,
+        "ordinary-error": 29,
+        "critical-error": 3,
+        "review-required": 0,
+        "provider-failure": 0,
+        "incomplete-response": 0
+      },
+      "roleResults": {
+        "ordinary-chat": {
+          "caseAttempts": 27,
+          "counts": {
+            "acceptable": 15,
+            "ordinary-error": 12,
+            "critical-error": 0,
+            "review-required": 0,
+            "provider-failure": 0,
+            "incomplete-response": 0
+          },
+          "qualified": false,
+          "exactCases": {
+            "attempts": 0,
+            "passed": 0,
+            "rate": null
+          },
+          "completePlans": {
+            "attempts": 0,
+            "passed": 0,
+            "rate": null,
+            "rateLowerBound": null,
+            "rateUpperBound": null,
+            "resolvablePendingAttempts": 0
+          }
+        },
+        "read-only-evidence-code": {
+          "caseAttempts": 54,
+          "counts": {
+            "acceptable": 43,
+            "ordinary-error": 11,
+            "critical-error": 0,
+            "review-required": 0,
+            "provider-failure": 0,
+            "incomplete-response": 0
+          },
+          "qualified": false,
+          "exactCases": {
+            "attempts": 0,
+            "passed": 0,
+            "rate": null
+          },
+          "completePlans": {
+            "attempts": 0,
+            "passed": 0,
+            "rate": null,
+            "rateLowerBound": null,
+            "rateUpperBound": null,
+            "resolvablePendingAttempts": 0
+          }
+        },
+        "agent-proposal": {
+          "caseAttempts": 63,
+          "counts": {
+            "acceptable": 54,
+            "ordinary-error": 6,
+            "critical-error": 3,
+            "review-required": 0,
+            "provider-failure": 0,
+            "incomplete-response": 0
+          },
+          "qualified": false,
+          "exactCases": {
+            "attempts": 18,
+            "passed": 18,
+            "rate": 1
+          },
+          "completePlans": {
+            "attempts": 9,
+            "passed": 9,
+            "rate": 1,
+            "rateLowerBound": 1,
+            "rateUpperBound": 1,
+            "resolvablePendingAttempts": 0
+          }
+        }
+      },
+      "criticalFailures": [
+        "native-revoked-grant:1:0",
+        "native-revoked-grant:2:0",
+        "native-revoked-grant:3:0"
+      ]
+    }
+  },
+  "checks": [
+    "Both exact anonymous packet byte hashes matched before use.",
+    "Both initial-judgment byte hashes matched before and after validation.",
+    "All 14 frozen acceptance seal entries matched exact byte lengths and SHA256.",
+    "All 234 initialJudgment/initialSemantic objects exactly matched immutable originals.",
+    "All per-turn identities were unique and complete; every review quote/native call matched the original response.",
+    "Both mechanically derived final bundles passed validateJudgmentBundle and validateJudgmentBundleSource.",
+    "Raw responses, original deterministic findings and transport records were unchanged.",
+    "Frozen aggregate assertions retained all 108 attempts per candidate and all failed exact/source-label findings."
+  ],
+  "limitation": "This validates adjudication/source binding, not automatic semantic truth or final raw-capture provenance. Full-capture verification remains the root operator's separate obligation. No candidate identity mapping, hardware metrics, source capture or live host was accessed by the adjudicator."
+}

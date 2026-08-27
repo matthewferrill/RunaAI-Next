@@ -217,8 +217,16 @@ repository and never push migration work into either source repository.
   `gate7f/GATE7F1-V2-CORRECTION-PLAN-2026-08-27.md`. V2 lives alongside the unchanged v1 package,
   supplies the complete nested schema, uses explicit current-answer fields and numeric tolerance for
   bounded fact cases, flags ambiguous prose for review, and freezes equal larger output caps with
-  cutoff-as-failed-observation accounting. Fifteen focused tests pass, including the full 105-row stub.
-  This authorizes the resealed Home rerun only, not tuning after v2 output or a production change.
+  cutoff-as-failed-observation accounting. Criteria commit `25b6c5a` precedes implementation/seal commit
+  `9e1e36c`; the 21-file v2 seal was frozen before either model call. Both Home arms completed all
+  105 observations with zero cutoffs and unloaded. Qwen has 75 automatic passes, 18 failures, and
+  12 reviews; Gemma has 90 passes, six failures, and nine reviews. Twelve Qwen failures are correct
+  answers missing the requested label, not wrong facts. Gemma proposed an unauthorized change in all
+  three simulated tool-output-authority attempts; both models also have planning or supplied-state
+  gaps. Neither is automatically eligible. Full validation is 512/512, v2 focused tests are 15/15,
+  both seals pass, and all six raw evidence transfer hashes match. Full results and limitations are
+  `gate7f/GATE7F1-V2-HOME-RERUN-RESULTS-2026-08-27.md`. The correction/reseal/rerun task is complete;
+  no post-output tuning, Control change, model switch, push, merge, or production activation occurred.
 - The first ordinary-user activation attempt failed closed before identity creation or application
   restart. RCA: Windows PowerShell 5.1 collapsed the empty Keycloak client response to `$null`, and
   strict mode rejected `.Count`. Normalized reconciliation then proved zero ordinary clients, zero
@@ -534,7 +542,7 @@ plain-language steward experience, or governed action pathway.
 | 7C | First user-interface shell | Complete and superseded on Control by the Gate 7D presentation release | Source integration remains part of the Gate 7D review chain |
 | 7D | Identity-aware Chat/Code navigation and end-to-end flow correction | Complete; accepted and merged as `3d95e50`; current-turn verifier successor active on Control at `e10e3db`; post-merge and exact-Control suites 423/423 | Complete |
 | 7E-0/1 | Truthful execution status and harmless bounded JavaScript Run | Complete; exact successor active and ordinary-browser acceptance green; local, Control, and active-runtime suites 441/441 | Complete |
-| 7F | Conversational Agent Mode with selectable approval profiles | 7F-0 inert foundation green; Gemma downloaded/hash-verified; both Home arms stopped at 66/105 and unloaded; original seal intact | Decide on corrected/resealed evaluation and rerun; no eligible model comparison or production activation |
+| 7F | Conversational Agent Mode with selectable approval profiles | 7F-0 inert foundation green; corrected/resealed v2 Home rerun complete at 105/105 per model; both unloaded, both seals intact; neither automatically eligible | Review model-role findings and targeted state/authority follow-up; no model switch or effectful activation |
 | 7F+ | Broader product extensions | Model-independent foundation precedes Gemma/incumbent agent burn-in; effectful activation follows accepted model and capability gates | New baseline and separate decision per extension group |
 
 ## Bootstrap validation
@@ -579,13 +587,17 @@ No dependency was changed during the prerequisite disposition. Full evidence is 
 
 ## Next operation
 
-Gate 7F-0 is locally complete. The authorized Gate 7F-1 Home operation verified the exact artifacts,
-ran both arms separately, retained synthetic evidence, and unloaded both after the sealed cutoff at
-66/105 complete observations each. The original seal and production routing are unchanged. The next
-decision is whether to correct the numeric/keyword grader and model-facing JSON contract, freeze an
-adequate output budget in a new evaluation version, and rerun both Home-only arms. Do not reinterpret
-partial grades as model selection or open the 31B arm on these defective/incomplete results. The bake-off
-does not itself authorize a model switch or tool activation. The first effectful capability set, disposable-project execution,
+Gate 7F-0 is locally complete. The authorized Gate 7F-1 evaluation correction and resealed v2 rerun
+are complete: both exact Home artifacts produced 105/105 observations, with zero cutoffs, then unloaded.
+The original partial v1 record is preserved; v2 was not tuned after seeing outputs. Both captures are
+provenance-valid, but neither model satisfies all role gates. Gemma has more automatic passes and lower
+GPU allocation, but a repeated simulated tool-output-authority failure; Qwen's score includes 12
+format-only misses. Both have planning or supplied-state handling findings, and unresolved prose
+reviews are not automatic passes. The next decision is whether to authorize a bounded investigation
+of state/template handling and application-enforced authority, with independent evaluation where
+authorized, before model-role selection. Keep production routing unchanged. Do not open the 31B arm,
+alter sealed v2 grades, or infer a model switch/tool activation from this experiment. Any revised
+evaluation requires a new preregistered version. The first effectful capability set, disposable-project execution,
 retained-project use, and each later capability group remain separate approval gates. UI refinement, live
 weather/web access, attachments, additional project functions, and off-LAN access also remain separate
 decisions. The active Control release and its exact Gate 7D rollback predecessor remain unchanged by this

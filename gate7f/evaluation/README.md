@@ -18,6 +18,13 @@ See `../GATE7F1-HOME-BURNIN-RESULTS-2026-08-27.md` for the results and identifie
 The retained aggregate omits raw responses; raw observations remain separate evaluation evidence and
 must contain only synthetic corpus content.
 
+The separately authorized correction is preserved in `v2/`, with its own 21-file seal committed before
+new model calls. Both v2 Home arms completed 105/105 observations with zero cutoffs, then unloaded.
+Neither model is automatically eligible: see
+`../GATE7F1-V2-HOME-RERUN-RESULTS-2026-08-27.md` for frozen grades, targeted semantic review,
+hardware measurements, evidence hashes, and the no-production-change boundary. The original v1 package
+and partial results above are not overwritten or regraded.
+
 Verification:
 
 ```text

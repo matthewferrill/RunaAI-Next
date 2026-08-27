@@ -6,15 +6,15 @@ import {createHash} from "node:crypto";
 const sha=bytes=>createHash("sha256").update(bytes).digest("hex");
 const check=(ok,code)=>{if(!ok)throw Error("qualification-prefix-"+code);};
 export function completedFunctionalPrefix(bytes){
-  const text=bytes.toString("utf8");let offset=0,acceptance=false;
-  while(offset<text.length){
-    const end=text.indexOf("\n",offset);check(end!==-1,"incomplete");
-    const line=text.slice(offset,end);offset=end+1;if(!line.trim())continue;
+  const decoder=new TextDecoder("utf-8",{fatal:true});let offset=0,acceptance=false;
+  while(offset<bytes.length){
+    const end=bytes.indexOf(10,offset);check(end!==-1,"incomplete");
+    const line=decoder.decode(bytes.subarray(offset,end));offset=end+1;if(!line.trim())continue;
     const row=JSON.parse(line);
     if(row.type==="acceptance-complete"){check(row.requests===117,"acceptance-count");acceptance=true;}
     if(row.type==="integration-summary"){
       check(acceptance&&row.complete===true&&row.observedRequests===8,"integration-count");
-      return Buffer.from(text.slice(0,offset),"utf8");
+      return bytes.subarray(0,offset);
     }
   }
   throw Error("qualification-prefix-incomplete");

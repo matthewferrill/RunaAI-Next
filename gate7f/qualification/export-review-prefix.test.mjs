@@ -9,3 +9,10 @@ test("functional prefix is complete and byte-exact while later soak may still ap
   assert.throws(()=>completedFunctionalPrefix(Buffer.from(JSON.stringify(rows[0])+"\n")));
   assert.throws(()=>completedFunctionalPrefix(Buffer.from(JSON.stringify(rows[2])+"\n")));
 });
+test("prefix rejects malformed UTF-8 and preserves original multibyte CRLF bytes",()=>{
+  const ending=Buffer.from('\r\n{"type":"acceptance-complete","requests":117}\r\n{"type":"integration-summary","complete":true,"observedRequests":8}\r\n');
+  const valid=Buffer.concat([Buffer.from('{"type":"source","value":"synthetic 🌲"}'),ending]);
+  assert.deepEqual(completedFunctionalPrefix(valid),valid);
+  const corrupt=Buffer.concat([Buffer.from('{"type":"source","value":"'),Buffer.from([0xc3]),Buffer.from('"}'),ending]);
+  assert.throws(()=>completedFunctionalPrefix(corrupt),{name:"TypeError"});
+});

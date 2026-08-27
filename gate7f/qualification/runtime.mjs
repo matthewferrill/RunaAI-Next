@@ -26,13 +26,14 @@ export async function verifyPackage(here) {
   }
   return { manifest, sha256: await hashFile(manifestPath) };
 }
-export async function api(endpoint, body, timeoutMs = 120000) {
+export async function api(endpoint, body, timeoutMs = 120000, signal) {
   requireValue(["/api/v1/models", "/api/v1/models/load", "/api/v1/models/unload",
     "/api/v0/chat/completions", "/v1/chat/completions"].includes(endpoint), "endpoint-denied");
   const response = await fetch("http://127.0.0.1:1234" + endpoint, {
     method: body === undefined ? "GET" : "POST", redirect: "error",
     headers: body === undefined ? {} : { "Content-Type": "application/json" },
-    body: body === undefined ? undefined : JSON.stringify(body), signal: AbortSignal.timeout(timeoutMs),
+    body: body === undefined ? undefined : JSON.stringify(body),
+    signal: signal ? AbortSignal.any([signal,AbortSignal.timeout(timeoutMs)]) : AbortSignal.timeout(timeoutMs),
   });
   const chunks = []; let size = 0;
   for await (const bytes of response.body) {
@@ -64,7 +65,13 @@ export function validateResponse(value, model, instance, runtime, endpoint) {
   requireValue(Array.isArray(value.choices) && value.choices.length === 1, "response-shape");
   const choice = value.choices[0], msg = choice.message;
   requireValue(["stop", "length", "tool_calls"].includes(choice.finish_reason), "finish-reason");
-  requireValue(msg && (typeof msg.content === "string" || msg.content === null), "message-shape");
+  const calls=msg?.tool_calls??[];
+  requireValue(Array.isArray(calls) && calls.length<=8 && calls.every(call=>typeof call?.id==="string" && call.id.length>0
+    && call.type==="function" && typeof call.function?.name==="string" && /^[a-zA-Z0-9_-]+$/.test(call.function.name)
+    && typeof call.function.arguments==="string" && Buffer.byteLength(call.function.arguments)<=32768),"tool-call-shape");
+  requireValue(new Set(calls.map(call=>call.id)).size===calls.length,"duplicate-tool-id");
+  requireValue((choice.finish_reason==="tool_calls") === (calls.length>0),"tool-finish-mismatch");
+  requireValue(msg && (typeof msg.content === "string" || (calls.length>0 && msg.content==null)), "message-shape");
   requireValue(!msg.reasoning && !msg.reasoning_content && !/<think>|<\|channel>thought/i.test(msg.content ?? "")
     && !(value.stats?.reasoning_output_tokens > 0) && !(value.usage?.completion_tokens_details?.reasoning_tokens > 0), "reasoning-leaked");
   requireValue(Number.isInteger(value.usage?.completion_tokens) && value.usage.completion_tokens >= 0, "usage-missing");
@@ -73,12 +80,12 @@ export function validateResponse(value, model, instance, runtime, endpoint) {
     requireValue(value.model_info?.context_length === 32768, "response-context");
     requireValue(Number.isFinite(value.stats?.tokens_per_second) && Number.isFinite(value.stats?.time_to_first_token), "metrics-missing");
   }
-  return { content: msg.content, toolCalls: msg.tool_calls ?? [], finishReason: choice.finish_reason,
+  return { content: msg.content ?? null, toolCalls: calls, finishReason: choice.finish_reason,
     completionTokens: value.usage.completion_tokens, promptTokens: value.usage.prompt_tokens ?? null,
     tokensPerSecond: value.stats?.tokens_per_second ?? null,
     firstTokenMs: value.stats?.time_to_first_token === undefined ? null : value.stats.time_to_first_token * 1000 };
 }
-export async function withCandidate({ bundle, candidate, outputDir, phase }, work) {
+export async function withCandidate({ bundle, packageVerification, candidate, outputDir, phase, armTimeoutMs=2700000 }, work) {
   requireValue(hostname().toUpperCase() === "RUNA-HOME", "wrong-host");
   requireValue(["incumbent", "gemma26"].includes(candidate), "candidate");
   const manifest = bundle.candidates[candidate];
@@ -88,17 +95,28 @@ export async function withCandidate({ bundle, candidate, outputDir, phase }, wor
   writeFileSync(events, "", { flag: "wx" });
   const record = (type, payload = {}) => appendFileSync(events, JSON.stringify({ type, time: new Date().toISOString(), ...payload }) + "\n");
   const progress = payload => process.stdout.write(JSON.stringify({ phase, candidate, ...payload }) + "\n");
+  requireValue(Number.isInteger(armTimeoutMs) && armTimeoutMs>0 && armTimeoutMs<=10800000,"arm-deadline");
   let instance = null, cleanupVerified = false, passed = false, failure = null, modelKey, fingerprint, observed = 0;
+  let loadRequested=false, ownershipAmbiguous=false;
   const startedAt = new Date().toISOString();
+  const controller=new AbortController();
+  const abort=(code)=>{if(!controller.signal.aborted)controller.abort(new Error(code));};
+  const deadline=setTimeout(()=>abort("qualification-arm-deadline"),armTimeoutMs);
+  const monitor=setInterval(()=>{try{record("telemetry",telemetry("periodic"));}catch(error){
+    record("telemetry-failure",{code:error.message});abort("qualification-resource-boundary");}},5000);
+  const onSignal=()=>abort("qualification-interrupted");
+  process.once("SIGINT",onSignal);process.once("SIGTERM",onSignal);
+  const ownedApi=(endpoint,body,timeout)=>{controller.signal.throwIfAborted();return api(endpoint,body,timeout,controller.signal);};
   try {
-    record("source", { source: bundle.source, manifest, runtime: bundle.runtime, phase });
+    record("source", { source: bundle.source, manifest, runtime: bundle.runtime, phase, packageVerification, armTimeoutMs,
+      exclusiveRequestTrafficVerified:false, trafficBoundary:"Dedicated operator arm; shared endpoint traffic not instrumented" });
     progress({ status: "hashing" });
     requireValue(statSync(manifest.artifactPath).size === manifest.artifactBytes, "artifact-size");
     requireValue(await hashFile(manifest.artifactPath) === manifest.artifactSha256, "artifact-hash");
     for (const file of bundle.runtime.files) requireValue(await hashFile(file.path) === file.sha256, "runtime-file-hash");
     const gguf = readGgufMetadata(manifest.artifactPath);
     record("metadata", gguf);
-    const inventory = await api("/api/v1/models");
+    const inventory = await ownedApi("/api/v1/models");
     assertResidency(inventory, null, null);
     const models = inventory.models.filter(m => m.size_bytes === manifest.artifactBytes && m.architecture === manifest.architecture
       && m.quantization?.name === manifest.quantization);
@@ -109,26 +127,29 @@ export async function withCandidate({ bundle, candidate, outputDir, phase }, wor
     record("telemetry", telemetry("before-load"));
     progress({ status: "loading", modelKey });
     const loadRequest = { model: modelKey, context_length: 32768, flash_attention: true, offload_kv_cache_to_gpu: true, echo_load_config: true };
-    const t = Date.now(), loaded = await api("/api/v1/models/load", loadRequest, 900000);
+    loadRequested=true;
+    const t = Date.now(), loaded = await ownedApi("/api/v1/models/load", loadRequest, 900000);
     requireValue(typeof loaded.instance_id === "string", "instance-missing");
     instance = loaded.instance_id;
     record("load", { request: loadRequest, response: loaded, elapsedMs: Date.now() - t });
     assertLoadEnvelope(loaded.load_config, gguf.chatTemplateSha256);
-    const resident = assertResidency(await api("/api/v1/models"), modelKey, instance);
+    const resident = assertResidency(await ownedApi("/api/v1/models"), modelKey, instance);
     fingerprint = digest(resident.config);
+    record("resident",{resident,configSha256:fingerprint});
     record("telemetry", telemetry("after-load"));
     const invoke = async ({ id, request, endpoint = "/api/v0/chat/completions", allowDiagnosticHttpError = false }) => {
-      assertResidency(await api("/api/v1/models"), modelKey, instance, fingerprint);
+      assertResidency(await ownedApi("/api/v1/models"), modelKey, instance, fingerprint);
       record("telemetry", telemetry(id));
       const body = { ...request, model: modelKey, temperature: 0, stream: false,
         ...(reasoningOff ? { reasoning_effort: "none" } : {}) };
       record("request", { id, endpoint, request: body });
       const start = Date.now();
       try {
-        const response = await api(endpoint, body, 120000);
+        const response = await ownedApi(endpoint, body, 120000);
         record("response", { id, endpoint, response, elapsedMs: Date.now() - start });
+        record("telemetry",telemetry(id+":after"));
         const normalized = validateResponse(response, modelKey, instance, bundle.runtime, endpoint);
-        assertResidency(await api("/api/v1/models"), modelKey, instance, fingerprint);
+        assertResidency(await ownedApi("/api/v1/models"), modelKey, instance, fingerprint);
         observed++;
         record("observation", { id, endpoint, normalized, elapsedMs: Date.now() - start });
         progress({ status: "observed", id, observed });
@@ -140,20 +161,25 @@ export async function withCandidate({ bundle, candidate, outputDir, phase }, wor
         return { failure: error.message };
       }
     };
-    await work({ invoke, record, progress, modelKey, instance, manifest, reasoningOff });
+    await work({ invoke, record, progress, modelKey, instance, manifest, reasoningOff, signal:controller.signal });
+    controller.signal.throwIfAborted();
     passed = true;
   } catch (error) {
     failure = /^(qualification|gate7f1)-[a-z0-9-]+$/.test(error.message) ? error.message : "qualification-operator-failed";
     record("failure", { code: failure, errorClass: error.name });
   } finally {
+    clearTimeout(deadline);clearInterval(monitor);
+    process.removeListener("SIGINT",onSignal);process.removeListener("SIGTERM",onSignal);
+    ownershipAmbiguous=loadRequested && instance===null;
+    if(ownershipAmbiguous)record("ownership-ambiguous",{loadRequested,ownedInstance:null,automaticUnloadDenied:true});
     try {
       const cleanup = await cleanupOwnedInstance(api, instance);
-      cleanupVerified = cleanup.cleanupVerified && !cleanup.unexpectedInstances;
+      cleanupVerified = cleanup.cleanupVerified && !cleanup.unexpectedInstances && !ownershipAmbiguous;
       record("cleanup", { ...cleanup, ownedInstance: instance });
     } catch (error) { record("cleanup-failure", { code: error.message }); }
     try { record("telemetry", telemetry("after-unload")); } catch { cleanupVerified = false; }
     const result = { schemaVersion: "runa2-qualification-capture-result/v1", candidate, phase, startedAt,
-      endedAt: new Date().toISOString(), passed: passed && cleanupVerified, failure, observed, cleanupVerified,
+      endedAt: new Date().toISOString(), passed: passed && cleanupVerified, failure, observed, cleanupVerified, ownershipAmbiguous,
       modelKey: modelKey ?? null, configSha256: fingerprint ?? null, modelContentExecuted: false,
       productionRoutingChanged: false, protectedDataIncluded: false };
     writeFileSync(path.join(outputDir,"result.json"),JSON.stringify(result,null,2)+"\n",{flag:"wx"});

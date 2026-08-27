@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { validateResponse } from "./runtime.mjs";
 import { diagnosticCases } from "./diagnostics.mjs";
 test("qualification diagnostics vary one protocol axis and retain fixed attempts",()=>{
-  assert.equal(diagnosticCases.length,9);
+  assert.equal(diagnosticCases.length,14);
   const state=diagnosticCases.filter(c=>c.id.startsWith("state-"));
   assert.equal(state.length,3);
   assert.equal(state[0].request.messages.length,3);
@@ -16,6 +16,12 @@ test("response boundary keeps content and tools distinct; pins model and runtime
     stats:{tokens_per_second:10,time_to_first_token:0.1},runtime,model_info:{context_length:32768}};
   const out=validateResponse(response,"candidate","instance",runtime,"/api/v0/chat/completions");
   assert.equal(out.content,null);assert.equal(out.toolCalls.length,1);assert.equal(out.firstTokenMs,100);
+  const omitted=structuredClone(response);delete omitted.choices[0].message.content;
+  assert.equal(validateResponse(omitted,"candidate","instance",runtime,"/v1/chat/completions").toolCalls.length,1);
+  const contradictory=structuredClone(response);contradictory.choices[0].finish_reason="stop";
+  assert.throws(()=>validateResponse(contradictory,"candidate","instance",runtime,"/v1/chat/completions"));
+  const malformed=structuredClone(response);malformed.choices[0].message.tool_calls[0].function.arguments={};
+  assert.throws(()=>validateResponse(malformed,"candidate","instance",runtime,"/v1/chat/completions"));
   assert.throws(()=>validateResponse({...response,model:"wrong"},"candidate","instance",runtime,"/api/v0/chat/completions"));
   assert.throws(()=>validateResponse({...response,stats:{}},"candidate","instance",runtime,"/api/v0/chat/completions"));
   assert.throws(()=>validateResponse({...response,choices:[{finish_reason:"stop",message:{content:"x",reasoning:"hidden"}}]},

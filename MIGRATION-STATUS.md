@@ -594,8 +594,15 @@ role criteria before implementation: independent fresh cases/review, shared cont
 and authority corrections, matched synthetic end-to-end runs, and an initial one-hour soak per model.
 Production routing and protected data remain unchanged. Human input is reserved for human-only testing.
 
-The coordinated qualification is now sealed and running. Its exact package is bound by
-`gate7f/qualification/RUN-SEAL.json`; design and diagnostic findings are in
+The coordinated qualification is now sealed and running. The first `RUN-SEAL.json` arm completed
+Qwen's 117 quality requests but stopped safely on a GPU boundary before integration/soak; its exact
+failing sample was not retained, so heat remains the leading explanation rather than a proven exact
+sample. That capture and seal are preserved. Both models now restart under the identical temporary
+160-W/GPU envelope in `gate7f/qualification/RUN-SEAL-POWER-V2.json`, with unchanged 85-C cutoff,
+new unsafe-sample retention, exact UUID/power telemetry, cool starts, and verified restoration to
+260 W afterward. No answers were inspected to tune this environmental change. These are repeated
+acceptance inputs, not a newly unseen holdout. Details are in `THERMAL-RESEAL-2026-08-27.md`.
+The design and diagnostic findings are in
 `gate7f/qualification/QUALIFICATION-FREEZE-2026-08-27.md`. Both models completed the 42 protocol
 probes and nine corrected full-schema probes. Large decoder string limits caused a pre-generation
 grammar rejection; a single-factor adapter change resolves that rejection while the unchanged
@@ -603,7 +610,7 @@ application parser retains its limits. Dropped second-system state was not repro
 state probes. Exact task grants, effect-time policy checks and receipt-bound state now cover the
 independently found synthetic authority races. These corrections are not production Agent Mode.
 
-The next operation is to complete both fresh 117-request acceptance sets, eight real synthetic
+The next operation is to complete both 117-request acceptance sets, eight real synthetic
 application round-trip requests per model, and the fixed 131-request one-hour endurance arms, then
 apply the independent model-anonymized semantic review. No current candidate is promoted from these
 in-progress results. The original partial v1 and complete v2 records are preserved. V2 recorded

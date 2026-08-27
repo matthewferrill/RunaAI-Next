@@ -1,0 +1,16 @@
+{
+  "schemaVersion": "runa2-qualification-home-export/v1",
+  "host": "RUNA-HOME",
+  "sourceDirectory": "C:\\Users\\codex-audit\\AppData\\Local\\RunaQualification\\20260827-acceptance-v1\\qualification\\capture-incumbent",
+  "files": {
+    "events.jsonl": {
+      "bytes": 932950,
+      "sha256": "ac0e9b181cb2b285c8a00b6b9d498a7539d5cd49580e614e5c2f59fefb1361ce"
+    },
+    "result.json": {
+      "bytes": 595,
+      "sha256": "7d6380395a289a4239db220410591889a7fb213141b7d5a20f8f5e9604a00822"
+    }
+  },
+  "capturedDate": "2026-08-27"
+}

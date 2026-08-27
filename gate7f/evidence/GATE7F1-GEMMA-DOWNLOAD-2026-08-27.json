@@ -1,0 +1,19 @@
+{
+  "schemaVersion": "runa2-gate7f1-download-result/v1",
+  "repository": "google/gemma-4-26B-A4B-it-qat-q4_0-gguf",
+  "revision": "8afd43710afbb87c711f33f7e7c11b1434a9fa1a",
+  "path": "C:\\lm-studio-models\\google\\gemma-4-26B-A4B-it-qat-q4_0-gguf\\gemma-4-26B_q4_0-it.gguf",
+  "bytes": 14439363584,
+  "sha256": "3eca3b8f6d7baf218a7dd6bba5fb59a56ee25fe2d567b6f5f589b4f697eca51d",
+  "observedAt": "2026-08-27T13:34:36.4601173Z",
+  "host": "RUNA-HOME",
+  "license": "Apache-2.0",
+  "passed": true,
+  "alreadyPresent": false,
+  "modelLoaded": false,
+  "credentialsUsed": false,
+  "multimodalProjectionDownloaded": false,
+  "controlChanged": false,
+  "productionRoutingChanged": false,
+  "privateValuesIncluded": false
+}

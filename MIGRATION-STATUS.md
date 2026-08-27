@@ -48,7 +48,9 @@ repository and never push migration work into either source repository.
 - The one approved Gate 4A aggregate inventory opened only the named project/chat roots and decrypted
   chat records in memory under Matthew's Control identity. It emitted no protected value and copied,
   converted, imported, or migrated no record.
-- No model has been downloaded.
+- Gate 7F-1 has downloaded only the explicitly authorized, pinned Gemma 4 26B A4B Q4_0 artifact to
+  Home. Its 14,439,363,584 bytes and full SHA-256 match; no multimodal projection or other model was
+  downloaded. Download evidence is `gate7f/evidence/GATE7F1-GEMMA-DOWNLOAD-2026-08-27.json`.
 - Gate 6D activated the exact private Control production path for the selected core. No model was
   downloaded, no provider credential was introduced, and no external spending path was activated.
   Candidate PostgreSQL, Keycloak, OpenFGA, Node, and Caddy are retained; only private Caddy TLS is
@@ -198,8 +200,9 @@ repository and never push migration work into either source repository.
   sealed comparison against the installed Qwen incumbent, one model at a time, with exact hashes,
   synthetic evidence, telemetry, and unload afterward. Control and production routing must remain
   unchanged. The execution plan is `gate7f/GATE7F1-HOME-EXECUTION-PLAN-2026-08-27.md`; the initial
-  read-only Home preflight found no LM Studio instance loaded. This is authorization and preflight,
-  not a completed download or burn-in result.
+  read-only Home preflight found no LM Studio instance loaded. The exact download is now verified.
+  The Home capture operator passes 12/12 focused tests and the complete repository passes 492/492;
+  the original five-file seal is unchanged. The burn-in remains pending live capture, not accepted.
 - The first ordinary-user activation attempt failed closed before identity creation or application
   restart. RCA: Windows PowerShell 5.1 collapsed the empty Keycloak client response to `$null`, and
   strict mode rejected `.Count`. Normalized reconciliation then proved zero ordinary clients, zero
@@ -515,7 +518,7 @@ plain-language steward experience, or governed action pathway.
 | 7C | First user-interface shell | Complete and superseded on Control by the Gate 7D presentation release | Source integration remains part of the Gate 7D review chain |
 | 7D | Identity-aware Chat/Code navigation and end-to-end flow correction | Complete; accepted and merged as `3d95e50`; current-turn verifier successor active on Control at `e10e3db`; post-merge and exact-Control suites 423/423 | Complete |
 | 7E-0/1 | Truthful execution status and harmless bounded JavaScript Run | Complete; exact successor active and ordinary-browser acceptance green; local, Control, and active-runtime suites 441/441 | Complete |
-| 7F | Conversational Agent Mode with selectable approval profiles | 7F-0 inert foundation green; 7F-1 exact candidates/corpus/grader sealed offline; no real tool, model call, UI, or production authority | Separate authorization for pinned Gemma 4 26B download and Home-only live burn-in |
+| 7F | Conversational Agent Mode with selectable approval profiles | 7F-0 inert foundation green; 7F-1 original seal intact, authorized exact Gemma download verified, Home capture operator green | Run the authorized Home-only comparison; no production role selection or activation |
 | 7F+ | Broader product extensions | Model-independent foundation precedes Gemma/incumbent agent burn-in; effectful activation follows accepted model and capability gates | New baseline and separate decision per extension group |
 
 ## Bootstrap validation
@@ -561,9 +564,9 @@ No dependency was changed during the prerequisite disposition. Full evidence is 
 ## Next operation
 
 Gate 7F-0 is locally complete, and Gate 7F-1 has sealed the exact candidate artifacts, terms, runtime
-parameters, Agent Mode corpus, metrics, and thresholds. The next operation requires separate protected
-authority: hash the existing incumbent/runtime on Home, download and verify only the pinned Gemma 4 26B
-A4B artifact, then run the two Home-only arms without changing production routing. Gemma 4 31B opens only
+parameters, Agent Mode corpus, metrics, and thresholds. The steward authorized the Home operation on
+2026-08-27; the incumbent/runtime hashes and exact Gemma download are verified. The next operation is
+the two Home-only arms, with exact-instance unload and no production-routing change. Gemma 4 31B opens only
 if the frozen conditional rule is met. The bake-off selects model roles; it does not itself authorize a
 model switch or tool activation. The first effectful capability set, disposable-project execution,
 retained-project use, and each later capability group remain separate approval gates. UI refinement, live

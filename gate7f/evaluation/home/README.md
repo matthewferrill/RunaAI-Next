@@ -40,3 +40,20 @@ Primary API references checked 2026-08-27:
 - https://lmstudio.ai/docs/developer/rest/load
 - https://lmstudio.ai/docs/developer/rest/list
 - https://lmstudio.ai/docs/developer/rest/unload
+
+## Unscored runtime correction
+
+The first Qwen transport probe selected the already-installed Vulkan 2.28.2 backend, not the CUDA
+2.25.2 backend inferred from the installed-file inventory. It answered `ready`, then correctly failed
+the expected-runtime check before any corpus case. Its exact instance was unloaded; GPU memory
+returned to 1,627 / 0 MiB. The r2 evidence is retained, not overwritten or scored.
+
+Before any scored output, r3 corrects the capture manifest to the observed Vulkan backend and hashes
+its files. No backend selection, runtime binary, model template, or global setting is changed. The
+original five-file evaluation seal remains unchanged. The echoed Qwen template SHA-256 matches the
+GGUF exactly (`672e747c77e990320152343b0a4951222e40de5645297905d89afba05586d827`).
+The operator also explicitly asserts exact template equality and disabled speculative decoding.
+
+`summarize-capture.mjs` grades retained local evidence with the sealed grader and reports partial runs
+as invalid for comparison. Missing metrics remain null, and sample peaks are not called continuous
+telemetry. It never sends data to a model or changes raw observations.

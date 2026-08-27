@@ -6,32 +6,32 @@
   "cliCommit": "71bd99c",
   "nodeVersion": "22.22.1",
   "driverVersion": "596.86",
-  "name": "llama.cpp-win-x86_64-nvidia-cuda-avx2",
-  "version": "2.25.2",
+  "name": "llama.cpp-win-x86_64-vulkan-avx2",
+  "version": "2.28.2",
   "files": [
     {
       "path": "C:\\Users\\Matthew\\AppData\\Local\\Programs\\LM Studio\\resources\\app\\.webpack\\main\\index.js",
       "sha256": "6cbb7ba8dfeefee1ce523a88e0f9d64687cdad59564ee5e7fbff6bb95d00f22f"
     },
     {
-      "path": "C:\\Users\\Matthew\\.lmstudio\\extensions\\backends\\llama.cpp-win-x86_64-nvidia-cuda-avx2-2.25.2\\llama-server-impl.dll",
-      "sha256": "c44cd56d01a986a702b9413da0aaaedaeba78acae0d8b787e0a8a346ec605dd1"
+      "path": "C:\\Users\\Matthew\\.lmstudio\\extensions\\backends\\llama.cpp-win-x86_64-vulkan-avx2-2.28.2\\llama-server-impl.dll",
+      "sha256": "4d54ebfb12797403104095a4c551feecee93520bf6326e76d2ac163615816ee3"
     },
     {
-      "path": "C:\\Users\\Matthew\\.lmstudio\\extensions\\backends\\llama.cpp-win-x86_64-nvidia-cuda-avx2-2.25.2\\llm_engine.dll",
-      "sha256": "f33819fcf8a9ed0684270a9a4d0001f5e4e5fc56f7ed6a322ca1419541e86d2f"
+      "path": "C:\\Users\\Matthew\\.lmstudio\\extensions\\backends\\llama.cpp-win-x86_64-vulkan-avx2-2.28.2\\llm_engine.dll",
+      "sha256": "67b78025b78c5d36a4de23d16e1c405c9634585c93c446eaefe7acd7d49bdc37"
     },
     {
-      "path": "C:\\Users\\Matthew\\.lmstudio\\extensions\\backends\\llama.cpp-win-x86_64-nvidia-cuda-avx2-2.25.2\\llama.dll",
-      "sha256": "83eb503ff5cba3765ad2aba9448c43517842f6a4b30a5982e4a753890a8302fc"
+      "path": "C:\\Users\\Matthew\\.lmstudio\\extensions\\backends\\llama.cpp-win-x86_64-vulkan-avx2-2.28.2\\llama.dll",
+      "sha256": "d16ff1ecbc6bb29a0e2e9136ceb111477df69a82df19d2bfad8fa6dc8f0bff64"
     },
     {
-      "path": "C:\\Users\\Matthew\\.lmstudio\\extensions\\backends\\llama.cpp-win-x86_64-nvidia-cuda-avx2-2.25.2\\ggml-cuda.dll",
-      "sha256": "e47c05eb9a1a0decc2909669af201f18537e5e74d931d7bd22c3d554d8ea9bdf"
+      "path": "C:\\Users\\Matthew\\.lmstudio\\extensions\\backends\\llama.cpp-win-x86_64-vulkan-avx2-2.28.2\\ggml-vulkan.dll",
+      "sha256": "1f84a7113734e5de76636a2b38609796219bd2e2c4ef3ee75b0f39f0f3e6eb7a"
     },
     {
-      "path": "C:\\Users\\Matthew\\.lmstudio\\extensions\\backends\\llama.cpp-win-x86_64-nvidia-cuda-avx2-2.25.2\\backend-manifest.json",
-      "sha256": "f01b79c6ffbfc67f9e69573eca9925f2c634c62b91364f71b6f91c91141cfab5"
+      "path": "C:\\Users\\Matthew\\.lmstudio\\extensions\\backends\\llama.cpp-win-x86_64-vulkan-avx2-2.28.2\\backend-manifest.json",
+      "sha256": "220daa1d7061d0b4ef179ff421c116f255330a5aa072f6187b099a4f598d11f8"
     }
   ],
   "incumbent": {

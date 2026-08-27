@@ -12,6 +12,15 @@ export function loadedInstances(inventory) {
     modelKey: model.key, ...instance,
   })));
 }
+export function assertLoadEnvelope(config, templateSha256) {
+  requireValue(config?.context_length === CONTEXT && config.flash_attention === true
+    && config.offload_kv_cache_to_gpu === true, "gate7f1-load-config-invalid");
+  requireValue(config.speculative_draft_mtp === false && config.speculative_draft_simple === false
+    && config.speculative_draft_model === "", "gate7f1-speculative-runtime-not-disabled");
+  requireValue(typeof templateSha256 === "string" && typeof config.prompt_template?.template === "string"
+    && createHash("sha256").update(config.prompt_template.template).digest("hex") === templateSha256,
+  "gate7f1-loaded-template-mismatch");
+}
 export function assertResidency(inventory, modelKey, instanceId, configDigest) {
   const instances = loadedInstances(inventory);
   if (instanceId === null) {
@@ -48,7 +57,8 @@ export function validateCompletion(response, modelKey, instanceId, runtime) {
   requireValue(!choice.message.tool_calls?.length, "gate7f1-unexpected-tool-call");
   requireValue(!choice.message.reasoning && !choice.message.reasoning_content
     && !/<think>|<\|channel>thought/i.test(choice.message.content)
-    && !(response.stats?.reasoning_output_tokens > 0), "gate7f1-reasoning-not-disabled");
+    && !(response.stats?.reasoning_output_tokens > 0)
+    && !(response.usage?.completion_tokens_details?.reasoning_tokens > 0), "gate7f1-reasoning-not-disabled");
   requireValue(response.model_info?.context_length === CONTEXT, "gate7f1-response-context-mismatch");
   requireValue(response.runtime?.name === runtime.name && response.runtime?.version === runtime.version,
     "gate7f1-response-runtime-mismatch");

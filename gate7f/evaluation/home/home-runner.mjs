@@ -5,7 +5,7 @@ import { execFileSync } from "node:child_process";
 import { freemem, hostname, totalmem } from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { API, CONTEXT, assertResidency, assertTelemetry, cleanupOwnedInstance, digest,
+import { API, CONTEXT, assertLoadEnvelope, assertResidency, assertTelemetry, cleanupOwnedInstance, digest,
   requestForCase, requireValue, validateCompletion } from "./capture-contract.mjs";
 import { readGgufMetadata } from "./gguf-metadata.mjs";
 
@@ -83,7 +83,8 @@ try {
   progress({ phase: "hashing-artifact" });
   requireValue(statSync(manifest.artifactPath).size === manifest.artifactBytes, "gate7f1-artifact-size-drift");
   requireValue(await hashFile(manifest.artifactPath) === manifest.artifactSha256, "gate7f1-artifact-hash-drift");
-  record("gguf-metadata", readGgufMetadata(manifest.artifactPath));
+  const gguf = readGgufMetadata(manifest.artifactPath);
+  record("gguf-metadata", gguf);
   for (const file of bundle.runtime.files) {
     requireValue(await hashFile(file.path) === file.sha256, "gate7f1-runtime-file-drift");
   }
@@ -110,6 +111,7 @@ try {
   record("load", { request: loadRequest, response: load, elapsedMs: Date.now() - loadStarted });
   requireValue(load.status === "loaded" && load.load_config?.context_length === CONTEXT,
     "gate7f1-load-config-invalid");
+  assertLoadEnvelope(load.load_config, gguf.chatTemplateSha256);
   const loaded = assertResidency(await api("/api/v1/models"), modelKey, instanceId);
   configDigest = digest(loaded.config);
   const afterLoad = telemetry("after-load");

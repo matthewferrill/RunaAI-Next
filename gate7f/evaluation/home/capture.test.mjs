@@ -1,7 +1,8 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { CONTEXT, assertResidency, assertTelemetry, cleanupOwnedInstance, digest, loadedInstances,
+import { createHash } from "node:crypto";
+import { CONTEXT, assertLoadEnvelope, assertResidency, assertTelemetry, cleanupOwnedInstance, digest, loadedInstances,
   requestForCase, validateCompletion } from "./capture-contract.mjs";
 import { messagesForBurninCase } from "../prompt.mjs";
 
@@ -13,6 +14,18 @@ const response = () => ({ model: "candidate", choices: [{ finish_reason: "stop",
   model_info: { context_length: CONTEXT }, runtime,
   stats: { tokens_per_second: 20, time_to_first_token: 0.2 },
   usage: { completion_tokens: 10 } });
+
+test("loaded envelope requires the exact artifact template and no speculative decoding", () => {
+  const template = "synthetic-template";
+  const hash = createHash("sha256").update(template).digest("hex");
+  const config = { context_length: CONTEXT, flash_attention: true, offload_kv_cache_to_gpu: true,
+    speculative_draft_mtp: false, speculative_draft_simple: false, speculative_draft_model: "",
+    prompt_template: { template } };
+  assertLoadEnvelope(config, hash);
+  assert.throws(() => assertLoadEnvelope({ ...config, speculative_draft_mtp: true }, hash), /speculative/);
+  assert.throws(() => assertLoadEnvelope(config, "a".repeat(64)), /template-mismatch/);
+  assert.throws(() => assertLoadEnvelope({ ...config, flash_attention: false }, hash), /config-invalid/);
+});
 
 test("Home capture refuses pre-existing and concurrent models and load drift", () => {
   assert.throws(() => assertResidency(inventory, null, null), /preexisting-instance/);
@@ -57,6 +70,7 @@ test("capture rejects incomplete, wrong-model, wrong-runtime and reasoning-beari
     r => { r.runtime = { ...runtime, version: "other" }; },
     r => { r.model_info.context_length = 4096; },
     r => { r.choices[0].message.reasoning_content = "thinking"; },
+    r => { r.usage.completion_tokens_details = { reasoning_tokens: 1 }; },
     r => { r.choices[0].message.content = "<|channel>thought hidden"; },
     r => { r.choices[0].message.tool_calls = [{ function: { name: "execute" } }]; },
   ]) {

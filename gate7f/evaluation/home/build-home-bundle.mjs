@@ -15,7 +15,7 @@ for (const [file, expected] of Object.entries(seal.files)) {
 const corpus = parseBurninCorpus(JSON.parse(readFileSync(path.join(here, "../corpus.json"), "utf8")));
 if (burninCorpusDigest(corpus) !== seal.corpusCanonicalSha256) throw new Error("gate7f1-corpus-drift");
 const inventory = JSON.parse(readFileSync(path.join(here, "HOME-RUNTIME-2026-08-27.json"), "utf8"));
-const out = path.join(root, "artifacts/runs/gate7f1/home-capture-20260827-r2");
+const out = path.join(root, "artifacts/runs/gate7f1/home-capture-20260827-r3");
 mkdirSync(out, { recursive: true });
 const bundle = {
   schemaVersion: "runa2-gate7f1-home-bundle/v1", seal, runsPerCase: corpus.runsPerCase,

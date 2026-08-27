@@ -1,0 +1,2 @@
+# Retained qualification packets are byte-pinned evidence, not platform-native text.
+gate7f/qualification/results/** -text

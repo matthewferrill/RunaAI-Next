@@ -1,0 +1,23 @@
+{
+  "files": {
+    "power-applied.json": {
+      "bytes": 838,
+      "sha256": "25b6deef32fd6e717b609d74691136a35d0566b92ddcf989dc9a93250c6918f4"
+    },
+    "power-before.json": {
+      "bytes": 975,
+      "sha256": "9c0872b16d21d9d1e64a2fe1fa6ec97c9a2edce2f3bb5f7f4ea3e35151a0dea8"
+    },
+    "qualification/capture-incumbent/result.json": {
+      "bytes": 559,
+      "sha256": "114cf5998be5ce099b08cab72aedc3ee2bda70301e2c233ce010fde4bcb9708d"
+    },
+    "qualification/capture-incumbent/events.jsonl": {
+      "bytes": 3505790,
+      "sha256": "1b7e1159ff5e9ac4f840ae1368289db452cfc389220a487bb11fe482652beeb4"
+    }
+  },
+  "host": "RUNA-HOME",
+  "schemaVersion": "runa2-qualification-home-export/v1",
+  "time": "2026-08-27T18:59:26.6110754Z"
+}

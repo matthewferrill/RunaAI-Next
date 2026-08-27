@@ -49,8 +49,11 @@ function frozenAcceptance(repositoryRoot, runSeal) {
   return verified;
 }
 
-function acceptanceRows(functionalBytes) {
+function acceptanceRows(functionalBytes, reviewExportTime) {
   const rows = functionalBytes.toString("utf8").split(/\r?\n/).filter(line => line.trim()).map(JSON.parse);
+  const completedAt = Date.parse(rows.at(-1)?.time);
+  assert.ok(Number.isFinite(completedAt) && Date.parse(reviewExportTime) >= completedAt,
+    "publication-review-export-clock");
   const markers = rows.filter(row => row.type === "acceptance-complete");
   assert.equal(markers.length, 1, "publication-acceptance-marker-count");
   assert.equal(markers[0].requests, 117, "publication-acceptance-marker-requests");
@@ -118,7 +121,7 @@ export async function verifyFinalPublication({ packageDir, runSeal: sealInput, r
     assert.equal(hash(prefixBytes), review.value.files[prefixName].sha256, "publication-prefix-transfer-binding");
     same(completedFunctionalPrefix(eventBytes), prefixBytes, "functional-prefix-replaced");
     same(completedFunctionalPrefix(prefixBytes), prefixBytes, "prefix-has-extra-bytes");
-    const prefixRows = acceptanceRows(prefixBytes);
+    const prefixRows = acceptanceRows(prefixBytes, review.value.time);
     const packet = pinned(arm.packet), judgments = pinned(arm.judgments);
     assert.equal(packet.value.candidateLabel, arm.armId === "blind-candidate-a" ? "Candidate-A" : "Candidate-B", "publication-packet-arm");
     assert.equal(packet.value.acceptancePrefixSha256, hash(JSON.stringify(prefixRows)), "publication-packet-acceptance-prefix");

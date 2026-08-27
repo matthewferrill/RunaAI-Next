@@ -23,10 +23,11 @@ export const encode = value => Buffer.from(JSON.stringify(value, null, 2) + "\n"
 export const save = (file, bytes) => { mkdirSync(path.dirname(file), { recursive: true }); writeFileSync(file, bytes); return file; };
 export const pin = file => ({ file, sha256: hash(readFileSync(file)) });
 const jsonl = rows => Buffer.from(rows.map(row => JSON.stringify(row) + "\n").join(""));
-const initial = Date.parse("2026-08-27T18:00:00.000Z");
+const fixtureStart = Date.parse("2026-08-27T18:00:00.000Z");
 
 async function fabricateCapture(bundle, packageManifest, candidate) {
   const base = qualificationEvidenceFixture(), events = [];
+  const initial = fixtureStart + (candidate === "gemma26" ? 60000 : 0);
   let clock = 0;
   const record = (type, payload) => {
     events.push({ type, time: new Date(initial + clock).toISOString(), ...structuredClone(payload) }); clock += 10;
@@ -81,7 +82,7 @@ async function fabricateCapture(bundle, packageManifest, candidate) {
   const cleanup = structuredClone(base.events.find(row => row.type === "cleanup")); delete cleanup.type; delete cleanup.time;
   record("cleanup", cleanup); sample("after-unload");
   const result = { ...base.result, candidate, phase: bundle.source.kind, modelKey: model,
-    endedAt: new Date(initial + clock).toISOString(), observed: 256 };
+    startedAt: new Date(initial).toISOString(), endedAt: new Date(initial + clock).toISOString(), observed: 256 };
   return { events, result, bytes: jsonl(events) };
 }
 

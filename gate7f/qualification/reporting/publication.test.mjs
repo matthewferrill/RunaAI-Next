@@ -72,6 +72,23 @@ test("the complete raw functional prefix must equal the separately pinned Home s
   await assert.rejects(verifyFinalPublication(f.options), /functional-prefix-replaced/);
 }));
 
+test("a separately repinned Home review export cannot predate either completed functional prefix", async () => usingFixture(async f => {
+  const completedTimes = Object.values(f.captures).map(capture =>
+    Date.parse(capture.events.find(row => row.type === "integration-summary").time));
+  const originalExportTime = Date.parse(json(f.options.reviewTransfer.manifest.file).time);
+  assert.ok(completedTimes.every(time => Number.isFinite(time) && originalExportTime >= time));
+  assert.equal(new Set(completedTimes).size, 2, "fixture-must-exercise-both-prefix-clock-checks");
+  changePinned(f.options.reviewTransfer.manifest, manifest => { manifest.time = "1970-01-01T00:00:00.000Z"; });
+  await assert.rejects(verifyFinalPublication(f.options), /publication-review-export-clock/);
+  changePinned(f.options.reviewTransfer.manifest, manifest => { manifest.time = new Date(Math.min(...completedTimes)).toISOString(); });
+  await assert.rejects(verifyFinalPublication(f.options), /publication-review-export-clock/);
+  const latestCompletion = Math.max(...completedTimes);
+  changePinned(f.options.reviewTransfer.manifest, manifest => { manifest.time = new Date(latestCompletion).toISOString(); });
+  assert.equal((await verifyFinalPublication(f.options)).passed, true);
+  changePinned(f.options.reviewTransfer.manifest, manifest => { manifest.time = new Date(latestCompletion - 1).toISOString(); });
+  await assert.rejects(verifyFinalPublication(f.options), /publication-review-export-clock/);
+}));
+
 test("extra prefix bytes and substituted source-snapshot names are not accepted", async () => {
   await usingFixture(async f => {
     const file = path.join(f.options.reviewTransfer.root, "incumbent-prefix.jsonl");

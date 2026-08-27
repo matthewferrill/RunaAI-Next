@@ -15,7 +15,7 @@ const files=["qualification/runtime.mjs","qualification/diagnostics.mjs",
   "evaluation/v2/capture-contract.mjs","evaluation/v2/capture-policy.mjs","evaluation/v2/gguf-metadata.mjs"];
 if(kind.startsWith("adapter-"))files.push("qualification/adapter.mjs","qualification/adapter-diagnostics.mjs");
 let inputs,acceptanceSeal,policies;
-if(kind==="acceptance-v1"){
+if(["acceptance-v1","acceptance-power-v2"].includes(kind)){
   const {verifyAcceptanceSeal}=await import("./acceptance/seal.mjs");
   acceptanceSeal=verifyAcceptanceSeal(root);if(!acceptanceSeal.passed)throw Error("acceptance-seal-invalid");
   const {loadAcceptanceCorpus}=await import("./acceptance/corpus.mjs");
@@ -24,6 +24,9 @@ if(kind==="acceptance-v1"){
   inputs=renderAcceptanceInputs(corpus);
   const {ADAPTER_POLICY}=await import("./adapter.mjs"),{SOAK_POLICY}=await import("./runner.mjs");
   policies={adapter:ADAPTER_POLICY,soak:SOAK_POLICY,armTimeoutMs:7200000,telemetryIntervalMs:5000,maximumTelemetryGapMs:30000};
+  if(kind==="acceptance-power-v2")policies.hardware={gpuPowerLimitWatts:160,maximumStartTemperatureC:50,
+    gpuUuids:["GPU-15ea3e34-292b-3333-5e43-e5b133f9a30c","GPU-1f2f6459-b688-3466-5b49-a65c538be843"],
+    originalPowerLimitWatts:260,temperatureCutoffC:85};
   files.push("qualification/adapter.mjs","qualification/runner.mjs","qualification/model-integration.mjs","qualification/authority.mjs",
     "contracts.mjs","core.mjs","policy.mjs","registry.mjs","adapters/memory.mjs","adapters/synthetic-executor.mjs","evaluation/contracts.mjs");
   const zod=JSON.parse(readFileSync(path.join(root,"node_modules/zod/package.json"),"utf8"));

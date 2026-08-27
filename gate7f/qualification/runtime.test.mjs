@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { monitorTick,validateResponse } from "./runtime.mjs";
+import { monitorTick,validateResponse,validateSample } from "./runtime.mjs";
 import { diagnosticCases } from "./diagnostics.mjs";
 test("qualification diagnostics vary one protocol axis and retain fixed attempts",()=>{
   assert.equal(diagnosticCases.length,14);
@@ -14,6 +14,26 @@ test("telemetry sink failure aborts without escaping the owned cleanup path",()=
   let reason;
   assert.doesNotThrow(()=>monitorTick({record:()=>{throw Error("disk-full");},sample:()=>({}),abort:code=>{reason=code;}}));
   assert.equal(reason,"qualification-resource-or-evidence-boundary");
+});
+test("unsafe sample is retained while unchanged thermal cutoff aborts",()=>{
+  const sample={label:"periodic",freeMemoryBytes:32*1024**3,totalMemoryBytes:128*1024**3,
+    gpus:[0,1].map(index=>({index,name:"Quadro RTX 6000",totalMemoryMiB:23040,usedMemoryMiB:10000,
+      utilizationPercent:40,temperatureC:index===0?85:70,powerWatts:140,uuid:"gpu-"+index,powerLimitWatts:160}))};
+  const events=[];let aborted;
+  monitorTick({sample:()=>validateSample(sample),record:(type,payload)=>events.push({type,...payload}),abort:code=>aborted=code});
+  assert.equal(aborted,"qualification-resource-or-evidence-boundary");
+  assert.equal(events[0].code,"gate7f1-gpu-boundary");assert.deepEqual(events[0].boundarySample,sample);
+});
+test("matched hardware policy pins UUIDs power ceiling and cool start",()=>{
+  const policy={gpuUuids:["gpu-0","gpu-1"],gpuPowerLimitWatts:160,maximumStartTemperatureC:50};
+  const sample={label:"before-load",freeMemoryBytes:32*1024**3,totalMemoryBytes:128*1024**3,
+    gpus:[0,1].map(index=>({index,name:"Quadro RTX 6000",totalMemoryMiB:23040,usedMemoryMiB:1000,
+      utilizationPercent:0,temperatureC:45,powerWatts:25,uuid:"gpu-"+index,powerLimitWatts:160}))};
+  assert.equal(validateSample(sample,policy),sample);
+  for(const patch of [{powerLimitWatts:260},{uuid:"wrong"},{temperatureC:51}]){
+    const bad=structuredClone(sample);Object.assign(bad.gpus[0],patch);
+    assert.throws(()=>validateSample(bad,policy),error=>error.boundarySample===bad);
+  }
 });
 test("response boundary keeps content and tools distinct; pins model and runtime",()=>{
   const runtime={name:"pinned",version:"1"}, response={model:"candidate",choices:[{finish_reason:"tool_calls",message:{content:null,

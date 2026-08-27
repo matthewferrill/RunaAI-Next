@@ -46,19 +46,30 @@ export async function api(endpoint, body, timeoutMs = 120000, signal) {
   if (!response.ok) throw Object.assign(new Error("qualification-http-" + response.status), { status: response.status, providerError: value });
   return value;
 }
-export function telemetry(label) {
+export function telemetry(label, hardwarePolicy) {
   const csv = execFileSync("nvidia-smi.exe", [
-    "--query-gpu=index,name,memory.total,memory.used,utilization.gpu,temperature.gpu,power.draw",
+    "--query-gpu=index,name,memory.total,memory.used,utilization.gpu,temperature.gpu,power.draw,uuid,power.limit",
     "--format=csv,noheader,nounits",
   ], { encoding: "utf8", timeout: 15000, windowsHide: true });
   const gpus = csv.trim().split(/\r?\n/).map(line => {
     const p = line.split(",").map(v => v.trim());
     return { index: Number(p[0]), name: p[1], totalMemoryMiB: Number(p[2]), usedMemoryMiB: Number(p[3]),
-      utilizationPercent: Number(p[4]), temperatureC: Number(p[5]), powerWatts: Number(p[6]) };
+      utilizationPercent: Number(p[4]), temperatureC: Number(p[5]), powerWatts: Number(p[6]),
+      uuid:p[7],powerLimitWatts:Number(p[8]) };
   });
   const sample = { label, freeMemoryBytes: freemem(), totalMemoryBytes: totalmem(), gpus };
-  validateTelemetry(sample);
-  return sample;
+  return validateSample(sample,hardwarePolicy);
+}
+export function validateSample(sample,hardwarePolicy){
+  try{
+    validateTelemetry(sample);
+    if(hardwarePolicy){
+      requireValue(sample.gpus.every(gpu=>gpu.uuid===hardwarePolicy.gpuUuids[gpu.index]
+        &&gpu.powerLimitWatts===hardwarePolicy.gpuPowerLimitWatts),"hardware-policy-drift");
+      if(sample.label==="before-load")requireValue(sample.gpus.every(gpu=>gpu.temperatureC<=hardwarePolicy.maximumStartTemperatureC),"start-temperature");
+    }
+    return sample;
+  }catch(error){error.boundarySample=sample;throw error;}
 }
 export function validateTelemetry(sample){
   assertTelemetry(sample);
@@ -72,7 +83,7 @@ export function validateTelemetry(sample){
 export function monitorTick({record,sample,abort}){
   try{record("telemetry",sample("periodic"));}
   catch(error){abort("qualification-resource-or-evidence-boundary");
-    try{record("telemetry-failure",{code:error.message});}catch{/* Abort is already armed; never throw out of the timer. */}}
+    try{record("telemetry-failure",{code:error.message,boundarySample:error.boundarySample??null});}catch{/* Abort is already armed; never throw out of the timer. */}}
 }
 export function validateResponse(value, model, instance, runtime, endpoint) {
   requireValue([model, instance].includes(value?.model), "response-model");
@@ -117,8 +128,9 @@ export async function withCandidate({ bundle, packageVerification, candidate, ou
   const startedAt = new Date().toISOString();
   const controller=new AbortController();
   const abort=(code)=>{if(!controller.signal.aborted)controller.abort(new Error(code));};
+  const sample=label=>telemetry(label,bundle.policies?.hardware);
   const deadline=setTimeout(()=>abort("qualification-arm-deadline"),armTimeoutMs);
-  const monitor=setInterval(()=>monitorTick({record,sample:telemetry,abort}),5000);
+  const monitor=setInterval(()=>monitorTick({record,sample,abort}),5000);
   const onSignal=()=>abort("qualification-interrupted");
   process.once("SIGINT",onSignal);process.once("SIGTERM",onSignal);
   const ownedApi=(endpoint,body,timeout)=>{controller.signal.throwIfAborted();return api(endpoint,body,timeout,controller.signal);};
@@ -145,7 +157,7 @@ export async function withCandidate({ bundle, packageVerification, candidate, ou
     const reasoningOff = identity.capabilities?.reasoning?.allowed_options?.includes("off") === true;
     if(manifest.modelKey)requireValue(modelKey===manifest.modelKey && reasoningOff===manifest.reasoningOff,"identity-pin");
     record("identity", { identity });
-    record("telemetry", telemetry("before-load"));
+    record("telemetry", sample("before-load"));
     progress({ status: "loading", modelKey });
     const loadRequest = { model: modelKey, context_length: 32768, flash_attention: true, offload_kv_cache_to_gpu: true, echo_load_config: true };
     loadRequested=true;
@@ -158,10 +170,10 @@ export async function withCandidate({ bundle, packageVerification, candidate, ou
     const resident = assertResidency(await ownedApi("/api/v1/models"), modelKey, instance);
     fingerprint = digest(resident.config);
     record("resident",{resident,configSha256:fingerprint});
-    record("telemetry", telemetry("after-load"));
+    record("telemetry", sample("after-load"));
     const invoke = async ({ id, request, endpoint = "/api/v0/chat/completions", allowDiagnosticHttpError = false }) => {
       assertResidency(await ownedApi("/api/v1/models"), modelKey, instance, fingerprint);
-      record("telemetry", telemetry(id));
+      record("telemetry", sample(id));
       const body = { ...request, model: modelKey, temperature: 0, stream: false,
         ...(reasoningOff ? { reasoning_effort: "none" } : {}) };
       record("request", { id, endpoint, request: body });
@@ -169,7 +181,7 @@ export async function withCandidate({ bundle, packageVerification, candidate, ou
       try {
         const response = await ownedApi(endpoint, body, 120000);
         record("response", { id, endpoint, response, elapsedMs: Date.now() - start });
-        record("telemetry",telemetry(id+":after"));
+        record("telemetry",sample(id+":after"));
         const normalized = validateResponse(response, modelKey, instance, bundle.runtime, endpoint);
         requireValue(normalized.completionTokens<=body.max_tokens,"response-budget");
         assertResidency(await ownedApi("/api/v1/models"), modelKey, instance, fingerprint);
@@ -190,7 +202,7 @@ export async function withCandidate({ bundle, packageVerification, candidate, ou
   } catch (error) {
     abort("qualification-arm-stopped");
     failure = /^(qualification|gate7f1)-[a-z0-9-]+$/.test(error.message) ? error.message : "qualification-operator-failed";
-    try{record("failure", { code: failure, errorClass: error.name });}catch{/* Cleanup still runs if the sink failed. */}
+    try{record("failure", { code: failure, errorClass: error.name,boundarySample:error.boundarySample??null });}catch{/* Cleanup still runs if the sink failed. */}
   } finally {
     clearTimeout(deadline);clearInterval(monitor);
     process.removeListener("SIGINT",onSignal);process.removeListener("SIGTERM",onSignal);
@@ -201,7 +213,8 @@ export async function withCandidate({ bundle, packageVerification, candidate, ou
       cleanupVerified = cleanup.cleanupVerified && !cleanup.unexpectedInstances && !ownershipAmbiguous;
       record("cleanup", { ...cleanup, ownedInstance: instance });
     } catch (error) { record("cleanup-failure", { code: error.message }); }
-    try { record("telemetry", telemetry("after-unload")); } catch { cleanupVerified = false; }
+    try { record("telemetry", sample("after-unload")); } catch(error) { cleanupVerified = false;
+      try{record("telemetry-failure",{code:error.message,boundarySample:error.boundarySample??null});}catch{} }
     const result = { schemaVersion: "runa2-qualification-capture-result/v1", candidate, phase, startedAt,
       endedAt: new Date().toISOString(), passed: passed && cleanupVerified, failure, observed, cleanupVerified, ownershipAmbiguous,
       modelKey: modelKey ?? null, configSha256: fingerprint ?? null, modelContentExecuted: false,

@@ -57,7 +57,7 @@ const here=path.dirname(fileURLToPath(import.meta.url));
 if(process.argv[1]&&path.resolve(process.argv[1])===fileURLToPath(import.meta.url)){
   requireValue(process.argv[3]==="--authorized-qualification","authorization-missing");
   const packageVerification=await verifyPackage(here),bundle=JSON.parse(readFileSync(path.join(here,"bundle.json"),"utf8"));
-  requireValue(bundle.source.kind==="acceptance-v1"&&bundle.inputs.cases.length===36&&bundle.inputs.attemptsPerCase===3,"acceptance-package");
+  requireValue(["acceptance-v1","acceptance-power-v2"].includes(bundle.source.kind)&&bundle.inputs.cases.length===36&&bundle.inputs.attemptsPerCase===3,"acceptance-package");
   const result=await withCandidate({bundle,packageVerification,candidate:process.argv[2],phase:bundle.source.kind,armTimeoutMs:7200000,
     outputDir:path.join(here,"capture-"+process.argv[2])},async session=>{
       const count=await runAcceptance(bundle.inputs,session);requireValue(count===117,"acceptance-count");

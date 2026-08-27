@@ -24,6 +24,11 @@
       "sha256": "2b443060beac09e89779ab2e4b60a22e7bf89e26880f14d0d4cdc04db9d8328e"
     },
     {
+      "path": "gate7f/qualification/acceptance/.gitattributes",
+      "bytes": 14,
+      "sha256": "a79691a93b46e49ce460c26ef22afcc03d6eca1e63bf2edbc20e96159510f6c9"
+    },
+    {
       "path": "gate7f/qualification/acceptance/tools.mjs",
       "bytes": 2283,
       "sha256": "f3fd84f9b26c97ec1777898b97d395df210a151484c56791e6efbdf7aa5e093c"
@@ -50,13 +55,13 @@
     },
     {
       "path": "gate7f/qualification/acceptance/seal.mjs",
-      "bytes": 2161,
-      "sha256": "34057c44868b403a91d6a8fa6f23f198539c15a8001a3b366a887b27f965e345"
+      "bytes": 2179,
+      "sha256": "69afaebe28b0481b8f3832fbc6012c3564c785176cb18aff7730a51752706934"
     },
     {
       "path": "gate7f/qualification/acceptance/acceptance.test.mjs",
       "bytes": 8467,
-      "sha256": "daf0b7fdf2404f2bafefb2e84f5a089cd0893dd277b65d0abefcb81fb978b835"
+      "sha256": "7b02a46b8ad697029cab0991a9994d2b25312c9bb0c2a4cd610a44d725961342"
     },
     {
       "path": "gate7f/qualification/acceptance/RUBRIC.md",

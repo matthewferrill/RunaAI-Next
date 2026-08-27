@@ -11,7 +11,7 @@ export const SEALED_PATHS = [
   "gate7f/contracts.mjs",
   "gate7f/evaluation/contracts.mjs",
   "package-lock.json",
-  ...["tools.mjs", "corpus.mjs", "inputs.mjs", "checks.mjs", "validate.mjs", "seal.mjs", "acceptance.test.mjs", "RUBRIC.md", "README.md"].map(path => prefix + path),
+  ...[".gitattributes", "tools.mjs", "corpus.mjs", "inputs.mjs", "checks.mjs", "validate.mjs", "seal.mjs", "acceptance.test.mjs", "RUBRIC.md", "README.md"].map(path => prefix + path),
 ];
 const digest = bytes => createHash("sha256").update(bytes).digest("hex");
 export function createAcceptanceSeal(root = repo) {

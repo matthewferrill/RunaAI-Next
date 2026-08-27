@@ -136,7 +136,7 @@ test("empty outputs fail without converting provider silence into a fabricated a
 
 test("acceptance seal binds rubric, checks, corpus, criteria, tests and typed parser", () => {
   const seal = createAcceptanceSeal();
-  assert.equal(seal.files.length, 13);
+  assert.equal(seal.files.length, 14);
   assert.deepEqual(seal.files.map(item => item.path), SEALED_PATHS);
   for (const item of seal.files) {
     assert.ok(item.bytes > 0);

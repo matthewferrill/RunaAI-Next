@@ -1,0 +1,86 @@
+{
+  "schemaVersion": "runa2-qualification-run-seal/v1",
+  "sealedAt": "2026-08-27T17:49:27.330Z",
+  "createdBeforeAcceptanceInference": false,
+  "sourceCommit": "cc4f2f4a18096e9d9cdcb93d1a63d85e032107c8",
+  "packageManifestSha256": "d54cfb2ade6ba912328889566449b4647ac752ff8deffa221cc1f4d5040db91a",
+  "bundleSha256": "0486d279420ef8a044cd0fc03129e5c0ba772552cc1ed3d500a68c3617b61108",
+  "acceptanceSealSha256": "cf1a6877bf022e18dc123f945e4389e37c568ba2b1fa07878d99caa5847a459e",
+  "candidates": {
+    "incumbent": {
+      "artifactPath": "C:\\lm-studio-models\\lmstudio-community\\Qwen3-Coder-30B-A3B-Instruct-GGUF\\Qwen3-Coder-30B-A3B-Instruct-Q6_K.gguf",
+      "artifactBytes": 25104724288,
+      "artifactSha256": "72a9b20a19c70db56e1ccd01fb35b0f0842d67d28e7c3bdff762df860120b769",
+      "quantization": "Q6_K",
+      "architecture": "qwen3moe",
+      "modelKey": "qwen3-coder-30b-a3b-instruct",
+      "reasoningOff": false,
+      "chatTemplateSha256": "672e747c77e990320152343b0a4951222e40de5645297905d89afba05586d827"
+    },
+    "gemma26": {
+      "artifactPath": "C:\\lm-studio-models\\google\\gemma-4-26B-A4B-it-qat-q4_0-gguf\\gemma-4-26B_q4_0-it.gguf",
+      "artifactBytes": 14439363584,
+      "artifactSha256": "3eca3b8f6d7baf218a7dd6bba5fb59a56ee25fe2d567b6f5f589b4f697eca51d",
+      "quantization": "Q4_0",
+      "architecture": "gemma4",
+      "modelKey": "gemma-4-26b-a4b-it-qat",
+      "reasoningOff": true,
+      "chatTemplateSha256": "ae53464bf3be25802b3a5b37def7fd89667067d7577049b3b2d74c4d8de4c6d4"
+    }
+  },
+  "policies": {
+    "adapter": {
+      "schemaVersion": "runa2-qualification-adapter/v1",
+      "endpoint": "/v1/chat/completions",
+      "textTokens": 1024,
+      "agentTokens": 1536,
+      "nativeTokens": 1024,
+      "temperature": 0,
+      "contextLength": 32768,
+      "systemState": "one-consolidated-trusted-system-message",
+      "reasoning": "off-when-supported",
+      "conditionalValidation": "unchanged-strict-application-parser",
+      "decoderMaximumStringRepetition": 2000,
+      "applicationBoundsUnchanged": true,
+      "outputRepair": false,
+      "automaticToolExecution": false
+    },
+    "soak": {
+      "schemaVersion": "runa2-qualification-soak/v1",
+      "durationMs": 3600000,
+      "slots": 120,
+      "slotIntervalMs": 30000,
+      "concurrency": 2,
+      "expectedRequests": 131,
+      "longContextRows": 600,
+      "hiddenRetries": 0
+    },
+    "armTimeoutMs": 7200000,
+    "telemetryIntervalMs": 5000,
+    "maximumTelemetryGapMs": 30000,
+    "hardware": {
+      "gpuPowerLimitWatts": 160,
+      "maximumStartTemperatureC": 50,
+      "gpuUuids": [
+        "GPU-15ea3e34-292b-3333-5e43-e5b133f9a30c",
+        "GPU-1f2f6459-b688-3466-5b49-a65c538be843"
+      ],
+      "originalPowerLimitWatts": 260,
+      "temperatureCutoffC": 85
+    }
+  },
+  "verificationFiles": {
+    "gate7f/qualification/verify.mjs": "635ac27fbff23d70f0054b48392d159d60ec934cbdb07bdf895eef4f3683cff3",
+    "gate7f/qualification/review/evidence-fixture.mjs": "00d590662ece5d0d3bc7f21ddd5e51971f915280e4b7165bb37b7414022fc1a1",
+    "gate7f/qualification/review/evidence-verifier.test.mjs": "cbfff63ff06fbfd5d55f8ae6022940c2bbbdc86559ea90616596bb3fecb96c63",
+    "gate7f/qualification/QUALIFICATION-FREEZE-2026-08-27.md": "83e7683e81ca1719063561f18f7f49f47cc28ec94f9f4d9af262497e12f53e93",
+    "gate7f/qualification/build-package.mjs": "ad350ae7c94f8a3084b32b59ef85c101aeb75a94c0e7b6161ad325de126cc869",
+    "gate7f/qualification/runtime.mjs": "bbd9ae8e25eaa701ab564627ac73a4abd5b4ee45fdc1c88bcb519e200a065efc",
+    "gate7f/qualification/runtime.test.mjs": "1194a3919c030d41a968fc2df2acccb6f4bff4266299d9e619de7feef639a74f",
+    "gate7f/qualification/runner.mjs": "a938282593ead2da69e2b89236978fe667b2585c5faec5e6cebc5305792a4dff",
+    "gate7f/qualification/THERMAL-RESEAL-2026-08-27.md": "506ab08c267f6673166af4f344240c01bfcc7eaf45f035a6f077a1cfa1d7a0f0",
+    "gate7f/qualification/Run-HomeControlledPower.ps1": "46b4c0dbdae399050ac75a06d9884096a875a62ad8546bcd9cb2914e5d8f6c5f"
+  },
+  "createdBeforeControlledPowerRerun": true,
+  "originalAcceptanceRunPreserved": true
+}

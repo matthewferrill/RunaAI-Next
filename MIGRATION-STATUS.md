@@ -542,7 +542,7 @@ plain-language steward experience, or governed action pathway.
 | 7C | First user-interface shell | Complete and superseded on Control by the Gate 7D presentation release | Source integration remains part of the Gate 7D review chain |
 | 7D | Identity-aware Chat/Code navigation and end-to-end flow correction | Complete; accepted and merged as `3d95e50`; current-turn verifier successor active on Control at `e10e3db`; post-merge and exact-Control suites 423/423 | Complete |
 | 7E-0/1 | Truthful execution status and harmless bounded JavaScript Run | Complete; exact successor active and ordinary-browser acceptance green; local, Control, and active-runtime suites 441/441 | Complete |
-| 7F | Conversational Agent Mode with selectable approval profiles | 7F-0 inert foundation green; corrected/resealed v2 Home rerun complete at 105/105 per model; both unloaded, both seals intact; neither automatically eligible | Review model-role findings and targeted state/authority follow-up; no model switch or effectful activation |
+| 7F | Conversational Agent Mode with selectable approval profiles | Matched qualification: both functional sets and independent blind adjudication complete; Qwen one-hour arm verified; Gemma endurance in progress; neither meets every frozen role threshold | Finish endurance/provenance and publish role recommendation; no model switch or effectful activation |
 | 7F+ | Broader product extensions | Model-independent foundation precedes Gemma/incumbent agent burn-in; effectful activation follows accepted model and capability gates | New baseline and separate decision per extension group |
 
 ## Bootstrap validation
@@ -599,7 +599,7 @@ Qwen's 117 quality requests but stopped safely on a GPU boundary before integrat
 failing sample was not retained, so heat remains the leading explanation rather than a proven exact
 sample. That capture and seal are preserved. Both models now restart under the identical temporary
 160-W/GPU envelope in `gate7f/qualification/RUN-SEAL-POWER-V2.json`, with unchanged 85-C cutoff,
-new unsafe-sample retention, exact UUID/power telemetry, cool starts, and verified restoration to
+new unsafe-sample retention, exact UUID/power telemetry, cool starts, and required verified restoration to
 260 W afterward. No answers were inspected to tune this environmental change. These are repeated
 acceptance inputs, not a newly unseen holdout. Details are in `THERMAL-RESEAL-2026-08-27.md`.
 The design and diagnostic findings are in
@@ -610,10 +610,20 @@ application parser retains its limits. Dropped second-system state was not repro
 state probes. Exact task grants, effect-time policy checks and receipt-bound state now cover the
 independently found synthetic authority races. These corrections are not production Agent Mode.
 
-The next operation is to complete both 117-request acceptance sets, eight real synthetic
-application round-trip requests per model, and the fixed 131-request one-hour endurance arms, then
-apply the independent model-anonymized semantic review. No current candidate is promoted from these
-in-progress results. The original partial v1 and complete v2 records are preserved. V2 recorded
+Both 117-request acceptance sets and eight actual synthetic application round-trip requests per model
+are complete. Qwen's 256-request full arm and one-hour endurance evidence passed independent source and
+measurement checks. Gemma's one-hour endurance arm is still running under the identical controls.
+Independent blinded grading and adjudication of all 234 responses are retained in qualification's
+`initial-judgments` and `results` directories; initial records are not overwritten. All semantic
+ambiguities are resolved; an underspecified source-label comparator remains an explicit measurement
+limitation with its original protocol failures intact. Only afterward was Candidate-A revealed as Gemma
+and Candidate-B as Qwen. Gemma is stronger on this bounded conversational/static-code set, but neither
+passes every frozen complete-role threshold. Both have three repeated critical model failures of
+different kinds. No current candidate is promoted.
+
+The next operation is to finish Gemma's endurance arm, verify owned unload and original power restoration,
+bind final captures to the original review snapshots/packets/judgments, and publish the operational and
+role recommendation. The original partial v1 and complete v2 records are preserved. V2 recorded
 105 observations per model with zero cutoffs; its verifier accepted them, but later review found
 missing provenance bindings, now covered by 85 independent mutation/sequence checks in qualification.
 Its role findings remain historical, not a substituted final model selection. Keep production routing

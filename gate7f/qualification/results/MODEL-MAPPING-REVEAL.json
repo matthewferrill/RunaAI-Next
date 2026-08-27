@@ -1,0 +1,17 @@
+{
+  "schemaVersion": "runa2-qualification-model-mapping-reveal/v1",
+  "revealedAt": "2026-08-27T19:32:12.913Z",
+  "revealedAfterAdjudicationCommit": "6a283c5",
+  "independentAdjudicationSha256": "ab7ac9865c410bfb167cc2e3414984755cf624f59a65016907d36d356cb7e997",
+  "originalPrivateMappingSha256": "918137d34f3a76f45f6cb4abd25d513561772851d34eb253efb447aa0a8ca9ab",
+  "mapping": {
+    "blind-candidate-b": "incumbent",
+    "blind-candidate-a": "gemma26"
+  },
+  "models": {
+    "incumbent": "Qwen3-Coder-30B-A3B-Instruct Q6_K",
+    "gemma26": "Gemma 4 26B A4B IT QAT Q4_0"
+  },
+  "semanticDecisionsFrozenBeforeReveal": true,
+  "finalEnduranceProvenanceStillPending": true
+}

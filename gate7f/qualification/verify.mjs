@@ -50,10 +50,21 @@ export function verifyCapture({packageManifest,packageManifestSha256,bundle,even
   const requests=rows("request"),responses=rows("response"),observations=rows("observation");
   check(requests.length===expectedSchedule.length&&responses.length===requests.length&&observations.length===requests.length,"denominator");
   const ids=expectedSchedule.map(item=>item.id);check(new Set(ids).size===ids.length,"schedule-duplicates");
-  same(requests.map(row=>row.id),ids,"request-sequence");
+  same([...requests.map(row=>row.id)].sort(),[...ids].sort(),"request-identities");
+  const groups=[];
+  for(const expected of expectedSchedule){const key=expected.concurrencyGroup??expected.id;
+    if(groups.at(-1)?.key!==key){check(!groups.some(group=>group.key===key),"noncontiguous-group");groups.push({key,ids:[]});}
+    groups.at(-1).ids.push(expected.id);}
+  let priorGroupEnd=index(residentRow);
+  for(const group of groups){
+    check(group.ids.length<=2,"concurrency-cap");
+    const starts=group.ids.map(id=>index(requests.find(row=>row.id===id))),ends=group.ids.map(id=>index(observations.find(row=>row.id===id)));
+    check(starts.every(at=>at>priorGroupEnd)&&ends.every(at=>at>=0),"request-group-barrier");
+    priorGroupEnd=Math.max(...ends);
+  }
   check(new Set(responses.map(row=>row.id)).size===ids.length&&new Set(observations.map(row=>row.id)).size===ids.length,"reply-duplicates");
-  for(const [i,expected] of expectedSchedule.entries()){
-    const request=requests[i],response=responses.find(row=>row.id===expected.id),observation=observations.find(row=>row.id===expected.id);
+  for(const expected of expectedSchedule){
+    const request=requests.find(row=>row.id===expected.id),response=responses.find(row=>row.id===expected.id),observation=observations.find(row=>row.id===expected.id);
     check(response&&observation,"reply-missing");
     check(request.endpoint===expected.endpoint&&response.endpoint===expected.endpoint&&observation.endpoint===expected.endpoint,"endpoint");
     same(request.request,{...expected.request,model:candidate.modelKey,temperature:0,stream:false,
@@ -61,7 +72,10 @@ export function verifyCapture({packageManifest,packageManifestSha256,bundle,even
     check(index(residentRow)<index(request)&&index(request)<index(response)&&index(response)<index(observation),"reply-order");
     const normalized=validateResponse(response.response,candidate.modelKey,instance,bundle.runtime,expected.endpoint);
     same(observation.normalized,normalized,"normalized-reply");
+    check(normalized.completionTokens<=expected.request.max_tokens,"response-budget");
     check(Number.isFinite(response.elapsedMs)&&response.elapsedMs>=0&&Number.isFinite(observation.elapsedMs)&&observation.elapsedMs>=response.elapsedMs,"elapsed");
+    check(Math.abs(response.elapsedMs-(Date.parse(response.time)-Date.parse(request.time)))<=100
+      &&Math.abs(observation.elapsedMs-(Date.parse(observation.time)-Date.parse(request.time)))<=100,"elapsed-clock");
   }
   const cleanup=one("cleanup");
   check(cleanup.ownedInstance===instance&&cleanup.unload?.instance_id===instance&&cleanup.cleanupVerified===true

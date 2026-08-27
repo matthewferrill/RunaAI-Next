@@ -89,6 +89,7 @@ export function validateResponse(value, model, instance, runtime, endpoint) {
   requireValue(!msg.reasoning && !msg.reasoning_content && !/<think>|<\|channel>thought/i.test(msg.content ?? "")
     && !(value.stats?.reasoning_output_tokens > 0) && !(value.usage?.completion_tokens_details?.reasoning_tokens > 0), "reasoning-leaked");
   requireValue(Number.isInteger(value.usage?.completion_tokens) && value.usage.completion_tokens >= 0, "usage-missing");
+  requireValue(value.usage.prompt_tokens===undefined||(Number.isInteger(value.usage.prompt_tokens)&&value.usage.prompt_tokens>=0),"prompt-usage-invalid");
   if (endpoint === "/api/v0/chat/completions") {
     requireValue(value.runtime?.name === runtime.name && value.runtime?.version === runtime.version, "runtime-drift");
     requireValue(value.model_info?.context_length === 32768, "response-context");
@@ -170,6 +171,7 @@ export async function withCandidate({ bundle, packageVerification, candidate, ou
         record("response", { id, endpoint, response, elapsedMs: Date.now() - start });
         record("telemetry",telemetry(id+":after"));
         const normalized = validateResponse(response, modelKey, instance, bundle.runtime, endpoint);
+        requireValue(normalized.completionTokens<=body.max_tokens,"response-budget");
         assertResidency(await ownedApi("/api/v1/models"), modelKey, instance, fingerprint);
         observed++;
         record("observation", { id, endpoint, normalized, elapsedMs: Date.now() - start });

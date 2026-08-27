@@ -594,15 +594,23 @@ role criteria before implementation: independent fresh cases/review, shared cont
 and authority corrections, matched synthetic end-to-end runs, and an initial one-hour soak per model.
 Production routing and protected data remain unchanged. Human input is reserved for human-only testing.
 
-Gate 7F-0 is locally complete. The authorized Gate 7F-1 evaluation correction and resealed v2 rerun
-are complete: both exact Home artifacts produced 105/105 observations, with zero cutoffs, then unloaded.
-The original partial v1 record is preserved; v2 was not tuned after seeing outputs. Both captures are
-provenance-valid, but neither model satisfies all role gates. Gemma has more automatic passes and lower
-GPU allocation, but a repeated simulated tool-output-authority failure; Qwen's score includes 12
-format-only misses. Both have planning or supplied-state handling findings, and unresolved prose
-reviews are not automatic passes. The next decision is whether to authorize a bounded investigation
-of state/template handling and application-enforced authority, with independent evaluation where
-authorized, before model-role selection. Keep production routing unchanged. Do not open the 31B arm,
+The coordinated qualification is now sealed and running. Its exact package is bound by
+`gate7f/qualification/RUN-SEAL.json`; design and diagnostic findings are in
+`gate7f/qualification/QUALIFICATION-FREEZE-2026-08-27.md`. Both models completed the 42 protocol
+probes and nine corrected full-schema probes. Large decoder string limits caused a pre-generation
+grammar rejection; a single-factor adapter change resolves that rejection while the unchanged
+application parser retains its limits. Dropped second-system state was not reproduced in the simple
+state probes. Exact task grants, effect-time policy checks and receipt-bound state now cover the
+independently found synthetic authority races. These corrections are not production Agent Mode.
+
+The next operation is to complete both fresh 117-request acceptance sets, eight real synthetic
+application round-trip requests per model, and the fixed 131-request one-hour endurance arms, then
+apply the independent model-anonymized semantic review. No current candidate is promoted from these
+in-progress results. The original partial v1 and complete v2 records are preserved. V2 recorded
+105 observations per model with zero cutoffs; its verifier accepted them, but later review found
+missing provenance bindings, now covered by 85 independent mutation/sequence checks in qualification.
+Its role findings remain historical, not a substituted final model selection. Keep production routing
+unchanged. Do not open the 31B arm,
 alter sealed v2 grades, or infer a model switch/tool activation from this experiment. Any revised
 evaluation requires a new preregistered version. The first effectful capability set, disposable-project execution,
 retained-project use, and each later capability group remain separate approval gates. UI refinement, live

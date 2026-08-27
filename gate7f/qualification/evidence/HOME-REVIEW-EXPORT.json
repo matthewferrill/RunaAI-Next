@@ -1,0 +1,26 @@
+{
+  "schemaVersion": "runa2-qualification-home-export/v1",
+  "host": "RUNA-HOME",
+  "time": "2026-08-27T19:07:55.418Z",
+  "files": {
+    "incumbent-prefix.jsonl": {
+      "bytes": 1116385,
+      "sha256": "94c44f6992b3071580540ec356e93add7082f7094e5abc0af9f6f32641d2d070"
+    },
+    "gemma26-prefix.jsonl": {
+      "bytes": 1150599,
+      "sha256": "4f7707fabee17fb49454d3539cb171c65fa83601633b4cb552e6cb9f09946bbc"
+    }
+  },
+  "reviewSnapshotNotFinalCapture": true,
+  "sourceSnapshots": [
+    {
+      "file": "incumbent-prefix.jsonl",
+      "sourceSnapshotSha256": "1b7e1159ff5e9ac4f840ae1368289db452cfc389220a487bb11fe482652beeb4"
+    },
+    {
+      "file": "gemma26-prefix.jsonl",
+      "sourceSnapshotSha256": "f69b715130b5f0ddf95314c0c4a06cdb2dfcc6d46981d6aa3429b8fde59d79e1"
+    }
+  ]
+}

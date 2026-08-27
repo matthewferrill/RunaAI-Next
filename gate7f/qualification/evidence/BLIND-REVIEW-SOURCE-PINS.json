@@ -1,0 +1,16 @@
+{
+  "schemaVersion": "runa2-qualification-blind-review-pins/v1",
+  "pinnedAt": "2026-08-27T19:08:40.168Z",
+  "pinnedBeforeAdjudication": true,
+  "homeExportManifestSha256": "9dabd2743ead1900af5e3209585e028c7d09ee5da344c410954cd1160bf55970",
+  "acceptanceSealSha256": "cf1a6877bf022e18dc123f945e4389e37c568ba2b1fa07878d99caa5847a459e",
+  "suppliedBundleSha256": "0486d279420ef8a044cd0fc03129e5c0ba772552cc1ed3d500a68c3617b61108",
+  "packets": {
+    "Candidate-A.json": "4be726089b5022c776dc1f7acad2206d8639f6107f0d18ea05eaf22c0ab2336a",
+    "Candidate-B.json": "54b072675c118e2739d703fc159d6b3e9889308b0427fc02f767032fd1f11847"
+  },
+  "providerMetadataOmitted": true,
+  "rawAnswerContentUnmodified": true,
+  "fullCaptureVerificationPending": true,
+  "mappingWithheldFromEvaluators": true
+}

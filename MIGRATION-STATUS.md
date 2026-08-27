@@ -212,6 +212,13 @@ repository and never push migration work into either source repository.
   genuine model-layer authority confusion is recorded separately. Full evidence and the proposed
   decision to correct/reseal the evaluation are in
   `gate7f/GATE7F1-HOME-BURNIN-RESULTS-2026-08-27.md`. No Control or production change was made.
+- The steward subsequently authorized correction/resealing and a fresh rerun of both exact artifacts
+  under the same Home-only boundary. The committed v2 criteria are
+  `gate7f/GATE7F1-V2-CORRECTION-PLAN-2026-08-27.md`. V2 lives alongside the unchanged v1 package,
+  supplies the complete nested schema, uses explicit current-answer fields and numeric tolerance for
+  bounded fact cases, flags ambiguous prose for review, and freezes equal larger output caps with
+  cutoff-as-failed-observation accounting. Fifteen focused tests pass, including the full 105-row stub.
+  This authorizes the resealed Home rerun only, not tuning after v2 output or a production change.
 - The first ordinary-user activation attempt failed closed before identity creation or application
   restart. RCA: Windows PowerShell 5.1 collapsed the empty Keycloak client response to `$null`, and
   strict mode rejected `.Count`. Normalized reconciliation then proved zero ordinary clients, zero

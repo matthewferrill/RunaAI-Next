@@ -587,6 +587,13 @@ No dependency was changed during the prerequisite disposition. Full evidence is 
 
 ## Next operation
 
+The steward has now authorized the coordinated qualification package, reversible environment work on
+Omen/Home/Control, parallel agents, documentation, commits and branch pushes, with no destructive work.
+`gate7f/GATE7F-QUALIFICATION-AUTHORIZATION-AND-CRITERIA-2026-08-27.md` freezes the work boundary and
+role criteria before implementation: independent fresh cases/review, shared context/structured-output
+and authority corrections, matched synthetic end-to-end runs, and an initial one-hour soak per model.
+Production routing and protected data remain unchanged. Human input is reserved for human-only testing.
+
 Gate 7F-0 is locally complete. The authorized Gate 7F-1 evaluation correction and resealed v2 rerun
 are complete: both exact Home artifacts produced 105/105 observations, with zero cutoffs, then unloaded.
 The original partial v1 record is preserved; v2 was not tuned after seeing outputs. Both captures are

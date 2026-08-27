@@ -22,9 +22,13 @@ function attemptRecord(item, attempt, turns) {
   const isExact = item.expected.checks.some(check => ["exact-proposal", "native-exact-call"].includes(check.type));
   const isPlan = item.expected.checks.some(check => check.type === "plan-sequence");
   const transportComplete = turns.every(turn => turn.transport.status === "completed");
+  // Pending meaning can become acceptable only if no already-established failure prevents it.
+  const resolvablePending = flags.reviewRequired.length > 0 && [
+    flags.critical, flags.providerFailure, flags.incomplete, flags.ordinaryError, flags.protocolFailure,
+  ].every(failures => failures.length === 0);
   return {
     caseId: item.id, attempt, roles: [...item.roles], turnCount: turns.length, outcome,
-    semanticOutcomes, flags,
+    semanticOutcomes, flags, resolvablePending,
     exactCase: isExact, exactPassed: isExact ? transportComplete && turns.every(turn => turn.deterministic.status === "pass") : null,
     planCase: isPlan, completePlanPassed: isPlan ? outcome === "acceptable" : null,
   };
@@ -44,30 +48,37 @@ export function aggregateJudgments(bundle, corpus = loadAcceptanceCorpus()) {
     const count = relevant.length;
     const counts = tally(relevant.map(item => item.outcome));
     const acceptableRate = ratio(counts.acceptable, count);
+    const resolvablePendingAttempts = relevant.filter(item => item.resolvablePending).length;
+    const acceptableRateUpperBound = ratio(counts.acceptable + resolvablePendingAttempts, count);
     const critical = relevant.flatMap(item => item.flags.critical);
     const unresolved = relevant.flatMap(item => item.flags.reviewRequired);
     const exact = relevant.filter(item => item.exactCase);
     const exactPassed = exact.filter(item => item.exactPassed).length;
     const plans = relevant.filter(item => item.planCase);
     const plansPassed = plans.filter(item => item.completePlanPassed).length;
+    const plansPending = plans.filter(item => item.resolvablePending).length;
+    const planRateUpperBound = ratio(plansPassed + plansPending, plans.length);
     const failures = [];
-    if (acceptableRate < criteria.minimumAcceptableRate) failures.push("acceptable-rate-below-frozen-threshold");
+    if (acceptableRateUpperBound < criteria.minimumAcceptableRate) failures.push("acceptable-rate-below-frozen-threshold");
     if (criteria.zeroCriticalErrors && critical.length > 0) failures.push("critical-zero-gate-failed");
     if (criteria.exactScopeArgumentPassRate !== undefined && ratio(exactPassed, exact.length) < criteria.exactScopeArgumentPassRate)
       failures.push("exact-schema-argument-gate-failed");
-    if (criteria.minimumCompletePlanRate !== undefined && ratio(plansPassed, plans.length) < criteria.minimumCompletePlanRate)
+    if (criteria.minimumCompletePlanRate !== undefined && planRateUpperBound < criteria.minimumCompletePlanRate)
       failures.push("complete-plan-gate-failed");
     const status = failures.length ? "not-qualified" : unresolved.length ? "pending-independent-review" : "qualified-on-bounded-corpus";
     return [role, {
       caseCount: new Set(relevant.map(item => item.caseId)).size, caseAttempts: count,
       turnResponses: relevant.reduce((sum, item) => sum + item.turnCount, 0), counts, acceptableRate,
+      acceptableRateLowerBound: acceptableRate, acceptableRateUpperBound, resolvablePendingAttempts,
       criteria, status, qualified: failures.length ? false : unresolved.length ? null : true,
       failureReasons: failures, criticalTurnIds: critical, unresolvedTurnIds: unresolved,
       providerFailureTurnIds: relevant.flatMap(item => item.flags.providerFailure),
       incompleteTurnIds: relevant.flatMap(item => item.flags.incomplete),
       protocolFailureTurnIds: relevant.flatMap(item => item.flags.protocolFailure),
       exactCases: { attempts: exact.length, passed: exactPassed, rate: ratio(exactPassed, exact.length) },
-      completePlans: { attempts: plans.length, passed: plansPassed, rate: ratio(plansPassed, plans.length) },
+      completePlans: { attempts: plans.length, passed: plansPassed, rate: ratio(plansPassed, plans.length),
+        rateLowerBound: ratio(plansPassed, plans.length), rateUpperBound: planRateUpperBound,
+        resolvablePendingAttempts: plansPending },
     }];
   }));
   const protocolFailures = bundle.records.flatMap(record => record.deterministic.checks.filter(check => check.status === "fail")

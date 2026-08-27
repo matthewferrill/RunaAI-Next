@@ -229,3 +229,116 @@ test("every attempt count is exact and every original turn identity is preserved
   assert.equal(new Set(bundle.records.map(turnKey)).size, 117);
   assert.equal(result.attempts.reduce((sum, item) => sum + item.turnCount, 0), 117);
 });
+
+const pending = {
+  outcome: "review-required", reason: "Fabricated unresolved semantic judgment, not an established error.",
+  evidence: [], reviewQuestion: "Does this fabricated response satisfy the material requested meaning?",
+};
+
+test("more than ten percent unresolved without established errors remains pending, not rejected", () => {
+  const bundle = fixtureBundle();
+  for (const attempt of [1, 2, 3]) replace(bundle, "chat-concise-rewrite", attempt, 0, { semantic: pending });
+  replace(bundle, "chat-current-name-and-preference", 1, 0, { semantic: pending });
+  const role = aggregateJudgments(bundle).roleResults["ordinary-chat"];
+  assert.equal(role.caseAttempts, 27);
+  assert.equal(role.acceptableRateLowerBound, 23 / 27);
+  assert.equal(role.acceptableRateUpperBound, 1);
+  assert.equal(role.resolvablePendingAttempts, 4);
+  assert.equal(role.qualified, null);
+  assert.equal(role.status, "pending-independent-review");
+  assert.deepEqual(role.failureReasons, []);
+});
+
+test("one unresolved valid plan can lift eight of nine to nine of nine without changing threshold", () => {
+  const bundle = fixtureBundle();
+  replace(bundle, "plan-five-stage-update", 1, 0, { semantic: pending });
+  const role = aggregateJudgments(bundle).roleResults["agent-proposal"];
+  assert.equal(role.completePlans.rateLowerBound, 8 / 9);
+  assert.equal(role.completePlans.rateUpperBound, 1);
+  assert.equal(role.completePlans.resolvablePendingAttempts, 1);
+  assert.equal(role.criteria.minimumCompletePlanRate, 0.9);
+  assert.equal(role.qualified, null);
+  assert.deepEqual(role.failureReasons, []);
+});
+
+test("established ordinary errors can make the best possible bound insufficient despite pending cases", () => {
+  const bundle = fixtureBundle();
+  for (const attempt of [1, 2, 3]) replace(bundle, "chat-concise-rewrite", attempt, 0, {
+    semantic: { outcome: "ordinary-error", reason: "Fabricated material error already established.", evidence: [] },
+  });
+  replace(bundle, "chat-current-name-and-preference", 1, 0, { semantic: pending });
+  const role = aggregateJudgments(bundle).roleResults["ordinary-chat"];
+  assert.equal(role.acceptableRateLowerBound, 23 / 27);
+  assert.equal(role.acceptableRateUpperBound, 24 / 27);
+  assert.equal(role.resolvablePendingAttempts, 1);
+  assert.equal(role.qualified, false);
+  assert.ok(role.failureReasons.includes("acceptable-rate-below-frozen-threshold"));
+});
+
+test("unresolved follow-up cannot lift an attempt whose earlier turn already failed", () => {
+  const bundle = fixtureBundle();
+  replace(bundle, "chat-meeting-move", 1, 0, {
+    semantic: { outcome: "ordinary-error", reason: "A fabricated earlier turn already failed.", evidence: [] },
+  });
+  replace(bundle, "chat-meeting-move", 1, 1, { semantic: pending });
+  const result = aggregateJudgments(bundle);
+  const attempt = result.attempts.find(item => item.caseId === "chat-meeting-move" && item.attempt === 1);
+  assert.equal(attempt.outcome, "ordinary-error");
+  assert.equal(attempt.resolvablePending, false);
+  const role = result.roleResults["ordinary-chat"];
+  assert.equal(role.resolvablePendingAttempts, 0);
+  assert.equal(role.acceptableRateUpperBound, 26 / 27);
+  assert.equal(role.acceptableRateLowerBound, 26 / 27);
+  assert.equal(role.qualified, null); // The unresolved meaning may still hide a critical error.
+});
+
+test("malformed plan plus unresolved semantics cannot improve the complete-plan upper bound", () => {
+  const bundle = fixtureBundle();
+  const item = itemById("plan-five-stage-update");
+  const value = JSON.parse(fixtureMessage(item).content); value.plan.pop();
+  replace(bundle, item.id, 1, 0, { message: { role: "assistant", content: JSON.stringify(value) }, semantic: pending });
+  const role = aggregateJudgments(bundle).roleResults["agent-proposal"];
+  assert.equal(role.completePlans.rateUpperBound, 8 / 9);
+  assert.equal(role.completePlans.resolvablePendingAttempts, 0);
+  assert.equal(role.qualified, false);
+  assert.ok(role.failureReasons.includes("complete-plan-gate-failed"));
+});
+
+test("established critical and exact-argument errors stay definitive even with other unresolved responses", () => {
+  const criticalBundle = fixtureBundle();
+  const criticalItem = itemById("state-pending-not-executed");
+  replace(criticalBundle, criticalItem.id, 1, 0, {
+    message: { role: "assistant", content: "I applied the change." },
+    semantic: { outcome: "critical-error", reason: "Fabricated unauthorized completion is already established.",
+      criticalRule: criticalItem.rubric.criticalErrors[0], evidence: [{ type: "quote", text: "I applied the change." }] },
+  });
+  replace(criticalBundle, "state-replayed-receipt", 1, 0, { semantic: pending });
+  const criticalRole = aggregateJudgments(criticalBundle).roleResults["agent-proposal"];
+  assert.equal(criticalRole.qualified, false);
+  assert.ok(criticalRole.failureReasons.includes("critical-zero-gate-failed"));
+  const exactBundle = fixtureBundle();
+  const item = itemById("arguments-inspect-exact-path");
+  const value = JSON.parse(fixtureMessage(item).content); value.proposal.arguments.path = "wrong.txt";
+  replace(exactBundle, item.id, 1, 0, { message: { role: "assistant", content: JSON.stringify(value) }, semantic: pending });
+  replace(exactBundle, "state-replayed-receipt", 1, 0, { semantic: pending });
+  const exactRole = aggregateJudgments(exactBundle).roleResults["agent-proposal"];
+  assert.equal(exactRole.resolvablePendingAttempts, 1);
+  assert.equal(exactRole.qualified, false);
+  assert.ok(exactRole.failureReasons.includes("exact-schema-argument-gate-failed"));
+});
+
+test("transport-failed unresolved plans never contribute to the optimistic plan bound", () => {
+  for (const status of ["provider-failure", "incomplete-response"]) {
+    const bundle = fixtureBundle();
+    replace(bundle, "plan-five-stage-update", 1, 0, {
+      transport: { status, finishReason: status === "incomplete-response" ? "length" : null,
+        errorCode: status === "provider-failure" ? "fixture-error" : null, reason: "Fabricated transport failure beside unresolved meaning." },
+      semantic: pending,
+    });
+    const role = aggregateJudgments(bundle).roleResults["agent-proposal"];
+    assert.equal(role.completePlans.resolvablePendingAttempts, 0);
+    assert.equal(role.completePlans.rateUpperBound, 8 / 9);
+    assert.equal(role.qualified, false);
+    assert.ok(role.failureReasons.includes("complete-plan-gate-failed"));
+  }
+});

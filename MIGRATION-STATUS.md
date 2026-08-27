@@ -1,6 +1,6 @@
 # RunaAI migration status
 
-Status date: 2026-08-26. This is the living migration handoff for RunaAI-Next. Update it in the same
+Status date: 2026-08-27. This is the living migration handoff for RunaAI-Next. Update it in the same
 commit whenever a gate changes repository direction, authority, implementation status, safety
 boundaries, verification state, or the next planned work.
 
@@ -194,6 +194,12 @@ repository and never push migration work into either source repository.
   repository suite passes 480/480 across 462 subtests. No model was downloaded, loaded, called, or
   selected. Full evidence is in
   `gate7f/GATE7F1-OFFLINE-PREREGISTRATION-RESULTS-2026-08-26.md`.
+- On 2026-08-27 the steward explicitly authorized the pinned Gemma 4 26B A4B download and Home-only
+  sealed comparison against the installed Qwen incumbent, one model at a time, with exact hashes,
+  synthetic evidence, telemetry, and unload afterward. Control and production routing must remain
+  unchanged. The execution plan is `gate7f/GATE7F1-HOME-EXECUTION-PLAN-2026-08-27.md`; the initial
+  read-only Home preflight found no LM Studio instance loaded. This is authorization and preflight,
+  not a completed download or burn-in result.
 - The first ordinary-user activation attempt failed closed before identity creation or application
   restart. RCA: Windows PowerShell 5.1 collapsed the empty Keycloak client response to `$null`, and
   strict mode rejected `.Count`. Normalized reconciliation then proved zero ordinary clients, zero

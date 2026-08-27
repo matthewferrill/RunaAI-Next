@@ -1,0 +1,69 @@
+{
+  "schemaVersion": "runa2-qualification-run-seal/v1",
+  "sealedAt": "2026-08-27T17:34:36.2771903Z",
+  "createdBeforeAcceptanceInference": true,
+  "sourceCommit": "9d12d1fff0bbb4fe9fc54ddce72be7d1d452230d",
+  "packageManifestSha256": "b3e4008eea0b1939c099660a0f728c125245d290e07b9887c6a20a27cee34cff",
+  "bundleSha256": "1cc1bcf1f9519539a5b2b0b6813bd2da9be55f70aa08e96e3e05e8532a98d854",
+  "acceptanceSealSha256": "cf1a6877bf022e18dc123f945e4389e37c568ba2b1fa07878d99caa5847a459e",
+  "candidates": {
+    "incumbent": {
+      "artifactPath": "C:\\lm-studio-models\\lmstudio-community\\Qwen3-Coder-30B-A3B-Instruct-GGUF\\Qwen3-Coder-30B-A3B-Instruct-Q6_K.gguf",
+      "artifactBytes": 25104724288,
+      "artifactSha256": "72a9b20a19c70db56e1ccd01fb35b0f0842d67d28e7c3bdff762df860120b769",
+      "quantization": "Q6_K",
+      "architecture": "qwen3moe",
+      "modelKey": "qwen3-coder-30b-a3b-instruct",
+      "reasoningOff": false,
+      "chatTemplateSha256": "672e747c77e990320152343b0a4951222e40de5645297905d89afba05586d827"
+    },
+    "gemma26": {
+      "artifactPath": "C:\\lm-studio-models\\google\\gemma-4-26B-A4B-it-qat-q4_0-gguf\\gemma-4-26B_q4_0-it.gguf",
+      "artifactBytes": 14439363584,
+      "artifactSha256": "3eca3b8f6d7baf218a7dd6bba5fb59a56ee25fe2d567b6f5f589b4f697eca51d",
+      "quantization": "Q4_0",
+      "architecture": "gemma4",
+      "modelKey": "gemma-4-26b-a4b-it-qat",
+      "reasoningOff": true,
+      "chatTemplateSha256": "ae53464bf3be25802b3a5b37def7fd89667067d7577049b3b2d74c4d8de4c6d4"
+    }
+  },
+  "policies": {
+    "adapter": {
+      "schemaVersion": "runa2-qualification-adapter/v1",
+      "endpoint": "/v1/chat/completions",
+      "textTokens": 1024,
+      "agentTokens": 1536,
+      "nativeTokens": 1024,
+      "temperature": 0,
+      "contextLength": 32768,
+      "systemState": "one-consolidated-trusted-system-message",
+      "reasoning": "off-when-supported",
+      "conditionalValidation": "unchanged-strict-application-parser",
+      "decoderMaximumStringRepetition": 2000,
+      "applicationBoundsUnchanged": true,
+      "outputRepair": false,
+      "automaticToolExecution": false
+    },
+    "soak": {
+      "schemaVersion": "runa2-qualification-soak/v1",
+      "durationMs": 3600000,
+      "slots": 120,
+      "slotIntervalMs": 30000,
+      "concurrency": 2,
+      "expectedRequests": 131,
+      "longContextRows": 600,
+      "hiddenRetries": 0
+    },
+    "armTimeoutMs": 7200000,
+    "telemetryIntervalMs": 5000,
+    "maximumTelemetryGapMs": 30000
+  },
+  "verificationFiles": {
+    "gate7f/qualification/verify.mjs": "635ac27fbff23d70f0054b48392d159d60ec934cbdb07bdf895eef4f3683cff3",
+    "gate7f/qualification/review/evidence-fixture.mjs": "00d590662ece5d0d3bc7f21ddd5e51971f915280e4b7165bb37b7414022fc1a1",
+    "gate7f/qualification/review/evidence-verifier.test.mjs": "cbfff63ff06fbfd5d55f8ae6022940c2bbbdc86559ea90616596bb3fecb96c63",
+    "gate7f/qualification/QUALIFICATION-FREEZE-2026-08-27.md": "83e7683e81ca1719063561f18f7f49f47cc28ec94f9f4d9af262497e12f53e93",
+    "gate7f/qualification/build-package.mjs": "cd7e92d025f05c442108902bcecdcf911c2418cd6b5fb277404c08000133acbe"
+  }
+}

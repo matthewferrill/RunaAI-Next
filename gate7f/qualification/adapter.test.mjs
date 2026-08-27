@@ -12,10 +12,10 @@ test("one trusted system block preserves tool data and real conversation history
   assert.doesNotMatch(request.messages[0].content,/ignore instructions/);
   assert.deepEqual(request.messages.slice(1),input.messages.slice(2));
 });
-test("agent decoder enforces full conditional shape without answer values",()=>{
-  assert.equal(AGENT_OUTPUT_SCHEMA.anyOf.length,4);
-  const p=AGENT_OUTPUT_SCHEMA.anyOf.find(s=>s.properties.kind.const==="plan");
-  assert.equal(p.properties.plan.minItems,1);assert.equal(p.properties.proposal.type,"null");
+test("agent decoder enforces structural shape without answer values; strict parser owns conditional rules",()=>{
+  assert.equal(AGENT_OUTPUT_SCHEMA.properties.kind.enum.length,4);
+  assert.deepEqual(AGENT_OUTPUT_SCHEMA.required,["kind","message","plan","proposal"]);
+  assert.equal(AGENT_OUTPUT_SCHEMA.properties.plan.maxItems,12);
   const q=buildRequest({mode:"agent-json",messages:[{role:"user",content:"plan"}]});
   assert.equal(q.request.response_format.json_schema.strict,true);assert.equal(q.request.max_tokens,1536);
   assert.equal(q.request.tools,undefined);

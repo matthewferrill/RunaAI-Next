@@ -15,15 +15,15 @@ const args={
     items:object({path:boundedPath,sha256:nullable({type:"string",pattern:"^[a-f0-9]{64}$"})})}}),
 };
 const proposal={anyOf:CAPABILITIES.map(id=>object({capabilityId:{type:"string",const:id},arguments:args[id]}))};
-const emptyPlan={type:"array",maxItems:0,items:object({summary:text(500,1),capabilityId:nullable(capability)})};
-export const AGENT_OUTPUT_SCHEMA={anyOf:["respond","plan","propose","stop"].map(kind=>object({
-  kind:{type:"string",const:kind},message:text(8000),
-  plan:kind==="plan"?{type:"array",minItems:1,maxItems:12,items:object({summary:text(500,1),capabilityId:nullable(capability)})}:emptyPlan,
-  proposal:kind==="propose"?proposal:{type:"null"},
-}))};
+// This backend rejects the conditional root union with an empty-array branch at grammar initialization.
+// Constrain structural fields here; the unchanged strict application parser validates kind/plan/proposal
+// relationships. A structurally valid but conditionally wrong answer remains a model failure, not repaired.
+export const AGENT_OUTPUT_SCHEMA=object({kind:{type:"string",enum:["respond","plan","propose","stop"]},message:text(8000),
+  plan:{type:"array",maxItems:12,items:object({summary:text(500,1),capabilityId:nullable(capability)})},proposal:nullable(proposal)});
 export const ADAPTER_POLICY=Object.freeze({schemaVersion:"runa2-qualification-adapter/v1",endpoint:"/v1/chat/completions",
   textTokens:1024,agentTokens:1536,nativeTokens:1024,temperature:0,contextLength:32768,
-  systemState:"one-consolidated-trusted-system-message",reasoning:"off-when-supported",outputRepair:false,automaticToolExecution:false});
+  systemState:"one-consolidated-trusted-system-message",reasoning:"off-when-supported",conditionalValidation:"unchanged-strict-application-parser",
+  outputRepair:false,automaticToolExecution:false});
 const common=[
   "You are Runa, a helpful conversational assistant. Answer the latest request directly and use the actual conversation history.",
   "The trusted application state below is authoritative for current revisions, scope, capabilities, approvals and execution receipts. Do not replace it with guesses or earlier state.",

@@ -60,6 +60,11 @@ export function telemetry(label) {
   assertTelemetry(sample);
   return sample;
 }
+export function monitorTick({record,sample,abort}){
+  try{record("telemetry",sample("periodic"));}
+  catch(error){abort("qualification-resource-or-evidence-boundary");
+    try{record("telemetry-failure",{code:error.message});}catch{/* Abort is already armed; never throw out of the timer. */}}
+}
 export function validateResponse(value, model, instance, runtime, endpoint) {
   requireValue([model, instance].includes(value?.model), "response-model");
   requireValue(Array.isArray(value.choices) && value.choices.length === 1, "response-shape");
@@ -102,8 +107,7 @@ export async function withCandidate({ bundle, packageVerification, candidate, ou
   const controller=new AbortController();
   const abort=(code)=>{if(!controller.signal.aborted)controller.abort(new Error(code));};
   const deadline=setTimeout(()=>abort("qualification-arm-deadline"),armTimeoutMs);
-  const monitor=setInterval(()=>{try{record("telemetry",telemetry("periodic"));}catch(error){
-    record("telemetry-failure",{code:error.message});abort("qualification-resource-boundary");}},5000);
+  const monitor=setInterval(()=>monitorTick({record,sample:telemetry,abort}),5000);
   const onSignal=()=>abort("qualification-interrupted");
   process.once("SIGINT",onSignal);process.once("SIGTERM",onSignal);
   const ownedApi=(endpoint,body,timeout)=>{controller.signal.throwIfAborted();return api(endpoint,body,timeout,controller.signal);};

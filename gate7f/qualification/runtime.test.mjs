@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { validateResponse } from "./runtime.mjs";
+import { monitorTick,validateResponse } from "./runtime.mjs";
 import { diagnosticCases } from "./diagnostics.mjs";
 test("qualification diagnostics vary one protocol axis and retain fixed attempts",()=>{
   assert.equal(diagnosticCases.length,14);
@@ -9,6 +9,11 @@ test("qualification diagnostics vary one protocol axis and retain fixed attempts
   assert.equal(state[0].request.messages.length,3);
   assert.equal(state[1].request.messages.length,2);
   assert.equal(diagnosticCases.find(c=>c.id==="native-result").request.messages.at(-1).role,"tool");
+});
+test("telemetry sink failure aborts without escaping the owned cleanup path",()=>{
+  let reason;
+  assert.doesNotThrow(()=>monitorTick({record:()=>{throw Error("disk-full");},sample:()=>({}),abort:code=>{reason=code;}}));
+  assert.equal(reason,"qualification-resource-or-evidence-boundary");
 });
 test("response boundary keeps content and tools distinct; pins model and runtime",()=>{
   const runtime={name:"pinned",version:"1"}, response={model:"candidate",choices:[{finish_reason:"tool_calls",message:{content:null,

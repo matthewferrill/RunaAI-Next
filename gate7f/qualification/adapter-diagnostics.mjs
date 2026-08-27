@@ -14,7 +14,7 @@ export const adapterDiagnostics=[
 if(process.argv[1] && path.resolve(process.argv[1])===fileURLToPath(import.meta.url)){
   requireValue(process.argv[3]==="--authorized-diagnostics","authorization-missing");
   const packageVerification=await verifyPackage(here),bundle=JSON.parse(readFileSync(path.join(here,"bundle.json"),"utf8"));
-  const result=await withCandidate({bundle,packageVerification,candidate:process.argv[2],phase:"adapter-diagnostics-v1",
+  const result=await withCandidate({bundle,packageVerification,candidate:process.argv[2],phase:bundle.source.kind,
     outputDir:path.join(here,"adapter-diagnostics-"+process.argv[2])},async({invoke})=>{
       for(const item of adapterDiagnostics)for(let attempt=1;attempt<=3;attempt++)
         await invoke({id:item.id+":"+attempt,...buildRequest(item),allowDiagnosticHttpError:true});

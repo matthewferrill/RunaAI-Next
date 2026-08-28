@@ -97,10 +97,15 @@ test('invalid remote envelope is never retained or silently retried',()=>{
  assert.equal(existsSync(path.join(base,'invalid-envelope','HomeOffer-response.json')),false);
 });
 test('generated upload and enrollment commands parse in actual Windows PowerShell5 without executing them',{skip:process.platform!=='win32'},()=>{
+ const lengths=[];
  for(const action of ['UploadHome','UploadControl','HomeOffer','ControlRequest','HomeSign','ControlImport']){
   const source=tlsRemoteCommand(context(),action).command;
+  const encoded=Buffer.from(source,'utf16le').toString('base64'),remote='powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -EncodedCommand '+encoded;
+  lengths.push({action,rawScriptChars:source.length,encodedChars:encoded.length,remoteChars:remote.length,
+   nestedHomeChars:action.includes('Home')||action==='HomeSign'?remote.length+'ssh -o ClearAllForwardings=yes runa-home-codex '.length:null});
   const script=`$ErrorActionPreference='Stop';$source=[Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('${Buffer.from(source).toString('base64')}'));$tokens=$null;$errors=$null;[void][Management.Automation.Language.Parser]::ParseInput($source,[ref]$tokens,[ref]$errors);if($errors.Count-ne0){throw ($errors.Message-join';')};'passed'`;
   const result=execFileSync('C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe',['-NoProfile','-NonInteractive','-ExecutionPolicy','Bypass','-EncodedCommand',Buffer.from(script,'utf16le').toString('base64')],
    {encoding:'utf8',timeout:10000,windowsHide:true,maxBuffer:32768});assert.match(result,/passed/);
  }
+ console.log('TLS direct-command length baseline '+JSON.stringify(lengths));
 });

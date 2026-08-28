@@ -138,3 +138,19 @@ Full operator regression including this assembly passed111/111, zero skips, with
 The first restricted run passed110/111 and failed the pre-existing CIM task-settings check with
 access denied; it was not treated as a pass or changed to a skip. The unchanged suite was rerun with
 the required OS access. Roadmap regression passed15/15. No Home or Control TLS operation was dispatched.
+
+Prospective transport hardening, before host enrollment: measure all six generated commands with
+their UTF16 EncodedCommand expansion and the nested Home SSH wrapper. A command must fit below the
+Windows8191-character command-processor limit; prefer an explicit6500-character outer ceiling. If the
+inline form exceeds it, use a fixed small bootstrap whose literal expected SHA256 binds the complete
+script sent over bounded stdin. Check exact envelope fields, encoding, size and script digest before
+executing that trusted operator script. Pass the bounded public/source input separately in the same
+envelope; do not stage or expose any private key. Test real PowerShell execution with a harmless
+synthetic script through the same bootstrap, wrong hashes/fields/caps, and every actual operation's
+outer command length. This is an operator transport correction, not a campaign/model source change.
+
+The original inline commands were measured before any live dispatch: UploadHome12538 characters
+(12585 with nested SSH), UploadControl12638, HomeOffer11370 (11417 nested), ControlRequest12502,
+HomeSign12170 (12217 nested), and ControlImport11826. All exceed8191. The earlier parser/transport-
+double tests did not prove the Windows remote command-processor path; this finding is retained and
+must be corrected before enrollment, not relabeled as successful transport.

@@ -70,6 +70,28 @@ pending exact qualification and the separately tested operational runtime guard.
 The prepared human trial is `gate7f/function-first/M1-CUSTOMER-TRIAL.md`; it is explicitly not ready
 to start and is not an additional permission gate. Fill its verified deployment entry record first.
 
+### 2026-08-28 health capture verified; fresh three-model run
+
+The prospective correction is implemented and verified in
+`gate7f/function-first/acceptance/HEALTH-CAPTURE-RESULTS-2026-08-28.md`. Actual Control application
+initial load and browser reload passed with 46 permitted auxiliary health reads, zero inference calls
+and zero unexpected calls. The full acceptance suite passed 125/125 against disposable PostgreSQL;
+the subsequent serialized-diagnostic-budget regression passed with the 11/11 focused health suite.
+The root default suite passed 1,153 tests with zero failures and 47 explicit environment-dependent
+skips; this is not a claim that every native/database test ran in that default invocation.
+
+The independent second-arm review is
+`gate7f/function-first/acceptance/STOPPED-GEMMA-R2-INDEPENDENT-REVIEW-2026-08-28.md`:
+24 attempts and all 33 model outputs were reviewed, with 17 passes, four failures and three
+inconclusive outcomes. Its semantic uncertainties and all 336 unexecuted slots across the three-model
+plan remain explicit; no model or role is qualified. No earlier result or denominator was rewritten.
+
+Next is a fresh exact-source seal, 12 fresh formal controls and the unchanged 120 attempts each for
+Coder, Qwen3.6 and Gemma. The separately owned Home operational-guard work continues in parallel.
+Production routing, protected stores and the existing release are unchanged. Continue through
+qualification and rollback-protected deployment until a real customer test is ready; internal commits
+and successful component checks are not stopping points or new permission gates.
+
 ### 2026-08-28 stopped-campaign independent semantic record
 
 Independent review of the stopped Gemma arm covers 23/120 attempts and all 32 captured model outputs;

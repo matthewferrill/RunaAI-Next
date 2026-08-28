@@ -77,6 +77,11 @@ test('runtime change after file write is retained and never replaced',async()=>{
   await assert.rejects(f.coordinator.closeAdmission(state),/quiescence-runtime-drift/u);
   assert.deepEqual(f.config(),{foreign:true});assert.equal(f.calls.reloads,0);assert.equal(f.records.at(-1).phase,'needs-reconciliation');
 });
+test('file change after CAS is retained and the old overlay is not sent to runtime',async()=>{
+  const f=fixture(),state=await f.prepare();f.options.afterFile=()=>f.setFile('foreign');
+  await assert.rejects(f.coordinator.closeAdmission(state),/quiescence-file-drift/u);
+  assert.equal(f.read().toString(),'foreign');assert.equal(f.calls.reloads,0);assert.equal(f.records.at(-1).phase,'needs-reconciliation');
+});
 test('lost acknowledgement after actual reload reconciles without a second mutation',async()=>{
   const f=fixture({failAfter:true}),closed=await f.coordinator.closeAdmission(await f.prepare());
   assert.equal(closed.events.at(-1).acknowledgementLost,true);const resumed=await f.coordinator.reconcile(closed);
@@ -87,6 +92,14 @@ test('lost reload before observation stays unknown until actual successor is vis
   const unknown=f.records.at(-1);assert.equal((await f.coordinator.reconcile(unknown)).phase,'needs-reconciliation');
   assert.equal(f.calls.reloads,1);f.setConfig(unknown.overlayConfig);
   assert.equal((await f.coordinator.reconcile(unknown)).phase,'admission-closed');assert.equal(f.calls.reloads,1);
+});
+test('uncertain admission cannot be rolled back before read-back reconciliation',async()=>{
+  const f=fixture({failBefore:true}),prepared=await f.prepare();await assert.rejects(f.coordinator.closeAdmission(prepared),/uncertain/u);
+  const unknown=f.records.at(-1),before=structuredClone(f.calls);
+  await assert.rejects(f.coordinator.rollback(unknown),/quiescence-reconcile-required/u);assert.deepEqual(f.calls,before);
+  f.setConfig(unknown.overlayConfig);f.options.failBefore=false;
+  const reconciled=await f.coordinator.reconcile(unknown);await f.coordinator.rollback(reconciled);
+  assert.deepEqual(f.read(),original);
 });
 test('restart reconciliation re-observes counters rather than inheriting a quiescent label',async()=>{
   const f=fixture(),closed=await f.coordinator.closeAdmission(await f.prepare()),idle=await f.coordinator.drain(closed);

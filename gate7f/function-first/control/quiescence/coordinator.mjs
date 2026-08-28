@@ -115,6 +115,7 @@ export class CaddyQuiescenceCoordinator {
     // must not be replaced even if the on-disk predecessor was still current.
     const actual=await this.admin.snapshot();
     if(configDigest(actual.config)!==state.originalConfigSha256){await this.record(state,'needs-reconciliation',{errorCode:'quiescence-runtime-drift'});throw fail('quiescence-runtime-drift');}
+    if(digest(await this.file.read())!==state.overlaySha256){await this.record(state,'needs-reconciliation',{errorCode:'quiescence-file-drift'});throw fail('quiescence-file-drift');}
     let acknowledgementLost=false;
     try{await this.admin.replace({config:state.overlayConfig,etag:actual.etag});}
     catch{acknowledgementLost=true;}
@@ -154,7 +155,11 @@ export class CaddyQuiescenceCoordinator {
     throw fail('quiescence-drain-timeout');
   }
   async rollback(input){
-    const state=clone(input),actual=await this.observe(state);
+    const state=clone(input);this.validate(state);
+    // A timed-out reload can still commit later. Do not "restore" its file while
+    // the pending runtime effect is unresolved, even when both digests look known.
+    if(!['prepared','admission-closed','control-quiescent','drain-timeout','restored'].includes(state.phase))throw fail('quiescence-reconcile-required');
+    const actual=await this.observe(state);
     if(![state.originalSha256,state.overlaySha256].includes(actual.fileSha256)
       ||![state.originalConfigSha256,state.overlayConfigSha256].includes(actual.configSha256))throw fail('quiescence-rollback-drift');
     await this.record(state,'restore-intent');

@@ -5,8 +5,9 @@ import {sha} from './lease-contract.mjs';
 const round=process.argv[2];assert.match(round,/^r[3-9][0-9]*$/);
 const here=import.meta.dirname,repository=path.resolve(here,'../../..');
 const hardwareSha256='d4e0d0b96ff4d1c15fb05801dff5c9b0f166c1c308cbbbf4e1a5eeed404e6c80';
+const selected=process.argv[3];assert.ok(selected===undefined||['coder','qwen36','gemma'].includes(selected));
 const results=[];
-for(const candidateId of ['coder','qwen36','gemma']){
+for(const candidateId of selected?[selected]:['coder','qwen36','gemma']){
   const leaseId=`20260828-campaign-${candidateId}-${round}`;
   const source=path.join(repository,'artifacts/m1-readiness',leaseId),target=path.join(here,'evidence',leaseId);
   assert.equal(existsSync(target),false);

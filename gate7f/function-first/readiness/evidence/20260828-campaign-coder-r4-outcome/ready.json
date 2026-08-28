@@ -1,0 +1,17 @@
+{
+  "schemaVersion": "runa-m1-campaign-lease-ready/v1",
+  "leaseId": "20260828-campaign-coder-r4",
+  "campaignHardwarePlanSha256": "d4e0d0b96ff4d1c15fb05801dff5c9b0f166c1c308cbbbf4e1a5eeed404e6c80",
+  "sealSha256": "bb6199dd34e4b535efa88a4632c1a9fd632815c9cdf706d200d23d423036dc99",
+  "candidateId": "coder",
+  "modelId": "qwen3-coder-30b-a3b-instruct",
+  "primaryInstanceId": "qwen3-coder-30b-a3b-instruct",
+  "embeddingModelId": "text-embedding-nomic-embed-text-v1.5",
+  "embeddingInstanceId": "text-embedding-nomic-embed-text-v1.5",
+  "primaryArtifactSha256": "72a9b20a19c70db56e1ccd01fb35b0f0842d67d28e7c3bdff762df860120b769",
+  "embeddingArtifactSha256": "d4e388894e09cf3816e8b0896d81d265b55e7a9fff9ab03fe8bf4ef5e11295ac",
+  "readyAt": "2026-08-28T20:21:47.147Z",
+  "expiresAt": "2026-08-28T21:21:47.041Z",
+  "reasoningEffort": null,
+  "completionPath": "C:\\Users\\codex-audit\\AppData\\Local\\RunaM1Readiness\\20260828-campaign-coder-r4\\complete.json"
+}

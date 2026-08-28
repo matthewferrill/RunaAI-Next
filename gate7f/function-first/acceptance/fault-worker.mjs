@@ -133,6 +133,7 @@ export async function startApplicationFaultWorker({ initialization, getLedger, b
     createBootstrap: (principalId, options) => call("browser.bootstrap", { principalId, options }),
     bindFixture: (context, item) => call("fixture.bind", { context, item }),
     snapshot: context => call("project.snapshot", context),
+    captureFinalProof: (context, input) => call("capture.final-proof", { context, input }),
     continuity: { prepareAnswerContext: input => call("continuity.prepare", input) },
     m1: { sources: { selected: (context, sourceIds) => call("sources.selected", { context, sourceIds }) } },
     syncPhase: (phase, requestScope) => call("capture.phase", { phase, requestScope }),

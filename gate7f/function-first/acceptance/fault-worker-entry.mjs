@@ -51,6 +51,7 @@ async function command(operation, input) {
       return host.m1.tasks.execute(input.context, input.input);
     case "fixture.bind": await host.bindFixture(input.context, input.item); return null;
     case "project.snapshot": return host.snapshot(input);
+    case "capture.final-proof": return host.captureFinalProof(input.context, input.input);
     case "sources.selected": return host.m1.sources.selected(input.context, input.sourceIds);
     case "continuity.prepare": return host.continuity.prepareAnswerContext(input);
     case "fault.arm-materialization": faults.armMaterializationHold(input); return null;

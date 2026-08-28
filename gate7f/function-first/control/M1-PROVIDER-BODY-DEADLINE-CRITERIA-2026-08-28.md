@@ -63,3 +63,22 @@ remain open; never turn its client timeout into a passing server timeout.
 
 This does not prove Home-wide quiescence, real hardware guard installation,
 two-host deployment, a finite outer deployment watchdog or customer readiness.
+
+## Mixed framing clarification, recorded before the corrected wire run
+
+The pinned Caddy executable's actual `build-info` reports Go1.26.3. Its
+[transfer parser](https://github.com/golang/go/blob/go1.26.3/src/net/http/transfer.go)
+removes Transfer-Encoding from parsed headers and deletes Content-Length when
+using chunked framing. [RFC9112 sections6.1 and6.3](https://www.rfc-editor.org/rfc/rfc9112.html#section-6.1)
+forbid a sender from producing both fields, but permit a server to reject or
+process using Transfer-Encoding, requiring connection closure afterward. An
+intermediary choosing forwarding must remove Content-Length and decode framing;
+the specification also warns of smuggling and recommends error handling.
+
+Consequently the original mixed-frame **denial** expectation is not retroactively
+passed. The new distinct normalization check accepts only a single decoded-empty
+health read, complete server connection closure, no forwarded CL/TE ambiguity,
+and no appended forbidden request. It proves that bounded case, not blanket
+HTTP-parser security or rejection of the original header pair. Nonempty decoded
+mixed frames remain denied before controller admission. Any second admitted
+request, nonempty forwarded body or missing closure fails the new check.

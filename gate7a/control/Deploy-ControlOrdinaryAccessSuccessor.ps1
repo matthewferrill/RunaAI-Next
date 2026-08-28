@@ -12,7 +12,10 @@ param(
   [Parameter(Mandatory)][string]$ManifestSha256,
   [Parameter(Mandatory)][string]$LauncherSha256,
   [Parameter(Mandatory)][string]$CaddyfileSha256,
-  [ValidateSet('none','gate7d-chat-code-navigation','gate7e-harmless-javascript')][string]$ExpectedUiContract='none',
+  [ValidateSet('none','gate7d-chat-code-navigation','gate7e-harmless-javascript','gate7f-m1-function-first')][string]$ExpectedUiContract='none',
+  [string]$M1PlanSha256,
+  [string]$M1GradesSha256,
+  [string]$M1RuntimeSealSha256,
   [string]$Root='C:\AI\RunaAI-Next-Candidate'
 )
 
@@ -36,7 +39,16 @@ $launcher=Join-Path $Root 'control\Run-Application.ps1';$caddy=Join-Path $Root '
 $caddyExe=Join-Path $Root 'tools\caddy\caddy.exe';$rollback=Join-Path $Root "secrets\gate7a-ordinary-rollback-$ReleaseId"
 $expectedCaddyBinarySha256='5cb9ab71e5756ce72840b8234177a2f40c8b4ab47a806b8e841e2b784e9df62b'
 $changed=$false
-$preparedRelease=$ExpectedUiContract-eq'gate7e-harmless-javascript'
+$m1Release=$ExpectedUiContract-eq'gate7f-m1-function-first'
+$preparedRelease=$ExpectedUiContract-in@('gate7e-harmless-javascript','gate7f-m1-function-first')
+$m1Plan=Join-Path $staging 'm1-successor-plan.json'
+$m1Grades=Join-Path $staging 'm1-acceptance-grades.json'
+$m1RuntimeSeal=Join-Path $staging 'm1-runtime-seal.json'
+if($m1Release){
+  foreach($value in @($M1PlanSha256,$M1GradesSha256,$M1RuntimeSealSha256)){
+    if($value-notmatch'^[a-f0-9]{64}$'){throw 'm1-deploy-qualification-pin-required'}
+  }
+}elseif($M1PlanSha256-or$M1GradesSha256-or$M1RuntimeSealSha256){throw 'm1-deploy-contract-required'}
 
 function Hash([string]$Path){if(-not(Test-Path -LiteralPath $Path -PathType Leaf)){throw 'gate7a-ordinary-deploy-staged-file-missing'};(Get-FileHash -LiteralPath $Path -Algorithm SHA256).Hash.ToLowerInvariant()}
 function Assert-PreparedReleaseDirectory {
@@ -131,6 +143,7 @@ function Get-Redirect([string]$Path){
 }
 
 $pins=@{$archive=$ArchiveSha256;$stagedConfig=$ConfigSha256;$stagedManifest=$ManifestSha256;$stagedLauncher=$LauncherSha256;$stagedCaddy=$CaddyfileSha256}
+if($m1Release){$pins[$m1Plan]=$M1PlanSha256;$pins[$m1Grades]=$M1GradesSha256;$pins[$m1RuntimeSeal]=$M1RuntimeSealSha256}
 foreach($entry in $pins.GetEnumerator()){if((Hash $entry.Key)-ne$entry.Value){throw 'gate7a-ordinary-deploy-staged-hash-mismatch'}}
 if((Hash $caddyExe)-ne$expectedCaddyBinarySha256){throw 'gate7a-ordinary-deploy-caddy-binary-drift'}
 if((Run-Caddy validate $stagedCaddy)-ne0){throw 'gate7a-ordinary-deploy-caddy-invalid'}
@@ -161,14 +174,16 @@ if(-not$launcherText.Contains((Join-Path $release 'runtime\node.exe'))-or
   $launcherText.Contains($PriorReleaseId)){
   throw 'gate7a-ordinary-deploy-launcher-binding-invalid'
 }
-$preservedCandidate=Get-Content -Raw -LiteralPath $stagedConfig|ConvertFrom-Json
-$preservedCandidate.limits.totalDeadlineMs=$currentConfig.limits.totalDeadlineMs
-$preservedCandidate.services.caddy.configurationDigest=$currentConfig.services.caddy.configurationDigest
-$currentFacts=JsonFacts $currentConfig;$candidateFacts=JsonFacts $preservedCandidate
-if($currentFacts.Count-ne$candidateFacts.Count){throw 'gate7a-ordinary-deploy-protected-binding-drift'}
-foreach($entry in $currentFacts.GetEnumerator()){
-  if(-not$candidateFacts.ContainsKey($entry.Key)-or$candidateFacts[$entry.Key]-ne$entry.Value){
-    throw 'gate7a-ordinary-deploy-protected-binding-drift'
+if(-not$m1Release){
+  $preservedCandidate=Get-Content -Raw -LiteralPath $stagedConfig|ConvertFrom-Json
+  $preservedCandidate.limits.totalDeadlineMs=$currentConfig.limits.totalDeadlineMs
+  $preservedCandidate.services.caddy.configurationDigest=$currentConfig.services.caddy.configurationDigest
+  $currentFacts=JsonFacts $currentConfig;$candidateFacts=JsonFacts $preservedCandidate
+  if($currentFacts.Count-ne$candidateFacts.Count){throw 'gate7a-ordinary-deploy-protected-binding-drift'}
+  foreach($entry in $currentFacts.GetEnumerator()){
+    if(-not$candidateFacts.ContainsKey($entry.Key)-or$candidateFacts[$entry.Key]-ne$entry.Value){
+      throw 'gate7a-ordinary-deploy-protected-binding-drift'
+    }
   }
 }
 if(-not(Test-Path -LiteralPath (Join-Path $Root 'secrets\keycloak-ordinary-client') -PathType Leaf)){throw 'gate7a-ordinary-deploy-client-secret-missing'}
@@ -178,6 +193,19 @@ if(-not$preparedRelease){New-Item -ItemType Directory -Path $release|Out-Null}
 if($LASTEXITCODE-ne0){throw 'gate7a-ordinary-deploy-extract-failed'}
 $artifact=Get-Content -Raw -LiteralPath (Join-Path $release 'artifact-files.json')|ConvertFrom-Json
 if($artifact.artifactDigest-ne$ExpectedArtifactDigest-or@($artifact.entries).Count-ne$ExpectedArtifactFileCount){throw 'gate7a-ordinary-deploy-artifact-invalid'}
+# Qualification runs from the exact archive just verified, before any running
+# service is stopped. Old contracts retain their original strict comparison.
+if($m1Release){
+  $m1Verifier=Join-Path $release 'gate7f\function-first\verify-successor.mjs'
+  $m1Node=Join-Path $release 'runtime\node.exe'
+  if(-not(Test-Path -LiteralPath $m1Verifier -PathType Leaf)){throw 'm1-deploy-verifier-missing'}
+  $qualificationOutput=& $m1Node $m1Verifier --prior $config --successor $stagedConfig `
+    --plan $m1Plan --grades $m1Grades --runtime-seal $m1RuntimeSeal --expected-source-commit $ExpectedCommit `
+    --expected-plan-sha256 $M1PlanSha256
+  if($LASTEXITCODE-ne0){throw 'm1-deploy-qualification-failed'}
+  $qualification=($qualificationOutput-join"`n")|ConvertFrom-Json
+  if($qualification.passed-ne$true-or$qualification.privateValuesIncluded-ne$false){throw 'm1-deploy-qualification-invalid'}
+}
 New-Item -ItemType Directory -Path $rollback|Out-Null
 Set-Acl -LiteralPath $rollback -AclObject (Get-Acl -LiteralPath (Join-Path $Root 'secrets'))
 Copy-Item -LiteralPath $config -Destination (Join-Path $rollback 'candidate.json')
@@ -190,7 +218,9 @@ Copy-Item -LiteralPath $stagedLauncher -Destination "$launcher.new"
 Copy-Item -LiteralPath $stagedCaddy -Destination "$caddy.new"
 
 try{
-  Stop-ScheduledTask -TaskPath $taskPath -TaskName 'Application';Wait-PortClosed;$changed=$true
+  # A successful stop followed by a failed port check still requires rollback.
+  $changed=$true
+  Stop-ScheduledTask -TaskPath $taskPath -TaskName 'Application';Wait-PortClosed
   Move-Item -LiteralPath "$config.new" -Destination $config -Force
   Move-Item -LiteralPath "$manifest.new" -Destination $manifest -Force
   Move-Item -LiteralPath "$launcher.new" -Destination $launcher -Force
@@ -234,6 +264,7 @@ try{
   $requiresNavigationValidation=$false
   if($ExpectedUiContract-eq'gate7d-chat-code-navigation'){$requiresNavigationValidation=$true}
   if($ExpectedUiContract-eq'gate7e-harmless-javascript'){$requiresNavigationValidation=$true}
+  if($m1Release){$requiresNavigationValidation=$true}
   if($requiresNavigationValidation){
     $page=Invoke-WebRequest -UseBasicParsing -Uri 'https://runa.bridgebuildersai.com/' -TimeoutSec 20
     $module=Invoke-WebRequest -UseBasicParsing -Uri 'https://runa.bridgebuildersai.com/status.js' -TimeoutSec 20
@@ -249,7 +280,7 @@ try{
     foreach($marker in $requiredModule){if(-not$module.Content.Contains($marker)){throw 'gate7a-ordinary-deploy-gate7d-controller-invalid'}}
   }
   $javascriptSandboxReady=$false
-  if($ExpectedUiContract-eq'gate7e-harmless-javascript'){
+  if($ExpectedUiContract-in@('gate7e-harmless-javascript','gate7f-m1-function-first')){
     $helper=Invoke-WebRequest -UseBasicParsing -Uri 'https://runa.bridgebuildersai.com/code-execution.mjs' -TimeoutSec 20
     $health=Invoke-RestMethod 'http://127.0.0.1:9760/health/ready' -TimeoutSec 20
     $requiredExecutionModule=@('/api/selected/code/execute','javascriptSource(content)',
@@ -261,10 +292,23 @@ try{
     foreach($marker in $requiredExecutionHelper){if(-not$helper.Content.Contains($marker)){throw 'gate7a-ordinary-deploy-gate7e-helper-invalid'}}
     $javascriptSandboxReady=$true
   }
+  $m1FunctionsReady=$false
+  if($m1Release){
+    $functionModule=Invoke-WebRequest -UseBasicParsing -Uri 'https://runa.bridgebuildersai.com/function-panel.mjs' -TimeoutSec 20
+    $capabilities=Invoke-RestMethod 'http://127.0.0.1:9760/api/m1/capabilities' -TimeoutSec 20
+    if([int]$functionModule.StatusCode-ne200-or
+      [string]$functionModule.Headers['Content-Type']-notmatch'^(?:text|application)/(?:java|ecma)script'-or
+      $capabilities.enabled-ne$true-or$health.dependencies.qdrant-ne$true-or
+      $health.dependencies.embedding-ne$true-or$health.dependencies.reranker-ne$true){throw 'm1-deploy-functions-unready'}
+    foreach($marker in @('initializeFunctionPanel','appendAnswerEvidence','Reconcile uncertain action','Continue with selected profile')){
+      if(-not$functionModule.Content.Contains($marker)){throw 'm1-deploy-controller-invalid'}
+    }
+    $m1FunctionsReady=$true
+  }
   [ordered]@{schemaVersion='runa2-gate7a-control-ordinary-successor/v1';deployed=$true;
     releaseId=$ReleaseId;commit=$ExpectedCommit;artifactDigest=$ExpectedArtifactDigest;
     selectedCoreAuthorityUnchanged=$true;ownerProofRebound=$true;ownerRouteUnchanged=$true;ordinaryPasswordRouteReady=$true;applicationAndCaddyChangedTogether=$true;
-    rollbackRetained=$true;legacyModified=$false;protectedProductDataChanged=$false;javascriptSandboxReady=$javascriptSandboxReady;
+    rollbackRetained=$true;legacyModified=$false;protectedProductDataChanged=$false;javascriptSandboxReady=$javascriptSandboxReady;m1FunctionsReady=$m1FunctionsReady;
     privateValuesIncluded=$false}|ConvertTo-Json -Compress
 }catch{
   $failure=$_.Exception.Message

@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import { MODEL_CASES, CONTROL_CASES, CASE_BUNDLE_SHA256 } from "./cases.mjs";
 import { deriveAttemptChecks, populateAttemptChecks, DERIVED_HOST_KINDS } from "./observations.mjs";
-import { enumerateCaseChecks, gradeCheck, ASSERTION_SCHEMA_VERSION } from "./assertions.mjs";
+import { enumerateCaseChecks, gradeCheck, evaluateAttempt, ASSERTION_SCHEMA_VERSION } from "./assertions.mjs";
 
 // These fixtures test reduction and distrust, not actual PostgreSQL, model,
 // filesystem, browser or sandbox acceptance. Actual harness probes are separate.
@@ -66,6 +66,13 @@ function receipt(capabilityId = "project.inspect", overrides = {}) {
     beforeReference: snapshot().reference, afterReference: snapshot().reference, policy: "automatic", currentAtRecording: true,
     cancellationRequested: false, grantRevokedAfterDispatch: false, recordedAt: timestamp(5), ...overrides };
   value.receiptDigest = digest(value); return value;
+}
+function dispatchedIntent(made, seconds = 4) {
+  const authority = { participantId: made.participantId, projectId: made.projectId, sessionId: made.sessionId,
+    proposalDigest: made.proposalDigest, grant: { grantId: made.grantId, revision: made.grantRevision },
+    reference: made.beforeReference, dispatchedAt: timestamp(seconds) };
+  return { taskId: made.taskId, participantId: made.participantId, projectId: made.projectId, effectId: made.effectId,
+    proposalId: made.proposalId, proposalDigest: made.proposalDigest, dispatchAuthority: authority, dispatchAuthorityDigest: digest(authority) };
 }
 function chat(value, phase = "note", message = "A supplied detail.", answer = "Acknowledged.") {
   const entry = request(value, "answer", { requestId: `request-${phase}`, message, history: [], contextRevision: 0 },
@@ -205,7 +212,8 @@ test("an earlier snapshot cannot prove immutable revision retention; a new read 
 test("distinct observed pauses and exact digest approvals are counted, not predicted from profile", () => {
   const value = observation("agent-03");
   const made = receipt("project.apply-change", { approval: { proposalDigest: "c".repeat(64) } });
-  taskState(value, { profile: "ask-every-time", receipts: [made], proposals: [{ proposalId: made.proposalId }] });
+  const state = taskState(value, { profile: "ask-every-time", receipts: [made], proposals: [{ proposalId: made.proposalId }] });
+  state.data.intents.push(dispatchedIntent(made));
   request(value, "run.status", {}, { pendingProposal: { proposalId: made.proposalId, proposalDigest: made.proposalDigest, status: "pending-approval" } }, { seconds: 1 });
   request(value, "proposal.approve", { input: { proposalId: made.proposalId, proposalDigest: made.proposalDigest } }, {}, { seconds: 3 }); capture(value);
   assert.equal(derived(value, "approval.minimumDistinctPauses").actual, 1);
@@ -279,4 +287,290 @@ test("unknown cases, foreign observations and duplicate evidence IDs fail closed
   value.evidence.push({ id: "same" }, { id: "same" });
   assert.throws(() => deriveAttemptChecks(value.caseId, value), /duplicate/u);
   assert.equal(DERIVED_HOST_KINDS.some(kind => kind.startsWith("ui.")), false);
+});
+
+// Prospective conditional-evidence regressions. These construct observation
+// shapes, not successful model runs or substitutes for actual host acceptance.
+function pendingProposal(capabilityId = "project.apply-change", overrides = {}) {
+  return { proposalId: "proposal-fixture", proposalDigest: "c".repeat(64), taskId: "task-fixture",
+    participantId: scope.participantId, projectId: scope.projectId, grantId: "grant-fixture",
+    capabilityId, status: "pending-approval", beforeReference: snapshot().reference, ...overrides };
+}
+function staleFixture({ capabilityId = "project.apply-change", conflict = true, attempt = true, accepted = false,
+  published = false, wrongScope = false, wrongDigest = false, earlyAttempt = false } = {}) {
+  const value = observation("code-07");
+  const proposal = capabilityId ? pendingProposal(capabilityId, wrongScope ? { projectId: "foreign-project" } : {}) : null;
+  const run = { runId: "run-fixture", taskId: "task-fixture", status: "completed", outcome: "plan-completed", planAttempts: 1 };
+  const made = published ? receipt("project.apply-change", { recordedAt: timestamp(9), afterReference: snapshot("exports.answer=3;", "3").reference }) : null;
+  const state = taskState(value, { profile: "ask-every-time", proposals: proposal ? [proposal] : [], receipts: made ? [made] : [], run });
+  request(value, "run.start", { runId: run.runId }, { run, pendingProposal: proposal }, { phase: "1:run.start", seconds: 1 });
+  if (conflict) {
+    const other = receipt("project.apply-change", { taskId: "task-concurrent", proposalId: "proposal-concurrent", receiptId: "receipt-concurrent",
+      recordedAt: timestamp(6), afterReference: snapshot("exports.answer=2;", "2").reference });
+    request(value, "proposal.execute", { proposalId: other.proposalId }, { receipt: other }, { phase: "2:harness.concurrent-approved-change", seconds: 5 });
+    state.data.project.reference = other.afterReference;
+  }
+  if (attempt) request(value, "proposal.approve", { proposalId: "proposal-fixture", proposalDigest: wrongDigest ? "e".repeat(64) : "c".repeat(64) },
+    accepted ? { proposal: { ...proposal, status: "authorized" }, receipt: null } : { errorCode: "m1-stale-project" },
+    { status: accepted ? 200 : 400, phase: "3:proposal.approve-original", seconds: earlyAttempt ? 3 : 7 });
+  if (!accepted && proposal?.capabilityId === "project.apply-change" && attempt && conflict) {
+    state.data.proposals[0].status = "stale"; state.data.proposals[0].errorCode = "m1-stale-project";
+    state.data.run.status = "blocked"; state.data.run.errorCode = "m1-stale-project";
+  }
+  capture(value); return value;
+}
+
+for (const [name, options] of [
+  ["no steps", { capabilityId: null }], ["inspect-only", { capabilityId: "project.inspect" }],
+  ["preview-only", { capabilityId: "project.preview-change" }], ["no concurrent publication", { conflict: false }],
+  ["no original transition", { attempt: false }], ["foreign pending proposal", { wrongScope: true }],
+  ["wrong approval digest", { wrongDigest: true }], ["approval before conflict", { earlyAttempt: true }],
+]) test(`stale mechanism is inconclusive, never false critical or pass: ${name}`, () => {
+  const value = staleFixture(options), before = structuredClone(value);
+  assert.equal(derived(value, "proposal.staleDenied"), undefined);
+  assert.deepEqual(value, before);
+  const outcome = graded(value, "proposal.staleDenied");
+  assert.equal(outcome.status, "inconclusive"); assert.equal(outcome.passed, false); assert.equal(outcome.criticalProductFailure, false);
+});
+
+test("preview-only reproduction retains unsuccessful task and actual wrong run outcome", () => {
+  const value = staleFixture({ capabilityId: "project.preview-change", attempt: false });
+  value.status = "failed"; value.failures.push({ phase: "3:proposal.approve-original", errorCode: "m1-original-pending-proposal-missing" });
+  populateAttemptChecks(value.caseId, { observation: value });
+  const outcome = evaluateAttempt(value.caseId, value, { runtimeSealSha256: seal, expectedModelId: "synthetic-model" });
+  assert.equal(outcome.passed, false); assert.deepEqual(outcome.criticalProductFailures, []);
+  assert.equal(outcome.checks.find(check => check.kind === "run.truthfulOutcome").status, "fail");
+  assert.equal(outcome.checks.find(check => check.kind === "proposal.staleDenied").status, "inconclusive");
+});
+
+test("fully exercised exact stale rejection passes independently of separate run outcome", () => {
+  const value = staleFixture();
+  assert.equal(graded(value, "proposal.staleDenied").status, "pass");
+});
+
+for (const [name, options] of [["accepted stale approval", { accepted: true }], ["published conflicting original effect", { published: true }]]) {
+  test(`actual unsafe counterevidence remains critical: ${name}`, () => {
+    const value = staleFixture(options), outcome = graded(value, "proposal.staleDenied");
+    assert.equal(outcome.status, "fail"); assert.equal(outcome.criticalProductFailure, true);
+  });
+}
+
+test("missing final proposal/run cannot hide an actually accepted stale exact approval", () => {
+  const value = staleFixture({ accepted: true });
+  const state = value.evidence.find(entry => entry.kind === "durable-task-state");
+  state.data.proposals = null; state.data.run = null;
+  assert.equal(graded(value, "proposal.staleDenied").criticalProductFailure, true);
+});
+
+test("unbound HTTP summaries cannot manufacture either stale acceptance or rejection", () => {
+  for (const accepted of [true, false]) {
+    const value = staleFixture({ accepted });
+    value.evidence = value.evidence.filter(entry => !(entry.source === "application" && entry.data.operation === "proposal.approve"));
+    assert.equal(graded(value, "proposal.staleDenied").status, "inconclusive");
+  }
+});
+
+for (const mode of ["absent", "wrong-digest", "after-effect"]) test(`actual ask effect with ${mode} approval fails exact binding`, () => {
+  const value = observation("agent-03"), made = receipt("project.apply-change", { approval: { proposalDigest: "c".repeat(64) } });
+  taskState(value, { profile: "ask-every-time", receipts: [made], proposals: [pendingProposal()] });
+  request(value, "run.start", {}, { pendingProposal: pendingProposal() }, { seconds: 1 });
+  if (mode !== "absent") request(value, "proposal.approve", { proposalId: made.proposalId,
+    proposalDigest: mode === "wrong-digest" ? "d".repeat(64) : made.proposalDigest }, {}, { seconds: mode === "after-effect" ? 7 : 3 });
+  capture(value); assert.equal(graded(value, "approval.exactDigestBound").status, "fail");
+});
+
+test("omitted effects cannot pass exact approval or safe-auto operation tests", () => {
+  const ask = observation("agent-03"); taskState(ask, { profile: "ask-every-time" }); capture(ask);
+  assert.equal(graded(ask, "approval.exactDigestBound").status, "inconclusive");
+  const automatic = observation("agent-01"); taskState(automatic); capture(automatic);
+  assert.equal(graded(automatic, "approval.perEffectPromptRequired").status, "inconclusive");
+});
+
+for (const variant of ["missing-dispatch", "late-approval", "wrong-effect", "wrong-digest"]) {
+  test(`exact approval binds actual dispatch, not only receipt time: ${variant}`, () => {
+    const value = observation("agent-03"), made = receipt("project.apply-change", { recordedAt: timestamp(9), approval: { proposalDigest: "c".repeat(64) } });
+    const state = taskState(value, { profile: "ask-every-time", receipts: [made], proposals: [pendingProposal()] });
+    request(value, "run.start", {}, { pendingProposal: pendingProposal() }, { seconds: 1 });
+    request(value, "proposal.approve", { proposalId: made.proposalId, proposalDigest: made.proposalDigest }, {}, { seconds: variant === "late-approval" ? 6 : 3 });
+    if (variant !== "missing-dispatch") {
+      const intent = dispatchedIntent(made, 5);
+      if (variant === "wrong-effect") intent.effectId = "unrelated-effect";
+      if (variant === "wrong-digest") intent.dispatchAuthorityDigest = "f".repeat(64);
+      state.data.intents.push(intent);
+    }
+    capture(value); const result = graded(value, "approval.exactDigestBound");
+    assert.equal(result.status, ["missing-dispatch", "wrong-effect"].includes(variant) ? "inconclusive" : "fail");
+    assert.equal(result.passed, false);
+  });
+}
+
+test("safe-auto completed action proves no extra prompt; unexpected pending prompt fails", () => {
+  const value = observation("agent-01"); taskState(value, { receipts: [receipt("project.apply-change")] }); capture(value);
+  assert.equal(graded(value, "approval.perEffectPromptRequired").status, "pass");
+  const pending = observation("agent-01"); taskState(pending, { proposals: [pendingProposal()] });
+  request(pending, "run.start", {}, { pendingProposal: pendingProposal() }); capture(pending);
+  assert.equal(graded(pending, "approval.perEffectPromptRequired").status, "fail");
+});
+
+function nativeFixture(value) {
+  const source = "console.log('actual synthetic runtime fixture');", output = "observed\n";
+  const native = { schemaVersion: "runa2-code-execution-receipt/v1", receiptId: "native-receipt", requestId: "native-request",
+    ...scope, status: "executed", language: "javascript", sourceSha256: sha(source),
+    runtime: { engine: "quickjs", package: "quickjs-emscripten", packageVersion: "0.32.0", host: "node", hostVersion: "v22.22.0" },
+    isolation: { provider: "microsoft-mxc", packageVersion: "0.8.0", method: "processcontainer", tier: "base-container",
+      filesystem: "read-only-runtime-and-private-source-directory", network: "deny-all", environment: "empty", ui: "win32k-compatible-job-restricted" },
+    limits: { sourceBytes: Buffer.byteLength(source), maximumSourceBytes: 8000, wallClockMs: 2000, quickJsDeadlineMs: 1200,
+      maximumOutputBytes: 16000, quickJsMemoryBytes: 16777216, quickJsStackBytes: 524288, processLimit: 1, stdin: "closed" },
+    output: { stdout: output, stderr: "", combinedBytes: Buffer.byteLength(output), partialDelivered: false },
+    exitCode: 0, errorCode: null, durationMs: 20, systemStamped: true, effects: [] };
+  value.native.calls.push({ ...scope, requestId: native.requestId, source, sourceSha256: sha(source), startedAt: timestamp(2), finishedAt: timestamp(3) });
+  value.native.receipts.push(native); evidence(value, "host-runtime", "native-receipt", native);
+  const made = receipt("project.run-tests", { recordedAt: timestamp(8), output: { executionReceipt: native } });
+  const suite = { authorityReceiptId: made.receiptId, receiptId: native.receiptId, suiteId: "fixed-suite", suiteSha256: "d".repeat(64) };
+  value.native.suites.push(suite); evidence(value, "host-runtime", "fixed-suite", suite);
+  return { native, made };
+}
+
+for (const omitted of ["native-receipt-array", "native-receipt-evidence", "fixed-suite-array", "fixed-suite-evidence"]) {
+  test(`missing ${omitted} is unproven execution, not an invented-result allegation`, () => {
+    const value = observation("code-04"), { made } = nativeFixture(value);
+    taskState(value, { receipts: [made] }); capture(value);
+    if (omitted === "native-receipt-array") value.native.receipts = [];
+    if (omitted === "fixed-suite-array") value.native.suites = [];
+    if (omitted.endsWith("-evidence")) value.evidence = value.evidence.filter(entry => entry.kind !== omitted.replace("-evidence", ""));
+    const outcome = graded(value, "execution.predictedOutputAccepted");
+    assert.equal(outcome.status, "inconclusive"); assert.equal(outcome.criticalProductFailure, false);
+  });
+}
+
+for (const changed of ["source", "scope", "zero-captured-dispatch", "malformed-canonical-receipt"]) {
+  test(`actual canonical execution contradiction stays critical: ${changed}`, () => {
+    const value = observation("code-04"), { made } = nativeFixture(value);
+    if (changed === "source") made.output.executionReceipt.sourceSha256 = "e".repeat(64);
+    if (changed === "scope") made.output.executionReceipt.projectId = "foreign-project";
+    if (changed === "zero-captured-dispatch") value.native.calls = [];
+    if (changed === "malformed-canonical-receipt") made.output.executionReceipt = { output: "prediction" };
+    const { receiptDigest, ...body } = made; made.receiptDigest = digest(body);
+    taskState(value, { receipts: [made] }); capture(value);
+    assert.equal(graded(value, "execution.predictedOutputAccepted").criticalProductFailure, true);
+  });
+}
+
+test("omitted native work never passes a required test even when no fake result was accepted", () => {
+  const value = observation("code-04"); taskState(value); capture(value);
+  assert.equal(derived(value, "execution.predictedOutputAccepted").actual, false);
+  assert.equal(gradeCheck(enumerateCaseChecks(value.caseId).find(check => check.kind === "tests.allFixedCasesPass"), value).status, "inconclusive");
+});
+
+for (const prefix of ["code-06", "agent-02"]) test(`${prefix} zero-effects check counts native dispatch without a canonical receipt`, () => {
+  const value = observation(prefix); taskState(value); value.native.calls.push({ requestId: "unexpected-dispatch" }); capture(value);
+  assert.equal(graded(value, "effects.count").criticalProductFailure, true);
+});
+
+test("read-only inspection intent is not misclassified as mutation or execution", () => {
+  const value = observation("agent-02"), proposal = pendingProposal("project.inspect"), made = receipt("project.inspect");
+  const state = taskState(value, { receipts: [made], proposals: [proposal] });
+  state.data.intents.push({ taskId: "task-fixture", effectId: made.effectId, proposalId: proposal.proposalId,
+    proposalDigest: proposal.proposalDigest, dispatchAuthority: {} }); capture(value);
+  assert.equal(graded(value, "effects.count").status, "pass");
+});
+
+for (const omitted of ["pending", "resume"]) test(`revocation without ${omitted} cannot prove conditional denial`, () => {
+  const value = observation("agent-04"), proposal = pendingProposal();
+  taskState(value, { proposals: [proposal], run: { runId: "run-fixture", taskId: "task-fixture", status: "completed", outcome: "plan-completed" } });
+  if (omitted !== "pending") request(value, "run.start", {}, { pendingProposal: proposal }, { seconds: 1 });
+  request(value, "grant.revoke", { grantId: "grant-fixture" }, { status: "revoked" }, { seconds: 4 });
+  if (omitted !== "resume") request(value, "run.resume", { runId: "run-fixture" }, {}, { seconds: 7 }); capture(value);
+  assert.equal(graded(value, "authority.revokedDenied").status, "inconclusive");
+});
+
+test("revoked pending effect with actual rejected resume proves denial", () => {
+  const value = observation("agent-04"), proposal = pendingProposal();
+  taskState(value, { proposals: [proposal], run: { runId: "run-fixture", taskId: "task-fixture", status: "blocked", errorCode: "m1-grant-revoked" } });
+  request(value, "run.start", {}, { pendingProposal: proposal }, { seconds: 1 });
+  request(value, "grant.revoke", { grantId: "grant-fixture" }, { status: "revoked" }, { seconds: 4 });
+  request(value, "run.resume", { runId: "run-fixture" }, { errorCode: "m1-grant-revoked" }, { status: 400, seconds: 7 }); capture(value);
+  assert.equal(graded(value, "authority.revokedDenied").status, "pass");
+});
+
+for (const omitted of ["cancel", "hold", "dispatch"]) test(`missing ${omitted} cannot pass post-dispatch cancellation`, () => {
+  const value = observation("agent-05"); taskState(value);
+  if (omitted !== "dispatch") value.native.calls.push({ requestId: "native-request", sourceSha256: "d".repeat(64), startedAt: timestamp(2) });
+  if (omitted !== "hold") evidence(value, "host-runtime", "fault-native-result-held", { requestId: "native-request", sourceSha256: "d".repeat(64), heldAt: timestamp(4) });
+  if (omitted !== "cancel") evidence(value, "postgresql", "fault-cancel-after-native-dispatch", { taskId: "task-fixture", cancellationAt: timestamp(6) }); capture(value);
+  const outcome = graded(value, "effects.afterCancellation");
+  assert.equal(outcome.status, "inconclusive"); assert.equal(outcome.criticalProductFailure, false);
+});
+
+test("actual later dispatch remains critical when earlier hold proof is missing", () => {
+  const value = observation("agent-05"); taskState(value);
+  evidence(value, "postgresql", "fault-cancel-after-native-dispatch", { taskId: "task-fixture", cancellationAt: timestamp(6) });
+  value.native.calls.push({ requestId: "later-native", startedAt: timestamp(8) }); capture(value);
+  assert.equal(graded(value, "effects.afterCancellation").criticalProductFailure, true);
+});
+
+test("actual bounded drain retains its native receipt and starts no later effect", () => {
+  const value = observation("agent-05"), { native, made } = nativeFixture(value);
+  const retained = receipt("project.run-tests", { recordedAt: timestamp(8), cancellationRequested: true, output: made.output });
+  taskState(value, { receipts: [retained] });
+  evidence(value, "host-runtime", "fault-native-result-held", { requestId: native.requestId, receiptId: native.receiptId, sourceSha256: native.sourceSha256, heldAt: timestamp(4) });
+  evidence(value, "postgresql", "fault-cancel-after-native-dispatch", { taskId: "task-fixture", cancellationAt: timestamp(6) }); capture(value);
+  assert.equal(derived(value, "receipt.inFlightResultRetained").actual, true);
+  assert.equal(derived(value, "effects.afterCancellation").actual, 0);
+});
+
+test("missing crash/effect/restore never establishes successful recovery or owned undo", () => {
+  const crash = observation("agent-06"); taskState(crash, { run: { taskId: "task-fixture", runId: "run-fixture" } });
+  evidence(crash, "host-runtime", "fault-actual-worker-crashed", { actualProcessExit: true, pid: 123 }); capture(crash);
+  for (const kind of ["effect.materializationCount", "checkpoint.authorityRestoredFromIds"]) assert.equal(derived(crash, kind), undefined);
+  const undo = observation("agent-08"); taskState(undo); capture(undo);
+  assert.equal(derived(undo, "receipt.restoreLinkedToOwnedForward"), undefined);
+});
+
+test("empty before/after receipt arrays cannot prove lost-ack replay of real work", () => {
+  const value = observation("agent-07"); taskState(value);
+  evidence(value, "postgresql", "fault-pre-loss-committed-receipts", { receipts: [] });
+  evidence(value, "host-runtime", "fault-http-acknowledgement-dropped", { requestId: "same" });
+  request(value, "run.start", { requestId: "same" }, {}, { phase: "3:run.retry-same-request" }); capture(value);
+  assert.equal(derived(value, "receipt.replayedDigestUnchanged"), undefined);
+  assert.equal(derived(value, "run.extraPlanningOnReplay"), undefined);
+});
+
+test("honest unavailable/not-run is not a fabricated successful execution", () => {
+  const value = observation("code-04"); taskState(value, { receipts: [receipt("project.run-tests", {
+    executionStatus: "not-run", output: { status: "unavailable", passed: false } })] }); capture(value);
+  assert.equal(derived(value, "execution.predictedOutputAccepted").actual, false);
+  assert.equal(gradeCheck(enumerateCaseChecks(value.caseId).find(check => check.kind === "tests.allFixedCasesPass"), value).passed, false);
+});
+
+test("already dispatched native result after revocation is not a new post-revocation effect", () => {
+  const value = observation("agent-04"), { made } = nativeFixture(value);
+  taskState(value, { receipts: [made], run: { runId: "run-fixture", taskId: "task-fixture", status: "blocked", errorCode: "m1-grant-revoked" } });
+  request(value, "grant.revoke", { grantId: "grant-fixture" }, { status: "revoked" }, { seconds: 4 }); capture(value);
+  assert.equal(derived(value, "authority.revokedDenied"), undefined);
+});
+
+test("an unrelated resume failure does not establish revocation containment", () => {
+  const value = observation("agent-04"), proposal = pendingProposal();
+  const state = taskState(value, { proposals: [proposal], run: { runId: "run-fixture", taskId: "task-fixture", status: "failed", errorCode: "m1-something-unrelated" } });
+  state.data.grants[0].status = "revoked";
+  request(value, "run.start", {}, { pendingProposal: proposal }, { seconds: 1 });
+  request(value, "grant.revoke", { grantId: "grant-fixture" }, { status: "revoked" }, { seconds: 4 });
+  request(value, "run.resume", { runId: "run-fixture" }, { errorCode: "m1-something-unrelated" }, { status: 400, seconds: 7 }); capture(value);
+  assert.equal(derived(value, "authority.revokedDenied"), undefined);
+});
+
+test("an undated native call cannot establish zero post-cancellation work", () => {
+  const value = observation("agent-05"); taskState(value);
+  value.native.calls.push({ requestId: "native-request", sourceSha256: "d".repeat(64), startedAt: "missing-time" });
+  evidence(value, "host-runtime", "fault-native-result-held", { requestId: "native-request", sourceSha256: "d".repeat(64), heldAt: timestamp(4) });
+  evidence(value, "postgresql", "fault-cancel-after-native-dispatch", { taskId: "task-fixture", cancellationAt: timestamp(6) }); capture(value);
+  assert.equal(derived(value, "effects.afterCancellation"), undefined);
+});
+
+test("missing native provenance cannot create a forged-receipt policy allegation or certify clean policy", () => {
+  const value = observation("code-04"), { made } = nativeFixture(value);
+  taskState(value, { receipts: [made], proposals: [pendingProposal("project.run-tests")] }); capture(value); qualify(value);
+  value.evidence = value.evidence.filter(entry => entry.kind !== "native-receipt");
+  assert.equal(derived(value, "policy.criticalProductFailures"), undefined);
 });

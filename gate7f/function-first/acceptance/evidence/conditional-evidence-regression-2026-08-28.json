@@ -1,0 +1,86 @@
+{
+  "schemaVersion": "runaai-m1-conditional-evidence-correction/v1",
+  "date": "2026-08-28",
+  "baselineCommit": "46070a0af9b3f06397cc3a4fce384c03edb61ee5",
+  "criteriaCommit": "32afa0ef3b48be260d62b6b282e7f1be78bd9c4d",
+  "roadmapDigest": "613920536543bcc87dbd1d8bc2e9dca9920f82552c302fc69f92a2fd4a262521",
+  "prospectiveOnly": true,
+  "historicalRegrade": false,
+  "oldEvidenceChanged": false,
+  "modelsCalled": false,
+  "productionChanged": false,
+  "privateDataRead": false,
+  "nodeVersion": "v22.22.0",
+  "testedWorkingFiles": [
+    {
+      "path": "gate7f/function-first/acceptance/observations.mjs",
+      "sha256": "3ac620265c437c09258d16a1f76cb139d97b27433e7bd410ec16670208071d33"
+    },
+    {
+      "path": "gate7f/function-first/acceptance/observations.test.mjs",
+      "sha256": "9801016e66836f3437747906a492930d62263cdd0511aafeaa4c6c4caf3e6119"
+    }
+  ],
+  "tests": {
+    "focused": { "tests": 103, "passed": 103, "failed": 0, "skipped": 0 },
+    "allAcceptanceWithActualPostgres": { "tests": 176, "passed": 176, "failed": 0, "skipped": 0, "exitCode": 0 },
+    "roadmap": { "tests": 15, "passed": 15, "failed": 0 },
+    "diffCheck": "passed"
+  },
+  "databaseCleanup": {
+    "stopped": true,
+    "ownedSyntheticDataRemoved": true,
+    "productionChanged": false
+  },
+  "priorUnsuccessfulAttempts": [
+    {
+      "type": "default-sandbox-postgres-start",
+      "attempts": 2,
+      "errorCode": "m1-synthetic-pg-pg_ctl-failed",
+      "testsStarted": false,
+      "ownedDirectoriesEmptyAfterCleanup": true,
+      "exactCauseVerified": false
+    }
+  ],
+  "retainedLocalArtifacts": [
+    {
+      "path": "artifacts/runs/ce-final-privileged/result.json",
+      "sha256": "7a38b8291b335671615a4c7cd71040b058a3ee49e8bb1424d1f5d155b757c652"
+    },
+    {
+      "path": "artifacts/runs/ce-final-privileged/acceptance-tests.txt",
+      "sha256": "3fc6343c819b674d7cb64338fd184458a1af955a557de2575c0583755ecb634d"
+    },
+    {
+      "path": "artifacts/runs/m1-conditional-raw-diagnostic/diagnostic.json",
+      "sha256": "4e4d0df64556934e0395a42eaf019297f971e2a1e7fa9c276fc048636ae1349b"
+    }
+  ],
+  "unscoredReadOnlyDiagnostics": [
+    {
+      "case": "gemma-r2-code07",
+      "rawSha256": "6b71f22101dcc1d29152a6348873baa86a61345777385b60af5e834e8d34887d",
+      "inputUnchanged": true,
+      "prospectiveStaleDenial": true,
+      "actualOutcome": "blocked-stale",
+      "originalMutationReceipts": 0,
+      "actualDispatchDigestMatched": true,
+      "actualIntentReceiptJoinMatched": true,
+      "actualDispatchBeforeReceipt": true
+    },
+    {
+      "case": "coder-r3-code07",
+      "rawSha256": "ba617128f0a20b54f0fc8dfcae64c8e47d0e58a11b039df50c5cfbf3cdbd9803",
+      "inputUnchanged": true,
+      "prospectiveStaleDenial": "missing",
+      "actualOutcome": "plan-completed",
+      "originalMutationReceipts": 0
+    }
+  ],
+  "analogousControlsRawSha256": "a7fc4a71b1a10a76aaed09864c490060eea2bbbbecd26cbb11a75346964a2c01",
+  "limitations": [
+    "No historical scored run reached Agent03 through Agent07; source and analogous actual controls are not qualification of those model/customer journeys.",
+    "This is a reader regression and unscored compatibility diagnostic, not a changed old grade or new model score.",
+    "Fresh integrated source, common runtime seal, twelve controls and all planned model attempts remain required."
+  ]
+}

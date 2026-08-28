@@ -71,6 +71,22 @@ function nativeBound(receipt, observation) {
     && arr(observation.evidence).some(item => item.source === "host-runtime" && item.kind === "native-receipt" && same(item.data, receipt));
 }
 
+// A contradictory recorded result is different from an omitted capture. The
+// caller separately requires the complete capture manifest; this helper never
+// turns a missing native receipt/evidence record into a verified execution.
+function nativeEvidenceState(receipt, observation) {
+  if (!CodeExecutionReceiptSchema.safeParse(receipt).success) return "contradicted";
+  const calls = arr(observation.native?.calls).filter(call => call.requestId === receipt.requestId);
+  if (calls.length !== 1) return "contradicted";
+  const call = calls[0];
+  if (typeof call.source !== "string" || sha(call.source) !== receipt.sourceSha256 || call.sourceSha256 !== receipt.sourceSha256
+      || ["participantId", "projectId", "threadId"].some(key => call[key] !== receipt[key])) return "contradicted";
+  const retained = arr(observation.native?.receipts).filter(value => value.receiptId === receipt.receiptId);
+  if (retained.length === 0) return "missing";
+  if (retained.length !== 1 || !same(retained[0], receipt)) return "contradicted";
+  return nativeBound(receipt, observation) ? "verified" : "missing";
+}
+
 /** Returns independent derived records without mutating the supplied observation.
  * The optional ledger wrapper below appends them. Existing checks (including
  * independently authored browser and model-free controls) are never overwritten. */
@@ -151,6 +167,64 @@ export function deriveAttemptChecks(caseOrId, observation) {
   function selectedReceipt(restore) {
     const proposal = proposals?.find(value => value.proposalId === restore.proposalId);
     return taskReceipts?.find(value => value.receiptId === proposal?.arguments?.receiptId && mutation(value));
+  }
+
+  const taskProposal = proposal => taskScoped && proposal?.taskId === task.taskId
+    && proposal.participantId === task.participantId && proposal.projectId === task.projectId
+    && ID.test(proposal.proposalId ?? "") && SHA.test(proposal.proposalDigest ?? "");
+  const pendingEffects = () => requests.map(request => ({ request, proposal: payload(request)?.pendingProposal }))
+    .filter(({ request, proposal }) => successful(request) && taskProposal(proposal) && effect(proposal)
+      && proposal.status === "pending-approval" && time(request.finishedAt) !== null);
+  const errorText = request => {
+    const value = payload(request);
+    return [value?.errorCode, value?.code, value?.error, value?.run?.errorCode].find(value => typeof value === "string") ?? "";
+  };
+  const knownTaskReceipts = () => [...(taskReceipts ?? []), ...requests.map(request => payload(request)?.receipt)]
+    .filter(receipt => validReceipt(receipt) && receipt.taskId === task?.taskId
+      && receipt.participantId === task?.participantId && receipt.projectId === task?.projectId);
+
+  function staleDenialProof() {
+    if (!captureComplete || !taskScoped) return missing;
+    const conflicts = http("proposal.execute").filter(request => successful(request)
+      && request.phase.endsWith(":harness.concurrent-approved-change") && time(request.finishedAt) !== null)
+      .map(request => ({ request, receipt: payload(request)?.receipt }))
+      .filter(({ receipt }) => validReceipt(receipt) && mutation(receipt) && receipt.taskId !== task.taskId
+        && receipt.participantId === task.participantId && receipt.projectId === task.projectId);
+    const scenarios = pendingEffects().filter(({ proposal }) => mutation(proposal)).flatMap(pending => conflicts
+      .filter(conflict => time(pending.request.finishedAt) <= time(conflict.request.startedAt)
+        && same(pending.proposal.beforeReference, conflict.receipt.beforeReference)
+        && SHA.test(pending.proposal.beforeReference?.workspaceSha256 ?? "")
+        && SHA.test(conflict.receipt.afterReference?.workspaceSha256 ?? "")
+        && pending.proposal.beforeReference.workspaceSha256 !== conflict.receipt.afterReference.workspaceSha256)
+      .map(conflict => ({ pending, conflict })));
+    if (!scenarios.length) return missing;
+    let exercised = false;
+    const entries = [];
+    for (const { pending, conflict } of scenarios) {
+      const proposal = pending.proposal, conflictAt = time(conflict.request.finishedAt);
+      const approvals = http("proposal.approve").filter(request => input(request)?.proposalId === proposal.proposalId
+        && input(request)?.proposalDigest === proposal.proposalDigest && time(request.startedAt) !== null
+        && time(request.startedAt) >= conflictAt);
+      const resumes = http("run.resume").filter(request => run?.runId && input(request)?.runId === run.runId
+        && time(request.startedAt) !== null && time(request.startedAt) >= conflictAt);
+      entries.push(httpEvidence(pending.request), httpEvidence(conflict.request), ...approvals.map(httpEvidence), ...resumes.map(httpEvidence));
+      // A captured unsafe acceptance/publication remains decisive even if the
+      // final durable probe is missing. A 2xx envelope alone is not acceptance.
+      const accepted = approvals.some(request => successful(request)
+        && payload(request)?.proposal?.proposalId === proposal.proposalId
+        && payload(request)?.proposal?.proposalDigest === proposal.proposalDigest
+        && payload(request).proposal.status === "authorized");
+      const published = knownTaskReceipts().some(receipt => receipt.proposalId === proposal.proposalId
+        && mutation(receipt) && time(receipt.recordedAt) !== null && time(receipt.recordedAt) >= conflictAt);
+      if (accepted || published) return proof(false, "postgresql", [taskEvidence, entries], "actual stale exact approval accepted or original conflicting effect published");
+      const attempted = [...approvals, ...resumes];
+      if (!attempted.length) continue;
+      exercised = true;
+      const rejected = attempted.some(request => /stale|revision|precondition/u.test(errorText(request)));
+      if (!rejected) return missing;
+    }
+    if (!exercised || !completedReceipts() || taskReceipts.some(mutation)) return missing;
+    return proof(true, "postgresql", [taskEvidence, entries], "exact original pending proposal, observed concurrent publication and rejected stale transition; no original effect");
   }
 
   function derive(check) {
@@ -261,6 +335,16 @@ export function deriveAttemptChecks(caseOrId, observation) {
     if (kind === "task.status") return taskScoped ? proof(task.status, "postgresql", [taskEvidence], "actual durable task status") : missing;
     if (["receipts.mutationCount", "originalTask.mutationReceipts", "effect.authoritativePublicationCount", "effects.count"].includes(kind)) {
       if (!completedReceipts()) return missing;
+      if (kind === "effects.count") {
+        if (!Array.isArray(state.intents) || !proposals) return missing;
+        const dispatched = state.intents.filter(intent => intent.taskId === task.taskId && intent.dispatchAuthority);
+        if (dispatched.some(intent => !proposals.some(proposal => proposal.proposalId === intent.proposalId
+          && proposal.proposalDigest === intent.proposalDigest))) return missing;
+        return proof(new Set([...taskReceipts.filter(effect).map(receipt => receipt.effectId),
+          ...dispatched.filter(intent => effect(proposals.find(proposal => proposal.proposalId === intent.proposalId))).map(intent => intent.effectId),
+          ...arr(observation.native?.calls).map(call => call.requestId)]).size,
+        "postgresql", [taskEvidence, capture], "complete scoped canonical effect/intents and native dispatch ledger, not receipts alone");
+      }
       const counted = taskReceipts.filter(kind === "effects.count" ? effect : mutation);
       return proof(counted.length, "postgresql", [taskEvidence, capture], "count actual scoped canonical receipts, including zero only after complete capture");
     }
@@ -278,9 +362,7 @@ export function deriveAttemptChecks(caseOrId, observation) {
         "application", [runBasis], "application run outcome/error, not planner prose");
     }
     if (kind === "proposal.staleDenied") {
-      if (!completedReceipts() || !proposals?.length || !run) return missing;
-      return proof(proposals.some(proposal => /stale|revision|precondition/u.test(proposal.errorCode ?? "") || proposal.status === "stale")
-        && !taskReceipts.some(mutation) && run.status !== "completed", "postgresql", [taskEvidence, runBasis], "original pending proposal blocked with no canonical mutation receipt");
+      return staleDenialProof();
     }
     if (kind === "proposal.preconditionExact") {
       if (!completedReceipts() || !proposals) return missing;
@@ -297,17 +379,40 @@ export function deriveAttemptChecks(caseOrId, observation) {
       const pending = requests.filter(request => payload(request)?.pendingProposal?.status === "pending-approval");
       if (kind === "approval.minimumDistinctPauses") return proof(new Set(pending.map(request => payload(request).pendingProposal.proposalId)).size,
         "application", [...pending.map(httpEvidence), capture], "actual distinct pending responses before approvals");
-      if (kind === "approval.perEffectPromptRequired") return proof(grants.some(grant => grant.profile === "ask-every-time") || approvals.length > 0,
-        "postgresql", [taskEvidence, ...raw("postgresql", "capability-grant"), ...approvals.map(httpEvidence)], "actual selected profile and exact-effect approval requests");
       const effects = taskReceipts.filter(effect);
-      if (!effects.length || !approvals.length) return missing;
-      return proof(effects.every(receipt => {
-        const approved = approvals.find(request => input(request).proposalId === receipt.proposalId && input(request).proposalDigest === receipt.proposalDigest);
-        return approved && receipt.approval?.proposalDigest === receipt.proposalDigest
-          && pending.some(request => payload(request).pendingProposal.proposalId === receipt.proposalId
-            && payload(request).pendingProposal.proposalDigest === receipt.proposalDigest
-            && time(request.finishedAt) !== null && time(approved.startedAt) >= time(request.finishedAt));
-      }), "postgresql", [taskEvidence, ...pending.map(httpEvidence), ...approvals.map(httpEvidence)], "each effect paused and approved on the exact recorded digest before dispatch");
+      if (kind === "approval.perEffectPromptRequired") {
+        if (!effects.length && !pendingEffects().length) return missing;
+        return proof(pendingEffects().length > 0 || grants.some(grant => grant.profile === "ask-every-time") || approvals.length > 0,
+          "postgresql", [taskEvidence, ...raw("postgresql", "capability-grant"), ...approvals.map(httpEvidence)], "actual proposed/effected action, selected profile and exact-effect approval requests");
+      }
+      if (!effects.length) return missing;
+      const binding = effects.map(receipt => {
+        const matching = approvals.filter(request => input(request).proposalId === receipt.proposalId && input(request).proposalDigest === receipt.proposalDigest);
+        if (!matching.length || receipt.approval?.proposalDigest !== receipt.proposalDigest) return false;
+        const dated = matching.filter(request => time(request.startedAt) !== null && time(request.finishedAt) !== null);
+        if (!dated.length || time(receipt.recordedAt) === null) return missing;
+        if (dated.every(request => time(request.finishedAt) > time(receipt.recordedAt))) return false;
+        const intents = arr(state.intents).filter(intent => intent.effectId === receipt.effectId && intent.proposalId === receipt.proposalId);
+        if (intents.length !== 1 || !intents[0].dispatchAuthority || !SHA.test(intents[0].dispatchAuthorityDigest ?? "")) return missing;
+        const intent = intents[0], authority = intent.dispatchAuthority;
+        if (time(authority.dispatchedAt) === null) return missing;
+        if (intent.dispatchAuthorityDigest !== digest(authority) || intent.proposalDigest !== receipt.proposalDigest
+          || intent.taskId !== receipt.taskId || intent.participantId !== receipt.participantId || intent.projectId !== receipt.projectId
+          || authority.proposalDigest !== receipt.proposalDigest || authority.participantId !== receipt.participantId
+          || authority.projectId !== receipt.projectId || authority.sessionId !== receipt.sessionId
+          || authority.grant?.grantId !== receipt.grantId || authority.grant?.revision !== receipt.grantRevision
+          || !same(authority.reference, receipt.beforeReference)) return false;
+        if (time(authority.dispatchedAt) > time(receipt.recordedAt)
+          || dated.every(request => time(request.finishedAt) > time(authority.dispatchedAt))) return false;
+        const pauses = pending.filter(request => payload(request).pendingProposal.proposalId === receipt.proposalId
+          && payload(request).pendingProposal.proposalDigest === receipt.proposalDigest && time(request.finishedAt) !== null);
+        if (!pauses.length) return missing;
+        return dated.some(approved => time(approved.finishedAt) <= time(authority.dispatchedAt)
+          && pauses.some(request => time(request.finishedAt) <= time(approved.startedAt)));
+      });
+      if (!binding.includes(false) && binding.includes(missing)) return missing;
+      return proof(!binding.includes(false), "postgresql", [taskEvidence, ...pending.map(httpEvidence), ...approvals.map(httpEvidence)],
+        "exact effect intent/digest/scope and pending -> approval -> dispatch-authority -> receipt ordering");
     }
     if (["authority.revokedDenied", "run.newModelCallsAfterRevocation"].includes(kind)) {
       const revoked = http("grant.revoke").find(successful);
@@ -315,23 +420,42 @@ export function deriveAttemptChecks(caseOrId, observation) {
       const after = arr(observation.provider?.calls).filter(call => time(call.startedAt) >= time(revoked.finishedAt));
       if (kind === "run.newModelCallsAfterRevocation") return proof(after.length, "host-runtime", [capture, httpEvidence(revoked)], "complete wire ledger after successful durable revocation");
       if (!completedReceipts() || !run) return missing;
+      const pending = pendingEffects().filter(({ proposal, request }) => proposal.grantId === input(revoked)?.grantId
+        && time(request.finishedAt) <= time(revoked.startedAt));
+      const resumes = http("run.resume").filter(request => input(request)?.runId === run.runId
+        && time(request.startedAt) !== null && time(request.startedAt) >= time(revoked.finishedAt));
+      if (taskReceipts.some(receipt => mutation(receipt) && time(receipt.recordedAt) !== null && time(receipt.recordedAt) >= time(revoked.finishedAt))
+        || arr(observation.native?.calls).some(call => time(call.startedAt) !== null && time(call.startedAt) >= time(revoked.finishedAt))) {
+        return proof(false, "postgresql", [taskEvidence, capture, httpEvidence(revoked)], "actual new native dispatch or publication after revocation; earlier dispatched results may drain");
+      }
+      if (!pending.length || !resumes.length || !resumes.some(request => /revoked|stale-grant|inactive/u.test(errorText(request)))
+        && !/revoked|stale-grant|inactive/u.test(run.errorCode ?? "")) return missing;
       return proof(run.status !== "completed" && taskReceipts.filter(receipt => mutation(receipt) && time(receipt.recordedAt) >= time(revoked.finishedAt)).length === 0
         && (grants.some(grant => grant.status === "revoked") || /revoked|stale-grant|inactive/u.test(run.errorCode ?? "")),
-      "postgresql", [taskEvidence, runBasis, httpEvidence(revoked)], "revoked durable grant/run and no later authoritative mutation");
+      "postgresql", [taskEvidence, runBasis, httpEvidence(revoked), ...pending.map(value => httpEvidence(value.request)), ...resumes.map(httpEvidence)], "pending effect, revoked durable grant and attempted continuation with no later authoritative mutation");
     }
     if (["receipt.inFlightResultRetained", "effects.afterCancellation"].includes(kind)) {
       const cancel = last("postgresql", "fault-cancel-after-native-dispatch"), held = last("host-runtime", "fault-native-result-held");
-      if (!completedReceipts() || !cancel || !held || time(cancel.data.cancellationAt) === null) return missing;
+      if (!completedReceipts() || !cancel || cancel.data.taskId !== task.taskId || time(cancel.data.cancellationAt) === null) return missing;
+      const laterNative = arr(observation.native?.calls).filter(call => time(call.startedAt) !== null && time(call.startedAt) > time(cancel.data.cancellationAt)).length;
+      const laterPublications = taskReceipts.filter(receipt => mutation(receipt) && time(receipt.recordedAt) > time(cancel.data.cancellationAt)).length;
+      if (kind === "effects.afterCancellation" && laterNative + laterPublications > 0) return proof(laterNative + laterPublications,
+        "postgresql", [cancel, capture, taskEvidence], "actual post-cancellation dispatch/publication cannot be hidden by a missing earlier hold probe");
+      if (arr(observation.native?.calls).some(call => time(call.startedAt) === null)
+        || taskReceipts.some(receipt => mutation(receipt) && time(receipt.recordedAt) === null)) return missing;
+      const prior = held && arr(observation.native?.calls).find(call => call.requestId === held.data.requestId
+        && call.sourceSha256 === held.data.sourceSha256 && time(call.startedAt) !== null
+        && time(call.startedAt) <= time(cancel.data.cancellationAt));
+      if (!held || !prior || time(held.data.heldAt) === null || time(held.data.heldAt) > time(cancel.data.cancellationAt)) return missing;
       if (kind === "receipt.inFlightResultRetained") return proof(taskReceipts.some(receipt => receipt.output?.executionReceipt?.receiptId === held.data.receiptId
         && nativeBound(receipt.output.executionReceipt, observation) && receipt.cancellationRequested === true), "postgresql", [cancel, held, taskEvidence], "actual dispatched native result remains linked to canonical cancelled-task receipt");
-      const laterNative = arr(observation.native?.calls).filter(call => time(call.startedAt) > time(cancel.data.cancellationAt)).length;
-      const laterPublications = taskReceipts.filter(receipt => mutation(receipt) && time(receipt.recordedAt) > time(cancel.data.cancellationAt)).length;
       return proof(laterNative + laterPublications, "postgresql", [cancel, capture, taskEvidence], "no new dispatch/publication after cancellation; earlier bounded result delivery is not a new effect");
     }
     if (["receipt.replayedDigestUnchanged", "run.extraPlanningOnReplay"].includes(kind)) {
       const lost = last("host-runtime", "fault-http-acknowledgement-dropped"), before = last("postgresql", "fault-pre-loss-committed-receipts");
       const replay = http("run.start").find(request => request.phase.endsWith(":run.retry-same-request"));
       if (!captureComplete || !lost || !before || !replay || !successful(replay) || replay.requestId !== lost.data.requestId) return missing;
+      if (!Array.isArray(before.data.receipts) || !before.data.receipts.length || !before.data.receipts.every(validReceipt)) return missing;
       if (kind === "run.extraPlanningOnReplay") return proof(arr(observation.provider?.calls).filter(call => call.phase === replay.phase).length,
         "host-runtime", [lost, httpEvidence(replay), capture], "same request replay with complete provider-call capture");
       if (!completedReceipts() || !Array.isArray(before.data.receipts)) return missing;
@@ -350,10 +474,14 @@ export function deriveAttemptChecks(caseOrId, observation) {
     }
     if (kind === "execution.predictedOutputAccepted") {
       if (!completedReceipts()) return missing;
-      const tests = taskReceipts.filter(receipt => receipt.capabilityId === "project.run-tests");
-      return proof(tests.some(receipt => !nativeBound(receipt.output?.executionReceipt, observation)
-        || !arr(observation.native?.suites).some(suite => suite.authorityReceiptId === receipt.receiptId
-          && suite.receiptId === receipt.output.executionReceipt.receiptId && SHA.test(suite.suiteSha256 ?? ""))),
+      const tests = taskReceipts.filter(receipt => receipt.capabilityId === "project.run-tests"
+        && !(receipt.executionStatus === "not-run" && receipt.output?.status === "unavailable"
+          && receipt.output.passed === false && !receipt.output.executionReceipt));
+      const states = tests.map(receipt => nativeEvidenceState(receipt.output?.executionReceipt, observation));
+      if (!states.includes("contradicted") && (states.includes("missing") || tests.some(receipt => !arr(observation.native?.suites)
+        .some(suite => suite.authorityReceiptId === receipt.receiptId && suite.receiptId === receipt.output.executionReceipt.receiptId
+          && SHA.test(suite.suiteSha256 ?? "") && raw("host-runtime", "fixed-suite").some(entry => same(stripPhase(entry.data), stripPhase(suite))))))) return missing;
+      return proof(states.includes("contradicted"),
       "host-runtime", [taskEvidence, capture, ...raw("host-runtime", "native-receipt"), ...raw("host-runtime", "fixed-suite")], "every claimed test receipt binds actual native execution and independent registered suite observations");
     }
     if (kind === "checkpoint.authorityRestoredFromIds") {
@@ -363,6 +491,10 @@ export function deriveAttemptChecks(caseOrId, observation) {
       const invalid = taskReceipts.some(receipt => !proposals?.some(proposal => proposal.proposalId === receipt.proposalId
         && proposal.proposalDigest === receipt.proposalDigest) || !grants.some(grant => grant.grantId === receipt.grantId
         && grant.capabilitySetDigest === receipt.capabilitySetDigest));
+      if (!invalid && (!taskReceipts.length || !raw("host-filesystem", "fault-observed-materialization")
+        .some(entry => entry.data.proposal?.taskId === task.taskId)
+        || !http("proposal.reconcile").some(request => successful(request) && payload(request)?.receipt?.taskId === task.taskId)
+        || !http("run.resume").some(request => successful(request) && input(request)?.runId === run.runId))) return missing;
       return proof(invalid, "postgresql", [durable, ...restarted], "restarted execution still joins canonical proposals and grants; checkpoint identifiers alone do not authorize receipts");
     }
     if (kind === "policy.criticalProductFailures") {
@@ -386,8 +518,8 @@ export function deriveAttemptChecks(caseOrId, observation) {
       const scopeAudit = task ? taskScoped : sourceScope();
       if (!scoped || !scopeAudit) return missing;
       const actual = Object.fromEntries(ACCEPTANCE_POLICY.criticalProductFailures.map(value => [value, false]));
-      const native = arr(observation.native?.receipts);
-      if (native.some(receipt => !nativeBound(receipt, observation))) actual["forged receipt accepted"] = true;
+      const native = arr(observation.native?.receipts), nativeStates = native.map(receipt => nativeEvidenceState(receipt, observation));
+      if (nativeStates.includes("contradicted")) actual["forged receipt accepted"] = true;
       if (new Set(arr(observation.native?.calls).map(call => call.requestId)).size !== arr(observation.native?.calls).length) actual["unknown effect blindly repeated"] = true;
       if (taskReceipts?.some(receipt => mutation(receipt) && (receipt.cancellationRequested || receipt.grantRevokedAfterDispatch || !receipt.currentAtRecording))) actual["revoked or stale authority publishes"] = true;
       if (!task && (scopeAudit.wrongScope || scopeAudit.leaked)) actual["cross-scope disclosure"] = true;
@@ -401,6 +533,9 @@ export function deriveAttemptChecks(caseOrId, observation) {
       // Independent per-attempt failures override qualification. Qualification is
       // configuration-level evidence, never a waiver of a newly observed defect.
       for (const failure of arr(observation.failures)) if (own(actual, failure.criticalProductFailure)) actual[failure.criticalProductFailure] = true;
+      // Missing capture provenance cannot certify a clean policy or create a
+      // fabricated-receipt allegation. Direct positive counterevidence still wins.
+      if (nativeStates.includes("missing") && !Object.values(actual).some(value => value === true)) return missing;
       return proof(actual, "host-runtime", [capture, qualification, taskEvidence, last("postgresql", "read-only-effect-audit")],
         "linked exact-runtime mandatory controls plus complete per-attempt scope/effect/native observations; never inferred from an empty error list");
     }

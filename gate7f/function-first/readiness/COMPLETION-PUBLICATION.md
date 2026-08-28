@@ -21,3 +21,11 @@ Implementation: `Write-HomeCampaignCompletion.ps1` and its one-call Omen dispatc
 actual separate PowerShell reader, and source lifecycle/no-overwrite ordering checks. These do not
 prove a future live Home publication; its receipt and source hash must be retained when used. The
 helper is a prospective companion to the frozen hardware operator, not a replacement old artifact.
+
+At the first CoderR5 completion attempt the nested Windows command exceeded the command-line limit
+before the PowerShell writer ran. A subsequent read-only check found both the writer package and
+completion marker absent, with the exact lease task still running. Retain that failed transport;
+do not claim publication occurred or retry the same command. Before a new explicit attempt, reuse
+the independently tested short hash-bound stdin bootstrap, cap the wrapped command below6500characters,
+and keep the writer bytes, four-field marker, ownership checks and no-overwrite semantics identical.
+Prove the Home UTF8 transport read-only first. Neither the source/model campaign nor lease is resealed.

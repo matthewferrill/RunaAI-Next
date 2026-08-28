@@ -1,0 +1,8 @@
+{
+  "type": "response",
+  "role": "reranker",
+  "url": "http://192.168.50.165:8412/rerank",
+  "status": 200,
+  "elapsedMs": 769,
+  "rawText": "{\"model\": \"BAAI/bge-reranker-v2-m3\", \"ms\": 717, \"scored\": 2, \"results\": [{\"index\": 0, \"score\": 5.1055}, {\"index\": 1, \"score\": -11.0234}]}"
+}

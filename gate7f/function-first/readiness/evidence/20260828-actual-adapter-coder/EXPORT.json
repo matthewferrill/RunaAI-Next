@@ -1,0 +1,179 @@
+{
+  "schemaVersion": "runaai-m1-operator-smoke-export/v1",
+  "sourceCommit": "a95971a15158f1ee09b18bfc3c4859617fcc4862",
+  "sourceArchiveSha256": "ca34c64c3600c07ad75dea0a8f47bf99569602ac0f52951410d7987c6e519b95",
+  "sourceCorrespondence": {
+    "gate7f/function-first/operator-smoke.mjs": {
+      "gitBlobSha256": "082c56f3c48b7a294656d659279ed1a2c39b01fd9bc0006060188dd005fbe29b",
+      "archivedSha256": "7c7396f8760f5c6c2a6dab65c2e866b1b09170171695f8488a12d755a35453b2",
+      "representation": "CRLF-export-of-LF-Git-blob"
+    },
+    "gate7f/function-first/planner.mjs": {
+      "gitBlobSha256": "45afe766502c1cff57a33030bbb2a891d6665f81cb116c172e03bcb309e0a262",
+      "archivedSha256": "b67f673322d2cac807e847647d0f2bfcca1a0a869a66399aadf88a338210e1a8",
+      "representation": "CRLF-export-of-LF-Git-blob"
+    },
+    "gate7f/function-first/provider-transport.mjs": {
+      "gitBlobSha256": "d276972a43b7ad374608d4646df79e81ea5d90db4f1c936bddf6b855ad0cac7c",
+      "archivedSha256": "d91e56ae39be344914fcd783d54df4465b480f82dfba9856fb4563e66a0f3f58",
+      "representation": "CRLF-export-of-LF-Git-blob"
+    },
+    "gate7f/function-first/model-roles.mjs": {
+      "gitBlobSha256": "cc1a675641e3a987c59d5336d40ebf715c0893c3c5b9b31e865ead351cd2435b",
+      "archivedSha256": "191e96ef25a59dd905f470bc0a5f58183260de4dfe815e1a885e3b5e04bac025",
+      "representation": "CRLF-export-of-LF-Git-blob"
+    },
+    "gate1/adapters/mastra-provider.mjs": {
+      "gitBlobSha256": "47ff5e925f4d1df984fa914b179a003bb8784f706a93e31e41c9a42fd17e3e61",
+      "archivedSha256": "c8e299e4e7f3df9fd3ce767eba248415d2dfbc687e1ee0574e238643b94605fd",
+      "representation": "CRLF-export-of-LF-Git-blob"
+    },
+    "gate1/adapters/qdrant.mjs": {
+      "gitBlobSha256": "1f74fdf5f1a1b403753c7e118973af8605c14c59f672b43e98866f02dadd14ac",
+      "archivedSha256": "c9b8d6f597250584c1e1141da028c48446714b74184f6e70250bb91ae110209c",
+      "representation": "CRLF-export-of-LF-Git-blob"
+    }
+  },
+  "files": {
+    "0000.json": {
+      "bytes": 2150,
+      "sha256": "320bd68bcca960d4755f81d3716f3a54f5cccd0feff0335000073ce0828fb86e"
+    },
+    "0001.json": {
+      "bytes": 261,
+      "sha256": "66a58b7a579e1cf50b4b6e2a2d502de7abf06a34dc6ff3a53061906ef345f2ab"
+    },
+    "0002.json": {
+      "bytes": 1853,
+      "sha256": "9c451eba92e6b5471da34fc1c93faaece8461eddadd7366e433a2c833ed3c475"
+    },
+    "0003.json": {
+      "bytes": 982,
+      "sha256": "980a20ef29c6476b44d370c8b5223613642049bbd7341dca76405e0dd0c94538"
+    },
+    "0004.json": {
+      "bytes": 470,
+      "sha256": "b7d43f6419d5ce101ac91205636add60ac11052d0321a0cc364049ce747df963"
+    },
+    "0005.json": {
+      "bytes": 2311,
+      "sha256": "25905736d26a36a51f655d33efcaabc2a1c8e061192dca2e5c0527172b5fc5ad"
+    },
+    "0006.json": {
+      "bytes": 1111,
+      "sha256": "77ca4915ab8da8b80eaf42a90518785921b622ff6ea9c092dbd2ca7b69fc64c1"
+    },
+    "0007.json": {
+      "bytes": 519,
+      "sha256": "e46e7af3d9c293d54ca0c9bf5ed9bc6ac1314c4768d659cbe3b7b279f75e8053"
+    },
+    "0008.json": {
+      "bytes": 2307,
+      "sha256": "1f808b855c606f68f95c330ab25d9f6a7a43393848ac39beaaa47e5daabb380c"
+    },
+    "0009.json": {
+      "bytes": 1110,
+      "sha256": "a824f064ec87a8a7e65bd1cd22451cde86aa554259f2bb0d6d849ccc5b263cbf"
+    },
+    "0010.json": {
+      "bytes": 515,
+      "sha256": "f53e52c37da906043b428cf02157f8791d83b3f5dc0ce5f82a87e7f841417e48"
+    },
+    "0011.json": {
+      "bytes": 2233,
+      "sha256": "58d008dcc39ecf672adeaff7d276876f0dd4671c81b8a10f38542c33f1b2757d"
+    },
+    "0012.json": {
+      "bytes": 1323,
+      "sha256": "e4a8c50f9285653fcadefe2d86f069f2a5698779a32f55403eff9f7e699d0f09"
+    },
+    "0013.json": {
+      "bytes": 471,
+      "sha256": "e8dcf0c609e32983ed6eead5dabe952fd2c1e34075437081f97f0370c8d7a9d4"
+    },
+    "0014.json": {
+      "bytes": 2234,
+      "sha256": "5423025e2fda0c20712422804555262796a30186e46c511746f43c19b9f63277"
+    },
+    "0015.json": {
+      "bytes": 1323,
+      "sha256": "48b4d4ac6fd2cd9ebb75f6c1951a7868f80faae457104367f864339daf428499"
+    },
+    "0016.json": {
+      "bytes": 472,
+      "sha256": "ff8d434e5ce52e8acbde133692970f00cd48647536f131d82fd0cef771db0516"
+    },
+    "0017.json": {
+      "bytes": 360,
+      "sha256": "5a5297cc9a525777fd551c6ba28ba6cac4b8635a4762b6368e6a4dbb59de9b13"
+    },
+    "0018.json": {
+      "bytes": 48322,
+      "sha256": "e49f10eda761980519520b1d1f4bf7670c3734df5e83326d28a82a24d1d08b4c"
+    },
+    "0019.json": {
+      "bytes": 341,
+      "sha256": "cbeadd0ba3e36cad555c389c3378150ae28337aaa53f4987df6c99272a0c2670"
+    },
+    "0020.json": {
+      "bytes": 299,
+      "sha256": "edbae4c00194683bd15dbdbba5ae56e28422489d88da5825ef60ccfb54aa8eb1"
+    },
+    "0021.json": {
+      "bytes": 261,
+      "sha256": "66a58b7a579e1cf50b4b6e2a2d502de7abf06a34dc6ff3a53061906ef345f2ab"
+    },
+    "0022.json": {
+      "bytes": 604,
+      "sha256": "4e7044789768471cd554c97e290dc1488d85d3ba15e7a71b2a7cd56391188e8d"
+    }
+  },
+  "result": {
+    "candidateId": "qwen3-coder-30b-a3b",
+    "modelId": "qwen3-coder-30b-a3b-instruct",
+    "passed": true,
+    "scored": false,
+    "runtimeSealSha256": "ca8dc389de69aa1485424b08fd8cce973a9317e6798a0564cee28186cfe53154",
+    "smokeSealSha256": "15c31b3030aad5bd7099b0dc5577ba31335a04329c3d0ef67e8e246b47619009",
+    "calls": [
+      {
+        "role": "chat",
+        "status": 200,
+        "elapsedMs": 1327
+      },
+      {
+        "role": "research",
+        "status": 200,
+        "elapsedMs": 994
+      },
+      {
+        "role": "review",
+        "status": 200,
+        "elapsedMs": 998
+      },
+      {
+        "role": "code",
+        "status": 200,
+        "elapsedMs": 1656
+      },
+      {
+        "role": "agent",
+        "status": 200,
+        "elapsedMs": 1159
+      },
+      {
+        "role": "embedding",
+        "status": 200,
+        "elapsedMs": 50
+      },
+      {
+        "role": "reranker",
+        "status": 200,
+        "elapsedMs": 90
+      }
+    ],
+    "actualQdrantJourneyIncluded": false,
+    "actualFunctionQualificationIncluded": false,
+    "productionChanged": false
+  }
+}

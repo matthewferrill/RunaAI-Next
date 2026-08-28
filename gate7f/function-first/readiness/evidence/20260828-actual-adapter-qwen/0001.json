@@ -1,0 +1,13 @@
+{
+  "type": "residency",
+  "loaded": [
+    {
+      "key": "qwen3.6-27b-mtp",
+      "id": "qwen3.6-27b-mtp"
+    },
+    {
+      "key": "text-embedding-nomic-embed-text-v1.5",
+      "id": "text-embedding-nomic-embed-text-v1.5"
+    }
+  ]
+}

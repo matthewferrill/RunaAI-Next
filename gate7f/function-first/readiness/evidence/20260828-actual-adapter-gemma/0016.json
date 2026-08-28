@@ -1,0 +1,15 @@
+{
+  "type": "adapter-result",
+  "role": "agent",
+  "result": {
+    "summary": "Inspect the contents of echo.js to verify its implementation.",
+    "steps": [
+      {
+        "capabilityId": "project.inspect",
+        "arguments": {
+          "path": "echo.js"
+        }
+      }
+    ]
+  }
+}

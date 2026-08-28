@@ -1,0 +1,13 @@
+{
+  "type": "residency",
+  "loaded": [
+    {
+      "key": "qwen3-coder-30b-a3b-instruct",
+      "id": "qwen3-coder-30b-a3b-instruct"
+    },
+    {
+      "key": "text-embedding-nomic-embed-text-v1.5",
+      "id": "text-embedding-nomic-embed-text-v1.5"
+    }
+  ]
+}

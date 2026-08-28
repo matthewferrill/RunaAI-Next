@@ -1,0 +1,18 @@
+{
+  "type": "adapter-result",
+  "role": "chat",
+  "result": {
+    "answer": "Hello, Garden Circle!",
+    "citations": [],
+    "model": {
+      "role": "chat",
+      "provider": "private-openai-compatible",
+      "modelId": "qwen3.6-27b-mtp"
+    },
+    "outputLimited": false,
+    "responseCheck": {
+      "performed": false,
+      "corrected": false
+    }
+  }
+}

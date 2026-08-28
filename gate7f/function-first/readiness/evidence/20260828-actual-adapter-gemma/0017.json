@@ -1,0 +1,12 @@
+{
+  "type": "request",
+  "role": "embedding",
+  "url": "http://192.168.50.165:1234/v1/embeddings",
+  "input": {
+    "model": "text-embedding-nomic-embed-text-v1.5",
+    "input": [
+      "search_document: In the fictional garden plan, pale stones mark the north room. The note lists no other room.",
+      "search_query: Which room has pale stones?"
+    ]
+  }
+}

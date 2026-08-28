@@ -1,0 +1,8 @@
+{
+  "type": "response",
+  "role": "code",
+  "url": "http://192.168.50.165:1234/v1/chat/completions",
+  "status": 200,
+  "elapsedMs": 1656,
+  "rawText": "{\n  \"id\": \"chatcmpl-z6fjblsw4xmokpdx3jtruo\",\n  \"object\": \"chat.completion\",\n  \"created\": 1787934901,\n  \"model\": \"qwen3-coder-30b-a3b-instruct\",\n  \"choices\": [\n    {\n      \"index\": 0,\n      \"message\": {\n        \"role\": \"assistant\",\n        \"content\": \"{\\n  \\\"summary\\\": \\\"The objective is to inspect the file 'echo.js' without making any changes or executing anything. Since only inspection is required and the file path is allowed, this can be accomplished with a single step using the 'project.inspect' capability.\\\",\\n  \\\"steps\\\": [\\n    {\\n      \\\"capabilityId\\\": \\\"project.inspect\\\",\\n      \\\"arguments\\\": {\\n        \\\"path\\\": \\\"echo.js\\\"\\n      }\\n    }\\n  ]\\n}\",\n        \"reasoning_content\": \"\",\n        \"tool_calls\": []\n      },\n      \"logprobs\": null,\n      \"finish_reason\": \"stop\"\n    }\n  ],\n  \"usage\": {\n    \"prompt_tokens\": 439,\n    \"completion_tokens\": 90,\n    \"total_tokens\": 529,\n    \"completion_tokens_details\": {\n      \"reasoning_tokens\": 0\n    }\n  },\n  \"stats\": {},\n  \"system_fingerprint\": \"qwen3-coder-30b-a3b-instruct\"\n}"
+}

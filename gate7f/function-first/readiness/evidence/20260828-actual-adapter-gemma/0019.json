@@ -1,0 +1,13 @@
+{
+  "type": "request",
+  "role": "reranker",
+  "url": "http://192.168.50.165:8412/rerank",
+  "input": {
+    "query": "Which room has pale stones?",
+    "documents": [
+      "In the fictional garden plan, pale stones mark the north room. The note lists no other room.",
+      "A fictional harbor uses amber flags."
+    ],
+    "top_n": 2
+  }
+}

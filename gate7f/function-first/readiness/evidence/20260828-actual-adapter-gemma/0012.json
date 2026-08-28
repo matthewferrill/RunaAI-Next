@@ -1,0 +1,8 @@
+{
+  "type": "response",
+  "role": "code",
+  "url": "http://192.168.50.165:1234/v1/chat/completions",
+  "status": 200,
+  "elapsedMs": 1795,
+  "rawText": "{\n  \"id\": \"chatcmpl-dlsj4ldyvd6iuoux1kvnjc\",\n  \"object\": \"chat.completion\",\n  \"created\": 1787934685,\n  \"model\": \"gemma-4-26b-a4b-it-qat\",\n  \"choices\": [\n    {\n      \"index\": 0,\n      \"message\": {\n        \"role\": \"assistant\",\n        \"content\": \"```json\\n{\\n  \\\"summary\\\": \\\"Inspect the contents of echo.js to verify its implementation.\\\",\\n  \\\"steps\\\": [\\n    {\\n      \\\"capabilityId\\\": \\\"project.inspect\\\",\\n      \\\"arguments\\\": {\\n        \\\"path\\\": \\\"echo.js\\\"\\n      }\\n    }\\n  ]\\n}\\n```\",\n        \"reasoning_content\": \"\",\n        \"tool_calls\": []\n      },\n      \"logprobs\": null,\n      \"finish_reason\": \"stop\"\n    }\n  ],\n  \"usage\": {\n    \"prompt_tokens\": 462,\n    \"completion_tokens\": 72,\n    \"total_tokens\": 534,\n    \"completion_tokens_details\": {\n      \"reasoning_tokens\": 0\n    }\n  },\n  \"stats\": {},\n  \"system_fingerprint\": \"gemma-4-26b-a4b-it-qat\"\n}"
+}

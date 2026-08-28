@@ -1,0 +1,8 @@
+{
+  "type": "response",
+  "role": "review",
+  "url": "http://192.168.50.165:1234/v1/chat/completions",
+  "status": 200,
+  "elapsedMs": 2948,
+  "rawText": "{\n  \"id\": \"chatcmpl-0etgzuek1jbkzv6stxoqqgd\",\n  \"object\": \"chat.completion\",\n  \"created\": 1787935095,\n  \"model\": \"qwen3.6-27b-mtp\",\n  \"choices\": [\n    {\n      \"index\": 0,\n      \"message\": {\n        \"role\": \"assistant\",\n        \"content\": \"{\\n\\\"answer\\\": \\\"The north room is marked by pale stones.\\\",\\n\\\"citations\\\": [\\n{\\n\\\"sourceId\\\": \\\"smoke-note\\\",\\n\\\"sectionId\\\": \\\"provided\\\"\\n}\\n]\\n}\",\n        \"reasoning_content\": \"\",\n        \"tool_calls\": []\n      },\n      \"logprobs\": null,\n      \"finish_reason\": \"stop\"\n    }\n  ],\n  \"usage\": {\n    \"prompt_tokens\": 445,\n    \"completion_tokens\": 47,\n    \"total_tokens\": 492,\n    \"completion_tokens_details\": {\n      \"reasoning_tokens\": 0\n    }\n  },\n  \"stats\": {\n    \"total_draft_tokens_count\": 29,\n    \"accepted_draft_tokens_count\": 29,\n    \"rejected_draft_tokens_count\": 0\n  },\n  \"system_fingerprint\": \"qwen3.6-27b-mtp\"\n}"
+}

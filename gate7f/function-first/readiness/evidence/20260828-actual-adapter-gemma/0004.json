@@ -1,0 +1,18 @@
+{
+  "type": "adapter-result",
+  "role": "chat",
+  "result": {
+    "answer": "Welcome to the garden, lovely members of the Circle!",
+    "citations": [],
+    "model": {
+      "role": "chat",
+      "provider": "private-openai-compatible",
+      "modelId": "gemma-4-26b-a4b-it-qat"
+    },
+    "outputLimited": false,
+    "responseCheck": {
+      "performed": false,
+      "corrected": false
+    }
+  }
+}

@@ -1,0 +1,179 @@
+{
+  "schemaVersion": "runaai-m1-operator-smoke-export/v1",
+  "sourceCommit": "a95971a15158f1ee09b18bfc3c4859617fcc4862",
+  "sourceArchiveSha256": "ca34c64c3600c07ad75dea0a8f47bf99569602ac0f52951410d7987c6e519b95",
+  "sourceCorrespondence": {
+    "gate7f/function-first/operator-smoke.mjs": {
+      "gitBlobSha256": "082c56f3c48b7a294656d659279ed1a2c39b01fd9bc0006060188dd005fbe29b",
+      "archivedSha256": "7c7396f8760f5c6c2a6dab65c2e866b1b09170171695f8488a12d755a35453b2",
+      "representation": "CRLF-export-of-LF-Git-blob"
+    },
+    "gate7f/function-first/planner.mjs": {
+      "gitBlobSha256": "45afe766502c1cff57a33030bbb2a891d6665f81cb116c172e03bcb309e0a262",
+      "archivedSha256": "b67f673322d2cac807e847647d0f2bfcca1a0a869a66399aadf88a338210e1a8",
+      "representation": "CRLF-export-of-LF-Git-blob"
+    },
+    "gate7f/function-first/provider-transport.mjs": {
+      "gitBlobSha256": "d276972a43b7ad374608d4646df79e81ea5d90db4f1c936bddf6b855ad0cac7c",
+      "archivedSha256": "d91e56ae39be344914fcd783d54df4465b480f82dfba9856fb4563e66a0f3f58",
+      "representation": "CRLF-export-of-LF-Git-blob"
+    },
+    "gate7f/function-first/model-roles.mjs": {
+      "gitBlobSha256": "cc1a675641e3a987c59d5336d40ebf715c0893c3c5b9b31e865ead351cd2435b",
+      "archivedSha256": "191e96ef25a59dd905f470bc0a5f58183260de4dfe815e1a885e3b5e04bac025",
+      "representation": "CRLF-export-of-LF-Git-blob"
+    },
+    "gate1/adapters/mastra-provider.mjs": {
+      "gitBlobSha256": "47ff5e925f4d1df984fa914b179a003bb8784f706a93e31e41c9a42fd17e3e61",
+      "archivedSha256": "c8e299e4e7f3df9fd3ce767eba248415d2dfbc687e1ee0574e238643b94605fd",
+      "representation": "CRLF-export-of-LF-Git-blob"
+    },
+    "gate1/adapters/qdrant.mjs": {
+      "gitBlobSha256": "1f74fdf5f1a1b403753c7e118973af8605c14c59f672b43e98866f02dadd14ac",
+      "archivedSha256": "c9b8d6f597250584c1e1141da028c48446714b74184f6e70250bb91ae110209c",
+      "representation": "CRLF-export-of-LF-Git-blob"
+    }
+  },
+  "files": {
+    "0000.json": {
+      "bytes": 2135,
+      "sha256": "40db0c2ea31fcfdb81d75df8148b36800480c2dadb7ba0bf6731ac7f466e0bd8"
+    },
+    "0001.json": {
+      "bytes": 249,
+      "sha256": "f725d524ec71b01705fd4e7e94acd80a3d643b1b78a83c21dbfc78ed99b2b500"
+    },
+    "0002.json": {
+      "bytes": 1879,
+      "sha256": "0abec8128121dd07881b6c23433d53842c4ac81e9d4ac1dab9fd1d7517423608"
+    },
+    "0003.json": {
+      "bytes": 905,
+      "sha256": "7ec75116236d0fccfcd3547e2dd4b4552bc2814f16c483b0cd071b2d671f750e"
+    },
+    "0004.json": {
+      "bytes": 399,
+      "sha256": "930f099d24f381300b051e446daabc0a909b7af00ffe9d1228b3f77e1f94836a"
+    },
+    "0005.json": {
+      "bytes": 2337,
+      "sha256": "a3c4add1b854f556cf059524b7019006223e90347c237bda57574e9c5f4a35c3"
+    },
+    "0006.json": {
+      "bytes": 1070,
+      "sha256": "ab6f591ed8d7bf27cdd7414fac4d0538faf64b5e359148a34896c10eb183e8ca"
+    },
+    "0007.json": {
+      "bytes": 482,
+      "sha256": "7813af7ac268e40eb24e72b2ed40073911897311b612e10e1d8064a1a80d4a0e"
+    },
+    "0008.json": {
+      "bytes": 2333,
+      "sha256": "4acd9e94b7f395b945c9ab04a43860dafb6c43a98b3ea3fe167338d78f500563"
+    },
+    "0009.json": {
+      "bytes": 1068,
+      "sha256": "dc00580c3f3fafc350245b078cf8545b7143c1ec139490eabc99dc0aa57392f3"
+    },
+    "0010.json": {
+      "bytes": 478,
+      "sha256": "c9d5ad0fe8a88bcf741a053802da66a48d2d55535d94c92bbbc222afe09325e0"
+    },
+    "0011.json": {
+      "bytes": 2259,
+      "sha256": "028c25360bb939b3c41d5c15a1ab5a035c5f709b19513ed1cbd1ec98269e1f89"
+    },
+    "0012.json": {
+      "bytes": 1144,
+      "sha256": "842757f9790ba7f44149bc415d590ac8f035d8e4ddc5ac46ae1a28e81e3cbc1c"
+    },
+    "0013.json": {
+      "bytes": 288,
+      "sha256": "8622e38ca93bf1a236c23614a8ca888760c35929a5a48404b7540689210f5597"
+    },
+    "0014.json": {
+      "bytes": 2260,
+      "sha256": "54cc0e4fcf7db1af81371339582d51983ca4ca4487b5e6370bf3b28443525a66"
+    },
+    "0015.json": {
+      "bytes": 1144,
+      "sha256": "b88a0862dab1a09ee7532d1a9158af001201fd54045433a48d5618846b438570"
+    },
+    "0016.json": {
+      "bytes": 289,
+      "sha256": "588ece4dbb80cd12febe12d129d6aeea9cc51e45820700a5c9e73fcffea02772"
+    },
+    "0017.json": {
+      "bytes": 360,
+      "sha256": "5a5297cc9a525777fd551c6ba28ba6cac4b8635a4762b6368e6a4dbb59de9b13"
+    },
+    "0018.json": {
+      "bytes": 48322,
+      "sha256": "2adba24389f33413c385e1074517c1ff8f2b8294938fcdcea448879185d39d7d"
+    },
+    "0019.json": {
+      "bytes": 341,
+      "sha256": "cbeadd0ba3e36cad555c389c3378150ae28337aaa53f4987df6c99272a0c2670"
+    },
+    "0020.json": {
+      "bytes": 301,
+      "sha256": "0f4638e18be4f2f92880c3985ef7ef632db4dbc4ce2e814ca967e4507f84583e"
+    },
+    "0021.json": {
+      "bytes": 249,
+      "sha256": "f725d524ec71b01705fd4e7e94acd80a3d643b1b78a83c21dbfc78ed99b2b500"
+    },
+    "0022.json": {
+      "bytes": 593,
+      "sha256": "429a458d9be140f1172253a960c00ffcf911d9906b3bf87f407340873501e685"
+    }
+  },
+  "result": {
+    "candidateId": "gemma4-26b-a4b",
+    "modelId": "gemma-4-26b-a4b-it-qat",
+    "passed": true,
+    "scored": false,
+    "runtimeSealSha256": "aa6d23d596f8d74d19c266e4fe5c3f99e5c6261eac36083bd4bb8ae929ff5ccf",
+    "smokeSealSha256": "acdd87f85d79bb9bc45931fa05265ee2fa90c59e59b302b97f305539d84605c5",
+    "calls": [
+      {
+        "role": "chat",
+        "status": 200,
+        "elapsedMs": 1295
+      },
+      {
+        "role": "research",
+        "status": 200,
+        "elapsedMs": 1214
+      },
+      {
+        "role": "review",
+        "status": 200,
+        "elapsedMs": 1212
+      },
+      {
+        "role": "code",
+        "status": 200,
+        "elapsedMs": 1795
+      },
+      {
+        "role": "agent",
+        "status": 200,
+        "elapsedMs": 1327
+      },
+      {
+        "role": "embedding",
+        "status": 200,
+        "elapsedMs": 58
+      },
+      {
+        "role": "reranker",
+        "status": 200,
+        "elapsedMs": 769
+      }
+    ],
+    "actualQdrantJourneyIncluded": false,
+    "actualFunctionQualificationIncluded": false,
+    "productionChanged": false
+  }
+}

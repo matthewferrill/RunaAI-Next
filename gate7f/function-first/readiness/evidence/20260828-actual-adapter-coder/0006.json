@@ -1,0 +1,8 @@
+{
+  "type": "response",
+  "role": "research",
+  "url": "http://192.168.50.165:1234/v1/chat/completions",
+  "status": 200,
+  "elapsedMs": 994,
+  "rawText": "{\n  \"id\": \"chatcmpl-w6jhumdqqtg7rimxdsv79\",\n  \"object\": \"chat.completion\",\n  \"created\": 1787934899,\n  \"model\": \"qwen3-coder-30b-a3b-instruct\",\n  \"choices\": [\n    {\n      \"index\": 0,\n      \"message\": {\n        \"role\": \"assistant\",\n        \"content\": \"{\\n  \\\"answer\\\": \\\"The north room is marked by pale stones in the supplied fictional note.\\\",\\n  \\\"citations\\\": [\\n    {\\n      \\\"sourceId\\\": \\\"smoke-note\\\",\\n      \\\"sectionId\\\": \\\"provided\\\"\\n    }\\n  ]\\n}\",\n        \"reasoning_content\": \"\",\n        \"tool_calls\": []\n      },\n      \"logprobs\": null,\n      \"finish_reason\": \"stop\"\n    }\n  ],\n  \"usage\": {\n    \"prompt_tokens\": 442,\n    \"completion_tokens\": 52,\n    \"total_tokens\": 494,\n    \"completion_tokens_details\": {\n      \"reasoning_tokens\": 0\n    }\n  },\n  \"stats\": {},\n  \"system_fingerprint\": \"qwen3-coder-30b-a3b-instruct\"\n}"
+}

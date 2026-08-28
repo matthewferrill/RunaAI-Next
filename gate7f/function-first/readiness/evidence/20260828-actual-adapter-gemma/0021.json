@@ -1,0 +1,13 @@
+{
+  "type": "residency",
+  "loaded": [
+    {
+      "key": "gemma-4-26b-a4b-it-qat",
+      "id": "gemma-4-26b-a4b-it-qat"
+    },
+    {
+      "key": "text-embedding-nomic-embed-text-v1.5",
+      "id": "text-embedding-nomic-embed-text-v1.5"
+    }
+  ]
+}

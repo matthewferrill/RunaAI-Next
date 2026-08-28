@@ -1,0 +1,23 @@
+{
+  "type": "adapter-result",
+  "role": "research",
+  "result": {
+    "answer": "The north room is marked by pale stones.",
+    "citations": [
+      {
+        "sourceId": "smoke-note",
+        "sectionId": "provided"
+      }
+    ],
+    "model": {
+      "role": "research",
+      "provider": "private-openai-compatible",
+      "modelId": "qwen3.6-27b-mtp"
+    },
+    "outputLimited": false,
+    "responseCheck": {
+      "performed": false,
+      "corrected": false
+    }
+  }
+}

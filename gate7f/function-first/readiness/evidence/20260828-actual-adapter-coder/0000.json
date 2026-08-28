@@ -1,0 +1,49 @@
+{
+  "type": "seal",
+  "sealSha256": "15c31b3030aad5bd7099b0dc5577ba31335a04329c3d0ef67e8e246b47619009",
+  "seal": {
+    "schemaVersion": "runaai-m1-operator-smoke/v1",
+    "scored": false,
+    "candidateId": "qwen3-coder-30b-a3b",
+    "modelId": "qwen3-coder-30b-a3b-instruct",
+    "primaryInstanceId": "qwen3-coder-30b-a3b-instruct",
+    "embeddingInstanceId": "text-embedding-nomic-embed-text-v1.5",
+    "embeddingModelId": "text-embedding-nomic-embed-text-v1.5",
+    "baseUrl": "http://192.168.50.165:1234/v1",
+    "inventoryUrl": "http://192.168.50.165:1234/api/v1/models",
+    "rerankerUrl": "http://192.168.50.165:8412",
+    "reasoningEffort": null,
+    "runtimeSealSha256": "ca8dc389de69aa1485424b08fd8cce973a9317e6798a0564cee28186cfe53154",
+    "primaryArtifactSha256": "72a9b20a19c70db56e1ccd01fb35b0f0842d67d28e7c3bdff762df860120b769",
+    "embeddingArtifactSha256": "d4e388894e09cf3816e8b0896d81d265b55e7a9fff9ab03fe8bf4ef5e11295ac",
+    "sourceFiles": {
+      "gate7f/function-first/operator-smoke.mjs": "7c7396f8760f5c6c2a6dab65c2e866b1b09170171695f8488a12d755a35453b2",
+      "gate7f/function-first/planner.mjs": "b67f673322d2cac807e847647d0f2bfcca1a0a869a66399aadf88a338210e1a8",
+      "gate7f/function-first/provider-transport.mjs": "d91e56ae39be344914fcd783d54df4465b480f82dfba9856fb4563e66a0f3f58",
+      "gate7f/function-first/model-roles.mjs": "191e96ef25a59dd905f470bc0a5f58183260de4dfe815e1a885e3b5e04bac025",
+      "gate1/adapters/mastra-provider.mjs": "c8e299e4e7f3df9fd3ce767eba248415d2dfbc687e1ee0574e238643b94605fd",
+      "gate1/adapters/qdrant.mjs": "c9b8d6f597250584c1e1141da028c48446714b74184f6e70250bb91ae110209c"
+    }
+  },
+  "policy": {
+    "schemaVersion": "runaai-m1-operator-smoke-policy/v1",
+    "scored": false,
+    "answerRoles": [
+      "chat",
+      "research",
+      "review"
+    ],
+    "plannerRoles": [
+      "code",
+      "agent"
+    ],
+    "answerTokens": 512,
+    "plannerTokens": 1536,
+    "deadlineMs": 30000,
+    "auxiliaryDeadlineMs": 10000,
+    "maximumWireBytes": 2000000,
+    "noTextualReasoningSuffix": true,
+    "modelLifecycleOwnedBySealedOperator": true,
+    "productionChanged": false
+  }
+}

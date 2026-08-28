@@ -1,0 +1,8 @@
+{
+  "type": "response",
+  "role": "chat",
+  "url": "http://192.168.50.165:1234/v1/chat/completions",
+  "status": 200,
+  "elapsedMs": 1295,
+  "rawText": "{\n  \"id\": \"chatcmpl-xpyofdvjgdkfpy87a8z0l\",\n  \"object\": \"chat.completion\",\n  \"created\": 1787934681,\n  \"model\": \"gemma-4-26b-a4b-it-qat\",\n  \"choices\": [\n    {\n      \"index\": 0,\n      \"message\": {\n        \"role\": \"assistant\",\n        \"content\": \"Welcome to the garden, lovely members of the Circle!\",\n        \"reasoning_content\": \"\",\n        \"tool_calls\": []\n      },\n      \"logprobs\": null,\n      \"finish_reason\": \"stop\"\n    }\n  ],\n  \"usage\": {\n    \"prompt_tokens\": 322,\n    \"completion_tokens\": 12,\n    \"total_tokens\": 334,\n    \"completion_tokens_details\": {\n      \"reasoning_tokens\": 0\n    }\n  },\n  \"stats\": {},\n  \"system_fingerprint\": \"gemma-4-26b-a4b-it-qat\"\n}"
+}

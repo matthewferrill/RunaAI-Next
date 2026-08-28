@@ -4,7 +4,8 @@
 // the prefix is included in every window. Full source revisions still feed BGE.
 export const NOMIC_INPUT_POLICY = Object.freeze({ schemaVersion: "runaai-m1-nomic-input/v1",
   maximumWindowUtf8Bytes: 1600, overlapUtf8Bytes: 128, maximumWindowsPerInput: 64,
-  maximumWindowsPerRequest: 64, normalization: "NFKC", combination: "coverage-weighted-normalized-mean" });
+  maximumWindowsPerRequest: 64, normalization: "NFKC", budgetNormalization: "NFKD",
+  combination: "coverage-weighted-normalized-mean" });
 const fail = code => Object.assign(new Error(code), { code });
 const byteLength = value => Buffer.byteLength(value, "utf8");
 
@@ -14,11 +15,15 @@ export function nomicInputWindows(input) {
   if (!prefix) throw fail("m1-embedding-prefix-required");
   const text = input.slice(prefix.length).normalize("NFKC");
   if (!text.trim()) throw fail("m1-embedding-input-empty");
-  const characters = [...text], sizes = characters.map(byteLength), cap = NOMIC_INPUT_POLICY.maximumWindowUtf8Bytes - byteLength(prefix);
+  const characters = [...text], sizes = characters.map(byteLength);
+  // Bound both transmitted bytes and the more expansive decomposition used by
+  // BERT normalization, including Hangul/Tibetan and compatibility expansions.
+  const budgetSizes = characters.map((value, index) => Math.max(sizes[index], byteLength(value.normalize("NFKD"))));
+  const cap = NOMIC_INPUT_POLICY.maximumWindowUtf8Bytes - byteLength(prefix);
   const windows = []; let start = 0, previouslyCovered = 0;
   while (start < characters.length) {
     let end = start, bytes = 0;
-    while (end < characters.length && bytes + sizes[end] <= cap) bytes += sizes[end++];
+    while (end < characters.length && bytes + budgetSizes[end] <= cap) bytes += budgetSizes[end++];
     if (end === start) throw fail("m1-embedding-character-overflow");
     const weight = sizes.slice(Math.max(start, previouslyCovered), end).reduce((sum, value) => sum + value, 0);
     windows.push({ text: prefix + characters.slice(start, end).join(""), weight }); previouslyCovered = end;

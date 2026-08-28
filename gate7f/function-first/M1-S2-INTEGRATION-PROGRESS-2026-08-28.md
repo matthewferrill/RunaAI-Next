@@ -103,7 +103,12 @@ used in that smoke, and the model/provider budgets have not been increased.
 
 ## Still in progress
 
-Real Nomic/BGE composition; bounded live-model readiness and matched three-model functional attempts;
+The actual adapter smoke now passed 7/7 for each of the three primary candidates, including real
+Nomic/BGE calls, under independently supervised Home leases. See
+`ACTUAL-ADAPTER-RESULTS-2026-08-28.md`; this is not yet the Qdrant customer journey or functional
+qualification. All owned models were unloaded and the original GPU limits restored.
+
+Remaining: full Nomic/Qdrant/BGE customer composition and matched three-model functional attempts;
 and the exact rollback-protected candidate/customer trial. The long-document budget and actual model
 request controls must be selected from the separate readiness evidence, not inferred from HTTP 200.
 

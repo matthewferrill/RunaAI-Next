@@ -1,0 +1,15 @@
+{
+  "type": "adapter-result",
+  "role": "code",
+  "result": {
+    "summary": "Inspect echo.js as requested.",
+    "steps": [
+      {
+        "capabilityId": "project.inspect",
+        "arguments": {
+          "path": "echo.js"
+        }
+      }
+    ]
+  }
+}

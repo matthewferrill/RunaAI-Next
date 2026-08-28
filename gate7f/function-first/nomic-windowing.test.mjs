@@ -10,10 +10,11 @@ test("short inputs retain the exact vector and required document/query prefixes"
 });
 
 test("long Unicode and normalized expansion are bounded without dropping the end of an input", () => {
-  for (const content of ["garden ".repeat(1100), "花園🙂".repeat(1900), "\uFDFA".repeat(200)]) {
+  for (const content of ["garden ".repeat(1100), "花園🙂".repeat(1900), "\uFDFA".repeat(200), "각힣".repeat(1200), "\u0F73".repeat(1500)]) {
     const input = "search_document: " + content, windows = nomicInputWindows(input);
     assert.ok(windows.length > 1);
     assert.ok(windows.every(window => Buffer.byteLength(window.text) <= 1600 && window.text.isWellFormed() && window.weight > 0));
+    assert.ok(windows.every(window => Buffer.byteLength(window.text.normalize("NFKD")) <= 1600));
     assert.equal(windows.reduce((sum, window) => sum + window.weight, 0), Buffer.byteLength(content.normalize("NFKC")));
     assert.ok(windows.at(-1).text.endsWith(content.normalize("NFKC").slice(-20)));
     assert.equal(input, "search_document: " + content);

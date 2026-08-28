@@ -1,0 +1,8 @@
+{
+  "type": "response",
+  "role": "chat",
+  "url": "http://192.168.50.165:1234/v1/chat/completions",
+  "status": 200,
+  "elapsedMs": 1327,
+  "rawText": "{\n  \"id\": \"chatcmpl-7ypqng2srm8w917m4ozpp\",\n  \"object\": \"chat.completion\",\n  \"created\": 1787934898,\n  \"model\": \"qwen3-coder-30b-a3b-instruct\",\n  \"choices\": [\n    {\n      \"index\": 0,\n      \"message\": {\n        \"role\": \"assistant\",\n        \"content\": \"Welcome to the whimsical world of the Garden Circle, where imagination blooms and every corner holds a new adventure!\",\n        \"reasoning_content\": \"\",\n        \"tool_calls\": []\n      },\n      \"logprobs\": null,\n      \"finish_reason\": \"stop\"\n    }\n  ],\n  \"usage\": {\n    \"prompt_tokens\": 302,\n    \"completion_tokens\": 23,\n    \"total_tokens\": 325,\n    \"completion_tokens_details\": {\n      \"reasoning_tokens\": 0\n    }\n  },\n  \"stats\": {},\n  \"system_fingerprint\": \"qwen3-coder-30b-a3b-instruct\"\n}"
+}

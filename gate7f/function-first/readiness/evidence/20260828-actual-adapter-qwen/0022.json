@@ -1,0 +1,22 @@
+{
+  "type": "result",
+  "result": {
+    "schemaVersion": "runaai-m1-operator-smoke-result/v1",
+    "candidateId": "qwen36-27b-mtp",
+    "modelId": "qwen3.6-27b-mtp",
+    "passed": true,
+    "scored": false,
+    "checks": [
+      "chat-actual-answer-adapter",
+      "research-actual-answer-adapter",
+      "review-actual-answer-adapter",
+      "code-actual-planner-adapter",
+      "agent-actual-planner-adapter",
+      "nomic-actual-prefix-and-dimension",
+      "bge-actual-adapter"
+    ],
+    "providerCalls": 7,
+    "productionChanged": false,
+    "modelsLoadedOrUnloaded": false
+  }
+}

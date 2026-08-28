@@ -1,0 +1,8 @@
+{
+  "type": "response",
+  "role": "review",
+  "url": "http://192.168.50.165:1234/v1/chat/completions",
+  "status": 200,
+  "elapsedMs": 1212,
+  "rawText": "{\n  \"id\": \"chatcmpl-5c3w5wya70woi1w587stqo\",\n  \"object\": \"chat.completion\",\n  \"created\": 1787934684,\n  \"model\": \"gemma-4-26b-a4b-it-qat\",\n  \"choices\": [\n    {\n      \"index\": 0,\n      \"message\": {\n        \"role\": \"assistant\",\n        \"content\": \"{\\n  \\\"answer\\\": \\\"The north room is marked by pale stones.\\\",\\n  \\\"citations\\\": [\\n    {\\n      \\\"sourceId\\\": \\\"smoke-note\\\",\\n      \\\"sectionId\\\": \\\"provided\\\"\\n    }\\n  ]\\n}\",\n        \"reasoning_content\": \"\",\n        \"tool_calls\": []\n      },\n      \"logprobs\": null,\n      \"finish_reason\": \"stop\"\n    }\n  ],\n  \"usage\": {\n    \"prompt_tokens\": 458,\n    \"completion_tokens\": 54,\n    \"total_tokens\": 512,\n    \"completion_tokens_details\": {\n      \"reasoning_tokens\": 0\n    }\n  },\n  \"stats\": {},\n  \"system_fingerprint\": \"gemma-4-26b-a4b-it-qat\"\n}"
+}

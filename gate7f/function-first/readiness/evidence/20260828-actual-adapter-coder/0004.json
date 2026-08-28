@@ -1,0 +1,18 @@
+{
+  "type": "adapter-result",
+  "role": "chat",
+  "result": {
+    "answer": "Welcome to the whimsical world of the Garden Circle, where imagination blooms and every corner holds a new adventure!",
+    "citations": [],
+    "model": {
+      "role": "chat",
+      "provider": "private-openai-compatible",
+      "modelId": "qwen3-coder-30b-a3b-instruct"
+    },
+    "outputLimited": false,
+    "responseCheck": {
+      "performed": false,
+      "corrected": false
+    }
+  }
+}

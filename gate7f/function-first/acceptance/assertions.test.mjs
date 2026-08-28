@@ -129,6 +129,19 @@ test("source/object pointers cannot use inherited fields or getters and duplicat
   assert.equal(gradeCheck(check, observed).status, "inconclusive");
 });
 
+test("foreign-account setup is not leakage; same canary in the tested provider phase still fails", () => {
+  const observed = observation("chat-07-scope-switch"), check = checkFor(observed.caseId, "scope.foreignContextBeforeProvider");
+  answer(observed, "own", "Otter selected.");
+  answer(observed, "scope", "We chose an otter.");
+  answer(observed, "1:fixture.foreign-session", "FOREIGN_SILK_BADGER_73 belongs to this other test account.");
+  host(observed, check, false, "host-runtime");
+  assert.equal(gradeCheck(check, observed).status, "pass");
+  observed.provider.calls[1].request.messages.push({ role: "user", content: "FOREIGN_SILK_BADGER_73" });
+  assert.equal(gradeCheck(check, observed).status, "fail");
+  assert.equal(gradeCheck(check, observed).criticalProductFailure, true);
+  assert.equal(gradeCheck(check, observed).criticalModelFailure, false);
+});
+
 test("semantic meaning is not a keyword pass: exact independent quotations and evaluator binding required", () => {
   const observed = observation("chat-05-useful-summary"), check = checkFor(observed.caseId, "answer.semanticFacts");
   answer(observed, check.phase, "Neri has18 kits and four labels. Dispatch awaits the label check; no date was agreed.");

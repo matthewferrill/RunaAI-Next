@@ -1,0 +1,186 @@
+TAP version 13
+# Subtest: body timeout attempts reply before a finite exact-reader destruction
+ok 1 - body timeout attempts reply before a finite exact-reader destruction
+  ---
+  duration_ms: 114.2561
+  type: 'test'
+  ...
+# Subtest: unavailable timeout reply falls back to immediate destruction ()=>false
+ok 2 - unavailable timeout reply falls back to immediate destruction ()=>false
+  ---
+  duration_ms: 0.7676
+  type: 'test'
+  ...
+# Subtest: unavailable timeout reply falls back to immediate destruction ()=>{throw Error('synthetic-write-failure');}
+ok 3 - unavailable timeout reply falls back to immediate destruction ()=>{throw Error('synthetic-write-failure');}
+  ---
+  duration_ms: 0.421
+  type: 'test'
+  ...
+# Subtest: other aborts never wait for a body-timeout reply
+ok 4 - other aborts never wait for a body-timeout reply
+  ---
+  duration_ms: 0.5018
+  type: 'test'
+  ...
+# Subtest: completed body leaves no timeout callback or later destruction
+ok 5 - completed body leaves no timeout callback or later destruction
+  ---
+  duration_ms: 1.5424
+  type: 'test'
+  ...
+# Subtest: actual ten-second incomplete HTTP body receives complete408 before close with zero admission
+ok 6 - actual ten-second incomplete HTTP body receives complete408 before close with zero admission
+  ---
+  duration_ms: 10184.0294
+  type: 'test'
+  ...
+# Subtest: three pinned profiles keep exact primary/MTP and Nomic settings; unknown profiles denied
+ok 7 - three pinned profiles keep exact primary/MTP and Nomic settings; unknown profiles denied
+  ---
+  duration_ms: 2.543
+  type: 'test'
+  ...
+# Subtest: unsafe JIT or logging settings fail before load or power change
+ok 8 - unsafe JIT or logging settings fail before load or power change
+  ---
+  duration_ms: 1.9588
+  type: 'test'
+  ...
+# Subtest: native MCP capability drift closes startup and active admissions without adding tool authority
+ok 9 - native MCP capability drift closes startup and active admissions without adding tool authority
+  ---
+  duration_ms: 4.7743
+  type: 'test'
+  ...
+# Subtest: live cleanup never restores higher power after unsafe settings or stale cleanup observation
+ok 10 - live cleanup never restores higher power after unsafe settings or stale cleanup observation
+  ---
+  duration_ms: 7.1799
+  type: 'test'
+  ...
+# Subtest: a returned identity without a verified observed fingerprint cannot authorize live unload
+ok 11 - a returned identity without a verified observed fingerprint cannot authorize live unload
+  ---
+  duration_ms: 0.7339
+  type: 'test'
+  ...
+# Subtest: explicit owned startup, idle polling and stop preserve the exact two-model envelope
+ok 12 - explicit owned startup, idle polling and stop preserve the exact two-model envelope
+  ---
+  duration_ms: 2.0498
+  type: 'test'
+  ...
+# Subtest: cancelling startup before native state changes stops without loading or inventing cleanup ownership
+ok 13 - cancelling startup before native state changes stops without loading or inventing cleanup ownership
+  ---
+  duration_ms: 0.6407
+  type: 'test'
+  ...
+# Subtest: drain prevents admissions and waits for both active requests before unloading
+ok 14 - drain prevents admissions and waits for both active requests before unloading
+  ---
+  duration_ms: 27.0704
+  type: 'test'
+  ...
+# Subtest: async observation cannot admit a request into a generation that already stopped
+ok 15 - async observation cannot admit a request into a generation that already stopped
+  ---
+  duration_ms: 1.8161
+  type: 'test'
+  ...
+# Subtest: one client cancelling an observation does not unload models or cancel other users
+ok 16 - one client cancelling an observation does not unload models or cancel other users
+  ---
+  duration_ms: 1.6645
+  type: 'test'
+  ...
+# Subtest: an ambiguous load response never allows original-power restoration or a blind retry
+ok 17 - an ambiguous load response never allows original-power restoration or a blind retry
+  ---
+  duration_ms: 0.4679
+  type: 'test'
+  ...
+# Subtest: changed instance is never treated as ours for cleanup; no power restoration with ambiguity
+ok 18 - changed instance is never treated as ours for cleanup; no power restoration with ambiguity
+  ---
+  duration_ms: 1.6031
+  type: 'test'
+  ...
+# Subtest: foreign resident is retained while only the exact owned instances are unloaded
+ok 19 - foreign resident is retained while only the exact owned instances are unloaded
+  ---
+  duration_ms: 1.1964
+  type: 'test'
+  ...
+# Subtest: engine replacement during cleanup prevents unloading reused instance identities
+ok 20 - engine replacement during cleanup prevents unloading reused instance identities
+  ---
+  duration_ms: 0.9547
+  type: 'test'
+  ...
+# Subtest: restored power is observed, not inferred from a successful setter return
+ok 21 - restored power is observed, not inferred from a successful setter return
+  ---
+  duration_ms: 1.3295
+  type: 'test'
+  ...
+# Subtest: thermal fault aborts existing admissions before owned cleanup
+ok 22 - thermal fault aborts existing admissions before owned cleanup
+  ---
+  duration_ms: 1.2755
+  type: 'test'
+  ...
+# Subtest: freshness, engine epoch and missing residency never trigger a blind reload
+ok 23 - freshness, engine epoch and missing residency never trigger a blind reload
+  ---
+  duration_ms: 2.8565
+  type: 'test'
+  ...
+# Subtest: request contract excludes override/JIT/native/MCP/unselected routes without changing accepted bytes
+ok 24 - request contract excludes override/JIT/native/MCP/unselected routes without changing accepted bytes
+  ---
+  duration_ms: 2.6241
+  type: 'test'
+  ...
+# Subtest: BGE fixed routes use only their loopback backend and preserve exact bodies and failure statuses
+ok 25 - BGE fixed routes use only their loopback backend and preserve exact bodies and failure statuses
+  ---
+  duration_ms: 62.9463
+  type: 'test'
+  ...
+# Subtest: actual disposable HTTP proxy preserves request/reply bytes and upstream failures; no models executed
+# (node:7368) ExperimentalWarning: The MockTimers API is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+ok 26 - actual disposable HTTP proxy preserves request/reply bytes and upstream failures; no models executed
+  ---
+  duration_ms: 21.2953
+  type: 'test'
+  ...
+# Subtest: qualified 60-second answer admission is not clipped by the outer proxy deadline (fake clock)
+ok 27 - qualified 60-second answer admission is not clipped by the outer proxy deadline (fake clock)
+  ---
+  duration_ms: 9.3622
+  type: 'test'
+  ...
+# Subtest: a real incomplete HTTP request body is destroyed on its bounded deadline, with no admission
+ok 28 - a real incomplete HTTP request body is destroyed on its bounded deadline, with no admission
+  ---
+  duration_ms: 5.4444
+  type: 'test'
+  ...
+# Subtest: mutual TLS requires exact Control identity and preserves bytes over an actual encrypted local request
+ok 29 - mutual TLS requires exact Control identity and preserves bytes over an actual encrypted local request
+  ---
+  duration_ms: 2465.4668
+  type: 'test'
+  ...
+1..29
+# tests 29
+# suites 0
+# pass 29
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 10441.626

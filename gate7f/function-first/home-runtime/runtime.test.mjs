@@ -229,11 +229,12 @@ test('a real incomplete HTTP request body is destroyed on its bounded deadline, 
   const f=fixture();await f.controller.start();let calls=0;const events=[];
   const proxy=createRuntimeProxy({controller:f.controller,allowedClients:['127.0.0.1'],fetchImpl:async()=>{calls++;throw Error('unexpected');},event:e=>events.push(e)});
   const url=new URL(await listen(proxy));t.mock.timers.enable({apis:['setTimeout']});
-  const socket=connect({host:'127.0.0.1',port:Number(url.port)});socket.on('error',()=>{});
+  const socket=connect({host:'127.0.0.1',port:Number(url.port)});socket.on('error',()=>{});socket.resume();
   try{
     await once(socket,'connect');const received=once(proxy,'request');
     socket.write('POST /v1/chat/completions HTTP/1.1\r\nHost: localhost\r\nContent-Type: application/json\r\nContent-Length: 1000\r\n\r\n{');
-    await received;await settle();const ended=once(socket,'close');t.mock.timers.tick(RUNTIME_LIMITS.bodyMs);await ended;await settle();
+    await received;await settle();const ended=once(socket,'close');t.mock.timers.tick(RUNTIME_LIMITS.bodyMs);await settle();
+    t.mock.timers.tick(100);await ended;await settle();
     assert.equal(calls,0);assert.equal(f.controller.status.activeRequests,0);assert.equal(events.length,1);
     assert.equal(events[0].code,'runtime-request-body-timeout');
   }finally{t.mock.timers.reset();socket.destroy();await close(proxy);await f.controller.stop();}

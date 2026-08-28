@@ -3,3 +3,5 @@ evidence/** -text
 # The transport proof pins the exact operator script, not a normalized checkout representation.
 tls-enrollment-operator.mjs -text
 prove-tls-transport.mjs -text
+# The real Caddy wire proof binds the exact body-timeout implementation bytes.
+proxy.mjs -text

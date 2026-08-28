@@ -1,0 +1,38 @@
+{
+  "schemaVersion": "runaai-body-timeout-local-proof/v1",
+  "startedAt": "2026-08-28T22:53:53.678Z",
+  "finishedAt": "2026-08-28T22:54:04.226Z",
+  "pins": [
+    {
+      "file": "proxy.mjs",
+      "bytes": 6843,
+      "sha256": "e965a57eed957e6797f8883e4d71f69c6a7c01911f39f44dd426db8043edaa2c"
+    },
+    {
+      "file": "body-timeout.test.mjs",
+      "bytes": 4343,
+      "sha256": "3a0bc37c8cbd34103a4ce450187fd25209a34004c5b1364ba8b37bb8a7237d32"
+    },
+    {
+      "file": "runtime.test.mjs",
+      "bytes": 21487,
+      "sha256": "49395fa22f2703bc49c95ba63f2e57e0e731e879d61f74ee39bbcc1a768c4d58"
+    },
+    {
+      "file": "tls-proxy.test.mjs",
+      "bytes": 6841,
+      "sha256": "e0aefc5ab8937d46a7c538bf852d06fab4c260ac8b891be3d57c864943acc832"
+    }
+  ],
+  "nodeVersion": "v22.22.0",
+  "nodeSha256": "bae898add4643fcf890a83ad8ae56e20dce7e781cab161a53991ceba70c99ffb",
+  "exitCode": 0,
+  "error": null,
+  "tapSha256": "ffa51754c00760d78a23681d7b8da6b8f5e7b3c4582c0d33ea2c15dbb0fe1051",
+  "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "realModelsLoaded": 0,
+  "homeContacted": false,
+  "controlContacted": false,
+  "productionChanged": false,
+  "passed": true
+}

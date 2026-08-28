@@ -152,14 +152,38 @@ export function tlsRemoteCommand(context,action){
  }
  return {host,command,input};
 }
+/** Windows SSH executes a remote command through cmd.exe, whose8191-character limit is
+ * smaller than CreateProcess. Only this short bootstrap goes in EncodedCommand. Its literal
+ * SHA256 binds the exact trusted operator script carried over a bounded two-field stdin
+ * envelope. No temporary remote script is needed and no private key enters this transport. */
+export function tlsTransportRequest(request){
+ demand(request&&['home','control'].includes(request.host)&&typeof request.command==='string'
+  &&request.command.length>0&&request.command.length<=65536
+  &&(request.input===undefined||Buffer.isBuffer(request.input)&&request.input.length<=2097152),'tls-transport-input');
+ const script=Buffer.from(request.command,'utf8'),body=request.input??Buffer.alloc(0);
+ const input=Buffer.from(script.toString('base64')+'\n'+body.toString('base64')+'\n');
+ demand(input.length<=4194304,'tls-transport-cap');
+ const bootstrap="$ErrorActionPreference='Stop';$ProgressPreference='SilentlyContinue';Set-StrictMode -Version Latest;[Console]::OutputEncoding=[Text.UTF8Encoding]::new($false);"+
+  "$text=[Text.StringBuilder]::new();$block=New-Object char[] 4096;while(($count=[Console]::In.Read($block,0,$block.Length))-gt0){if($text.Length+$count-gt4194304){throw 'tls-bootstrap-cap'};[void]$text.Append($block,0,$count)};"+
+  "$parts=$text.ToString().Split([char]10);if($parts.Count-ne3-or$parts[2]-cne''-or$parts[0]-cnotmatch'^[A-Za-z0-9+/=]+$'-or$parts[1]-cnotmatch'^[A-Za-z0-9+/=]*$'){throw 'tls-bootstrap-envelope'};"+
+  "$code=[Convert]::FromBase64String($parts[0]);$data=[Convert]::FromBase64String($parts[1]);if($code.Length-gt65536-or$data.Length-gt2097152-or[Convert]::ToBase64String($code)-cne$parts[0]-or[Convert]::ToBase64String($data)-cne$parts[1]){throw 'tls-bootstrap-encoding'};"+
+  "$hasher=[Security.Cryptography.SHA256]::Create();try{$digest=([BitConverter]::ToString($hasher.ComputeHash($code))).Replace('-','').ToLowerInvariant()}finally{$hasher.Dispose()};"+
+  `if($digest-cne'${sha(script)}'){throw 'tls-bootstrap-script-pin'};`+
+  "$utf8=[Text.UTF8Encoding]::new($false,$true);$source=$utf8.GetString($code);$reader=[IO.StringReader]::new($utf8.GetString($data));[Console]::SetIn($reader);& ([scriptblock]::Create($source))";
+ const encoded=Buffer.from(bootstrap,'utf16le').toString('base64');
+ const remote='powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -EncodedCommand '+encoded;
+ const nested=request.host==='home'?'ssh -o ClearAllForwardings=yes runa-home-codex '+remote:remote;
+ // Include both command-processor and the outer Omen invocation overhead conservatively.
+ demand(nested.length+256<=6500,'tls-transport-command-length');
+ return {bootstrap,encoded,remote,nested,input,scriptSha256:sha(script),maximumWrappedChars:nested.length+256};
+}
 export function runTlsOperator({descriptorFile,expectedDescriptor,action,execute=execFileSync}){
  const context=loadTlsOperator(descriptorFile,expectedDescriptor),request=tlsRemoteCommand(context,action);
  const output=path.join(context.local,action+'-result.json');demand(!existsSync(output),'tls-operator-result-exists');
- const encoded=Buffer.from(request.command,'utf16le').toString('base64');
- const remote='powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -EncodedCommand '+encoded;
+ const transport=tlsTransportRequest(request);
  const args=['-F','C:\\Users\\matth\\.ssh\\config','-o','ClearAllForwardings=yes',request.host==='home'?'runa-control-wsl-codex':'runa-control',
-  request.host==='home'?'ssh -o ClearAllForwardings=yes runa-home-codex '+remote:remote];
- const raw=execute('ssh.exe',args,{input:request.input,timeout:60000,maxBuffer:131072,windowsHide:true});
+  transport.nested];
+ const raw=execute('ssh.exe',args,{input:transport.input,timeout:60000,maxBuffer:131072,windowsHide:true});
  const value=JSON.parse(raw),id=context.descriptor.enrollmentId;
  let receipt,publicRaw=null;
  if(action.startsWith('Upload')){

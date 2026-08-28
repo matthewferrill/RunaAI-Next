@@ -8,7 +8,7 @@ import {execFileSync} from 'node:child_process';
 import {sha} from './tls-primitives.mjs';
 import {TLS_ENROLLMENT_SOURCE_FILES} from './tls-enrollment-cli.mjs';
 import {createHomeTlsEnrollment,createControlTlsEnrollment,issueControlTlsCertificate,importControlTlsCertificate} from './tls-enrollment.mjs';
-import {prepareTlsOperator,loadTlsOperator,tlsRemoteCommand,runTlsOperator,validateTlsPublicTransfer} from './tls-enrollment-operator.mjs';
+import {prepareTlsOperator,loadTlsOperator,tlsRemoteCommand,tlsTransportRequest,runTlsOperator,validateTlsPublicTransfer} from './tls-enrollment-operator.mjs';
 
 const openssl=process.platform==='win32'?'C:\\Program Files\\Git\\usr\\bin\\openssl.exe':'/usr/bin/openssl';
 const id=randomBytes(16).toString('hex'),packet=value=>Buffer.from(JSON.stringify(value)+'\n');
@@ -81,7 +81,9 @@ test('transport driver retains exact public responses and follows all four steps
    execute:(exe,args,options)=>{
     calls++;assert.equal(exe,'ssh.exe');assert.equal(options.windowsHide,true);assert.equal(options.timeout,60000);
     assert.equal(args[4],mode.startsWith('Home')?'runa-control-wsl-codex':'runa-control');
-    if(options.input){const input=Buffer.from(options.input.toString(),'base64');assert.doesNotMatch(input.toString(),/PRIVATE KEY/);assert.ok(input.length<=32768);}
+    const [script,body,trailing]=options.input.toString().split('\n');assert.equal(trailing,'');
+    assert.ok(Buffer.from(script,'base64').length<65536);
+    if(body){const input=Buffer.from(body,'base64');assert.doesNotMatch(input.toString(),/PRIVATE KEY/);assert.ok(input.length<=32768);}
     return packet(response(mode));
    }});
   assert.equal(calls,1);assert.equal(result.result.activated,false);assert.equal(result.rawSha256,sha(packet(response(mode))));
@@ -99,13 +101,31 @@ test('invalid remote envelope is never retained or silently retried',()=>{
 test('generated upload and enrollment commands parse in actual Windows PowerShell5 without executing them',{skip:process.platform!=='win32'},()=>{
  const lengths=[];
  for(const action of ['UploadHome','UploadControl','HomeOffer','ControlRequest','HomeSign','ControlImport']){
-  const source=tlsRemoteCommand(context(),action).command;
+  const request=tlsRemoteCommand(context(),action),source=request.command,transport=tlsTransportRequest(request);
   const encoded=Buffer.from(source,'utf16le').toString('base64'),remote='powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -EncodedCommand '+encoded;
-  lengths.push({action,rawScriptChars:source.length,encodedChars:encoded.length,remoteChars:remote.length,
-   nestedHomeChars:action.includes('Home')||action==='HomeSign'?remote.length+'ssh -o ClearAllForwardings=yes runa-home-codex '.length:null});
+  lengths.push({action,rawScriptChars:source.length,oldDirectRemoteChars:remote.length,
+   actualRemoteChars:transport.remote.length,actualNestedChars:transport.nested.length,maximumWrappedChars:transport.maximumWrappedChars});
+  assert.ok(transport.maximumWrappedChars<=6500);assert.ok(transport.input.length<=4194304);
   const script=`$ErrorActionPreference='Stop';$source=[Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('${Buffer.from(source).toString('base64')}'));$tokens=$null;$errors=$null;[void][Management.Automation.Language.Parser]::ParseInput($source,[ref]$tokens,[ref]$errors);if($errors.Count-ne0){throw ($errors.Message-join';')};'passed'`;
   const result=execFileSync('C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe',['-NoProfile','-NonInteractive','-ExecutionPolicy','Bypass','-EncodedCommand',Buffer.from(script,'utf16le').toString('base64')],
    {encoding:'utf8',timeout:10000,windowsHide:true,maxBuffer:32768});assert.match(result,/passed/);
  }
- console.log('TLS direct-command length baseline '+JSON.stringify(lengths));
+ console.log('TLS bounded transport lengths '+JSON.stringify(lengths));
+});
+
+test('actual Windows cmd and PowerShell5 execute only the pinned stdin script with exact UTF8 input/output',{skip:process.platform!=='win32'},()=>{
+ const request=tlsTransportRequest({host:'home',command:"[Console]::Out.Write([Console]::In.ReadToEnd())",input:Buffer.from('synthetic-input-\u03c0\nsecond-line')});
+ const result=execFileSync('C:\\Windows\\System32\\cmd.exe',['/d','/s','/c',request.remote],
+  {input:request.input,timeout:10000,windowsHide:true,maxBuffer:8192});assert.equal(result.toString(),'synthetic-input-\u03c0\nsecond-line');
+});
+test('actual bootstrap rejects wrong script hash, extra envelope fields and invalid encoding before executing',{skip:process.platform!=='win32'},()=>{
+ const request=tlsTransportRequest({host:'control',command:"[Console]::Out.Write('MUST-NOT-RUN')"});
+ const run=input=>execFileSync('C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe',['-NoProfile','-NonInteractive','-ExecutionPolicy','Bypass','-EncodedCommand',request.encoded],
+  {input,timeout:10000,windowsHide:true,maxBuffer:16384,stdio:['pipe','pipe','pipe']});
+ for(const input of [Buffer.from(Buffer.from("[Console]::Out.Write('altered')").toString('base64')+'\n\n'),
+  Buffer.concat([request.input,Buffer.from('unexpected\n')]),Buffer.from('invalid*\n\n'),Buffer.alloc(4194305,65)]){
+  let error;try{run(input);}catch(value){error=value;}assert.ok(error);assert.doesNotMatch(error.stdout.toString(),/MUST-NOT-RUN|altered/);
+ }
+ assert.throws(()=>tlsTransportRequest({host:'home',command:'x'.repeat(65537)}),/tls-transport-input/);
+ assert.throws(()=>tlsTransportRequest({host:'other',command:'x'}),/tls-transport-input/);
 });

@@ -1,2 +1,5 @@
 # Retained native observations are byte-pinned; never normalize their line endings.
 evidence/** -text
+# The transport proof pins the exact operator script, not a normalized checkout representation.
+tls-enrollment-operator.mjs -text
+prove-tls-transport.mjs -text

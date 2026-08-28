@@ -154,3 +154,23 @@ The original inline commands were measured before any live dispatch: UploadHome1
 HomeSign12170 (12217 nested), and ControlImport11826. All exceed8191. The earlier parser/transport-
 double tests did not prove the Windows remote command-processor path; this finding is retained and
 must be corrected before enrollment, not relabeled as successful transport.
+
+The corrected bootstrap is3630 characters for every operation,3677 with the nested Home SSH
+command, and at most3933 including a conservative256-character outer-wrapper allowance. All are
+below the6500 ceiling. A bounded two-line base64 stdin envelope carries the full script and its
+public/source input; the literal SHA256 in the small bootstrap is checked before script execution.
+No temporary remote script is installed. Wrong digests, extra fields, invalid encoding and excess
+input are rejected. A real Windows cmd→PowerShell5 test initially exposed default-console Unicode
+loss; the child now explicitly selects UTF8 output. That test and all nine focused tests then passed.
+
+Actual read-only Omen→Control SSH transport at2026-08-28T21:20:51.345Z preserved the exact synthetic
+UTF8 input/output through the shortened bootstrap, exited0, and made no enrollment/model/config/
+task/listener changes. Its raw response and bound operator hash are retained in
+`evidence/20260828-tls-transport-control.json` (SHA256
+`d3551dd21eac64369e49acb61fe8271428267c8fb5e0c2e038a1cba0ccf830e0`).
+The Home nested-hop proof is deferred to the between-model window. This proves transport mechanics,
+not cross-host certificate enrollment or native runtime activation.
+
+The complete isolated operator suite with this transport correction passed113/113, no skips,
+using the required Windows OS access. The previously prepared local descriptor is retained but no
+longer dispatchable because the operator hash changed; any actual enrollment will use a new packet.

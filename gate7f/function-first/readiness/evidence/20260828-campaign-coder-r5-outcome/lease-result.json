@@ -1,0 +1,26 @@
+{
+  "schemaVersion": "runa-m1-campaign-lease-result/v1",
+  "leaseId": "20260828-campaign-coder-r5",
+  "sealSha256": "95a726e758e44285fe30c77cfeb4889fefaca8c52ca4af3bae9767d4721c0caa",
+  "endedAt": "2026-08-28T21:50:17.542Z",
+  "failure": null,
+  "completion": "completed",
+  "cleanupVerified": true,
+  "powerRestored": true,
+  "owned": [
+    {
+      "key": "qwen3-coder-30b-a3b-instruct",
+      "id": "qwen3-coder-30b-a3b-instruct",
+      "fingerprint": "cbf5fe1426acdc624c6f3a33abd5ebe5486fc247441b0f05996dd4ef8ab4986b"
+    },
+    {
+      "key": "text-embedding-nomic-embed-text-v1.5",
+      "id": "text-embedding-nomic-embed-text-v1.5",
+      "fingerprint": "66f5db3ab6ec2819b698b24780d7511d0d343f5d0d911dfd5c74640a1b3233db"
+    }
+  ],
+  "ambiguousLoad": null,
+  "productionRoutingChanged": false,
+  "protectedDataIncluded": false,
+  "inferenceCalledByOperator": false
+}

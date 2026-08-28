@@ -170,3 +170,14 @@ Complete operator regression at `410e3bc`:115/115 passed, zero skips, with Windo
 41.4seconds. Command: `node --test --test-reporter=spec gate7f/function-first/home-runtime/*.test.mjs
 gate7f/function-first/home-runtime/windows-proof/*.test.mjs`. This includes the real local TLS,
 bounded command transport, exact file replacement and process-crash fixtures, not a live Home service.
+
+The second read-only static collection at2026-08-28T21:51:14.884Z, between completed Coder and new Qwen
+leases, is `evidence/20260828-native-drain-details.json`, SHA256
+`100b766f8dea308406fb77a17e1b99a950f0577263b0f50bc077c29d227b796c`.
+Its exact installed diagnostics provider implements a log stream, not an aggregate drain counter;
+no log stream was opened. REST server stop cancels tracked predictions, so it cannot be called a
+graceful drain. Native model-loading source also exposes internal processing-stat signals; investigate
+the supported busy/unload contract before concluding that maintenance requires a new external counter.
+The available-model/JIT-disabled branch is now located: it returns an invalidModelIdentifier failure
+whose message explicitly states JIT is disabled. The actual negative-probe status/body still must be
+captured with the pinned available Nomic model after safe transition; static code is not the live proof.

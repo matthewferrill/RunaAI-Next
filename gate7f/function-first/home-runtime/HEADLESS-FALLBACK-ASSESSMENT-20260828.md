@@ -79,3 +79,12 @@ The corrected Control quiescence v2 interface is necessary but still proves only
 traffic. The outer operator must load the latest private journal, reconcile its exact configuration,
 and obtain a fresh drain result; a cached quiescent receipt is not a transferable Home-idle assertion.
 Native LAN and trusted local desktop/CLI callers remain a distinct admission/drain boundary.
+
+Actual read-only inventory at2026-08-28T21:51:16.337Z, after CoderR5's verified cleanup and before Qwen
+dispatch, is retained in `evidence/20260828-headless-inventory.json`, SHA256
+`451fe89d8c6ef3835757f1264f65428dbaa10c9fb6ba26b96772df69de1f1613`.
+Both pointers resolved to their reviewed `.lmstudio` roots. Matthew's desktop descriptor and binary
+matched the observed210,352,824-byte engine SHA428c4686...e4c1529c1; its arguments were not disclosed.
+Neither reviewed profile contained `llmster-install-location.json`; codex-audit also had no desktop
+descriptor. This establishes absence in those two exact locations, not a whole-host installation
+inventory. No executable was launched, no version was inferred by execution, and no installer ran.

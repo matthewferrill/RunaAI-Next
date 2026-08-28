@@ -1,0 +1,38 @@
+{
+  "name": "slow incomplete chunk ends under actual body deadline",
+  "passed": false,
+  "error": "ERR_ASSERTION",
+  "result": {
+    "status": null,
+    "response": "",
+    "error": "fixture-client-timeout",
+    "elapsedMs": 16007
+  },
+  "before": {
+    "admitAttempts": 2,
+    "admitted": 2,
+    "released": 2,
+    "active": 0,
+    "polls": 0,
+    "primary": 1,
+    "bge": 1,
+    "redirects": 0
+  },
+  "after": {
+    "admitAttempts": 2,
+    "admitted": 2,
+    "released": 2,
+    "active": 0,
+    "polls": 0,
+    "primary": 1,
+    "bge": 1,
+    "redirects": 0
+  },
+  "proxyEvents": [
+    {
+      "type": "denied",
+      "code": "runtime-request-body-timeout",
+      "at": 1787956264484
+    }
+  ]
+}

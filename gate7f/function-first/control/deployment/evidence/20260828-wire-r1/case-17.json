@@ -1,0 +1,32 @@
+{
+  "name": "empty decoded chunked GET is explicitly observed",
+  "passed": false,
+  "error": "ERR_ASSERTION",
+  "result": {
+    "status": 200,
+    "response": "HTTP/1.1 200 OK\r\nServer: Caddy\r\nDate: Fri, 28 Aug 2026 22:30:54 GMT\r\nContent-Length: 0\r\nConnection: close\r\n\r\n",
+    "error": null,
+    "elapsedMs": 5
+  },
+  "before": {
+    "admitAttempts": 2,
+    "admitted": 2,
+    "released": 2,
+    "active": 0,
+    "polls": 0,
+    "primary": 1,
+    "bge": 1,
+    "redirects": 0
+  },
+  "after": {
+    "admitAttempts": 2,
+    "admitted": 2,
+    "released": 2,
+    "active": 0,
+    "polls": 0,
+    "primary": 1,
+    "bge": 1,
+    "redirects": 0
+  },
+  "proxyEvents": []
+}

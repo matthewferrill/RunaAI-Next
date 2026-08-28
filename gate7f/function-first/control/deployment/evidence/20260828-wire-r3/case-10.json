@@ -1,0 +1,33 @@
+{
+  "name": "closed path /unknown",
+  "passed": true,
+  "error": null,
+  "errorMessage": null,
+  "result": {
+    "status": 503,
+    "body": "Runa maintenance bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "elapsedMs": 1
+  },
+  "before": {
+    "admitAttempts": 2,
+    "admitted": 2,
+    "released": 2,
+    "active": 0,
+    "polls": 0,
+    "primary": 1,
+    "bge": 1,
+    "redirects": 0
+  },
+  "after": {
+    "admitAttempts": 2,
+    "admitted": 2,
+    "released": 2,
+    "active": 0,
+    "polls": 0,
+    "primary": 1,
+    "bge": 1,
+    "redirects": 0
+  },
+  "nativeRequests": [],
+  "proxyEvents": []
+}

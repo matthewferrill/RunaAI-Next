@@ -1,0 +1,4 @@
+# Exact retained wire evidence and harness bytes are not checkout-native text.
+evidence/** -text
+run-wire-proof.mjs -text
+wire-fixture.mjs -text

@@ -1,0 +1,32 @@
+{
+  "name": "incomplete fixed length cannot leave an unbounded request",
+  "passed": true,
+  "error": null,
+  "result": {
+    "status": 503,
+    "response": "HTTP/1.1 503 Service Unavailable\r\nContent-Type: text/plain; charset=utf-8\r\nServer: Caddy\r\nDate: Fri, 28 Aug 2026 22:31:10 GMT\r\nContent-Length: 49\r\nConnection: close\r\n\r\nRuna maintenance bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "error": null,
+    "elapsedMs": 2
+  },
+  "before": {
+    "admitAttempts": 2,
+    "admitted": 2,
+    "released": 2,
+    "active": 0,
+    "polls": 0,
+    "primary": 1,
+    "bge": 1,
+    "redirects": 0
+  },
+  "after": {
+    "admitAttempts": 2,
+    "admitted": 2,
+    "released": 2,
+    "active": 0,
+    "polls": 0,
+    "primary": 1,
+    "bge": 1,
+    "redirects": 0
+  },
+  "proxyEvents": []
+}

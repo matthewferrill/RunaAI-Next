@@ -1,0 +1,57 @@
+{
+  "name": "empty GET models reaches exactly primary backend",
+  "passed": true,
+  "error": null,
+  "errorMessage": null,
+  "result": {
+    "status": 200,
+    "body": " {\"data\":[]}\n",
+    "elapsedMs": 23
+  },
+  "before": {
+    "admitAttempts": 0,
+    "admitted": 0,
+    "released": 0,
+    "active": 0,
+    "polls": 0,
+    "primary": 0,
+    "bge": 0,
+    "redirects": 0
+  },
+  "after": {
+    "admitAttempts": 1,
+    "admitted": 1,
+    "released": 1,
+    "active": 0,
+    "polls": 0,
+    "primary": 1,
+    "bge": 0,
+    "redirects": 0
+  },
+  "nativeRequests": [
+    {
+      "kind": "primary",
+      "path": "/v1/models",
+      "method": "GET",
+      "bodyBytes": 0,
+      "bodySha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "headers": {
+        "host": "127.0.0.1:52849",
+        "connection": "keep-alive"
+      },
+      "at": 1787957518505
+    }
+  ],
+  "proxyEvents": [
+    {
+      "type": "forwarded",
+      "method": "GET",
+      "path": "/v1/models",
+      "requestBytes": 0,
+      "responseBytes": 13,
+      "status": 200,
+      "generation": "b7c7f27b-3df0-4473-8a4d-dc52cd8fc9b3",
+      "at": 1787957518508
+    }
+  ]
+}

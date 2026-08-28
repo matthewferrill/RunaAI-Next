@@ -1,0 +1,42 @@
+{
+  "name": "backend failure status preserved",
+  "passed": true,
+  "error": null,
+  "result": {
+    "status": 503,
+    "body": " {\"ok\":true}\n",
+    "elapsedMs": 17
+  },
+  "before": {
+    "admitAttempts": 3,
+    "admitted": 3,
+    "released": 3,
+    "active": 0,
+    "polls": 0,
+    "primary": 1,
+    "bge": 2,
+    "redirects": 0
+  },
+  "after": {
+    "admitAttempts": 4,
+    "admitted": 4,
+    "released": 4,
+    "active": 0,
+    "polls": 0,
+    "primary": 1,
+    "bge": 3,
+    "redirects": 0
+  },
+  "proxyEvents": [
+    {
+      "type": "forwarded",
+      "method": "GET",
+      "path": "/health",
+      "requestBytes": 0,
+      "responseBytes": 13,
+      "status": 503,
+      "generation": "9b9f8513-e7f0-4368-881b-73c113e00e2b",
+      "at": 1787956270513
+    }
+  ]
+}

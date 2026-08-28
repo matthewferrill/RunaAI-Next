@@ -1,0 +1,39 @@
+{
+  "name": "same issuer wrong client pin",
+  "passed": true,
+  "error": null,
+  "errorMessage": null,
+  "result": {
+    "status": 403,
+    "body": "{\"schemaVersion\":\"runaai-home-runtime-error/v1\",\"errorCode\":\"runtime-client-denied\",\"privateValuesIncluded\":false}",
+    "elapsedMs": 9
+  },
+  "before": {
+    "admitAttempts": 10,
+    "admitted": 10,
+    "released": 10,
+    "active": 0,
+    "polls": 0,
+    "primary": 6,
+    "bge": 4,
+    "redirects": 0
+  },
+  "after": {
+    "admitAttempts": 10,
+    "admitted": 10,
+    "released": 10,
+    "active": 0,
+    "polls": 0,
+    "primary": 6,
+    "bge": 4,
+    "redirects": 0
+  },
+  "nativeRequests": [],
+  "proxyEvents": [
+    {
+      "type": "denied",
+      "code": "runtime-client-denied",
+      "at": 1787957669777
+    }
+  ]
+}

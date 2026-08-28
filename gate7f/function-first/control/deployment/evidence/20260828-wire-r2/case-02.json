@@ -1,0 +1,57 @@
+{
+  "name": "empty GET health reaches exactly BGE backend",
+  "passed": true,
+  "error": null,
+  "errorMessage": null,
+  "result": {
+    "status": 200,
+    "body": " {\"ok\":true}\n",
+    "elapsedMs": 6
+  },
+  "before": {
+    "admitAttempts": 1,
+    "admitted": 1,
+    "released": 1,
+    "active": 0,
+    "polls": 0,
+    "primary": 1,
+    "bge": 0,
+    "redirects": 0
+  },
+  "after": {
+    "admitAttempts": 2,
+    "admitted": 2,
+    "released": 2,
+    "active": 0,
+    "polls": 0,
+    "primary": 1,
+    "bge": 1,
+    "redirects": 0
+  },
+  "nativeRequests": [
+    {
+      "kind": "bge",
+      "path": "/health",
+      "method": "GET",
+      "bodyBytes": 0,
+      "bodySha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "headers": {
+        "host": "127.0.0.1:55257",
+        "connection": "keep-alive"
+      },
+      "at": 1787956891750
+    }
+  ],
+  "proxyEvents": [
+    {
+      "type": "forwarded",
+      "method": "GET",
+      "path": "/health",
+      "requestBytes": 0,
+      "responseBytes": 13,
+      "status": 200,
+      "generation": "8a7816b5-2168-4da2-8c48-2a46b3fad5d9",
+      "at": 1787956891751
+    }
+  ]
+}

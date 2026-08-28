@@ -1,0 +1,37 @@
+{
+  "name": "foreign issuer client",
+  "passed": true,
+  "error": null,
+  "result": {
+    "status": 502,
+    "body": "",
+    "elapsedMs": 5
+  },
+  "before": {
+    "admitAttempts": 6,
+    "admitted": 6,
+    "released": 6,
+    "active": 0,
+    "polls": 0,
+    "primary": 2,
+    "bge": 4,
+    "redirects": 0
+  },
+  "after": {
+    "admitAttempts": 6,
+    "admitted": 6,
+    "released": 6,
+    "active": 0,
+    "polls": 0,
+    "primary": 2,
+    "bge": 4,
+    "redirects": 0
+  },
+  "proxyEvents": [
+    {
+      "type": "tls-client-error",
+      "code": "ERR_SSL_PEER_DID_NOT_RETURN_A_CERTIFICATE",
+      "at": 1787956351154
+    }
+  ]
+}

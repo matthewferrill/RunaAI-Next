@@ -1,0 +1,37 @@
+{
+  "name": "actual 65 second primary timeout releases admission",
+  "passed": false,
+  "error": "ERR_ASSERTION",
+  "result": {
+    "status": 504,
+    "body": "",
+    "elapsedMs": 65003
+  },
+  "before": {
+    "admitAttempts": 5,
+    "admitted": 5,
+    "released": 5,
+    "active": 0,
+    "polls": 0,
+    "primary": 1,
+    "bge": 4,
+    "redirects": 0
+  },
+  "after": {
+    "admitAttempts": 6,
+    "admitted": 6,
+    "released": 6,
+    "active": 0,
+    "polls": 0,
+    "primary": 2,
+    "bge": 4,
+    "redirects": 0
+  },
+  "proxyEvents": [
+    {
+      "type": "denied",
+      "code": "runtime-request-unavailable",
+      "at": 1787956350531
+    }
+  ]
+}

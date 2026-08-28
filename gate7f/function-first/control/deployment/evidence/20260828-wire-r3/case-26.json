@@ -1,0 +1,52 @@
+{
+  "name": "backend redirect rejected without following",
+  "passed": true,
+  "error": null,
+  "errorMessage": null,
+  "result": {
+    "status": 503,
+    "body": "{\"schemaVersion\":\"runaai-home-runtime-error/v1\",\"errorCode\":\"runtime-upstream-redirect\",\"privateValuesIncluded\":false}",
+    "elapsedMs": 10
+  },
+  "before": {
+    "admitAttempts": 5,
+    "admitted": 5,
+    "released": 5,
+    "active": 0,
+    "polls": 0,
+    "primary": 4,
+    "bge": 1,
+    "redirects": 0
+  },
+  "after": {
+    "admitAttempts": 6,
+    "admitted": 6,
+    "released": 6,
+    "active": 0,
+    "polls": 0,
+    "primary": 4,
+    "bge": 2,
+    "redirects": 0
+  },
+  "nativeRequests": [
+    {
+      "kind": "bge",
+      "path": "/health",
+      "method": "GET",
+      "bodyBytes": 0,
+      "bodySha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "headers": {
+        "host": "127.0.0.1:52850",
+        "connection": "keep-alive"
+      },
+      "at": 1787957528604
+    }
+  ],
+  "proxyEvents": [
+    {
+      "type": "denied",
+      "code": "runtime-upstream-redirect",
+      "at": 1787957528605
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "name": "invalid chunk syntax",
+  "passed": true,
+  "error": null,
+  "result": {
+    "status": 502,
+    "response": "HTTP/1.1 502 Bad Gateway\r\nServer: Caddy\r\nDate: Fri, 28 Aug 2026 22:30:54 GMT\r\nContent-Length: 0\r\nConnection: close\r\n\r\n",
+    "error": null,
+    "elapsedMs": 6
+  },
+  "before": {
+    "admitAttempts": 2,
+    "admitted": 2,
+    "released": 2,
+    "active": 0,
+    "polls": 0,
+    "primary": 1,
+    "bge": 1,
+    "redirects": 0
+  },
+  "after": {
+    "admitAttempts": 2,
+    "admitted": 2,
+    "released": 2,
+    "active": 0,
+    "polls": 0,
+    "primary": 1,
+    "bge": 1,
+    "redirects": 0
+  },
+  "proxyEvents": []
+}

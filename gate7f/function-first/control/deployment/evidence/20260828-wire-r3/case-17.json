@@ -1,0 +1,62 @@
+{
+  "name": "empty decoded chunked GET is explicitly observed",
+  "passed": true,
+  "error": null,
+  "errorMessage": null,
+  "result": {
+    "status": 200,
+    "response": "HTTP/1.1 200 OK\r\nCache-Control: no-store\r\nContent-Length: 13\r\nContent-Type: application/json\r\nDate: Fri, 28 Aug 2026 22:51:58 GMT\r\nVia: 1.1 Caddy\r\nConnection: close\r\n\r\n {\"data\":[]}\n",
+    "error": null,
+    "elapsedMs": 3,
+    "requestWire": "GET /v1/models HTTP/1.1\r\nHost: 127.0.0.1:52852\r\nConnection: close\r\nTransfer-Encoding: chunked\r\n\r\n0\r\n\r\n",
+    "tcpHalfClose": false,
+    "termination": "server-end",
+    "serverTerminated": true
+  },
+  "before": {
+    "admitAttempts": 2,
+    "admitted": 2,
+    "released": 2,
+    "active": 0,
+    "polls": 0,
+    "primary": 1,
+    "bge": 1,
+    "redirects": 0
+  },
+  "after": {
+    "admitAttempts": 3,
+    "admitted": 3,
+    "released": 3,
+    "active": 0,
+    "polls": 0,
+    "primary": 2,
+    "bge": 1,
+    "redirects": 0
+  },
+  "nativeRequests": [
+    {
+      "kind": "primary",
+      "path": "/v1/models",
+      "method": "GET",
+      "bodyBytes": 0,
+      "bodySha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "headers": {
+        "host": "127.0.0.1:52849",
+        "connection": "keep-alive"
+      },
+      "at": 1787957518550
+    }
+  ],
+  "proxyEvents": [
+    {
+      "type": "forwarded",
+      "method": "GET",
+      "path": "/v1/models",
+      "requestBytes": 0,
+      "responseBytes": 13,
+      "status": 200,
+      "generation": "b7c7f27b-3df0-4473-8a4d-dc52cd8fc9b3",
+      "at": 1787957518551
+    }
+  ]
+}

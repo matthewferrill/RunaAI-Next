@@ -1,0 +1,1450 @@
+{
+  "schemaVersion": "runaai-m1-closed-tls-wire-proof/v1",
+  "startedAt": "2026-08-28T22:30:50.405Z",
+  "sourcePins": [
+    {
+      "file": "home-runtime/tls-proxy.mjs",
+      "sha256": "9d5068d1a3a0c09a0b4bb580fb192011730f40cbdb9ef26bb04402ea5869e1f6",
+      "bytes": 2673
+    },
+    {
+      "file": "home-runtime/proxy.mjs",
+      "sha256": "dce23f5b7c32470ab38e531846e94021a06e6fba45202da2250f89651c59afeb",
+      "bytes": 6152
+    },
+    {
+      "file": "home-runtime/contracts.mjs",
+      "sha256": "d977fcc68f6fc8959b76e8ff1b3cc165ec697f0a0cf01bb6e7e3dcea4131c52e",
+      "bytes": 6693
+    },
+    {
+      "file": "home-runtime/controller.mjs",
+      "sha256": "53fd576f52e2dc51f25200548232367756602f0ac70a00b865ba3eee6af0a354",
+      "bytes": 10762
+    },
+    {
+      "file": "readiness/manifest.mjs",
+      "sha256": "21757455f9bf2274f495cf0bc538bd684b35a7c0a60196b612eb61ab8903bed6",
+      "bytes": 2467
+    },
+    {
+      "file": "readiness/lease-contract.mjs",
+      "sha256": "9000ea05b54214bc27f394b078e50df6b10d8df231ef32954a143e6d10256c13",
+      "bytes": 4073
+    },
+    {
+      "file": "readiness/evidence/20260828-smoke-gemma-r1/events.jsonl",
+      "sha256": "e8329085a4bd3eccbe0ba9ae2be5afe32a85f9e5c774c2f83bd34fdf19cd6eaf",
+      "bytes": 67132
+    }
+  ],
+  "caddySha256": "5cb9ab71e5756ce72840b8234177a2f40c8b4ab47a806b8e841e2b784e9df62b",
+  "opensslSha256": "063e62dcc027fc5dbb1343de631f02a9291f8b1df0b4e37012e49a03d525aad4",
+  "nodeVersion": "v22.22.0",
+  "nodeSha256": "bae898add4643fcf890a83ad8ae56e20dce7e781cab161a53991ceba70c99ffb",
+  "cases": [
+    {
+      "name": "empty GET models reaches exactly primary backend",
+      "passed": true,
+      "error": null,
+      "result": {
+        "status": 200,
+        "body": " {\"data\":[]}\n",
+        "elapsedMs": 23
+      },
+      "before": {
+        "admitAttempts": 0,
+        "admitted": 0,
+        "released": 0,
+        "active": 0,
+        "polls": 0,
+        "primary": 0,
+        "bge": 0,
+        "redirects": 0
+      },
+      "after": {
+        "admitAttempts": 1,
+        "admitted": 1,
+        "released": 1,
+        "active": 0,
+        "polls": 0,
+        "primary": 1,
+        "bge": 0,
+        "redirects": 0
+      },
+      "proxyEvents": [
+        {
+          "type": "forwarded",
+          "method": "GET",
+          "path": "/v1/models",
+          "requestBytes": 0,
+          "responseBytes": 13,
+          "status": 200,
+          "generation": "9b9f8513-e7f0-4368-881b-73c113e00e2b",
+          "at": 1787956254409
+        }
+      ]
+    },
+    {
+      "name": "empty GET health reaches exactly BGE backend",
+      "passed": true,
+      "error": null,
+      "result": {
+        "status": 200,
+        "body": " {\"ok\":true}\n",
+        "elapsedMs": 5
+      },
+      "before": {
+        "admitAttempts": 1,
+        "admitted": 1,
+        "released": 1,
+        "active": 0,
+        "polls": 0,
+        "primary": 1,
+        "bge": 0,
+        "redirects": 0
+      },
+      "after": {
+        "admitAttempts": 2,
+        "admitted": 2,
+        "released": 2,
+        "active": 0,
+        "polls": 0,
+        "primary": 1,
+        "bge": 1,
+        "redirects": 0
+      },
+      "proxyEvents": [
+        {
+          "type": "forwarded",
+          "method": "GET",
+          "path": "/health",
+          "requestBytes": 0,
+          "responseBytes": 13,
+          "status": 200,
+          "generation": "9b9f8513-e7f0-4368-881b-73c113e00e2b",
+          "at": 1787956254416
+        }
+      ]
+    },
+    {
+      "name": "closed path /v1/models?x=1",
+      "passed": true,
+      "error": null,
+      "result": {
+        "status": 503,
+        "body": "Runa maintenance bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "elapsedMs": 2
+      },
+      "before": {
+        "admitAttempts": 2,
+        "admitted": 2,
+        "released": 2,
+        "active": 0,
+        "polls": 0,
+        "primary": 1,
+        "bge": 1,
+        "redirects": 0
+      },
+      "after": {
+        "admitAttempts": 2,
+        "admitted": 2,
+        "released": 2,
+        "active": 0,
+        "polls": 0,
+        "primary": 1,
+        "bge": 1,
+        "redirects": 0
+      },
+      "proxyEvents": []
+    },
+    {
+      "name": "closed path /health?x=1",
+      "passed": true,
+      "error": null,
+      "result": {
+        "status": 503,
+        "body": "Runa maintenance bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "elapsedMs": 2
+      },
+      "before": {
+        "admitAttempts": 2,
+        "admitted": 2,
+        "released": 2,
+        "active": 0,
+        "polls": 0,
+        "primary": 1,
+        "bge": 1,
+        "redirects": 0
+      },
+      "after": {
+        "admitAttempts": 2,
+        "admitted": 2,
+        "released": 2,
+        "active": 0,
+        "polls": 0,
+        "primary": 1,
+        "bge": 1,
+        "redirects": 0
+      },
+      "proxyEvents": []
+    },
+    {
+      "name": "closed path /v1/models/",
+      "passed": true,
+      "error": null,
+      "result": {
+        "status": 503,
+        "body": "Runa maintenance bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "elapsedMs": 1
+      },
+      "before": {
+        "admitAttempts": 2,
+        "admitted": 2,
+        "released": 2,
+        "active": 0,
+        "polls": 0,
+        "primary": 1,
+        "bge": 1,
+        "redirects": 0
+      },
+      "after": {
+        "admitAttempts": 2,
+        "admitted": 2,
+        "released": 2,
+        "active": 0,
+        "polls": 0,
+        "primary": 1,
+        "bge": 1,
+        "redirects": 0
+      },
+      "proxyEvents": []
+    },
+    {
+      "name": "closed path /v1/%6dodels",
+      "passed": true,
+      "error": null,
+      "result": {
+        "status": 503,
+        "body": "Runa maintenance bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "elapsedMs": 2
+      },
+      "before": {
+        "admitAttempts": 2,
+        "admitted": 2,
+        "released": 2,
+        "active": 0,
+        "polls": 0,
+        "primary": 1,
+        "bge": 1,
+        "redirects": 0
+      },
+      "after": {
+        "admitAttempts": 2,
+        "admitted": 2,
+        "released": 2,
+        "active": 0,
+        "polls": 0,
+        "primary": 1,
+        "bge": 1,
+        "redirects": 0
+      },
+      "proxyEvents": []
+    },
+    {
+      "name": "closed path /health#suffix",
+      "passed": true,
+      "error": null,
+      "result": {
+        "status": 503,
+        "body": "Runa maintenance bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "elapsedMs": 2
+      },
+      "before": {
+        "admitAttempts": 2,
+        "admitted": 2,
+        "released": 2,
+        "active": 0,
+        "polls": 0,
+        "primary": 1,
+        "bge": 1,
+        "redirects": 0
+      },
+      "after": {
+        "admitAttempts": 2,
+        "admitted": 2,
+        "released": 2,
+        "active": 0,
+        "polls": 0,
+        "primary": 1,
+        "bge": 1,
+        "redirects": 0
+      },
+      "proxyEvents": []
+    },
+    {
+      "name": "closed path /healthz",
+      "passed": true,
+      "error": null,
+      "result": {
+        "status": 503,
+        "body": "Runa maintenance bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "elapsedMs": 1
+      },
+      "before": {
+        "admitAttempts": 2,
+        "admitted": 2,
+        "released": 2,
+        "active": 0,
+        "polls": 0,
+        "primary": 1,
+        "bge": 1,
+        "redirects": 0
+      },
+      "after": {
+        "admitAttempts": 2,
+        "admitted": 2,
+        "released": 2,
+        "active": 0,
+        "polls": 0,
+        "primary": 1,
+        "bge": 1,
+        "redirects": 0
+      },
+      "proxyEvents": []
+    },
+    {
+      "name": "closed path /api/v1/models/load",
+      "passed": true,
+      "error": null,
+      "result": {
+        "status": 503,
+        "body": "Runa maintenance bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "elapsedMs": 1
+      },
+      "before": {
+        "admitAttempts": 2,
+        "admitted": 2,
+        "released": 2,
+        "active": 0,
+        "polls": 0,
+        "primary": 1,
+        "bge": 1,
+        "redirects": 0
+      },
+      "after": {
+        "admitAttempts": 2,
+        "admitted": 2,
+        "released": 2,
+        "active": 0,
+        "polls": 0,
+        "primary": 1,
+        "bge": 1,
+        "redirects": 0
+      },
+      "proxyEvents": []
+    },
+    {
+      "name": "closed path /unknown",
+      "passed": true,
+      "error": null,
+      "result": {
+        "status": 503,
+        "body": "Runa maintenance bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "elapsedMs": 1
+      },
+      "before": {
+        "admitAttempts": 2,
+        "admitted": 2,
+        "released": 2,
+        "active": 0,
+        "polls": 0,
+        "primary": 1,
+        "bge": 1,
+        "redirects": 0
+      },
+      "after": {
+        "admitAttempts": 2,
+        "admitted": 2,
+        "released": 2,
+        "active": 0,
+        "polls": 0,
+        "primary": 1,
+        "bge": 1,
+        "redirects": 0
+      },
+      "proxyEvents": []
+    },
+    {
+      "name": "closed method POST",
+      "passed": true,
+      "error": null,
+      "result": {
+        "status": 503,
+        "body": "Runa maintenance bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "elapsedMs": 1
+      },
+      "before": {
+        "admitAttempts": 2,
+        "admitted": 2,
+        "released": 2,
+        "active": 0,
+        "polls": 0,
+        "primary": 1,
+        "bge": 1,
+        "redirects": 0
+      },
+      "after": {
+        "admitAttempts": 2,
+        "admitted": 2,
+        "released": 2,
+        "active": 0,
+        "polls": 0,
+        "primary": 1,
+        "bge": 1,
+        "redirects": 0
+      },
+      "proxyEvents": []
+    },
+    {
+      "name": "closed method HEAD",
+      "passed": true,
+      "error": null,
+      "result": {
+        "status": 503,
+        "body": "",
+        "elapsedMs": 1
+      },
+      "before": {
+        "admitAttempts": 2,
+        "admitted": 2,
+        "released": 2,
+        "active": 0,
+        "polls": 0,
+        "primary": 1,
+        "bge": 1,
+        "redirects": 0
+      },
+      "after": {
+        "admitAttempts": 2,
+        "admitted": 2,
+        "released": 2,
+        "active": 0,
+        "polls": 0,
+        "primary": 1,
+        "bge": 1,
+        "redirects": 0
+      },
+      "proxyEvents": []
+    },
+    {
+      "name": "closed method OPTIONS",
+      "passed": true,
+      "error": null,
+      "result": {
+        "status": 503,
+        "body": "Runa maintenance bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "elapsedMs": 1
+      },
+      "before": {
+        "admitAttempts": 2,
+        "admitted": 2,
+        "released": 2,
+        "active": 0,
+        "polls": 0,
+        "primary": 1,
+        "bge": 1,
+        "redirects": 0
+      },
+      "after": {
+        "admitAttempts": 2,
+        "admitted": 2,
+        "released": 2,
+        "active": 0,
+        "polls": 0,
+        "primary": 1,
+        "bge": 1,
+        "redirects": 0
+      },
+      "proxyEvents": []
+    },
+    {
+      "name": "nonempty fixed length GET denied",
+      "passed": true,
+      "error": null,
+      "result": {
+        "status": 503,
+        "body": "Runa maintenance bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "elapsedMs": 1
+      },
+      "before": {
+        "admitAttempts": 2,
+        "admitted": 2,
+        "released": 2,
+        "active": 0,
+        "polls": 0,
+        "primary": 1,
+        "bge": 1,
+        "redirects": 0
+      },
+      "after": {
+        "admitAttempts": 2,
+        "admitted": 2,
+        "released": 2,
+        "active": 0,
+        "polls": 0,
+        "primary": 1,
+        "bge": 1,
+        "redirects": 0
+      },
+      "proxyEvents": []
+    },
+    {
+      "name": "content encoding denied",
+      "passed": true,
+      "error": null,
+      "result": {
+        "status": 503,
+        "body": "Runa maintenance bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "elapsedMs": 1
+      },
+      "before": {
+        "admitAttempts": 2,
+        "admitted": 2,
+        "released": 2,
+        "active": 0,
+        "polls": 0,
+        "primary": 1,
+        "bge": 1,
+        "redirects": 0
+      },
+      "after": {
+        "admitAttempts": 2,
+        "admitted": 2,
+        "released": 2,
+        "active": 0,
+        "polls": 0,
+        "primary": 1,
+        "bge": 1,
+        "redirects": 0
+      },
+      "proxyEvents": []
+    },
+    {
+      "name": "nonempty chunked GET denied before admission",
+      "passed": false,
+      "error": "ERR_ASSERTION",
+      "result": {
+        "status": 200,
+        "response": "HTTP/1.1 200 OK\r\nServer: Caddy\r\nDate: Fri, 28 Aug 2026 22:30:54 GMT\r\nContent-Length: 0\r\nConnection: close\r\n\r\n",
+        "error": null,
+        "elapsedMs": 4
+      },
+      "before": {
+        "admitAttempts": 2,
+        "admitted": 2,
+        "released": 2,
+        "active": 0,
+        "polls": 0,
+        "primary": 1,
+        "bge": 1,
+        "redirects": 0
+      },
+      "after": {
+        "admitAttempts": 2,
+        "admitted": 2,
+        "released": 2,
+        "active": 0,
+        "polls": 0,
+        "primary": 1,
+        "bge": 1,
+        "redirects": 0
+      },
+      "proxyEvents": [
+        {
+          "type": "denied",
+          "code": "runtime-request-unavailable",
+          "at": 1787956254448
+        }
+      ]
+    },
+    {
+      "name": "empty decoded chunked GET is explicitly observed",
+      "passed": false,
+      "error": "ERR_ASSERTION",
+      "result": {
+        "status": 200,
+        "response": "HTTP/1.1 200 OK\r\nServer: Caddy\r\nDate: Fri, 28 Aug 2026 22:30:54 GMT\r\nContent-Length: 0\r\nConnection: close\r\n\r\n",
+        "error": null,
+        "elapsedMs": 5
+      },
+      "before": {
+        "admitAttempts": 2,
+        "admitted": 2,
+        "released": 2,
+        "active": 0,
+        "polls": 0,
+        "primary": 1,
+        "bge": 1,
+        "redirects": 0
+      },
+      "after": {
+        "admitAttempts": 2,
+        "admitted": 2,
+        "released": 2,
+        "active": 0,
+        "polls": 0,
+        "primary": 1,
+        "bge": 1,
+        "redirects": 0
+      },
+      "proxyEvents": []
+    },
+    {
+      "name": "conflicting content length and transfer encoding",
+      "passed": false,
+      "error": "ERR_ASSERTION",
+      "result": {
+        "status": 200,
+        "response": "HTTP/1.1 200 OK\r\nServer: Caddy\r\nDate: Fri, 28 Aug 2026 22:30:54 GMT\r\nContent-Length: 0\r\nConnection: close\r\n\r\n",
+        "error": null,
+        "elapsedMs": 5
+      },
+      "before": {
+        "admitAttempts": 2,
+        "admitted": 2,
+        "released": 2,
+        "active": 0,
+        "polls": 0,
+        "primary": 1,
+        "bge": 1,
+        "redirects": 0
+      },
+      "after": {
+        "admitAttempts": 2,
+        "admitted": 2,
+        "released": 2,
+        "active": 0,
+        "polls": 0,
+        "primary": 1,
+        "bge": 1,
+        "redirects": 0
+      },
+      "proxyEvents": []
+    },
+    {
+      "name": "negative content length",
+      "passed": true,
+      "error": null,
+      "result": {
+        "status": 400,
+        "response": "HTTP/1.1 400 Bad Request\r\nContent-Type: text/plain; charset=utf-8\r\nConnection: close\r\n\r\n400 Bad Request",
+        "error": null,
+        "elapsedMs": 0
+      },
+      "before": {
+        "admitAttempts": 2,
+        "admitted": 2,
+        "released": 2,
+        "active": 0,
+        "polls": 0,
+        "primary": 1,
+        "bge": 1,
+        "redirects": 0
+      },
+      "after": {
+        "admitAttempts": 2,
+        "admitted": 2,
+        "released": 2,
+        "active": 0,
+        "polls": 0,
+        "primary": 1,
+        "bge": 1,
+        "redirects": 0
+      },
+      "proxyEvents": []
+    },
+    {
+      "name": "different duplicate lengths",
+      "passed": true,
+      "error": null,
+      "result": {
+        "status": 400,
+        "response": "HTTP/1.1 400 Bad Request\r\nContent-Type: text/plain; charset=utf-8\r\nConnection: close\r\n\r\n400 Bad Request",
+        "error": null,
+        "elapsedMs": 1
+      },
+      "before": {
+        "admitAttempts": 2,
+        "admitted": 2,
+        "released": 2,
+        "active": 0,
+        "polls": 0,
+        "primary": 1,
+        "bge": 1,
+        "redirects": 0
+      },
+      "after": {
+        "admitAttempts": 2,
+        "admitted": 2,
+        "released": 2,
+        "active": 0,
+        "polls": 0,
+        "primary": 1,
+        "bge": 1,
+        "redirects": 0
+      },
+      "proxyEvents": []
+    },
+    {
+      "name": "invalid chunk syntax",
+      "passed": true,
+      "error": null,
+      "result": {
+        "status": 502,
+        "response": "HTTP/1.1 502 Bad Gateway\r\nServer: Caddy\r\nDate: Fri, 28 Aug 2026 22:30:54 GMT\r\nContent-Length: 0\r\nConnection: close\r\n\r\n",
+        "error": null,
+        "elapsedMs": 6
+      },
+      "before": {
+        "admitAttempts": 2,
+        "admitted": 2,
+        "released": 2,
+        "active": 0,
+        "polls": 0,
+        "primary": 1,
+        "bge": 1,
+        "redirects": 0
+      },
+      "after": {
+        "admitAttempts": 2,
+        "admitted": 2,
+        "released": 2,
+        "active": 0,
+        "polls": 0,
+        "primary": 1,
+        "bge": 1,
+        "redirects": 0
+      },
+      "proxyEvents": []
+    },
+    {
+      "name": "slow incomplete chunk ends under actual body deadline",
+      "passed": false,
+      "error": "ERR_ASSERTION",
+      "result": {
+        "status": null,
+        "response": "",
+        "error": "fixture-client-timeout",
+        "elapsedMs": 16007
+      },
+      "before": {
+        "admitAttempts": 2,
+        "admitted": 2,
+        "released": 2,
+        "active": 0,
+        "polls": 0,
+        "primary": 1,
+        "bge": 1,
+        "redirects": 0
+      },
+      "after": {
+        "admitAttempts": 2,
+        "admitted": 2,
+        "released": 2,
+        "active": 0,
+        "polls": 0,
+        "primary": 1,
+        "bge": 1,
+        "redirects": 0
+      },
+      "proxyEvents": [
+        {
+          "type": "denied",
+          "code": "runtime-request-body-timeout",
+          "at": 1787956264484
+        }
+      ]
+    },
+    {
+      "name": "incomplete fixed length cannot leave an unbounded request",
+      "passed": true,
+      "error": null,
+      "result": {
+        "status": 503,
+        "response": "HTTP/1.1 503 Service Unavailable\r\nContent-Type: text/plain; charset=utf-8\r\nServer: Caddy\r\nDate: Fri, 28 Aug 2026 22:31:10 GMT\r\nContent-Length: 49\r\nConnection: close\r\n\r\nRuna maintenance bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "error": null,
+        "elapsedMs": 2
+      },
+      "before": {
+        "admitAttempts": 2,
+        "admitted": 2,
+        "released": 2,
+        "active": 0,
+        "polls": 0,
+        "primary": 1,
+        "bge": 1,
+        "redirects": 0
+      },
+      "after": {
+        "admitAttempts": 2,
+        "admitted": 2,
+        "released": 2,
+        "active": 0,
+        "polls": 0,
+        "primary": 1,
+        "bge": 1,
+        "redirects": 0
+      },
+      "proxyEvents": []
+    },
+    {
+      "name": "backend redirect rejected without following",
+      "passed": true,
+      "error": null,
+      "result": {
+        "status": 503,
+        "body": "{\"schemaVersion\":\"runaai-home-runtime-error/v1\",\"errorCode\":\"runtime-upstream-redirect\",\"privateValuesIncluded\":false}",
+        "elapsedMs": 16
+      },
+      "before": {
+        "admitAttempts": 2,
+        "admitted": 2,
+        "released": 2,
+        "active": 0,
+        "polls": 0,
+        "primary": 1,
+        "bge": 1,
+        "redirects": 0
+      },
+      "after": {
+        "admitAttempts": 3,
+        "admitted": 3,
+        "released": 3,
+        "active": 0,
+        "polls": 0,
+        "primary": 1,
+        "bge": 2,
+        "redirects": 0
+      },
+      "proxyEvents": [
+        {
+          "type": "denied",
+          "code": "runtime-upstream-redirect",
+          "at": 1787956270495
+        }
+      ]
+    },
+    {
+      "name": "backend failure status preserved",
+      "passed": true,
+      "error": null,
+      "result": {
+        "status": 503,
+        "body": " {\"ok\":true}\n",
+        "elapsedMs": 17
+      },
+      "before": {
+        "admitAttempts": 3,
+        "admitted": 3,
+        "released": 3,
+        "active": 0,
+        "polls": 0,
+        "primary": 1,
+        "bge": 2,
+        "redirects": 0
+      },
+      "after": {
+        "admitAttempts": 4,
+        "admitted": 4,
+        "released": 4,
+        "active": 0,
+        "polls": 0,
+        "primary": 1,
+        "bge": 3,
+        "redirects": 0
+      },
+      "proxyEvents": [
+        {
+          "type": "forwarded",
+          "method": "GET",
+          "path": "/health",
+          "requestBytes": 0,
+          "responseBytes": 13,
+          "status": 503,
+          "generation": "9b9f8513-e7f0-4368-881b-73c113e00e2b",
+          "at": 1787956270513
+        }
+      ]
+    },
+    {
+      "name": "actual 15 second BGE timeout releases admission",
+      "passed": true,
+      "error": null,
+      "result": {
+        "status": 503,
+        "body": "{\"schemaVersion\":\"runaai-home-runtime-error/v1\",\"errorCode\":\"runtime-request-unavailable\",\"privateValuesIncluded\":false}",
+        "elapsedMs": 15012
+      },
+      "before": {
+        "admitAttempts": 4,
+        "admitted": 4,
+        "released": 4,
+        "active": 0,
+        "polls": 0,
+        "primary": 1,
+        "bge": 3,
+        "redirects": 0
+      },
+      "after": {
+        "admitAttempts": 5,
+        "admitted": 5,
+        "released": 5,
+        "active": 0,
+        "polls": 0,
+        "primary": 1,
+        "bge": 4,
+        "redirects": 0
+      },
+      "proxyEvents": [
+        {
+          "type": "denied",
+          "code": "runtime-request-unavailable",
+          "at": 1787956285526
+        }
+      ]
+    },
+    {
+      "name": "actual 65 second primary timeout releases admission",
+      "passed": false,
+      "error": "ERR_ASSERTION",
+      "result": {
+        "status": 504,
+        "body": "",
+        "elapsedMs": 65003
+      },
+      "before": {
+        "admitAttempts": 5,
+        "admitted": 5,
+        "released": 5,
+        "active": 0,
+        "polls": 0,
+        "primary": 1,
+        "bge": 4,
+        "redirects": 0
+      },
+      "after": {
+        "admitAttempts": 6,
+        "admitted": 6,
+        "released": 6,
+        "active": 0,
+        "polls": 0,
+        "primary": 2,
+        "bge": 4,
+        "redirects": 0
+      },
+      "proxyEvents": [
+        {
+          "type": "denied",
+          "code": "runtime-request-unavailable",
+          "at": 1787956350531
+        }
+      ]
+    },
+    {
+      "name": "same issuer wrong client pin",
+      "passed": true,
+      "error": null,
+      "result": {
+        "status": 403,
+        "body": "{\"schemaVersion\":\"runaai-home-runtime-error/v1\",\"errorCode\":\"runtime-client-denied\",\"privateValuesIncluded\":false}",
+        "elapsedMs": 7
+      },
+      "before": {
+        "admitAttempts": 6,
+        "admitted": 6,
+        "released": 6,
+        "active": 0,
+        "polls": 0,
+        "primary": 2,
+        "bge": 4,
+        "redirects": 0
+      },
+      "after": {
+        "admitAttempts": 6,
+        "admitted": 6,
+        "released": 6,
+        "active": 0,
+        "polls": 0,
+        "primary": 2,
+        "bge": 4,
+        "redirects": 0
+      },
+      "proxyEvents": [
+        {
+          "type": "denied",
+          "code": "runtime-client-denied",
+          "at": 1787956350850
+        }
+      ]
+    },
+    {
+      "name": "foreign issuer client",
+      "passed": true,
+      "error": null,
+      "result": {
+        "status": 502,
+        "body": "",
+        "elapsedMs": 5
+      },
+      "before": {
+        "admitAttempts": 6,
+        "admitted": 6,
+        "released": 6,
+        "active": 0,
+        "polls": 0,
+        "primary": 2,
+        "bge": 4,
+        "redirects": 0
+      },
+      "after": {
+        "admitAttempts": 6,
+        "admitted": 6,
+        "released": 6,
+        "active": 0,
+        "polls": 0,
+        "primary": 2,
+        "bge": 4,
+        "redirects": 0
+      },
+      "proxyEvents": [
+        {
+          "type": "tls-client-error",
+          "code": "ERR_SSL_PEER_DID_NOT_RETURN_A_CERTIFICATE",
+          "at": 1787956351154
+        }
+      ]
+    },
+    {
+      "name": "missing client certificate",
+      "passed": true,
+      "error": null,
+      "result": {
+        "status": 502,
+        "body": "",
+        "elapsedMs": 5
+      },
+      "before": {
+        "admitAttempts": 6,
+        "admitted": 6,
+        "released": 6,
+        "active": 0,
+        "polls": 0,
+        "primary": 2,
+        "bge": 4,
+        "redirects": 0
+      },
+      "after": {
+        "admitAttempts": 6,
+        "admitted": 6,
+        "released": 6,
+        "active": 0,
+        "polls": 0,
+        "primary": 2,
+        "bge": 4,
+        "redirects": 0
+      },
+      "proxyEvents": [
+        {
+          "type": "tls-client-error",
+          "code": "ERR_SSL_PEER_DID_NOT_RETURN_A_CERTIFICATE",
+          "at": 1787956351446
+        }
+      ]
+    },
+    {
+      "name": "wrong server name",
+      "passed": true,
+      "error": null,
+      "result": {
+        "status": 502,
+        "body": "",
+        "elapsedMs": 5
+      },
+      "before": {
+        "admitAttempts": 6,
+        "admitted": 6,
+        "released": 6,
+        "active": 0,
+        "polls": 0,
+        "primary": 2,
+        "bge": 4,
+        "redirects": 0
+      },
+      "after": {
+        "admitAttempts": 6,
+        "admitted": 6,
+        "released": 6,
+        "active": 0,
+        "polls": 0,
+        "primary": 2,
+        "bge": 4,
+        "redirects": 0
+      },
+      "proxyEvents": [
+        {
+          "type": "tls-client-error",
+          "code": "ERR_SSL_SSL/TLS_ALERT_BAD_CERTIFICATE",
+          "at": 1787956351752
+        }
+      ]
+    },
+    {
+      "name": "wrong server trust",
+      "passed": true,
+      "error": null,
+      "result": {
+        "status": 502,
+        "body": "",
+        "elapsedMs": 5
+      },
+      "before": {
+        "admitAttempts": 6,
+        "admitted": 6,
+        "released": 6,
+        "active": 0,
+        "polls": 0,
+        "primary": 2,
+        "bge": 4,
+        "redirects": 0
+      },
+      "after": {
+        "admitAttempts": 6,
+        "admitted": 6,
+        "released": 6,
+        "active": 0,
+        "polls": 0,
+        "primary": 2,
+        "bge": 4,
+        "redirects": 0
+      },
+      "proxyEvents": [
+        {
+          "type": "tls-client-error",
+          "code": "ERR_SSL_SSL/TLS_ALERT_BAD_CERTIFICATE",
+          "at": 1787956352058
+        }
+      ]
+    },
+    {
+      "name": "actual 10 second TLS handshake timeout has zero controller admission",
+      "passed": false,
+      "error": "ERR_ASSERTION",
+      "result": {
+        "status": 504,
+        "body": "",
+        "elapsedMs": 10003
+      },
+      "before": {
+        "admitAttempts": 6,
+        "admitted": 6,
+        "released": 6,
+        "active": 0,
+        "polls": 0,
+        "primary": 2,
+        "bge": 4,
+        "redirects": 0
+      },
+      "after": {
+        "admitAttempts": 6,
+        "admitted": 6,
+        "released": 6,
+        "active": 0,
+        "polls": 0,
+        "primary": 2,
+        "bge": 4,
+        "redirects": 0
+      },
+      "proxyEvents": []
+    }
+  ],
+  "nativeRequests": [
+    {
+      "kind": "primary",
+      "path": "/v1/models",
+      "method": "GET",
+      "bodyBytes": 0,
+      "bodySha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "at": 1787956254406
+    },
+    {
+      "kind": "bge",
+      "path": "/health",
+      "method": "GET",
+      "bodyBytes": 0,
+      "bodySha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "at": 1787956254415
+    },
+    {
+      "kind": "bge",
+      "path": "/health",
+      "method": "GET",
+      "bodyBytes": 0,
+      "bodySha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "at": 1787956270493
+    },
+    {
+      "kind": "bge",
+      "path": "/health",
+      "method": "GET",
+      "bodyBytes": 0,
+      "bodySha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "at": 1787956270513
+    },
+    {
+      "kind": "bge",
+      "path": "/health",
+      "method": "GET",
+      "bodyBytes": 0,
+      "bodySha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "at": 1787956270518
+    },
+    {
+      "kind": "primary",
+      "path": "/v1/models",
+      "method": "GET",
+      "bodyBytes": 0,
+      "bodySha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "at": 1787956285532
+    }
+  ],
+  "proxyEvents": [
+    {
+      "type": "forwarded",
+      "method": "GET",
+      "path": "/v1/models",
+      "requestBytes": 0,
+      "responseBytes": 13,
+      "status": 200,
+      "generation": "9b9f8513-e7f0-4368-881b-73c113e00e2b",
+      "at": 1787956254409
+    },
+    {
+      "type": "forwarded",
+      "method": "GET",
+      "path": "/health",
+      "requestBytes": 0,
+      "responseBytes": 13,
+      "status": 200,
+      "generation": "9b9f8513-e7f0-4368-881b-73c113e00e2b",
+      "at": 1787956254416
+    },
+    {
+      "type": "denied",
+      "code": "runtime-request-unavailable",
+      "at": 1787956254448
+    },
+    {
+      "type": "denied",
+      "code": "runtime-request-body-timeout",
+      "at": 1787956264484
+    },
+    {
+      "type": "denied",
+      "code": "runtime-upstream-redirect",
+      "at": 1787956270495
+    },
+    {
+      "type": "forwarded",
+      "method": "GET",
+      "path": "/health",
+      "requestBytes": 0,
+      "responseBytes": 13,
+      "status": 503,
+      "generation": "9b9f8513-e7f0-4368-881b-73c113e00e2b",
+      "at": 1787956270513
+    },
+    {
+      "type": "denied",
+      "code": "runtime-request-unavailable",
+      "at": 1787956285526
+    },
+    {
+      "type": "denied",
+      "code": "runtime-request-unavailable",
+      "at": 1787956350531
+    },
+    {
+      "type": "denied",
+      "code": "runtime-client-denied",
+      "at": 1787956350850
+    },
+    {
+      "type": "tls-client-error",
+      "code": "ERR_SSL_PEER_DID_NOT_RETURN_A_CERTIFICATE",
+      "at": 1787956351154
+    },
+    {
+      "type": "tls-client-error",
+      "code": "ERR_SSL_PEER_DID_NOT_RETURN_A_CERTIFICATE",
+      "at": 1787956351446
+    },
+    {
+      "type": "tls-client-error",
+      "code": "ERR_SSL_SSL/TLS_ALERT_BAD_CERTIFICATE",
+      "at": 1787956351752
+    },
+    {
+      "type": "tls-client-error",
+      "code": "ERR_SSL_SSL/TLS_ALERT_BAD_CERTIFICATE",
+      "at": 1787956352058
+    }
+  ],
+  "lifecycle": [
+    {
+      "type": "start-intent",
+      "time": 1787956254018
+    },
+    {
+      "type": "load-intent",
+      "time": 1787956254018
+    },
+    {
+      "type": "load-returned",
+      "time": 1787956254018
+    },
+    {
+      "type": "owned",
+      "time": 1787956254019
+    },
+    {
+      "type": "load-intent",
+      "time": 1787956254019
+    },
+    {
+      "type": "load-returned",
+      "time": 1787956254019
+    },
+    {
+      "type": "owned",
+      "time": 1787956254019
+    },
+    {
+      "type": "ready",
+      "time": 1787956254019
+    },
+    {
+      "type": "unloaded",
+      "time": 1787956362375
+    },
+    {
+      "type": "unloaded",
+      "time": 1787956362375
+    },
+    {
+      "type": "cleanup-complete",
+      "time": 1787956362375
+    }
+  ],
+  "caddyChildren": [
+    {
+      "pid": 19132,
+      "configSha256": "fa2a71f4530a41d8eff6e82d81be68668c2fea3dc1125a5df844e4324805f583",
+      "startedAt": "2026-08-28T22:30:54.268Z",
+      "stopped": true,
+      "logs": [
+        "{\"level\":\"error\",\"ts\":1787956254.468931,\"logger\":\"http.log.error\",\"msg\":\"invalid byte in chunk length\",\"request\":{\"remote_ip\":\"127.0.0.1\",\"remote_port\":\"64075\",\"client_ip\":\"127.0.0.1\",\"proto\":\"HTTP/1.1\",\"method\":\"GET\",\"host\":\"127.0.0.1:64045\",\"uri\":\"/v1/models\",\"headers\":{\"Connection\":[\"close\"]},\"transfer_encoding\":[\"chunked\"]},\"duration\":0.0036026,\"status\":502,\"err_id\":\"eh76439pi\",\"err_trace\":\"reverseproxy.statusError (reverseproxy.go:1626)\"}\n",
+        "{\"level\":\"error\",\"ts\":1787956270.4770925,\"logger\":\"http.log.error\",\"msg\":\"unexpected EOF\",\"request\":{\"remote_ip\":\"127.0.0.1\",\"remote_port\":\"64077\",\"client_ip\":\"127.0.0.1\",\"proto\":\"HTTP/1.1\",\"method\":\"GET\",\"host\":\"127.0.0.1:64045\",\"uri\":\"/v1/models\",\"headers\":{\"Connection\":[\"close\"]},\"transfer_encoding\":[\"chunked\"]},\"duration\":16.005961,\"status\":502,\"err_id\":\"6qr6e33yf\",\"err_trace\":\"reverseproxy.statusError (reverseproxy.go:1626)\"}\n",
+        "{\"level\":\"error\",\"ts\":1787956350.530737,\"logger\":\"http.log.error\",\"msg\":\"net/http: timeout awaiting response headers\",\"request\":{\"remote_ip\":\"127.0.0.1\",\"remote_port\":\"63406\",\"client_ip\":\"127.0.0.1\",\"proto\":\"HTTP/1.1\",\"method\":\"GET\",\"host\":\"127.0.0.1:64045\",\"uri\":\"/v1/models\",\"headers\":{\"Connection\":[\"close\"]}},\"duration\":65.0000479,\"status\":504,\"err_id\":\"90fcdttg2\",\"err_trace\":\"reverseproxy.statusError (reverseproxy.go:1626)\"}\n"
+      ],
+      "finishedAt": "2026-08-28T22:32:30.542Z"
+    },
+    {
+      "pid": 36836,
+      "configSha256": "30249de1207869ef29693cffca1db3d8c13567c79bb265ca754bb8a3530d82e2",
+      "startedAt": "2026-08-28T22:32:30.722Z",
+      "stopped": true,
+      "logs": [],
+      "finishedAt": "2026-08-28T22:32:30.861Z"
+    },
+    {
+      "pid": 36376,
+      "configSha256": "5bf0fcc874ef54e7797b3fb1f81f13f136af72ecc9eab068cafccaf06d9e61ca",
+      "startedAt": "2026-08-28T22:32:31.031Z",
+      "stopped": true,
+      "logs": [
+        "{\"level\":\"error\",\"ts\":1787956351.1541123,\"logger\":\"http.log.error\",\"msg\":\"remote error: tls: certificate required\",\"request\":{\"remote_ip\":\"127.0.0.1\",\"remote_port\":\"50651\",\"client_ip\":\"127.0.0.1\",\"proto\":\"HTTP/1.1\",\"method\":\"GET\",\"host\":\"127.0.0.1:64045\",\"uri\":\"/v1/models\",\"headers\":{\"Connection\":[\"close\"]}},\"duration\":0.0034291,\"status\":502,\"err_id\":\"tw6y3x728\",\"err_trace\":\"reverseproxy.statusError (reverseproxy.go:1626)\"}\n"
+      ],
+      "finishedAt": "2026-08-28T22:32:31.163Z"
+    },
+    {
+      "pid": 33448,
+      "configSha256": "1e13daa3985831349f9fcc5544efa8b8fdd403794cd92b981836fdd8556d3009",
+      "startedAt": "2026-08-28T22:32:31.328Z",
+      "stopped": true,
+      "logs": [
+        "{\"level\":\"error\",\"ts\":1787956351.4465034,\"logger\":\"http.log.error\",\"msg\":\"remote error: tls: certificate required\",\"request\":{\"remote_ip\":\"127.0.0.1\",\"remote_port\":\"50657\",\"client_ip\":\"127.0.0.1\",\"proto\":\"HTTP/1.1\",\"method\":\"GET\",\"host\":\"127.0.0.1:64045\",\"uri\":\"/v1/models\",\"headers\":{\"Connection\":[\"close\"]}},\"duration\":0.0035907,\"status\":502,\"err_id\":\"kgdipms6j\",\"err_trace\":\"reverseproxy.statusError (reverseproxy.go:1626)\"}\n"
+      ],
+      "finishedAt": "2026-08-28T22:32:31.457Z"
+    },
+    {
+      "pid": 36880,
+      "configSha256": "e71960e249006bf2875ce751778f0cc277bf56520a6169f526cc929246c9c4dd",
+      "startedAt": "2026-08-28T22:32:31.626Z",
+      "stopped": true,
+      "logs": [
+        "{\"level\":\"error\",\"ts\":1787956351.7532706,\"logger\":\"http.log.error\",\"msg\":\"tls: failed to verify certificate: x509: certificate is valid for runa-home-m1.internal, not wrong.synthetic\",\"request\":{\"remote_ip\":\"127.0.0.1\",\"remote_port\":\"50663\",\"client_ip\":\"127.0.0.1\",\"proto\":\"HTTP/1.1\",\"method\":\"GET\",\"host\":\"127.0.0.1:64045\",\"uri\":\"/v1/models\",\"headers\":{\"Connection\":[\"close\"]}},\"duration\":0.0032959,\"status\":502,\"err_id\":\"0wwx0zaqj\",\"err_trace\":\"reverseproxy.statusError (reverseproxy.go:1626)\"}\n"
+      ],
+      "finishedAt": "2026-08-28T22:32:31.764Z"
+    },
+    {
+      "pid": 34560,
+      "configSha256": "2292c606902302f0f48eeb334fda8dbefb1505beb0aca308a6691c1c5967a01d",
+      "startedAt": "2026-08-28T22:32:31.938Z",
+      "stopped": true,
+      "logs": [
+        "{\"level\":\"error\",\"ts\":1787956352.0590076,\"logger\":\"http.log.error\",\"msg\":\"tls: failed to verify certificate: x509: certificate signed by unknown authority\",\"request\":{\"remote_ip\":\"127.0.0.1\",\"remote_port\":\"50669\",\"client_ip\":\"127.0.0.1\",\"proto\":\"HTTP/1.1\",\"method\":\"GET\",\"host\":\"127.0.0.1:64045\",\"uri\":\"/v1/models\",\"headers\":{\"Connection\":[\"close\"]}},\"duration\":0.0034762,\"status\":502,\"err_id\":\"zp2v5qrbm\",\"err_trace\":\"reverseproxy.statusError (reverseproxy.go:1626)\"}\n"
+      ],
+      "finishedAt": "2026-08-28T22:32:32.070Z"
+    },
+    {
+      "pid": 36312,
+      "configSha256": "ff0841d79d0dd3bc330ea26223e36112e67193a1737d29eb1a8cd007694ac05e",
+      "startedAt": "2026-08-28T22:32:32.244Z",
+      "stopped": true,
+      "logs": [
+        "{\"level\":\"error\",\"ts\":1787956362.3616338,\"logger\":\"http.log.error\",\"msg\":\"net/http: TLS handshake timeout\",\"request\":{\"remote_ip\":\"127.0.0.1\",\"remote_port\":\"50682\",\"client_ip\":\"127.0.0.1\",\"proto\":\"HTTP/1.1\",\"method\":\"GET\",\"host\":\"127.0.0.1:64045\",\"uri\":\"/v1/models\",\"headers\":{\"Connection\":[\"close\"]}},\"duration\":10.0011846,\"status\":504,\"err_id\":\"wnhn7jutg\",\"err_trace\":\"reverseproxy.statusError (reverseproxy.go:1626)\"}\n"
+      ],
+      "finishedAt": "2026-08-28T22:32:42.372Z"
+    }
+  ],
+  "realController": true,
+  "syntheticLifecycleAdapter": true,
+  "realLoopbackBackends": true,
+  "realModelsLoaded": 0,
+  "homeContacted": false,
+  "controlContacted": false,
+  "productionChanged": false,
+  "passed": false,
+  "certificatePins": {
+    "issuer": "fb0db56978294a1376a0228b2319fca8e029584b0e170e22b7cc233577a7a0fe",
+    "server": "6a1b472db815b73ef226cb497f1717c4d8506161ec305b9d368330971cb9ae14",
+    "client": "2f616089d20ccc153580113a46189dfed60f845bf774a13a9cbcf4a97b7f0ec5"
+  },
+  "closedProjectionSha256": "af6639cb60f6e41473b07a49b32d35cc67a3d67e14cb23bcc0f7c308cf8b435f",
+  "cleanup": {
+    "ownedCaddyStopped": true,
+    "ownedPortsClosed": [
+      true,
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "activeControllerRequests": 0,
+    "syntheticInstances": 0,
+    "privateFilesRemoved": true
+  },
+  "finishedAt": "2026-08-28T22:32:42.388Z"
+}

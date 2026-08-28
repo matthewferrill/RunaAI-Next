@@ -1,0 +1,57 @@
+{
+  "name": "backend failure status preserved",
+  "passed": true,
+  "error": null,
+  "errorMessage": null,
+  "result": {
+    "status": 503,
+    "body": " {\"ok\":true}\n",
+    "elapsedMs": 4
+  },
+  "before": {
+    "admitAttempts": 6,
+    "admitted": 6,
+    "released": 6,
+    "active": 0,
+    "polls": 0,
+    "primary": 4,
+    "bge": 2,
+    "redirects": 0
+  },
+  "after": {
+    "admitAttempts": 7,
+    "admitted": 7,
+    "released": 7,
+    "active": 0,
+    "polls": 0,
+    "primary": 4,
+    "bge": 3,
+    "redirects": 0
+  },
+  "nativeRequests": [
+    {
+      "kind": "bge",
+      "path": "/health",
+      "method": "GET",
+      "bodyBytes": 0,
+      "bodySha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "headers": {
+        "host": "127.0.0.1:52850",
+        "connection": "keep-alive"
+      },
+      "at": 1787957528609
+    }
+  ],
+  "proxyEvents": [
+    {
+      "type": "forwarded",
+      "method": "GET",
+      "path": "/health",
+      "requestBytes": 0,
+      "responseBytes": 13,
+      "status": 503,
+      "generation": "b7c7f27b-3df0-4473-8a4d-dc52cd8fc9b3",
+      "at": 1787957528610
+    }
+  ]
+}

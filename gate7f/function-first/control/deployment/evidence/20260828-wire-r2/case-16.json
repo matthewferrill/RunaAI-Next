@@ -1,0 +1,44 @@
+{
+  "name": "nonempty chunked GET denied before admission",
+  "passed": true,
+  "error": null,
+  "errorMessage": null,
+  "result": {
+    "status": 503,
+    "response": "HTTP/1.1 503 Service Unavailable\r\nCache-Control: no-store\r\nContent-Length: 112\r\nContent-Type: application/json\r\nDate: Fri, 28 Aug 2026 22:41:31 GMT\r\nVia: 1.1 Caddy\r\nConnection: close\r\n\r\n{\"schemaVersion\":\"runaai-home-runtime-error/v1\",\"errorCode\":\"runtime-body-denied\",\"privateValuesIncluded\":false}",
+    "error": null,
+    "elapsedMs": 3,
+    "requestWire": "GET /v1/models HTTP/1.1\r\nHost: 127.0.0.1:55259\r\nConnection: close\r\nTransfer-Encoding: chunked\r\n\r\n1\r\nx\r\n0\r\n\r\n",
+    "tcpHalfClose": false,
+    "termination": "server-end",
+    "serverTerminated": true
+  },
+  "before": {
+    "admitAttempts": 2,
+    "admitted": 2,
+    "released": 2,
+    "active": 0,
+    "polls": 0,
+    "primary": 1,
+    "bge": 1,
+    "redirects": 0
+  },
+  "after": {
+    "admitAttempts": 2,
+    "admitted": 2,
+    "released": 2,
+    "active": 0,
+    "polls": 0,
+    "primary": 1,
+    "bge": 1,
+    "redirects": 0
+  },
+  "nativeRequests": [],
+  "proxyEvents": [
+    {
+      "type": "denied",
+      "code": "runtime-body-denied",
+      "at": 1787956891787
+    }
+  ]
+}

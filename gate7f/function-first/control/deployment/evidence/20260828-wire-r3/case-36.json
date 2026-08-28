@@ -1,0 +1,33 @@
+{
+  "name": "actual 10 second TLS handshake timeout has zero controller admission",
+  "passed": true,
+  "error": null,
+  "errorMessage": null,
+  "result": {
+    "status": 504,
+    "body": "",
+    "elapsedMs": 10004
+  },
+  "before": {
+    "admitAttempts": 10,
+    "admitted": 10,
+    "released": 10,
+    "active": 0,
+    "polls": 0,
+    "primary": 6,
+    "bge": 4,
+    "redirects": 0
+  },
+  "after": {
+    "admitAttempts": 10,
+    "admitted": 10,
+    "released": 10,
+    "active": 0,
+    "polls": 0,
+    "primary": 6,
+    "bge": 4,
+    "redirects": 0
+  },
+  "nativeRequests": [],
+  "proxyEvents": []
+}

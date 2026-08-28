@@ -1,0 +1,1595 @@
+{
+  "schemaVersion": "runaai-m1-closed-tls-wire-proof/v1",
+  "startedAt": "2026-08-28T22:41:27.921Z",
+  "sourcePins": [
+    {
+      "file": "home-runtime/tls-proxy.mjs",
+      "sha256": "9d5068d1a3a0c09a0b4bb580fb192011730f40cbdb9ef26bb04402ea5869e1f6",
+      "bytes": 2673
+    },
+    {
+      "file": "home-runtime/proxy.mjs",
+      "sha256": "dce23f5b7c32470ab38e531846e94021a06e6fba45202da2250f89651c59afeb",
+      "bytes": 6152
+    },
+    {
+      "file": "home-runtime/contracts.mjs",
+      "sha256": "d977fcc68f6fc8959b76e8ff1b3cc165ec697f0a0cf01bb6e7e3dcea4131c52e",
+      "bytes": 6693
+    },
+    {
+      "file": "home-runtime/controller.mjs",
+      "sha256": "53fd576f52e2dc51f25200548232367756602f0ac70a00b865ba3eee6af0a354",
+      "bytes": 10762
+    },
+    {
+      "file": "readiness/manifest.mjs",
+      "sha256": "21757455f9bf2274f495cf0bc538bd684b35a7c0a60196b612eb61ab8903bed6",
+      "bytes": 2467
+    },
+    {
+      "file": "readiness/lease-contract.mjs",
+      "sha256": "9000ea05b54214bc27f394b078e50df6b10d8df231ef32954a143e6d10256c13",
+      "bytes": 4073
+    },
+    {
+      "file": "readiness/evidence/20260828-smoke-gemma-r1/events.jsonl",
+      "sha256": "e8329085a4bd3eccbe0ba9ae2be5afe32a85f9e5c774c2f83bd34fdf19cd6eaf",
+      "bytes": 67132
+    }
+  ],
+  "caddySha256": "5cb9ab71e5756ce72840b8234177a2f40c8b4ab47a806b8e841e2b784e9df62b",
+  "opensslSha256": "063e62dcc027fc5dbb1343de631f02a9291f8b1df0b4e37012e49a03d525aad4",
+  "nodeVersion": "v22.22.0",
+  "nodeSha256": "bae898add4643fcf890a83ad8ae56e20dce7e781cab161a53991ceba70c99ffb",
+  "cases": [
+    {
+      "name": "empty GET models reaches exactly primary backend",
+      "passed": true,
+      "error": null,
+      "errorMessage": null,
+      "result": {
+        "status": 200,
+        "body": " {\"data\":[]}\n",
+        "elapsedMs": 24
+      },
+      "before": {
+        "admitAttempts": 0,
+        "admitted": 0,
+        "released": 0,
+        "active": 0,
+        "polls": 0,
+        "primary": 0,
+        "bge": 0,
+        "redirects": 0
+      },
+      "after": {
+        "admitAttempts": 1,
+        "admitted": 1,
+        "released": 1,
+        "active": 0,
+        "polls": 0,
+        "primary": 1,
+        "bge": 0,
+        "redirects": 0
+      },
+      "nativeRequests": [
+        {
+          "kind": "primary",
+          "path": "/v1/models",
+          "method": "GET",
+          "bodyBytes": 0,
+          "bodySha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "headers": {
+            "host": "127.0.0.1:55256",
+            "connection": "keep-alive"
+          },
+          "at": 1787956891740
+        }
+      ],
+      "proxyEvents": [
+        {
+          "type": "forwarded",
+          "method": "GET",
+          "path": "/v1/models",
+          "requestBytes": 0,
+          "responseBytes": 13,
+          "status": 200,
+          "generation": "8a7816b5-2168-4da2-8c48-2a46b3fad5d9",
+          "at": 1787956891743
+        }
+      ]
+    },
+    {
+      "name": "empty GET health reaches exactly BGE backend",
+      "passed": true,
+      "error": null,
+      "errorMessage": null,
+      "result": {
+        "status": 200,
+        "body": " {\"ok\":true}\n",
+        "elapsedMs": 6
+      },
+      "before": {
+        "admitAttempts": 1,
+        "admitted": 1,
+        "released": 1,
+        "active": 0,
+        "polls": 0,
+        "primary": 1,
+        "bge": 0,
+        "redirects": 0
+      },
+      "after": {
+        "admitAttempts": 2,
+        "admitted": 2,
+        "released": 2,
+        "active": 0,
+        "polls": 0,
+        "primary": 1,
+        "bge": 1,
+        "redirects": 0
+      },
+      "nativeRequests": [
+        {
+          "kind": "bge",
+          "path": "/health",
+          "method": "GET",
+          "bodyBytes": 0,
+          "bodySha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "headers": {
+            "host": "127.0.0.1:55257",
+            "connection": "keep-alive"
+          },
+          "at": 1787956891750
+        }
+      ],
+      "proxyEvents": [
+        {
+          "type": "forwarded",
+          "method": "GET",
+          "path": "/health",
+          "requestBytes": 0,
+          "responseBytes": 13,
+          "status": 200,
+          "generation": "8a7816b5-2168-4da2-8c48-2a46b3fad5d9",
+          "at": 1787956891751
+        }
+      ]
+    },
+    {
+      "name": "closed path /v1/models?x=1",
+      "passed": true,
+      "error": null,
+      "errorMessage": null,
+      "result": {
+        "status": 503,
+        "body": "Runa maintenance bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "elapsedMs": 3
+      },
+      "before": {
+        "admitAttempts": 2,
+        "admitted": 2,
+        "released": 2,
+        "active": 0,
+        "polls": 0,
+        "primary": 1,
+        "bge": 1,
+        "redirects": 0
+      },
+      "after": {
+        "admitAttempts": 2,
+        "admitted": 2,
+        "released": 2,
+        "active": 0,
+        "polls": 0,
+        "primary": 1,
+        "bge": 1,
+        "redirects": 0
+      },
+      "nativeRequests": [],
+      "proxyEvents": []
+    },
+    {
+      "name": "closed path /health?x=1",
+      "passed": true,
+      "error": null,
+      "errorMessage": null,
+      "result": {
+        "status": 503,
+        "body": "Runa maintenance bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "elapsedMs": 2
+      },
+      "before": {
+        "admitAttempts": 2,
+        "admitted": 2,
+        "released": 2,
+        "active": 0,
+        "polls": 0,
+        "primary": 1,
+        "bge": 1,
+        "redirects": 0
+      },
+      "after": {
+        "admitAttempts": 2,
+        "admitted": 2,
+        "released": 2,
+        "active": 0,
+        "polls": 0,
+        "primary": 1,
+        "bge": 1,
+        "redirects": 0
+      },
+      "nativeRequests": [],
+      "proxyEvents": []
+    },
+    {
+      "name": "closed path /v1/models/",
+      "passed": true,
+      "error": null,
+      "errorMessage": null,
+      "result": {
+        "status": 503,
+        "body": "Runa maintenance bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "elapsedMs": 2
+      },
+      "before": {
+        "admitAttempts": 2,
+        "admitted": 2,
+        "released": 2,
+        "active": 0,
+        "polls": 0,
+        "primary": 1,
+        "bge": 1,
+        "redirects": 0
+      },
+      "after": {
+        "admitAttempts": 2,
+        "admitted": 2,
+        "released": 2,
+        "active": 0,
+        "polls": 0,
+        "primary": 1,
+        "bge": 1,
+        "redirects": 0
+      },
+      "nativeRequests": [],
+      "proxyEvents": []
+    },
+    {
+      "name": "closed path /v1/%6dodels",
+      "passed": true,
+      "error": null,
+      "errorMessage": null,
+      "result": {
+        "status": 503,
+        "body": "Runa maintenance bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "elapsedMs": 2
+      },
+      "before": {
+        "admitAttempts": 2,
+        "admitted": 2,
+        "released": 2,
+        "active": 0,
+        "polls": 0,
+        "primary": 1,
+        "bge": 1,
+        "redirects": 0
+      },
+      "after": {
+        "admitAttempts": 2,
+        "admitted": 2,
+        "released": 2,
+        "active": 0,
+        "polls": 0,
+        "primary": 1,
+        "bge": 1,
+        "redirects": 0
+      },
+      "nativeRequests": [],
+      "proxyEvents": []
+    },
+    {
+      "name": "closed path /health#suffix",
+      "passed": true,
+      "error": null,
+      "errorMessage": null,
+      "result": {
+        "status": 503,
+        "body": "Runa maintenance bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "elapsedMs": 3
+      },
+      "before": {
+        "admitAttempts": 2,
+        "admitted": 2,
+        "released": 2,
+        "active": 0,
+        "polls": 0,
+        "primary": 1,
+        "bge": 1,
+        "redirects": 0
+      },
+      "after": {
+        "admitAttempts": 2,
+        "admitted": 2,
+        "released": 2,
+        "active": 0,
+        "polls": 0,
+        "primary": 1,
+        "bge": 1,
+        "redirects": 0
+      },
+      "nativeRequests": [],
+      "proxyEvents": []
+    },
+    {
+      "name": "closed path /healthz",
+      "passed": true,
+      "error": null,
+      "errorMessage": null,
+      "result": {
+        "status": 503,
+        "body": "Runa maintenance bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "elapsedMs": 2
+      },
+      "before": {
+        "admitAttempts": 2,
+        "admitted": 2,
+        "released": 2,
+        "active": 0,
+        "polls": 0,
+        "primary": 1,
+        "bge": 1,
+        "redirects": 0
+      },
+      "after": {
+        "admitAttempts": 2,
+        "admitted": 2,
+        "released": 2,
+        "active": 0,
+        "polls": 0,
+        "primary": 1,
+        "bge": 1,
+        "redirects": 0
+      },
+      "nativeRequests": [],
+      "proxyEvents": []
+    },
+    {
+      "name": "closed path /api/v1/models/load",
+      "passed": true,
+      "error": null,
+      "errorMessage": null,
+      "result": {
+        "status": 503,
+        "body": "Runa maintenance bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "elapsedMs": 1
+      },
+      "before": {
+        "admitAttempts": 2,
+        "admitted": 2,
+        "released": 2,
+        "active": 0,
+        "polls": 0,
+        "primary": 1,
+        "bge": 1,
+        "redirects": 0
+      },
+      "after": {
+        "admitAttempts": 2,
+        "admitted": 2,
+        "released": 2,
+        "active": 0,
+        "polls": 0,
+        "primary": 1,
+        "bge": 1,
+        "redirects": 0
+      },
+      "nativeRequests": [],
+      "proxyEvents": []
+    },
+    {
+      "name": "closed path /unknown",
+      "passed": true,
+      "error": null,
+      "errorMessage": null,
+      "result": {
+        "status": 503,
+        "body": "Runa maintenance bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "elapsedMs": 2
+      },
+      "before": {
+        "admitAttempts": 2,
+        "admitted": 2,
+        "released": 2,
+        "active": 0,
+        "polls": 0,
+        "primary": 1,
+        "bge": 1,
+        "redirects": 0
+      },
+      "after": {
+        "admitAttempts": 2,
+        "admitted": 2,
+        "released": 2,
+        "active": 0,
+        "polls": 0,
+        "primary": 1,
+        "bge": 1,
+        "redirects": 0
+      },
+      "nativeRequests": [],
+      "proxyEvents": []
+    },
+    {
+      "name": "closed method POST",
+      "passed": true,
+      "error": null,
+      "errorMessage": null,
+      "result": {
+        "status": 503,
+        "body": "Runa maintenance bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "elapsedMs": 1
+      },
+      "before": {
+        "admitAttempts": 2,
+        "admitted": 2,
+        "released": 2,
+        "active": 0,
+        "polls": 0,
+        "primary": 1,
+        "bge": 1,
+        "redirects": 0
+      },
+      "after": {
+        "admitAttempts": 2,
+        "admitted": 2,
+        "released": 2,
+        "active": 0,
+        "polls": 0,
+        "primary": 1,
+        "bge": 1,
+        "redirects": 0
+      },
+      "nativeRequests": [],
+      "proxyEvents": []
+    },
+    {
+      "name": "closed method HEAD",
+      "passed": true,
+      "error": null,
+      "errorMessage": null,
+      "result": {
+        "status": 503,
+        "body": "",
+        "elapsedMs": 1
+      },
+      "before": {
+        "admitAttempts": 2,
+        "admitted": 2,
+        "released": 2,
+        "active": 0,
+        "polls": 0,
+        "primary": 1,
+        "bge": 1,
+        "redirects": 0
+      },
+      "after": {
+        "admitAttempts": 2,
+        "admitted": 2,
+        "released": 2,
+        "active": 0,
+        "polls": 0,
+        "primary": 1,
+        "bge": 1,
+        "redirects": 0
+      },
+      "nativeRequests": [],
+      "proxyEvents": []
+    },
+    {
+      "name": "closed method OPTIONS",
+      "passed": true,
+      "error": null,
+      "errorMessage": null,
+      "result": {
+        "status": 503,
+        "body": "Runa maintenance bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "elapsedMs": 1
+      },
+      "before": {
+        "admitAttempts": 2,
+        "admitted": 2,
+        "released": 2,
+        "active": 0,
+        "polls": 0,
+        "primary": 1,
+        "bge": 1,
+        "redirects": 0
+      },
+      "after": {
+        "admitAttempts": 2,
+        "admitted": 2,
+        "released": 2,
+        "active": 0,
+        "polls": 0,
+        "primary": 1,
+        "bge": 1,
+        "redirects": 0
+      },
+      "nativeRequests": [],
+      "proxyEvents": []
+    },
+    {
+      "name": "nonempty fixed length GET denied",
+      "passed": true,
+      "error": null,
+      "errorMessage": null,
+      "result": {
+        "status": 503,
+        "body": "Runa maintenance bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "elapsedMs": 1
+      },
+      "before": {
+        "admitAttempts": 2,
+        "admitted": 2,
+        "released": 2,
+        "active": 0,
+        "polls": 0,
+        "primary": 1,
+        "bge": 1,
+        "redirects": 0
+      },
+      "after": {
+        "admitAttempts": 2,
+        "admitted": 2,
+        "released": 2,
+        "active": 0,
+        "polls": 0,
+        "primary": 1,
+        "bge": 1,
+        "redirects": 0
+      },
+      "nativeRequests": [],
+      "proxyEvents": []
+    },
+    {
+      "name": "content encoding denied",
+      "passed": true,
+      "error": null,
+      "errorMessage": null,
+      "result": {
+        "status": 503,
+        "body": "Runa maintenance bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "elapsedMs": 2
+      },
+      "before": {
+        "admitAttempts": 2,
+        "admitted": 2,
+        "released": 2,
+        "active": 0,
+        "polls": 0,
+        "primary": 1,
+        "bge": 1,
+        "redirects": 0
+      },
+      "after": {
+        "admitAttempts": 2,
+        "admitted": 2,
+        "released": 2,
+        "active": 0,
+        "polls": 0,
+        "primary": 1,
+        "bge": 1,
+        "redirects": 0
+      },
+      "nativeRequests": [],
+      "proxyEvents": []
+    },
+    {
+      "name": "nonempty chunked GET denied before admission",
+      "passed": true,
+      "error": null,
+      "errorMessage": null,
+      "result": {
+        "status": 503,
+        "response": "HTTP/1.1 503 Service Unavailable\r\nCache-Control: no-store\r\nContent-Length: 112\r\nContent-Type: application/json\r\nDate: Fri, 28 Aug 2026 22:41:31 GMT\r\nVia: 1.1 Caddy\r\nConnection: close\r\n\r\n{\"schemaVersion\":\"runaai-home-runtime-error/v1\",\"errorCode\":\"runtime-body-denied\",\"privateValuesIncluded\":false}",
+        "error": null,
+        "elapsedMs": 3,
+        "requestWire": "GET /v1/models HTTP/1.1\r\nHost: 127.0.0.1:55259\r\nConnection: close\r\nTransfer-Encoding: chunked\r\n\r\n1\r\nx\r\n0\r\n\r\n",
+        "tcpHalfClose": false,
+        "termination": "server-end",
+        "serverTerminated": true
+      },
+      "before": {
+        "admitAttempts": 2,
+        "admitted": 2,
+        "released": 2,
+        "active": 0,
+        "polls": 0,
+        "primary": 1,
+        "bge": 1,
+        "redirects": 0
+      },
+      "after": {
+        "admitAttempts": 2,
+        "admitted": 2,
+        "released": 2,
+        "active": 0,
+        "polls": 0,
+        "primary": 1,
+        "bge": 1,
+        "redirects": 0
+      },
+      "nativeRequests": [],
+      "proxyEvents": [
+        {
+          "type": "denied",
+          "code": "runtime-body-denied",
+          "at": 1787956891787
+        }
+      ]
+    },
+    {
+      "name": "empty decoded chunked GET is explicitly observed",
+      "passed": true,
+      "error": null,
+      "errorMessage": null,
+      "result": {
+        "status": 200,
+        "response": "HTTP/1.1 200 OK\r\nCache-Control: no-store\r\nContent-Length: 13\r\nContent-Type: application/json\r\nDate: Fri, 28 Aug 2026 22:41:31 GMT\r\nVia: 1.1 Caddy\r\nConnection: close\r\n\r\n {\"data\":[]}\n",
+        "error": null,
+        "elapsedMs": 4,
+        "requestWire": "GET /v1/models HTTP/1.1\r\nHost: 127.0.0.1:55259\r\nConnection: close\r\nTransfer-Encoding: chunked\r\n\r\n0\r\n\r\n",
+        "tcpHalfClose": false,
+        "termination": "server-end",
+        "serverTerminated": true
+      },
+      "before": {
+        "admitAttempts": 2,
+        "admitted": 2,
+        "released": 2,
+        "active": 0,
+        "polls": 0,
+        "primary": 1,
+        "bge": 1,
+        "redirects": 0
+      },
+      "after": {
+        "admitAttempts": 3,
+        "admitted": 3,
+        "released": 3,
+        "active": 0,
+        "polls": 0,
+        "primary": 2,
+        "bge": 1,
+        "redirects": 0
+      },
+      "nativeRequests": [
+        {
+          "kind": "primary",
+          "path": "/v1/models",
+          "method": "GET",
+          "bodyBytes": 0,
+          "bodySha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "headers": {
+            "host": "127.0.0.1:55256",
+            "connection": "keep-alive"
+          },
+          "at": 1787956891791
+        }
+      ],
+      "proxyEvents": [
+        {
+          "type": "forwarded",
+          "method": "GET",
+          "path": "/v1/models",
+          "requestBytes": 0,
+          "responseBytes": 13,
+          "status": 200,
+          "generation": "8a7816b5-2168-4da2-8c48-2a46b3fad5d9",
+          "at": 1787956891792
+        }
+      ]
+    },
+    {
+      "name": "mixed CL plus empty chunked normalizes to one exact empty read, not header denial",
+      "passed": true,
+      "error": null,
+      "errorMessage": null,
+      "result": {
+        "status": 200,
+        "response": "HTTP/1.1 200 OK\r\nCache-Control: no-store\r\nContent-Length: 13\r\nContent-Type: application/json\r\nDate: Fri, 28 Aug 2026 22:41:31 GMT\r\nVia: 1.1 Caddy\r\nConnection: close\r\n\r\n {\"data\":[]}\n",
+        "error": null,
+        "elapsedMs": 4,
+        "requestWire": "GET /v1/models HTTP/1.1\r\nHost: 127.0.0.1:55259\r\nConnection: close\r\nContent-Length: 1\r\nTransfer-Encoding: chunked\r\n\r\n0\r\n\r\n",
+        "tcpHalfClose": false,
+        "termination": "server-end",
+        "serverTerminated": true
+      },
+      "before": {
+        "admitAttempts": 3,
+        "admitted": 3,
+        "released": 3,
+        "active": 0,
+        "polls": 0,
+        "primary": 2,
+        "bge": 1,
+        "redirects": 0
+      },
+      "after": {
+        "admitAttempts": 4,
+        "admitted": 4,
+        "released": 4,
+        "active": 0,
+        "polls": 0,
+        "primary": 3,
+        "bge": 1,
+        "redirects": 0
+      },
+      "nativeRequests": [
+        {
+          "kind": "primary",
+          "path": "/v1/models",
+          "method": "GET",
+          "bodyBytes": 0,
+          "bodySha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "headers": {
+            "host": "127.0.0.1:55256",
+            "connection": "keep-alive"
+          },
+          "at": 1787956891796
+        }
+      ],
+      "proxyEvents": [
+        {
+          "type": "forwarded",
+          "method": "GET",
+          "path": "/v1/models",
+          "requestBytes": 0,
+          "responseBytes": 13,
+          "status": 200,
+          "generation": "8a7816b5-2168-4da2-8c48-2a46b3fad5d9",
+          "at": 1787956891796
+        }
+      ]
+    },
+    {
+      "name": "mixed CL plus empty chunked cannot smuggle appended forbidden request",
+      "passed": true,
+      "error": null,
+      "errorMessage": null,
+      "result": {
+        "status": 200,
+        "response": "HTTP/1.1 200 OK\r\nCache-Control: no-store\r\nContent-Length: 13\r\nContent-Type: application/json\r\nDate: Fri, 28 Aug 2026 22:41:31 GMT\r\nVia: 1.1 Caddy\r\nConnection: close\r\n\r\n {\"data\":[]}\n",
+        "error": null,
+        "elapsedMs": 3,
+        "requestWire": "GET /v1/models HTTP/1.1\r\nHost: 127.0.0.1:55259\r\nConnection: close\r\nContent-Length: 1\r\nTransfer-Encoding: chunked\r\n\r\n0\r\n\r\nPOST /api/v1/models/load HTTP/1.1\r\nHost: 127.0.0.1:55259\r\nContent-Length: 2\r\n\r\n{}",
+        "tcpHalfClose": false,
+        "termination": "server-end",
+        "serverTerminated": true
+      },
+      "before": {
+        "admitAttempts": 4,
+        "admitted": 4,
+        "released": 4,
+        "active": 0,
+        "polls": 0,
+        "primary": 3,
+        "bge": 1,
+        "redirects": 0
+      },
+      "after": {
+        "admitAttempts": 5,
+        "admitted": 5,
+        "released": 5,
+        "active": 0,
+        "polls": 0,
+        "primary": 4,
+        "bge": 1,
+        "redirects": 0
+      },
+      "nativeRequests": [
+        {
+          "kind": "primary",
+          "path": "/v1/models",
+          "method": "GET",
+          "bodyBytes": 0,
+          "bodySha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "headers": {
+            "host": "127.0.0.1:55256",
+            "connection": "keep-alive"
+          },
+          "at": 1787956891800
+        }
+      ],
+      "proxyEvents": [
+        {
+          "type": "forwarded",
+          "method": "GET",
+          "path": "/v1/models",
+          "requestBytes": 0,
+          "responseBytes": 13,
+          "status": 200,
+          "generation": "8a7816b5-2168-4da2-8c48-2a46b3fad5d9",
+          "at": 1787956891800
+        }
+      ]
+    },
+    {
+      "name": "nonempty mixed content length and transfer encoding denied",
+      "passed": true,
+      "error": null,
+      "errorMessage": null,
+      "result": {
+        "status": 503,
+        "response": "HTTP/1.1 503 Service Unavailable\r\nCache-Control: no-store\r\nContent-Length: 112\r\nContent-Type: application/json\r\nDate: Fri, 28 Aug 2026 22:41:31 GMT\r\nVia: 1.1 Caddy\r\nConnection: close\r\n\r\n{\"schemaVersion\":\"runaai-home-runtime-error/v1\",\"errorCode\":\"runtime-body-denied\",\"privateValuesIncluded\":false}",
+        "error": null,
+        "elapsedMs": 2,
+        "requestWire": "GET /v1/models HTTP/1.1\r\nHost: 127.0.0.1:55259\r\nConnection: close\r\nContent-Length: 1\r\nTransfer-Encoding: chunked\r\n\r\n1\r\nx\r\n0\r\n\r\n",
+        "tcpHalfClose": false,
+        "termination": "server-end",
+        "serverTerminated": true
+      },
+      "before": {
+        "admitAttempts": 5,
+        "admitted": 5,
+        "released": 5,
+        "active": 0,
+        "polls": 0,
+        "primary": 4,
+        "bge": 1,
+        "redirects": 0
+      },
+      "after": {
+        "admitAttempts": 5,
+        "admitted": 5,
+        "released": 5,
+        "active": 0,
+        "polls": 0,
+        "primary": 4,
+        "bge": 1,
+        "redirects": 0
+      },
+      "nativeRequests": [],
+      "proxyEvents": [
+        {
+          "type": "denied",
+          "code": "runtime-body-denied",
+          "at": 1787956891803
+        }
+      ]
+    },
+    {
+      "name": "negative content length",
+      "passed": true,
+      "error": null,
+      "errorMessage": null,
+      "result": {
+        "status": 400,
+        "response": "HTTP/1.1 400 Bad Request\r\nContent-Type: text/plain; charset=utf-8\r\nConnection: close\r\n\r\n400 Bad Request",
+        "error": null,
+        "elapsedMs": 0,
+        "requestWire": "GET /v1/models HTTP/1.1\r\nHost: 127.0.0.1:55259\r\nConnection: close\r\nContent-Length: -1\r\n\r\n",
+        "tcpHalfClose": false,
+        "termination": "server-end",
+        "serverTerminated": true
+      },
+      "before": {
+        "admitAttempts": 5,
+        "admitted": 5,
+        "released": 5,
+        "active": 0,
+        "polls": 0,
+        "primary": 4,
+        "bge": 1,
+        "redirects": 0
+      },
+      "after": {
+        "admitAttempts": 5,
+        "admitted": 5,
+        "released": 5,
+        "active": 0,
+        "polls": 0,
+        "primary": 4,
+        "bge": 1,
+        "redirects": 0
+      },
+      "nativeRequests": [],
+      "proxyEvents": []
+    },
+    {
+      "name": "different duplicate lengths",
+      "passed": true,
+      "error": null,
+      "errorMessage": null,
+      "result": {
+        "status": 400,
+        "response": "HTTP/1.1 400 Bad Request\r\nContent-Type: text/plain; charset=utf-8\r\nConnection: close\r\n\r\n400 Bad Request",
+        "error": null,
+        "elapsedMs": 1,
+        "requestWire": "GET /v1/models HTTP/1.1\r\nHost: 127.0.0.1:55259\r\nConnection: close\r\nContent-Length: 0\r\nContent-Length: 1\r\n\r\nx",
+        "tcpHalfClose": false,
+        "termination": "server-end",
+        "serverTerminated": true
+      },
+      "before": {
+        "admitAttempts": 5,
+        "admitted": 5,
+        "released": 5,
+        "active": 0,
+        "polls": 0,
+        "primary": 4,
+        "bge": 1,
+        "redirects": 0
+      },
+      "after": {
+        "admitAttempts": 5,
+        "admitted": 5,
+        "released": 5,
+        "active": 0,
+        "polls": 0,
+        "primary": 4,
+        "bge": 1,
+        "redirects": 0
+      },
+      "nativeRequests": [],
+      "proxyEvents": []
+    },
+    {
+      "name": "invalid chunk syntax",
+      "passed": true,
+      "error": null,
+      "errorMessage": null,
+      "result": {
+        "status": 502,
+        "response": "HTTP/1.1 502 Bad Gateway\r\nServer: Caddy\r\nDate: Fri, 28 Aug 2026 22:41:31 GMT\r\nContent-Length: 0\r\nConnection: close\r\n\r\n",
+        "error": null,
+        "elapsedMs": 4,
+        "requestWire": "GET /v1/models HTTP/1.1\r\nHost: 127.0.0.1:55259\r\nConnection: close\r\nTransfer-Encoding: chunked\r\n\r\nQ\r\nx\r\n0\r\n\r\n",
+        "tcpHalfClose": false,
+        "termination": "server-end",
+        "serverTerminated": true
+      },
+      "before": {
+        "admitAttempts": 5,
+        "admitted": 5,
+        "released": 5,
+        "active": 0,
+        "polls": 0,
+        "primary": 4,
+        "bge": 1,
+        "redirects": 0
+      },
+      "after": {
+        "admitAttempts": 5,
+        "admitted": 5,
+        "released": 5,
+        "active": 0,
+        "polls": 0,
+        "primary": 4,
+        "bge": 1,
+        "redirects": 0
+      },
+      "nativeRequests": [],
+      "proxyEvents": [
+        {
+          "type": "denied",
+          "code": "runtime-request-unavailable",
+          "at": 1787956891811
+        }
+      ]
+    },
+    {
+      "name": "slow incomplete chunk ends under actual body deadline",
+      "passed": false,
+      "error": "ERR_ASSERTION",
+      "errorMessage": "unexpected response 200",
+      "result": {
+        "status": 200,
+        "response": "HTTP/1.1 200 OK\r\nServer: Caddy\r\nDate: Fri, 28 Aug 2026 22:41:41 GMT\r\nContent-Length: 0\r\nConnection: close\r\n\r\n",
+        "error": null,
+        "elapsedMs": 10002,
+        "requestWire": "GET /v1/models HTTP/1.1\r\nHost: 127.0.0.1:55259\r\nConnection: close\r\nTransfer-Encoding: chunked\r\n\r\n1\r\n",
+        "tcpHalfClose": false,
+        "termination": "server-end",
+        "serverTerminated": true
+      },
+      "before": {
+        "admitAttempts": 5,
+        "admitted": 5,
+        "released": 5,
+        "active": 0,
+        "polls": 0,
+        "primary": 4,
+        "bge": 1,
+        "redirects": 0
+      },
+      "after": {
+        "admitAttempts": 5,
+        "admitted": 5,
+        "released": 5,
+        "active": 0,
+        "polls": 0,
+        "primary": 4,
+        "bge": 1,
+        "redirects": 0
+      },
+      "nativeRequests": [],
+      "proxyEvents": [
+        {
+          "type": "denied",
+          "code": "runtime-request-unavailable",
+          "at": 1787956901814
+        }
+      ]
+    },
+    {
+      "name": "incomplete fixed length cannot leave an unbounded request",
+      "passed": true,
+      "error": null,
+      "errorMessage": null,
+      "result": {
+        "status": 503,
+        "response": "HTTP/1.1 503 Service Unavailable\r\nContent-Type: text/plain; charset=utf-8\r\nServer: Caddy\r\nDate: Fri, 28 Aug 2026 22:41:41 GMT\r\nContent-Length: 49\r\nConnection: close\r\n\r\nRuna maintenance bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "error": null,
+        "elapsedMs": 2,
+        "requestWire": "GET /v1/models HTTP/1.1\r\nHost: 127.0.0.1:55259\r\nConnection: close\r\nContent-Length: 1\r\n\r\n",
+        "tcpHalfClose": false,
+        "termination": "server-end",
+        "serverTerminated": true
+      },
+      "before": {
+        "admitAttempts": 5,
+        "admitted": 5,
+        "released": 5,
+        "active": 0,
+        "polls": 0,
+        "primary": 4,
+        "bge": 1,
+        "redirects": 0
+      },
+      "after": {
+        "admitAttempts": 5,
+        "admitted": 5,
+        "released": 5,
+        "active": 0,
+        "polls": 0,
+        "primary": 4,
+        "bge": 1,
+        "redirects": 0
+      },
+      "nativeRequests": [],
+      "proxyEvents": []
+    },
+    {
+      "name": "backend redirect rejected without following",
+      "passed": true,
+      "error": null,
+      "errorMessage": null,
+      "result": {
+        "status": 503,
+        "body": "{\"schemaVersion\":\"runaai-home-runtime-error/v1\",\"errorCode\":\"runtime-upstream-redirect\",\"privateValuesIncluded\":false}",
+        "elapsedMs": 10
+      },
+      "before": {
+        "admitAttempts": 5,
+        "admitted": 5,
+        "released": 5,
+        "active": 0,
+        "polls": 0,
+        "primary": 4,
+        "bge": 1,
+        "redirects": 0
+      },
+      "after": {
+        "admitAttempts": 6,
+        "admitted": 6,
+        "released": 6,
+        "active": 0,
+        "polls": 0,
+        "primary": 4,
+        "bge": 2,
+        "redirects": 0
+      },
+      "nativeRequests": [
+        {
+          "kind": "bge",
+          "path": "/health",
+          "method": "GET",
+          "bodyBytes": 0,
+          "bodySha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "headers": {
+            "host": "127.0.0.1:55257",
+            "connection": "keep-alive"
+          },
+          "at": 1787956901825
+        }
+      ],
+      "proxyEvents": [
+        {
+          "type": "denied",
+          "code": "runtime-upstream-redirect",
+          "at": 1787956901826
+        }
+      ]
+    },
+    {
+      "name": "backend failure status preserved",
+      "passed": true,
+      "error": null,
+      "errorMessage": null,
+      "result": {
+        "status": 503,
+        "body": " {\"ok\":true}\n",
+        "elapsedMs": 4
+      },
+      "before": {
+        "admitAttempts": 6,
+        "admitted": 6,
+        "released": 6,
+        "active": 0,
+        "polls": 0,
+        "primary": 4,
+        "bge": 2,
+        "redirects": 0
+      },
+      "after": {
+        "admitAttempts": 7,
+        "admitted": 7,
+        "released": 7,
+        "active": 0,
+        "polls": 0,
+        "primary": 4,
+        "bge": 3,
+        "redirects": 0
+      },
+      "nativeRequests": [
+        {
+          "kind": "bge",
+          "path": "/health",
+          "method": "GET",
+          "bodyBytes": 0,
+          "bodySha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "headers": {
+            "host": "127.0.0.1:55257",
+            "connection": "keep-alive"
+          },
+          "at": 1787956901830
+        }
+      ],
+      "proxyEvents": [
+        {
+          "type": "forwarded",
+          "method": "GET",
+          "path": "/health",
+          "requestBytes": 0,
+          "responseBytes": 13,
+          "status": 503,
+          "generation": "8a7816b5-2168-4da2-8c48-2a46b3fad5d9",
+          "at": 1787956901831
+        }
+      ]
+    },
+    {
+      "name": "actual 15 second BGE timeout releases admission",
+      "passed": false,
+      "error": "ERR_ASSERTION",
+      "errorMessage": "unexpected response 200",
+      "result": {
+        "status": 200,
+        "body": "",
+        "elapsedMs": 10002
+      },
+      "before": {
+        "admitAttempts": 7,
+        "admitted": 7,
+        "released": 7,
+        "active": 0,
+        "polls": 0,
+        "primary": 4,
+        "bge": 3,
+        "redirects": 0
+      },
+      "after": {
+        "admitAttempts": 8,
+        "admitted": 8,
+        "released": 8,
+        "active": 0,
+        "polls": 0,
+        "primary": 4,
+        "bge": 4,
+        "redirects": 0
+      },
+      "nativeRequests": [
+        {
+          "kind": "bge",
+          "path": "/health",
+          "method": "GET",
+          "bodyBytes": 0,
+          "bodySha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "headers": {
+            "host": "127.0.0.1:55257",
+            "connection": "keep-alive"
+          },
+          "at": 1787956901834
+        }
+      ],
+      "proxyEvents": [
+        {
+          "type": "denied",
+          "code": "runtime-request-unavailable",
+          "at": 1787956911834
+        }
+      ]
+    },
+    {
+      "name": "actual 65 second primary timeout releases admission",
+      "passed": false,
+      "error": "ERR_ASSERTION",
+      "errorMessage": "unexpected response 200",
+      "result": {
+        "status": 200,
+        "body": "",
+        "elapsedMs": 10004
+      },
+      "before": {
+        "admitAttempts": 8,
+        "admitted": 8,
+        "released": 8,
+        "active": 0,
+        "polls": 0,
+        "primary": 4,
+        "bge": 4,
+        "redirects": 0
+      },
+      "after": {
+        "admitAttempts": 9,
+        "admitted": 9,
+        "released": 9,
+        "active": 0,
+        "polls": 0,
+        "primary": 5,
+        "bge": 4,
+        "redirects": 0
+      },
+      "nativeRequests": [
+        {
+          "kind": "primary",
+          "path": "/v1/models",
+          "method": "GET",
+          "bodyBytes": 0,
+          "bodySha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "headers": {
+            "host": "127.0.0.1:55256",
+            "connection": "keep-alive"
+          },
+          "at": 1787956911842
+        }
+      ],
+      "proxyEvents": [
+        {
+          "type": "denied",
+          "code": "runtime-request-unavailable",
+          "at": 1787956921838
+        }
+      ]
+    }
+  ],
+  "nativeRequests": [
+    {
+      "kind": "primary",
+      "path": "/v1/models",
+      "method": "GET",
+      "bodyBytes": 0,
+      "bodySha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "headers": {
+        "host": "127.0.0.1:55256",
+        "connection": "keep-alive"
+      },
+      "at": 1787956891740
+    },
+    {
+      "kind": "bge",
+      "path": "/health",
+      "method": "GET",
+      "bodyBytes": 0,
+      "bodySha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "headers": {
+        "host": "127.0.0.1:55257",
+        "connection": "keep-alive"
+      },
+      "at": 1787956891750
+    },
+    {
+      "kind": "primary",
+      "path": "/v1/models",
+      "method": "GET",
+      "bodyBytes": 0,
+      "bodySha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "headers": {
+        "host": "127.0.0.1:55256",
+        "connection": "keep-alive"
+      },
+      "at": 1787956891791
+    },
+    {
+      "kind": "primary",
+      "path": "/v1/models",
+      "method": "GET",
+      "bodyBytes": 0,
+      "bodySha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "headers": {
+        "host": "127.0.0.1:55256",
+        "connection": "keep-alive"
+      },
+      "at": 1787956891796
+    },
+    {
+      "kind": "primary",
+      "path": "/v1/models",
+      "method": "GET",
+      "bodyBytes": 0,
+      "bodySha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "headers": {
+        "host": "127.0.0.1:55256",
+        "connection": "keep-alive"
+      },
+      "at": 1787956891800
+    },
+    {
+      "kind": "bge",
+      "path": "/health",
+      "method": "GET",
+      "bodyBytes": 0,
+      "bodySha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "headers": {
+        "host": "127.0.0.1:55257",
+        "connection": "keep-alive"
+      },
+      "at": 1787956901825
+    },
+    {
+      "kind": "bge",
+      "path": "/health",
+      "method": "GET",
+      "bodyBytes": 0,
+      "bodySha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "headers": {
+        "host": "127.0.0.1:55257",
+        "connection": "keep-alive"
+      },
+      "at": 1787956901830
+    },
+    {
+      "kind": "bge",
+      "path": "/health",
+      "method": "GET",
+      "bodyBytes": 0,
+      "bodySha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "headers": {
+        "host": "127.0.0.1:55257",
+        "connection": "keep-alive"
+      },
+      "at": 1787956901834
+    },
+    {
+      "kind": "primary",
+      "path": "/v1/models",
+      "method": "GET",
+      "bodyBytes": 0,
+      "bodySha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "headers": {
+        "host": "127.0.0.1:55256",
+        "connection": "keep-alive"
+      },
+      "at": 1787956911842
+    }
+  ],
+  "proxyEvents": [
+    {
+      "type": "forwarded",
+      "method": "GET",
+      "path": "/v1/models",
+      "requestBytes": 0,
+      "responseBytes": 13,
+      "status": 200,
+      "generation": "8a7816b5-2168-4da2-8c48-2a46b3fad5d9",
+      "at": 1787956891743
+    },
+    {
+      "type": "forwarded",
+      "method": "GET",
+      "path": "/health",
+      "requestBytes": 0,
+      "responseBytes": 13,
+      "status": 200,
+      "generation": "8a7816b5-2168-4da2-8c48-2a46b3fad5d9",
+      "at": 1787956891751
+    },
+    {
+      "type": "denied",
+      "code": "runtime-body-denied",
+      "at": 1787956891787
+    },
+    {
+      "type": "forwarded",
+      "method": "GET",
+      "path": "/v1/models",
+      "requestBytes": 0,
+      "responseBytes": 13,
+      "status": 200,
+      "generation": "8a7816b5-2168-4da2-8c48-2a46b3fad5d9",
+      "at": 1787956891792
+    },
+    {
+      "type": "forwarded",
+      "method": "GET",
+      "path": "/v1/models",
+      "requestBytes": 0,
+      "responseBytes": 13,
+      "status": 200,
+      "generation": "8a7816b5-2168-4da2-8c48-2a46b3fad5d9",
+      "at": 1787956891796
+    },
+    {
+      "type": "forwarded",
+      "method": "GET",
+      "path": "/v1/models",
+      "requestBytes": 0,
+      "responseBytes": 13,
+      "status": 200,
+      "generation": "8a7816b5-2168-4da2-8c48-2a46b3fad5d9",
+      "at": 1787956891800
+    },
+    {
+      "type": "denied",
+      "code": "runtime-body-denied",
+      "at": 1787956891803
+    },
+    {
+      "type": "denied",
+      "code": "runtime-request-unavailable",
+      "at": 1787956891811
+    },
+    {
+      "type": "denied",
+      "code": "runtime-request-unavailable",
+      "at": 1787956901814
+    },
+    {
+      "type": "denied",
+      "code": "runtime-upstream-redirect",
+      "at": 1787956901826
+    },
+    {
+      "type": "forwarded",
+      "method": "GET",
+      "path": "/health",
+      "requestBytes": 0,
+      "responseBytes": 13,
+      "status": 503,
+      "generation": "8a7816b5-2168-4da2-8c48-2a46b3fad5d9",
+      "at": 1787956901831
+    },
+    {
+      "type": "denied",
+      "code": "runtime-request-unavailable",
+      "at": 1787956911834
+    },
+    {
+      "type": "denied",
+      "code": "runtime-request-unavailable",
+      "at": 1787956921838
+    }
+  ],
+  "lifecycle": [
+    {
+      "type": "start-intent",
+      "time": 1787956891384
+    },
+    {
+      "type": "load-intent",
+      "time": 1787956891385
+    },
+    {
+      "type": "load-returned",
+      "time": 1787956891385
+    },
+    {
+      "type": "owned",
+      "time": 1787956891386
+    },
+    {
+      "type": "load-intent",
+      "time": 1787956891386
+    },
+    {
+      "type": "load-returned",
+      "time": 1787956891386
+    },
+    {
+      "type": "owned",
+      "time": 1787956891386
+    },
+    {
+      "type": "ready",
+      "time": 1787956891386
+    },
+    {
+      "type": "unloaded",
+      "time": 1787956922046
+    },
+    {
+      "type": "unloaded",
+      "time": 1787956922046
+    },
+    {
+      "type": "cleanup-complete",
+      "time": 1787956922046
+    }
+  ],
+  "caddyChildren": [
+    {
+      "pid": 21540,
+      "configSha256": "14af565605492d869fbd282dfd11fe8b0044f662078bbd6cfe7ac7d9a917813c",
+      "startedAt": "2026-08-28T22:41:31.598Z",
+      "stopped": true,
+      "logs": [
+        "{\"level\":\"error\",\"ts\":1787956891.8086789,\"logger\":\"http.log.error\",\"msg\":\"invalid byte in chunk length\",\"request\":{\"remote_ip\":\"127.0.0.1\",\"remote_port\":\"55288\",\"client_ip\":\"127.0.0.1\",\"proto\":\"HTTP/1.1\",\"method\":\"GET\",\"host\":\"127.0.0.1:55259\",\"uri\":\"/v1/models\",\"headers\":{\"Connection\":[\"close\"]},\"transfer_encoding\":[\"chunked\"]},\"duration\":0.0005576,\"status\":502,\"err_id\":\"wvygkyjdj\",\"err_trace\":\"reverseproxy.statusError (reverseproxy.go:1626)\"}\n"
+      ],
+      "phase": "candidate-closed",
+      "sourceProjectionSha256": "e708207f0686ced6937cbee159f441cced8daff306bd35df98a3c1e21a1afb07",
+      "finishedAt": "2026-08-28T22:42:01.852Z"
+    }
+  ],
+  "realController": true,
+  "syntheticLifecycleAdapter": true,
+  "realLoopbackBackends": true,
+  "realModelsLoaded": 0,
+  "homeContacted": false,
+  "controlContacted": false,
+  "productionChanged": false,
+  "passed": false,
+  "harnessSources": [
+    {
+      "file": "run-wire-proof.mjs",
+      "sha256": "c9af923b60899ede0ccebd1f5c07e4cbe799253fd83691fc828abf2c6ab1b960",
+      "bytes": 15166,
+      "source": "import assert from 'node:assert/strict';\nimport {mkdtempSync,mkdirSync,readFileSync,writeFileSync,realpathSync,existsSync} from 'node:fs';\nimport {tmpdir} from 'node:os';\nimport path from 'node:path';\nimport net from 'node:net';\nimport {createServer} from 'node:http';\nimport {fileURLToPath} from 'node:url';\nimport {digest,verifySources,modules,certificates,realController,listen,unusedPort,portClosed,closeServer,\n  observeSockets,backend,localCaddyConfig,startCaddy,stopCaddy,send,raw,removeFixture,sleep,SLOW_COMPLETION_RESPONSE} from './wire-fixture.mjs';\n\n/** Local transport integration only. Real proxy/controller/Caddy, synthetic\n * lifecycle observation and ordinary loopback HTTP servers; never a real model. */\nexport async function runClosedWireProof({sourceRoot,binary,openssl,outputDirectory,onProgress=()=>{}}){\n  assert.equal(process.platform,'win32');sourceRoot=realpathSync(sourceRoot);\n  const sourcePins=verifySources(sourceRoot),proofDeadline=Date.now()+240000;\n  const output=path.resolve(outputDirectory);mkdirSync(output);\n  const parent=realpathSync(tmpdir()),directory=mkdtempSync(path.join(parent,'m1-closed-tls-'));\n  const report={schemaVersion:'runaai-m1-closed-tls-wire-proof/v1',startedAt:new Date().toISOString(),\n    sourcePins,caddySha256:digest(readFileSync(binary)),opensslSha256:digest(readFileSync(openssl)),\n    nodeVersion:process.version,nodeSha256:digest(readFileSync(process.execPath)),cases:[],nativeRequests:[],proxyEvents:[],lifecycle:[],caddyChildren:[],\n    realController:true,syntheticLifecycleAdapter:true,realLoopbackBackends:true,realModelsLoaded:0,homeContacted:false,controlContacted:false,productionChanged:false,passed:false};\n  report.harnessSources=['run-wire-proof.mjs','wire-fixture.mjs','assembly.mjs'].map(file=>{\n    const bytes=readFileSync(new URL(file,import.meta.url));return {file,sha256:digest(bytes),bytes:bytes.length,source:bytes.toString()};});\n  writeFileSync(path.join(output,'harness-source.json'),JSON.stringify(report.harnessSources,null,2)+'\\n',{flag:'wx'});\n  const allSockets=new Set(),servers=[],ports=[],held=new Set(),modes={primary:'good',bge:'good',redirect:null};\n  let caddy=null,fixtureController=null,loaded=null,certs=null,frontPort=null,tlsPort=null,redirects=0;\n  const snapshot=()=>({admitAttempts:fixtureController.state.admitAttempts,admitted:fixtureController.state.admitted,released:fixtureController.state.released,\n    active:fixtureController.controller.status.activeRequests,polls:fixtureController.state.polls,\n    primary:report.nativeRequests.filter(v=>v.kind==='primary').length,bge:report.nativeRequests.filter(v=>v.kind==='bge').length,redirects});\n  const record=async(name,action,{status=[503],admissions=0,primary=0,bge=0,minimumMs=0,maximumMs=7000,allowSocketError=false,check=()=>{}}={})=>{\n    if(Date.now()>proofDeadline)throw Error('wire-proof-deadline');\n    const before=snapshot(),eventStart=report.proxyEvents.length,nativeStart=report.nativeRequests.length;let result,error,errorMessage;\n    try{\n      result=await action();const deadline=Date.now()+1500;\n      while(fixtureController.controller.status.activeRequests&&Date.now()<deadline)await sleep(10);\n      assert.notEqual(result.error,'fixture-client-timeout','fixture timeout is not evidence of server enforcement');\n      if(result.status)assert.ok(status.includes(result.status),'unexpected response '+result.status);\n      else assert.ok(allowSocketError&&(result.error||result.serverTerminated),'missing HTTP response');\n      assert.ok(result.elapsedMs>=minimumMs&&result.elapsedMs<=maximumMs,'response deadline '+result.elapsedMs);\n      const after=snapshot();assert.equal(after.admitAttempts-before.admitAttempts,admissions,'controller attempted admission');\n      assert.equal(after.admitted-before.admitted,admissions,'successful admission');assert.equal(after.released-before.released,admissions,'ticket release');\n      assert.equal(after.primary-before.primary,primary,'actual primary requests');assert.equal(after.bge-before.bge,bge,'actual BGE requests');\n      assert.equal(after.redirects-before.redirects,0,'redirect target reached');assert.equal(after.active,0,'active ticket leaked');\n      check(result,report.nativeRequests.slice(nativeStart));\n    }catch(e){error=e.code??e.message;errorMessage=e.message;}\n    const observation={name,passed:!error,error:error??null,errorMessage:errorMessage??null,result:result??null,before,after:snapshot(),\n      nativeRequests:report.nativeRequests.slice(nativeStart),proxyEvents:report.proxyEvents.slice(eventStart)};\n    report.cases.push(observation);writeFileSync(path.join(output,`case-${String(report.cases.length).padStart(2,'0')}.json`),JSON.stringify(observation,null,2)+'\\n',{flag:'wx'});\n    onProgress({case:name,passed:observation.passed,error:observation.error});return observation;\n  };\n  const switchCaddy=async options=>{\n    await stopCaddy(caddy);caddy=null;\n    const projection=localCaddyConfig({binary,certificates:certs,frontPort,tlsPort,...options});\n    report.closedProjectionSha256=projection.sourceSha256;\n    caddy=await startCaddy({binary,directory,config:projection.config,report});\n    caddy.record.phase=projection.phase;caddy.record.sourceProjectionSha256=projection.sourceSha256;\n  };\n  try{\n    loaded=await modules(sourceRoot);certs=certificates(directory,openssl);report.certificatePins={issuer:certs.pin('issuer.crt'),server:certs.pin('home.crt'),client:certs.pin('control.crt')};\n    fixtureController=await realController(sourceRoot,loaded,report);\n    const redirect=createServer((_req,res)=>{redirects++;res.end('must not be reached');});servers.push(redirect);observeSockets(redirect,allSockets);\n    const redirectPort=await listen(redirect);ports.push(redirectPort);modes.redirect=`http://127.0.0.1:${redirectPort}/trap`;\n    const primary=backend('primary',report,modes,held),bge=backend('bge',report,modes,held);servers.push(primary,bge);\n    for(const server of [primary,bge])observeSockets(server,allSockets);\n    const primaryPort=await listen(primary),bgePort=await listen(bge);ports.push(primaryPort,bgePort);\n    const proxy=loaded.tls.createRuntimeTlsProxy({controller:fixtureController.controller,tls:certs.tls,allowedClients:['127.0.0.1'],\n      upstream:`http://127.0.0.1:${primaryPort}`,rerankerUpstream:`http://127.0.0.1:${bgePort}`,event:e=>report.proxyEvents.push({...e,at:Date.now()})});\n    servers.push(proxy);observeSockets(proxy,allSockets);tlsPort=await listen(proxy);ports.push(tlsPort);\n    proxy.on('tlsClientError',error=>{report.proxyEvents.push({type:'tls-client-error',code:error.code??'TLS_ERROR',at:Date.now()});});\n    frontPort=await unusedPort();ports.push(frontPort);assert.equal(new Set(ports).size,ports.length);\n    await switchCaddy({});\n    const health=route=>send(frontPort,{route});\n    await record('empty GET models reaches exactly primary backend',()=>health('/v1/models'),{status:[200],admissions:1,primary:1});\n    await record('empty GET health reaches exactly BGE backend',()=>health('/health'),{status:[200],admissions:1,bge:1});\n    for(const route of ['/v1/models?x=1','/health?x=1','/v1/models/','/v1/%6dodels','/health#suffix','/healthz','/api/v1/models/load','/unknown'])\n      await record('closed path '+route,()=>health(route));\n    for(const method of ['POST','HEAD','OPTIONS'])await record('closed method '+method,()=>send(frontPort,{route:'/health',method,body:method==='POST'?'{}':undefined}));\n    await record('nonempty fixed length GET denied',()=>send(frontPort,{headers:{'content-length':'1'},body:'x'}));\n    await record('content encoding denied',()=>send(frontPort,{headers:{'content-encoding':'gzip','content-length':'0'}}));\n    const wire=(headers,body='',target='/v1/models')=>`GET ${target} HTTP/1.1\\r\\nHost: 127.0.0.1:${frontPort}\\r\\nConnection: close\\r\\n${headers}\\r\\n${body}`;\n    await record('nonempty chunked GET denied before admission',()=>raw(frontPort,wire('Transfer-Encoding: chunked\\r\\n','1\\r\\nx\\r\\n0\\r\\n\\r\\n')),{status:[400,502,503],allowSocketError:true});\n    await record('empty decoded chunked GET is explicitly observed',()=>raw(frontPort,wire('Transfer-Encoding: chunked\\r\\n','0\\r\\n\\r\\n')),{status:[200],admissions:1,primary:1});\n    const emptyRead=(response,requests)=>{assert.equal(requests.length,1);assert.equal(requests[0].method,'GET');assert.equal(requests[0].path,'/v1/models');\n      assert.equal(response.serverTerminated,true,'mixed framing must close after its one response');\n      assert.equal(requests[0].bodyBytes,0);assert.equal(requests[0].bodySha256,digest(Buffer.alloc(0)));\n      assert.equal(requests[0].headers['transfer-encoding'],undefined);assert.ok([undefined,'0'].includes(requests[0].headers['content-length']));\n      assert.equal((response.response.match(/HTTP\\/1\\.[01] /gu)??[]).length,1);};\n    await record('mixed CL plus empty chunked normalizes to one exact empty read, not header denial',\n      ()=>raw(frontPort,wire('Content-Length: 1\\r\\nTransfer-Encoding: chunked\\r\\n','0\\r\\n\\r\\n')),{status:[200],admissions:1,primary:1,check:emptyRead});\n    await record('mixed CL plus empty chunked cannot smuggle appended forbidden request',\n      ()=>raw(frontPort,wire('Content-Length: 1\\r\\nTransfer-Encoding: chunked\\r\\n','0\\r\\n\\r\\n')+\n        `POST /api/v1/models/load HTTP/1.1\\r\\nHost: 127.0.0.1:${frontPort}\\r\\nContent-Length: 2\\r\\n\\r\\n{}`),\n      {status:[200],admissions:1,primary:1,check:emptyRead});\n    for(const [name,headers,body] of [\n      ['nonempty mixed content length and transfer encoding denied','Content-Length: 1\\r\\nTransfer-Encoding: chunked\\r\\n','1\\r\\nx\\r\\n0\\r\\n\\r\\n'],\n      ['negative content length','Content-Length: -1\\r\\n',''],\n      ['different duplicate lengths','Content-Length: 0\\r\\nContent-Length: 1\\r\\n','x'],\n      ['invalid chunk syntax','Transfer-Encoding: chunked\\r\\n','Q\\r\\nx\\r\\n0\\r\\n\\r\\n']])\n      await record(name,()=>raw(frontPort,wire(headers,body)),{status:[400,502,503],allowSocketError:true});\n    await record('slow incomplete chunk ends under actual body deadline',()=>raw(frontPort,wire('Transfer-Encoding: chunked\\r\\n','1\\r\\n'),{end:false,timeout:16000}),\n      {status:[400,502,503,504],minimumMs:9000,maximumMs:15000,allowSocketError:true});\n    await record('incomplete fixed length cannot leave an unbounded request',()=>raw(frontPort,wire('Content-Length: 1\\r\\n'),{end:false,timeout:16000}),\n      {status:[400,502,503],maximumMs:15000,allowSocketError:true});\n    modes.bge='redirect';await record('backend redirect rejected without following',()=>health('/health'),{status:[503],admissions:1,bge:1});modes.bge='good';\n    modes.bge='failure';await record('backend failure status preserved',()=>health('/health'),{status:[503],admissions:1,bge:1});modes.bge='good';\n    modes.bge='stall';await record('actual 15 second BGE timeout releases admission',()=>send(frontPort,{route:'/health',timeout:22000}),\n      {status:[502,503],admissions:1,bge:1,minimumMs:14000,maximumMs:21000});modes.bge='good';\n    modes.primary='stall';await record('actual 65 second primary timeout releases admission',()=>send(frontPort,{timeout:72000}),\n      {status:[502,503,504],admissions:1,primary:1,minimumMs:64000,maximumMs:71000});modes.primary='good';\n    await switchCaddy({phase:'final'});\n    const completionBody=JSON.stringify({model:fixtureController.controller.profile.candidate.key,max_tokens:512,temperature:0,reasoning_effort:'none',\n      messages:[{role:'user',content:'Return the fixed synthetic transport fixture response.'}]});\n    modes.primary='slow-completion';\n    await record('valid sixty second completion remains byte exact under input-only deadline',\n      ()=>send(frontPort,{method:'POST',route:'/v1/chat/completions',headers:{'content-type':'application/json','content-length':Buffer.byteLength(completionBody)},body:completionBody,timeout:70000}),\n      {status:[200],admissions:1,primary:1,minimumMs:59000,maximumMs:64000,check:(response,requests)=>{\n        assert.equal(response.body,SLOW_COMPLETION_RESPONSE);assert.equal(requests.length,1);assert.equal(requests[0].path,'/v1/chat/completions');\n        assert.equal(requests[0].method,'POST');assert.equal(requests[0].bodySha256,digest(Buffer.from(completionBody)));}});\n    modes.primary='good';\n    for(const [name,options,status] of [['same issuer wrong client pin',{client:'other'},[403]],['foreign issuer client',{client:'untrusted'},[502]],\n      ['missing client certificate',{client:'none'},[502]],['wrong server name',{serverName:'wrong.synthetic'},[502]],['wrong server trust',{issuer:'foreign'},[502]]]){\n      await switchCaddy(options);await record(name,()=>health('/v1/models'),{status});\n    }\n    const stalledTls=net.createServer();servers.push(stalledTls);observeSockets(stalledTls,allSockets);const stalledPort=await listen(stalledTls);ports.push(stalledPort);\n    await switchCaddy({tlsPort:stalledPort});await record('actual 10 second TLS handshake timeout has zero controller admission',()=>send(frontPort,{timeout:16000}),\n      {status:[502,504],minimumMs:9000,maximumMs:15000});\n    verifySources(sourceRoot);report.passed=report.cases.every(c=>c.passed);\n  }catch(error){report.error=error.code??error.message;}\n  finally{\n    try{await stopCaddy(caddy);}catch(error){report.cleanupError=error.code??error.message;}\n    for(const res of held)res.destroy();for(const socket of allSockets)socket.destroy();\n    for(const server of servers)await closeServer(server);\n    if(fixtureController){try{await fixtureController.controller.stop();}catch(error){report.controllerCleanupError=error.code??error.message;}}\n    report.cleanup={ownedCaddyStopped:report.caddyChildren.every(c=>c.stopped),ownedPortsClosed:await Promise.all(ports.map(portClosed)),\n      activeControllerRequests:fixtureController?.controller.status.activeRequests??0,syntheticInstances:fixtureController?.state.loaded.length??0,privateFilesRemoved:false};\n    try{removeFixture(directory,parent);report.cleanup.privateFilesRemoved=!existsSync(directory);}catch(error){report.cleanupError=error.code??error.message;}\n    if(report.cleanupError||report.controllerCleanupError||!report.cleanup.ownedCaddyStopped||report.cleanup.ownedPortsClosed.some(v=>!v)\n      ||report.cleanup.activeControllerRequests!==0||report.cleanup.syntheticInstances!==0||!report.cleanup.privateFilesRemoved)report.passed=false;\n    report.finishedAt=new Date().toISOString();writeFileSync(path.join(output,'proof.json'),JSON.stringify(report,null,2)+'\\n',{flag:'wx'});\n  }\n  return report;\n}\nif(process.argv[1]&&path.resolve(process.argv[1])===fileURLToPath(import.meta.url)){\n  if(process.argv.length!==6)throw Error('usage: run-wire-proof.mjs FUNCTION_FIRST_SOURCE_ROOT CADDY OPENSSL NEW_OUTPUT_DIRECTORY');\n  const report=await runClosedWireProof({sourceRoot:process.argv[2],binary:process.argv[3],openssl:process.argv[4],outputDirectory:process.argv[5],onProgress:value=>console.log(JSON.stringify(value))});\n  console.log(JSON.stringify({passed:report.passed,cases:report.cases.length,failures:report.cases.filter(v=>!v.passed).map(v=>({name:v.name,error:v.error})),error:report.error??null,cleanup:report.cleanup}));process.exitCode=report.passed?0:1;\n}\n"
+    },
+    {
+      "file": "wire-fixture.mjs",
+      "sha256": "2a2465e9d5f2ef54f38bbe11d1bc7a13403d7d350f42e08140db1043d1d46bec",
+      "bytes": 16386,
+      "source": "import assert from 'node:assert/strict';\nimport {spawn,spawnSync,execFileSync} from 'node:child_process';\nimport {readFileSync,writeFileSync,realpathSync,rmSync} from 'node:fs';\nimport {createHash,X509Certificate} from 'node:crypto';\nimport {createServer,request} from 'node:http';\nimport net from 'node:net';\nimport path from 'node:path';\nimport {once} from 'node:events';\nimport {pathToFileURL} from 'node:url';\nimport {APPLICATION,HEALTH_EXPRESSION,PROVIDER_BODY_READ_MS,buildCaddyProjection} from './assembly.mjs';\nimport {caddyfile} from '../../../../gate7a/lan-release.mjs';\n\nexport const digest=bytes=>createHash('sha256').update(bytes).digest('hex');\nexport const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));\nexport const SOURCE_PINS=Object.freeze({\n  'home-runtime/tls-proxy.mjs':'9d5068d1a3a0c09a0b4bb580fb192011730f40cbdb9ef26bb04402ea5869e1f6',\n  'home-runtime/proxy.mjs':'dce23f5b7c32470ab38e531846e94021a06e6fba45202da2250f89651c59afeb',\n  'home-runtime/contracts.mjs':'d977fcc68f6fc8959b76e8ff1b3cc165ec697f0a0cf01bb6e7e3dcea4131c52e',\n  'home-runtime/controller.mjs':'53fd576f52e2dc51f25200548232367756602f0ac70a00b865ba3eee6af0a354',\n  'readiness/manifest.mjs':'21757455f9bf2274f495cf0bc538bd684b35a7c0a60196b612eb61ab8903bed6',\n  'readiness/lease-contract.mjs':'9000ea05b54214bc27f394b078e50df6b10d8df231ef32954a143e6d10256c13',\n  'readiness/evidence/20260828-smoke-gemma-r1/events.jsonl':'e8329085a4bd3eccbe0ba9ae2be5afe32a85f9e5c774c2f83bd34fdf19cd6eaf',\n});\nexport function verifySources(root){return Object.entries(SOURCE_PINS).map(([file,sha256])=>{\n  const bytes=readFileSync(path.join(root,file));assert.equal(digest(bytes),sha256,'wire-source-drift:'+file);return {file,sha256,bytes:bytes.length};});}\nexport async function modules(root){verifySources(root);const load=file=>import(pathToFileURL(path.join(root,file)).href);\n  return {tls:await load('home-runtime/tls-proxy.mjs'),contracts:await load('home-runtime/contracts.mjs'),controller:await load('home-runtime/controller.mjs')};}\n\n// Only generated disposable certificates; the directory has no inherited access\n// for ordinary other users. No production enrollment/keys are opened here.\nexport function certificates(directory,openssl){\n  assert.equal(digest(readFileSync(openssl)),'063e62dcc027fc5dbb1343de631f02a9291f8b1df0b4e37012e49a03d525aad4','wire-openssl-pin');\n  const sidScript=`$ErrorActionPreference='Stop';$p='${directory.replaceAll(\"'\",\"''\")}';$a=[Security.AccessControl.DirectorySecurity]::new();$a.SetAccessRuleProtection($true,$false);foreach($s in @('S-1-5-18','S-1-5-32-544',[Security.Principal.WindowsIdentity]::GetCurrent().User.Value)){$r=[Security.AccessControl.FileSystemAccessRule]::new([Security.Principal.SecurityIdentifier]::new($s),'FullControl','ContainerInherit,ObjectInherit','None','Allow');$a.AddAccessRule($r)};Set-Acl -LiteralPath $p -AclObject $a`;\n  execFileSync(String.raw`C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe`,['-NoProfile','-NonInteractive','-EncodedCommand',Buffer.from(sidScript,'utf16le').toString('base64')],\n    {windowsHide:true,timeout:15000,stdio:'pipe',env:{...process.env,PSModulePath:String.raw`C:\\Windows\\system32\\WindowsPowerShell\\v1.0\\Modules;C:\\Program Files\\WindowsPowerShell\\Modules`}});\n  const run=args=>execFileSync(openssl,args,{cwd:directory,windowsHide:true,timeout:15000,stdio:'pipe',maxBuffer:262144});\n  for(const issuer of ['issuer','foreign'])run(['req','-x509','-newkey','rsa:2048','-nodes','-keyout',issuer+'.key','-out',issuer+'.crt','-days','1','-subj','/CN=synthetic-'+issuer,'-addext','basicConstraints=critical,CA:TRUE']);\n  for(const [name,issuer,usage] of [['home','issuer','serverAuth'],['control','issuer','clientAuth'],['other','issuer','clientAuth'],['untrusted','foreign','clientAuth']]){\n    run(['req','-new','-newkey','rsa:2048','-nodes','-keyout',name+'.key','-out',name+'.csr','-subj','/CN=synthetic-'+name]);\n    writeFileSync(path.join(directory,name+'.ext'),`basicConstraints=critical,CA:FALSE\\nkeyUsage=digitalSignature,keyEncipherment\\nextendedKeyUsage=${usage}\\nsubjectAltName=DNS:runa-home-m1.internal\\n`,{flag:'wx'});\n    run(['x509','-req','-in',name+'.csr','-CA',issuer+'.crt','-CAkey',issuer+'.key','-CAcreateserial','-out',name+'.crt','-days','1','-sha256','-extfile',name+'.ext']);\n  }\n  const read=name=>readFileSync(path.join(directory,name)),pin=name=>digest(new X509Certificate(read(name)).raw);\n  return {directory,read,pin,tls:{key:read('home.key'),cert:read('home.crt'),ca:read('issuer.crt'),\n    caSha256:pin('issuer.crt'),serverCertificateSha256:pin('home.crt'),clientCertificateSha256:pin('control.crt')}};\n}\n\nexport async function realController(root,loadedModules,report){\n  const {QualifiedRuntimeController}=loadedModules.controller,{LEASE_POLICY}=loadedModules.contracts;\n  const responses=new Map(readFileSync(path.join(root,'readiness/evidence/20260828-smoke-gemma-r1/events.jsonl'),'utf8')\n    .trim().split(/\\r?\\n/u).map(JSON.parse).filter(e=>e.type==='load-response').map(e=>[e.key,e.value]));\n  const state={power:260,loaded:[],admitAttempts:0,admitted:0,released:0,polls:0};\n  const adapter={verifyPins:async()=>{},record:async event=>report.lifecycle.push({type:event.type,time:event.time}),\n    setPower:async value=>{state.power=value;},\n    load:async request=>{const result=structuredClone(responses.get(request.model));assert.ok(result);result.instance_id='synthetic-'+request.model;\n      state.loaded.push({key:request.model,id:result.instance_id,config:result.load_config});return result;},\n    unload:async({instance_id})=>{state.loaded=state.loaded.filter(v=>v.id!==instance_id);},\n    observe:async()=>({observedAt:Date.now(),engineIdentity:'synthetic-no-native-engine',\n      settings:{justInTimeModelLoading:false,logSensitiveData:false,verbose:false,dynamicRemoteMcpServer:'deny',pluginUse:'deny'},\n      hardware:{freeMemoryBytes:32*1024**3,gpus:LEASE_POLICY.gpuUuids.map((uuid,index)=>({index,uuid,name:'Quadro RTX 6000',memoryTotalMiB:23040,memoryUsedMiB:8000,temperatureC:40,powerLimitWatts:state.power}))},\n      inventory:{models:state.loaded.map(v=>({key:v.key,loaded_instances:[{id:v.id,config:structuredClone(v.config)}]}))}})};\n  const controller=new QualifiedRuntimeController({profile:{schemaVersion:'runaai-qualified-home-profile/v1',candidateId:'gemma',\n    appSourceCommit:'1'.repeat(40),runtimeSealSha256:'2'.repeat(64),qualificationGradesSha256:'3'.repeat(64)},adapter});\n  const admit=controller.admit.bind(controller),poll=controller.poll.bind(controller);\n  controller.admit=async args=>{state.admitAttempts++;const ticket=await admit(args);state.admitted++;const release=ticket.release;let done=false;\n    return {...ticket,release(){release();if(!done){state.released++;done=true;}}};};\n  controller.poll=async()=>{state.polls++;return poll();};await controller.start();return {controller,state};\n}\n\nexport async function listen(server){server.listen(0,'127.0.0.1');await once(server,'listening');return server.address().port;}\nexport async function unusedPort(){const server=net.createServer();const port=await listen(server);await new Promise(resolve=>server.close(resolve));return port;}\nexport function portClosed(port){return new Promise(resolve=>{const socket=net.connect({host:'127.0.0.1',port});let done=false;\n  const end=value=>{if(done)return;done=true;socket.destroy();resolve(value);};socket.once('connect',()=>end(false));socket.once('error',()=>end(true));socket.setTimeout(500,()=>end(false));});}\nexport async function closeServer(server){if(!server)return;server.closeAllConnections?.();await new Promise(resolve=>server.close(resolve));}\nexport function observeSockets(server,set){server.on('connection',socket=>{set.add(socket);socket.on('close',()=>set.delete(socket));});}\nexport function backend(kind,report,modes,held){return createServer(async(req,res)=>{\n  const chunks=[];for await(const chunk of req)chunks.push(chunk);const body=Buffer.concat(chunks);\n  report.nativeRequests.push({kind,path:req.url,method:req.method,bodyBytes:body.length,bodySha256:digest(body),headers:req.headers,at:Date.now()});\n  const mode=modes[kind];if(mode==='stall'){held.add(res);res.once('close',()=>held.delete(res));return;}\n  if(mode==='redirect'){res.writeHead(302,{location:modes.redirect});res.end();return;}\n  if(mode==='slow-completion'){\n    held.add(res);await new Promise(resolve=>{const timer=setTimeout(resolve,60000);res.once('close',()=>{clearTimeout(timer);resolve();});});held.delete(res);\n    if(!res.destroyed){res.writeHead(200,{'content-type':'application/json'});res.end(SLOW_COMPLETION_RESPONSE);}return;\n  }\n  const status=mode==='failure'?503:200;res.writeHead(status,{'content-type':'application/json'});res.end(kind==='primary'?' {\"data\":[]}\\n':' {\"ok\":true}\\n');\n});}\nexport const SLOW_COMPLETION_RESPONSE=' {\"id\":\"synthetic-sixty-second\",\"choices\":[{\"message\":{\"role\":\"assistant\",\"content\":\"Complete unchanged response after sixty seconds.\"}}]}\\n';\n\nexport function localCaddyConfig({binary,certificates:certs,frontPort,tlsPort,client='control',issuer='issuer',serverName='runa-home-m1.internal',phase='candidate-closed'}){\n  assert.equal(digest(readFileSync(binary)),APPLICATION.caddyBinarySha256);\n  for(const value of [frontPort,tlsPort])assert.ok(Number.isSafeInteger(value)&&value>=1024&&value<=65535&&!([1234,8412,9761,9770,9774,9775,9776].includes(value)));\n  assert.ok(['control','other','untrusted','none'].includes(client));assert.ok(['issuer','foreign'].includes(issuer));\n  assert.ok(['runa-home-m1.internal','wrong.synthetic'].includes(serverName));\n  assert.ok(['candidate-closed','final'].includes(phase));\n  const enrollment={schemaVersion:'runaai-control-tls-enrollment/v1',enrollmentId:'a'.repeat(32),caSha256:certs.pin('issuer.crt'),\n    serverCertificateSha256:certs.pin('home.crt'),clientCertificateSha256:certs.pin('control.crt'),serverName:'runa-home-m1.internal',\n    clientExpiresAt:new Date(Date.now()+60000).toISOString(),activated:false,privateMaterialIncluded:false};\n  const source=buildCaddyProjection({originalBytes:Buffer.from(caddyfile),enrollment,transitionId:'b'.repeat(32)});\n  const input=phase==='final'?source.finalBytes:source.candidateClosedBytes;\n  const adapted=spawnSync(binary,['adapt','--config','-','--adapter','caddyfile'],{input,encoding:'utf8',windowsHide:true,timeout:10000,maxBuffer:1048576});\n  assert.equal(adapted.status,0,adapted.stderr);const original=Object.values(JSON.parse(adapted.stdout).apps.http.servers).find(s=>s.listen.includes('127.0.0.1:9770'));\n  const server=structuredClone(original);\n  const literal=phase==='final'?server.routes[0].handle[0].routes:server.routes[0].handle[0].routes[0].handle[0].routes;\n  assert.deepEqual(literal[0],{handle:[{handler:'request_body',read_timeout:PROVIDER_BODY_READ_MS*1e6}]});\n  if(phase==='candidate-closed'){\n    assert.equal(literal[1].match[0].expression.expr,HEALTH_EXPRESSION);assert.equal(literal[2].handle[0].status_code,503);\n    assert.deepEqual(literal[2].match[0].path,['*']);\n  }else assert.equal(literal[1].handle[0].handler,'reverse_proxy');\n  server.listen=[`127.0.0.1:${frontPort}`];let replacements=0;\n  const change=node=>{if(!node||typeof node!=='object')return;\n    if(node.handler==='reverse_proxy'){\n      replacements++;assert.deepEqual(node.upstreams,[{dial:'192.168.50.165:9776'}]);node.upstreams=[{dial:`127.0.0.1:${tlsPort}`}];\n      assert.equal(node.transport.response_header_timeout,65e9);assert.equal(node.transport.dial_timeout,10e9);assert.equal(node.transport.tls.handshake_timeout,10e9);\n      assert.deepEqual(node.transport.versions,['1.1']);assert.deepEqual(node.load_balancing,{});\n      node.transport.tls.ca.pem_files=[path.join(certs.directory,issuer+'.crt')];node.transport.tls.server_name=serverName;\n      if(client==='none'){delete node.transport.tls.client_certificate_file;delete node.transport.tls.client_certificate_key_file;}\n      else{node.transport.tls.client_certificate_file=path.join(certs.directory,client+'.crt');node.transport.tls.client_certificate_key_file=path.join(certs.directory,client+'.key');}\n    }\n    for(const value of Object.values(node))if(value&&typeof value==='object')change(value);\n  };change(server);assert.equal(replacements,phase==='final'?1:2);\n  return {sourceSha256:digest(input),phase,original,config:{admin:{disabled:true,config:{persist:false}},logging:{logs:{default:{level:'ERROR'}}},\n    storage:{module:'file_system',root:path.join(certs.directory,'caddy-storage')},apps:{http:{servers:{synthetic:server}}}}};\n}\n\nexport async function startCaddy({binary,directory,config,report}){\n  const filename=path.join(directory,'caddy-'+report.caddyChildren.length+'.json');writeFileSync(filename,JSON.stringify(config),{flag:'wx'});\n  const child=spawn(binary,['run','--config',filename],{cwd:directory,windowsHide:true,stdio:['ignore','pipe','pipe'],\n    env:{...process.env,APPDATA:path.join(directory,'appdata'),LOCALAPPDATA:path.join(directory,'localappdata'),XDG_CONFIG_HOME:path.join(directory,'config'),XDG_DATA_HOME:path.join(directory,'data')}});\n  const record={pid:child.pid,configSha256:digest(readFileSync(filename)),startedAt:new Date().toISOString(),stopped:false,logs:[]};report.caddyChildren.push(record);let bytes=0;\n  for(const stream of [child.stdout,child.stderr])stream.on('data',chunk=>{bytes+=chunk.length;if(bytes<=262144)record.logs.push(chunk.toString());else{record.logCapExceeded=true;child.kill();}});\n  const port=Number(config.apps.http.servers.synthetic.listen[0].split(':').at(-1)),deadline=Date.now()+10000;\n  try{while(await portClosed(port)){if(child.exitCode!==null||Date.now()>deadline)throw Error('wire-caddy-start-failed');await sleep(50);}}\n  catch(error){await stopCaddy({child,record,port});throw error;}\n  return {child,record,port};\n}\nexport async function stopCaddy(value){if(!value)return;const {child,record}=value;\n  if(child.exitCode===null&&child.signalCode===null){const stopped=once(child,'exit');child.kill();await Promise.race([stopped,sleep(5000)]);}\n  record.stopped=child.exitCode!==null||child.signalCode!==null;record.finishedAt=new Date().toISOString();assert.equal(record.stopped,true);assert.equal(await portClosed(value.port),true);\n}\nexport async function send(port,{method='GET',route='/v1/models',headers={},body,timeout=70000}={}){\n  return new Promise(resolve=>{const started=Date.now(),chunks=[];let done=false;const finish=value=>{if(done)return;done=true;clearTimeout(timer);resolve({...value,elapsedMs:Date.now()-started});};\n    const req=request({host:'127.0.0.1',port,path:route,method,headers:{connection:'close',...headers}},async res=>{\n      try{for await(const chunk of res){chunks.push(chunk);assert.ok(Buffer.concat(chunks).length<=65536);}finish({status:res.statusCode,body:Buffer.concat(chunks).toString()});}\n      catch(e){finish({error:e.code??'response-error'});}});\n    const timer=setTimeout(()=>{req.destroy();finish({error:'fixture-client-timeout'});},timeout);req.on('error',e=>finish({error:e.code??'request-error'}));req.end(body);\n  });\n}\nexport function raw(port,wire,{timeout=16000,end=false}={}){return new Promise(resolve=>{\n  const started=Date.now(),chunks=[];let done=false;const socket=net.connect({host:'127.0.0.1',port});\n  const finish=(error,termination)=>{if(done)return;done=true;clearTimeout(timer);const response=Buffer.concat(chunks).toString();socket.destroy();\n    resolve({status:Number(response.match(/^HTTP\\/1\\.[01] (\\d{3})/u)?.[1])||null,response,error:error??null,elapsedMs:Date.now()-started,\n      requestWire:wire,tcpHalfClose:end,termination:termination??'fixture',serverTerminated:['server-end','server-close','server-error'].includes(termination)});};\n  const timer=setTimeout(()=>finish('fixture-client-timeout'),timeout);\n  socket.on('connect',()=>{socket.write(wire);if(end)socket.end();});socket.on('data',chunk=>{chunks.push(chunk);if(Buffer.concat(chunks).length>65536)finish('fixture-response-cap');});\n  socket.on('end',()=>finish(null,'server-end'));socket.on('close',()=>finish(null,'server-close'));socket.on('error',e=>finish(e.code??'socket-error','server-error'));\n});}\nexport function removeFixture(directory,parent){const actual=realpathSync(directory);assert.equal(actual,directory);assert.equal(path.dirname(actual),parent);\n  assert.ok(path.basename(actual).startsWith('m1-closed-tls-'));rmSync(actual,{recursive:true,force:false});}\n"
+    },
+    {
+      "file": "assembly.mjs",
+      "sha256": "ccb830cf246235e8ff540cf66af496f062697d96ecff34fbae91bd6a191da484",
+      "bytes": 9174,
+      "source": "import {canonicalJson,sha256} from '../../../../gate4/canonical.mjs';\nimport {assertM1SuccessorProjection,assertQualifiedM1Successor} from '../../deployment.mjs';\nimport {buildAdmissionOverlay} from '../quiescence/coordinator.mjs';\nimport {CONTRACT as QDRANT} from '../qdrant/contract.mjs';\n\nexport const APPLICATION=Object.freeze({sourceCommit:'9556ed01f9dbabe8c93eea309e482aad60bf809f',\n  sourceArchiveSha256:'e10adce53387bcf31b639738e2d7ae26c2b5dd17e2914f1870ba0ef1949b31dc',\n  runtimeSealSha256:'416102ff7129e5adb00de51b2f0fc3e5ca542c18a82941a32fdc4075b6a1c89f',\n  deployerSourceSha256:'9834fb63f7c56428fa965f39ac2985ff6a3d132b06f4244e108ebb3cde6aa6f5',\n  caddyBinarySha256:'5cb9ab71e5756ce72840b8234177a2f40c8b4ab47a806b8e841e2b784e9df62b'});\nexport const ROOT='C:\\\\AI\\\\RunaAI-Next-Candidate';\nexport const ROLES=Object.freeze(['chat','research','code','review','agent']);\nexport const HOME_CANDIDATE=Object.freeze({'gemma-4-26b-a4b-it-qat':'gemma',\n  'qwen3-coder-30b-a3b-instruct':'coder','qwen3.6-27b-mtp':'qwen36'});\nexport const demand=(condition,code)=>{if(!condition)throw Object.assign(Error('m1-assembly-'+code),{code:'m1-assembly-'+code});};\nexport const hash=value=>sha256(canonicalJson(value));\nconst HASH=/^[a-f0-9]{64}$/u,ID=/^[a-f0-9]{32}$/u;\nconst exact=(value,keys)=>value&&typeof value==='object'&&!Array.isArray(value)&&Object.keys(value).sort().join()===keys;\n\nexport function validateEnrollment(enrollment,{now=Date.now()}={}){\n  demand(exact(enrollment,'activated,caSha256,clientCertificateSha256,clientExpiresAt,enrollmentId,privateMaterialIncluded,schemaVersion,serverCertificateSha256,serverName')\n    &&enrollment.schemaVersion==='runaai-control-tls-enrollment/v1'&&ID.test(enrollment.enrollmentId)\n    &&enrollment.serverName==='runa-home-m1.internal'&&enrollment.activated===false&&enrollment.privateMaterialIncluded===false\n    &&['caSha256','serverCertificateSha256','clientCertificateSha256'].every(key=>HASH.test(enrollment[key]))\n    &&Number.isFinite(now)&&Date.parse(enrollment.clientExpiresAt)>now,'enrollment-invalid');\n  return structuredClone(enrollment);\n}\nconst oldProviderLines=['http://127.0.0.1:9770 {','  bind 127.0.0.1',\n  '  reverse_proxy http://192.168.50.165:1234 {','    lb_retries 0','    transport http {',\n  '      dial_timeout 10s','      response_header_timeout 65s','    }','  }','}'];\nfunction tlsProxy(enrollment,eol,matcher=''){\n  const directory=ROOT+'\\\\m1-home-runtime-tls\\\\'+enrollment.enrollmentId;\n  return [`  reverse_proxy ${matcher?matcher+' ':''}https://192.168.50.165:9776 {`,\n    '    lb_retries 0','    transport http {','      dial_timeout 10s','      response_header_timeout 65s',\n    '      tls_timeout 10s','      tls_server_name runa-home-m1.internal',\n    `      tls_client_auth ${directory}\\\\client.pem ${directory}\\\\client-key.pem`,\n    `      tls_trust_pool file ${directory}\\\\ca.pem`,'      versions 1.1','    }','  }'].join(eol);\n}\nexport const HEALTH_EXPRESSION='{http.request.method} == \"GET\" && {http.request.uri} in [\"/v1/models\", \"/health\"]'\n  +' && {http.request.header.Transfer-Encoding} == \"\" && {http.request.header.Content-Encoding} == \"\"'\n  +' && {http.request.header.Content-Length} in [\"\", \"0\"]';\nexport const PROVIDER_BODY_READ_MS=10000;\nconst providerBodyDeadline=eol=>['  request_body {','    read_timeout 10s','  }'].join(eol);\n\n/** Pure, byte-retaining provider replacement. No certificate/key reads or writes. */\nexport function buildCaddyProjection({originalBytes,enrollment,transitionId,now=Date.now()}){\n  validateEnrollment(enrollment,{now});demand(Buffer.isBuffer(originalBytes)&&originalBytes.length<=1_048_576&&ID.test(transitionId),'caddy-input');\n  const text=originalBytes.toString('utf8');demand(Buffer.from(text).equals(originalBytes),'caddy-utf8');\n  const eol=text.includes('\\r\\n')?'\\r\\n':'\\n';\n  demand(eol==='\\n'||!text.replaceAll('\\r\\n','').includes('\\n'),'caddy-mixed-eol');\n  const old=oldProviderLines.join(eol);demand(text.split(old).length===2&&text.split('http://127.0.0.1:9770').length===2,'provider-preimage');\n  const provider=['http://127.0.0.1:9770 {','  bind 127.0.0.1',providerBodyDeadline(eol),tlsProxy(enrollment,eol),'}'].join(eol);\n  const finalBytes=Buffer.from(text.replace(old,provider));\n  const scopes=[{siteAddress:'https://192.168.50.169:9761',mode:'api'},\n    {siteAddress:'https://runa.bridgebuildersai.com',mode:'api'},{siteAddress:'http://127.0.0.1:9770',mode:'all'}];\n  const initialClosedBytes=buildAdmissionOverlay({originalBytes,scopes,transitionId});\n  const fullyClosedBytes=buildAdmissionOverlay({originalBytes:finalBytes,scopes,transitionId});\n  const maintenance='runa_m1_maintenance_'+transitionId,health='runa_m1_health_'+transitionId;\n  const before=`@${maintenance} path *${eol}  route {${eol}`;\n  const replacement=`@${maintenance} path *${eol}  @${health} expression \\`${HEALTH_EXPRESSION}\\`${eol}  route {${eol}`\n    // The closure wraps ordinary handlers in its fallback. Its health exception\n    // therefore needs its own preceding input deadline, not a write deadline.\n    +providerBodyDeadline(eol)+eol+tlsProxy(enrollment,eol,'@'+health)+eol;\n  const closed=fullyClosedBytes.toString();demand(closed.split(before).length===2,'closed-provider-binding');\n  const candidateClosedBytes=Buffer.from(closed.replace(before,replacement));\n  return {originalBytes:Buffer.from(originalBytes),initialClosedBytes,initialClosedSha256:sha256(initialClosedBytes),finalBytes,fullyClosedBytes,candidateClosedBytes,\n    originalSha256:sha256(originalBytes),finalSha256:sha256(finalBytes),fullyClosedSha256:sha256(fullyClosedBytes),\n    candidateClosedSha256:sha256(candidateClosedBytes),caddyConfigurationDigest:sha256(finalBytes.toString()+APPLICATION.caddyBinarySha256),\n    enrollmentId:enrollment.enrollmentId,transitionId};\n}\n\nexport function assertCaddyProjection(caddy,enrollment,{now=Date.now()}={}){\n  demand(caddy&&typeof caddy==='object','caddy-binding');\n  const expected=buildCaddyProjection({originalBytes:caddy.originalBytes,enrollment,transitionId:caddy.transitionId,now});\n  for(const key of Object.keys(expected))demand(Buffer.isBuffer(expected[key])\n    ?Buffer.isBuffer(caddy[key])&&expected[key].equals(caddy[key]):expected[key]===caddy[key],'caddy-binding');\n  return expected;\n}\n\n/** Plan/config generation is not qualification. The combined verifier is separate\n * below, and must consume the complete real campaign before any activation. */\nexport function createConfigurationProjection({prior,provider,functionFirst,caddyConfigurationDigest,acceptanceGradesSha256}){\n  demand(HASH.test(caddyConfigurationDigest)&&HASH.test(acceptanceGradesSha256),'projection-pin');\n  demand(provider?.baseUrl==='http://127.0.0.1:9770/v1'&&prior?.provider?.baseUrl===provider.baseUrl,'provider-boundary');\n  demand(Object.keys(provider.models??{}).sort().join()===ROLES.slice().sort().join()\n    &&new Set(Object.values(provider.models)).size===1&&HOME_CANDIDATE[provider.models.chat],'single-primary-required');\n  demand(functionFirst?.embedding?.baseUrl==='http://127.0.0.1:9770/v1'\n    &&functionFirst?.reranker?.baseUrl==='http://127.0.0.1:9770'\n    &&functionFirst?.qdrant?.endpoint===`http://${QDRANT.host}:${QDRANT.httpPort}`,'dependency-boundary');\n  const successor=structuredClone(prior);successor.schemaVersion='runa2-gate6b-release-config/v2';\n  successor.provider=structuredClone(provider);successor.functionFirst=structuredClone(functionFirst);\n  successor.services.caddy.configurationDigest=caddyConfigurationDigest;\n  const plan={schemaVersion:'runaai-m1-successor-plan/v1',priorConfigurationDigest:hash(prior),successorConfigurationDigest:hash(successor),\n    provider:structuredClone(provider),functionFirst:structuredClone(functionFirst),caddyConfigurationDigest,\n    acceptanceGradesSha256,runtimeSealSha256:APPLICATION.runtimeSealSha256};\n  assertM1SuccessorProjection(prior,successor,plan);return {successor,plan,qualified:false};\n}\n\nexport function qualifyAssemblyProjection({prior,successor,plan,gradesBytes,runtimeSealBytes,homeProfile,enrollment,caddy}){\n  demand(plan.runtimeSealSha256===APPLICATION.runtimeSealSha256&&sha256(runtimeSealBytes)===APPLICATION.runtimeSealSha256,'runtime-seal');\n  createConfigurationProjection({prior,provider:successor.provider,functionFirst:successor.functionFirst,\n    caddyConfigurationDigest:plan.caddyConfigurationDigest,acceptanceGradesSha256:plan.acceptanceGradesSha256});\n  validateEnrollment(enrollment);\n  demand(exact(homeProfile,'appSourceCommit,candidateId,qualificationGradesSha256,runtimeSealSha256,schemaVersion')\n    &&homeProfile.schemaVersion==='runaai-qualified-home-profile/v1'&&homeProfile.appSourceCommit===APPLICATION.sourceCommit\n    &&homeProfile.runtimeSealSha256===APPLICATION.runtimeSealSha256&&homeProfile.qualificationGradesSha256===sha256(gradesBytes)\n    &&homeProfile.candidateId===HOME_CANDIDATE[successor.provider.models.chat],'home-profile');\n  assertCaddyProjection(caddy,enrollment);\n  demand(caddy.caddyConfigurationDigest===plan.caddyConfigurationDigest,'caddy-binding');\n  return assertQualifiedM1Successor({prior,successor,plan,gradesBytes,runtimeSealBytes,expectedSourceCommit:APPLICATION.sourceCommit});\n}\n"
+    }
+  ],
+  "certificatePins": {
+    "issuer": "a6e6b543506af7de2453a310d9125891886536812b8b29cf6ede4370cc0240f6",
+    "server": "460710d4740a92a64258526f089ca1bd5d5e60dfdc4e52627edaae68d8873803",
+    "client": "1467289ac0f01d492ab9c5d1249013e83acde8d92e50ca49c6e31479218b2a58"
+  },
+  "closedProjectionSha256": "e708207f0686ced6937cbee159f441cced8daff306bd35df98a3c1e21a1afb07",
+  "error": "ERR_ASSERTION",
+  "cleanup": {
+    "ownedCaddyStopped": true,
+    "ownedPortsClosed": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "activeControllerRequests": 0,
+    "syntheticInstances": 0,
+    "privateFilesRemoved": true
+  },
+  "finishedAt": "2026-08-28T22:42:02.062Z"
+}

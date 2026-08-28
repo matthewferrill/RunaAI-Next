@@ -67,6 +67,8 @@ Fresh offline R3 hardware packets retain the same limits and three-model roster;
 Coder, Qwen3.6, then Gemma, still 120 attempts each. No model is loaded by packet preparation.
 Continue the authorized work; no new approval is needed. Deployment and meaningful human trial remain
 pending exact qualification and the separately tested operational runtime guard.
+The prepared human trial is `gate7f/function-first/M1-CUSTOMER-TRIAL.md`; it is explicitly not ready
+to start and is not an additional permission gate. Fill its verified deployment entry record first.
 
 ### 2026-08-28 stopped-campaign independent semantic record
 

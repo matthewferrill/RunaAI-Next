@@ -1,0 +1,71 @@
+{
+  "schemaVersion": "runaai-request-coverage-regression/v1",
+  "observedAt": "2026-08-28T23:33:28.725Z",
+  "nodeVersion": "v22.22.0",
+  "passed": 91,
+  "failed": 0,
+  "skipped": 0,
+  "actualModelsTested": false,
+  "actualSdkHttp": true,
+  "recordsAndIndex": "memory-fixtures",
+  "productionChanged": false,
+  "files": [
+    {
+      "file": "request-coverage-regression-20260828.tap",
+      "bytes": 21095,
+      "sha256": "4045f2f6cc87e305f00525d2905b35042004bf9de9a6b6b853a9f6fbae9bd59a"
+    },
+    {
+      "file": "evidence-wire-request-coverage-20260828.json",
+      "bytes": 15315,
+      "sha256": "6dac91199c38eec527378f1591a65f9954fde8eb742ebee2489c1d597084a68f"
+    }
+  ],
+  "sourcePins": [
+    {
+      "file": "../../gate1/adapters/mastra-provider.mjs",
+      "bytes": 11509,
+      "sha256": "2ef1340acbf74e47f8262f75a3957e3dd88a7506e9a7a5f294aee37dc166a29c"
+    },
+    {
+      "file": "./provider-transport.mjs",
+      "bytes": 1223,
+      "sha256": "d276972a43b7ad374608d4646df79e81ea5d90db4f1c936bddf6b855ad0cac7c"
+    },
+    {
+      "file": "./probe-evidence-wire.mjs",
+      "bytes": 3944,
+      "sha256": "c40d4cbd08cadde9a355380d3e63595757777a2fac7d7f303db8ffd2da587b43"
+    },
+    {
+      "file": "./evidence-output.mjs",
+      "bytes": 1755,
+      "sha256": "ef61fd605d598dfda83782c54c8a1d019bc8a3d21a08aa81aa709ebe691d9f9a"
+    },
+    {
+      "file": "./home-runtime/contracts.mjs",
+      "bytes": 6905,
+      "sha256": "995339141c0928312827ed7169a98d8ab2f2de7d7fbbf52e6ae1b54377de39e0"
+    },
+    {
+      "file": "./home-runtime/runtime-installation.mjs",
+      "bytes": 5383,
+      "sha256": "9193efadcde57a05303695f419d8160fe130bc2d9358cd74a036a2ea60398ac8"
+    },
+    {
+      "file": "./home-runtime/Runtime-Windows.ps1",
+      "bytes": 11554,
+      "sha256": "cf8b5fc7ecf81b2718ce20f62cc2df7cfe2977dae2f90e3df3e85cced974b466"
+    },
+    {
+      "file": "./home-runtime/Install-HomeRuntime.ps1",
+      "bytes": 5699,
+      "sha256": "cd7b0a4f0810b19e308f961afdd673229072c9d74648114672485b5aa982b169"
+    },
+    {
+      "file": "./request-coverage.test.mjs",
+      "bytes": 5569,
+      "sha256": "4a1efdc725a0d1d58bc224c6d8e5ead436fb5263baafefd7c47551e0d2501879"
+    }
+  ]
+}

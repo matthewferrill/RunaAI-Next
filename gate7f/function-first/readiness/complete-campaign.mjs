@@ -13,7 +13,7 @@ const command=`$ErrorActionPreference='Stop';$ProgressPreference='SilentlyContin
   `for($p=$root;$p;$p=[IO.Path]::GetDirectoryName($p)){if((Test-Path -LiteralPath $p)-and((Get-Item -LiteralPath $p -Force).Attributes-band[IO.FileAttributes]::ReparsePoint)){throw 'completion-source-link'}};`+
   `if(-not(Test-Path -LiteralPath $root)){[void][IO.Directory]::CreateDirectory($root);$b=[Convert]::FromBase64String('${bytes.toString('base64')}');$s=[IO.File]::Open(($root+'\\Write-HomeCampaignCompletion.ps1'),[IO.FileMode]::CreateNew,[IO.FileAccess]::Write,[IO.FileShare]::None);try{$s.Write($b,0,$b.Length);$s.Flush($true)}finally{$s.Dispose()}};`+
   `$file=$root+'\\Write-HomeCampaignCompletion.ps1';if((Get-FileHash -LiteralPath $file -Algorithm SHA256).Hash.ToLowerInvariant()-cne'${writerSha256}'){throw 'completion-source-pin'};`+
-  `& $file -LeaseId '${leaseId}' -ExpectedSeal '${expectedSeal}' -Reason '${reason}';exit $LASTEXITCODE`;
+  `& 'C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe' -NoProfile -NonInteractive -ExecutionPolicy Bypass -File $file -LeaseId '${leaseId}' -ExpectedSeal '${expectedSeal}' -Reason '${reason}';exit $LASTEXITCODE`;
 const encoded=Buffer.from(command,'utf16le').toString('base64');
 // One call only: uncertain publication is inspected, never retried automatically.
 const raw=execFileSync('ssh.exe',['-F','C:\\Users\\matth\\.ssh\\config','-o','ClearAllForwardings=yes','runa-control-wsl-codex',

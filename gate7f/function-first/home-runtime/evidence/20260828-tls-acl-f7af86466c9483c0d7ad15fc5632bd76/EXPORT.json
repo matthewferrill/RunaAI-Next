@@ -1,0 +1,31 @@
+{
+  "schemaVersion": "runaai-tls-acl-proof-retention/v1",
+  "root": "C:\\AI\\RunaAI-Next-Candidate\\staging\\m1-home-tls-acl-proof-f7af86466c9483c0d7ad15fc5632bd76",
+  "privateValuesIncluded": false,
+  "files": {
+    "result.json": {
+      "bytes": 634,
+      "sha256": "4424cad0c668e9264a47c9e4bafd56d014c82844dbe0e2846ee3b6581f2dc244"
+    },
+    "package.json": {
+      "bytes": 473,
+      "sha256": "0502fbaf64d0395daefc769feb25ed12a26259e18883be016768553c215c7cf0"
+    },
+    "Runtime-Windows.ps1": {
+      "bytes": 11290,
+      "sha256": "98954955f04bdb2646b2dec1209f025817d5e995c7203db4a9ffe27997a32b6f"
+    },
+    "Tls-Windows.ps1": {
+      "bytes": 3183,
+      "sha256": "42e71acea3b29d40d719c7ee71bb29562fd010e8255ba57f104fedcd9478edd5"
+    },
+    "Invoke-ControlTlsAclProof.ps1": {
+      "bytes": 4409,
+      "sha256": "332b4d91c26fc34483c9c9bdda96ac6ae995264529bff2fb95761b729b1f6651"
+    },
+    "run-result.json": {
+      "bytes": 635,
+      "sha256": "d78329f0206a2114d338dd7fb73e788cd68ebeccd1fa7402a87c71320790f9fc"
+    }
+  }
+}

@@ -72,3 +72,35 @@ the private keys never appear in the transfer packets, reject mismatched CSR/iss
 extra packet fields, and refuse existing output paths. Actual SYSTEM ACL, installed OpenSSL pin,
 cross-host transfer and Caddy/mTLS handshakes remain installed proof requirements. No live enrollment
 or Home configuration change occurs while candidate model campaigns are running.
+
+## Enrollment implementation and observed proof
+
+`tls-enrollment.mjs` plus `tls-enrollment-cli.mjs` implement the four fixed host operations. The
+standalone six-file package imports no model/profile code. Each host validates its own Node/OpenSSL
+and all source hashes before work, and exact fixed paths keep the enrollment outside existing keys.
+The Windows wrapper creates/validates only the approved new parent and enrollment directory. Every
+OpenSSL call rechecks the restricted directory; existing keys, outputs and unknown files are refused.
+No enrollment mode can activate a route, trust store, task, listener, model or runtime.
+
+Eleven local tests passed: eight real OpenSSL generation/CSR/sign/import and rejection tests, complete
+standalone-package import, exact source-set validation, and actual PowerShell5 syntax validation.
+An initial native ACL fixture was invalid because its PowerShell import failure was nonterminating;
+it was corrected to fail immediately. Omen then correctly refused setting Administrators as owner
+because that process was not an elevated Windows administrator. Those attempts are not native passes.
+
+The actual native proof ran on Control as its already-authorized administrative Matthew context,
+entirely under a fresh `staging\\m1-home-tls-acl-proof-<id>` directory. It uses synthetic text, not an
+actual credential. The first proof's six native checks passed, but the outer dispatcher incorrectly
+read an unset LASTEXITCODE; both its retained result and failed outer output remain evidence. A new
+proof used an explicit native PowerShell child for reliable exit propagation and exited0 at
+2026-08-28T20:50:45.4106691Z. All six checks passed: restricted ACL, public-read drift refusal, hardlink
+refusal, restored own ACL, existing-root refusal, and shared parent unchanged. No task, listener,
+model or production configuration was created/changed. Both exact fixture trees remain recoverable.
+
+This proves the actual Control ACL primitive, not Home enrollment, private-key transfer, a Caddy
+handshake, or the native LM Studio transition. Those remain explicitly unactivated requirements.
+
+The combined isolated Home-runtime regression after this implementation passed104/104, zero skips.
+The separate atomic completion companion passed3/3; roadmap regression passed15/15. Native Control
+ACL evidence is retained under `evidence/20260828-tls-acl-*` with original raw file hashes, not folded
+into those local test counts.

@@ -1,0 +1,9 @@
+{
+  "schemaVersion": "runaai-tls-acl-proof-package/v1",
+  "root": "C:\\AI\\RunaAI-Next-Candidate\\staging\\m1-home-tls-acl-proof-f7af86466c9483c0d7ad15fc5632bd76",
+  "files": {
+    "Runtime-Windows.ps1": "98954955f04bdb2646b2dec1209f025817d5e995c7203db4a9ffe27997a32b6f",
+    "Tls-Windows.ps1": "42e71acea3b29d40d719c7ee71bb29562fd010e8255ba57f104fedcd9478edd5",
+    "Invoke-ControlTlsAclProof.ps1": "332b4d91c26fc34483c9c9bdda96ac6ae995264529bff2fb95761b729b1f6651"
+  }
+}

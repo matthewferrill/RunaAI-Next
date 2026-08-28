@@ -458,6 +458,11 @@ export class M1TaskService {
 
   async status(rawContext, rawInput) {
     const context = parseContext(rawContext), { taskId } = parseTaskId(rawInput);
+    // Internal recovery must still observe already-recorded state after logout.
+    // The HTTP surface authenticates reads; only live authority can offer approval.
+    let online = false;
+    try { await this.checkContext(context); online = true; }
+    catch (error) { if (error.code !== "m1-session-authority-unavailable") throw error; }
     return this.store.transaction(context, async tx => {
       const task = await this.requireTask(tx, taskId), project = await tx.project();
       const proposals = await tx.list("proposal", taskId);
@@ -466,8 +471,21 @@ export class M1TaskService {
       for (const receipt of receipts) this.verifyReceipt(receipt);
       proposals.sort((a, b) => a.createdAt.localeCompare(b.createdAt) || a.proposalId.localeCompare(b.proposalId));
       receipts.sort((a, b) => a.recordedAt.localeCompare(b.recordedAt) || a.receiptId.localeCompare(b.receiptId));
+      const pendingReconciliation = (await tx.list("intent", taskId)).filter(intent => !["recorded", "not-published"].includes(intent.status));
+      const approvableProposalIds = [];
+      // Presentation guidance only, recomputed from the current online session.
+      // Reloading a page does not cancel an existing grant, and logging in again
+      // does not inherit it. approve/execute still independently recheck authority.
+      if (online && task.status === "active" && !pendingReconciliation.length) for (const proposal of proposals) {
+        if (proposal.status !== "pending-approval") continue;
+        try {
+          await this.authority(tx, context, { taskId, grantId: proposal.grantId,
+            grantRevision: proposal.grantRevision, capabilityId: proposal.capabilityId }, { proposal });
+          approvableProposalIds.push(proposal.proposalId);
+        } catch (error) { if (!error.code?.startsWith("m1-")) throw error; }
+      }
       return { task, project, grants: await tx.list("grant", taskId), proposals, receipts,
-        pendingReconciliation: (await tx.list("intent", taskId)).filter(intent => !["recorded", "not-published"].includes(intent.status)),
+        pendingReconciliation, approvableProposalIds,
         currentReceiptIds: receipts.filter(receipt => receipt.afterRevision === project.revision
           && digest(receipt.afterReference) === digest(project.reference)).map(receipt => receipt.receiptId) };
     });

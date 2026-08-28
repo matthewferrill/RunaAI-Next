@@ -131,6 +131,37 @@ integration("real PG: ask profile requires exact application approval; read-only
   } finally { await f.close(); }
 });
 
+integration("real PG: same-session reload retains exact pending approval; a new login, expiry and revocation do not", async () => {
+  const f = await fixture({ profile: "ask-every-time" });
+  try {
+    const proposal = await f.propose();
+    const status = ctx => f.service.status(ctx, { taskId: f.task.taskId });
+    assert.deepEqual((await status(context)).approvableProposalIds, [proposal.proposalId]);
+    assert.deepEqual((await status({ ...context, sessionId: "fresh-login" })).approvableProposalIds, []);
+    f.clock.now += 60_001;
+    assert.deepEqual((await status(context)).approvableProposalIds, []);
+    f.clock.now -= 60_001;
+    assert.deepEqual((await status(context)).approvableProposalIds, [proposal.proposalId]);
+    await f.service.revokeGrant(context, { grantId: f.grant.grantId });
+    assert.deepEqual((await status(context)).approvableProposalIds, []);
+    assert.equal(f.adapter.materializeCalls, 0);
+    assert.equal(f.adapter.testCalls, 0);
+  } finally { await f.close(); }
+});
+
+integration("real PG: stale project proposals and cancelled tasks are not offered for approval", async () => {
+  const f = await fixture({ profile: "ask-every-time" });
+  try {
+    const first = await f.propose(), stale = await f.propose();
+    await f.service.approve(context, { proposalId: first.proposalId, proposalDigest: first.proposalDigest });
+    await f.service.execute(context, { proposalId: first.proposalId });
+    assert.deepEqual((await f.service.status(context, { taskId: f.task.taskId })).approvableProposalIds, []);
+    assert.equal((await f.service.status(context, { taskId: f.task.taskId })).proposals.find(p => p.proposalId === stale.proposalId).status, "pending-approval");
+    await f.service.cancel(context, { taskId: f.task.taskId });
+    assert.deepEqual((await f.service.status(context, { taskId: f.task.taskId })).approvableProposalIds, []);
+  } finally { await f.close(); }
+});
+
 integration("real PG: effect-time revocation, expiry and stale project state fail closed", async () => {
   const f = await fixture();
   try {

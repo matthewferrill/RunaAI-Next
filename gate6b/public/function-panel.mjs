@@ -4,6 +4,20 @@ const element = (root, tag, text, className) => {
 };
 const terminalRuns = new Set(["completed", "cancelled", "failed", "budget-exhausted"]);
 const profiles = new Set(["ask-every-time", "safe-autopilot", "read-only"]);
+export function approvalIsAvailable(result, proposal) {
+  return result?.task?.status === "active" && proposal?.status === "pending-approval"
+    && Array.isArray(result.approvableProposalIds) && result.approvableProposalIds.includes(proposal.proposalId)
+    && Array.isArray(result.pendingReconciliation) && result.pendingReconciliation.length === 0
+    && (result.grants ?? []).some(grant => grant.status === "active"
+      && grant.grantId === proposal.grantId && grant.revision === proposal.grantRevision);
+}
+export function restoredWorkspaceNotice(result) {
+  const current = new Set(result?.currentReceiptIds ?? []);
+  return (result?.receipts ?? []).some(receipt => current.has(receipt.receiptId)
+    && receipt.capabilityId === "project.restore" && receipt.effectKind === "revision-published")
+    ? "Current workspace: restored to the earlier recorded files. Prior successful runs remain in history; they do not describe the current restored files."
+    : null;
+}
 const publicErrors = new Set(["m1-grant-session-mismatch", "m1-grant-expired", "m1-stale-project",
   "m1-restore-stale", "m1-operation-in-progress", "m1-source-index-unavailable",
   "m1-source-content-mismatch", "m1-authentication-required", "identity-token-invalid"]);
@@ -201,7 +215,8 @@ export async function initializeFunctionPanel({ root = document, request, getCon
     const task = await call("task.status", { taskId }, token);
     if (!runId) return task;
     const run = await call("run.status", { runId }, token);
-    return { ...task, ...run, currentReceiptIds: task.currentReceiptIds, grants: task.grants };
+    return { ...task, ...run, currentReceiptIds: task.currentReceiptIds, grants: task.grants,
+      approvableProposalIds: task.approvableProposalIds };
   }
   async function openTask(token, taskId, runId, restored = false) {
     if (!alive(token)) return;
@@ -220,6 +235,8 @@ export async function initializeFunctionPanel({ root = document, request, getCon
     const { taskId, runId, restored } = ids, run = result.run;
     taskView.replaceChildren(element(root, "h3", result.task?.objective ?? run?.objective ?? "Saved task"),
       element(root, "p", `Task: ${run?.status ?? result.task?.status ?? "unknown"}`));
+    const restoredNotice = restoredWorkspaceNotice(result);
+    if (restoredNotice) taskView.append(element(root, "p", restoredNotice));
     if (run?.outcome === "plan-completed") taskView.append(element(root, "p", "The recorded plan completed. This does not prove every part of a broader goal is finished."));
     for (const plan of run?.plans ?? []) {
       const planBox = element(root, "details"), planTitle = element(root, "summary", "Proposed plan — not execution evidence");
@@ -241,14 +258,12 @@ export async function initializeFunctionPanel({ root = document, request, getCon
       }, parent); return control;
     };
     const pendingIds = new Set((result.pendingReconciliation ?? []).map(value => value.proposalId));
-    const currentGrant = proposal => (result.grants ?? []).some(grant => grant.status === "active"
-      && grant.grantId === proposal.grantId && grant.revision === proposal.grantRevision);
     for (const proposal of result.proposals ?? []) {
       const section = element(root, "section", null, "task-proposal");
       section.append(element(root, "p", `${proposal.capabilityId} — ${proposal.status}`));
       showData("Exact proposed action and preview", { arguments: proposal.arguments, preview: proposal.prepared?.preview,
         proposalId: proposal.proposalId, proposalDigest: proposal.proposalDigest }, section);
-      if (proposal.status === "pending-approval" && !restored && !pendingIds.size && currentGrant(proposal)) action("Approve this exact action", async () => {
+      if (approvalIsAvailable(result, proposal)) action("Approve this exact action", async () => {
         await call("proposal.approve", { proposalId: proposal.proposalId, proposalDigest: proposal.proposalDigest }, token);
         if (!visible(token)) return;
         if (runId) await call("run.resume", { runId }, token);
@@ -269,19 +284,19 @@ export async function initializeFunctionPanel({ root = document, request, getCon
       section.append(element(root, "p", `Actual receipt: ${receipt.capabilityId} — ${receipt.executionStatus}`));
       if (receipt.cancellationRequested) section.append(element(root, "p", "This bounded action finished after cancellation was requested."));
       showData("Application receipt and actual output", receipt, section);
-      if (!pendingIds.size && receipt.effectKind === "revision-published" && (result.currentReceiptIds ?? []).includes(receipt.receiptId)) {
+      if (result.task?.status === "active" && !pendingIds.size && receipt.effectKind === "revision-published" && (result.currentReceiptIds ?? []).includes(receipt.receiptId)) {
         action("Propose undo of this change", async () => {
           const choice = profile.value;
           if (!profiles.has(choice)) { setStatus("Choose an approval profile before proposing undo.", token); return; }
-          const task = await call("task.create", { requestId: `undo-${crypto.randomUUID()}`, objective: "Undo the exact recorded project change." }, token);
+          // Restore is deliberately receipt-bound to its originating task. A new
+          // task would not own that receipt and must not be used to evade scope.
+          const grant = await makeGrant(token, taskId, choice);
           if (!visible(token)) return;
-          const grant = await makeGrant(token, task.taskId, choice);
-          if (!visible(token)) return;
-          const proposal = await call("proposal.create", { taskId: task.taskId, grantId: grant.grantId, grantRevision: grant.revision,
+          const proposal = await call("proposal.create", { taskId, grantId: grant.grantId, grantRevision: grant.revision,
             requestId: `restore-${crypto.randomUUID()}`, capabilityId: "project.restore", arguments: { receiptId: receipt.receiptId } }, token);
           if (!visible(token)) return;
           if (proposal.status === "authorized") await call("proposal.execute", { proposalId: proposal.proposalId }, token);
-          await openTask(token, task.taskId, null, false); await savedTasks(token);
+          await openTask(token, taskId, null, false); await savedTasks(token);
         }, section);
       }
       taskView.append(section);
@@ -300,7 +315,9 @@ export async function initializeFunctionPanel({ root = document, request, getCon
       .find(proposal => ["pending-approval", "authorized"].includes(proposal.status)) : null;
     if (result.task?.status === "active" && ((runId && !terminalRuns.has(run?.status)) || standaloneProposal)) {
       taskView.append(element(root, "p", restored
-        ? "Reopened tasks do not inherit permission to act. Choose a profile, then explicitly continue."
+        ? (result.approvableProposalIds?.length
+          ? "Your current session can approve the exact pending action. Reopening this task has not started any work."
+          : "No pending action is authorized for this session. Choose a profile, then explicitly continue.")
         : "Continue with the selected profile creates a new grant and retires earlier approvals."));
       action("Continue with selected profile", async () => {
         const choice = profile.value;

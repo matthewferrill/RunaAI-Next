@@ -3,6 +3,24 @@
 The 2026-08-28 standing authorization and full roadmap remain in force. Continue until the complete
 bounded customer journey is ready for the human trial; an internal test/commit is not a stopping gate.
 
+## Customer recovery corrections during actual acceptance preparation
+
+- Same-session page reload now offers an exact pending approval only when the server
+  revalidates its grant/session/expiry/project state. A new login does not inherit it,
+  and reopening starts no action. Actual approve/execute repeat the authority checks.
+- Undo stays on the task that owns the exact receipt. The previous UI created a new
+  task and would therefore be rejected by the correct task-bound restore policy.
+  A current restore receipt now labels earlier successful runs as historical, not the
+  state of the restored files. M1 does not offer undo from a cancelled task.
+- Disposable PostgreSQL task/orchestrator regressions: **35/35**, including reload,
+  new-session denial, expiry, revocation, stale revision and logout recovery. The first
+  implementation over-applied the online check to internal recovery reads (33/35);
+  it was corrected so offline recovery can observe state but cannot offer approval.
+  Presentation helpers: **5/5**. Database stopped and temporary data removed.
+- The first actual browser preflight exposed an incomplete synthetic host status
+  response and did not reach the task view. It is retained as inconclusive, not a
+  browser pass. Formal model qualification and real customer testing remain open.
+
 ## Implemented and verified so far
 
 - Server-authoritative owned conversation context, per-thread revision concurrency, same-request retry,

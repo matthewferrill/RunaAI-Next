@@ -29,6 +29,12 @@ Private raw settings and child output are not accepted as record fields.
   `New-ScheduledTaskSettingsSet`. The unchanged complete suite was rerun with
   access to that read-only CIM construction; no test or assertion was removed.
   Initial raw TAP remains at `artifacts/runs/native-journal-regression-20260828.tap`.
+  SHA-256 `50a14ea8e1478db448541805af4b1c412cf7b32565c9eb8b31ef5865acc9773c`.
+- Independent reviewer read the full criteria, implementation and tests, then
+  reran **12/12** with zero skips. No blocking finding within the specified
+  private-directory/exclusive-lock boundary. Review reiterated that restart must
+  reuse the exact retained directory and that native confirmation comes from the
+  fixed trusted adapter, not an untrusted caller's assertion.
 
 ## Boundaries still to establish live
 
@@ -42,5 +48,5 @@ accepted as recovery authority. No production default skips ACL verification.
 The implementation does not resolve an unknown native mutation. Such a state
 stays closed and needs separately proved reconciliation. This local test pass
 does not claim complete two-host rollback, native admission closure, power
-restoration, an active deployment, or any model outcome. Independent review and
-actual host assembly remain pending.
+restoration, an active deployment, or any model outcome. Actual host assembly and
+live operational verification remain pending.

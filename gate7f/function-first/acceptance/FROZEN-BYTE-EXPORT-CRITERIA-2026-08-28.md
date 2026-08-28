@@ -37,8 +37,11 @@ does not change it or the package verifier.
 
 ## Authorized change
 
-1. Add exact-path `-text` attributes for the fourteen frozen entries. Preserve existing rules.
-   No wildcard conversion across unrelated source or evidence.
+1. Add exact-path `-text` attributes for the four uncovered frozen entries (the old criteria
+   Markdown, two external contract modules and package lock). The other ten entries already have
+   the sealed `acceptance/.gitattributes` rule `* text eol=lf`; retain that file and its effective
+   LF protection unchanged. All fourteen raw entries must remain exact. No wildcard conversion
+   across unrelated source or evidence.
 2. Preserve the thirteen already-correct Git blobs. Restore only equivalent local checkout bytes
    from the verified originals where needed; no module, rubric, criteria or seal edit is committed.
 3. For the one explicit lockfile exception, commit the already-existing, independently verified
@@ -51,8 +54,9 @@ does not change it or the package verifier.
 
 - All fourteen committed raw objects, working files and newly exported archive entries must match
   their original sealed byte lengths and SHA-256 values, including the Markdown/attributes/lockfile.
-- Regression fixtures export under both `core.autocrlf=true` and `false`, with identical sealed bytes.
-  Negative byte mutations and CRLF rewrites still fail strict verification.
+- A separate operator proof exports under both `core.autocrlf=true` and `false`, with identical
+  sealed bytes. Git-less unit regressions check actual loaded files, and negative byte mutations
+  and CRLF rewrites still fail strict verification.
 - All seventeen historical publication tests pass from the new archive without changing them.
 - The package lock's parsed JSON is unchanged and its raw hash remains the actual deployed pin.
 - No frozen module or historical seal changes appear in the committed diff. Only exact attributes,

@@ -27,9 +27,9 @@ function makeCertificates(root){
     client:name=>({cert:read(name,'.crt'),key:read(name,'.key')})};
 }
 const profile=()=>validateProfile({schemaVersion:'runaai-qualified-home-profile/v1',candidateId:'gemma',appSourceCommit:'1'.repeat(40),runtimeSealSha256:'2'.repeat(64),qualificationGradesSha256:'3'.repeat(64)});
-function send(server,{ca,cert,key,servername='synthetic-home',body,method='POST'}){
+function send(server,{ca,cert,key,servername='synthetic-home',body,method='POST',route}){
   return new Promise((resolve,reject)=>{
-    const req=request({host:'127.0.0.1',port:server.address().port,path:method==='GET'?'/healthz':'/v1/chat/completions',method,
+    const req=request({host:'127.0.0.1',port:server.address().port,path:route??(method==='GET'?'/healthz':'/v1/chat/completions'),method,
       ca,cert,key,servername,agent:new Agent({maxCachedSessions:0}),headers:{'content-type':'application/json'}},async res=>{
         const chunks=[];for await(const chunk of res)chunks.push(chunk);resolve({status:res.statusCode,body:Buffer.concat(chunks)});});
     req.once('error',reject);req.end(body);
@@ -59,6 +59,10 @@ test('mutual TLS requires exact Control identity and preserves bytes over an act
     await assert.rejects(send(server,{ca:certificates.issuer,...certificates.client('control'),servername:'wrong-server',body}));
     const health=await send(server,{ca:certificates.issuer,...certificates.client('control'),method:'GET'});assert.equal(health.status,200);
     assert.equal(admissions,1);assert.equal(polls,1);
+    const ranked=await send(server,{ca:certificates.issuer,...certificates.client('control'),route:'/rerank',body:Buffer.from('{"query":"synthetic","documents":["window"],"top_n":1}')});
+    assert.equal(ranked.status,200);assert.deepEqual(ranked.body,response);
+    assert.equal((await send(server,{ca:certificates.issuer,...certificates.client('other'),route:'/health',method:'GET'})).status,403);
+    assert.equal(admissions,2);
     const peer=new X509Certificate(certificates.client('control').cert);
     const socket={encrypted:true,authorized:true,getProtocol:()=> 'TLSv1.3',isSessionReused:()=>false,getPeerX509Certificate:()=>peer};
     assert.equal(verifiedPeer(socket,pin(peer.raw)),true);

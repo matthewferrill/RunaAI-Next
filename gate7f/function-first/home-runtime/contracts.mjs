@@ -4,7 +4,7 @@ import {NOMICS,LEASE_POLICY,primaryLoad,sha,residentList,checkHardware} from '..
 // The application owns its qualified per-role deadline (answers <=60s, plans <=30s).
 // This outer transport ceiling must not shorten those deadlines, and cannot extend them.
 export const RUNTIME_LIMITS=Object.freeze({sampleMs:5000,maximumObservationAgeMs:5000,requestMs:65000,bodyMs:10000,
-  requestBytes:2*1024*1024,responseBytes:4*1024*1024,maximumOutputTokens:1536,drainMs:70000,abortDrainMs:5000,preparationMs:600000});
+  rerankerMs:15000,requestBytes:2*1024*1024,responseBytes:4*1024*1024,maximumOutputTokens:1536,drainMs:70000,abortDrainMs:5000,preparationMs:600000});
 export const error=code=>Object.assign(Error('runtime-'+code),{code:'runtime-'+code});
 export const demand=(ok,code)=>{if(!ok)throw error(code);};
 const HASH=/^[a-f0-9]{64}$/;
@@ -46,7 +46,7 @@ export function verifyObservation(observation,{owned,engineIdentity,now=Date.now
   return observation;
 }
 export function validateRequest(profile,pathname,method,raw){
-  demand((method==='GET'&&pathname==='/v1/models')||(method==='POST'&&['/v1/chat/completions','/v1/embeddings'].includes(pathname)),'endpoint-denied');
+  demand((method==='GET'&&['/v1/models','/health'].includes(pathname))||(method==='POST'&&['/v1/chat/completions','/v1/embeddings','/rerank'].includes(pathname)),'endpoint-denied');
   if(method==='GET'){demand(raw.length===0,'body-denied');return;}
   let body;try{body=JSON.parse(new TextDecoder('utf-8',{fatal:true}).decode(raw));}catch{throw error('body-invalid');}
   demand(body&&typeof body==='object'&&!Array.isArray(body),'body-invalid');
@@ -62,10 +62,16 @@ export function validateRequest(profile,pathname,method,raw){
       &&typeof message.content==='string'),'message-shape');
     demand(!Object.hasOwn(body,'stream')||body.stream===false,'stream-not-qualified');
     demand(profile.reasoningEffort===null?!Object.hasOwn(body,'reasoning_effort'):body.reasoning_effort===profile.reasoningEffort,'reasoning-drift');
-  }else{
+  }else if(pathname==='/v1/embeddings'){
     demand(Object.keys(body).sort().join()==='input,model','request-field');demand(body.model===NOMICS.key,'unselected-model');
     demand(Array.isArray(body.input)&&body.input.length>0&&body.input.length<=64&&body.input.every(text=>typeof text==='string'
       &&Buffer.byteLength(text,'utf8')<=1600&&/^search_(?:document|query): /.test(text)),'embedding-input');
+  }else{
+    demand(Object.keys(body).sort().join()==='documents,query,top_n','request-field');
+    demand(typeof body.query==='string'&&body.query.length>0&&body.query.length<=4000,'reranker-query');
+    demand(Array.isArray(body.documents)&&body.documents.length>0&&body.documents.length<=32
+      &&body.documents.every(text=>typeof text==='string'&&text.length>0&&text.length<=2000)
+      &&body.top_n===body.documents.length,'reranker-window-batch');
   }
 }
 export {NOMICS,LEASE_POLICY,sha,residentList};

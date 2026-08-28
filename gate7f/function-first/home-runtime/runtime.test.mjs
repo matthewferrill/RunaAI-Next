@@ -134,6 +134,28 @@ test('request contract excludes override/JIT/native/MCP/unselected routes withou
   validateRequest(p,'/v1/embeddings','POST',Buffer.from(JSON.stringify(embedded)));
   for(const b of [{...embedded,dimensions:123},{...embedded,input:['unprefixed']},{...embedded,input:['search_query: '+'x'.repeat(1600)]}])
     assert.throws(()=>validateRequest(p,'/v1/embeddings','POST',Buffer.from(JSON.stringify(b))));
+  const rerank={query:'synthetic',documents:['synthetic document'],top_n:1};
+  validateRequest(p,'/rerank','POST',Buffer.from(JSON.stringify(rerank)));
+  for(const b of [{...rerank,documents:Array(33).fill('text'),top_n:33},{...rerank,documents:['x'.repeat(2001)]},
+    {...rerank,top_n:0},{...rerank,model:'foreign'},{...rerank,query:'x'.repeat(4001)}])
+    assert.throws(()=>validateRequest(p,'/rerank','POST',Buffer.from(JSON.stringify(b))));
+});
+
+test('BGE fixed routes use only their loopback backend and preserve exact bodies and failure statuses',async()=>{
+  const f=fixture();await f.controller.start();let primaryCalls=0;const seen=[];let status=200;
+  const primary=createServer((_req,res)=>{primaryCalls++;res.end('{}');});
+  const bge=createServer(async(req,res)=>{const chunks=[];for await(const chunk of req)chunks.push(chunk);seen.push({path:req.url,body:Buffer.concat(chunks)});
+    res.writeHead(status,{'content-type':'application/json'});res.end(req.url==='/health'?' {"ok":true} ':' {"results":[{"index":0,"score":1}]} ');});
+  const proxy=createRuntimeProxy({controller:f.controller,upstream:await listen(primary),rerankerUpstream:await listen(bge),allowedClients:['127.0.0.1']});
+  const url=await listen(proxy);
+  try{
+    const body=Buffer.from(' {"query":"synthetic", "documents":["synthetic window"],"top_n":1}\n');
+    const result=await fetch(url+'/rerank',{method:'POST',headers:{'content-type':'application/json'},body});
+    assert.equal(result.status,200);assert.equal(await result.text(),' {"results":[{"index":0,"score":1}]} ');assert.deepEqual(seen[0].body,body);
+    const health=await fetch(url+'/health');assert.equal(await health.text(),' {"ok":true} ');assert.equal(primaryCalls,0);
+    status=503;const failed=await fetch(url+'/rerank',{method:'POST',headers:{'content-type':'application/json'},body});assert.equal(failed.status,503);
+    assert.equal(seen.length,3);assert.equal(f.controller.status.activeRequests,0);
+  }finally{await close(proxy);await close(primary);await close(bge);await f.controller.stop();}
 });
 test('actual disposable HTTP proxy preserves request/reply bytes and upstream failures; no models executed',async()=>{
   const f=fixture();await f.controller.start();const seen=[];const response=Buffer.from('{\n "choices" : [{"message":{"content":"synthetic receipt"}}]\n}\n');

@@ -18,14 +18,17 @@ export async function readRequestBody(req,{signal,limit=RUNTIME_LIMITS.requestBy
   }finally{signal.removeEventListener('abort',stop);}
 }
 export function createRuntimeProxy({controller,upstream='http://127.0.0.1:1234',allowedClients=['192.168.50.169'],fetchImpl=rawHttpRequest,event=()=>{},
-  serverFactory=createServer,authorizeClient=()=>true}){
+  rerankerUpstream='http://127.0.0.1:8412',serverFactory=createServer,authorizeClient=()=>true}){
   const base=new URL(upstream);demand(base.protocol==='http:'&&base.hostname==='127.0.0.1'&&!base.username&&!base.password
     &&base.pathname==='/'&&!base.search&&!base.hash,'upstream');
+  const reranker=new URL(rerankerUpstream);demand(reranker.protocol==='http:'&&reranker.hostname==='127.0.0.1'&&!reranker.username&&!reranker.password
+    &&reranker.pathname==='/'&&!reranker.search&&!reranker.hash,'reranker-upstream');
   const clients=new Set(allowedClients);demand(clients.size>0&&[...clients].every(v=>/^\d{1,3}(?:\.\d{1,3}){3}$/.test(v)),'clients');
   const server=serverFactory(async(req,res)=>{
     let ticket=null,bodyTimeout=null;const abort=new AbortController();const closed=()=>{if(!res.writableEnded)abort.abort(error('client-disconnected'));};
     req.once('aborted',closed);res.once('close',closed);
-    const timeout=setTimeout(()=>abort.abort(error('request-timeout')),RUNTIME_LIMITS.requestMs);
+    const isReranker=['/rerank','/health'].includes(req.url);
+    const timeout=setTimeout(()=>abort.abort(error('request-timeout')),isReranker?RUNTIME_LIMITS.rerankerMs:RUNTIME_LIMITS.requestMs);
     const reject=(status,code)=>{if(res.headersSent||res.destroyed){res.destroy();return;}
       const bytes=Buffer.from(JSON.stringify({schemaVersion:'runaai-home-runtime-error/v1',errorCode:code,privateValuesIncluded:false}));
       res.writeHead(status,{'content-type':'application/json','content-length':bytes.length,'cache-control':'no-store'});res.end(bytes);};
@@ -42,7 +45,7 @@ export function createRuntimeProxy({controller,upstream='http://127.0.0.1:1234',
       const raw=await readRequestBody(req,{signal:abort.signal});clearTimeout(bodyTimeout);bodyTimeout=null;
       validateRequest(controller.profile,req.url,req.method,raw);
       ticket=await controller.admit({signal:abort.signal});
-      const response=await fetchImpl(new URL(req.url,base),{method:req.method,redirect:'error',
+      const response=await fetchImpl(new URL(req.url,isReranker?reranker:base),{method:req.method,redirect:'error',
         headers:{...(req.headers['content-type']?{'content-type':req.headers['content-type']}:{}),...(req.headers.accept?{accept:req.headers.accept}:{})},
         body:req.method==='POST'?raw:undefined,signal:AbortSignal.any([abort.signal,ticket.signal])});
       demand(response.status<300||response.status>=400,'upstream-redirect');

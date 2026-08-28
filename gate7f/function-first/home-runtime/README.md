@@ -41,6 +41,11 @@ Control certificate fingerprint, current certificate/issuer validity on each req
 admission, and the same IP allowlist. Private material never enters upstream headers or model traffic.
 It does not provision certificates or install a listener; the future operational package owns protected
 key handling and the separately validated Caddy route. See [private binding criteria](PRIVATE-BINDING-PLAN.md).
+Fixed `/rerank` and `/health` routes go only to the separate loopback BGE backend. They share the
+authenticated boundary and retain their raw bytes; the application10second deadline sits inside a
+15second outer cap. Only complete batches of1–32 windows (at most2000characters each) are accepted.
+The existing LAN8412 listener has not been altered. Its legacy/other consumers require a separate
+read-only baseline and exact rollback before any later listener change.
 
 The outer request ceiling is65seconds, preserving the application's qualified60second answer and
 30second planner limits; graceful drain permits70seconds. An incomplete request body has its own10second
@@ -56,7 +61,7 @@ again on observations; owned model IDs are required for unload. The independent 
 exclusive lifecycle lock and crash supervisor remain necessary before this adapter may be activated.
 
 Run `node --test gate7f/function-first/home-runtime/*.test.mjs`.
-Local verification2026-08-28:23/23 pass. The60second test uses a controlled clock, not a long inference;
+Local verification2026-08-28:24/24 pass. The60second test uses a controlled clock, not a long inference;
 the incomplete-body regression uses an actual disposable HTTP socket. Native file-link rejection uses
 actual NTFS hardlinks/junctions; the observer was parsed by Windows PowerShell. None is live Home proof.
 The real local TLS regression creates disposable certificates using the installed Git OpenSSL and

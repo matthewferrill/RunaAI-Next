@@ -14,7 +14,7 @@ export function verifiedPeer(socket,clientCertificateSha256,now=Date.now()){
 
 /** Creates but never binds a TLS server. Key bytes come only from the independently protected
  * operator package; they are not copied into request headers, model traffic, logs or return values. */
-export function createRuntimeTlsProxy({controller,upstream,allowedClients,fetchImpl,event,tls}){
+export function createRuntimeTlsProxy({controller,upstream,rerankerUpstream,allowedClients,fetchImpl,event,tls}){
   demand(tls&&Object.keys(tls).sort().join()==='ca,caSha256,cert,clientCertificateSha256,key,serverCertificateSha256','tls-shape');
   for(const name of ['caSha256','clientCertificateSha256','serverCertificateSha256'])demand(/^[a-f0-9]{64}$/.test(tls[name]),'tls-pin');
   demand([tls.key,tls.cert,tls.ca].every(value=>(Buffer.isBuffer(value)||typeof value==='string')&&Buffer.byteLength(value)>0&&Buffer.byteLength(value)<=32768),'tls-material');
@@ -23,7 +23,7 @@ export function createRuntimeTlsProxy({controller,upstream,allowedClients,fetchI
   demand(!certificate.ca&&issuer.ca&&currentlyValid(certificate,Date.now())&&currentlyValid(issuer,Date.now()),'tls-material-validity');
   demand(certificate.verify(issuer.publicKey)&&certificate.checkIssued(issuer),'tls-server-issuer');
   const clientPin=tls.clientCertificateSha256;
-  return createRuntimeProxy({controller,upstream,allowedClients,fetchImpl,event,
+  return createRuntimeProxy({controller,upstream,rerankerUpstream,allowedClients,fetchImpl,event,
     authorizeClient:request=>currentlyValid(certificate,Date.now())&&currentlyValid(issuer,Date.now())&&verifiedPeer(request.socket,clientPin),
     serverFactory:handler=>createServer({key:tls.key,cert:tls.cert,ca:tls.ca,requestCert:true,rejectUnauthorized:true,
       minVersion:'TLSv1.3',maxVersion:'TLSv1.3',secureOptions:constants.SSL_OP_NO_TICKET,handshakeTimeout:10000,ALPNProtocols:['http/1.1']},handler)});

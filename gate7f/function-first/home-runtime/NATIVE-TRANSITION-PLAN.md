@@ -165,3 +165,8 @@ settings, coordinator and actual Windows file tests passed23/23 with zero skips.
 foreign-preimage variants reject before new files/writes; normalization restores the exact original.
 The earlier unsafe result is retained in the task output, not relabeled as a pass. No live deployment
 or campaign qualification follows from these local filesystem tests.
+
+Complete operator regression at `410e3bc`:115/115 passed, zero skips, with Windows OS access; runtime
+41.4seconds. Command: `node --test --test-reporter=spec gate7f/function-first/home-runtime/*.test.mjs
+gate7f/function-first/home-runtime/windows-proof/*.test.mjs`. This includes the real local TLS,
+bounded command transport, exact file replacement and process-crash fixtures, not a live Home service.

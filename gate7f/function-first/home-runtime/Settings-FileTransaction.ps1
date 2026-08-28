@@ -50,8 +50,19 @@ function Read-SettingsIntent([string]$Directory){
   if((Settings-Hash (Read-SettingsBytes ($Directory+'\observed-original.bin')))-cne$intent.originalSha256){throw 'settings-original-drift'}
   return $intent
 }
+function Assert-SettingsNoRetainedConflict([string]$Directory,$Intent){
+  # A crash may happen after ReplaceFile but before its failure receipt. Every prior rollback
+  # preimage must still be inspected before an already-restored target can be declared clean.
+  $files=@(Get-ChildItem -LiteralPath $Directory -Filter 'displaced-*.bin' -File)
+  if($files.Count-gt32){throw 'settings-recovery-attempt-cap'}
+  foreach($file in $files){
+    if($file.Name-notmatch'^displaced-[a-f0-9]{32}\.bin$'-or
+      (Settings-Hash (Read-SettingsBytes $file.FullName))-cne$Intent.candidateSha256-or(Settings-Acl $file.FullName)-cne$Intent.aclSddl){throw 'settings-conflict-retained'}
+  }
+}
 function Restore-SettingsActualPreimage([string]$Directory,[string]$ExpectedCurrentSha256,[scriptblock]$BeforeReplace=$null){
   $intent=Read-SettingsIntent $Directory;$backup=$Directory+'\actual-preimage.bin';$target=$intent.target
+  Assert-SettingsNoRetainedConflict $Directory $intent
   $prior=Read-SettingsBytes $backup;$priorAcl=Settings-Acl $backup
   if((Settings-Hash (Read-SettingsBytes $target))-cne$ExpectedCurrentSha256-or(Settings-Acl $target)-cne$priorAcl){throw 'settings-rollback-unrelated-drift'}
   $id=[Guid]::NewGuid().ToString('N');$pending=$Directory+'\restore-'+$id+'.bin';$displaced=$Directory+'\displaced-'+$id+'.bin'
@@ -92,6 +103,7 @@ function Invoke-SettingsFileSwap([string]$Directory,[scriptblock]$BeforeReplace=
 }
 function Repair-InterruptedSettingsSwap([string]$Directory){
   $intent=Read-SettingsIntent $Directory
+  Assert-SettingsNoRetainedConflict $Directory $intent
   if(-not(Test-Path -LiteralPath ($Directory+'\actual-preimage.bin'))){
     if((Settings-Hash (Read-SettingsBytes $intent.target))-cne$intent.originalSha256){throw 'settings-unstarted-unrelated-drift'}
     return @{changed=$false;alreadyOriginal=$true}

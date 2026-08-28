@@ -1,0 +1,27 @@
+{
+  "schemaVersion": "runaai-native-cli-binding-observation/v1",
+  "observedAt": "2026-08-28T20:15:02.7903769Z",
+  "host": "RUNA-HOME",
+  "cliSha256": "976d4389f97b2cf95b38a4eb673855d8a846f2db21a20eb4fe5e79f7179722f5",
+  "installedCodeBranch": {
+    "variable": "LMS_API_SERVER_INFO_PATH",
+    "usesSelectedApiOnly": true,
+    "doesNotCallFindOrStartLlmster": true,
+    "omitsDefaultMachineKeyRead": true,
+    "actualServerOperationAuthorizationProved": false
+  },
+  "engine": {
+    "pid": 14568,
+    "startedAt": "2026-08-23T14:19:15.3385098Z",
+    "owner": "RUNA-HOME\\Matthew",
+    "executable": "C:\\Users\\Matthew\\AppData\\Local\\Programs\\LM Studio\\LM Studio.exe"
+  },
+  "listeners": [
+    {"port": 41343, "address": "127.0.0.1"},
+    {"port": 1234, "address": "0.0.0.0"}
+  ],
+  "cliExecuted": false,
+  "settingsChanged": false,
+  "modelsCalled": false,
+  "privateValuesIncluded": false
+}

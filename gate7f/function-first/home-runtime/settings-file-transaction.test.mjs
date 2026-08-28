@@ -77,6 +77,7 @@ test('a late rollback writer is retained without racing another blind compensati
   const displaced=readdirSync(f.directory).filter(name=>name.startsWith('displaced-'));assert.equal(displaced.length,1);
   assert.equal(readFileSync(path.join(f.directory,displaced[0]),'utf8'),'rollback-racing-writer');
   assert.equal(readdirSync(f.directory).some(name=>name.startsWith('compensated-')),false);
+  assert.match(ps(f,fail('Repair-InterruptedSettingsSwap $directory')).error,/conflict-retained/);
 });
 test('rollback refuses post-apply unrelated bytes and preserves both versions',{skip:process.platform!=='win32'},t=>{
   const f=fixture(t);ps(f,`${create}\n$null=Invoke-SettingsFileSwap $directory`);writeFileSync(f.target,'new unrelated settings');

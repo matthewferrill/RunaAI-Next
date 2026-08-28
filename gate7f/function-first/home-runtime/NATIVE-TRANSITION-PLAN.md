@@ -82,3 +82,42 @@ pointer files predate it (codex-audit2026-08-27, Matthew2026-08-08); no pointer 
 Verification2026-08-28: native-settings plus Windows file-transaction tests14/14 passed, no skips;
 roadmap15/15 passed. Initial duplicate-key and second-writer-compensation findings were independently
 reported, reproduced, then corrected prospectively. These results do not assert a live Home transition.
+
+## Native binding and finite coordinator
+
+Read-only inspection of the exact pinned installed CLI found that `LMS_API_SERVER_INFO_PATH` selects
+one existing internal API descriptor. That branch calls `tryFindLocalAPIServer`, not
+`findOrStartLlmster`; an absent selected API fails closed. It also omits the default machine-specific
+CLI key-file read, so authorization of actual server operations remains an explicit installed-runtime
+proof requirement, not an assumption. No secret was copied and the CLI was not executed in this
+inspection. Use this variable only in the child environment, never override HOME or user profiles.
+
+Fresh read-only endpoint metadata20:15:02Z bound the existing internal41343/127.0.0.1 and public1234/
+0.0.0.0 listeners to the same Matthew-owned LMStudio.exe PID14568, start2026-08-23T14:19:15.3385098Z.
+`Observe-NativeServer.ps1` independently checks descriptor, executable, owner, process start and actual
+listeners; `native-server-control.mjs` pins the CLI, Home Node, engine and all observer dependencies,
+allows only literal server-stop or explicit1234/bind-start, and never retries an unknown mutation.
+The transient registry check closes its own connection so it cannot masquerade as customer traffic.
+
+`native-settings-transition.mjs` supplies the finite apply and explicit-restore coordinator, with
+intent records before effects, independent ownership/quiescence/hardware callbacks, a real available
+Nomic negative-probe contract and no admission/promotion/power-raise operation. Its12 combined local
+coordinator/controller tests are control-flow tests, not installed proof. HTTP503 or a generic error
+is not JIT-disabled evidence. The actual negative response must be classified from the pinned native
+runtime and retained alongside before/after inventories and the independent hardware lease.
+
+Assembly still needs the actual native ownership wrapper, live Control drain/caller isolation,
+Windows file bridge and negative-probe adapter connected to these interfaces. No script in this
+change is an activation command. Before a live transition, close the scoped Control routes, account
+for direct nativeLAN callers, and prove their drain. Empty model inventory or TCP counts alone are
+not an active-request counter, and neither governs unrelated trusted local desktop/CLI clients.
+
+Independent root verification of the earlier integrated operator snapshot97c94ae passed81/81 with no
+skips using OS access; the initially restricted run failed only the CIM-backed scheduled-task-settings
+check and remains retained. Root log:
+`artifacts/runs/home-runtime-root-97c94ae-1787948178122/tests.log`, SHA256
+`b6685ae82a8efb80e2b0aef73bd32d41111526737ce601dd6815432606c8e480`.
+That independently tested snapshot does not include the subsequently added transition coordinator.
+
+Current local full operator regression including the prospective transition code passed93/93,
+zero skips; roadmap15/15 passed. No installed transition/probe/promotion was executed by those tests.

@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {EventEmitter} from 'node:events';
 import {PassThrough} from 'node:stream';
 import {spawn} from 'node:child_process';
-import {privateChildJson} from './private-child-result.mjs';
+import {privateChildJson,privateChildText} from './private-child-result.mjs';
 function fixture({closes=true}={}){
   const child=new EventEmitter();Object.assign(child,{stdin:new PassThrough(),stdout:new PassThrough(),stderr:new PassThrough(),
     kills:0,unrefs:0,kill(){this.kills++;if(closes)queueMicrotask(()=>this.emit('close',1));},unref(){this.unrefs++;}});return child;
@@ -11,6 +11,20 @@ function fixture({closes=true}={}){
 test('private child returns bounded JSON only after successful close',async()=>{
   const child=fixture(),pending=privateChildJson(child);child.stdout.write('{"ok":true}');child.emit('close',0);
   assert.deepEqual(await pending,{ok:true});assert.equal(child.kills,0);
+});
+
+test('bounded private text preserves exact stdout and stderr only after successful close',async()=>{
+  const child=fixture(),pending=privateChildText(child);
+  child.stdout.write('CLI status\r\n');child.stderr.write('CLI note\n');child.emit('close',0);
+  assert.deepEqual(await pending,{stdout:'CLI status\r\n',stderr:'CLI note\n'});assert.equal(child.kills,0);
+});
+
+test('malformed private JSON and UTF8 return sanitized stopped-but-unconfirmed failures',async()=>{
+  for(const kind of ['json','utf8']){
+    const child=fixture(),pending=kind==='json'?privateChildJson(child):privateChildText(child);
+    child.stdout.write(kind==='json'?'PRIVATE invalid JSON':Buffer.from([0xc3,0x28]));child.emit('close',0);
+    await assert.rejects(pending,error=>error.executionStopped===true&&!JSON.stringify(error).includes('PRIVATE'));
+  }
 });
 test('timeout and output cap stop exactly one owned child and expose no private output',async()=>{
   for(const kind of ['timeout','stdout','stderr']){

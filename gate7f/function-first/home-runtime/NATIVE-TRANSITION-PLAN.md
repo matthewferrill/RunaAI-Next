@@ -314,3 +314,13 @@ native CLI-return record is not terminal proof: append a distinct confirmed even
 native postconditions and quiescence are verified. A newly constructed adapter must call the same
 barrier. Local new-instance tests will exercise a retained unresolved record; actual private journal/
 child reconciliation remains a separate assembly requirement and cannot be replaced by a no-op callback.
+
+Implemented locally after `ec056bf`/`72081d0`: native commands hold a serial uncertainty gate through
+fresh postconditions, use bounded private child settlement, and append a separate command-ID-bound
+confirmed event. Both file/native adapters and the outer coordinator now require the independent
+`assertMutationSettled` callback; reconstruction is tested against retained unresolved state and cannot
+omit that dependency. The processing observer supplies a rejecting lifecycle callback and remains
+read-only. Forty focused native, file, child and coordinator tests passed, zero skips, including actual
+local child termination. These are callback-contract and local OS tests, not an implemented Home-wide
+durable maintenance transaction. Its real private journal/reconciliation and installed native busy/
+caller-closure proof remain required. No live command, configuration or model behavior changed.

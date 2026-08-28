@@ -2,7 +2,7 @@ import {demand,sha,NOMICS} from './contracts.mjs';
 import {validatePreparedSettings,verifyAppliedNativeSettings,prepareNativeSettingsRollback} from './native-settings.mjs';
 import {validateNativeServerObservation,validateNativeServerBaseline} from './native-server-control.mjs';
 
-const required=['withOwnership','assertQuiescent','readSettings','prepareFileIntent','swapFile','restoreFile',
+const required=['withOwnership','assertQuiescent','assertMutationSettled','readSettings','prepareFileIntent','swapFile','restoreFile',
   'observeServer','commandServer','assertHardwareLease','probeNonresidentNomic','record','closeAdmission'];
 function validateAdapter(adapter){demand(adapter&&required.every(name=>typeof adapter[name]==='function'),'transition-adapter');}
 function cleanServer(observation,baseline,stopped){
@@ -22,7 +22,7 @@ export async function applyNativeSettingsTransition({prepared,baseline,adapter,t
   let stage='entry';
   return adapter.withOwnership(async()=>{
     try{
-      await adapter.closeAdmission();await adapter.assertQuiescent();await adapter.assertHardwareLease();
+      await adapter.closeAdmission();await adapter.assertMutationSettled();await adapter.assertQuiescent();await adapter.assertHardwareLease();
       cleanServer(await adapter.observeServer(),baseline,false);
       demand(sha(await adapter.readSettings())===pin.originalSha256,'transition-baseline-drift');
       await adapter.record({type:'transition-intent',transactionId,originalSha256:pin.originalSha256,candidateSha256:pin.candidateSha256,engine:baseline.engine});
@@ -70,7 +70,7 @@ export async function restoreNativeSettingsTransition({prepared,baseline,adapter
   validateAdapter(adapter);const pin=validatePreparedSettings(prepared);
   demand(/^[a-f0-9]{32}$/.test(transactionId),'transition-id');validateNativeServerBaseline(baseline);
   return adapter.withOwnership(async()=>{
-    await adapter.closeAdmission();await adapter.assertQuiescent();await adapter.assertHardwareLease();
+    await adapter.closeAdmission();await adapter.assertMutationSettled();await adapter.assertQuiescent();await adapter.assertHardwareLease();
     const rollback=prepareNativeSettingsRollback(pin,await adapter.readSettings());
     const observed=cleanServer(await adapter.observeServer(),baseline,false);
     await adapter.record({type:'transition-restore-intent',transactionId,expectedCurrentSha256:rollback.expectedCurrentSha256,

@@ -22,7 +22,7 @@ function fixture(){
       candidateSha256:prepared.candidateSha256,currentSha256:sha(current),passed:true,targetBound:true,privateValuesIncluded:false,
       inMemoryEnforcementProved:false,admissionOpened:false,actualPreimageRetained:mode!=='Prepare',alreadyOriginal};
   }};
-  const options={transactionId,prepared,io,assertQuiescent:async()=>{calls.push('quiescent');},record:async event=>{events.push(event);calls.push('record');}};
+  const options={transactionId,prepared,io,assertMutationSettled:async()=>{},assertQuiescent:async()=>{calls.push('quiescent');},record:async event=>{events.push(event);calls.push('record');}};
   return {prepared,transactionId,io,events,calls,options,setCurrent:value=>{current=value;},setHook:value=>{hook=value;}};
 }
 test('fixed command projection keeps private candidate off arguments and has no arbitrary path or action',()=>{
@@ -62,6 +62,16 @@ test('stopped-but-unknown child still blocks restore and verify cannot reset the
   await assert.rejects(()=>bridge.swapFile(),/command-unconfirmed/);
   assert.equal(f.events.at(-1).executionStopped,true);await bridge.verify();
   await assert.rejects(()=>bridge.restoreFile({expectedCurrentSha256:f.prepared.originalSha256,alreadyOriginal:true}),/replay-or-busy/);
+  assert.equal(f.calls.filter(value=>value==='execute').length,1);
+});
+
+test('new settings bridge cannot bypass a retained unresolved operation or omit the durable barrier',async()=>{
+  const f=fixture();assert.throws(()=>createSettingsFileBridgeCore({...f.options,assertMutationSettled:undefined}),/settings-file-bridge/);
+  f.options.assertMutationSettled=async()=>{if(f.events.some(event=>event.type==='native-settings-file-intent'))throw Error('durable unresolved');};
+  let bridge=createSettingsFileBridgeCore(f.options);await bridge.verify();
+  f.setHook(async()=>{throw Error('lost result');});await assert.rejects(()=>bridge.swapFile(),/command-unconfirmed/);
+  bridge=createSettingsFileBridgeCore(f.options);await bridge.verify();
+  await assert.rejects(()=>bridge.restoreFile({expectedCurrentSha256:f.prepared.originalSha256,alreadyOriginal:true}),/durable unresolved/);
   assert.equal(f.calls.filter(value=>value==='execute').length,1);
 });
 
@@ -143,7 +153,7 @@ test('receipt mismatch or post-command mutation never confirms a settings operat
 });
 test('real bridge rejects non-Home use and additional path overrides without any read or mutation',async()=>{
   const f=fixture(),codePins=Object.fromEntries(SETTINGS_FILE_SOURCES.map(name=>[name,sha(readFileSync(new URL('./'+name,import.meta.url)))]));
-  const options={transactionId:f.transactionId,prepared:f.prepared,codePins,assertQuiescent:async()=>{},record:async()=>{}};
+  const options={transactionId:f.transactionId,prepared:f.prepared,codePins,assertMutationSettled:async()=>{},assertQuiescent:async()=>{},record:async()=>{}};
   assert.throws(()=>createNativeSettingsFileBridge({...options,target:'C:\\other'}),/options/);
   const bridge=createNativeSettingsFileBridge(options);
   if(hostname().toUpperCase()!=='RUNA-HOME')await assert.rejects(()=>bridge.verify(),/settings-file-host/);

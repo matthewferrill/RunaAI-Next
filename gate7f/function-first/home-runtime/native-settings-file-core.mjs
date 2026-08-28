@@ -30,9 +30,9 @@ function checkReceipt(value,{transactionId,pin,mode,alreadyOriginal}){
 /** Pure orchestration seam for local fixtures. Production must use createNativeSettingsFileBridge,
  * which supplies fixed Home paths/runtime pins and host-local child execution. None of these
  * callbacks or input objects is a product/model tool or a transferable maintenance permission. */
-export function createSettingsFileBridgeCore({transactionId,prepared,io,assertQuiescent,record}){
+export function createSettingsFileBridgeCore({transactionId,prepared,io,assertQuiescent,assertMutationSettled,record}){
   demand(/^[a-f0-9]{32}$/.test(transactionId)&&io&&['verify','read','execute'].every(key=>typeof io[key]==='function')
-    &&typeof assertQuiescent==='function'&&typeof record==='function','settings-file-bridge');
+    &&typeof assertQuiescent==='function'&&typeof assertMutationSettled==='function'&&typeof record==='function','settings-file-bridge');
   const pin=validatePreparedSettings(prepared),dispatched=new Set();let verified=false,busy=false,uncertain=false;
   async function readSettings(){
     demand(verified,'settings-file-not-verified');await io.verify();const bytes=await io.read();
@@ -44,6 +44,7 @@ export function createSettingsFileBridgeCore({transactionId,prepared,io,assertQu
     // needs an independently durable terminal-operation and exact-child-stop proof first.
     demand(verified&&!busy&&!dispatched.has(mode)&&!uncertain,'settings-file-replay-or-busy');busy=true;
     try{
+      await assertMutationSettled();
       await io.verify();const current=await readSettings();
       if(mode==='Restore'){
         const rollback=prepareNativeSettingsRollback(pin,current);

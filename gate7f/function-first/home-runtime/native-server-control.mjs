@@ -1,12 +1,11 @@
 import {createReadStream} from 'node:fs';
-import {createHash} from 'node:crypto';
-import {execFile} from 'node:child_process';
-import {promisify} from 'node:util';
+import {createHash,randomUUID} from 'node:crypto';
+import {spawn} from 'node:child_process';
 import {hostname} from 'node:os';
 import {fileURLToPath} from 'node:url';
 import {demand,sha,residentList} from './contracts.mjs';
 import {assertPlainPath} from './native-adapter.mjs';
-const execute=promisify(execFile);
+import {privateChildJson,privateChildText} from './private-child-result.mjs';
 export const NATIVE_SERVER_PATHS=Object.freeze({cli:'C:\\Users\\Matthew\\.lmstudio\\bin\\lms.exe',
   descriptor:'C:\\Users\\Matthew\\.lmstudio\\.internal\\http-server.json',
   settings:'C:\\Users\\Matthew\\.lmstudio\\.internal\\http-server-config.json',
@@ -44,22 +43,36 @@ export function nativeServerCommand(mode,bind){
   demand(['127.0.0.1','0.0.0.0'].includes(bind),'native-server-bind');
   return ['server','start','--port','1234','--bind',bind];
 }
+/** No reset or state-based compensation. A closed CLI does not itself prove its native RPC terminal. */
+export function createNativeCommandGate({assertMutationSettled}){
+  demand(typeof assertMutationSettled==='function','native-server-durable-barrier');
+  let busy=false,uncertain=false;
+  return {async run(operation){
+    demand(typeof operation==='function'&&!busy&&!uncertain,'native-server-command-busy-or-unknown');busy=true;
+    let dispatched=false;
+    try{
+      await assertMutationSettled();
+      const result=await operation(()=>{demand(!dispatched,'native-server-command-duplicate-dispatch');dispatched=true;uncertain=true;});
+      demand(dispatched,'native-server-command-not-dispatched');uncertain=false;return result;
+    }finally{busy=false;}
+  }};
+}
 /** Real narrow host adapter, no effects at construction. Only the privileged transaction calls it.
  * assertQuiescent must verify its independent native lock and the live Control/caller drain; a stale
  * JSON claim is not supplied by this class and is never treated as application-drain evidence.
  * No HOME/USERPROFILE override, daemon command, credential read/copy, model loading or broad kill. */
-export function createNativeServerController({codePins,assertQuiescent,record}){
+export function createNativeServerController({codePins,assertQuiescent,assertMutationSettled,record}){
   demand(codePins&&Object.keys(codePins).sort().join()==='Observe-NativeServer.ps1,Runtime-Windows.ps1,Settings-FileTransaction.ps1'
     &&Object.values(codePins).every(pin=>/^[a-f0-9]{64}$/.test(pin))
-    &&typeof assertQuiescent==='function'&&typeof record==='function','native-server-controller');
-  let verified=false;
+    &&typeof assertQuiescent==='function'&&typeof assertMutationSettled==='function'&&typeof record==='function','native-server-controller');
+  let verified=false;const commandGate=createNativeCommandGate({assertMutationSettled});
   function requireHome(){demand(process.platform==='win32'&&hostname().toUpperCase()==='RUNA-HOME'&&process.version==='v22.22.1','native-server-host');}
   async function observe(){
     requireHome();demand(verified,'native-server-not-verified');
-    const result=await execute(NATIVE_SERVER_PATHS.powershell,['-NoProfile','-NonInteractive','-ExecutionPolicy','Bypass','-File',OBSERVER],
-      {encoding:'utf8',windowsHide:true,timeout:15000,maxBuffer:16384,
+    const child=spawn(NATIVE_SERVER_PATHS.powershell,['-NoProfile','-NonInteractive','-ExecutionPolicy','Bypass','-File',OBSERVER],
+      {windowsHide:true,stdio:['pipe','pipe','pipe'],
         env:{...process.env,PSModulePath:'C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\Modules'}});
-    return validateNativeServerObservation(JSON.parse(result.stdout));
+    const result=privateChildJson(child);child.stdin.end();return validateNativeServerObservation(await result);
   }
   async function emptyRegistry(){
     const reply=await fetch('http://127.0.0.1:1234/api/v1/models',{redirect:'error',headers:{connection:'close'},signal:AbortSignal.timeout(5000)});
@@ -72,7 +85,7 @@ export function createNativeServerController({codePins,assertQuiescent,record}){
       ...Object.entries(codePins).map(([name,pin])=>[fileURLToPath(new URL('./'+name,import.meta.url)),pin])]){
       demand(await fileHash(file)===pin,'native-server-pin');}assertPlainPath(NATIVE_SERVER_PATHS.descriptor);verified=true;},
     observe,
-    async command(mode,{bind,baseline}){
+    command(mode,{bind,baseline}){return commandGate.run(async markDispatched=>{
       const args=nativeServerCommand(mode,bind);requireHome();demand(verified,'native-server-not-verified');
       validateNativeServerBaseline(baseline);await assertQuiescent();
       const before=validateNativeServerObservation(await observe(),{expectedEngine:baseline.engine,expectedDescriptorSha256:baseline.descriptorSha256});
@@ -80,14 +93,17 @@ export function createNativeServerController({codePins,assertQuiescent,record}){
       if(mode==='stop'){demand(before.http.addresses.length>0,'native-server-already-stopped');await emptyRegistry();}
       else demand(before.http.addresses.length===0,'native-server-already-started');
       demand(await fileHash(NATIVE_SERVER_PATHS.cli)===NATIVE_CLI_PIN,'native-server-cli-drift');await assertQuiescent();
-      await record({type:'native-server-command-intent',mode,bind:bind??null,engine:before.engine,descriptorSha256:before.descriptorSha256,time:Date.now()});
+      const commandId=randomUUID();
+      await record({type:'native-server-command-intent',commandId,mode,bind:bind??null,engine:before.engine,descriptorSha256:before.descriptorSha256,time:Date.now()});
       let result=null,failure=null;
-      try{result=await execute(NATIVE_SERVER_PATHS.cli,args,{encoding:'utf8',windowsHide:true,timeout:15000,maxBuffer:16384,
+      markDispatched();
+      try{const child=spawn(NATIVE_SERVER_PATHS.cli,args,{windowsHide:true,stdio:['pipe','pipe','pipe'],
         // Installed exact CLI source proves this branch uses only tryFindLocalAPIServer; missing
         // selected API fails, rather than launching llmster or trying an unbound default instance.
-        env:{...process.env,LMS_API_SERVER_INFO_PATH:NATIVE_SERVER_PATHS.descriptor}});}
-      catch(error){failure={code:typeof error.code==='number'?error.code:'unknown',timedOut:error.killed===true};}
-      await record({type:'native-server-command-returned',mode,failure,stdoutSha256:result?sha(result.stdout):null,
+        env:{...process.env,LMS_API_SERVER_INFO_PATH:NATIVE_SERVER_PATHS.descriptor}});
+        const pending=privateChildText(child);child.stdin.end();result=await pending;}
+      catch(error){failure={code:'runtime-native-server-child-unconfirmed',executionStopped:error?.executionStopped===true};}
+      await record({type:'native-server-command-returned',commandId,mode,failure,stdoutSha256:result?sha(result.stdout):null,
         stderrSha256:result?sha(result.stderr):null,time:Date.now()});
       // Never infer successful mutation from exit status or retry a timed-out command.
       const after=validateNativeServerObservation(await observe(),{expectedEngine:baseline.engine,expectedDescriptorSha256:baseline.descriptorSha256});
@@ -95,7 +111,9 @@ export function createNativeServerController({codePins,assertQuiescent,record}){
         after.http.addresses.length>0&&after.http.addresses.every(address=>address===bind||(bind==='127.0.0.1'&&address==='::1'));
       demand(!failure&&expected,'native-server-command-unconfirmed');
       if(mode==='start')await emptyRegistry();await assertQuiescent();
+      await record({type:'native-server-command-confirmed',commandId,mode,engine:after.engine,
+        descriptorSha256:after.descriptorSha256,observedAt:after.observedAt,time:Date.now(),settingsEnforced:false});
       return {mode,after,settingsEnforced:false};
-    },
+    });},
   };
 }

@@ -11,6 +11,7 @@ function fixture(){
   const baseline={schemaVersion:'runaai-native-server-observation/v1',observedAt:Date.now(),internalPort:50000,descriptorSha256:'a'.repeat(64),
     engine:{pid:42,startedAt:'2026-08-28T12:00:00.000Z',executable:'C:\\Users\\Matthew\\AppData\\Local\\Programs\\LM Studio\\LM Studio.exe'},http:{addresses,established:0}};
   const adapter={withOwnership:async fn=>{assert.equal(held,false);held=true;try{return await fn();}finally{held=false;}},
+    assertMutationSettled:async()=>{assert.equal(held,true);},
     assertQuiescent:async()=>{assert.equal(held,true);calls.push('quiescent');},assertHardwareLease:async()=>{assert.equal(held,true);calls.push('hardware');},
     readSettings:async()=>Buffer.from(settings),prepareFileIntent:async()=>calls.push('prepare'),
     swapFile:async()=>{calls.push('swap');settings=prepared.rawCandidate;},
@@ -40,6 +41,17 @@ test('unknown native mutation is not retried or silently compensated',async()=>{
   const f=fixture();f.adapter.commandServer=async()=>{f.calls.push('uncertain-stop');throw Error('timeout');};
   const result=await applyNativeSettingsTransition(f);assert.equal(result.passed,false);assert.equal(result.stage,'prepared');
   assert.equal(f.calls.filter(name=>name==='uncertain-stop').length,1);assert.equal(f.calls.includes('swap'),false);assert.equal(f.calls.includes('restore'),false);
+});
+
+test('restarted outer coordinator denies both apply and restore before any effect with an unresolved durable intent',async()=>{
+  for(const mode of ['apply','restore']){
+    const f=fixture();f.adapter.assertMutationSettled=async()=>{throw Error('durable unresolved');};
+    if(mode==='apply')assert.equal((await applyNativeSettingsTransition(f)).passed,false);
+    else await assert.rejects(()=>restoreNativeSettingsTransition(f),/durable unresolved/);
+    assert.equal(f.calls.some(name=>['prepare','stop','swap','start','restore','probe'].includes(name)),false);
+  }
+  const f=fixture();delete f.adapter.assertMutationSettled;
+  await assert.rejects(()=>applyNativeSettingsTransition(f),/transition-adapter/);
 });
 test('denial of an unavailable model or any resident after the real JIT probe is not a pass',async()=>{
   for(const change of [{availableBefore:false},{afterResidentIds:['unexpected']},{beforeResidentIds:''},{status:200},{status:503},

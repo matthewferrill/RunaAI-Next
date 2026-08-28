@@ -50,6 +50,7 @@ export function createNativeProcessingObserver({codePins,assertOwnership}){
     &&Object.values(codePins).every(value=>/^[a-f0-9]{64}$/.test(value))&&typeof assertOwnership==='function','native-processing-options');
   const pins=Object.freeze({...codePins});let verified=false;
   const controller=createNativeServerController({codePins:Object.fromEntries(observerSources.map(name=>[name,pins[name]])),
+    assertMutationSettled:async()=>{demand(false,'native-processing-no-lifecycle');},
     assertQuiescent:async()=>{demand(false,'native-processing-no-lifecycle');},record:async()=>{demand(false,'native-processing-no-lifecycle');}});
   const checkSources=()=>{for(const name of ownSources){const file=new URL('./'+name,import.meta.url);
     // URL paths are converted by the filesystem API only after the shared native path check.

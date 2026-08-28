@@ -49,7 +49,7 @@ function executePrivate({args,input}){
  * transaction subtree. External orchestration receives only sanitized hash-bound receipts.
  * Construction does not read or write anything. verify() must run before any other method. */
 export function createNativeSettingsFileBridge(options){
-  demand(options&&Object.keys(options).sort().join()==='assertQuiescent,codePins,prepared,record,transactionId','settings-file-options');
+  demand(options&&Object.keys(options).sort().join()==='assertMutationSettled,assertQuiescent,codePins,prepared,record,transactionId','settings-file-options');
   const {codePins,...rest}=options;
   demand(codePins&&Object.keys(codePins).sort().join()===SETTINGS_FILE_SOURCES.join()
     &&Object.values(codePins).every(value=>/^[a-f0-9]{64}$/.test(value)),'settings-file-code-pins');

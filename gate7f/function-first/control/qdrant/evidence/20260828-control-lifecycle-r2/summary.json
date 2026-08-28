@@ -1,0 +1,194 @@
+{
+  "schemaVersion": "runaai-m1-qdrant-live-proof/v1",
+  "sourceCommit": "aa5deecf1c50bf54d4713784faab02333c05c590",
+  "packageSha256": "02cae44f55de901c084b18060d153e1640934cf94fbc26f6345c8a5c531d2b02",
+  "observedAt": "2026-08-28T17:33:09.7072080Z",
+  "firstRehearsal": {
+    "passed": false,
+    "failedAfterReadiness": true,
+    "failedMutableReceiptReplacement": true,
+    "retainedPath": "C:\\AI\\RunaAI-Next-Candidate\\m1-qdrant-retained-r1",
+    "packageSha256": "665a0050a2eae72cc3d2f73e2a059e3c2687ea305e8fa3e93d5dd5aa1c8d8c61"
+  },
+  "correctedRehearsal": {
+    "passed": true,
+    "initialRunId": "c91bfc92293148d3870a6109b5d2b6f7",
+    "restartedRunId": "6b62aa15e7914187970236baf330c1ed",
+    "syntheticReferenceSurvivedRestart": true,
+    "cleanRunnerResults": 2,
+    "scopedRollbackCount": 2,
+    "finalTaskDisabled": true,
+    "finalPortsFree": true
+  },
+  "unchanged": {
+    "productionConfigurationHashes": {
+      "candidate.json": "e6466cfb794de10ef490b9102e6d9380aae51cdcb04d9101086715d47cd62925",
+      "Caddyfile": "fcb9dd788fb48af32c61d74705175629e01ec03911c3089127f7d3037ed44da5",
+      "release.json": "0cd6c8a3b9d87d4f4196cb75ba94e17d2ed831327e34530554ccb848746efbaf"
+    },
+    "existingListenerIdentities": true,
+    "existingTaskStates": true,
+    "trackedCheckout": true
+  },
+  "claims": {
+    "productionApplicationActivated": false,
+    "modelsCalled": false,
+    "protectedStoreReadOrChanged": false,
+    "gracefulDatabaseShutdownProven": false,
+    "windowsRebootTested": false
+  },
+  "artifacts": {
+    "r1/receipts/ArchiveFailed-3e8f098c09784b5b879866c3a2e3e95c.json": {
+      "bytes": 716,
+      "sha256": "94b3090762ab89aa958b039d649cae4abefb152079e3681b69fa26b51047b826"
+    },
+    "r1/receipts/InspectFailure-cc1137b206104b3d8513559d427d7f90.json": {
+      "bytes": 73139,
+      "sha256": "18f08429177e9566d5e31e7ae0094a563fea237997d3f5978844f626658f7e5c"
+    },
+    "r1/receipts/Install-6e3e72eb7a6a4d92900e91aa95a0e672.json": {
+      "bytes": 722,
+      "sha256": "197d2b6591f0b856c99d1295b0aa726bca646c6458cb4c4f85575191a16e5e2f"
+    },
+    "r1/receipts/Preflight-d0f4d8258c6e488d9b7bd2990a8d0600.json": {
+      "bytes": 2142,
+      "sha256": "932bb38f5d588ce460ef4c22b2cadc85b31c7c210207fb9c9dd2a4a651f807c9"
+    },
+    "r1/receipts/Probe-ed2485fe527d4101a38b31f5e7438fc9.json": {
+      "bytes": 334,
+      "sha256": "d910c1cf4398a3d8efc871db277f9b3176ef1c7a517df74585c9905f6298258f"
+    },
+    "r1/receipts/Rollback-58e10130de4042beaa57a75e1ec799d3.json": {
+      "bytes": 538,
+      "sha256": "42d6fd1218146db7b6d06a57ff8095d70d17941cadde8d9d2e93694d6b8fa6d2"
+    },
+    "r1/receipts/Start-7b9a940cd7404a7795c828033ba6f6da.json": {
+      "bytes": 672,
+      "sha256": "c4a78c236b7bbf396b2d673270878b12540c1f2243540433009b1df97d87dbf5"
+    },
+    "r1/receipts/Upload-3378ac6f9f0140e290c78529c1c06388.json": {
+      "bytes": 408,
+      "sha256": "294d30ff44b866c3f54d5d33b45b18c7072fc35761889135a7d13356e12d61ed"
+    },
+    "r1/receipts/Upload-f7553df7890f4abd857b2922fe8d9501.json": {
+      "bytes": 335,
+      "sha256": "c88cde4abec63841ab1ae7f5ccc0b4aa58b44c60283a6de7c92e60478333fa92"
+    },
+    "r1/package/Common-M1Qdrant.ps1": {
+      "bytes": 12110,
+      "sha256": "5f7bfd8651f5214f64f373ecfc1ba673ec4e42d52387470f240cbba3c50cdff2"
+    },
+    "r1/package/Run-M1Qdrant.ps1": {
+      "bytes": 5232,
+      "sha256": "2030244e9176e6f6e372f87370e61a19cdc5a42ca21b329f987ae4baa9a56cff"
+    },
+    "r1/package/Install-ControlM1Qdrant.ps1": {
+      "bytes": 4729,
+      "sha256": "02dfe976d993b9e53eab99071dddc2980687565298b580844f856181f0ff6a26"
+    },
+    "r1/package/Start-ControlM1Qdrant.ps1": {
+      "bytes": 3827,
+      "sha256": "53e583a713f73b22236d4fa3b2941d43b8e3b637483c52de70feb426c1f90d91"
+    },
+    "r1/package/Rollback-ControlM1Qdrant.ps1": {
+      "bytes": 3990,
+      "sha256": "a7d5eac905d983c163c50a96b2f137646167561b078d33ed51544e7794a61c3e"
+    },
+    "r1/package/qdrant.yaml": {
+      "bytes": 586,
+      "sha256": "6b6c131bbbd3761404ada5e72d76e06b3aa632999181f63fe05daadc06f3be97"
+    },
+    "r1/package/package.json": {
+      "bytes": 1496,
+      "sha256": "665a0050a2eae72cc3d2f73e2a059e3c2687ea305e8fa3e93d5dd5aa1c8d8c61"
+    },
+    "r2/receipts/Final-6f8e10b078ae48d5b540adcdb78db9e4.json": {
+      "bytes": 2235,
+      "sha256": "9315c58daf252402642b75d3a1a554225c059fa50e4cc74d1e29e84af16aa64e"
+    },
+    "r2/receipts/InspectFailure-08964fe340924357b699fdda50f53702.json": {
+      "bytes": 1678,
+      "sha256": "f6ac0f3e70b90cba0f9d285440b21bd6a23a2f0aeebbef4012911fededb4160a"
+    },
+    "r2/receipts/InspectFailure-f5e64f788be54483b0cc03d56128adeb.json": {
+      "bytes": 2853,
+      "sha256": "e1af19bf280b305aa110f07fcc717e23b4843fec77cfac4a3d283cb9cbf9e24b"
+    },
+    "r2/receipts/Install-101b9735023346618fb61ea0649e9ca4.json": {
+      "bytes": 721,
+      "sha256": "29695e4a8284ac8229c3ed1dd71626ae4c1452e06b22ca90adb4c14132939954"
+    },
+    "r2/receipts/Install-71633192c72941288497ab488c75f0f6.json": {
+      "bytes": 722,
+      "sha256": "e46db8aecec52b446b53c7af407ec25461e71358c54cde7b2a141cbd03c1105d"
+    },
+    "r2/receipts/Probe-adb2d1cbe8924d3a95ecdf1af7fdeca1.json": {
+      "bytes": 774,
+      "sha256": "d4cbda8a06bc7d2ef3a7315f06997e4e6b0b7fa56a13c34b8b45ff1d49e1fc68"
+    },
+    "r2/receipts/ReadProbe-09012ca965e2408783141e17a7f073ad.json": {
+      "bytes": 778,
+      "sha256": "8254460989d4bd86d7dac2e13c8bdc6d17dc441a8de68f0eab6fcd880faa9063"
+    },
+    "r2/receipts/RegisterDisabled-d80591e04fc24b29ae2e95fb40e06f7a.json": {
+      "bytes": 730,
+      "sha256": "c1044fcf61fac35f72745c399676a72ea514d83c3d9005dcb0b65f87ea183b73"
+    },
+    "r2/receipts/Rollback-a9e07627354345c29a038eff8e8d765b.json": {
+      "bytes": 538,
+      "sha256": "776ea26d0488b355250bf27005671fc0d19cfd2a8272a93d994d6b200a820ae9"
+    },
+    "r2/receipts/Rollback-d0f74f3427104bd2b5c3f3d1e1dd07ee.json": {
+      "bytes": 538,
+      "sha256": "37b35c5d0badde9829bc8c6109cf6337fb4822767bf350eb6594a1b3b7befc9d"
+    },
+    "r2/receipts/Start-4748c16ef28c4002b1e025823cf83b10.json": {
+      "bytes": 672,
+      "sha256": "4a0928eefd3c3c9c29b6f11b832da339543b97be0510f043fd43ee9da443d456"
+    },
+    "r2/receipts/Start-6e1476f4f64c4299a50cfcd13e6c00b4.json": {
+      "bytes": 672,
+      "sha256": "eecfabd68e5ab4f705bc80c88345613282fc48abe9b76dd762955931c1bfab8e"
+    },
+    "r2/receipts/Upload-2384c1aaa9dd40518c5207cc7cb1d1a6.json": {
+      "bytes": 335,
+      "sha256": "689e7e01a070a60c34055697d241311b0643f8ffae9b6815a30ff3f578aa95b1"
+    },
+    "r2/receipts/Upload-9d0a0228c602453680417ab24278795b.json": {
+      "bytes": 408,
+      "sha256": "646cce06979bd42da623c3150afa00702f3548fa97f3802cbc29da5df74ae603"
+    },
+    "r2/package/Common-M1Qdrant.ps1": {
+      "bytes": 12260,
+      "sha256": "509872d953e6565589f74abf73f958870e8a1dd971792415ec15d53bca3586ab"
+    },
+    "r2/package/Run-M1Qdrant.ps1": {
+      "bytes": 5463,
+      "sha256": "cedd0f88aa1530a5ff2d207731905d37b7be4616677270dbd697ffaa6f4e2532"
+    },
+    "r2/package/Install-ControlM1Qdrant.ps1": {
+      "bytes": 4729,
+      "sha256": "02dfe976d993b9e53eab99071dddc2980687565298b580844f856181f0ff6a26"
+    },
+    "r2/package/Start-ControlM1Qdrant.ps1": {
+      "bytes": 3827,
+      "sha256": "53e583a713f73b22236d4fa3b2941d43b8e3b637483c52de70feb426c1f90d91"
+    },
+    "r2/package/Rollback-ControlM1Qdrant.ps1": {
+      "bytes": 3990,
+      "sha256": "a7d5eac905d983c163c50a96b2f137646167561b078d33ed51544e7794a61c3e"
+    },
+    "r2/package/qdrant.yaml": {
+      "bytes": 586,
+      "sha256": "6b6c131bbbd3761404ada5e72d76e06b3aa632999181f63fe05daadc06f3be97"
+    },
+    "r2/package/package.json": {
+      "bytes": 1496,
+      "sha256": "02cae44f55de901c084b18060d153e1640934cf94fbc26f6345c8a5c531d2b02"
+    },
+    "operator.ps1": {
+      "bytes": 9939,
+      "sha256": "e8407c1ff3848a0092c88755579fa0b95220de55a804e631325aa928d3f40d89"
+    }
+  }
+}

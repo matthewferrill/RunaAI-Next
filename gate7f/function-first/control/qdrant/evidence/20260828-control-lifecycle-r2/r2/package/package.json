@@ -1,0 +1,50 @@
+{
+  "schemaVersion": "runaai-m1-qdrant-package/v1",
+  "root": "C:\\AI\\RunaAI-Next-Candidate\\m1-qdrant",
+  "taskPath": "\\RunaAI-Next\\",
+  "taskName": "M1-Qdrant",
+  "serviceSid": "S-1-5-19",
+  "host": "127.0.0.1",
+  "httpPort": 9774,
+  "grpcPort": 9775,
+  "version": "1.19.0",
+  "binaryBytes": 84184576,
+  "binarySha256": "369c562eae3d89333a13abfdb522fa209e3f587c1217a1059d817e80814ea9d4",
+  "files": [
+    {
+      "name": "Common-M1Qdrant.ps1",
+      "bytes": 12260,
+      "sha256": "509872d953e6565589f74abf73f958870e8a1dd971792415ec15d53bca3586ab"
+    },
+    {
+      "name": "Run-M1Qdrant.ps1",
+      "bytes": 5463,
+      "sha256": "cedd0f88aa1530a5ff2d207731905d37b7be4616677270dbd697ffaa6f4e2532"
+    },
+    {
+      "name": "Install-ControlM1Qdrant.ps1",
+      "bytes": 4729,
+      "sha256": "02dfe976d993b9e53eab99071dddc2980687565298b580844f856181f0ff6a26"
+    },
+    {
+      "name": "Start-ControlM1Qdrant.ps1",
+      "bytes": 3827,
+      "sha256": "53e583a713f73b22236d4fa3b2941d43b8e3b637483c52de70feb426c1f90d91"
+    },
+    {
+      "name": "Rollback-ControlM1Qdrant.ps1",
+      "bytes": 3990,
+      "sha256": "a7d5eac905d983c163c50a96b2f137646167561b078d33ed51544e7794a61c3e"
+    },
+    {
+      "name": "qdrant.exe",
+      "bytes": 84184576,
+      "sha256": "369c562eae3d89333a13abfdb522fa209e3f587c1217a1059d817e80814ea9d4"
+    },
+    {
+      "name": "qdrant.yaml",
+      "bytes": 586,
+      "sha256": "6b6c131bbbd3761404ada5e72d76e06b3aa632999181f63fe05daadc06f3be97"
+    }
+  ]
+}

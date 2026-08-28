@@ -1,0 +1,11 @@
+{
+    "schemaVersion":  "runaai-m1-qdrant-remote-command/v1",
+    "mode":  "Rollback",
+    "stageId":  "m1-qdrant-proof-20260828-r1",
+    "packageSha256":  "665a0050a2eae72cc3d2f73e2a059e3c2687ea305e8fa3e93d5dd5aa1c8d8c61",
+    "time":  "2026-08-28T17:21:02.6845848Z",
+    "exitCode":  0,
+    "output":  [
+                   "{\"schemaVersion\":\"runaai-m1-qdrant-rollback/v1\",\"stopped\":true,\"taskUnregistered\":true,\"dataRetained\":true,\"otherServicesChanged\":false,\"privateValuesIncluded\":false}"
+               ]
+}

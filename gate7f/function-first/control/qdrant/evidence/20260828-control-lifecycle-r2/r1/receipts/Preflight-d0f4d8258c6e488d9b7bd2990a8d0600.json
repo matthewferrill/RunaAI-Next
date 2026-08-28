@@ -1,0 +1,11 @@
+{
+    "schemaVersion":  "runaai-m1-qdrant-remote-command/v1",
+    "mode":  "Preflight",
+    "stageId":  "m1-qdrant-proof-20260828-r1",
+    "packageSha256":  "665a0050a2eae72cc3d2f73e2a059e3c2687ea305e8fa3e93d5dd5aa1c8d8c61",
+    "time":  "2026-08-28T17:18:37.5498119Z",
+    "exitCode":  0,
+    "output":  [
+                   "{\"schemaVersion\":\"runaai-m1-qdrant-host-observation/v1\",\"time\":\"2026-08-28T17:18:37.7732983Z\",\"identity\":\"RUNA-CONTROL\\\\Matthew\",\"administrator\":true,\"head\":\"f092d358a18f0ec0b6c2eaaeaf9a057b1d7f6d68\",\"branch\":\"runa2/integration\",\"trackedChanges\":0,\"targetExists\":false,\"ports\":[{\"LocalAddress\":\"127.0.0.1\",\"LocalPort\":9760,\"OwningProcess\":17200},{\"LocalAddress\":\"192.168.50.169\",\"LocalPort\":9761,\"OwningProcess\":7880},{\"LocalAddress\":\"127.0.0.1\",\"LocalPort\":9762,\"OwningProcess\":7988},{\"LocalAddress\":\"127.0.0.1\",\"LocalPort\":9763,\"OwningProcess\":7912},{\"LocalAddress\":\"127.0.0.1\",\"LocalPort\":9764,\"OwningProcess\":7912},{\"LocalAddress\":\"127.0.0.1\",\"LocalPort\":9765,\"OwningProcess\":7888},{\"LocalAddress\":\"127.0.0.1\",\"LocalPort\":9766,\"OwningProcess\":7988},{\"LocalAddress\":\"127.0.0.1\",\"LocalPort\":9770,\"OwningProcess\":7880}],\"tasks\":[{\"enabled\":true,\"name\":\"Application\",\"principal\":\"SYSTEM\",\"state\":\"Running\"},{\"enabled\":true,\"name\":\"Caddy\",\"principal\":\"SYSTEM\",\"state\":\"Running\"},{\"enabled\":true,\"name\":\"Keycloak\",\"principal\":\"SYSTEM\",\"state\":\"Running\"},{\"enabled\":true,\"name\":\"OpenFga\",\"principal\":\"SYSTEM\",\"state\":\"Running\"},{\"enabled\":true,\"name\":\"Postgresql\",\"principal\":\"LOCAL SERVICE\",\"state\":\"Running\"},{\"enabled\":true,\"name\":\"ProtectedBackup\",\"principal\":\"SYSTEM\",\"state\":\"Ready\"}],\"configurationHashes\":{\"candidate.json\":\"e6466cfb794de10ef490b9102e6d9380aae51cdcb04d9101086715d47cd62925\",\"Caddyfile\":\"fcb9dd788fb48af32c61d74705175629e01ec03911c3089127f7d3037ed44da5\",\"release.json\":\"0cd6c8a3b9d87d4f4196cb75ba94e17d2ed831327e34530554ccb848746efbaf\"},\"protectedDataIncluded\":false}"
+               ]
+}

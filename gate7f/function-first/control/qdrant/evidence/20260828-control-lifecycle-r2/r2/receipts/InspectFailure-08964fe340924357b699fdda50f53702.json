@@ -1,0 +1,11 @@
+{
+    "schemaVersion":  "runaai-m1-qdrant-remote-command/v1",
+    "mode":  "InspectFailure",
+    "stageId":  "m1-qdrant-proof-20260828-r2",
+    "packageSha256":  "02cae44f55de901c084b18060d153e1640934cf94fbc26f6345c8a5c531d2b02",
+    "time":  "2026-08-28T17:30:19.3059888Z",
+    "exitCode":  0,
+    "output":  [
+                   "{\"logs\":[{\"stdout\":\"           _                 _    \\n  __ _  __| |_ __ __ _ _ __ | |_  \\n / _` |/ _` | \\u0027__/ _` | \\u0027_ \\\\| __| \\n| (_| | (_| | | | (_| | | | | |_  \\n \\\\__, |\\\\__,_|_|  \\\\__,_|_| |_|\\\\__| \\n    |_|                           \\n\\nVersion: 1.19.0, build: 74f3e85b\\nAccess web UI at http://localhost:9774/dashboard\\nAgentic Skills: https://skills.qdrant.tech/\\n\\n\",\"time\":\"2026-08-28T17:30:14.0611220Z\",\"stderr\":\"\"}],\"receipts\":[{\"value\":{\"schemaVersion\":\"runaai-m1-qdrant-process/v1\",\"packageSha256\":\"02cae44f55de901c084b18060d153e1640934cf94fbc26f6345c8a5c531d2b02\",\"runId\":\"c91bfc92293148d3870a6109b5d2b6f7\",\"pid\":10844,\"startedAt\":\"2026-08-28T17:29:35.1108400Z\",\"executable\":\"C:\\\\AI\\\\RunaAI-Next-Candidate\\\\m1-qdrant\\\\code\\\\qdrant.exe\",\"runnerPid\":18052,\"runnerStartedAt\":\"2026-08-28T17:29:32.2040100Z\"},\"name\":\"process.json\"},{\"value\":{\"readyAt\":\"2026-08-28T17:29:36.5582268Z\",\"schemaVersion\":\"runaai-m1-qdrant-ready/v1\",\"packageSha256\":\"02cae44f55de901c084b18060d153e1640934cf94fbc26f6345c8a5c531d2b02\",\"runId\":\"c91bfc92293148d3870a6109b5d2b6f7\",\"pid\":10844},\"name\":\"ready.json\"}],\"task\":{\"lastTaskResult\":267009,\"enabled\":true,\"name\":\"M1-Qdrant\",\"state\":\"Running\"}}"
+               ]
+}

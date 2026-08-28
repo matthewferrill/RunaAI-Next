@@ -1,0 +1,11 @@
+{
+    "schemaVersion":  "runaai-m1-qdrant-remote-command/v1",
+    "mode":  "Install",
+    "stageId":  "m1-qdrant-proof-20260828-r2",
+    "packageSha256":  "02cae44f55de901c084b18060d153e1640934cf94fbc26f6345c8a5c531d2b02",
+    "time":  "2026-08-28T17:29:18.1691207Z",
+    "exitCode":  0,
+    "output":  [
+                   "{\"schemaVersion\":\"runaai-m1-qdrant-install/v1\",\"installed\":true,\"taskEnabled\":false,\"recoveredRetainedInstallation\":false,\"servicesStarted\":false,\"root\":\"C:\\\\AI\\\\RunaAI-Next-Candidate\\\\m1-qdrant\",\"packageSha256\":\"02cae44f55de901c084b18060d153e1640934cf94fbc26f6345c8a5c531d2b02\",\"productionChanged\":false,\"privateValuesIncluded\":false}"
+               ]
+}

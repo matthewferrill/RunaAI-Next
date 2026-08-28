@@ -1,0 +1,11 @@
+{
+    "schemaVersion":  "runaai-m1-qdrant-remote-command/v1",
+    "mode":  "Start",
+    "stageId":  "m1-qdrant-proof-20260828-r2",
+    "packageSha256":  "02cae44f55de901c084b18060d153e1640934cf94fbc26f6345c8a5c531d2b02",
+    "time":  "2026-08-28T17:31:21.9502057Z",
+    "exitCode":  0,
+    "output":  [
+                   "{\"schemaVersion\":\"runaai-m1-qdrant-activation/v1\",\"ready\":true,\"packageSha256\":\"02cae44f55de901c084b18060d153e1640934cf94fbc26f6345c8a5c531d2b02\",\"http\":\"http://127.0.0.1:9774\",\"grpc\":\"127.0.0.1:9775\",\"ordinaryAuthorityChanged\":false,\"protectedDataChanged\":false,\"privateValuesIncluded\":false}"
+               ]
+}

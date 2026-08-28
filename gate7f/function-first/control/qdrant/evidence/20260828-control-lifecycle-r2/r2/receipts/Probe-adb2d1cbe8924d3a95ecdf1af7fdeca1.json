@@ -1,0 +1,11 @@
+{
+    "schemaVersion":  "runaai-m1-qdrant-remote-command/v1",
+    "mode":  "Probe",
+    "stageId":  "m1-qdrant-proof-20260828-r2",
+    "packageSha256":  "02cae44f55de901c084b18060d153e1640934cf94fbc26f6345c8a5c531d2b02",
+    "time":  "2026-08-28T17:30:05.3408450Z",
+    "exitCode":  0,
+    "output":  [
+                   "{\"schemaVersion\":\"runaai-m1-qdrant-synthetic-probe/v1\",\"time\":\"2026-08-28T17:30:05.6076373Z\",\"packageSha256\":\"02cae44f55de901c084b18060d153e1640934cf94fbc26f6345c8a5c531d2b02\",\"pid\":10844,\"runId\":\"c91bfc92293148d3870a6109b5d2b6f7\",\"collection\":\"m1_service_lifecycle_probe\",\"syntheticReferenceRetained\":true,\"rawPrivateContentStored\":false,\"modelsCalled\":false,\"protectedDataChanged\":false}"
+               ]
+}

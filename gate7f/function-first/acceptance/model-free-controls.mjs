@@ -1,36 +1,37 @@
 import assert from "node:assert/strict";
 import { FunctionalHttpJourney } from "./http-journey.mjs";
 import { fail } from "./runner-contract.mjs";
+import { EXTENDED_CONTROLS } from "./extended-controls.mjs";
 
 export const CONTROL_SUITES = Object.freeze({ "control-value-v1": { suiteId: "control-value-v1",
   cases: [{ testId: "value", exportName: "value", args: [], expected: 7 }] },
 "control-host-apis-v1": { suiteId: "control-host-apis-v1", cases: [{ testId: "absent", exportName: "probe", args: [],
   expected: ["undefined", "undefined", "undefined", "undefined"] }] } });
-export const SUPPORTED_CONTROLS = Object.freeze(["control-06-exact-grants", "control-09-native-limits", "control-11-exact-undo"]);
-const setup = (id, profile = "safe-autopilot") => ({ id, role: "control", objective: "Exercise explicit synthetic control operations without a model.",
+export const SUPPORTED_CONTROLS = Object.freeze(["control-06-exact-grants", "control-09-native-limits", "control-11-exact-undo", ...Object.keys(EXTENDED_CONTROLS)]);
+export const controlSetup = (id, profile = "safe-autopilot") => ({ id, role: "control", objective: "Exercise explicit synthetic control operations without a model.",
   setup: { experience: "code", project: `synthetic-${id}`, profile, files: { "control.js": "exports.value=()=>7;" },
     allowedPaths: ["control.js"], allowedSuites: Object.keys(CONTROL_SUITES), suites: Object.values(CONTROL_SUITES) }, journey: [] });
 
-function recordCheck(ledger, item, kind, actual, raw) {
+export function recordCheck(ledger, item, kind, actual, raw, source = "host-runtime") {
   const index = item.expected.findIndex(value => value.kind === kind);
   if (index < 0) throw fail("m1-control-check-not-frozen");
   const checkId = `${item.id}/case/${index}:${kind}`;
-  const id = ledger.evidence("host-runtime", "control-observation", { checkId, actual, raw });
+  const id = ledger.evidence(source, "control-observation", { checkId, actual, raw });
   ledger.actual(checkId, kind, actual, id, "/actual");
 }
-async function prepare(host, item, ledger, profile = "safe-autopilot") {
-  const client = new FunctionalHttpJourney({ host, item: setup(item.id, profile), ledger, identitySeed: item.id });
+export async function prepare(host, item, ledger, profile = "safe-autopilot") {
+  const client = new FunctionalHttpJourney({ host, item: controlSetup(item.id, profile), ledger, identitySeed: item.id });
   await client.initialize(); await client.prepareProject(); return client;
 }
-async function propose(client, capabilityId, args, override = {}) {
+export async function propose(client, capabilityId, args, override = {}) {
   return client.m1("proposal.create", { requestId: client.id("control-proposal"), taskId: client.task.taskId,
     grantId: client.grant.grantId, grantRevision: client.grant.revision, capabilityId, arguments: args, ...override });
 }
-async function edit(client, content) {
+export async function edit(client, content) {
   const snapshot = await client.host.snapshot(client.context());
   return client.executeCapability("project.apply-change", { path: "control.js", content, expectedSha256: snapshot.files[0].sha256 });
 }
-async function denial(ledger, label, operation) {
+export async function denial(ledger, label, operation) {
   const before = ledger.observation.application.requests.length;
   let denied = false, errorCode;
   try { const value = await operation(); if (value?.errorCode) { denied = true; errorCode = value.errorCode; } }
@@ -122,11 +123,11 @@ async function exactUndo(host, item, ledger) {
     { initial, first: first.receipt, second: second.receipt, restored: restoredSecond.receipt, replay: replay.receipt, beforeDuplicate });
 }
 
-export async function runModelFreeControl({ host, item, ledger }) {
-  const handler = { "control-06-exact-grants": exactGrants, "control-09-native-limits": nativeLimits, "control-11-exact-undo": exactUndo }[item.id];
+export async function runModelFreeControl({ host, item, ledger, support = {} }) {
+  const handler = { ...EXTENDED_CONTROLS, "control-06-exact-grants": exactGrants, "control-09-native-limits": nativeLimits, "control-11-exact-undo": exactUndo }[item.id];
   if (!handler) { ledger.unsupported(item.id, "The full frozen control needs its remaining actual browser, worker or dependency-fault driver; component regressions are not relabeled acceptance.");
     ledger.observation.finishedAt = new Date().toISOString(); return ledger.observation; }
-  try { await handler(host, item, ledger);
+  try { await handler(host, item, ledger, support);
     assert.equal(ledger.observation.provider.calls.length, 0, "A model-free control attempted model inference.");
     ledger.observation.status = "completed";
   } catch (error) { ledger.observation.status = "failed"; ledger.observation.failures.push({ phase: ledger.phase,

@@ -1,5 +1,6 @@
 import { randomBytes } from "node:crypto";
 import { caseCoverage, fail, sha256 } from "./runner-contract.mjs";
+import { CAPABILITY_SET_DIGEST } from "../tasks/contracts.mjs";
 
 export class FunctionalHttpJourney {
   constructor({ host, item, ledger, identitySeed, extensionActions = {}, checkpoint = null }) {
@@ -45,7 +46,24 @@ export class FunctionalHttpJourney {
     this.projectId = result.projectId; this.originalProjectId ??= result.projectId;
     return result;
   }
-  async initialize() { await this.login(); await this.createProject(this.item.setup.project); }
+  async initialize() {
+    await this.login(); await this.createProject(this.item.setup.project);
+    this.continuityBefore = await this.host.continuity.prepareAnswerContext({ participantId: this.principalId,
+      projectId: this.projectId, threadId: this.threadId, experience: this.experience });
+  }
+  async captureFinalProof() {
+    const proof = await this.host.captureFinalProof(this.context(), { threadId: this.threadId,
+      experience: this.experience, taskId: this.task?.taskId, runId: this.run?.runId });
+    this.ledger.evidence("postgresql", "continuity-snapshot", { ...proof.continuity, before: this.continuityBefore });
+    this.ledger.evidence("postgresql", "durable-task-state", proof.durable);
+    if (!this.task) this.ledger.evidence("postgresql", "read-only-effect-audit", { scope: proof.durable.scope,
+      intents: proof.durable.intents, receipts: proof.durable.receipts });
+    for (const retained of proof.retained) this.ledger.evidence("host-filesystem", "retained-project-revision", retained);
+    this.ledger.evidence("host-runtime", "attempt-capture-complete", {
+      requestCount: this.ledger.observation.application.requests.length, providerCallCount: this.ledger.observation.provider.calls.length,
+      nativeCallCount: this.ledger.observation.native.calls.length, scope: { participantId: this.principalId, projectId: this.projectId, threadId: this.threadId },
+      sourceCommit: this.ledger.observation.sourceCommit, runtimeSealSha256: this.ledger.observation.runtimeSealSha256, capabilitySetDigest: CAPABILITY_SET_DIGEST });
+  }
   async navigation() { return this.http("navigation", "/api/selected/navigation/query", { experience: this.experience }); }
   async readChat() { return this.http("chat.read", "/api/selected/chat/read", { chatId: this.threadId, experience: this.experience }); }
   async answer(action) {
@@ -240,6 +258,10 @@ export class FunctionalHttpJourney {
       if (this.task) await this.recordState().catch(() => {});
     } finally {
       this.host.faults?.setIndexUnavailable(false);
+      if (this.projectId) await this.captureFinalProof().catch(error => {
+        this.ledger.observation.failures.push({ phase: "final-proof", errorCode: error.code ?? "m1-final-proof-unavailable" });
+        if (this.ledger.observation.status === "completed") this.ledger.observation.status = "failed";
+      });
       this.ledger.observation.finishedAt = new Date().toISOString();
     }
     return this.ledger.observation;

@@ -34,8 +34,11 @@ Qdrant collection creation and filesystem/native effects remain available to mod
   released dependency directory. It does not run a service or model.
 - On that stage, `control-functional.mjs --mode controls --owned-root <exact stage> --source-commit
   <exact commit>` starts disposable loopback PostgreSQL/Qdrant and a compact isolated runtime,
-  runs implemented controls, retains synthetic evidence and cleans up its data/runtime/processes.
-  The unimplemented controls remain explicit in the report. No production store URL is accepted.
+  runs all twelve model-free control drivers, retains synthetic evidence and cleans up its
+  data/runtime/processes under a fifteen-minute watchdog. No production store URL is accepted.
+  The runtime/control seal is written before any control effects; independent grades remain
+  separate from a driver completing. Control10 cannot pass its UI check without the actual
+  browser checkpoint supplied through `runControlFunctional(args,{checkpoint})`.
 - The CLI deliberately rejects `--mode scored` until runtime/readiness and all required drivers are
   sealed. `createFunctionalTestbed` and `FunctionalHttpJourney` are composition APIs for the final
   controlled campaign, not an authorization to run it. This commit performs no model inference.
@@ -54,7 +57,7 @@ model or release-config field. Restart must preserve unknown outcomes rather tha
 
 ## Evidence and remaining implementation
 
-Local helper tests cover 12 contracts: inventory, scoped roots, sealed budgets/roster, exact receipt
+Local helper tests cover inventory, scoped roots, sealed budgets/roster, exact receipt
 retention, disabled inference, unchanged forwarding, wrong-model/settings denial, redirects, actual
 index fault boundary, and one-use browser bootstrap. These are helper tests, not live Control proof.
 
@@ -63,7 +66,19 @@ provider-response loss/retry, actual stale-vector mutation, native in-flight can
 lost acknowledgement, and two actual browser reload journeys. Unsupported actions fail before inference;
 they do not silently skip, pass, or reduce the denominator. Separate fault/browser modules are being
 integrated. The initial complete model-free drivers are exact grants, native limits and exact undo;
-the other nine controls are explicitly not implemented at this layer, despite existing component tests.
+the other nine now have dedicated real controls: CAS/history/foreign references, malicious selected-index
+responses,307/308 across the actual adapters, encrypted PostgreSQL/replay/plan records and cross-record
+envelope rejection, actual worker restart and lost native receipt, logout/replacement grants, Windows
+native-handle/link containment, and release/resource configuration. Negative dependency fixtures are
+explicitly labeled: fixed vectors/malicious HTTP responses do not qualify Nomic or retrieval quality.
+The controls categorically deny upstream model inference. Source fixtures can be retained even when
+their indexing attempt is deliberately denied. No such retained source is counted as indexed evidence.
+
+`captureFinalProof` re-reads actual scoped PostgreSQL continuity/task/grant/intent/receipt state,
+LangGraph checkpoint values, and retained immutable revision bytes. The independent reducer consumes
+those probes; missing probes or browser evidence remain inconclusive. Runtime evidence from the first
+three-control run lacked its prospective seal/check IDs and is diagnostic evidence only. Corrected
+controls must be run afresh; prior evidence is not relabeled as a retrospective pass.
 
 The candidate runtime seal fixes the existing answer cap of 512 tokens and planning cap of 1536, with
 60-second answer route and 30-second planning deadlines (55-second active workflow budget). The harness

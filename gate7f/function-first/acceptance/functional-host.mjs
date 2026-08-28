@@ -107,6 +107,37 @@ export async function createFunctionalHost({ pool, cipher, configuration, provid
         projectId: context.projectId, environmentId: project.environmentId }, reference: project.reference });
       return { ...snapshot, projectRevision: project.revision };
     },
+    async captureFinalProof(context, { threadId, experience, taskId = null, runId = null }) {
+      if (!/^m1-test-[a-f0-9]{24,64}$/.test(context.principalId)) throw fail("m1-proof-scope-invalid");
+      const scope = { participantId: context.principalId, projectId: context.projectId, threadId, experience };
+      const continuityState = await continuity.prepareAnswerContext(scope);
+      const records = await m1.tasks.store.transaction(context, async tx => ({
+        project: await tx.project(), intents: await tx.list("intent", taskId), receipts: await tx.list("receipt", taskId),
+      }));
+      let durable = { scope, ...records, task: null, run: null, grants: [], proposals: [], checkpoint: null }, retained = [];
+      if (taskId) {
+        const status = await m1.tasks.status(context, { taskId });
+        const run = runId ? (await m1.orchestrator.status(context, { runId })).run : null;
+        const last = status.proposals.at(-1), workflow = m1.orchestrator.agent.workflow;
+        let checkpoint = null;
+        if (last) {
+          const checkpointThread = workflow.threadKey(context, last.proposalId);
+          const state = await workflow.graph.getState({ configurable: { thread_id: checkpointThread, authorityContext: context } });
+          checkpoint = { threadId: checkpointThread, checkpointId: state.config?.configurable?.checkpoint_id ?? null,
+            channel_values: state.values ?? {} };
+        }
+        durable = { scope, ...records, task: status.task, run, grants: status.grants, proposals: status.proposals, checkpoint };
+        const references = new Map([status.project.reference, ...status.receipts.flatMap(value => [value.beforeReference, value.afterReference])]
+          .filter(Boolean).map(value => [value.revisionId, value]));
+        if (references.size > 30) throw fail("m1-proof-revision-limit");
+        for (const reference of references.values()) {
+          const snapshot = await m1.tasks.adapter.inspectRevision({ binding: { participantId: context.principalId,
+            projectId: context.projectId, environmentId: status.project.environmentId }, reference });
+          retained.push({ snapshot, reference, inspectedAt: new Date().toISOString() });
+        }
+      }
+      return { continuity: { scope, after: continuityState }, durable, retained };
+    },
     async close() { await new Promise(done => { server.close(done); server.closeAllConnections(); }); },
   };
 }

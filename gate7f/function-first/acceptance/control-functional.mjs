@@ -6,6 +6,7 @@ import { inventory, newObservation, ObservationLedger, fail, assertOwnedStage, s
 import { createOwnedControlResources, fileSha256 } from "./owned-control-resources.mjs";
 import { createFunctionalTestbed } from "./functional-testbed.mjs";
 import { runModelFreeControl, SUPPORTED_CONTROLS } from "./model-free-controls.mjs";
+import { evaluateControl } from "./assertions.mjs";
 
 export function parseArguments(args) {
   const result = { mode: "inventory" }, seen = new Set();
@@ -17,7 +18,7 @@ export function parseArguments(args) {
   return result;
 }
 
-export async function runControlFunctional(args) {
+export async function runControlFunctional(args, { checkpoint = null } = {}) {
   if (args.mode === "inventory") return { ...inventory(), implementedControlDrivers: SUPPORTED_CONTROLS,
     scoredCliEnabled: false, status: "unscored-scaffold; runtime/readiness seal and remaining drivers required" };
   const root = assertOwnedStage(args["owned-root"]);
@@ -32,7 +33,7 @@ export async function runControlFunctional(args) {
     productionChanged: false, protectedDataRead: false, startedAt: new Date().toISOString() };
   let resources, testbed, ledger = null;
   try {
-    resources = await createOwnedControlResources({ root, maximumMs: 300000 }); report.resources = resources.report;
+    resources = await createOwnedControlResources({ root, maximumMs: 900000 }); report.resources = resources.report;
     report.controlSeal = { schemaVersion: "runaai-m1-model-free-control-seal/v1", sourceCommit: identity.sourceCommit,
       sourceArchiveSha256: identity.sourceArchiveSha256, caseBundleSha256: CASE_BUNDLE_SHA256,
       nodeSha256: resources.report.nodeSha256, qdrantSha256: resources.report.qdrantArtifact.sha256,
@@ -45,7 +46,8 @@ export async function runControlFunctional(args) {
     testbed = await createFunctionalTestbed({ resources, mode: "controls", getLedger: () => ledger });
     for (const item of selected) {
       ledger = new ObservationLedger(newObservation({ ...item, role: "control" }, { runtimeSealSha256: report.runtimeSealSha256 }));
-      const observed = await runModelFreeControl({ host: testbed.host, item, ledger }); report.attempts.push(observed);
+      const observed = await runModelFreeControl({ host: testbed.host, item, ledger, support: { resources, testbed, checkpoint } });
+      observed.grade = evaluateControl(item, observed, { runtimeSealSha256: report.runtimeSealSha256 }); report.attempts.push(observed);
       if (observed.provider.calls.length) report.modelsInvoked = true; // Attempted only; controls proxy never sends it upstream.
     }
   } catch (error) { report.errorCode = error.code ?? "m1-control-functional-failed"; report.diagnostic = error.diagnostic ?? null;

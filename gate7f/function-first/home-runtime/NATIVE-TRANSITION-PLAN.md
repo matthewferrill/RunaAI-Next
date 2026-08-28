@@ -181,3 +181,16 @@ the supported busy/unload contract before concluding that maintenance requires a
 The available-model/JIT-disabled branch is now located: it returns an invalidModelIdentifier failure
 whose message explicitly states JIT is disabled. The actual negative-probe status/body still must be
 captured with the pinned available Nomic model after safe transition; static code is not the live proof.
+
+## Prospective exact settings-file bridge
+
+Connect the already-tested file primitive to the transition coordinator with a fixed Home-only vendor
+target and a new protected transaction directory. The bridge must verify exact Node and its own source
+pins, retain original/candidate bytes only in that host-private directory, and call an independent fresh
+quiescence callback before every possible write. No arbitrary path, raw shell command, model operation,
+service operation, or implicit retry is accepted. Each command uses bounded stdin and sanitized errors.
+Restore must re-evaluate semantic rollback eligibility and exact current hash, then invoke the corrected
+actual-preimage ownership primitive. A matching original target is not enough if retained conflict
+evidence disagrees. Before live use, verify the bridge's fixed-path/argument binding, stale state,
+unknown result, no-retry, and private-output behavior with local fixtures; the actual Home transition
+still needs its independently proved caller-maintenance boundary and hardware ownership.

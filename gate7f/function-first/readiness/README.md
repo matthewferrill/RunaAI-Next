@@ -5,6 +5,11 @@ model-operation ownership to the readiness agent on 2026-08-28; root and other a
 inference concurrently. This is unscored readiness/regression, never M1 function quality qualification.
 Old evaluation runners, seals and captures remain untouched.
 
+The completed diagnostics are reported in `RESULTS-2026-08-28.md`. The subsequent actual-adapter smoke
+uses the prospective `M1-AUXILIARY-ENVELOPE.md` and a separate finite hardware lease: root now owns all
+smoke inference, and the readiness operator owns only load/unload/power/watchdog. Historical r2/r3/r4
+seals remain unchanged. The lease source contains no chat/embedding/reranker inference endpoints.
+
 The new create-only package freezes source, synthetic prompts, all three artifact/template pins, runtime
 binary hashes, 32,768 context, 512 output tokens, three repetitions, 30-second requests and a separately
 labelled 120-second late diagnostic. Qwen3.6 MTP is not replaced by its differently sized base artifact.

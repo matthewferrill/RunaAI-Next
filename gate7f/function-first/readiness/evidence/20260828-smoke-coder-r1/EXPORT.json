@@ -1,0 +1,104 @@
+{
+  "schemaVersion": "runa-m1-smoke-lease-export/v1",
+  "retrievedAt": "2026-08-28T16:35:49.121Z",
+  "files": [
+    {
+      "name": "worker-stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "worker.json",
+      "bytes": 105,
+      "sha256": "de7f091b37c8de728ebb35df4a186d9ebcb0c50a9d9711787574bb4d8011ee29"
+    },
+    {
+      "name": "runtime.json",
+      "bytes": 1950,
+      "sha256": "5b13307cd32f48b8d2cd61b563322d02b2f68bbf6d3401b87358ccf0c6735d51"
+    },
+    {
+      "name": "lease-result.json",
+      "bytes": 867,
+      "sha256": "037eed451d5689afe612cb93134e151de6c30d31b8015cdcb349cef34eca0450"
+    },
+    {
+      "name": "seal.json",
+      "bytes": 812,
+      "sha256": "ca8dc389de69aa1485424b08fd8cce973a9317e6798a0564cee28186cfe53154"
+    },
+    {
+      "name": "supervisor.jsonl",
+      "bytes": 9567,
+      "sha256": "25e236a84a1db74a6d36e0a615c4b84e167eeea971eec386d98060d1274690b8"
+    },
+    {
+      "name": "complete.json",
+      "bytes": 184,
+      "sha256": "960f82ccf6647c1dd718b9336c34dbe71d0e2d9c93108070edcd093546f31fb8"
+    },
+    {
+      "name": "events.jsonl",
+      "bytes": 38169,
+      "sha256": "b898be012f4ee21353aadc5a2475e3b88553540711b5b3a90d1de7e7053f2a65"
+    },
+    {
+      "name": "lease-contract.mjs",
+      "bytes": 3296,
+      "sha256": "bc2e3bafd34870562da3ca50b856d6ec2916c6f69758b9c5b7a297bf9a6e4ef8"
+    },
+    {
+      "name": "worker-stdout.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "ready.json",
+      "bytes": 853,
+      "sha256": "9890c5ad97adcd37ea9c4d09f50745b0048d3edd419f9f7991ebca83c49f0816"
+    },
+    {
+      "name": "supervisor-result.json",
+      "bytes": 180,
+      "sha256": "dee737f569fbee5292bebc7b7a4f4d8272f9cf78f86a8a6b6cd637033e88c73d"
+    },
+    {
+      "name": "gguf-metadata.mjs",
+      "bytes": 2623,
+      "sha256": "315fae56b2b70d19a817e5a248f91946a4ae46d3bff33f94c1bb96ffc8fe3b71"
+    },
+    {
+      "name": "Run-HomeSmokeLease.ps1",
+      "bytes": 5963,
+      "sha256": "87cd93ce572bd0e541a1387632a1089b9ab725f1538c4e2b38176e6040fbcbbc"
+    },
+    {
+      "name": "lease-config.json",
+      "bytes": 1659,
+      "sha256": "c0ac9f14ef7b06ab2a9a94ade64eb71932f31ff48947f361e82513c9b7ac9ebc"
+    },
+    {
+      "name": "home-smoke-lease.mjs",
+      "bytes": 9492,
+      "sha256": "f4f3c7ad6f42f58ec64622b8c49cdbeef4a24833aada9748dbd9b6ee6b1d453e"
+    }
+  ],
+  "summary": {
+    "leaseId": "20260828-smoke-coder-r1",
+    "sealSha256": "ca8dc389de69aa1485424b08fd8cce973a9317e6798a0564cee28186cfe53154",
+    "failure": null,
+    "completion": "completed",
+    "cleanupVerified": true,
+    "powerRestored": true,
+    "supervisorExitCode": 0,
+    "supervisorRestorationVerified": true,
+    "peakTemperatureC": 54,
+    "maximumSampleGapMs": 5022,
+    "minimumFreeHostBytes": 100472291328,
+    "minimumFreeGpuMiB": 7150,
+    "readyAt": "2026-08-28T16:34:32.799Z",
+    "endedAt": "2026-08-28T16:35:31.725Z",
+    "modelFunctionQualityQualified": false,
+    "inferenceCalledByOperator": false
+  }
+}

@@ -1,0 +1,84 @@
+{
+  "schemaVersion": "runa-m1-smoke-lease-export/v1",
+  "retrievedAt": "2026-08-28T16:32:38.627Z",
+  "files": [
+    {
+      "name": "runtime.json",
+      "bytes": 1950,
+      "sha256": "5b13307cd32f48b8d2cd61b563322d02b2f68bbf6d3401b87358ccf0c6735d51"
+    },
+    {
+      "name": "ready.json",
+      "bytes": 843,
+      "sha256": "1e83b90ea959262db891748cdbd349d48c31b570397011116e19458acb5cf919"
+    },
+    {
+      "name": "worker-stdout.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "supervisor.jsonl",
+      "bytes": 12291,
+      "sha256": "b37c6a5929e30b5e721d6f9c85219fccb8edcec07fc10b1f813ec30c438deb8e"
+    },
+    {
+      "name": "lease-result.json",
+      "bytes": 855,
+      "sha256": "fc1c028c58ce50171425f1f9bacac057fda7b30653df76d74a01fc86abe3eaf5"
+    },
+    {
+      "name": "worker.json",
+      "bytes": 104,
+      "sha256": "d0d43fae97b2b5100c43144063e0d495dac30cada0b96161211947477b539f7f"
+    },
+    {
+      "name": "lease-config.json",
+      "bytes": 1624,
+      "sha256": "5682c9472c48bc0348192fdcd6060d4d5362cb9b247683c94082981b21bcc696"
+    },
+    {
+      "name": "events.jsonl",
+      "bytes": 67132,
+      "sha256": "e8329085a4bd3eccbe0ba9ae2be5afe32a85f9e5c774c2f83bd34fdf19cd6eaf"
+    },
+    {
+      "name": "worker-stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "supervisor-result.json",
+      "bytes": 180,
+      "sha256": "beb2fe7a54d6c745643850056f97c26682a45118d2a867a81f610b72cc9effe3"
+    },
+    {
+      "name": "complete.json",
+      "bytes": 184,
+      "sha256": "42f73517c2bdbb53d3228d67959066e10559cb269a64a79eb9d4725328d3b430"
+    },
+    {
+      "name": "seal.json",
+      "bytes": 812,
+      "sha256": "aa6d23d596f8d74d19c266e4fe5c3f99e5c6261eac36083bd4bb8ae929ff5ccf"
+    }
+  ],
+  "summary": {
+    "leaseId": "20260828-smoke-gemma-r1",
+    "sealSha256": "aa6d23d596f8d74d19c266e4fe5c3f99e5c6261eac36083bd4bb8ae929ff5ccf",
+    "failure": null,
+    "completion": "completed",
+    "cleanupVerified": true,
+    "powerRestored": true,
+    "supervisorExitCode": 0,
+    "supervisorRestorationVerified": true,
+    "peakTemperatureC": 53,
+    "maximumSampleGapMs": 5909,
+    "minimumFreeHostBytes": 110043680768,
+    "minimumFreeGpuMiB": 13144,
+    "readyAt": "2026-08-28T16:29:56.509Z",
+    "endedAt": "2026-08-28T16:32:14.843Z",
+    "modelFunctionQualityQualified": false,
+    "inferenceCalledByOperator": false
+  }
+}

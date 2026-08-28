@@ -1,0 +1,15 @@
+{
+  "schemaVersion": "runa-m1-smoke-lease-seal/v1",
+  "createdAt": "2026-08-28T16:30:37.591Z",
+  "sourceCommit": "59575e9498d26b7b9a84e4b495d120871d120840",
+  "leaseId": "20260828-smoke-coder-r1",
+  "createdBeforeModelLoads": true,
+  "files": {
+    "home-smoke-lease.mjs": "f4f3c7ad6f42f58ec64622b8c49cdbeef4a24833aada9748dbd9b6ee6b1d453e",
+    "lease-contract.mjs": "bc2e3bafd34870562da3ca50b856d6ec2916c6f69758b9c5b7a297bf9a6e4ef8",
+    "Run-HomeSmokeLease.ps1": "87cd93ce572bd0e541a1387632a1089b9ab725f1538c4e2b38176e6040fbcbbc",
+    "gguf-metadata.mjs": "315fae56b2b70d19a817e5a248f91946a4ae46d3bff33f94c1bb96ffc8fe3b71",
+    "runtime.json": "5b13307cd32f48b8d2cd61b563322d02b2f68bbf6d3401b87358ccf0c6735d51",
+    "lease-config.json": "c0ac9f14ef7b06ab2a9a94ade64eb71932f31ff48947f361e82513c9b7ac9ebc"
+  }
+}

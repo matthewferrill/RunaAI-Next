@@ -1,0 +1,26 @@
+{
+  "schemaVersion": "runa-m1-smoke-lease-result/v1",
+  "leaseId": "20260828-smoke-qwen36-r1",
+  "sealSha256": "f9891e11efe43ea35d060cb0312a1a38c0c114eed8fe81f4c5cc397d2585887d",
+  "endedAt": "2026-08-28T16:39:54.735Z",
+  "failure": null,
+  "completion": "completed",
+  "cleanupVerified": true,
+  "powerRestored": true,
+  "owned": [
+    {
+      "key": "qwen3.6-27b-mtp",
+      "id": "qwen3.6-27b-mtp",
+      "fingerprint": "1aff08461f8e9c1d7ee509728a5cc2435a1ccd810042a2d9fbbb22fa6fd626fc"
+    },
+    {
+      "key": "text-embedding-nomic-embed-text-v1.5",
+      "id": "text-embedding-nomic-embed-text-v1.5",
+      "fingerprint": "66f5db3ab6ec2819b698b24780d7511d0d343f5d0d911dfd5c74640a1b3233db"
+    }
+  ],
+  "ambiguousLoad": null,
+  "productionRoutingChanged": false,
+  "protectedDataIncluded": false,
+  "inferenceCalledByOperator": false
+}

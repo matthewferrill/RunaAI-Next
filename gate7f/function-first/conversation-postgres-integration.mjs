@@ -69,7 +69,7 @@ export async function runConversationPostgresProof({ pgBin } = {}) {
         continuity, workspaceResolver: workspace });
       return new SelectedCoreApplication({ mode: "active", targetGeneration: "synthetic",
         cutoverStatus: async () => ({ phase: "closed", authorityGeneration: "synthetic" }),
-        answerService, actionService: {}, continuity, requestCoordinator: new PostgresRequestCoordinator({ pool }),
+        answerService, actionService: {}, continuity, requestCoordinator: new PostgresRequestCoordinator({ pool, cipher }),
         authenticator: { async authenticate() { return { verified: true, principalId: participantId, methods: ["password"] }; } },
         authorizer: { async authorize() { return { allowed: true }; } } });
     };

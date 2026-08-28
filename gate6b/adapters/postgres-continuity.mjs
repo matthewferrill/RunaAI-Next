@@ -4,6 +4,7 @@ import { PERSONAL_SCOPE } from "../application.mjs";
 import { createConversationContext, parseConversationScope, CONVERSATION_CONTEXT_LIMITS }
   from "../../gate7f/function-first/conversation-context.mjs";
 import { isRetryableConversationFailure } from "../../gate7f/function-first/conversation-outcome.mjs";
+import { answerEvidence, readAnswerEvidence } from "../../gate7f/function-first/conversation-evidence.mjs";
 
 const coded = (code, message) => Object.assign(new Error(message), { code });
 const sha256 = value => createHash("sha256").update(String(value)).digest("hex");
@@ -56,6 +57,12 @@ export class PostgresSelectedContinuityStore {
       CREATE TABLE IF NOT EXISTS runa_runtime.route_responses (
         operation text NOT NULL, request_id text NOT NULL, actor_id text NOT NULL,
         input_digest text NOT NULL, response_json jsonb NOT NULL,
+        completed_at timestamptz NOT NULL DEFAULT clock_timestamp(),
+        PRIMARY KEY(operation,request_id)
+      );
+      CREATE TABLE IF NOT EXISTS runa_runtime.route_responses_v2 (
+        operation text NOT NULL, request_id text NOT NULL, actor_id text NOT NULL,
+        input_digest text NOT NULL, response_envelope jsonb NOT NULL,
         completed_at timestamptz NOT NULL DEFAULT clock_timestamp(),
         PRIMARY KEY(operation,request_id)
       );
@@ -173,10 +180,13 @@ export class PostgresSelectedContinuityStore {
     const retainedExperience = classifyExperience({ explicit: title.experience,
       routes: turnRows.map(turn => turn.route), projectExperience });
     if (retainedExperience !== experience) throw coded("chat-experience-denied", "The selected chat belongs to another experience.");
-    const turns = turnRows.map(row => ({ turnOrdinal: row.turn_ordinal,
-      occurredAt: new Date(row.occurred_at).toISOString(), route: row.route,
-      ...this.cipher.decrypt(privateContext("chat-turn", participantId,
-        `turn:${chatId}:${row.turn_ordinal}`), row.content_envelope) }));
+    const turns = turnRows.map(row => {
+      const payload = this.cipher.decrypt(privateContext("chat-turn", participantId,
+        `turn:${chatId}:${row.turn_ordinal}`), row.content_envelope);
+      return { turnOrdinal: row.turn_ordinal, occurredAt: new Date(row.occurred_at).toISOString(),
+        route: row.route, user: payload.user, assistant: payload.assistant,
+        evidence: readAnswerEvidence(payload.evidence) };
+    });
     return Object.freeze({ schemaVersion: "runa2-chat-record/v1", chatId, projectId: row.project_id,
       title: safeTitle(title.title), experience, turnCount: row.turn_count,
       updatedAt: new Date(row.updated_at).toISOString(), turns: Object.freeze(turns) });
@@ -314,7 +324,7 @@ export class PostgresSelectedContinuityStore {
     const participantId = request.participant.principalId;
     const chatId = request.thread.threadId;
     const id = `turn:${chatId}:${ordinal}`;
-    const privateData = { user: request.message, assistant: response.answer };
+    const privateData = { user: request.message, assistant: response.answer, evidence: answerEvidence(response) };
     const publicData = { chatId, turnOrdinal: ordinal, occurredAt: this.now().toISOString(),
       route: routeFor(request.lane), originRequestId: request.requestId };
     const context = { recordType: "chat-turn", participantId, recordId: id, field: "private-payload" };
@@ -339,28 +349,44 @@ export class PostgresSelectedContinuityStore {
 }
 
 export class PostgresRequestCoordinator {
-  constructor({ pool }) { this.pool = pool; }
+  constructor({ pool, cipher }) {
+    if (typeof cipher?.encrypt !== "function" || typeof cipher?.decrypt !== "function") {
+      throw coded("request-cache-cipher-required", "An authenticated private cache cipher is required.");
+    }
+    this.pool = pool; this.cipher = cipher;
+  }
   async runOnce({ operation, requestId, actorId, inputDigest, execute }) {
+    for (const value of [operation, requestId, actorId, inputDigest]) {
+      if (typeof value !== "string" || !value.length || value.length > 512 || /[\u0000-\u001f\u007f]/.test(value)) {
+        throw coded("request-cache-scope-invalid", "The request cache scope is invalid.");
+      }
+    }
+    const context = { recordType: "request-response-v2", participantId: actorId,
+      recordId: sha256(JSON.stringify([operation, requestId, inputDigest])), field: "private-response" };
     const client = await this.pool.connect();
     const key = lockKey(`route:${operation}:${requestId}`);
     let locked = false;
     try {
       await client.query("SELECT pg_advisory_lock($1::bigint)", [key]);
       locked = true;
-      const prior = (await client.query(`SELECT actor_id,input_digest,response_json FROM runa_runtime.route_responses
+      // The old plaintext namespace is retained for old-release rollback, never
+      // read as v2 authority or updated by this coordinator.
+      const prior = (await client.query(`SELECT actor_id,input_digest,response_envelope FROM runa_runtime.route_responses_v2
         WHERE operation=$1 AND request_id=$2`, [operation, requestId])).rows[0];
       if (prior) {
         if (prior.actor_id !== actorId || prior.input_digest !== inputDigest) throw coded("request-id-conflict", "The request id is bound to different input.");
-        if (operation !== "answer" || !isRetryableConversationFailure(prior.response_json)) return clone(prior.response_json);
+        const response = this.cipher.decrypt(context, prior.response_envelope);
+        if (operation !== "answer" || !isRetryableConversationFailure(response)) return clone(response);
       }
       const response = await execute();
-      await client.query(`INSERT INTO runa_runtime.route_responses
-        (operation,request_id,actor_id,input_digest,response_json) VALUES($1,$2,$3,$4,$5::jsonb)
-        ON CONFLICT(operation,request_id) DO UPDATE SET response_json=excluded.response_json,
+      const envelope = this.cipher.encrypt(context, response);
+      await client.query(`INSERT INTO runa_runtime.route_responses_v2
+        (operation,request_id,actor_id,input_digest,response_envelope) VALUES($1,$2,$3,$4,$5::jsonb)
+        ON CONFLICT(operation,request_id) DO UPDATE SET response_envelope=excluded.response_envelope,
           completed_at=clock_timestamp()
-        WHERE runa_runtime.route_responses.actor_id=excluded.actor_id
-          AND runa_runtime.route_responses.input_digest=excluded.input_digest`,
-      [operation, requestId, actorId, inputDigest, JSON.stringify(response)]);
+        WHERE runa_runtime.route_responses_v2.actor_id=excluded.actor_id
+          AND runa_runtime.route_responses_v2.input_digest=excluded.input_digest`,
+      [operation, requestId, actorId, inputDigest, JSON.stringify(envelope)]);
       return response;
     } finally {
       if (locked) await client.query("SELECT pg_advisory_unlock($1::bigint)", [key]).catch(() => {});

@@ -1,0 +1,32 @@
+import { z } from "zod";
+
+const id = z.string().min(1).max(160).regex(/^[A-Za-z0-9][A-Za-z0-9_.:-]*$/);
+const code = z.string().max(160).regex(/^[A-Za-z0-9_.: -]*$/);
+const count = z.number().int().nonnegative().max(1_000_000);
+const evidenceSchema = z.object({
+  schemaVersion: z.literal("runaai-answer-evidence/v1"),
+  citations: z.array(z.object({ sourceId: id, sectionId: id,
+    contentSha256: z.string().regex(/^[a-f0-9]{64}$/), ordinal: z.number().int().min(1).max(1_000_000) }).strict()).max(24),
+  ground: z.enum(["record-answers", "record-silent", "not-a-question-of-fact", "no-ground-needed"]),
+  retrieval: z.object({ attempted: z.boolean(), skipped: z.boolean(), skipReason: code, empty: z.boolean(),
+    degraded: z.boolean(), evidenceCount: count, unavailable: z.array(code).max(24), omissions: z.array(code).max(24) }).strict(),
+  workspace: z.object({ explicitSources: count, resolvedSources: count, extraReads: z.literal(0),
+    citationStatus: z.enum(["not-applicable", "recognized", "missing", "contains-unknown"]) }).strict().nullable(),
+  completion: z.object({ reason: code, timedOut: z.boolean(), outputLimited: z.boolean() }).strict(),
+  execution: z.object({ status: z.literal("not-executed") }).strict(),
+}).strict();
+
+// Persist application-produced metadata only, never model labels, duplicate source text,
+// private request payloads or an inferred execution result. Missing old metadata stays missing.
+export function answerEvidence(response) {
+  if (response?.execution?.status !== "not-executed") return null;
+  const result = evidenceSchema.safeParse({ schemaVersion: "runaai-answer-evidence/v1",
+    citations: response.citations, ground: response.ground, retrieval: response.retrieval,
+    workspace: response.workspace, completion: response.completion, execution: { status: "not-executed" } });
+  return result.success ? result.data : null;
+}
+
+export function readAnswerEvidence(value) {
+  const result = evidenceSchema.safeParse(value);
+  return result.success ? result.data : null;
+}

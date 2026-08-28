@@ -6,16 +6,18 @@ import { Gate2ReadOnlyService } from "../../gate2/core.mjs";
 import { SelectedCoreApplication } from "../../gate6b/application.mjs";
 import { PostgresRequestCoordinator } from "../../gate6b/adapters/postgres-continuity.mjs";
 import { INCOMPLETE_ANSWER_REASONS, isRetryableConversationFailure } from "./conversation-outcome.mjs";
+import { testCipher } from "../../gate4/fixtures.mjs";
 
 function coordinatorPool() {
   const rows = new Map();
   const query = async (sql, values) => {
-    if (sql.includes("SELECT actor_id,input_digest,response_json")) {
+    if (sql.includes("SELECT actor_id,input_digest,response_envelope")) {
       const row = rows.get(`${values[0]}:${values[1]}`);
       return { rows: row ? [structuredClone(row)] : [] };
     }
     if (sql.includes("INSERT INTO runa_runtime.route_responses")) {
-      rows.set(`${values[0]}:${values[1]}`, { actor_id: values[2], input_digest: values[3], response_json: JSON.parse(values[4]) });
+      assert.match(sql, /route_responses_v2/);
+      rows.set(`${values[0]}:${values[1]}`, { actor_id: values[2], input_digest: values[3], response_envelope: JSON.parse(values[4]) });
       return { rows: [], rowCount: 1 };
     }
     return { rows: [] };
@@ -38,7 +40,7 @@ function harness({ reply, coordinator = false } = {}) {
   const app = new SelectedCoreApplication({ mode: "active", targetGeneration: "synthetic",
     cutoverStatus: async () => ({ phase: "closed", authorityGeneration: "synthetic" }),
     answerService: service, actionService: {}, continuity,
-    requestCoordinator: coordinator ? new PostgresRequestCoordinator({ pool }) : null,
+    requestCoordinator: coordinator ? new PostgresRequestCoordinator({ pool, cipher: testCipher() }) : null,
     authenticator: { async authenticate() { return { principalId: actor, verified: true }; } },
     authorizer: { async authorize() { return { allowed: true }; } } });
   return { app, continuity, provider, records, pool };
@@ -123,7 +125,7 @@ test("retryable failures remain bound to their actor and original request input"
 
 test("the read-only retry classifier never replays actions or uncertain effects", async () => {
   const pool = coordinatorPool();
-  const coordinator = new PostgresRequestCoordinator({ pool });
+  const coordinator = new PostgresRequestCoordinator({ pool, cipher: testCipher() });
   const failure = { schemaVersion: "runa2-answer-response/v2", completion: { reason: "provider-incomplete" },
     execution: { status: "not-executed" }, effects: [] };
   let attempts = 0;
@@ -149,4 +151,41 @@ test("invalid or forged client revisions do not replace the server's retained hi
   await assert.rejects(context.app.answer({ credential: "synthetic", body: body("forged", { contextRevision: 999 }) }),
     { code: "conversation-revision-conflict" });
   assert.equal(context.provider.calls.length, 0);
+});
+
+test("reply cache requires authenticated encryption and retains no source-derived plaintext", async () => {
+  assert.throws(() => new PostgresRequestCoordinator({ pool: coordinatorPool() }), { code: "request-cache-cipher-required" });
+  const pool = coordinatorPool(), cipher = testCipher(), coordinator = new PostgresRequestCoordinator({ pool, cipher });
+  let calls = 0;
+  const input = { operation: "answer", requestId: "encrypted", actorId: actor, inputDigest: "scope-digest",
+    execute: async () => { calls++; return { answer: "PRIVATE_SOURCE_DERIVED_CANARY" }; } };
+  await coordinator.runOnce(input);
+  assert.equal(JSON.stringify([...pool.rows.values()]).includes("PRIVATE_SOURCE_DERIVED_CANARY"), false);
+  assert.deepEqual(await new PostgresRequestCoordinator({ pool, cipher }).runOnce(input), { answer: "PRIVATE_SOURCE_DERIVED_CANARY" });
+  assert.equal(calls, 1);
+});
+
+test("encrypted cache cannot be copied across actor, operation, request or input bindings", async () => {
+  for (const change of [{ actorId: "other-actor" }, { operation: "other-operation" }, { requestId: "other-request" }, { inputDigest: "other-input" }]) {
+    const pool = coordinatorPool(), coordinator = new PostgresRequestCoordinator({ pool, cipher: testCipher() });
+    let calls = 0;
+    const input = { operation: "answer", requestId: "bound", actorId: actor, inputDigest: "input",
+      execute: async () => { calls++; return { answer: "Synthetic confidential answer" }; } };
+    await coordinator.runOnce(input);
+    const changed = { ...input, ...change }, original = pool.rows.get("answer:bound");
+    pool.rows.set(`${changed.operation}:${changed.requestId}`, { ...original, actor_id: changed.actorId, input_digest: changed.inputDigest });
+    await assert.rejects(coordinator.runOnce(changed), { code: "private-envelope-invalid" });
+    assert.equal(calls, 1);
+  }
+});
+
+test("ciphertext corruption fails closed without repeating inference", async () => {
+  const pool = coordinatorPool(), coordinator = new PostgresRequestCoordinator({ pool, cipher: testCipher() });
+  let calls = 0;
+  const input = { operation: "answer", requestId: "tampered", actorId: actor, inputDigest: "input",
+    execute: async () => { calls++; return { answer: "Synthetic" }; } };
+  await coordinator.runOnce(input);
+  pool.rows.get("answer:tampered").response_envelope.tag = Buffer.alloc(16).toString("base64");
+  await assert.rejects(coordinator.runOnce(input), { code: "private-envelope-invalid" });
+  assert.equal(calls, 1);
 });

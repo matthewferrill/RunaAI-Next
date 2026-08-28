@@ -1,0 +1,67 @@
+{
+  "schemaVersion": "runa-m1-control-native-component-evidence/v1",
+  "date": "2026-08-28",
+  "taskSourceCommit": "ad3e64ca1bbf210c4a8e65bc50f5f5efb4c353f8",
+  "projectSourceCommit": "769357425bb8613aac5bd3ac49d7ec70ec074719",
+  "sourceArchiveSha256": "ade244756dbfac185f7de1d01017e2ebfeafa80f22d9a78d60d730012a164de1",
+  "host": "RUNA-CONTROL",
+  "accessIdentity": "RUNA-CONTROL\\Matthew",
+  "repositoryHeadBeforeAndAfter": "f092d358a18f0ec0b6c2eaaeaf9a057b1d7f6d68",
+  "repositoryTrackedChangesBeforeAndAfter": [],
+  "runtime": {
+    "hostVersion": "v22.22.0",
+    "engine": "quickjs",
+    "packageVersion": "0.32.0",
+    "isolationProvider": "microsoft-mxc",
+    "isolationPackageVersion": "0.8.0",
+    "isolationTier": "appcontainer-dacl",
+    "compactCopiedRuntime": true,
+    "copiedNodeExecutable": true,
+    "dedicatedOwnedTransientDirectory": true
+  },
+  "startup": {
+    "ready": true,
+    "status": "executed",
+    "errorCode": null,
+    "stdout": "runa2-sandbox-ready\n"
+  },
+  "tests": {
+    "total": 6,
+    "passed": 6,
+    "failed": 0,
+    "skipped": 0,
+    "durationMs": 48309.3539,
+    "cases": [
+      {"name": "real PG + immutable filesystem + MXC: inspect, fail, correct, verify and exact restore", "passed": true, "durationMs": 17157.1644},
+      {"name": "actual worker crash after immutable staging reconciles from disk without re-executing", "passed": true, "durationMs": 6004.8502},
+      {"name": "actual bounded MXC result is retained when cancellation occurs after execution but before record", "passed": true, "durationMs": 3200.5258},
+      {"name": "actual MXC exposes no host filesystem/process/network interfaces and rejects escaping paths", "passed": true, "durationMs": 6482.5712},
+      {"name": "actual infinite JavaScript is bounded by the retained native runtime deadline", "passed": true, "durationMs": 7669.8443},
+      {"name": "actual excessive output is rejected without presenting a partial successful result", "passed": true, "durationMs": 6548.3293}
+    ]
+  },
+  "accessChecks": {
+    "onlyFourNewOwnedDirectoryTargetsChanged": true,
+    "ownedTargetBeforeDaclSha256": "276001d189dfa8d4a3143bea67566ca8cfbdfcb8526ab2576844130f6766b5fc",
+    "ownedTargetAfterDaclSha256": "c640d564ca0f25335e8e7f1cdf3b4d5d38548422063282f1517b2f824ed3502c",
+    "ownershipUnchanged": true,
+    "ancestorsUnchanged": true,
+    "sampledDescendantUnchanged": true,
+    "productionAclChanged": false
+  },
+  "cleanupAndPostcheck": {
+    "disposablePostgresStopped": true,
+    "ownedRuntimeAndDatabaseRemoved": true,
+    "ownedStagingDirectoryRemoved": true,
+    "ownedNodeProcessesRemaining": 0,
+    "productionRuntimeDaclsUnchanged": true,
+    "productionNodeHashUnchanged": true,
+    "productionPostgresProcessesUnchanged": true,
+    "sourceRecoverableFromPinnedLocalArchiveAndGit": true
+  },
+  "productionChanged": false,
+  "protectedDataRead": false,
+  "modelsInvoked": false,
+  "privateValuesIncluded": false,
+  "milestoneComplete": false
+}

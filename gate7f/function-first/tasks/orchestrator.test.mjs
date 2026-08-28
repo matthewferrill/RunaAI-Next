@@ -51,14 +51,15 @@ class Adapter {
   }
 }
 
-async function fixture({ planner, profile = "safe-autopilot", hooks = {}, budgets = {}, cipher = null, authorizeContext = null } = {}) {
+async function fixture({ planner, profile = "safe-autopilot", hooks = {}, budgets = {}, cipher = null, authorizeContext = null,
+  files = { "index.js": "exports.add=(a,b)=>a-b;" } } = {}) {
   const pool = new pg.Pool({ connectionString: process.env.M1_TASK_PG_URL });
   const schema = `m1_orch_${randomBytes(6).toString("hex")}`;
   const store = new PostgresTaskStore({ pool, schema, cipher, allowPlaintextForSynthetic: !cipher }); await store.initialize();
   const adapter = new Adapter();
   const service = new M1TaskService({ store, adapter, hooks,
     ...(authorizeContext ? { authorizeContext } : { allowSyntheticAuthority: true }) });
-  await service.registerProject(context, { environmentId: "orch-environment", files: { "index.js": "exports.add=(a,b)=>a-b;" } });
+  await service.registerProject(context, { environmentId: "orch-environment", files });
   const task = await service.createTask(context, { requestId: "task-create", objective: "Fix and test the addition function." });
   const grant = await service.createGrant(context, { taskId: task.taskId, profile, allowedPaths: ["index.js"],
     allowedSuites: ["addition"], expiresAt: new Date(Date.now() + 600_000).toISOString() });
@@ -252,4 +253,16 @@ integration("logout between conversational steps prevents every following effect
     assert.equal(result.receipts.length, 1);
     assert.equal(result.receipts[0].capabilityId, "project.apply-change");
   } finally { await f.close(); }
+});
+
+integration("planner receives only grant-selected file contents and no opaque full reference", async () => {
+  const canary = "OUTSIDE_SELECTED_PATH_CANARY";
+  const f = await fixture({ files: { "index.js": "exports.add=(a,b)=>a+b;", "hidden.js": canary },
+    planner: { async plan(input) {
+      assert.equal(input.snapshot.files.length, 1); assert.equal(input.snapshot.omittedFileCount, 1);
+      assert.equal(input.snapshot.reference, undefined); assert(!JSON.stringify(input).includes(canary));
+      return { summary: "Read the selected file", steps: [{ capabilityId: "project.inspect", arguments: { path: "index.js" } }] };
+    } } });
+  try { assert.equal((await f.start()).run.status, "completed"); }
+  finally { await f.close(); }
 });

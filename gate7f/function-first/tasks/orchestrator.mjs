@@ -217,6 +217,12 @@ export class M1TaskOrchestrator {
     assert(grant?.definitionDigest === run.grantDefinitionDigest, "m1-stale-grant");
     const snapshot = await this.service.adapter.inspectRevision({ binding: binding(context, taskState.project.environmentId),
       reference: taskState.project.reference });
+    const permittedStep = step => (!step.arguments?.path || grant.allowedPaths.includes(step.arguments.path))
+      && (!step.arguments?.suiteId || grant.allowedSuites.includes(step.arguments.suiteId));
+    const permittedProposalIds = new Set(taskState.proposals.filter(permittedStep).map(proposal => proposal.proposalId));
+    const plannerSnapshot = { workspaceSha256: snapshot.workspaceSha256, projectRevision: taskState.project.revision,
+      files: snapshot.files.filter(file => grant.allowedPaths.includes(file.path)),
+      omittedFileCount: snapshot.files.filter(file => !grant.allowedPaths.includes(file.path)).length };
     await this.update(context, run.runId, state => { state.status = "planning"; state.planAttempts++; });
     const timeout = Math.min(run.budgets.planningTimeoutMs,
       run.budgets.maximumActiveMs - run.consumedMs - (this.now() - activeStarted));
@@ -235,8 +241,10 @@ export class M1TaskOrchestrator {
       }, 250);
       poll.unref?.();
       const rawPlan = await Promise.race([this.planner.plan({ objective: run.objective,
-        snapshot: structuredClone(snapshot), receipts: structuredClone(taskState.receipts),
-        previousPlans: structuredClone(run.plans), repair: run.status === "repair-required",
+        snapshot: structuredClone(plannerSnapshot),
+        receipts: structuredClone(taskState.receipts.filter(receipt => permittedProposalIds.has(receipt.proposalId))
+          .map(({ beforeReference, afterReference, rollbackReference, ...receipt }) => receipt)),
+        previousPlans: structuredClone(run.plans.filter(plan => plan.steps.every(permittedStep))), repair: run.status === "repair-required",
         allowedPaths: [...grant.allowedPaths], allowedSuites: [...grant.allowedSuites],
         capabilityIds: grant.capabilityIds.filter(id => grant.profile !== "read-only" || !CAPABILITIES[id].effectful),
         signal: controller.signal }), timeoutPromise]);

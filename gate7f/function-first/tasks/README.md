@@ -48,6 +48,8 @@ capabilityIds,signal})`. The planner returns strict data: `{summary,steps:[{capa
 No model-supplied approval, receipt, completion or runtime instruction is accepted. Initial maximums are
 six steps/plan, two plan attempts (one repair), twelve actions, 120 seconds/planning call, five minutes
 active work and one hour run age. Callers may narrow, not widen, these limits.
+The model sees only grant-selected file contents, not the full immutable reference or other paths'
+historical content. Execution authority and the complete revision remain application-owned.
 
 - `start(context,{taskId,grantId,grantRevision,requestId})` plans and advances through ordinary authority.
 - `resume(context,{runId})` continues a persisted run. Ask-profile work pauses for exact service approval;
@@ -108,6 +110,12 @@ the same disposable URL for real PostgreSQL/LangGraph planning, approval, repair
 logout recovery. The separate real-project
 integration uses actual immutable files and the retained Gate 7E executor. Root owns the disposable
 PostgreSQL lifecycle; these tests never stop it or access a production/private database.
+
+The completed isolated Control transport proof is retained in
+`CONTROL-NATIVE-RESULTS-2026-08-28.json` and `RESULTS-2026-08-28.md`. Its six actual native scenarios
+passed using a compact staged runtime and dedicated temporary source directory. `control-native-proof.mjs`
+is intentionally restricted to an exact newly owned Control staging directory and a disposable database;
+it must not be pointed at production storage or used to prepare existing production/ancestor ACLs.
 
 This module does not implement the authenticated HTTP/UI adapter, a particular model provider, matched three-model
 qualification or steward customer trial. Root composes those; no module test is M1 completion evidence.

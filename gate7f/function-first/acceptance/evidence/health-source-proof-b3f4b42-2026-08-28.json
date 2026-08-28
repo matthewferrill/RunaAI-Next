@@ -1,0 +1,21 @@
+{
+  "sourceCommit": "b3f4b42e297d7a0d6fc743a65c8b4440513fcec2",
+  "archive": {
+    "files": 1360,
+    "archiveSha256": "e800dc6c32d9f85ff8078f1fa42afeacf8e30e77270209cd9d6b75d5162dc4cd",
+    "extractedBytesVerified": true
+  },
+  "dependencyArtifactVerification": {
+    "schemaVersion": "runa2-gate6b-artifact-status/v1",
+    "verified": true,
+    "artifactDigest": "248aaee4f7855c83fe94a2855e156d2321dee3721c06535afbca87a3f3e86167",
+    "fileCount": 30036,
+    "privateValuesIncluded": false
+  },
+  "packageLockSha256": "2b443060beac09e89779ab2e4b60a22e7bf89e26880f14d0d4cdc04db9d8328e",
+  "nodeSha256": "bae898add4643fcf890a83ad8ae56e20dce7e781cab161a53991ceba70c99ffb",
+  "qdrantSha256": "369c562eae3d89333a13abfdb522fa209e3f587c1217a1059d817e80814ea9d4",
+  "inspectedAt": "2026-08-28T18:48:34.240Z",
+  "productionChanged": false,
+  "modelsInvoked": false
+}

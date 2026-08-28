@@ -1,0 +1,10 @@
+{
+  "sourceCommit": "b3f4b42e297d7a0d6fc743a65c8b4440513fcec2",
+  "exitCode": 0,
+  "cleanup": {
+    "stopped": true,
+    "ownedSyntheticDataRemoved": true,
+    "productionChanged": false
+  },
+  "tail": "  type: 'test'\n  ...\n1..125\n# tests 125\n# suites 0\n# pass 125\n# fail 0\n# cancelled 0\n# skipped 0\n# todo 0\n# duration_ms 3125.042\n"
+}

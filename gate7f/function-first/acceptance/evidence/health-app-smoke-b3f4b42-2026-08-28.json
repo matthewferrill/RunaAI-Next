@@ -1,0 +1,3765 @@
+{
+  "schemaVersion": "runaai-m1-health-app-smoke/v1",
+  "smokeId": "71546dc9-8cd2-45c7-ab76-542d97ce0198",
+  "sourceCommit": "b3f4b42e297d7a0d6fc743a65c8b4440513fcec2",
+  "sourceArchiveSha256": "e800dc6c32d9f85ff8078f1fa42afeacf8e30e77270209cd9d6b75d5162dc4cd",
+  "startedAt": "2026-08-28T18:45:23.947Z",
+  "passed": true,
+  "scored": false,
+  "modelsInvoked": false,
+  "productionChanged": false,
+  "protectedDataRead": false,
+  "samples": [
+    {
+      "path": "/health/live",
+      "startedAt": "2026-08-28T18:45:40.243Z",
+      "finishedAt": "2026-08-28T18:45:40.249Z",
+      "status": 200,
+      "body": {
+        "schemaVersion": "runa2-gate6b-liveness/v1",
+        "live": true,
+        "privateValuesIncluded": false
+      }
+    },
+    {
+      "path": "/api/runtime/status",
+      "startedAt": "2026-08-28T18:45:40.249Z",
+      "finishedAt": "2026-08-28T18:45:40.252Z",
+      "status": 200,
+      "body": {
+        "schemaVersion": "runa2-gate6-runtime-status/v2",
+        "synthetic": true,
+        "running": {
+          "releaseId": "m1-isolated-acceptance",
+          "commit": "b3f4b42e297d7a0d6fc743a65c8b4440513fcec2",
+          "artifactDigest": "e800dc6c32d9f85ff8078f1fa42afeacf8e30e77270209cd9d6b75d5162dc4cd",
+          "applicationEntryPoint": "gate7f/function-first/acceptance/control-functional.mjs"
+        },
+        "selectedScopeVersion": "m1-supplied-text-and-disposable-javascript",
+        "authorityGeneration": "m1-isolated-synthetic",
+        "cutover": {
+          "phase": "closed",
+          "revision": 0
+        },
+        "privateValuesIncluded": false
+      }
+    },
+    {
+      "path": "/api/readiness/status",
+      "startedAt": "2026-08-28T18:45:40.252Z",
+      "finishedAt": "2026-08-28T18:45:40.265Z",
+      "status": 200,
+      "body": {
+        "schemaVersion": "runa2-gate6b-shadow-readiness/v1",
+        "authority": "active",
+        "dependencies": {
+          "qdrant": true,
+          "embedding": false,
+          "reranker": false,
+          "ready": false
+        },
+        "synthetic": true,
+        "protectedDataImported": false,
+        "ownerCredentialEnrolled": false,
+        "productionTrafficChanged": false,
+        "privateValuesIncluded": false
+      }
+    },
+    {
+      "path": "/api/session/status",
+      "startedAt": "2026-08-28T18:45:40.265Z",
+      "finishedAt": "2026-08-28T18:45:40.267Z",
+      "status": 200,
+      "body": {
+        "schemaVersion": "runa2-gate7a-browser-session-status/v1",
+        "authenticated": false,
+        "sessionType": null,
+        "privateValuesIncluded": false
+      }
+    },
+    {
+      "path": "/health/ready",
+      "startedAt": "2026-08-28T18:45:40.267Z",
+      "finishedAt": "2026-08-28T18:45:40.274Z",
+      "status": 503,
+      "body": {
+        "qdrant": true,
+        "embedding": false,
+        "reranker": false,
+        "ready": false
+      }
+    },
+    {
+      "path": "/health/ready",
+      "startedAt": "2026-08-28T18:45:45.364Z",
+      "finishedAt": "2026-08-28T18:45:45.373Z",
+      "status": 503,
+      "body": {
+        "qdrant": true,
+        "embedding": false,
+        "reranker": false,
+        "ready": false
+      }
+    },
+    {
+      "path": "/health/ready",
+      "startedAt": "2026-08-28T18:45:50.482Z",
+      "finishedAt": "2026-08-28T18:45:50.489Z",
+      "status": 503,
+      "body": {
+        "qdrant": true,
+        "embedding": false,
+        "reranker": false,
+        "ready": false
+      }
+    },
+    {
+      "path": "/health/ready",
+      "startedAt": "2026-08-28T18:45:55.595Z",
+      "finishedAt": "2026-08-28T18:45:55.604Z",
+      "status": 503,
+      "body": {
+        "qdrant": true,
+        "embedding": false,
+        "reranker": false,
+        "ready": false
+      }
+    },
+    {
+      "path": "/health/ready",
+      "startedAt": "2026-08-28T18:46:00.714Z",
+      "finishedAt": "2026-08-28T18:46:00.722Z",
+      "status": 503,
+      "body": {
+        "qdrant": true,
+        "embedding": false,
+        "reranker": false,
+        "ready": false
+      }
+    },
+    {
+      "path": "/health/ready",
+      "startedAt": "2026-08-28T18:46:05.796Z",
+      "finishedAt": "2026-08-28T18:46:05.804Z",
+      "status": 503,
+      "body": {
+        "qdrant": true,
+        "embedding": false,
+        "reranker": false,
+        "ready": false
+      }
+    },
+    {
+      "path": "/health/ready",
+      "startedAt": "2026-08-28T18:46:10.891Z",
+      "finishedAt": "2026-08-28T18:46:10.898Z",
+      "status": 503,
+      "body": {
+        "qdrant": true,
+        "embedding": false,
+        "reranker": false,
+        "ready": false
+      }
+    },
+    {
+      "path": "/health/ready",
+      "startedAt": "2026-08-28T18:46:16.016Z",
+      "finishedAt": "2026-08-28T18:46:16.023Z",
+      "status": 503,
+      "body": {
+        "qdrant": true,
+        "embedding": false,
+        "reranker": false,
+        "ready": false
+      }
+    },
+    {
+      "path": "/health/ready",
+      "startedAt": "2026-08-28T18:46:21.088Z",
+      "finishedAt": "2026-08-28T18:46:21.096Z",
+      "status": 503,
+      "body": {
+        "qdrant": true,
+        "embedding": false,
+        "reranker": false,
+        "ready": false
+      }
+    },
+    {
+      "path": "/health/ready",
+      "startedAt": "2026-08-28T18:46:26.188Z",
+      "finishedAt": "2026-08-28T18:46:26.195Z",
+      "status": 503,
+      "body": {
+        "qdrant": true,
+        "embedding": false,
+        "reranker": false,
+        "ready": false
+      }
+    },
+    {
+      "path": "/health/ready",
+      "startedAt": "2026-08-28T18:46:31.276Z",
+      "finishedAt": "2026-08-28T18:46:31.283Z",
+      "status": 503,
+      "body": {
+        "qdrant": true,
+        "embedding": false,
+        "reranker": false,
+        "ready": false
+      }
+    },
+    {
+      "path": "/health/ready",
+      "startedAt": "2026-08-28T18:46:36.370Z",
+      "finishedAt": "2026-08-28T18:46:36.376Z",
+      "status": 503,
+      "body": {
+        "qdrant": true,
+        "embedding": false,
+        "reranker": false,
+        "ready": false
+      }
+    },
+    {
+      "path": "/health/ready",
+      "startedAt": "2026-08-28T18:46:41.466Z",
+      "finishedAt": "2026-08-28T18:46:41.472Z",
+      "status": 503,
+      "body": {
+        "qdrant": true,
+        "embedding": false,
+        "reranker": false,
+        "ready": false
+      }
+    },
+    {
+      "path": "/health/ready",
+      "startedAt": "2026-08-28T18:46:46.563Z",
+      "finishedAt": "2026-08-28T18:46:46.569Z",
+      "status": 503,
+      "body": {
+        "qdrant": true,
+        "embedding": false,
+        "reranker": false,
+        "ready": false
+      }
+    },
+    {
+      "path": "/health/ready",
+      "startedAt": "2026-08-28T18:46:51.680Z",
+      "finishedAt": "2026-08-28T18:46:51.689Z",
+      "status": 503,
+      "body": {
+        "qdrant": true,
+        "embedding": false,
+        "reranker": false,
+        "ready": false
+      }
+    },
+    {
+      "path": "/health/ready",
+      "startedAt": "2026-08-28T18:46:56.784Z",
+      "finishedAt": "2026-08-28T18:46:56.790Z",
+      "status": 503,
+      "body": {
+        "qdrant": true,
+        "embedding": false,
+        "reranker": false,
+        "ready": false
+      }
+    },
+    {
+      "path": "/health/ready",
+      "startedAt": "2026-08-28T18:47:01.898Z",
+      "finishedAt": "2026-08-28T18:47:01.904Z",
+      "status": 503,
+      "body": {
+        "qdrant": true,
+        "embedding": false,
+        "reranker": false,
+        "ready": false
+      }
+    },
+    {
+      "path": "/health/ready",
+      "startedAt": "2026-08-28T18:47:06.993Z",
+      "finishedAt": "2026-08-28T18:47:07.001Z",
+      "status": 503,
+      "body": {
+        "qdrant": true,
+        "embedding": false,
+        "reranker": false,
+        "ready": false
+      }
+    },
+    {
+      "path": "/health/ready",
+      "startedAt": "2026-08-28T18:47:12.103Z",
+      "finishedAt": "2026-08-28T18:47:12.111Z",
+      "status": 503,
+      "body": {
+        "qdrant": true,
+        "embedding": false,
+        "reranker": false,
+        "ready": false
+      }
+    },
+    {
+      "path": "/health/ready",
+      "startedAt": "2026-08-28T18:47:17.229Z",
+      "finishedAt": "2026-08-28T18:47:17.235Z",
+      "status": 503,
+      "body": {
+        "qdrant": true,
+        "embedding": false,
+        "reranker": false,
+        "ready": false
+      }
+    }
+  ],
+  "negativeControls": [
+    {
+      "kind": "embedding",
+      "method": "POST",
+      "path": "/models",
+      "status": 503,
+      "body": {
+        "errorCode": "m1-capture-route-denied"
+      }
+    },
+    {
+      "kind": "embedding",
+      "method": "GET",
+      "path": "/models?x=1",
+      "status": 503,
+      "body": {
+        "errorCode": "m1-capture-route-denied"
+      }
+    },
+    {
+      "kind": "reranker",
+      "method": "POST",
+      "path": "/health",
+      "status": 503,
+      "body": {
+        "errorCode": "m1-capture-route-denied"
+      }
+    },
+    {
+      "kind": "reranker",
+      "method": "GET",
+      "path": "/unknown",
+      "status": 503,
+      "body": {
+        "errorCode": "m1-capture-route-denied"
+      }
+    },
+    {
+      "kind": "provider",
+      "method": "GET",
+      "path": "/models",
+      "status": 503,
+      "body": {
+        "errorCode": "m1-capture-route-denied"
+      }
+    },
+    {
+      "kind": "provider",
+      "method": "POST",
+      "path": "/models/load",
+      "status": 503,
+      "body": {
+        "errorCode": "m1-capture-route-denied"
+      }
+    }
+  ],
+  "resources": {
+    "schemaVersion": "runaai-m1-owned-resources/v1",
+    "productionChanged": false,
+    "protectedDataRead": false,
+    "qdrantArtifact": {
+      "version": "1.19.0",
+      "bytes": 84184576,
+      "sha256": "369c562eae3d89333a13abfdb522fa209e3f587c1217a1059d817e80814ea9d4"
+    },
+    "modelResidencyChanged": false,
+    "cleanup": {
+      "stoppedOwnedPostgres": true,
+      "stoppedOwnedQdrant": true,
+      "removedOwnedRuntimeAndSyntheticData": true,
+      "sourceAndEvidenceRetained": true,
+      "productionChanged": false
+    },
+    "access": {
+      "schemaVersion": "runa-m1-owned-native-access/v1",
+      "passed": true,
+      "ancestorsUnchanged": true,
+      "sampledDescendantUnchanged": true,
+      "ownedTargets": [
+        {
+          "role": "m1-task-native-0bfcf1a3abbe4fa897aaede2c931fee9",
+          "changed": true,
+          "beforeDacl": "276001d189dfa8d4a3143bea67566ca8cfbdfcb8526ab2576844130f6766b5fc",
+          "afterDacl": "c640d564ca0f25335e8e7f1cdf3b4d5d38548422063282f1517b2f824ed3502c",
+          "ownershipUnchanged": true
+        },
+        {
+          "role": "runtime",
+          "changed": true,
+          "beforeDacl": "276001d189dfa8d4a3143bea67566ca8cfbdfcb8526ab2576844130f6766b5fc",
+          "afterDacl": "c640d564ca0f25335e8e7f1cdf3b4d5d38548422063282f1517b2f824ed3502c",
+          "ownershipUnchanged": true
+        },
+        {
+          "role": "sandbox-runtime",
+          "changed": true,
+          "beforeDacl": "276001d189dfa8d4a3143bea67566ca8cfbdfcb8526ab2576844130f6766b5fc",
+          "afterDacl": "c640d564ca0f25335e8e7f1cdf3b4d5d38548422063282f1517b2f824ed3502c",
+          "ownershipUnchanged": true
+        },
+        {
+          "role": "transient",
+          "changed": true,
+          "beforeDacl": "276001d189dfa8d4a3143bea67566ca8cfbdfcb8526ab2576844130f6766b5fc",
+          "afterDacl": "c640d564ca0f25335e8e7f1cdf3b4d5d38548422063282f1517b2f824ed3502c",
+          "ownershipUnchanged": true
+        }
+      ],
+      "productionAclChanged": false
+    },
+    "nodeSha256": "bae898add4643fcf890a83ad8ae56e20dce7e781cab161a53991ceba70c99ffb",
+    "nativePreflight": {
+      "ready": true,
+      "receipt": {
+        "schemaVersion": "runa2-code-execution-receipt/v1",
+        "receiptId": "exec-bb85612c9d4d74a281754be0c5d2a883661913be",
+        "requestId": "sandbox-preflight-5c73fd0d-4339-4b88-82a4-715697c13497",
+        "participantId": "runa2-system-preflight",
+        "projectId": "runa:system",
+        "threadId": "sandbox-startup",
+        "status": "executed",
+        "language": "javascript",
+        "sourceSha256": "cedaa8ebe9cc08319881e8f490a2ba9369f2d46b00c19dee543c7f02dca9725e",
+        "runtime": {
+          "engine": "quickjs",
+          "package": "quickjs-emscripten",
+          "packageVersion": "0.32.0",
+          "host": "node",
+          "hostVersion": "v22.22.0"
+        },
+        "isolation": {
+          "provider": "microsoft-mxc",
+          "packageVersion": "0.8.0",
+          "method": "processcontainer",
+          "tier": "appcontainer-dacl",
+          "filesystem": "read-only-runtime-and-private-source-directory",
+          "network": "deny-all",
+          "environment": "empty",
+          "ui": "win32k-compatible-job-restricted"
+        },
+        "limits": {
+          "sourceBytes": 34,
+          "maximumSourceBytes": 8000,
+          "wallClockMs": 2000,
+          "quickJsDeadlineMs": 1200,
+          "maximumOutputBytes": 16000,
+          "quickJsMemoryBytes": 16777216,
+          "quickJsStackBytes": 524288,
+          "processLimit": 1,
+          "stdin": "closed"
+        },
+        "output": {
+          "stdout": "runa2-sandbox-ready\n",
+          "stderr": "",
+          "combinedBytes": 20,
+          "partialDelivered": false
+        },
+        "exitCode": 0,
+        "errorCode": null,
+        "durationMs": 1839,
+        "systemStamped": true,
+        "effects": []
+      }
+    },
+    "qdrantReady": true,
+    "qdrantLogs": "           _                 _    \n  __ _  __| |_ __ __ _ _ __ | |_  \n / _` |/ _` | '__/ _` | '_ \\| __| \n| (_| | (_| | | | (_| | | | | |_  \n \\__, |\\__,_|_|  \\__,_|_| |_|\\__| \n    |_|                           \n\nVersion: 1.19.0, build: 74f3e85b\nAccess web UI at http://localhost:59801/dashboard\nAgentic Skills: https://skills.qdrant.tech/\n\n2026-08-28T18:45:39.550345Z  WARN qdrant::settings: Config file not found: config/config\n2026-08-28T18:45:39.550431Z  WARN qdrant::settings: Config file not found: config/development\n2026-08-28T18:45:39.565624Z  WARN qdrant: There is a potential issue with the filesystem for storage path C:\\AI\\RunaAI-Next-Candidate\\staging\\m1-task-native-0bfcf1a3abbe4fa897aaede2c931fee9\\q\\db. Details: Filesystem type check is not supported on this platform\n2026-08-28T18:45:39.586968Z  WARN qdrant::actix::web_ui: Static content folder for Web UI './static' does not exist\n",
+    "ports": {
+      "postgres": 59800,
+      "qdrantHttp": 59801,
+      "qdrantGrpc": 59802
+    }
+  },
+  "browser": {
+    "schemaVersion": "runaai-m1-health-browser-ack/v1",
+    "smokeId": "71546dc9-8cd2-45c7-ab76-542d97ce0198",
+    "sourceCommit": "b3f4b42e297d7a0d6fc743a65c8b4440513fcec2",
+    "observations": [
+      {
+        "source": "browser",
+        "action": "initial-load",
+        "url": "http://127.0.0.1:59812/",
+        "observedAt": "2026-08-28T18:46:44.825Z",
+        "domText": "- banner:\n  - link \"RunaAI home\":\n    - /url: /\n    - generic: R\n    - generic: RunaAI\n  - generic: ST\n  - generic: Synthetic ordinary tester\n  - button \"Sign out\"\n- main:\n  - region \"Runa workspace\":\n    - complementary \"Left workspace panel\":\n      - button \"Collapse left panel\" [expanded]:\n      - tablist \"Work area\":\n        - tab \"Chat\" [selected]:\n          - generic: Chat\n        - tab \"Code\":\n          - generic: Code\n      - button \"New\":\n        - generic: +\n        - generic: New\n      - region \"Projects\":\n        - heading \"Projects\" [level=2]\n        - button \"Create project\": + Project\n        - paragraph: No projects yet\n        - list \"Projects\"\n      - region \"Chat records\":\n        - heading \"Chat records\" [level=2]\n        - paragraph: No chat records yet\n        - list \"Chat records\"\n      - status\n    - region \"Chat with Runa\":\n      - tabpanel \"Runa conversation\":\n        - paragraph: Private chat\n        - heading \"Chat with Runa\" [level=1]\n        - paragraph: Ask questions, brainstorm, draft writing, and work with text you paste here. Runa does not have live web access and cannot change files, settings, or systems from this chat.\n        - generic \"Conversation\":\n          - text: Runa\n          - paragraph: Hi. What would you like to talk about?\n      - generic: Message Runa\n      - textbox \"Message Runa\":\n        - /placeholder: Type your message…\n      - status: Ready\n      - button \"Send\"\n    - complementary \"Right workspace panel\":\n      - button \"Expand right panel\":"
+      },
+      {
+        "source": "browser",
+        "action": "reload",
+        "url": "http://127.0.0.1:59812/",
+        "observedAt": "2026-08-28T18:47:06.884Z",
+        "domText": "- banner:\n  - link \"RunaAI home\":\n    - /url: /\n    - generic: R\n    - generic: RunaAI\n  - generic: ST\n  - generic: Synthetic ordinary tester\n  - button \"Sign out\"\n- main:\n  - region \"Runa workspace\":\n    - complementary \"Left workspace panel\":\n      - button \"Collapse left panel\" [expanded]:\n      - tablist \"Work area\":\n        - tab \"Chat\" [selected]:\n          - generic: Chat\n        - tab \"Code\":\n          - generic: Code\n      - button \"New\":\n        - generic: +\n        - generic: New\n      - region \"Projects\":\n        - heading \"Projects\" [level=2]\n        - button \"Create project\": + Project\n        - paragraph: No projects yet\n        - list \"Projects\"\n      - region \"Chat records\":\n        - heading \"Chat records\" [level=2]\n        - paragraph: No chat records yet\n        - list \"Chat records\"\n      - status\n    - region \"Chat with Runa\":\n      - tabpanel \"Runa conversation\":\n        - paragraph: Private chat\n        - heading \"Chat with Runa\" [level=1]\n        - paragraph: Ask questions, brainstorm, draft writing, and work with text you paste here. Runa does not have live web access and cannot change files, settings, or systems from this chat.\n        - generic \"Conversation\":\n          - text: Runa\n          - paragraph: Hi. What would you like to talk about?\n      - generic: Message Runa\n      - textbox \"Message Runa\":\n        - /placeholder: Type your message…\n      - status: Ready\n      - button \"Send\"\n    - complementary \"Right workspace panel\":\n      - button \"Expand right panel\":"
+      }
+    ]
+  },
+  "positiveObservation": {
+    "schemaVersion": "runaai-m1-functional-attempt/v1",
+    "caseId": "unscored-health-app-smoke",
+    "candidateId": null,
+    "repetition": 0,
+    "role": "control",
+    "caseBundleSha256": "8713db8fb54bebe069f73edfef7cd179c13a3caba1d4d15bd8567f39aaa418ed",
+    "runtimeSealSha256": null,
+    "status": "running",
+    "startedAt": "2026-08-28T18:45:23.948Z",
+    "application": {
+      "requests": [],
+      "final": null
+    },
+    "provider": {
+      "calls": [],
+      "unexpectedCalls": []
+    },
+    "health": {
+      "calls": [
+        {
+          "sequence": 1,
+          "category": "health",
+          "kind": "embedding",
+          "method": "GET",
+          "path": "/models",
+          "phase": "actual-application-health",
+          "startedAt": "2026-08-28T18:45:40.261Z",
+          "upstreamContacted": false,
+          "inference": false,
+          "errorCode": "m1-health-disabled-in-controls",
+          "finishedAt": "2026-08-28T18:45:40.261Z"
+        },
+        {
+          "sequence": 1,
+          "category": "health",
+          "kind": "reranker",
+          "method": "GET",
+          "path": "/health",
+          "phase": "actual-application-health",
+          "startedAt": "2026-08-28T18:45:40.261Z",
+          "upstreamContacted": false,
+          "inference": false,
+          "errorCode": "m1-health-disabled-in-controls",
+          "finishedAt": "2026-08-28T18:45:40.262Z"
+        },
+        {
+          "sequence": 2,
+          "category": "health",
+          "kind": "embedding",
+          "method": "GET",
+          "path": "/models",
+          "phase": "actual-application-health",
+          "startedAt": "2026-08-28T18:45:40.269Z",
+          "upstreamContacted": false,
+          "inference": false,
+          "errorCode": "m1-health-disabled-in-controls",
+          "finishedAt": "2026-08-28T18:45:40.269Z"
+        },
+        {
+          "sequence": 2,
+          "category": "health",
+          "kind": "reranker",
+          "method": "GET",
+          "path": "/health",
+          "phase": "actual-application-health",
+          "startedAt": "2026-08-28T18:45:40.270Z",
+          "upstreamContacted": false,
+          "inference": false,
+          "errorCode": "m1-health-disabled-in-controls",
+          "finishedAt": "2026-08-28T18:45:40.270Z"
+        },
+        {
+          "sequence": 3,
+          "category": "health",
+          "kind": "embedding",
+          "method": "GET",
+          "path": "/models",
+          "phase": "actual-application-health",
+          "startedAt": "2026-08-28T18:45:45.369Z",
+          "upstreamContacted": false,
+          "inference": false,
+          "errorCode": "m1-health-disabled-in-controls",
+          "finishedAt": "2026-08-28T18:45:45.369Z"
+        },
+        {
+          "sequence": 3,
+          "category": "health",
+          "kind": "reranker",
+          "method": "GET",
+          "path": "/health",
+          "phase": "actual-application-health",
+          "startedAt": "2026-08-28T18:45:45.369Z",
+          "upstreamContacted": false,
+          "inference": false,
+          "errorCode": "m1-health-disabled-in-controls",
+          "finishedAt": "2026-08-28T18:45:45.369Z"
+        },
+        {
+          "sequence": 4,
+          "category": "health",
+          "kind": "embedding",
+          "method": "GET",
+          "path": "/models",
+          "phase": "actual-application-health",
+          "startedAt": "2026-08-28T18:45:50.486Z",
+          "upstreamContacted": false,
+          "inference": false,
+          "errorCode": "m1-health-disabled-in-controls",
+          "finishedAt": "2026-08-28T18:45:50.486Z"
+        },
+        {
+          "sequence": 4,
+          "category": "health",
+          "kind": "reranker",
+          "method": "GET",
+          "path": "/health",
+          "phase": "actual-application-health",
+          "startedAt": "2026-08-28T18:45:50.486Z",
+          "upstreamContacted": false,
+          "inference": false,
+          "errorCode": "m1-health-disabled-in-controls",
+          "finishedAt": "2026-08-28T18:45:50.487Z"
+        },
+        {
+          "sequence": 5,
+          "category": "health",
+          "kind": "embedding",
+          "method": "GET",
+          "path": "/models",
+          "phase": "actual-application-health",
+          "startedAt": "2026-08-28T18:45:55.600Z",
+          "upstreamContacted": false,
+          "inference": false,
+          "errorCode": "m1-health-disabled-in-controls",
+          "finishedAt": "2026-08-28T18:45:55.600Z"
+        },
+        {
+          "sequence": 5,
+          "category": "health",
+          "kind": "reranker",
+          "method": "GET",
+          "path": "/health",
+          "phase": "actual-application-health",
+          "startedAt": "2026-08-28T18:45:55.601Z",
+          "upstreamContacted": false,
+          "inference": false,
+          "errorCode": "m1-health-disabled-in-controls",
+          "finishedAt": "2026-08-28T18:45:55.601Z"
+        },
+        {
+          "sequence": 6,
+          "category": "health",
+          "kind": "embedding",
+          "method": "GET",
+          "path": "/models",
+          "phase": "actual-application-health",
+          "startedAt": "2026-08-28T18:46:00.718Z",
+          "upstreamContacted": false,
+          "inference": false,
+          "errorCode": "m1-health-disabled-in-controls",
+          "finishedAt": "2026-08-28T18:46:00.718Z"
+        },
+        {
+          "sequence": 6,
+          "category": "health",
+          "kind": "reranker",
+          "method": "GET",
+          "path": "/health",
+          "phase": "actual-application-health",
+          "startedAt": "2026-08-28T18:46:00.719Z",
+          "upstreamContacted": false,
+          "inference": false,
+          "errorCode": "m1-health-disabled-in-controls",
+          "finishedAt": "2026-08-28T18:46:00.719Z"
+        },
+        {
+          "sequence": 7,
+          "category": "health",
+          "kind": "embedding",
+          "method": "GET",
+          "path": "/models",
+          "phase": "actual-application-health",
+          "startedAt": "2026-08-28T18:46:05.800Z",
+          "upstreamContacted": false,
+          "inference": false,
+          "errorCode": "m1-health-disabled-in-controls",
+          "finishedAt": "2026-08-28T18:46:05.800Z"
+        },
+        {
+          "sequence": 7,
+          "category": "health",
+          "kind": "reranker",
+          "method": "GET",
+          "path": "/health",
+          "phase": "actual-application-health",
+          "startedAt": "2026-08-28T18:46:05.801Z",
+          "upstreamContacted": false,
+          "inference": false,
+          "errorCode": "m1-health-disabled-in-controls",
+          "finishedAt": "2026-08-28T18:46:05.801Z"
+        },
+        {
+          "sequence": 8,
+          "category": "health",
+          "kind": "embedding",
+          "method": "GET",
+          "path": "/models",
+          "phase": "actual-application-health",
+          "startedAt": "2026-08-28T18:46:10.895Z",
+          "upstreamContacted": false,
+          "inference": false,
+          "errorCode": "m1-health-disabled-in-controls",
+          "finishedAt": "2026-08-28T18:46:10.896Z"
+        },
+        {
+          "sequence": 8,
+          "category": "health",
+          "kind": "reranker",
+          "method": "GET",
+          "path": "/health",
+          "phase": "actual-application-health",
+          "startedAt": "2026-08-28T18:46:10.896Z",
+          "upstreamContacted": false,
+          "inference": false,
+          "errorCode": "m1-health-disabled-in-controls",
+          "finishedAt": "2026-08-28T18:46:10.896Z"
+        },
+        {
+          "sequence": 9,
+          "category": "health",
+          "kind": "embedding",
+          "method": "GET",
+          "path": "/models",
+          "phase": "actual-application-health",
+          "startedAt": "2026-08-28T18:46:16.020Z",
+          "upstreamContacted": false,
+          "inference": false,
+          "errorCode": "m1-health-disabled-in-controls",
+          "finishedAt": "2026-08-28T18:46:16.020Z"
+        },
+        {
+          "sequence": 9,
+          "category": "health",
+          "kind": "reranker",
+          "method": "GET",
+          "path": "/health",
+          "phase": "actual-application-health",
+          "startedAt": "2026-08-28T18:46:16.020Z",
+          "upstreamContacted": false,
+          "inference": false,
+          "errorCode": "m1-health-disabled-in-controls",
+          "finishedAt": "2026-08-28T18:46:16.020Z"
+        },
+        {
+          "sequence": 10,
+          "category": "health",
+          "kind": "embedding",
+          "method": "GET",
+          "path": "/models",
+          "phase": "actual-application-health",
+          "startedAt": "2026-08-28T18:46:21.093Z",
+          "upstreamContacted": false,
+          "inference": false,
+          "errorCode": "m1-health-disabled-in-controls",
+          "finishedAt": "2026-08-28T18:46:21.093Z"
+        },
+        {
+          "sequence": 10,
+          "category": "health",
+          "kind": "reranker",
+          "method": "GET",
+          "path": "/health",
+          "phase": "actual-application-health",
+          "startedAt": "2026-08-28T18:46:21.093Z",
+          "upstreamContacted": false,
+          "inference": false,
+          "errorCode": "m1-health-disabled-in-controls",
+          "finishedAt": "2026-08-28T18:46:21.093Z"
+        },
+        {
+          "sequence": 11,
+          "category": "health",
+          "kind": "embedding",
+          "method": "GET",
+          "path": "/models",
+          "phase": "actual-application-health",
+          "startedAt": "2026-08-28T18:46:26.192Z",
+          "upstreamContacted": false,
+          "inference": false,
+          "errorCode": "m1-health-disabled-in-controls",
+          "finishedAt": "2026-08-28T18:46:26.192Z"
+        },
+        {
+          "sequence": 11,
+          "category": "health",
+          "kind": "reranker",
+          "method": "GET",
+          "path": "/health",
+          "phase": "actual-application-health",
+          "startedAt": "2026-08-28T18:46:26.192Z",
+          "upstreamContacted": false,
+          "inference": false,
+          "errorCode": "m1-health-disabled-in-controls",
+          "finishedAt": "2026-08-28T18:46:26.192Z"
+        },
+        {
+          "sequence": 12,
+          "category": "health",
+          "kind": "embedding",
+          "method": "GET",
+          "path": "/models",
+          "phase": "actual-application-health",
+          "startedAt": "2026-08-28T18:46:31.280Z",
+          "upstreamContacted": false,
+          "inference": false,
+          "errorCode": "m1-health-disabled-in-controls",
+          "finishedAt": "2026-08-28T18:46:31.280Z"
+        },
+        {
+          "sequence": 12,
+          "category": "health",
+          "kind": "reranker",
+          "method": "GET",
+          "path": "/health",
+          "phase": "actual-application-health",
+          "startedAt": "2026-08-28T18:46:31.280Z",
+          "upstreamContacted": false,
+          "inference": false,
+          "errorCode": "m1-health-disabled-in-controls",
+          "finishedAt": "2026-08-28T18:46:31.281Z"
+        },
+        {
+          "sequence": 13,
+          "category": "health",
+          "kind": "embedding",
+          "method": "GET",
+          "path": "/models",
+          "phase": "actual-application-health",
+          "startedAt": "2026-08-28T18:46:36.373Z",
+          "upstreamContacted": false,
+          "inference": false,
+          "errorCode": "m1-health-disabled-in-controls",
+          "finishedAt": "2026-08-28T18:46:36.374Z"
+        },
+        {
+          "sequence": 13,
+          "category": "health",
+          "kind": "reranker",
+          "method": "GET",
+          "path": "/health",
+          "phase": "actual-application-health",
+          "startedAt": "2026-08-28T18:46:36.374Z",
+          "upstreamContacted": false,
+          "inference": false,
+          "errorCode": "m1-health-disabled-in-controls",
+          "finishedAt": "2026-08-28T18:46:36.374Z"
+        },
+        {
+          "sequence": 14,
+          "category": "health",
+          "kind": "embedding",
+          "method": "GET",
+          "path": "/models",
+          "phase": "actual-application-health",
+          "startedAt": "2026-08-28T18:46:41.470Z",
+          "upstreamContacted": false,
+          "inference": false,
+          "errorCode": "m1-health-disabled-in-controls",
+          "finishedAt": "2026-08-28T18:46:41.470Z"
+        },
+        {
+          "sequence": 14,
+          "category": "health",
+          "kind": "reranker",
+          "method": "GET",
+          "path": "/health",
+          "phase": "actual-application-health",
+          "startedAt": "2026-08-28T18:46:41.470Z",
+          "upstreamContacted": false,
+          "inference": false,
+          "errorCode": "m1-health-disabled-in-controls",
+          "finishedAt": "2026-08-28T18:46:41.471Z"
+        },
+        {
+          "sequence": 15,
+          "category": "health",
+          "kind": "embedding",
+          "method": "GET",
+          "path": "/models",
+          "phase": "actual-application-health",
+          "startedAt": "2026-08-28T18:46:45.178Z",
+          "upstreamContacted": false,
+          "inference": false,
+          "errorCode": "m1-health-disabled-in-controls",
+          "finishedAt": "2026-08-28T18:46:45.178Z"
+        },
+        {
+          "sequence": 15,
+          "category": "health",
+          "kind": "reranker",
+          "method": "GET",
+          "path": "/health",
+          "phase": "actual-application-health",
+          "startedAt": "2026-08-28T18:46:45.179Z",
+          "upstreamContacted": false,
+          "inference": false,
+          "errorCode": "m1-health-disabled-in-controls",
+          "finishedAt": "2026-08-28T18:46:45.179Z"
+        },
+        {
+          "sequence": 16,
+          "category": "health",
+          "kind": "embedding",
+          "method": "GET",
+          "path": "/models",
+          "phase": "actual-application-health",
+          "startedAt": "2026-08-28T18:46:46.567Z",
+          "upstreamContacted": false,
+          "inference": false,
+          "errorCode": "m1-health-disabled-in-controls",
+          "finishedAt": "2026-08-28T18:46:46.567Z"
+        },
+        {
+          "sequence": 16,
+          "category": "health",
+          "kind": "reranker",
+          "method": "GET",
+          "path": "/health",
+          "phase": "actual-application-health",
+          "startedAt": "2026-08-28T18:46:46.567Z",
+          "upstreamContacted": false,
+          "inference": false,
+          "errorCode": "m1-health-disabled-in-controls",
+          "finishedAt": "2026-08-28T18:46:46.567Z"
+        },
+        {
+          "sequence": 17,
+          "category": "health",
+          "kind": "embedding",
+          "method": "GET",
+          "path": "/models",
+          "phase": "actual-application-health",
+          "startedAt": "2026-08-28T18:46:51.685Z",
+          "upstreamContacted": false,
+          "inference": false,
+          "errorCode": "m1-health-disabled-in-controls",
+          "finishedAt": "2026-08-28T18:46:51.685Z"
+        },
+        {
+          "sequence": 17,
+          "category": "health",
+          "kind": "reranker",
+          "method": "GET",
+          "path": "/health",
+          "phase": "actual-application-health",
+          "startedAt": "2026-08-28T18:46:51.685Z",
+          "upstreamContacted": false,
+          "inference": false,
+          "errorCode": "m1-health-disabled-in-controls",
+          "finishedAt": "2026-08-28T18:46:51.685Z"
+        },
+        {
+          "sequence": 18,
+          "category": "health",
+          "kind": "embedding",
+          "method": "GET",
+          "path": "/models",
+          "phase": "actual-application-health",
+          "startedAt": "2026-08-28T18:46:56.788Z",
+          "upstreamContacted": false,
+          "inference": false,
+          "errorCode": "m1-health-disabled-in-controls",
+          "finishedAt": "2026-08-28T18:46:56.788Z"
+        },
+        {
+          "sequence": 18,
+          "category": "health",
+          "kind": "reranker",
+          "method": "GET",
+          "path": "/health",
+          "phase": "actual-application-health",
+          "startedAt": "2026-08-28T18:46:56.788Z",
+          "upstreamContacted": false,
+          "inference": false,
+          "errorCode": "m1-health-disabled-in-controls",
+          "finishedAt": "2026-08-28T18:46:56.788Z"
+        },
+        {
+          "sequence": 19,
+          "category": "health",
+          "kind": "embedding",
+          "method": "GET",
+          "path": "/models",
+          "phase": "actual-application-health",
+          "startedAt": "2026-08-28T18:47:01.902Z",
+          "upstreamContacted": false,
+          "inference": false,
+          "errorCode": "m1-health-disabled-in-controls",
+          "finishedAt": "2026-08-28T18:47:01.902Z"
+        },
+        {
+          "sequence": 19,
+          "category": "health",
+          "kind": "reranker",
+          "method": "GET",
+          "path": "/health",
+          "phase": "actual-application-health",
+          "startedAt": "2026-08-28T18:47:01.902Z",
+          "upstreamContacted": false,
+          "inference": false,
+          "errorCode": "m1-health-disabled-in-controls",
+          "finishedAt": "2026-08-28T18:47:01.902Z"
+        },
+        {
+          "sequence": 20,
+          "category": "health",
+          "kind": "embedding",
+          "method": "GET",
+          "path": "/models",
+          "phase": "actual-application-health",
+          "startedAt": "2026-08-28T18:47:06.998Z",
+          "upstreamContacted": false,
+          "inference": false,
+          "errorCode": "m1-health-disabled-in-controls",
+          "finishedAt": "2026-08-28T18:47:06.998Z"
+        },
+        {
+          "sequence": 20,
+          "category": "health",
+          "kind": "reranker",
+          "method": "GET",
+          "path": "/health",
+          "phase": "actual-application-health",
+          "startedAt": "2026-08-28T18:47:06.998Z",
+          "upstreamContacted": false,
+          "inference": false,
+          "errorCode": "m1-health-disabled-in-controls",
+          "finishedAt": "2026-08-28T18:47:06.998Z"
+        },
+        {
+          "sequence": 21,
+          "category": "health",
+          "kind": "embedding",
+          "method": "GET",
+          "path": "/models",
+          "phase": "actual-application-health",
+          "startedAt": "2026-08-28T18:47:07.239Z",
+          "upstreamContacted": false,
+          "inference": false,
+          "errorCode": "m1-health-disabled-in-controls",
+          "finishedAt": "2026-08-28T18:47:07.239Z"
+        },
+        {
+          "sequence": 21,
+          "category": "health",
+          "kind": "reranker",
+          "method": "GET",
+          "path": "/health",
+          "phase": "actual-application-health",
+          "startedAt": "2026-08-28T18:47:07.240Z",
+          "upstreamContacted": false,
+          "inference": false,
+          "errorCode": "m1-health-disabled-in-controls",
+          "finishedAt": "2026-08-28T18:47:07.240Z"
+        },
+        {
+          "sequence": 22,
+          "category": "health",
+          "kind": "embedding",
+          "method": "GET",
+          "path": "/models",
+          "phase": "actual-application-health",
+          "startedAt": "2026-08-28T18:47:12.107Z",
+          "upstreamContacted": false,
+          "inference": false,
+          "errorCode": "m1-health-disabled-in-controls",
+          "finishedAt": "2026-08-28T18:47:12.108Z"
+        },
+        {
+          "sequence": 22,
+          "category": "health",
+          "kind": "reranker",
+          "method": "GET",
+          "path": "/health",
+          "phase": "actual-application-health",
+          "startedAt": "2026-08-28T18:47:12.108Z",
+          "upstreamContacted": false,
+          "inference": false,
+          "errorCode": "m1-health-disabled-in-controls",
+          "finishedAt": "2026-08-28T18:47:12.108Z"
+        },
+        {
+          "sequence": 23,
+          "category": "health",
+          "kind": "embedding",
+          "method": "GET",
+          "path": "/models",
+          "phase": "actual-application-health",
+          "startedAt": "2026-08-28T18:47:17.233Z",
+          "upstreamContacted": false,
+          "inference": false,
+          "errorCode": "m1-health-disabled-in-controls",
+          "finishedAt": "2026-08-28T18:47:17.233Z"
+        },
+        {
+          "sequence": 23,
+          "category": "health",
+          "kind": "reranker",
+          "method": "GET",
+          "path": "/health",
+          "phase": "actual-application-health",
+          "startedAt": "2026-08-28T18:47:17.233Z",
+          "upstreamContacted": false,
+          "inference": false,
+          "errorCode": "m1-health-disabled-in-controls",
+          "finishedAt": "2026-08-28T18:47:17.233Z"
+        }
+      ]
+    },
+    "sources": {
+      "bindings": [],
+      "selectedAliases": [],
+      "indexOperations": [
+        {
+          "adapter": "qdrant",
+          "operation": "index",
+          "phase": "setup",
+          "path": "/collections/m1_85f1684b6478",
+          "method": "GET",
+          "startedAt": "2026-08-28T18:45:39.966Z",
+          "request": null,
+          "httpStatus": 404,
+          "response": {
+            "status": {
+              "error": "Not found: Collection `m1_85f1684b6478` doesn't exist!"
+            },
+            "time": 0.0000397
+          },
+          "finishedAt": "2026-08-28T18:45:39.974Z"
+        },
+        {
+          "adapter": "qdrant",
+          "operation": "index",
+          "phase": "setup",
+          "path": "/collections/m1_85f1684b6478",
+          "method": "PUT",
+          "startedAt": "2026-08-28T18:45:39.979Z",
+          "request": {
+            "vectors": {
+              "size": 768,
+              "distance": "Cosine"
+            }
+          },
+          "httpStatus": 200,
+          "response": {
+            "result": true,
+            "status": "ok",
+            "time": 0.174615
+          },
+          "finishedAt": "2026-08-28T18:45:40.158Z"
+        },
+        {
+          "adapter": "qdrant",
+          "operation": "index",
+          "phase": "actual-application-health",
+          "path": "/readyz",
+          "method": "GET",
+          "startedAt": "2026-08-28T18:45:40.257Z",
+          "request": null,
+          "httpStatus": 200,
+          "responseText": "all shards are ready",
+          "finishedAt": "2026-08-28T18:45:40.264Z"
+        },
+        {
+          "adapter": "qdrant",
+          "operation": "index",
+          "phase": "actual-application-health",
+          "path": "/readyz",
+          "method": "GET",
+          "startedAt": "2026-08-28T18:45:40.269Z",
+          "request": null,
+          "httpStatus": 200,
+          "responseText": "all shards are ready",
+          "finishedAt": "2026-08-28T18:45:40.273Z"
+        },
+        {
+          "adapter": "qdrant",
+          "operation": "index",
+          "phase": "actual-application-health",
+          "path": "/readyz",
+          "method": "GET",
+          "startedAt": "2026-08-28T18:45:45.368Z",
+          "request": null,
+          "httpStatus": 200,
+          "responseText": "all shards are ready",
+          "finishedAt": "2026-08-28T18:45:45.372Z"
+        },
+        {
+          "adapter": "qdrant",
+          "operation": "index",
+          "phase": "actual-application-health",
+          "path": "/readyz",
+          "method": "GET",
+          "startedAt": "2026-08-28T18:45:50.485Z",
+          "request": null,
+          "httpStatus": 200,
+          "responseText": "all shards are ready",
+          "finishedAt": "2026-08-28T18:45:50.488Z"
+        },
+        {
+          "adapter": "qdrant",
+          "operation": "index",
+          "phase": "actual-application-health",
+          "path": "/readyz",
+          "method": "GET",
+          "startedAt": "2026-08-28T18:45:55.599Z",
+          "request": null,
+          "httpStatus": 200,
+          "responseText": "all shards are ready",
+          "finishedAt": "2026-08-28T18:45:55.603Z"
+        },
+        {
+          "adapter": "qdrant",
+          "operation": "index",
+          "phase": "actual-application-health",
+          "path": "/readyz",
+          "method": "GET",
+          "startedAt": "2026-08-28T18:46:00.718Z",
+          "request": null,
+          "httpStatus": 200,
+          "responseText": "all shards are ready",
+          "finishedAt": "2026-08-28T18:46:00.721Z"
+        },
+        {
+          "adapter": "qdrant",
+          "operation": "index",
+          "phase": "actual-application-health",
+          "path": "/readyz",
+          "method": "GET",
+          "startedAt": "2026-08-28T18:46:05.800Z",
+          "request": null,
+          "httpStatus": 200,
+          "responseText": "all shards are ready",
+          "finishedAt": "2026-08-28T18:46:05.803Z"
+        },
+        {
+          "adapter": "qdrant",
+          "operation": "index",
+          "phase": "actual-application-health",
+          "path": "/readyz",
+          "method": "GET",
+          "startedAt": "2026-08-28T18:46:10.895Z",
+          "request": null,
+          "httpStatus": 200,
+          "responseText": "all shards are ready",
+          "finishedAt": "2026-08-28T18:46:10.897Z"
+        },
+        {
+          "adapter": "qdrant",
+          "operation": "index",
+          "phase": "actual-application-health",
+          "path": "/readyz",
+          "method": "GET",
+          "startedAt": "2026-08-28T18:46:16.019Z",
+          "request": null,
+          "httpStatus": 200,
+          "responseText": "all shards are ready",
+          "finishedAt": "2026-08-28T18:46:16.022Z"
+        },
+        {
+          "adapter": "qdrant",
+          "operation": "index",
+          "phase": "actual-application-health",
+          "path": "/readyz",
+          "method": "GET",
+          "startedAt": "2026-08-28T18:46:21.092Z",
+          "request": null,
+          "httpStatus": 200,
+          "responseText": "all shards are ready",
+          "finishedAt": "2026-08-28T18:46:21.095Z"
+        },
+        {
+          "adapter": "qdrant",
+          "operation": "index",
+          "phase": "actual-application-health",
+          "path": "/readyz",
+          "method": "GET",
+          "startedAt": "2026-08-28T18:46:26.191Z",
+          "request": null,
+          "httpStatus": 200,
+          "responseText": "all shards are ready",
+          "finishedAt": "2026-08-28T18:46:26.194Z"
+        },
+        {
+          "adapter": "qdrant",
+          "operation": "index",
+          "phase": "actual-application-health",
+          "path": "/readyz",
+          "method": "GET",
+          "startedAt": "2026-08-28T18:46:31.280Z",
+          "request": null,
+          "httpStatus": 200,
+          "responseText": "all shards are ready",
+          "finishedAt": "2026-08-28T18:46:31.282Z"
+        },
+        {
+          "adapter": "qdrant",
+          "operation": "index",
+          "phase": "actual-application-health",
+          "path": "/readyz",
+          "method": "GET",
+          "startedAt": "2026-08-28T18:46:36.373Z",
+          "request": null,
+          "httpStatus": 200,
+          "responseText": "all shards are ready",
+          "finishedAt": "2026-08-28T18:46:36.375Z"
+        },
+        {
+          "adapter": "qdrant",
+          "operation": "index",
+          "phase": "actual-application-health",
+          "path": "/readyz",
+          "method": "GET",
+          "startedAt": "2026-08-28T18:46:41.470Z",
+          "request": null,
+          "httpStatus": 200,
+          "responseText": "all shards are ready",
+          "finishedAt": "2026-08-28T18:46:41.472Z"
+        },
+        {
+          "adapter": "qdrant",
+          "operation": "index",
+          "phase": "actual-application-health",
+          "path": "/readyz",
+          "method": "GET",
+          "startedAt": "2026-08-28T18:46:45.178Z",
+          "request": null,
+          "httpStatus": 200,
+          "responseText": "all shards are ready",
+          "finishedAt": "2026-08-28T18:46:45.181Z"
+        },
+        {
+          "adapter": "qdrant",
+          "operation": "index",
+          "phase": "actual-application-health",
+          "path": "/readyz",
+          "method": "GET",
+          "startedAt": "2026-08-28T18:46:46.566Z",
+          "request": null,
+          "httpStatus": 200,
+          "responseText": "all shards are ready",
+          "finishedAt": "2026-08-28T18:46:46.568Z"
+        },
+        {
+          "adapter": "qdrant",
+          "operation": "index",
+          "phase": "actual-application-health",
+          "path": "/readyz",
+          "method": "GET",
+          "startedAt": "2026-08-28T18:46:51.684Z",
+          "request": null,
+          "httpStatus": 200,
+          "responseText": "all shards are ready",
+          "finishedAt": "2026-08-28T18:46:51.687Z"
+        },
+        {
+          "adapter": "qdrant",
+          "operation": "index",
+          "phase": "actual-application-health",
+          "path": "/readyz",
+          "method": "GET",
+          "startedAt": "2026-08-28T18:46:56.787Z",
+          "request": null,
+          "httpStatus": 200,
+          "responseText": "all shards are ready",
+          "finishedAt": "2026-08-28T18:46:56.790Z"
+        },
+        {
+          "adapter": "qdrant",
+          "operation": "index",
+          "phase": "actual-application-health",
+          "path": "/readyz",
+          "method": "GET",
+          "startedAt": "2026-08-28T18:47:01.901Z",
+          "request": null,
+          "httpStatus": 200,
+          "responseText": "all shards are ready",
+          "finishedAt": "2026-08-28T18:47:01.904Z"
+        },
+        {
+          "adapter": "qdrant",
+          "operation": "index",
+          "phase": "actual-application-health",
+          "path": "/readyz",
+          "method": "GET",
+          "startedAt": "2026-08-28T18:47:06.997Z",
+          "request": null,
+          "httpStatus": 200,
+          "responseText": "all shards are ready",
+          "finishedAt": "2026-08-28T18:47:07.000Z"
+        },
+        {
+          "adapter": "qdrant",
+          "operation": "index",
+          "phase": "actual-application-health",
+          "path": "/readyz",
+          "method": "GET",
+          "startedAt": "2026-08-28T18:47:07.239Z",
+          "request": null,
+          "httpStatus": 200,
+          "responseText": "all shards are ready",
+          "finishedAt": "2026-08-28T18:47:07.242Z"
+        },
+        {
+          "adapter": "qdrant",
+          "operation": "index",
+          "phase": "actual-application-health",
+          "path": "/readyz",
+          "method": "GET",
+          "startedAt": "2026-08-28T18:47:12.107Z",
+          "request": null,
+          "httpStatus": 200,
+          "responseText": "all shards are ready",
+          "finishedAt": "2026-08-28T18:47:12.109Z"
+        },
+        {
+          "adapter": "qdrant",
+          "operation": "index",
+          "phase": "actual-application-health",
+          "path": "/readyz",
+          "method": "GET",
+          "startedAt": "2026-08-28T18:47:17.232Z",
+          "request": null,
+          "httpStatus": 200,
+          "responseText": "all shards are ready",
+          "finishedAt": "2026-08-28T18:47:17.235Z"
+        }
+      ],
+      "canonicalBefore": [],
+      "canonicalAfter": []
+    },
+    "project": {
+      "initial": null,
+      "final": null,
+      "snapshots": []
+    },
+    "authority": {
+      "grants": [],
+      "approvals": [],
+      "revocations": [],
+      "sessionEvents": [
+        {
+          "type": "issued",
+          "sessionHash": "f2572fffe83bad8b315d31d91acd1516bfb8a88bef7821dd78158374f1873f41",
+          "principalId": "m1-test-687055f8fbcea9b6c4da3c15e95e1302"
+        }
+      ]
+    },
+    "workflow": {
+      "task": null,
+      "run": null,
+      "proposals": [],
+      "intents": [],
+      "receipts": [],
+      "events": []
+    },
+    "native": {
+      "calls": [],
+      "receipts": [],
+      "suites": []
+    },
+    "evidence": [
+      {
+        "id": "evidence-1",
+        "source": "host-runtime",
+        "kind": "retrieval-operation",
+        "phase": "setup",
+        "data": {
+          "phase": "setup",
+          "adapter": "qdrant",
+          "operation": "index",
+          "path": "/collections/m1_85f1684b6478",
+          "method": "GET",
+          "startedAt": "2026-08-28T18:45:39.966Z",
+          "request": null,
+          "httpStatus": 404,
+          "response": {
+            "status": {
+              "error": "Not found: Collection `m1_85f1684b6478` doesn't exist!"
+            },
+            "time": 0.0000397
+          },
+          "finishedAt": "2026-08-28T18:45:39.974Z"
+        }
+      },
+      {
+        "id": "evidence-2",
+        "source": "host-runtime",
+        "kind": "retrieval-operation",
+        "phase": "setup",
+        "data": {
+          "phase": "setup",
+          "adapter": "qdrant",
+          "operation": "index",
+          "path": "/collections/m1_85f1684b6478",
+          "method": "PUT",
+          "startedAt": "2026-08-28T18:45:39.979Z",
+          "request": {
+            "vectors": {
+              "size": 768,
+              "distance": "Cosine"
+            }
+          },
+          "httpStatus": 200,
+          "response": {
+            "result": true,
+            "status": "ok",
+            "time": 0.174615
+          },
+          "finishedAt": "2026-08-28T18:45:40.158Z"
+        }
+      },
+      {
+        "id": "evidence-3",
+        "source": "host-runtime",
+        "kind": "auxiliary-health-observation",
+        "phase": "actual-application-health",
+        "data": {
+          "phase": "actual-application-health",
+          "sequence": 1,
+          "category": "health",
+          "kind": "embedding",
+          "method": "GET",
+          "path": "/models",
+          "startedAt": "2026-08-28T18:45:40.261Z",
+          "upstreamContacted": false,
+          "inference": false,
+          "errorCode": "m1-health-disabled-in-controls",
+          "finishedAt": "2026-08-28T18:45:40.261Z"
+        }
+      },
+      {
+        "id": "evidence-4",
+        "source": "host-runtime",
+        "kind": "auxiliary-health-observation",
+        "phase": "actual-application-health",
+        "data": {
+          "phase": "actual-application-health",
+          "sequence": 1,
+          "category": "health",
+          "kind": "reranker",
+          "method": "GET",
+          "path": "/health",
+          "startedAt": "2026-08-28T18:45:40.261Z",
+          "upstreamContacted": false,
+          "inference": false,
+          "errorCode": "m1-health-disabled-in-controls",
+          "finishedAt": "2026-08-28T18:45:40.262Z"
+        }
+      },
+      {
+        "id": "evidence-5",
+        "source": "host-runtime",
+        "kind": "retrieval-operation",
+        "phase": "actual-application-health",
+        "data": {
+          "phase": "actual-application-health",
+          "adapter": "qdrant",
+          "operation": "index",
+          "path": "/readyz",
+          "method": "GET",
+          "startedAt": "2026-08-28T18:45:40.257Z",
+          "request": null,
+          "httpStatus": 200,
+          "responseText": "all shards are ready",
+          "finishedAt": "2026-08-28T18:45:40.264Z"
+        }
+      },
+      {
+        "id": "evidence-6",
+        "source": "host-runtime",
+        "kind": "auxiliary-health-observation",
+        "phase": "actual-application-health",
+        "data": {
+          "phase": "actual-application-health",
+          "sequence": 2,
+          "category": "health",
+          "kind": "embedding",
+          "method": "GET",
+          "path": "/models",
+          "startedAt": "2026-08-28T18:45:40.269Z",
+          "upstreamContacted": false,
+          "inference": false,
+          "errorCode": "m1-health-disabled-in-controls",
+          "finishedAt": "2026-08-28T18:45:40.269Z"
+        }
+      },
+      {
+        "id": "evidence-7",
+        "source": "host-runtime",
+        "kind": "auxiliary-health-observation",
+        "phase": "actual-application-health",
+        "data": {
+          "phase": "actual-application-health",
+          "sequence": 2,
+          "category": "health",
+          "kind": "reranker",
+          "method": "GET",
+          "path": "/health",
+          "startedAt": "2026-08-28T18:45:40.270Z",
+          "upstreamContacted": false,
+          "inference": false,
+          "errorCode": "m1-health-disabled-in-controls",
+          "finishedAt": "2026-08-28T18:45:40.270Z"
+        }
+      },
+      {
+        "id": "evidence-8",
+        "source": "host-runtime",
+        "kind": "retrieval-operation",
+        "phase": "actual-application-health",
+        "data": {
+          "phase": "actual-application-health",
+          "adapter": "qdrant",
+          "operation": "index",
+          "path": "/readyz",
+          "method": "GET",
+          "startedAt": "2026-08-28T18:45:40.269Z",
+          "request": null,
+          "httpStatus": 200,
+          "responseText": "all shards are ready",
+          "finishedAt": "2026-08-28T18:45:40.273Z"
+        }
+      },
+      {
+        "id": "evidence-9",
+        "source": "host-runtime",
+        "kind": "auxiliary-health-observation",
+        "phase": "actual-application-health",
+        "data": {
+          "phase": "actual-application-health",
+          "sequence": 3,
+          "category": "health",
+          "kind": "embedding",
+          "method": "GET",
+          "path": "/models",
+          "startedAt": "2026-08-28T18:45:45.369Z",
+          "upstreamContacted": false,
+          "inference": false,
+          "errorCode": "m1-health-disabled-in-controls",
+          "finishedAt": "2026-08-28T18:45:45.369Z"
+        }
+      },
+      {
+        "id": "evidence-10",
+        "source": "host-runtime",
+        "kind": "auxiliary-health-observation",
+        "phase": "actual-application-health",
+        "data": {
+          "phase": "actual-application-health",
+          "sequence": 3,
+          "category": "health",
+          "kind": "reranker",
+          "method": "GET",
+          "path": "/health",
+          "startedAt": "2026-08-28T18:45:45.369Z",
+          "upstreamContacted": false,
+          "inference": false,
+          "errorCode": "m1-health-disabled-in-controls",
+          "finishedAt": "2026-08-28T18:45:45.369Z"
+        }
+      },
+      {
+        "id": "evidence-11",
+        "source": "host-runtime",
+        "kind": "retrieval-operation",
+        "phase": "actual-application-health",
+        "data": {
+          "phase": "actual-application-health",
+          "adapter": "qdrant",
+          "operation": "index",
+          "path": "/readyz",
+          "method": "GET",
+          "startedAt": "2026-08-28T18:45:45.368Z",
+          "request": null,
+          "httpStatus": 200,
+          "responseText": "all shards are ready",
+          "finishedAt": "2026-08-28T18:45:45.372Z"
+        }
+      },
+      {
+        "id": "evidence-12",
+        "source": "host-runtime",
+        "kind": "auxiliary-health-observation",
+        "phase": "actual-application-health",
+        "data": {
+          "phase": "actual-application-health",
+          "sequence": 4,
+          "category": "health",
+          "kind": "embedding",
+          "method": "GET",
+          "path": "/models",
+          "startedAt": "2026-08-28T18:45:50.486Z",
+          "upstreamContacted": false,
+          "inference": false,
+          "errorCode": "m1-health-disabled-in-controls",
+          "finishedAt": "2026-08-28T18:45:50.486Z"
+        }
+      },
+      {
+        "id": "evidence-13",
+        "source": "host-runtime",
+        "kind": "auxiliary-health-observation",
+        "phase": "actual-application-health",
+        "data": {
+          "phase": "actual-application-health",
+          "sequence": 4,
+          "category": "health",
+          "kind": "reranker",
+          "method": "GET",
+          "path": "/health",
+          "startedAt": "2026-08-28T18:45:50.486Z",
+          "upstreamContacted": false,
+          "inference": false,
+          "errorCode": "m1-health-disabled-in-controls",
+          "finishedAt": "2026-08-28T18:45:50.487Z"
+        }
+      },
+      {
+        "id": "evidence-14",
+        "source": "host-runtime",
+        "kind": "retrieval-operation",
+        "phase": "actual-application-health",
+        "data": {
+          "phase": "actual-application-health",
+          "adapter": "qdrant",
+          "operation": "index",
+          "path": "/readyz",
+          "method": "GET",
+          "startedAt": "2026-08-28T18:45:50.485Z",
+          "request": null,
+          "httpStatus": 200,
+          "responseText": "all shards are ready",
+          "finishedAt": "2026-08-28T18:45:50.488Z"
+        }
+      },
+      {
+        "id": "evidence-15",
+        "source": "host-runtime",
+        "kind": "auxiliary-health-observation",
+        "phase": "actual-application-health",
+        "data": {
+          "phase": "actual-application-health",
+          "sequence": 5,
+          "category": "health",
+          "kind": "embedding",
+          "method": "GET",
+          "path": "/models",
+          "startedAt": "2026-08-28T18:45:55.600Z",
+          "upstreamContacted": false,
+          "inference": false,
+          "errorCode": "m1-health-disabled-in-controls",
+          "finishedAt": "2026-08-28T18:45:55.600Z"
+        }
+      },
+      {
+        "id": "evidence-16",
+        "source": "host-runtime",
+        "kind": "auxiliary-health-observation",
+        "phase": "actual-application-health",
+        "data": {
+          "phase": "actual-application-health",
+          "sequence": 5,
+          "category": "health",
+          "kind": "reranker",
+          "method": "GET",
+          "path": "/health",
+          "startedAt": "2026-08-28T18:45:55.601Z",
+          "upstreamContacted": false,
+          "inference": false,
+          "errorCode": "m1-health-disabled-in-controls",
+          "finishedAt": "2026-08-28T18:45:55.601Z"
+        }
+      },
+      {
+        "id": "evidence-17",
+        "source": "host-runtime",
+        "kind": "retrieval-operation",
+        "phase": "actual-application-health",
+        "data": {
+          "phase": "actual-application-health",
+          "adapter": "qdrant",
+          "operation": "index",
+          "path": "/readyz",
+          "method": "GET",
+          "startedAt": "2026-08-28T18:45:55.599Z",
+          "request": null,
+          "httpStatus": 200,
+          "responseText": "all shards are ready",
+          "finishedAt": "2026-08-28T18:45:55.603Z"
+        }
+      },
+      {
+        "id": "evidence-18",
+        "source": "host-runtime",
+        "kind": "auxiliary-health-observation",
+        "phase": "actual-application-health",
+        "data": {
+          "phase": "actual-application-health",
+          "sequence": 6,
+          "category": "health",
+          "kind": "embedding",
+          "method": "GET",
+          "path": "/models",
+          "startedAt": "2026-08-28T18:46:00.718Z",
+          "upstreamContacted": false,
+          "inference": false,
+          "errorCode": "m1-health-disabled-in-controls",
+          "finishedAt": "2026-08-28T18:46:00.718Z"
+        }
+      },
+      {
+        "id": "evidence-19",
+        "source": "host-runtime",
+        "kind": "auxiliary-health-observation",
+        "phase": "actual-application-health",
+        "data": {
+          "phase": "actual-application-health",
+          "sequence": 6,
+          "category": "health",
+          "kind": "reranker",
+          "method": "GET",
+          "path": "/health",
+          "startedAt": "2026-08-28T18:46:00.719Z",
+          "upstreamContacted": false,
+          "inference": false,
+          "errorCode": "m1-health-disabled-in-controls",
+          "finishedAt": "2026-08-28T18:46:00.719Z"
+        }
+      },
+      {
+        "id": "evidence-20",
+        "source": "host-runtime",
+        "kind": "retrieval-operation",
+        "phase": "actual-application-health",
+        "data": {
+          "phase": "actual-application-health",
+          "adapter": "qdrant",
+          "operation": "index",
+          "path": "/readyz",
+          "method": "GET",
+          "startedAt": "2026-08-28T18:46:00.718Z",
+          "request": null,
+          "httpStatus": 200,
+          "responseText": "all shards are ready",
+          "finishedAt": "2026-08-28T18:46:00.721Z"
+        }
+      },
+      {
+        "id": "evidence-21",
+        "source": "host-runtime",
+        "kind": "auxiliary-health-observation",
+        "phase": "actual-application-health",
+        "data": {
+          "phase": "actual-application-health",
+          "sequence": 7,
+          "category": "health",
+          "kind": "embedding",
+          "method": "GET",
+          "path": "/models",
+          "startedAt": "2026-08-28T18:46:05.800Z",
+          "upstreamContacted": false,
+          "inference": false,
+          "errorCode": "m1-health-disabled-in-controls",
+          "finishedAt": "2026-08-28T18:46:05.800Z"
+        }
+      },
+      {
+        "id": "evidence-22",
+        "source": "host-runtime",
+        "kind": "auxiliary-health-observation",
+        "phase": "actual-application-health",
+        "data": {
+          "phase": "actual-application-health",
+          "sequence": 7,
+          "category": "health",
+          "kind": "reranker",
+          "method": "GET",
+          "path": "/health",
+          "startedAt": "2026-08-28T18:46:05.801Z",
+          "upstreamContacted": false,
+          "inference": false,
+          "errorCode": "m1-health-disabled-in-controls",
+          "finishedAt": "2026-08-28T18:46:05.801Z"
+        }
+      },
+      {
+        "id": "evidence-23",
+        "source": "host-runtime",
+        "kind": "retrieval-operation",
+        "phase": "actual-application-health",
+        "data": {
+          "phase": "actual-application-health",
+          "adapter": "qdrant",
+          "operation": "index",
+          "path": "/readyz",
+          "method": "GET",
+          "startedAt": "2026-08-28T18:46:05.800Z",
+          "request": null,
+          "httpStatus": 200,
+          "responseText": "all shards are ready",
+          "finishedAt": "2026-08-28T18:46:05.803Z"
+        }
+      },
+      {
+        "id": "evidence-24",
+        "source": "host-runtime",
+        "kind": "auxiliary-health-observation",
+        "phase": "actual-application-health",
+        "data": {
+          "phase": "actual-application-health",
+          "sequence": 8,
+          "category": "health",
+          "kind": "embedding",
+          "method": "GET",
+          "path": "/models",
+          "startedAt": "2026-08-28T18:46:10.895Z",
+          "upstreamContacted": false,
+          "inference": false,
+          "errorCode": "m1-health-disabled-in-controls",
+          "finishedAt": "2026-08-28T18:46:10.896Z"
+        }
+      },
+      {
+        "id": "evidence-25",
+        "source": "host-runtime",
+        "kind": "auxiliary-health-observation",
+        "phase": "actual-application-health",
+        "data": {
+          "phase": "actual-application-health",
+          "sequence": 8,
+          "category": "health",
+          "kind": "reranker",
+          "method": "GET",
+          "path": "/health",
+          "startedAt": "2026-08-28T18:46:10.896Z",
+          "upstreamContacted": false,
+          "inference": false,
+          "errorCode": "m1-health-disabled-in-controls",
+          "finishedAt": "2026-08-28T18:46:10.896Z"
+        }
+      },
+      {
+        "id": "evidence-26",
+        "source": "host-runtime",
+        "kind": "retrieval-operation",
+        "phase": "actual-application-health",
+        "data": {
+          "phase": "actual-application-health",
+          "adapter": "qdrant",
+          "operation": "index",
+          "path": "/readyz",
+          "method": "GET",
+          "startedAt": "2026-08-28T18:46:10.895Z",
+          "request": null,
+          "httpStatus": 200,
+          "responseText": "all shards are ready",
+          "finishedAt": "2026-08-28T18:46:10.897Z"
+        }
+      },
+      {
+        "id": "evidence-27",
+        "source": "host-runtime",
+        "kind": "auxiliary-health-observation",
+        "phase": "actual-application-health",
+        "data": {
+          "phase": "actual-application-health",
+          "sequence": 9,
+          "category": "health",
+          "kind": "embedding",
+          "method": "GET",
+          "path": "/models",
+          "startedAt": "2026-08-28T18:46:16.020Z",
+          "upstreamContacted": false,
+          "inference": false,
+          "errorCode": "m1-health-disabled-in-controls",
+          "finishedAt": "2026-08-28T18:46:16.020Z"
+        }
+      },
+      {
+        "id": "evidence-28",
+        "source": "host-runtime",
+        "kind": "auxiliary-health-observation",
+        "phase": "actual-application-health",
+        "data": {
+          "phase": "actual-application-health",
+          "sequence": 9,
+          "category": "health",
+          "kind": "reranker",
+          "method": "GET",
+          "path": "/health",
+          "startedAt": "2026-08-28T18:46:16.020Z",
+          "upstreamContacted": false,
+          "inference": false,
+          "errorCode": "m1-health-disabled-in-controls",
+          "finishedAt": "2026-08-28T18:46:16.020Z"
+        }
+      },
+      {
+        "id": "evidence-29",
+        "source": "host-runtime",
+        "kind": "retrieval-operation",
+        "phase": "actual-application-health",
+        "data": {
+          "phase": "actual-application-health",
+          "adapter": "qdrant",
+          "operation": "index",
+          "path": "/readyz",
+          "method": "GET",
+          "startedAt": "2026-08-28T18:46:16.019Z",
+          "request": null,
+          "httpStatus": 200,
+          "responseText": "all shards are ready",
+          "finishedAt": "2026-08-28T18:46:16.022Z"
+        }
+      },
+      {
+        "id": "evidence-30",
+        "source": "host-runtime",
+        "kind": "auxiliary-health-observation",
+        "phase": "actual-application-health",
+        "data": {
+          "phase": "actual-application-health",
+          "sequence": 10,
+          "category": "health",
+          "kind": "embedding",
+          "method": "GET",
+          "path": "/models",
+          "startedAt": "2026-08-28T18:46:21.093Z",
+          "upstreamContacted": false,
+          "inference": false,
+          "errorCode": "m1-health-disabled-in-controls",
+          "finishedAt": "2026-08-28T18:46:21.093Z"
+        }
+      },
+      {
+        "id": "evidence-31",
+        "source": "host-runtime",
+        "kind": "auxiliary-health-observation",
+        "phase": "actual-application-health",
+        "data": {
+          "phase": "actual-application-health",
+          "sequence": 10,
+          "category": "health",
+          "kind": "reranker",
+          "method": "GET",
+          "path": "/health",
+          "startedAt": "2026-08-28T18:46:21.093Z",
+          "upstreamContacted": false,
+          "inference": false,
+          "errorCode": "m1-health-disabled-in-controls",
+          "finishedAt": "2026-08-28T18:46:21.093Z"
+        }
+      },
+      {
+        "id": "evidence-32",
+        "source": "host-runtime",
+        "kind": "retrieval-operation",
+        "phase": "actual-application-health",
+        "data": {
+          "phase": "actual-application-health",
+          "adapter": "qdrant",
+          "operation": "index",
+          "path": "/readyz",
+          "method": "GET",
+          "startedAt": "2026-08-28T18:46:21.092Z",
+          "request": null,
+          "httpStatus": 200,
+          "responseText": "all shards are ready",
+          "finishedAt": "2026-08-28T18:46:21.095Z"
+        }
+      },
+      {
+        "id": "evidence-33",
+        "source": "host-runtime",
+        "kind": "auxiliary-health-observation",
+        "phase": "actual-application-health",
+        "data": {
+          "phase": "actual-application-health",
+          "sequence": 11,
+          "category": "health",
+          "kind": "embedding",
+          "method": "GET",
+          "path": "/models",
+          "startedAt": "2026-08-28T18:46:26.192Z",
+          "upstreamContacted": false,
+          "inference": false,
+          "errorCode": "m1-health-disabled-in-controls",
+          "finishedAt": "2026-08-28T18:46:26.192Z"
+        }
+      },
+      {
+        "id": "evidence-34",
+        "source": "host-runtime",
+        "kind": "auxiliary-health-observation",
+        "phase": "actual-application-health",
+        "data": {
+          "phase": "actual-application-health",
+          "sequence": 11,
+          "category": "health",
+          "kind": "reranker",
+          "method": "GET",
+          "path": "/health",
+          "startedAt": "2026-08-28T18:46:26.192Z",
+          "upstreamContacted": false,
+          "inference": false,
+          "errorCode": "m1-health-disabled-in-controls",
+          "finishedAt": "2026-08-28T18:46:26.192Z"
+        }
+      },
+      {
+        "id": "evidence-35",
+        "source": "host-runtime",
+        "kind": "retrieval-operation",
+        "phase": "actual-application-health",
+        "data": {
+          "phase": "actual-application-health",
+          "adapter": "qdrant",
+          "operation": "index",
+          "path": "/readyz",
+          "method": "GET",
+          "startedAt": "2026-08-28T18:46:26.191Z",
+          "request": null,
+          "httpStatus": 200,
+          "responseText": "all shards are ready",
+          "finishedAt": "2026-08-28T18:46:26.194Z"
+        }
+      },
+      {
+        "id": "evidence-36",
+        "source": "host-runtime",
+        "kind": "auxiliary-health-observation",
+        "phase": "actual-application-health",
+        "data": {
+          "phase": "actual-application-health",
+          "sequence": 12,
+          "category": "health",
+          "kind": "embedding",
+          "method": "GET",
+          "path": "/models",
+          "startedAt": "2026-08-28T18:46:31.280Z",
+          "upstreamContacted": false,
+          "inference": false,
+          "errorCode": "m1-health-disabled-in-controls",
+          "finishedAt": "2026-08-28T18:46:31.280Z"
+        }
+      },
+      {
+        "id": "evidence-37",
+        "source": "host-runtime",
+        "kind": "auxiliary-health-observation",
+        "phase": "actual-application-health",
+        "data": {
+          "phase": "actual-application-health",
+          "sequence": 12,
+          "category": "health",
+          "kind": "reranker",
+          "method": "GET",
+          "path": "/health",
+          "startedAt": "2026-08-28T18:46:31.280Z",
+          "upstreamContacted": false,
+          "inference": false,
+          "errorCode": "m1-health-disabled-in-controls",
+          "finishedAt": "2026-08-28T18:46:31.281Z"
+        }
+      },
+      {
+        "id": "evidence-38",
+        "source": "host-runtime",
+        "kind": "retrieval-operation",
+        "phase": "actual-application-health",
+        "data": {
+          "phase": "actual-application-health",
+          "adapter": "qdrant",
+          "operation": "index",
+          "path": "/readyz",
+          "method": "GET",
+          "startedAt": "2026-08-28T18:46:31.280Z",
+          "request": null,
+          "httpStatus": 200,
+          "responseText": "all shards are ready",
+          "finishedAt": "2026-08-28T18:46:31.282Z"
+        }
+      },
+      {
+        "id": "evidence-39",
+        "source": "host-runtime",
+        "kind": "auxiliary-health-observation",
+        "phase": "actual-application-health",
+        "data": {
+          "phase": "actual-application-health",
+          "sequence": 13,
+          "category": "health",
+          "kind": "embedding",
+          "method": "GET",
+          "path": "/models",
+          "startedAt": "2026-08-28T18:46:36.373Z",
+          "upstreamContacted": false,
+          "inference": false,
+          "errorCode": "m1-health-disabled-in-controls",
+          "finishedAt": "2026-08-28T18:46:36.374Z"
+        }
+      },
+      {
+        "id": "evidence-40",
+        "source": "host-runtime",
+        "kind": "auxiliary-health-observation",
+        "phase": "actual-application-health",
+        "data": {
+          "phase": "actual-application-health",
+          "sequence": 13,
+          "category": "health",
+          "kind": "reranker",
+          "method": "GET",
+          "path": "/health",
+          "startedAt": "2026-08-28T18:46:36.374Z",
+          "upstreamContacted": false,
+          "inference": false,
+          "errorCode": "m1-health-disabled-in-controls",
+          "finishedAt": "2026-08-28T18:46:36.374Z"
+        }
+      },
+      {
+        "id": "evidence-41",
+        "source": "host-runtime",
+        "kind": "retrieval-operation",
+        "phase": "actual-application-health",
+        "data": {
+          "phase": "actual-application-health",
+          "adapter": "qdrant",
+          "operation": "index",
+          "path": "/readyz",
+          "method": "GET",
+          "startedAt": "2026-08-28T18:46:36.373Z",
+          "request": null,
+          "httpStatus": 200,
+          "responseText": "all shards are ready",
+          "finishedAt": "2026-08-28T18:46:36.375Z"
+        }
+      },
+      {
+        "id": "evidence-42",
+        "source": "host-runtime",
+        "kind": "auxiliary-health-observation",
+        "phase": "actual-application-health",
+        "data": {
+          "phase": "actual-application-health",
+          "sequence": 14,
+          "category": "health",
+          "kind": "embedding",
+          "method": "GET",
+          "path": "/models",
+          "startedAt": "2026-08-28T18:46:41.470Z",
+          "upstreamContacted": false,
+          "inference": false,
+          "errorCode": "m1-health-disabled-in-controls",
+          "finishedAt": "2026-08-28T18:46:41.470Z"
+        }
+      },
+      {
+        "id": "evidence-43",
+        "source": "host-runtime",
+        "kind": "auxiliary-health-observation",
+        "phase": "actual-application-health",
+        "data": {
+          "phase": "actual-application-health",
+          "sequence": 14,
+          "category": "health",
+          "kind": "reranker",
+          "method": "GET",
+          "path": "/health",
+          "startedAt": "2026-08-28T18:46:41.470Z",
+          "upstreamContacted": false,
+          "inference": false,
+          "errorCode": "m1-health-disabled-in-controls",
+          "finishedAt": "2026-08-28T18:46:41.471Z"
+        }
+      },
+      {
+        "id": "evidence-44",
+        "source": "host-runtime",
+        "kind": "retrieval-operation",
+        "phase": "actual-application-health",
+        "data": {
+          "phase": "actual-application-health",
+          "adapter": "qdrant",
+          "operation": "index",
+          "path": "/readyz",
+          "method": "GET",
+          "startedAt": "2026-08-28T18:46:41.470Z",
+          "request": null,
+          "httpStatus": 200,
+          "responseText": "all shards are ready",
+          "finishedAt": "2026-08-28T18:46:41.472Z"
+        }
+      },
+      {
+        "id": "evidence-45",
+        "source": "application",
+        "kind": "synthetic-bootstrap-request",
+        "phase": "actual-application-health",
+        "data": {
+          "phase": "actual-application-health",
+          "method": "POST",
+          "originMatched": true
+        }
+      },
+      {
+        "id": "evidence-46",
+        "source": "browser",
+        "kind": "synthetic-session-bootstrap",
+        "phase": "actual-application-health",
+        "data": {
+          "phase": "actual-application-health",
+          "principalId": "m1-test-687055f8fbcea9b6c4da3c15e95e1302",
+          "issued": true,
+          "oneTimeNonceConsumed": true,
+          "sameSessionReattached": false,
+          "sessionCookieExposedToScript": false,
+          "productionIdentityUsed": false
+        }
+      },
+      {
+        "id": "evidence-47",
+        "source": "host-runtime",
+        "kind": "auxiliary-health-observation",
+        "phase": "actual-application-health",
+        "data": {
+          "phase": "actual-application-health",
+          "sequence": 15,
+          "category": "health",
+          "kind": "embedding",
+          "method": "GET",
+          "path": "/models",
+          "startedAt": "2026-08-28T18:46:45.178Z",
+          "upstreamContacted": false,
+          "inference": false,
+          "errorCode": "m1-health-disabled-in-controls",
+          "finishedAt": "2026-08-28T18:46:45.178Z"
+        }
+      },
+      {
+        "id": "evidence-48",
+        "source": "host-runtime",
+        "kind": "auxiliary-health-observation",
+        "phase": "actual-application-health",
+        "data": {
+          "phase": "actual-application-health",
+          "sequence": 15,
+          "category": "health",
+          "kind": "reranker",
+          "method": "GET",
+          "path": "/health",
+          "startedAt": "2026-08-28T18:46:45.179Z",
+          "upstreamContacted": false,
+          "inference": false,
+          "errorCode": "m1-health-disabled-in-controls",
+          "finishedAt": "2026-08-28T18:46:45.179Z"
+        }
+      },
+      {
+        "id": "evidence-49",
+        "source": "host-runtime",
+        "kind": "retrieval-operation",
+        "phase": "actual-application-health",
+        "data": {
+          "phase": "actual-application-health",
+          "adapter": "qdrant",
+          "operation": "index",
+          "path": "/readyz",
+          "method": "GET",
+          "startedAt": "2026-08-28T18:46:45.178Z",
+          "request": null,
+          "httpStatus": 200,
+          "responseText": "all shards are ready",
+          "finishedAt": "2026-08-28T18:46:45.181Z"
+        }
+      },
+      {
+        "id": "evidence-50",
+        "source": "host-runtime",
+        "kind": "auxiliary-health-observation",
+        "phase": "actual-application-health",
+        "data": {
+          "phase": "actual-application-health",
+          "sequence": 16,
+          "category": "health",
+          "kind": "embedding",
+          "method": "GET",
+          "path": "/models",
+          "startedAt": "2026-08-28T18:46:46.567Z",
+          "upstreamContacted": false,
+          "inference": false,
+          "errorCode": "m1-health-disabled-in-controls",
+          "finishedAt": "2026-08-28T18:46:46.567Z"
+        }
+      },
+      {
+        "id": "evidence-51",
+        "source": "host-runtime",
+        "kind": "auxiliary-health-observation",
+        "phase": "actual-application-health",
+        "data": {
+          "phase": "actual-application-health",
+          "sequence": 16,
+          "category": "health",
+          "kind": "reranker",
+          "method": "GET",
+          "path": "/health",
+          "startedAt": "2026-08-28T18:46:46.567Z",
+          "upstreamContacted": false,
+          "inference": false,
+          "errorCode": "m1-health-disabled-in-controls",
+          "finishedAt": "2026-08-28T18:46:46.567Z"
+        }
+      },
+      {
+        "id": "evidence-52",
+        "source": "host-runtime",
+        "kind": "retrieval-operation",
+        "phase": "actual-application-health",
+        "data": {
+          "phase": "actual-application-health",
+          "adapter": "qdrant",
+          "operation": "index",
+          "path": "/readyz",
+          "method": "GET",
+          "startedAt": "2026-08-28T18:46:46.566Z",
+          "request": null,
+          "httpStatus": 200,
+          "responseText": "all shards are ready",
+          "finishedAt": "2026-08-28T18:46:46.568Z"
+        }
+      },
+      {
+        "id": "evidence-53",
+        "source": "host-runtime",
+        "kind": "auxiliary-health-observation",
+        "phase": "actual-application-health",
+        "data": {
+          "phase": "actual-application-health",
+          "sequence": 17,
+          "category": "health",
+          "kind": "embedding",
+          "method": "GET",
+          "path": "/models",
+          "startedAt": "2026-08-28T18:46:51.685Z",
+          "upstreamContacted": false,
+          "inference": false,
+          "errorCode": "m1-health-disabled-in-controls",
+          "finishedAt": "2026-08-28T18:46:51.685Z"
+        }
+      },
+      {
+        "id": "evidence-54",
+        "source": "host-runtime",
+        "kind": "auxiliary-health-observation",
+        "phase": "actual-application-health",
+        "data": {
+          "phase": "actual-application-health",
+          "sequence": 17,
+          "category": "health",
+          "kind": "reranker",
+          "method": "GET",
+          "path": "/health",
+          "startedAt": "2026-08-28T18:46:51.685Z",
+          "upstreamContacted": false,
+          "inference": false,
+          "errorCode": "m1-health-disabled-in-controls",
+          "finishedAt": "2026-08-28T18:46:51.685Z"
+        }
+      },
+      {
+        "id": "evidence-55",
+        "source": "host-runtime",
+        "kind": "retrieval-operation",
+        "phase": "actual-application-health",
+        "data": {
+          "phase": "actual-application-health",
+          "adapter": "qdrant",
+          "operation": "index",
+          "path": "/readyz",
+          "method": "GET",
+          "startedAt": "2026-08-28T18:46:51.684Z",
+          "request": null,
+          "httpStatus": 200,
+          "responseText": "all shards are ready",
+          "finishedAt": "2026-08-28T18:46:51.687Z"
+        }
+      },
+      {
+        "id": "evidence-56",
+        "source": "host-runtime",
+        "kind": "auxiliary-health-observation",
+        "phase": "actual-application-health",
+        "data": {
+          "phase": "actual-application-health",
+          "sequence": 18,
+          "category": "health",
+          "kind": "embedding",
+          "method": "GET",
+          "path": "/models",
+          "startedAt": "2026-08-28T18:46:56.788Z",
+          "upstreamContacted": false,
+          "inference": false,
+          "errorCode": "m1-health-disabled-in-controls",
+          "finishedAt": "2026-08-28T18:46:56.788Z"
+        }
+      },
+      {
+        "id": "evidence-57",
+        "source": "host-runtime",
+        "kind": "auxiliary-health-observation",
+        "phase": "actual-application-health",
+        "data": {
+          "phase": "actual-application-health",
+          "sequence": 18,
+          "category": "health",
+          "kind": "reranker",
+          "method": "GET",
+          "path": "/health",
+          "startedAt": "2026-08-28T18:46:56.788Z",
+          "upstreamContacted": false,
+          "inference": false,
+          "errorCode": "m1-health-disabled-in-controls",
+          "finishedAt": "2026-08-28T18:46:56.788Z"
+        }
+      },
+      {
+        "id": "evidence-58",
+        "source": "host-runtime",
+        "kind": "retrieval-operation",
+        "phase": "actual-application-health",
+        "data": {
+          "phase": "actual-application-health",
+          "adapter": "qdrant",
+          "operation": "index",
+          "path": "/readyz",
+          "method": "GET",
+          "startedAt": "2026-08-28T18:46:56.787Z",
+          "request": null,
+          "httpStatus": 200,
+          "responseText": "all shards are ready",
+          "finishedAt": "2026-08-28T18:46:56.790Z"
+        }
+      },
+      {
+        "id": "evidence-59",
+        "source": "host-runtime",
+        "kind": "auxiliary-health-observation",
+        "phase": "actual-application-health",
+        "data": {
+          "phase": "actual-application-health",
+          "sequence": 19,
+          "category": "health",
+          "kind": "embedding",
+          "method": "GET",
+          "path": "/models",
+          "startedAt": "2026-08-28T18:47:01.902Z",
+          "upstreamContacted": false,
+          "inference": false,
+          "errorCode": "m1-health-disabled-in-controls",
+          "finishedAt": "2026-08-28T18:47:01.902Z"
+        }
+      },
+      {
+        "id": "evidence-60",
+        "source": "host-runtime",
+        "kind": "auxiliary-health-observation",
+        "phase": "actual-application-health",
+        "data": {
+          "phase": "actual-application-health",
+          "sequence": 19,
+          "category": "health",
+          "kind": "reranker",
+          "method": "GET",
+          "path": "/health",
+          "startedAt": "2026-08-28T18:47:01.902Z",
+          "upstreamContacted": false,
+          "inference": false,
+          "errorCode": "m1-health-disabled-in-controls",
+          "finishedAt": "2026-08-28T18:47:01.902Z"
+        }
+      },
+      {
+        "id": "evidence-61",
+        "source": "host-runtime",
+        "kind": "retrieval-operation",
+        "phase": "actual-application-health",
+        "data": {
+          "phase": "actual-application-health",
+          "adapter": "qdrant",
+          "operation": "index",
+          "path": "/readyz",
+          "method": "GET",
+          "startedAt": "2026-08-28T18:47:01.901Z",
+          "request": null,
+          "httpStatus": 200,
+          "responseText": "all shards are ready",
+          "finishedAt": "2026-08-28T18:47:01.904Z"
+        }
+      },
+      {
+        "id": "evidence-62",
+        "source": "host-runtime",
+        "kind": "auxiliary-health-observation",
+        "phase": "actual-application-health",
+        "data": {
+          "phase": "actual-application-health",
+          "sequence": 20,
+          "category": "health",
+          "kind": "embedding",
+          "method": "GET",
+          "path": "/models",
+          "startedAt": "2026-08-28T18:47:06.998Z",
+          "upstreamContacted": false,
+          "inference": false,
+          "errorCode": "m1-health-disabled-in-controls",
+          "finishedAt": "2026-08-28T18:47:06.998Z"
+        }
+      },
+      {
+        "id": "evidence-63",
+        "source": "host-runtime",
+        "kind": "auxiliary-health-observation",
+        "phase": "actual-application-health",
+        "data": {
+          "phase": "actual-application-health",
+          "sequence": 20,
+          "category": "health",
+          "kind": "reranker",
+          "method": "GET",
+          "path": "/health",
+          "startedAt": "2026-08-28T18:47:06.998Z",
+          "upstreamContacted": false,
+          "inference": false,
+          "errorCode": "m1-health-disabled-in-controls",
+          "finishedAt": "2026-08-28T18:47:06.998Z"
+        }
+      },
+      {
+        "id": "evidence-64",
+        "source": "host-runtime",
+        "kind": "retrieval-operation",
+        "phase": "actual-application-health",
+        "data": {
+          "phase": "actual-application-health",
+          "adapter": "qdrant",
+          "operation": "index",
+          "path": "/readyz",
+          "method": "GET",
+          "startedAt": "2026-08-28T18:47:06.997Z",
+          "request": null,
+          "httpStatus": 200,
+          "responseText": "all shards are ready",
+          "finishedAt": "2026-08-28T18:47:07.000Z"
+        }
+      },
+      {
+        "id": "evidence-65",
+        "source": "host-runtime",
+        "kind": "auxiliary-health-observation",
+        "phase": "actual-application-health",
+        "data": {
+          "phase": "actual-application-health",
+          "sequence": 21,
+          "category": "health",
+          "kind": "embedding",
+          "method": "GET",
+          "path": "/models",
+          "startedAt": "2026-08-28T18:47:07.239Z",
+          "upstreamContacted": false,
+          "inference": false,
+          "errorCode": "m1-health-disabled-in-controls",
+          "finishedAt": "2026-08-28T18:47:07.239Z"
+        }
+      },
+      {
+        "id": "evidence-66",
+        "source": "host-runtime",
+        "kind": "auxiliary-health-observation",
+        "phase": "actual-application-health",
+        "data": {
+          "phase": "actual-application-health",
+          "sequence": 21,
+          "category": "health",
+          "kind": "reranker",
+          "method": "GET",
+          "path": "/health",
+          "startedAt": "2026-08-28T18:47:07.240Z",
+          "upstreamContacted": false,
+          "inference": false,
+          "errorCode": "m1-health-disabled-in-controls",
+          "finishedAt": "2026-08-28T18:47:07.240Z"
+        }
+      },
+      {
+        "id": "evidence-67",
+        "source": "host-runtime",
+        "kind": "retrieval-operation",
+        "phase": "actual-application-health",
+        "data": {
+          "phase": "actual-application-health",
+          "adapter": "qdrant",
+          "operation": "index",
+          "path": "/readyz",
+          "method": "GET",
+          "startedAt": "2026-08-28T18:47:07.239Z",
+          "request": null,
+          "httpStatus": 200,
+          "responseText": "all shards are ready",
+          "finishedAt": "2026-08-28T18:47:07.242Z"
+        }
+      },
+      {
+        "id": "evidence-68",
+        "source": "host-runtime",
+        "kind": "auxiliary-health-observation",
+        "phase": "actual-application-health",
+        "data": {
+          "phase": "actual-application-health",
+          "sequence": 22,
+          "category": "health",
+          "kind": "embedding",
+          "method": "GET",
+          "path": "/models",
+          "startedAt": "2026-08-28T18:47:12.107Z",
+          "upstreamContacted": false,
+          "inference": false,
+          "errorCode": "m1-health-disabled-in-controls",
+          "finishedAt": "2026-08-28T18:47:12.108Z"
+        }
+      },
+      {
+        "id": "evidence-69",
+        "source": "host-runtime",
+        "kind": "auxiliary-health-observation",
+        "phase": "actual-application-health",
+        "data": {
+          "phase": "actual-application-health",
+          "sequence": 22,
+          "category": "health",
+          "kind": "reranker",
+          "method": "GET",
+          "path": "/health",
+          "startedAt": "2026-08-28T18:47:12.108Z",
+          "upstreamContacted": false,
+          "inference": false,
+          "errorCode": "m1-health-disabled-in-controls",
+          "finishedAt": "2026-08-28T18:47:12.108Z"
+        }
+      },
+      {
+        "id": "evidence-70",
+        "source": "host-runtime",
+        "kind": "retrieval-operation",
+        "phase": "actual-application-health",
+        "data": {
+          "phase": "actual-application-health",
+          "adapter": "qdrant",
+          "operation": "index",
+          "path": "/readyz",
+          "method": "GET",
+          "startedAt": "2026-08-28T18:47:12.107Z",
+          "request": null,
+          "httpStatus": 200,
+          "responseText": "all shards are ready",
+          "finishedAt": "2026-08-28T18:47:12.109Z"
+        }
+      },
+      {
+        "id": "evidence-71",
+        "source": "host-runtime",
+        "kind": "auxiliary-health-observation",
+        "phase": "actual-application-health",
+        "data": {
+          "phase": "actual-application-health",
+          "sequence": 23,
+          "category": "health",
+          "kind": "embedding",
+          "method": "GET",
+          "path": "/models",
+          "startedAt": "2026-08-28T18:47:17.233Z",
+          "upstreamContacted": false,
+          "inference": false,
+          "errorCode": "m1-health-disabled-in-controls",
+          "finishedAt": "2026-08-28T18:47:17.233Z"
+        }
+      },
+      {
+        "id": "evidence-72",
+        "source": "host-runtime",
+        "kind": "auxiliary-health-observation",
+        "phase": "actual-application-health",
+        "data": {
+          "phase": "actual-application-health",
+          "sequence": 23,
+          "category": "health",
+          "kind": "reranker",
+          "method": "GET",
+          "path": "/health",
+          "startedAt": "2026-08-28T18:47:17.233Z",
+          "upstreamContacted": false,
+          "inference": false,
+          "errorCode": "m1-health-disabled-in-controls",
+          "finishedAt": "2026-08-28T18:47:17.233Z"
+        }
+      },
+      {
+        "id": "evidence-73",
+        "source": "host-runtime",
+        "kind": "retrieval-operation",
+        "phase": "actual-application-health",
+        "data": {
+          "phase": "actual-application-health",
+          "adapter": "qdrant",
+          "operation": "index",
+          "path": "/readyz",
+          "method": "GET",
+          "startedAt": "2026-08-28T18:47:17.232Z",
+          "request": null,
+          "httpStatus": 200,
+          "responseText": "all shards are ready",
+          "finishedAt": "2026-08-28T18:47:17.235Z"
+        }
+      }
+    ],
+    "checks": [],
+    "failures": [],
+    "notImplemented": [],
+    "identityBoundary": "synthetic-server-issued-session; not production Keycloak or Windows Hello qualification",
+    "browserExercised": false,
+    "protectedDataRead": false,
+    "productionChanged": false
+  },
+  "negativeObservation": {
+    "schemaVersion": "runaai-m1-functional-attempt/v1",
+    "caseId": "unscored-health-route-negative-controls",
+    "candidateId": null,
+    "repetition": 0,
+    "role": "control",
+    "caseBundleSha256": "8713db8fb54bebe069f73edfef7cd179c13a3caba1d4d15bd8567f39aaa418ed",
+    "runtimeSealSha256": null,
+    "status": "running",
+    "startedAt": "2026-08-28T18:47:19.791Z",
+    "application": {
+      "requests": [],
+      "final": null
+    },
+    "provider": {
+      "calls": [
+        {
+          "sequence": 1,
+          "kind": "provider",
+          "role": "control",
+          "phase": "expected-negative-route-denials",
+          "path": "/models",
+          "startedAt": "2026-08-28T18:47:19.797Z",
+          "scope": null,
+          "errorCode": "m1-capture-route-denied",
+          "finishedAt": "2026-08-28T18:47:19.797Z"
+        },
+        {
+          "sequence": 2,
+          "kind": "provider",
+          "role": "control",
+          "phase": "expected-negative-route-denials",
+          "path": "/models/load",
+          "startedAt": "2026-08-28T18:47:19.799Z",
+          "scope": null,
+          "errorCode": "m1-capture-route-denied",
+          "finishedAt": "2026-08-28T18:47:19.799Z"
+        }
+      ],
+      "unexpectedCalls": [
+        {
+          "sequence": 1,
+          "kind": "embedding",
+          "role": "control",
+          "phase": "expected-negative-route-denials",
+          "path": "/models",
+          "startedAt": "2026-08-28T18:47:19.792Z",
+          "scope": null,
+          "errorCode": "m1-capture-route-denied",
+          "request": null
+        },
+        {
+          "sequence": 1,
+          "kind": "embedding",
+          "role": "control",
+          "phase": "expected-negative-route-denials",
+          "path": "/models",
+          "startedAt": "2026-08-28T18:47:19.794Z",
+          "scope": null,
+          "errorCode": "m1-capture-route-denied",
+          "request": null
+        },
+        {
+          "sequence": 1,
+          "kind": "reranker",
+          "role": "control",
+          "phase": "expected-negative-route-denials",
+          "path": "/health",
+          "startedAt": "2026-08-28T18:47:19.795Z",
+          "scope": null,
+          "errorCode": "m1-capture-route-denied",
+          "request": null
+        },
+        {
+          "sequence": 1,
+          "kind": "reranker",
+          "role": "control",
+          "phase": "expected-negative-route-denials",
+          "path": "/unknown",
+          "startedAt": "2026-08-28T18:47:19.796Z",
+          "scope": null,
+          "errorCode": "m1-capture-route-denied",
+          "request": null
+        },
+        {
+          "sequence": 1,
+          "kind": "provider",
+          "role": "control",
+          "phase": "expected-negative-route-denials",
+          "path": "/models",
+          "startedAt": "2026-08-28T18:47:19.797Z",
+          "scope": null,
+          "errorCode": "m1-capture-route-denied",
+          "request": null
+        },
+        {
+          "sequence": 2,
+          "kind": "provider",
+          "role": "control",
+          "phase": "expected-negative-route-denials",
+          "path": "/models/load",
+          "startedAt": "2026-08-28T18:47:19.799Z",
+          "scope": null,
+          "errorCode": "m1-capture-route-denied",
+          "request": null
+        }
+      ]
+    },
+    "health": {
+      "calls": []
+    },
+    "sources": {
+      "bindings": [],
+      "selectedAliases": [],
+      "indexOperations": [
+        {
+          "sequence": 1,
+          "kind": "embedding",
+          "role": "control",
+          "phase": "expected-negative-route-denials",
+          "path": "/models",
+          "startedAt": "2026-08-28T18:47:19.792Z",
+          "scope": null,
+          "errorCode": "m1-capture-route-denied",
+          "finishedAt": "2026-08-28T18:47:19.792Z"
+        },
+        {
+          "sequence": 1,
+          "kind": "embedding",
+          "role": "control",
+          "phase": "expected-negative-route-denials",
+          "path": "/models",
+          "startedAt": "2026-08-28T18:47:19.794Z",
+          "scope": null,
+          "errorCode": "m1-capture-route-denied",
+          "finishedAt": "2026-08-28T18:47:19.794Z"
+        },
+        {
+          "sequence": 1,
+          "kind": "reranker",
+          "role": "control",
+          "phase": "expected-negative-route-denials",
+          "path": "/health",
+          "startedAt": "2026-08-28T18:47:19.795Z",
+          "scope": null,
+          "errorCode": "m1-capture-route-denied",
+          "finishedAt": "2026-08-28T18:47:19.795Z"
+        },
+        {
+          "sequence": 1,
+          "kind": "reranker",
+          "role": "control",
+          "phase": "expected-negative-route-denials",
+          "path": "/unknown",
+          "startedAt": "2026-08-28T18:47:19.796Z",
+          "scope": null,
+          "errorCode": "m1-capture-route-denied",
+          "finishedAt": "2026-08-28T18:47:19.796Z"
+        }
+      ],
+      "canonicalBefore": [],
+      "canonicalAfter": []
+    },
+    "project": {
+      "initial": null,
+      "final": null,
+      "snapshots": []
+    },
+    "authority": {
+      "grants": [],
+      "approvals": [],
+      "revocations": [],
+      "sessionEvents": []
+    },
+    "workflow": {
+      "task": null,
+      "run": null,
+      "proposals": [],
+      "intents": [],
+      "receipts": [],
+      "events": []
+    },
+    "native": {
+      "calls": [],
+      "receipts": [],
+      "suites": []
+    },
+    "evidence": [
+      {
+        "id": "evidence-1",
+        "source": "host-runtime",
+        "kind": "retrieval-operation",
+        "phase": "expected-negative-route-denials",
+        "data": {
+          "phase": "expected-negative-route-denials",
+          "sequence": 1,
+          "kind": "embedding",
+          "role": "control",
+          "path": "/models",
+          "startedAt": "2026-08-28T18:47:19.792Z",
+          "scope": null,
+          "errorCode": "m1-capture-route-denied",
+          "finishedAt": "2026-08-28T18:47:19.792Z"
+        }
+      },
+      {
+        "id": "evidence-2",
+        "source": "host-runtime",
+        "kind": "retrieval-operation",
+        "phase": "expected-negative-route-denials",
+        "data": {
+          "phase": "expected-negative-route-denials",
+          "sequence": 1,
+          "kind": "embedding",
+          "role": "control",
+          "path": "/models",
+          "startedAt": "2026-08-28T18:47:19.794Z",
+          "scope": null,
+          "errorCode": "m1-capture-route-denied",
+          "finishedAt": "2026-08-28T18:47:19.794Z"
+        }
+      },
+      {
+        "id": "evidence-3",
+        "source": "host-runtime",
+        "kind": "retrieval-operation",
+        "phase": "expected-negative-route-denials",
+        "data": {
+          "phase": "expected-negative-route-denials",
+          "sequence": 1,
+          "kind": "reranker",
+          "role": "control",
+          "path": "/health",
+          "startedAt": "2026-08-28T18:47:19.795Z",
+          "scope": null,
+          "errorCode": "m1-capture-route-denied",
+          "finishedAt": "2026-08-28T18:47:19.795Z"
+        }
+      },
+      {
+        "id": "evidence-4",
+        "source": "host-runtime",
+        "kind": "retrieval-operation",
+        "phase": "expected-negative-route-denials",
+        "data": {
+          "phase": "expected-negative-route-denials",
+          "sequence": 1,
+          "kind": "reranker",
+          "role": "control",
+          "path": "/unknown",
+          "startedAt": "2026-08-28T18:47:19.796Z",
+          "scope": null,
+          "errorCode": "m1-capture-route-denied",
+          "finishedAt": "2026-08-28T18:47:19.796Z"
+        }
+      },
+      {
+        "id": "evidence-5",
+        "source": "host-runtime",
+        "kind": "transport-provider",
+        "phase": "expected-negative-route-denials",
+        "data": {
+          "phase": "expected-negative-route-denials",
+          "sequence": 1,
+          "kind": "provider",
+          "role": "control",
+          "path": "/models",
+          "startedAt": "2026-08-28T18:47:19.797Z",
+          "scope": null,
+          "errorCode": "m1-capture-route-denied",
+          "finishedAt": "2026-08-28T18:47:19.797Z"
+        }
+      },
+      {
+        "id": "evidence-6",
+        "source": "host-runtime",
+        "kind": "transport-provider",
+        "phase": "expected-negative-route-denials",
+        "data": {
+          "phase": "expected-negative-route-denials",
+          "sequence": 2,
+          "kind": "provider",
+          "role": "control",
+          "path": "/models/load",
+          "startedAt": "2026-08-28T18:47:19.799Z",
+          "scope": null,
+          "errorCode": "m1-capture-route-denied",
+          "finishedAt": "2026-08-28T18:47:19.799Z"
+        }
+      }
+    ],
+    "checks": [],
+    "failures": [],
+    "notImplemented": [],
+    "identityBoundary": "synthetic-server-issued-session; not production Keycloak or Windows Hello qualification",
+    "browserExercised": false,
+    "protectedDataRead": false,
+    "productionChanged": false
+  },
+  "transportHealth": {
+    "provider": [],
+    "embedding": [
+      {
+        "sequence": 1,
+        "category": "health",
+        "kind": "embedding",
+        "method": "GET",
+        "path": "/models",
+        "phase": "actual-application-health",
+        "startedAt": "2026-08-28T18:45:40.261Z",
+        "upstreamContacted": false,
+        "inference": false,
+        "errorCode": "m1-health-disabled-in-controls",
+        "finishedAt": "2026-08-28T18:45:40.261Z"
+      },
+      {
+        "sequence": 2,
+        "category": "health",
+        "kind": "embedding",
+        "method": "GET",
+        "path": "/models",
+        "phase": "actual-application-health",
+        "startedAt": "2026-08-28T18:45:40.269Z",
+        "upstreamContacted": false,
+        "inference": false,
+        "errorCode": "m1-health-disabled-in-controls",
+        "finishedAt": "2026-08-28T18:45:40.269Z"
+      },
+      {
+        "sequence": 3,
+        "category": "health",
+        "kind": "embedding",
+        "method": "GET",
+        "path": "/models",
+        "phase": "actual-application-health",
+        "startedAt": "2026-08-28T18:45:45.369Z",
+        "upstreamContacted": false,
+        "inference": false,
+        "errorCode": "m1-health-disabled-in-controls",
+        "finishedAt": "2026-08-28T18:45:45.369Z"
+      },
+      {
+        "sequence": 4,
+        "category": "health",
+        "kind": "embedding",
+        "method": "GET",
+        "path": "/models",
+        "phase": "actual-application-health",
+        "startedAt": "2026-08-28T18:45:50.486Z",
+        "upstreamContacted": false,
+        "inference": false,
+        "errorCode": "m1-health-disabled-in-controls",
+        "finishedAt": "2026-08-28T18:45:50.486Z"
+      },
+      {
+        "sequence": 5,
+        "category": "health",
+        "kind": "embedding",
+        "method": "GET",
+        "path": "/models",
+        "phase": "actual-application-health",
+        "startedAt": "2026-08-28T18:45:55.600Z",
+        "upstreamContacted": false,
+        "inference": false,
+        "errorCode": "m1-health-disabled-in-controls",
+        "finishedAt": "2026-08-28T18:45:55.600Z"
+      },
+      {
+        "sequence": 6,
+        "category": "health",
+        "kind": "embedding",
+        "method": "GET",
+        "path": "/models",
+        "phase": "actual-application-health",
+        "startedAt": "2026-08-28T18:46:00.718Z",
+        "upstreamContacted": false,
+        "inference": false,
+        "errorCode": "m1-health-disabled-in-controls",
+        "finishedAt": "2026-08-28T18:46:00.718Z"
+      },
+      {
+        "sequence": 7,
+        "category": "health",
+        "kind": "embedding",
+        "method": "GET",
+        "path": "/models",
+        "phase": "actual-application-health",
+        "startedAt": "2026-08-28T18:46:05.800Z",
+        "upstreamContacted": false,
+        "inference": false,
+        "errorCode": "m1-health-disabled-in-controls",
+        "finishedAt": "2026-08-28T18:46:05.800Z"
+      },
+      {
+        "sequence": 8,
+        "category": "health",
+        "kind": "embedding",
+        "method": "GET",
+        "path": "/models",
+        "phase": "actual-application-health",
+        "startedAt": "2026-08-28T18:46:10.895Z",
+        "upstreamContacted": false,
+        "inference": false,
+        "errorCode": "m1-health-disabled-in-controls",
+        "finishedAt": "2026-08-28T18:46:10.896Z"
+      },
+      {
+        "sequence": 9,
+        "category": "health",
+        "kind": "embedding",
+        "method": "GET",
+        "path": "/models",
+        "phase": "actual-application-health",
+        "startedAt": "2026-08-28T18:46:16.020Z",
+        "upstreamContacted": false,
+        "inference": false,
+        "errorCode": "m1-health-disabled-in-controls",
+        "finishedAt": "2026-08-28T18:46:16.020Z"
+      },
+      {
+        "sequence": 10,
+        "category": "health",
+        "kind": "embedding",
+        "method": "GET",
+        "path": "/models",
+        "phase": "actual-application-health",
+        "startedAt": "2026-08-28T18:46:21.093Z",
+        "upstreamContacted": false,
+        "inference": false,
+        "errorCode": "m1-health-disabled-in-controls",
+        "finishedAt": "2026-08-28T18:46:21.093Z"
+      },
+      {
+        "sequence": 11,
+        "category": "health",
+        "kind": "embedding",
+        "method": "GET",
+        "path": "/models",
+        "phase": "actual-application-health",
+        "startedAt": "2026-08-28T18:46:26.192Z",
+        "upstreamContacted": false,
+        "inference": false,
+        "errorCode": "m1-health-disabled-in-controls",
+        "finishedAt": "2026-08-28T18:46:26.192Z"
+      },
+      {
+        "sequence": 12,
+        "category": "health",
+        "kind": "embedding",
+        "method": "GET",
+        "path": "/models",
+        "phase": "actual-application-health",
+        "startedAt": "2026-08-28T18:46:31.280Z",
+        "upstreamContacted": false,
+        "inference": false,
+        "errorCode": "m1-health-disabled-in-controls",
+        "finishedAt": "2026-08-28T18:46:31.280Z"
+      },
+      {
+        "sequence": 13,
+        "category": "health",
+        "kind": "embedding",
+        "method": "GET",
+        "path": "/models",
+        "phase": "actual-application-health",
+        "startedAt": "2026-08-28T18:46:36.373Z",
+        "upstreamContacted": false,
+        "inference": false,
+        "errorCode": "m1-health-disabled-in-controls",
+        "finishedAt": "2026-08-28T18:46:36.374Z"
+      },
+      {
+        "sequence": 14,
+        "category": "health",
+        "kind": "embedding",
+        "method": "GET",
+        "path": "/models",
+        "phase": "actual-application-health",
+        "startedAt": "2026-08-28T18:46:41.470Z",
+        "upstreamContacted": false,
+        "inference": false,
+        "errorCode": "m1-health-disabled-in-controls",
+        "finishedAt": "2026-08-28T18:46:41.470Z"
+      },
+      {
+        "sequence": 15,
+        "category": "health",
+        "kind": "embedding",
+        "method": "GET",
+        "path": "/models",
+        "phase": "actual-application-health",
+        "startedAt": "2026-08-28T18:46:45.178Z",
+        "upstreamContacted": false,
+        "inference": false,
+        "errorCode": "m1-health-disabled-in-controls",
+        "finishedAt": "2026-08-28T18:46:45.178Z"
+      },
+      {
+        "sequence": 16,
+        "category": "health",
+        "kind": "embedding",
+        "method": "GET",
+        "path": "/models",
+        "phase": "actual-application-health",
+        "startedAt": "2026-08-28T18:46:46.567Z",
+        "upstreamContacted": false,
+        "inference": false,
+        "errorCode": "m1-health-disabled-in-controls",
+        "finishedAt": "2026-08-28T18:46:46.567Z"
+      },
+      {
+        "sequence": 17,
+        "category": "health",
+        "kind": "embedding",
+        "method": "GET",
+        "path": "/models",
+        "phase": "actual-application-health",
+        "startedAt": "2026-08-28T18:46:51.685Z",
+        "upstreamContacted": false,
+        "inference": false,
+        "errorCode": "m1-health-disabled-in-controls",
+        "finishedAt": "2026-08-28T18:46:51.685Z"
+      },
+      {
+        "sequence": 18,
+        "category": "health",
+        "kind": "embedding",
+        "method": "GET",
+        "path": "/models",
+        "phase": "actual-application-health",
+        "startedAt": "2026-08-28T18:46:56.788Z",
+        "upstreamContacted": false,
+        "inference": false,
+        "errorCode": "m1-health-disabled-in-controls",
+        "finishedAt": "2026-08-28T18:46:56.788Z"
+      },
+      {
+        "sequence": 19,
+        "category": "health",
+        "kind": "embedding",
+        "method": "GET",
+        "path": "/models",
+        "phase": "actual-application-health",
+        "startedAt": "2026-08-28T18:47:01.902Z",
+        "upstreamContacted": false,
+        "inference": false,
+        "errorCode": "m1-health-disabled-in-controls",
+        "finishedAt": "2026-08-28T18:47:01.902Z"
+      },
+      {
+        "sequence": 20,
+        "category": "health",
+        "kind": "embedding",
+        "method": "GET",
+        "path": "/models",
+        "phase": "actual-application-health",
+        "startedAt": "2026-08-28T18:47:06.998Z",
+        "upstreamContacted": false,
+        "inference": false,
+        "errorCode": "m1-health-disabled-in-controls",
+        "finishedAt": "2026-08-28T18:47:06.998Z"
+      },
+      {
+        "sequence": 21,
+        "category": "health",
+        "kind": "embedding",
+        "method": "GET",
+        "path": "/models",
+        "phase": "actual-application-health",
+        "startedAt": "2026-08-28T18:47:07.239Z",
+        "upstreamContacted": false,
+        "inference": false,
+        "errorCode": "m1-health-disabled-in-controls",
+        "finishedAt": "2026-08-28T18:47:07.239Z"
+      },
+      {
+        "sequence": 22,
+        "category": "health",
+        "kind": "embedding",
+        "method": "GET",
+        "path": "/models",
+        "phase": "actual-application-health",
+        "startedAt": "2026-08-28T18:47:12.107Z",
+        "upstreamContacted": false,
+        "inference": false,
+        "errorCode": "m1-health-disabled-in-controls",
+        "finishedAt": "2026-08-28T18:47:12.108Z"
+      },
+      {
+        "sequence": 23,
+        "category": "health",
+        "kind": "embedding",
+        "method": "GET",
+        "path": "/models",
+        "phase": "actual-application-health",
+        "startedAt": "2026-08-28T18:47:17.233Z",
+        "upstreamContacted": false,
+        "inference": false,
+        "errorCode": "m1-health-disabled-in-controls",
+        "finishedAt": "2026-08-28T18:47:17.233Z"
+      }
+    ],
+    "reranker": [
+      {
+        "sequence": 1,
+        "category": "health",
+        "kind": "reranker",
+        "method": "GET",
+        "path": "/health",
+        "phase": "actual-application-health",
+        "startedAt": "2026-08-28T18:45:40.261Z",
+        "upstreamContacted": false,
+        "inference": false,
+        "errorCode": "m1-health-disabled-in-controls",
+        "finishedAt": "2026-08-28T18:45:40.262Z"
+      },
+      {
+        "sequence": 2,
+        "category": "health",
+        "kind": "reranker",
+        "method": "GET",
+        "path": "/health",
+        "phase": "actual-application-health",
+        "startedAt": "2026-08-28T18:45:40.270Z",
+        "upstreamContacted": false,
+        "inference": false,
+        "errorCode": "m1-health-disabled-in-controls",
+        "finishedAt": "2026-08-28T18:45:40.270Z"
+      },
+      {
+        "sequence": 3,
+        "category": "health",
+        "kind": "reranker",
+        "method": "GET",
+        "path": "/health",
+        "phase": "actual-application-health",
+        "startedAt": "2026-08-28T18:45:45.369Z",
+        "upstreamContacted": false,
+        "inference": false,
+        "errorCode": "m1-health-disabled-in-controls",
+        "finishedAt": "2026-08-28T18:45:45.369Z"
+      },
+      {
+        "sequence": 4,
+        "category": "health",
+        "kind": "reranker",
+        "method": "GET",
+        "path": "/health",
+        "phase": "actual-application-health",
+        "startedAt": "2026-08-28T18:45:50.486Z",
+        "upstreamContacted": false,
+        "inference": false,
+        "errorCode": "m1-health-disabled-in-controls",
+        "finishedAt": "2026-08-28T18:45:50.487Z"
+      },
+      {
+        "sequence": 5,
+        "category": "health",
+        "kind": "reranker",
+        "method": "GET",
+        "path": "/health",
+        "phase": "actual-application-health",
+        "startedAt": "2026-08-28T18:45:55.601Z",
+        "upstreamContacted": false,
+        "inference": false,
+        "errorCode": "m1-health-disabled-in-controls",
+        "finishedAt": "2026-08-28T18:45:55.601Z"
+      },
+      {
+        "sequence": 6,
+        "category": "health",
+        "kind": "reranker",
+        "method": "GET",
+        "path": "/health",
+        "phase": "actual-application-health",
+        "startedAt": "2026-08-28T18:46:00.719Z",
+        "upstreamContacted": false,
+        "inference": false,
+        "errorCode": "m1-health-disabled-in-controls",
+        "finishedAt": "2026-08-28T18:46:00.719Z"
+      },
+      {
+        "sequence": 7,
+        "category": "health",
+        "kind": "reranker",
+        "method": "GET",
+        "path": "/health",
+        "phase": "actual-application-health",
+        "startedAt": "2026-08-28T18:46:05.801Z",
+        "upstreamContacted": false,
+        "inference": false,
+        "errorCode": "m1-health-disabled-in-controls",
+        "finishedAt": "2026-08-28T18:46:05.801Z"
+      },
+      {
+        "sequence": 8,
+        "category": "health",
+        "kind": "reranker",
+        "method": "GET",
+        "path": "/health",
+        "phase": "actual-application-health",
+        "startedAt": "2026-08-28T18:46:10.896Z",
+        "upstreamContacted": false,
+        "inference": false,
+        "errorCode": "m1-health-disabled-in-controls",
+        "finishedAt": "2026-08-28T18:46:10.896Z"
+      },
+      {
+        "sequence": 9,
+        "category": "health",
+        "kind": "reranker",
+        "method": "GET",
+        "path": "/health",
+        "phase": "actual-application-health",
+        "startedAt": "2026-08-28T18:46:16.020Z",
+        "upstreamContacted": false,
+        "inference": false,
+        "errorCode": "m1-health-disabled-in-controls",
+        "finishedAt": "2026-08-28T18:46:16.020Z"
+      },
+      {
+        "sequence": 10,
+        "category": "health",
+        "kind": "reranker",
+        "method": "GET",
+        "path": "/health",
+        "phase": "actual-application-health",
+        "startedAt": "2026-08-28T18:46:21.093Z",
+        "upstreamContacted": false,
+        "inference": false,
+        "errorCode": "m1-health-disabled-in-controls",
+        "finishedAt": "2026-08-28T18:46:21.093Z"
+      },
+      {
+        "sequence": 11,
+        "category": "health",
+        "kind": "reranker",
+        "method": "GET",
+        "path": "/health",
+        "phase": "actual-application-health",
+        "startedAt": "2026-08-28T18:46:26.192Z",
+        "upstreamContacted": false,
+        "inference": false,
+        "errorCode": "m1-health-disabled-in-controls",
+        "finishedAt": "2026-08-28T18:46:26.192Z"
+      },
+      {
+        "sequence": 12,
+        "category": "health",
+        "kind": "reranker",
+        "method": "GET",
+        "path": "/health",
+        "phase": "actual-application-health",
+        "startedAt": "2026-08-28T18:46:31.280Z",
+        "upstreamContacted": false,
+        "inference": false,
+        "errorCode": "m1-health-disabled-in-controls",
+        "finishedAt": "2026-08-28T18:46:31.281Z"
+      },
+      {
+        "sequence": 13,
+        "category": "health",
+        "kind": "reranker",
+        "method": "GET",
+        "path": "/health",
+        "phase": "actual-application-health",
+        "startedAt": "2026-08-28T18:46:36.374Z",
+        "upstreamContacted": false,
+        "inference": false,
+        "errorCode": "m1-health-disabled-in-controls",
+        "finishedAt": "2026-08-28T18:46:36.374Z"
+      },
+      {
+        "sequence": 14,
+        "category": "health",
+        "kind": "reranker",
+        "method": "GET",
+        "path": "/health",
+        "phase": "actual-application-health",
+        "startedAt": "2026-08-28T18:46:41.470Z",
+        "upstreamContacted": false,
+        "inference": false,
+        "errorCode": "m1-health-disabled-in-controls",
+        "finishedAt": "2026-08-28T18:46:41.471Z"
+      },
+      {
+        "sequence": 15,
+        "category": "health",
+        "kind": "reranker",
+        "method": "GET",
+        "path": "/health",
+        "phase": "actual-application-health",
+        "startedAt": "2026-08-28T18:46:45.179Z",
+        "upstreamContacted": false,
+        "inference": false,
+        "errorCode": "m1-health-disabled-in-controls",
+        "finishedAt": "2026-08-28T18:46:45.179Z"
+      },
+      {
+        "sequence": 16,
+        "category": "health",
+        "kind": "reranker",
+        "method": "GET",
+        "path": "/health",
+        "phase": "actual-application-health",
+        "startedAt": "2026-08-28T18:46:46.567Z",
+        "upstreamContacted": false,
+        "inference": false,
+        "errorCode": "m1-health-disabled-in-controls",
+        "finishedAt": "2026-08-28T18:46:46.567Z"
+      },
+      {
+        "sequence": 17,
+        "category": "health",
+        "kind": "reranker",
+        "method": "GET",
+        "path": "/health",
+        "phase": "actual-application-health",
+        "startedAt": "2026-08-28T18:46:51.685Z",
+        "upstreamContacted": false,
+        "inference": false,
+        "errorCode": "m1-health-disabled-in-controls",
+        "finishedAt": "2026-08-28T18:46:51.685Z"
+      },
+      {
+        "sequence": 18,
+        "category": "health",
+        "kind": "reranker",
+        "method": "GET",
+        "path": "/health",
+        "phase": "actual-application-health",
+        "startedAt": "2026-08-28T18:46:56.788Z",
+        "upstreamContacted": false,
+        "inference": false,
+        "errorCode": "m1-health-disabled-in-controls",
+        "finishedAt": "2026-08-28T18:46:56.788Z"
+      },
+      {
+        "sequence": 19,
+        "category": "health",
+        "kind": "reranker",
+        "method": "GET",
+        "path": "/health",
+        "phase": "actual-application-health",
+        "startedAt": "2026-08-28T18:47:01.902Z",
+        "upstreamContacted": false,
+        "inference": false,
+        "errorCode": "m1-health-disabled-in-controls",
+        "finishedAt": "2026-08-28T18:47:01.902Z"
+      },
+      {
+        "sequence": 20,
+        "category": "health",
+        "kind": "reranker",
+        "method": "GET",
+        "path": "/health",
+        "phase": "actual-application-health",
+        "startedAt": "2026-08-28T18:47:06.998Z",
+        "upstreamContacted": false,
+        "inference": false,
+        "errorCode": "m1-health-disabled-in-controls",
+        "finishedAt": "2026-08-28T18:47:06.998Z"
+      },
+      {
+        "sequence": 21,
+        "category": "health",
+        "kind": "reranker",
+        "method": "GET",
+        "path": "/health",
+        "phase": "actual-application-health",
+        "startedAt": "2026-08-28T18:47:07.240Z",
+        "upstreamContacted": false,
+        "inference": false,
+        "errorCode": "m1-health-disabled-in-controls",
+        "finishedAt": "2026-08-28T18:47:07.240Z"
+      },
+      {
+        "sequence": 22,
+        "category": "health",
+        "kind": "reranker",
+        "method": "GET",
+        "path": "/health",
+        "phase": "actual-application-health",
+        "startedAt": "2026-08-28T18:47:12.108Z",
+        "upstreamContacted": false,
+        "inference": false,
+        "errorCode": "m1-health-disabled-in-controls",
+        "finishedAt": "2026-08-28T18:47:12.108Z"
+      },
+      {
+        "sequence": 23,
+        "category": "health",
+        "kind": "reranker",
+        "method": "GET",
+        "path": "/health",
+        "phase": "actual-application-health",
+        "startedAt": "2026-08-28T18:47:17.233Z",
+        "upstreamContacted": false,
+        "inference": false,
+        "errorCode": "m1-health-disabled-in-controls",
+        "finishedAt": "2026-08-28T18:47:17.233Z"
+      }
+    ]
+  },
+  "finishedAt": "2026-08-28T18:47:20.670Z"
+}

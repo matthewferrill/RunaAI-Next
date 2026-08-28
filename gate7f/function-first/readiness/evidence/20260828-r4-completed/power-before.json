@@ -1,0 +1,23 @@
+{
+    "time":  "2026-08-28T16:08:03.8639492Z",
+    "gpus":  [
+                 {
+                     "index":  0,
+                     "uuid":  "GPU-15ea3e34-292b-3333-5e43-e5b133f9a30c",
+                     "name":  "Quadro RTX 6000",
+                     "powerLimitWatts":  260,
+                     "minimumWatts":  100,
+                     "maximumWatts":  260,
+                     "temperatureC":  41
+                 },
+                 {
+                     "index":  1,
+                     "uuid":  "GPU-1f2f6459-b688-3466-5b49-a65c538be843",
+                     "name":  "Quadro RTX 6000",
+                     "powerLimitWatts":  260,
+                     "minimumWatts":  100,
+                     "maximumWatts":  260,
+                     "temperatureC":  36
+                 }
+             ]
+}

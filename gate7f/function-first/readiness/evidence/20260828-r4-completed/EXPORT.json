@@ -1,0 +1,93 @@
+{
+  "schemaVersion": "runa-m1-readiness-export/v1",
+  "retrievedAt": "2026-08-28T16:15:32.895Z",
+  "files": [
+    {
+      "name": "capture-coder.jsonl",
+      "bytes": 281632,
+      "sha256": "f9ef6a70ff1f077d227ed0fc959e65e2828fdb0ce13f1231ac0beac6ef071cd8"
+    },
+    {
+      "name": "capture-gemma.jsonl",
+      "bytes": 312051,
+      "sha256": "a688a9f7dd222e1126df007db676a1592950b30c352edc95ab4eefd6d13d64bd"
+    },
+    {
+      "name": "power-applied.json",
+      "bytes": 838,
+      "sha256": "4fd0be87ffa73a7de74f97aba24cc566c35d998edc75dea83f94945448916ba5"
+    },
+    {
+      "name": "power-before.json",
+      "bytes": 838,
+      "sha256": "e22fd0bd1c0a2be364dea913953f848dfdcda1f3e5cc7cbf55060535a300a4fb"
+    },
+    {
+      "name": "power-result.json",
+      "bytes": 27094,
+      "sha256": "261a13b1daadb6350df51fcee5cb695131adad24693af15e01af7c7f7ba34fba"
+    },
+    {
+      "name": "result-coder.json",
+      "bytes": 4611,
+      "sha256": "3223c3b7876f5aa707868bae1546ba0a3273b43075906a7320d2e6b33fafec13"
+    },
+    {
+      "name": "result-gemma.json",
+      "bytes": 4612,
+      "sha256": "8aa1fe23e7e18d4e539390c1ba5ea46d81c5d0c5293209842d516265baf86326"
+    },
+    {
+      "name": "seal.json",
+      "bytes": 791,
+      "sha256": "dda05bd43db3d445d093224d7345bf86522e2ef1824b2018f932e4acd656ae88"
+    },
+    {
+      "name": "watchdog.jsonl",
+      "bytes": 35127,
+      "sha256": "fbe337acf36c681a2e58989b372391ca1dcd1d485bdc9c0f7a120bf5985448fc"
+    },
+    {
+      "name": "worker-coder-exit.json",
+      "bytes": 144,
+      "sha256": "bd065673c5904a2bb9101210e33619fff0e848f067ed8493f293fb6e53011cc1"
+    },
+    {
+      "name": "worker-coder-stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "worker-coder-stdout.txt",
+      "bytes": 3685,
+      "sha256": "d303d8d5aae81d4d1393cda685b2d5df902dc9787b5e84c8cad95b6c7ddf2924"
+    },
+    {
+      "name": "worker-coder.json",
+      "bytes": 235,
+      "sha256": "74ad133d6a7327f3819f1f9fd5959e4a0c69b6205859176580de7e22fc3870c1"
+    },
+    {
+      "name": "worker-gemma-exit.json",
+      "bytes": 145,
+      "sha256": "664d5fca7c7174a0eaf28a1e2bb6e741fe03ab34d113b28b4f9cab082a1d38dc"
+    },
+    {
+      "name": "worker-gemma-stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "worker-gemma-stdout.txt",
+      "bytes": 3680,
+      "sha256": "a2e9ecc929d680c39778384ff376854f3f572cecc263b9ad82023e83580bf0df"
+    },
+    {
+      "name": "worker-gemma.json",
+      "bytes": 236,
+      "sha256": "ef4ccac6f78c5b19f7f7cea0397644bde02b551a0bd596ce92b8fae8cf78db97"
+    }
+  ],
+  "syntheticOnly": true,
+  "protectedDataIncluded": false
+}

@@ -1,0 +1,34 @@
+{
+    "artifact":  {
+                     "path":  "C:\\Users\\Matthew\\AppData\\Local\\Programs\\LM Studio\\resources\\app\\.webpack\\bin\\bundled-models\\nomic-ai\\nomic-embed-text-v1.5-GGUF\\nomic-embed-text-v1.5.Q4_K_M.gguf",
+                     "sha256":  "d4e388894e09cf3816e8b0896d81d265b55e7a9fff9ab03fe8bf4ef5e11295ac",
+                     "bytes":  84106624,
+                     "format":  "GGUFv3"
+                 },
+    "protectedDataIncluded":  false,
+    "productionChanged":  false,
+    "inferenceCalled":  false,
+    "outputShapeTested":  false,
+    "time":  "2026-08-28T16:17:51.9204057Z",
+    "host":  "RUNA-HOME",
+    "model":  {
+                  "type":  "embedding",
+                  "publisher":  "nomic-ai",
+                  "key":  "text-embedding-nomic-embed-text-v1.5",
+                  "display_name":  "Nomic Embed Text v1.5",
+                  "quantization":  {
+                                       "name":  "Q4_K_M",
+                                       "bits_per_weight":  4
+                                   },
+                  "size_bytes":  84106624,
+                  "params_string":  null,
+                  "loaded_instances":  [
+
+                                       ],
+                  "max_context_length":  2048,
+                  "format":  "gguf"
+              },
+    "modelLoaded":  false,
+    "schemaVersion":  "runa-m1-auxiliary-pin/v1",
+    "expectedOutputDimensions":  768
+}

@@ -1,0 +1,15 @@
+{
+  "schemaVersion": "runa-m1-readiness-package-seal/v1",
+  "createdAt": "2026-08-28T16:07:36.509Z",
+  "sourceCommit": "a2518ed1c980d0450fa12b9558a40038a519cf03",
+  "diagnosticId": "20260828-readiness-r4",
+  "createdBeforeInference": true,
+  "files": {
+    "runner.mjs": "40865cfb13241b529d237f6df895229ec7355b4fc61005ff6c48d82d9a172b96",
+    "cases.mjs": "9e91249f6d6716de9a4f319131b76f3b63325e196206ba39d9cf16c25ba77301",
+    "manifest.mjs": "16f780c577b670a640d84a1c28ebbe11efef53235beb712825db4fd7ec1ef88d",
+    "gguf-metadata.mjs": "315fae56b2b70d19a817e5a248f91946a4ae46d3bff33f94c1bb96ffc8fe3b71",
+    "runtime.json": "5b13307cd32f48b8d2cd61b563322d02b2f68bbf6d3401b87358ccf0c6735d51",
+    "Run-HomePower.ps1": "4b59145bd7da1e9d6903999b505bd2a04cbea69b11447dcd4927e5a4147ef0d0"
+  }
+}

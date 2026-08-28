@@ -9,6 +9,7 @@ import { createCandidateHttpServer } from "../gate6b/http-server.mjs";
 import { PostgresSelectedContinuityStore, classifyExperience } from "../gate6b/adapters/postgres-continuity.mjs";
 import { publicProfileFromClaims } from "../gate6b/clients.mjs";
 import { createEnvelopeCipher } from "../gate4/envelope.mjs";
+import { createConversationContext } from "../gate7f/function-first/conversation-context.mjs";
 
 const publicFile = name => new URL(`../gate6b/public/${name}`, import.meta.url);
 const target = "runaai-next:gate7d-test";
@@ -19,6 +20,7 @@ const participant = Object.freeze({ verified: true, principalId: "matthew-person
 function applicationHarness() {
   const calls = { authorize: [], answer: [], navigation: [], create: [], read: [] };
   const continuity = {
+    async prepareAnswerContext(scope) { return createConversationContext(scope); },
     async navigation(...input) { calls.navigation.push(input); return { experience: input[1], projects: [], chats: [] }; },
     async createProject(input) { calls.create.push(input); return { projectId: "project-chat-1", ...input }; },
     async readChat(...input) { calls.read.push(input); return { chatId: input[1], experience: input[2], turns: [] }; },

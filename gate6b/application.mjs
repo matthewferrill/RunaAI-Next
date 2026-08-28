@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto";
 import { unverifiedParticipant } from "../gate5/identity.mjs";
 import { assertSelectedAuthority } from "./authority.mjs";
+import { assertConversationContext } from "../gate7f/function-first/conversation-context.mjs";
 
 const coded = (code, message) => Object.assign(new Error(message), { code });
 const sha256 = value => createHash("sha256").update(String(value)).digest("hex");
@@ -71,7 +72,7 @@ export class SelectedCoreApplication {
     this.actionService = actionService;
     this.authenticator = authenticator;
     this.authorizer = authorizer;
-    this.continuity = continuity;
+    this.continuity = continuity ?? answerService?.continuity ?? null;
     this.requestCoordinator = requestCoordinator;
     this.codeExecution = codeExecution;
     this.now = now;
@@ -99,7 +100,25 @@ export class SelectedCoreApplication {
     const decision = await this.authorizer.authorize({ participant, action, resource: `project:${authorizationProjectId}` });
     if (!decision?.allowed) throw coded(decision?.reason ?? "authorization-denied", "The selected read route was denied.");
     const request = answerRequest(body, participant, this.totalDeadlineMs);
-    const run = () => this.answerService.answer(request);
+    let preparedRequest = request;
+    if (request.participant.verified) {
+      const store = this.continuity;
+      if (typeof store?.prepareAnswerContext !== "function") {
+        throw coded("conversation-context-unavailable", "Authoritative conversation context is unavailable.");
+      }
+      const scope = { participantId: request.participant.principalId, projectId: request.project.projectId,
+        threadId: request.thread.threadId, experience: request.experience };
+      let context;
+      try { context = assertConversationContext(await store.prepareAnswerContext(scope), scope); }
+      catch (error) {
+        if (["project-not-found", "project-scope-denied", "project-experience-denied", "chat-not-found",
+          "chat-scope-denied", "chat-experience-denied", "conversation-context-invalid"].includes(error?.code)) throw error;
+        throw coded("conversation-context-unavailable", "Authoritative conversation context is unavailable.");
+      }
+      // The browser can select a chat, but cannot supply its retained history or authority.
+      preparedRequest = { ...request, history: context.history };
+    }
+    const run = () => this.answerService.answer(preparedRequest);
     return this.requestCoordinator && request.participant.verified ? this.requestCoordinator.runOnce({
       operation: "answer", requestId: request.requestId, actorId: request.participant.principalId,
       inputDigest: sha256(JSON.stringify(request)), execute: run,

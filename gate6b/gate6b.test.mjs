@@ -14,6 +14,7 @@ import { ARTIFACT_FILE, buildArtifactManifest, verifyReleaseArtifact } from "./a
 import { KeycloakOnlineClient, MultiClientAuthenticator, OpenFgaChecker } from "./clients.mjs";
 import { loadReleaseConfig } from "./release-config.mjs";
 import { composeReadinessStatus, protectedImportCompleted } from "./composition.mjs";
+import { createConversationContext } from "../gate7f/function-first/conversation-context.mjs";
 
 const target = "runaai-next:test-target";
 const activeCutover = () => ({ phase: "promoted", revision: 7, authorityGeneration: target });
@@ -33,6 +34,7 @@ function harness(overrides = {}) {
     },
     authenticator: { async authenticate(credential, options) { calls.auth.push({ credential, options }); return steward(); } },
     authorizer: { async authorize(input) { calls.authorization.push(input); return { allowed: true, reason: "allowed" }; } },
+    continuity: { async prepareAnswerContext(scope) { return createConversationContext(scope); } },
     now: () => new Date("2026-08-21T20:00:00.000Z"), ...overrides });
   return { application, calls };
 }

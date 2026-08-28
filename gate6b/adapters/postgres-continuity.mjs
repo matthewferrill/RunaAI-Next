@@ -1,6 +1,8 @@
 import { createHash } from "node:crypto";
 import pg from "pg";
 import { PERSONAL_SCOPE } from "../application.mjs";
+import { createConversationContext, parseConversationScope, CONVERSATION_CONTEXT_LIMITS }
+  from "../../gate7f/function-first/conversation-context.mjs";
 
 const coded = (code, message) => Object.assign(new Error(message), { code });
 const sha256 = value => createHash("sha256").update(String(value)).digest("hex");
@@ -239,6 +241,46 @@ export class PostgresSelectedContinuityStore {
       if (locked) await client.query("SELECT pg_advisory_unlock($1::bigint)", [key]).catch(() => {});
       client.release();
     }
+  }
+
+  async prepareAnswerContext(input) {
+    const scope = parseConversationScope(input);
+    const { participantId, threadId, experience } = scope;
+    const projectId = scope.projectId === PERSONAL_SCOPE ? null : scope.projectId;
+    if (projectId !== null) {
+      const project = (await this.pool.query(`SELECT status,private_payload_envelope FROM runa_core.projects
+        WHERE participant_id=$1 AND project_id=$2`, [participantId, projectId])).rows[0];
+      if (!project || project.status !== "managed") throw coded("project-not-found", "The selected managed project was not found.");
+      const privateProject = this.cipher.decrypt(privateContext("project", participantId, projectId), project.private_payload_envelope);
+      const routes = privateProject.experience ? [] : (await this.pool.query(`SELECT DISTINCT turns.route
+        FROM runa_core.chats chats JOIN runa_core.chat_turns turns
+          ON turns.participant_id=chats.participant_id AND turns.chat_id=chats.chat_id
+        WHERE chats.participant_id=$1 AND chats.project_id=$2`, [participantId, projectId])).rows.map(row => row.route);
+      if (classifyExperience({ explicit: privateProject.experience, routes }) !== experience) {
+        throw coded("project-experience-denied", "The selected project belongs to another experience.");
+      }
+    }
+    const chat = (await this.pool.query(`SELECT chat_id,project_id,turn_count,archived,title_envelope
+      FROM runa_core.chats WHERE participant_id=$1 AND chat_id=$2`, [participantId, threadId])).rows[0];
+    if (!chat) {
+      const foreign = (await this.pool.query(`SELECT 1 FROM runa_core.chats
+        WHERE chat_id=$1 AND participant_id<>$2 LIMIT 1`, [threadId, participantId])).rowCount;
+      if (foreign) throw coded("chat-scope-denied", "The selected conversation was not found.");
+      return createConversationContext(scope);
+    }
+    if (chat.archived || chat.project_id !== projectId) throw coded("chat-scope-denied", "The selected conversation was not found.");
+    const privateChat = this.cipher.decrypt(privateContext("chat", participantId, threadId), chat.title_envelope);
+    const routeRows = privateChat.experience ? [] : (await this.pool.query(`SELECT DISTINCT route
+      FROM runa_core.chat_turns WHERE participant_id=$1 AND chat_id=$2`, [participantId, threadId])).rows;
+    if (classifyExperience({ explicit: privateChat.experience, routes: routeRows.map(row => row.route) }) !== experience) {
+      throw coded("chat-experience-denied", "The selected conversation belongs to another experience.");
+    }
+    const rows = (await this.pool.query(`SELECT turn_ordinal,content_envelope FROM runa_core.chat_turns
+      WHERE participant_id=$1 AND chat_id=$2 ORDER BY turn_ordinal DESC LIMIT $3`,
+    [participantId, threadId, CONVERSATION_CONTEXT_LIMITS.maximumTurns])).rows.reverse();
+    const turns = rows.map(row => this.cipher.decrypt(privateContext("chat-turn", participantId,
+      `turn:${threadId}:${row.turn_ordinal}`), row.content_envelope));
+    return createConversationContext(scope, { turns, turnCount: chat.turn_count });
   }
 
   async #insertChat(client, request, projectId) {

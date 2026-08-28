@@ -1,4 +1,5 @@
 import { createHash, randomBytes } from "node:crypto";
+import { createConversationContext, parseConversationScope } from "../gate7f/function-first/conversation-context.mjs";
 
 export const GATE2_CONTINUITY_VERSION = "runa2-continuity/v1";
 export const GATE2_SETTING_SPEC = Object.freeze({
@@ -28,6 +29,7 @@ function assertProject(project) {
     sourceReferences: [...new Set((project.sourceReferences ?? []).map(safeId))].slice(0, 24),
     memoryEnabled: project.memoryEnabled === true,
     memory: (project.memory ?? []).map(item => String(item).trim()).filter(Boolean).slice(0, 20),
+    ...(["chat", "code"].includes(project.experience) ? { experience: project.experience } : {}),
   };
   if (value.status !== "managed") value.memoryEnabled = false;
   return value;
@@ -137,6 +139,24 @@ export class MemoryContinuityStore {
     this.chats.set(chat.chatId, chat);
     this.requests.set(request.requestId, { digest, chatId: chat.chatId });
     return { turnRecorded: true, source: this.adapterName };
+  }
+
+  async prepareAnswerContext(input) {
+    const scope = parseConversationScope(input);
+    const project = this.projects.get(scope.projectId);
+    if (scope.projectId !== "runa:personal") {
+      if (!project || project.status !== "managed") throw coded("project-not-found", "The selected project was not found.");
+      if (project.participantId !== scope.participantId) throw coded("project-scope-denied", "The selected project was not found.");
+      if (project.experience && project.experience !== scope.experience) throw coded("project-experience-denied", "The project belongs to another experience.");
+    }
+    const chat = this.chats.get(scope.threadId);
+    if (!chat) return createConversationContext(scope);
+    if (chat.archived || chat.participantId !== scope.participantId || chat.projectId !== scope.projectId) {
+      throw coded("chat-scope-denied", "The selected conversation was not found.");
+    }
+    const experience = chat.turns.some(turn => ["code", "workspace"].includes(turn.lane)) ? "code" : "chat";
+    if (experience !== scope.experience) throw coded("chat-experience-denied", "The conversation belongs to another experience.");
+    return createConversationContext(scope, { turns: chat.turns, turnCount: chat.turns.length });
   }
 
   readChat(participantId, projectId, chatId) {

@@ -4,7 +4,7 @@ const retryableCompletionReasons = new Set([
   "timeout", "output-limited", "provider-output-empty", "provider-response-invalid",
   "provider-shape-invalid", "provider-incomplete", "provider-transport-failed",
   "provider-model-mismatch", "provider-role-mismatch", "provider-role-unavailable",
-  "unverified-action-claim",
+  "unverified-action-claim", "dependency-unavailable",
 ]);
 
 const friendlyErrors = Object.freeze({
@@ -48,7 +48,8 @@ export function customerMessageFor(code) {
 
 export function answerNeedsRetry(answer) {
   return retryableCompletionReasons.has(answer?.completion?.reason)
-    || typeof answer?.approvedKnowledge?.errorCode === "string";
+    || typeof answer?.approvedKnowledge?.errorCode === "string"
+    || (answer?.continuity?.durableChatEligible === true && answer.continuity.turnRecorded !== true);
 }
 
 export function boundedHistory(history) {

@@ -2,7 +2,7 @@ import { CHAT_DEADLINE_MS, answerNeedsRetry, boundedHistory, customerMessageFor,
   readJsonResponse } from "./chat-client.mjs";
 import { initializeWorkspaceShell } from "./workspace-shell.mjs";
 import { executionOutput, javascriptSource } from "./code-execution.mjs";
-import { initializeFunctionPanel } from "./function-panel.mjs";
+import { initializeFunctionPanel, appendAnswerEvidence } from "./function-panel.mjs";
 
 const byId = id => document.getElementById(id);
 const text = (id, value) => { byId(id).textContent = value; };
@@ -66,7 +66,7 @@ async function runJavascript({ item, source, state }) {
   }
 }
 
-function appendMessage(role, content, { codeDraft = false, state = null } = {}) {
+function appendMessage(role, content, { codeDraft = false, state = null, evidence = undefined } = {}) {
   const item = document.createElement("div");
   item.className = `message ${role}`;
   const label = document.createElement("span");
@@ -75,6 +75,7 @@ function appendMessage(role, content, { codeDraft = false, state = null } = {}) 
   const body = document.createElement("p");
   body.textContent = content;
   item.append(label, body);
+  if (role === "assistant" && evidence !== undefined) appendAnswerEvidence(document, item, evidence);
   if (role === "assistant" && codeDraft) {
     const controls = document.createElement("div");
     controls.className = "execution-controls";
@@ -89,7 +90,8 @@ function appendMessage(role, content, { codeDraft = false, state = null } = {}) 
       run.type = "button";
       run.className = "run-button";
       run.textContent = "Run in sandbox";
-      run.addEventListener("click", () => runJavascript({ item, source, state }));
+      const scope = { threadId: state.threadId, projectId: state.projectId };
+      run.addEventListener("click", () => runJavascript({ item, source, state: scope }));
       controls.append(run);
     }
     item.append(controls);
@@ -212,7 +214,7 @@ async function selectExperience(experience) {
   const state = activeState();
   resetTranscript();
   for (const turn of state.history) appendMessage(turn.role, turn.content, {
-    codeDraft: activeExperience === "code" && turn.role === "assistant", state,
+    codeDraft: activeExperience === "code" && turn.role === "assistant", state, evidence: turn.evidence,
   });
   renderNavigation();
   await refreshNavigation(experience);
@@ -222,11 +224,13 @@ async function selectExperience(experience) {
 }
 
 async function loadChat(chatId) {
+  const experience = activeExperience;
   text("navigation-status", "Loading…");
   setNavigationDisabled(true);
   send.disabled = true;
   try {
-    const record = await workspaceJson("/api/selected/chat/read", { experience: activeExperience, chatId });
+    const record = await workspaceJson("/api/selected/chat/read", { experience, chatId });
+    if (experience !== activeExperience) return false;
     const state = activeState();
     state.threadId = record.chatId;
     state.projectId = record.projectId ?? "runa:personal";
@@ -235,19 +239,21 @@ async function loadChat(chatId) {
     state.activeChatId = record.chatId;
     state.contextRevision = record.turnCount;
     state.history = record.turns.flatMap(turn => [
-      { role: "user", content: turn.user }, { role: "assistant", content: turn.assistant },
+      { role: "user", content: turn.user }, { role: "assistant", content: turn.assistant, evidence: turn.evidence ?? null },
     ]);
     transcript.replaceChildren();
     for (const turn of state.history) appendMessage(turn.role, turn.content, {
-      codeDraft: activeExperience === "code" && turn.role === "assistant", state,
+      codeDraft: activeExperience === "code" && turn.role === "assistant", state, evidence: turn.evidence,
     });
     renderNavigation();
     await functionPanel?.refresh();
     text("navigation-status", "");
     text("chat-status", state.projectName ? `Ready in ${state.projectName}` : "Ready");
     message.focus();
+    return true;
   } catch {
     text("navigation-status", "That record could not be loaded");
+    return false;
   } finally {
     setNavigationDisabled(false);
     send.disabled = false;
@@ -356,8 +362,9 @@ form.addEventListener("submit", async event => {
   if (!content || send.disabled) return;
   if (functionPanel?.workSelected()) {
     send.disabled = true;
-    try { await functionPanel.startWork(content); }
-    finally { send.disabled = false; }
+    setNavigationDisabled(true);
+    try { if (await functionPanel.startWork(content)) message.value = ""; }
+    finally { send.disabled = false; setNavigationDisabled(false); }
     return;
   }
   let functionSelection;
@@ -387,27 +394,29 @@ form.addEventListener("submit", async event => {
       result = await readJsonResponse(response);
     } finally { clearTimeout(timer); }
     if (answerNeedsRetry(result)) {
-      appendMessage("assistant", result.answer);
+      appendMessage("assistant", result.answer, { evidence: result });
       addRetry(userItem, content);
       text("chat-status", "Message not completed — retry available");
       return;
     }
     state.history.push({ role: "user", content: content.slice(0, 8_000) },
-      { role: "assistant", content: result.answer.slice(0, 8_000) });
+      { role: "assistant", content: result.answer.slice(0, 8_000), evidence: result });
     state.activeChatId = state.threadId;
     state.contextRevision = result.contextRevision ?? state.contextRevision + (result.continuity?.turnRecorded ? 1 : 0);
     appendMessage("assistant", result.answer, {
       codeDraft: submittedExperience === "code" && result.execution?.status === "not-executed",
-      state,
+      state, evidence: result,
     });
     text("chat-status", state.projectName ? `Ready in ${state.projectName}` : "Ready");
     await refreshNavigation(submittedExperience);
   } catch (error) {
     const code = error?.name === "AbortError" ? "chat-request-timeout" : error?.code;
     if (code === "conversation-revision-conflict") {
-      await loadChat(state.threadId);
+      const loaded = await loadChat(state.threadId);
       message.value = content;
-      text("chat-status", "This chat changed in another view. The latest record is loaded; your draft is ready to review and resend.");
+      text("chat-status", loaded
+        ? "This chat changed in another view. The latest record is loaded; your draft is ready to review and resend."
+        : "This chat changed in another view, but the latest record could not be loaded. Your draft is preserved. Reload the saved chat before resending.");
       return;
     }
     appendMessage("assistant", customerMessageFor(code));

@@ -840,3 +840,13 @@ body.workspace-active .primary-button:hover { filter: brightness(1.07); }
 .function-panel button:disabled { opacity:.55; cursor:default; }
 .function-panel .execution-output { white-space:pre-wrap; overflow-wrap:anywhere; font-size:.75rem; max-height:22rem; overflow:auto; }
 #m1-mode { margin-top:.6rem; max-width:25rem; }
+.function-panel [hidden] { display:none; }
+#m1-task-list, #m1-task { display:flex; flex-direction:column; gap:.65rem; }
+#m1-task-list button { text-align:left; overflow-wrap:anywhere; }
+.task-proposal, .task-receipt, .source-entry { border:1px solid #c2d2d0; border-radius:.65rem; padding:.65rem; }
+.task-receipt { background:#eff7f3; }
+.function-panel summary, .answer-evidence summary { cursor:pointer; }
+.answer-evidence { margin-top:.6rem; font-size:.8rem; line-height:1.5; overflow-wrap:anywhere; }
+.answer-evidence p, .answer-evidence li { font-size:inherit; }
+.answer-evidence ol { padding-left:1.3rem; }
+.evidence-warning { color:#795712; }

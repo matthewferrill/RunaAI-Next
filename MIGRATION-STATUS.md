@@ -125,6 +125,20 @@ Home is unloaded with both 260 W limits restored. No production or protected-dat
 The operational Home guard continues in parallel; do not stop at this internal correction or request
 new permission. Continue until the qualified deployment is ready for genuine customer testing.
 
+### 2026-08-28 R4 prospective application freeze
+
+The approval protocol, read-only explanation and conditional-evidence corrections are now
+integrated at `ec0a63d974e53ac7e19a2a6bae1c6caa40fc1a8a`. The prospective common seal and
+unchanged three-model/360-attempt contract are recorded in
+`gate7f/function-first/acceptance/R4-FREEZE-2026-08-28.md`. The conditional reader's actual
+PostgreSQL acceptance suite passed 176/176 with zero skips; this is not model qualification.
+
+The combined Omen real-PostgreSQL suite ran 1,259 tests: 1,254 passed, five native-start failures,
+zero skips. This used the default checkout/profile-temp MXC envelope, not Control's reviewed
+compact envelope; original failure output is retained. Fresh Control staging, full compact-runtime
+regression and twelve qualified controls are required before the R4 model requests. No failed
+invocation is relabeled green. Production remains unchanged and M1 remains in progress.
+
 ### 2026-08-28 stopped-campaign independent semantic record
 
 Independent review of the stopped Gemma arm covers 23/120 attempts and all 32 captured model outputs;

@@ -1,0 +1,148 @@
+{
+  "schemaVersion": "runaai-m1-functional-runtime-seal/v1",
+  "sourceCommit": "ec0a63d974e53ac7e19a2a6bae1c6caa40fc1a8a",
+  "caseBundleSha256": "8713db8fb54bebe069f73edfef7cd179c13a3caba1d4d15bd8567f39aaa418ed",
+  "runtime": {
+    "nodeSha256": "bae898add4643fcf890a83ad8ae56e20dce7e781cab161a53991ceba70c99ffb",
+    "sourceArchiveSha256": "724a884d3d2b6429b12c31582f3ac73456943c591f7c50ac8286c9bde1aa505c",
+    "packageLockSha256": "2b443060beac09e89779ab2e4b60a22e7bf89e26880f14d0d4cdc04db9d8328e",
+    "qdrantSha256": "369c562eae3d89333a13abfdb522fa209e3f587c1217a1059d817e80814ea9d4",
+    "modelRuntimeSha256": "6cbb7ba8dfeefee1ce523a88e0f9d64687cdad59564ee5e7fbff6bb95d00f22f",
+    "modelRuntimeVersion": "LM Studio 0.4.21.0 / llama.cpp Vulkan AVX2 2.28.2"
+  },
+  "candidates": [
+    {
+      "candidateId": "gemma4-26b-a4b",
+      "modelId": "gemma-4-26b-a4b-it-qat",
+      "artifactSha256": "3eca3b8f6d7baf218a7dd6bba5fb59a56ee25fe2d567b6f5f589b4f697eca51d",
+      "artifactBytes": 14439363584,
+      "requestControls": {
+        "chat": {
+          "reasoningEffort": "none"
+        },
+        "research": {
+          "reasoningEffort": "none"
+        },
+        "code": {
+          "reasoningEffort": "none"
+        },
+        "agent": {
+          "reasoningEffort": "none"
+        },
+        "review": {
+          "reasoningEffort": "none"
+        }
+      }
+    },
+    {
+      "candidateId": "qwen3-coder-30b-a3b",
+      "modelId": "qwen3-coder-30b-a3b-instruct",
+      "artifactSha256": "72a9b20a19c70db56e1ccd01fb35b0f0842d67d28e7c3bdff762df860120b769",
+      "artifactBytes": 25104724288,
+      "requestControls": {
+        "chat": {
+          "reasoningEffort": null
+        },
+        "research": {
+          "reasoningEffort": null
+        },
+        "code": {
+          "reasoningEffort": null
+        },
+        "agent": {
+          "reasoningEffort": null
+        },
+        "review": {
+          "reasoningEffort": null
+        }
+      }
+    },
+    {
+      "candidateId": "qwen36-27b-mtp",
+      "modelId": "qwen3.6-27b-mtp",
+      "artifactSha256": "a7cbd3ecc0e3f9b333edee61ae66bc87ed713c5d49587a8355814722ed329e0f",
+      "artifactBytes": 17106773120,
+      "requestControls": {
+        "chat": {
+          "reasoningEffort": "none"
+        },
+        "research": {
+          "reasoningEffort": "none"
+        },
+        "code": {
+          "reasoningEffort": "none"
+        },
+        "agent": {
+          "reasoningEffort": "none"
+        },
+        "review": {
+          "reasoningEffort": "none"
+        }
+      }
+    }
+  ],
+  "roles": {
+    "chat": {
+      "maximumOutputTokens": 512,
+      "maximumContextTokens": 32768,
+      "deadlineMs": 60000
+    },
+    "research": {
+      "maximumOutputTokens": 512,
+      "maximumContextTokens": 32768,
+      "deadlineMs": 60000
+    },
+    "code": {
+      "maximumOutputTokens": 1536,
+      "maximumContextTokens": 32768,
+      "deadlineMs": 30000
+    },
+    "agent": {
+      "maximumOutputTokens": 1536,
+      "maximumContextTokens": 32768,
+      "deadlineMs": 30000
+    },
+    "review": {
+      "maximumOutputTokens": 512,
+      "maximumContextTokens": 32768,
+      "deadlineMs": 60000
+    }
+  },
+  "providerBaseUrl": "http://127.0.0.1:9770/v1",
+  "embedding": {
+    "baseUrl": "http://127.0.0.1:9770/v1",
+    "modelId": "text-embedding-nomic-embed-text-v1.5",
+    "artifactSha256": "d4e388894e09cf3816e8b0896d81d265b55e7a9fff9ab03fe8bf4ef5e11295ac"
+  },
+  "reranker": {
+    "baseUrl": "http://192.168.50.165:8412",
+    "artifactSha256": "d9e3e081faff1eefb84019509b2f5558fd74c1a05a2c7db22f74174fcedb5286",
+    "windowCharacters": 2000,
+    "overlapCharacters": 300,
+    "batchSize": 32
+  },
+  "residency": {
+    "oneLargeModelAtATime": true,
+    "readinessEvidenceSha256": "44d89022cfebb3383a4844f2cc6ace341af440cdb2c6763b6efa141a44c513ac",
+    "effectiveReasoningEvidenceSha256": "44d89022cfebb3383a4844f2cc6ace341af440cdb2c6763b6efa141a44c513ac",
+    "telemetryPolicySha256": "d4e0d0b96ff4d1c15fb05801dff5c9b0f166c1c308cbbbf4e1a5eeed404e6c80"
+  },
+  "suites": {
+    "clamp-inclusive-v1": "747baed34cd3b1bcbef6470c1196c217017fc9e216cb1c6182692adff3cc6bca",
+    "discount-price-v1": "1d7cef0396a6ee1f70b769436a7c9309f995163bb338e8e8abc41cf7c5f89cf8",
+    "rotate-index-v1": "e638271b581501e727d69d404e018724400105e897e6e0cb385cd2db43c0f190",
+    "unique-order-v1": "ec586d05c6509552048aa71e4dec95a1a9f4b47c99b42656ed25498223de83e1",
+    "remaining-v1": "27078f25b735b5bafb8969058d3bba2c19519a8a69d1537e85c740757a0d9a5c",
+    "rectangle-area-v1": "d820f2ee8b7981436a7f09e44890dc309601d6ba45471f77d7f4a6323b746507",
+    "charge-product-v1": "da7c8f075ddc90bb043b67a6548f5fb2bd1a7f8c3dd5860c1d50c216221bb3ff",
+    "mean-pair-v1": "e231eac34e51691e01349c8e4b507c97ee513ed5daf8964c81ed25f9f24f4875",
+    "double-v1": "4674d72eda35079bad9130ca85b98487501fb38135e38cf7050b53a306821232",
+    "distance-v1": "f0b8cba7643397605179917d637f43845a665c560ecea7834fe6b594a588287c",
+    "difference-v1": "f6dd2f31274680b9fdf3930c8e8f711531feb5502ef86c60869ade5d9d38e61a",
+    "half-v1": "c01f682e9be73bc493eb75519f71f94d0ae61039aecd4795636083832a428679",
+    "hours-minutes-v1": "3f5834f42966bd8fa76ac8e8231368001d36cf8cb3b7211eed6565f3937cdfaf"
+  },
+  "evaluatorId": "codex-independent-model-role-review-20260828",
+  "maximumBatchMs": 3600000,
+  "productionRoutingChanged": false
+}

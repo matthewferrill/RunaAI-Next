@@ -1,3 +1,4 @@
 # Retained qualification packets are byte-pinned evidence, not platform-native text.
 gate7f/qualification/results/** -text
 gate7f/qualification/evidence/*-POWER-V2-VERIFIED-SUMMARY.json -text
+gate7f/function-first/acceptance/evidence/campaign-20260828-r4/runtime-seal.json -text

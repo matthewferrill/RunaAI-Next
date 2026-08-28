@@ -120,6 +120,9 @@ function Stop-RuntimeProcess($Identity){
     $process.Kill();if(-not$process.WaitForExit(5000)){throw 'runtime-stop-unconfirmed'}
   }finally{$process.Dispose()}
 }
+function Assert-RuntimeCodeName([string]$Name){
+  if($Name.Contains('..')-or($Name-cne'evidence-output.mjs'-and$Name-notmatch'^(home-runtime|readiness)/[A-Za-z0-9/.-]+\.(mjs|ps1|json)$')){throw 'runtime-code-path'}
+}
 function Assert-RuntimeInstallation([string]$ExpectedSeal){
   if($env:COMPUTERNAME-cne'RUNA-HOME'-or$ExpectedSeal-notmatch'^[a-f0-9]{64}$'){throw 'runtime-host-seal'}
   $file=$script:RuntimeRoot+'\installation.json';$bytes=Read-RuntimeBytes $file
@@ -128,7 +131,7 @@ function Assert-RuntimeInstallation([string]$ExpectedSeal){
   $installation=[Text.Encoding]::UTF8.GetString($bytes)|ConvertFrom-Json
   if($installation.schemaVersion-cne'runaai-qualified-home-installation/v1'){throw 'runtime-installation-schema'}
   foreach($file in $installation.codeFiles.PSObject.Properties){
-    if($file.Name-notmatch'^(home-runtime|readiness)/[A-Za-z0-9/.-]+\.(mjs|ps1|json)$'-or$file.Name.Contains('..')){throw 'runtime-code-path'}
+    Assert-RuntimeCodeName $file.Name
     $path=$script:RuntimeRoot+'\code\'+$file.Name.Replace('/','\');[void](Read-RuntimeBytes $path 2097152)
     if((Get-FileHash -LiteralPath $path -Algorithm SHA256).Hash.ToLowerInvariant()-cne$file.Value){throw 'runtime-code-drift'}
   }

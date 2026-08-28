@@ -10,7 +10,7 @@ if((Get-FileHash -LiteralPath $manifestFile -Algorithm SHA256).Hash.ToLowerInvar
 $manifest=Get-Content -LiteralPath $manifestFile -Raw|ConvertFrom-Json
 if($manifest.schemaVersion-cne'runaai-qualified-home-installation/v1'-or$manifest.installationId-cne[IO.Path]::GetFileName($PackageRoot)){throw 'runtime-package-binding'}
 foreach($file in $manifest.codeFiles.PSObject.Properties){
-  if($file.Name-notmatch'^(home-runtime|readiness)/[A-Za-z0-9/.-]+\.(mjs|ps1|json)$'-or$file.Name.Contains('..')){throw 'runtime-package-path'}
+  Assert-RuntimeCodeName $file.Name
   $path=$PackageRoot+'\code\'+$file.Name.Replace('/','\')
   for($current=$path;$current.StartsWith($PackageRoot,[StringComparison]::Ordinal);$current=[IO.Path]::GetDirectoryName($current)){
     if((Get-Item -LiteralPath $current -Force).Attributes-band[IO.FileAttributes]::ReparsePoint){throw 'runtime-package-link'}

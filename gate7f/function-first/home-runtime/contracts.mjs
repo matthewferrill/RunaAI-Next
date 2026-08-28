@@ -1,5 +1,6 @@
 import {MANIFEST} from '../readiness/manifest.mjs';
 import {NOMICS,LEASE_POLICY,primaryLoad,sha,residentList,checkHardware} from '../readiness/lease-contract.mjs';
+import {isEvidenceResponseFormat} from '../evidence-output.mjs';
 
 // The application owns its qualified per-role deadline (answers <=60s, plans <=30s).
 // This outer transport ceiling must not shorten those deadlines, and cannot extend them.
@@ -53,7 +54,7 @@ export function validateRequest(profile,pathname,method,raw){
   demand(body&&typeof body==='object'&&!Array.isArray(body),'body-invalid');
   for(const name of ['ttl','load_config','context_length','integrations','previous_response_id'])demand(!Object.hasOwn(body,name),'load-or-agent-override');
   if(pathname==='/v1/chat/completions'){
-    const allowed=new Set(['model','max_tokens','temperature','messages','reasoning_effort','stream']);
+    const allowed=new Set(['model','max_tokens','temperature','messages','reasoning_effort','stream','response_format']);
     demand(Object.keys(body).every(name=>allowed.has(name)),'request-field');
     demand(body.model===profile.candidate.key&&Array.isArray(body.messages),'unselected-model');
     demand(Number.isInteger(body.max_tokens)&&body.max_tokens>0&&body.max_tokens<=RUNTIME_LIMITS.maximumOutputTokens,'output-token-limit');
@@ -62,6 +63,7 @@ export function validateRequest(profile,pathname,method,raw){
       &&Object.keys(message).sort().join()==='content,role'&&['system','user','assistant'].includes(message.role)
       &&typeof message.content==='string'),'message-shape');
     demand(!Object.hasOwn(body,'stream')||body.stream===false,'stream-not-qualified');
+    demand(!Object.hasOwn(body,'response_format')||isEvidenceResponseFormat(body.response_format),'response-format-not-qualified');
     demand(profile.reasoningEffort===null?!Object.hasOwn(body,'reasoning_effort'):body.reasoning_effort===profile.reasoningEffort,'reasoning-drift');
   }else if(pathname==='/v1/embeddings'){
     demand(Object.keys(body).sort().join()==='input,model','request-field');demand(body.model===NOMICS.key,'unselected-model');

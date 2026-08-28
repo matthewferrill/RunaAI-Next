@@ -6,6 +6,7 @@ import {HOME_RUNTIME_ROOT,assertPlainPath} from './native-adapter.mjs';
 import {demand,sha,validateProfile} from './contracts.mjs';
 
 export const OPERATOR_FILES=Object.freeze([
+  'evidence-output.mjs',
   'home-runtime/contracts.mjs','home-runtime/controller.mjs','home-runtime/native-adapter.mjs','home-runtime/Observe-HomeRuntime.ps1',
   'home-runtime/recovery.mjs','home-runtime/admission-broker.mjs','home-runtime/file-ipc.mjs','home-runtime/worker-controller.mjs',
   'home-runtime/proxy.mjs','home-runtime/tls-proxy.mjs','home-runtime/runtime-installation.mjs','home-runtime/runtime-main.mjs',

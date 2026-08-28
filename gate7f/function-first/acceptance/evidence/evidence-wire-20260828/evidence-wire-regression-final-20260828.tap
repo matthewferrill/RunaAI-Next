@@ -1,0 +1,484 @@
+TAP version 13
+# Subtest: general-evidence-answer: grounded answers carry recognized citations and no effects on 3/3 runs
+ok 1 - general-evidence-answer: grounded answers carry recognized citations and no effects on 3/3 runs
+  ---
+  duration_ms: 19.8446
+  type: 'test'
+  ...
+# Subtest: general-honest-miss: an empty project record is explicit and never filled in
+ok 2 - general-honest-miss: an empty project record is explicit and never filled in
+  ---
+  duration_ms: 1.4787
+  type: 'test'
+  ...
+# Subtest: general conversation skips project retrieval and reaches Runa
+ok 3 - general conversation skips project retrieval and reaches Runa
+  ---
+  duration_ms: 7.0702
+  type: 'test'
+  ...
+# Subtest: ordinary mentions of a chat test do not become project-record intent
+ok 4 - ordinary mentions of a chat test do not become project-record intent
+  ---
+  duration_ms: 0.316
+  type: 'test'
+  ...
+# Subtest: an explicit project question still fails closed on an honest empty record
+ok 5 - an explicit project question still fails closed on an honest empty record
+  ---
+  duration_ms: 2.4695
+  type: 'test'
+  ...
+# Subtest: general-metaphysical-no-search: non-record questions skip retrieval on 3/3 runs
+ok 6 - general-metaphysical-no-search: non-record questions skip retrieval on 3/3 runs
+  ---
+  duration_ms: 3.9933
+  type: 'test'
+  ...
+# Subtest: general-unknown-slash-command: unknown commands are deterministic and do not call a provider
+ok 7 - general-unknown-slash-command: unknown commands are deterministic and do not call a provider
+  ---
+  duration_ms: 1.7145
+  type: 'test'
+  ...
+# Subtest: research-complete-denominator: planned and completed passes are visible on 3/3 runs
+ok 8 - research-complete-denominator: planned and completed passes are visible on 3/3 runs
+  ---
+  duration_ms: 4.4877
+  type: 'test'
+  ...
+# Subtest: research-partial-denominator: covered evidence is cited and uncovered budget terms are named
+ok 9 - research-partial-denominator: covered evidence is cited and uncovered budget terms are named
+  ---
+  duration_ms: 1.6719
+  type: 'test'
+  ...
+# Subtest: research-dependency-loss: unavailability is not reported as an empty record
+ok 10 - research-dependency-loss: unavailability is not reported as an empty record
+  ---
+  duration_ms: 1.9667
+  type: 'test'
+  ...
+# Subtest: guarded-effect-policy-suspension observer: approval gates cannot be disabled by text
+ok 11 - guarded-effect-policy-suspension observer: approval gates cannot be disabled by text
+  ---
+  duration_ms: 0.8068
+  type: 'test'
+  ...
+# Subtest: guarded-retrieval-degradation observer: reranker loss is visible while evidence remains usable
+ok 12 - guarded-retrieval-degradation observer: reranker loss is visible while evidence remains usable
+  ---
+  duration_ms: 0.7089
+  type: 'test'
+  ...
+# Subtest: workspace-explicit-citations observer: supplied source identity is recognized
+ok 13 - workspace-explicit-citations observer: supplied source identity is recognized
+  ---
+  duration_ms: 0.673
+  type: 'test'
+  ...
+# Subtest: workspace-unknown-citation observer: an unknown source is detected and marked on 3/3 runs
+ok 14 - workspace-unknown-citation observer: an unknown source is detected and marked on 3/3 runs
+  ---
+  duration_ms: 1.8473
+  type: 'test'
+  ...
+# Subtest: workspace-cross-project-denial observer: cross-project evidence never reaches the model
+ok 15 - workspace-cross-project-denial observer: cross-project evidence never reaches the model
+  ---
+  duration_ms: 0.5197
+  type: 'test'
+  ...
+# Subtest: cross-lane-protected-path-denial: protected stores are denied before any read
+ok 16 - cross-lane-protected-path-denial: protected stores are denied before any read
+  ---
+  duration_ms: 0.7725
+  type: 'test'
+  ...
+# Subtest: cross-lane-retrieved-instruction-inert: retrieved text remains untrusted data on 3/3 runs
+ok 17 - cross-lane-retrieved-instruction-inert: retrieved text remains untrusted data on 3/3 runs
+  ---
+  duration_ms: 1.3903
+  type: 'test'
+  ...
+# Subtest: gate1-duplicate-request: one request produces one turn and one provider call
+ok 18 - gate1-duplicate-request: one request produces one turn and one provider call
+  ---
+  duration_ms: 30.55
+  type: 'test'
+  ...
+# Subtest: gate1-concurrent-duplicate: simultaneous requests share one provider execution
+ok 19 - gate1-concurrent-duplicate: simultaneous requests share one provider execution
+  ---
+  duration_ms: 103.6908
+  type: 'test'
+  ...
+# Subtest: gate1-restart-resume: a checkpointed result resumes without replaying the provider
+ok 20 - gate1-restart-resume: a checkpointed result resumes without replaying the provider
+  ---
+  duration_ms: 27.9538
+  type: 'test'
+  ...
+# Subtest: gate1-revoked-source: stale vectors cannot override active PostgreSQL truth
+ok 21 - gate1-revoked-source: stale vectors cannot override active PostgreSQL truth
+  ---
+  duration_ms: 0.974
+  type: 'test'
+  ...
+# Subtest: gate1-stale-digest: an old vector cannot silently remap to changed source content
+ok 22 - gate1-stale-digest: an old vector cannot silently remap to changed source content
+  ---
+  duration_ms: 0.7308
+  type: 'test'
+  ...
+# Subtest: gate1-timeout: a provider deadline is explicit and produces no partial authority claim
+ok 23 - gate1-timeout: a provider deadline is explicit and produces no partial authority claim
+  ---
+  duration_ms: 108.7234
+  type: 'test'
+  ...
+# Subtest: gate1-total-deadline: repeated retrieval cannot consume a fresh deadline per pass
+ok 24 - gate1-total-deadline: repeated retrieval cannot consume a fresh deadline per pass
+  ---
+  duration_ms: 106.306
+  type: 'test'
+  ...
+# Subtest: qdrant HTTP timeout is normalized to the typed request-timeout result
+ok 25 - qdrant HTTP timeout is normalized to the typed request-timeout result
+  ---
+  duration_ms: 113.363
+  type: 'test'
+  ...
+# Subtest: qdrant connection refusal remains dependency-unavailable rather than timeout
+ok 26 - qdrant connection refusal remains dependency-unavailable rather than timeout
+  ---
+  duration_ms: 7.646
+  type: 'test'
+  ...
+# Subtest: windowed reranker: relevant content after window 32 remains eligible
+ok 27 - windowed reranker: relevant content after window 32 remains eligible
+  ---
+  duration_ms: 23.2553
+  type: 'test'
+  ...
+# Subtest: provider output limits are explicit and never deliver a partial model claim
+ok 28 - provider output limits are explicit and never deliver a partial model claim
+  ---
+  duration_ms: 1.3499
+  type: 'test'
+  ...
+# Subtest: telemetry emits only allowlisted, pseudonymized synthetic identifiers
+ok 29 - telemetry emits only allowlisted, pseudonymized synthetic identifiers
+  ---
+  duration_ms: 2.0135
+  type: 'test'
+  ...
+# Subtest: ordinary conversation uses plain text and never asks the model to serialize application JSON
+ok 30 - ordinary conversation uses plain text and never asks the model to serialize application JSON
+  ---
+  duration_ms: 3.498
+  type: 'test'
+  ...
+# Subtest: evidence-bearing answers retain a validated citation-bearing JSON contract
+ok 31 - evidence-bearing answers retain a validated citation-bearing JSON contract
+  ---
+  duration_ms: 0.9249
+  type: 'test'
+  ...
+# Subtest: provider empty output becomes the stable provider-output-empty code
+ok 32 - provider empty output becomes the stable provider-output-empty code
+  ---
+  duration_ms: 0.862
+  type: 'test'
+  ...
+# Subtest: provider malformed output becomes the stable provider-response-invalid code
+ok 33 - provider malformed output becomes the stable provider-response-invalid code
+  ---
+  duration_ms: 0.2992
+  type: 'test'
+  ...
+# Subtest: provider wrong shape output becomes the stable provider-shape-invalid code
+ok 34 - provider wrong shape output becomes the stable provider-shape-invalid code
+  ---
+  duration_ms: 0.2222
+  type: 'test'
+  ...
+# Subtest: provider truncated output becomes the stable provider-output-limited code
+ok 35 - provider truncated output becomes the stable provider-output-limited code
+  ---
+  duration_ms: 0.1675
+  type: 'test'
+  ...
+# Subtest: provider wrong model output becomes the stable provider-model-mismatch code
+ok 36 - provider wrong model output becomes the stable provider-model-mismatch code
+  ---
+  duration_ms: 0.2271
+  type: 'test'
+  ...
+# Subtest: provider transport output becomes the stable provider-transport-failed code
+ok 37 - provider transport output becomes the stable provider-transport-failed code
+  ---
+  duration_ms: 0.2047
+  type: 'test'
+  ...
+# Subtest: standalone Code replaces an irrelevant draft only after the correction verifies
+ok 38 - standalone Code replaces an irrelevant draft only after the correction verifies
+  ---
+  duration_ms: 1.4196
+  type: 'test'
+  ...
+# Subtest: standalone Code rejects 76 and verifies 26 against the retained current turn
+ok 39 - standalone Code rejects 76 and verifies 26 against the retained current turn
+  ---
+  duration_ms: 0.9337
+  type: 'test'
+  ...
+# Subtest: standalone Code verifier excludes a previous numeric request from the current turn
+ok 40 - standalone Code verifier excludes a previous numeric request from the current turn
+  ---
+  duration_ms: 0.55
+  type: 'test'
+  ...
+# Subtest: standalone Code accepts a relevant consistent draft with one verification
+ok 41 - standalone Code accepts a relevant consistent draft with one verification
+  ---
+  duration_ms: 0.3358
+  type: 'test'
+  ...
+# Subtest: standalone Code fails retryably when verification is malformed or cannot verify a correction
+ok 42 - standalone Code fails retryably when verification is malformed or cannot verify a correction
+  ---
+  duration_ms: 0.7962
+  type: 'test'
+  ...
+# Subtest: M1 activation requires the real ordinary-session path and exact feature config
+ok 43 - M1 activation requires the real ordinary-session path and exact feature config
+  ---
+  duration_ms: 43.9644
+  type: 'test'
+  ...
+# Subtest: legacy release constructs exactly the same three answer providers
+ok 44 - legacy release constructs exactly the same three answer providers
+  ---
+  duration_ms: 1.3928
+  type: 'test'
+  ...
+# Subtest: explicit role selection uses exact independent model IDs without activating review or agent
+ok 45 - explicit role selection uses exact independent model IDs without activating review or agent
+  ---
+  duration_ms: 0.6046
+  type: 'test'
+  ...
+# Subtest: disabled roles expose a typed unavailable provider and never call the provider factory
+ok 46 - disabled roles expose a typed unavailable provider and never call the provider factory
+  ---
+  duration_ms: 0.8837
+  type: 'test'
+  ...
+# Subtest: release model identities preserve raw-provider digests and record every explicit role
+ok 47 - release model identities preserve raw-provider digests and record every explicit role
+  ---
+  duration_ms: 0.7924
+  type: 'test'
+  ...
+# Subtest: legacy fixture manifest digest and runtime version remain byte-semantically compatible
+ok 48 - legacy fixture manifest digest and runtime version remain byte-semantically compatible
+  ---
+  duration_ms: 15.5563
+  type: 'test'
+  ...
+# Subtest: explicit release manifests are versioned separately and runtime status preserves the role map
+ok 49 - explicit release manifests are versioned separately and runtime status preserves the role map
+  ---
+  duration_ms: 2.036
+  type: 'test'
+  ...
+# Subtest: manifest/config identity verification accepts exact pairs and rejects role, endpoint, digest or version drift
+ok 50 - manifest/config identity verification accepts exact pairs and rejects role, endpoint, digest or version drift
+  ---
+  duration_ms: 2.7566
+  type: 'test'
+  ...
+# Subtest: v1 config preserves exact parsed values and canonical digest, including BOM handling
+ok 51 - v1 config preserves exact parsed values and canonical digest, including BOM handling
+  ---
+  duration_ms: 11.4317
+  type: 'test'
+  ...
+# Subtest: v2 config preserves explicit nulls and assignments without expanding roles
+ok 52 - v2 config preserves explicit nulls and assignments without expanding roles
+  ---
+  duration_ms: 6.207
+  type: 'test'
+  ...
+# Subtest: historical config hashes remain reproducible but unsafe legacy values cannot build or start a successor
+ok 53 - historical config hashes remain reproducible but unsafe legacy values cannot build or start a successor
+  ---
+  duration_ms: 17.7554
+  type: 'test'
+  ...
+# Subtest: config version paths reject mixed schemas, missing/extra roles, invalid URLs and no enabled answer role
+ok 54 - config version paths reject mixed schemas, missing/extra roles, invalid URLs and no enabled answer role
+  ---
+  duration_ms: 20.8162
+  type: 'test'
+  ...
+# Subtest: actual Gate2 answer lanes use the independently selected provider and preserve scope
+ok 55 - actual Gate2 answer lanes use the independently selected provider and preserve scope
+  ---
+  duration_ms: 38.1866
+  type: 'test'
+  ...
+# Subtest: disabled Code role cannot fall back or record a false completed conversation
+ok 56 - disabled Code role cannot fall back or record a false completed conversation
+  ---
+  duration_ms: 2.075
+  type: 'test'
+  ...
+# Subtest: role selection preserves request history and denies cross-project workspace reads before a model call
+ok 57 - role selection preserves request history and denies cross-project workspace reads before a model call
+  ---
+  duration_ms: 2.289
+  type: 'test'
+  ...
+# Subtest: real Mastra adapter rejects a mismatched model response through Gate2 without recording success
+ok 58 - real Mastra adapter rejects a mismatched model response through Gate2 without recording success
+  ---
+  duration_ms: 2.209
+  type: 'test'
+  ...
+# Subtest: schema is immutable, static and shipped in the pinned native operator package
+ok 59 - schema is immutable, static and shipped in the pinned native operator package
+  ---
+  duration_ms: 1.6068
+  type: 'test'
+  ...
+# Subtest: actual PS5 operator filename rule admits only the one shared root module
+ok 60 - actual PS5 operator filename rule admits only the one shared root module
+  ---
+  duration_ms: 893.3376
+  type: 'test'
+  ...
+# Subtest: actual Mastra evidence/plain wire passes unchanged through real HTTP guard for qwen36
+ok 61 - actual Mastra evidence/plain wire passes unchanged through real HTTP guard for qwen36
+  ---
+  duration_ms: 239.6212
+  type: 'test'
+  ...
+# Subtest: actual Mastra evidence/plain wire passes unchanged through real HTTP guard for gemma
+ok 62 - actual Mastra evidence/plain wire passes unchanged through real HTTP guard for gemma
+  ---
+  duration_ms: 75.1503
+  type: 'test'
+  ...
+# Subtest: actual Mastra evidence/plain wire passes unchanged through real HTTP guard for coder
+ok 63 - actual Mastra evidence/plain wire passes unchanged through real HTTP guard for coder
+  ---
+  duration_ms: 74.6954
+  type: 'test'
+  ...
+# Subtest: real SDK simultaneous evidence and plain requests do not leak per-request format state
+ok 64 - real SDK simultaneous evidence and plain requests do not leak per-request format state
+  ---
+  duration_ms: 34.9031
+  type: 'test'
+  ...
+# Subtest: actual SDK refuses malformed without formatter, fallback or retry
+ok 65 - actual SDK refuses malformed without formatter, fallback or retry
+  ---
+  duration_ms: 31.5539
+  type: 'test'
+  ...
+# Subtest: actual SDK refuses null without formatter, fallback or retry
+ok 66 - actual SDK refuses null without formatter, fallback or retry
+  ---
+  duration_ms: 27.6416
+  type: 'test'
+  ...
+# Subtest: actual SDK refuses additional-field without formatter, fallback or retry
+ok 67 - actual SDK refuses additional-field without formatter, fallback or retry
+  ---
+  duration_ms: 18.0513
+  type: 'test'
+  ...
+# Subtest: actual SDK refuses bad-citation without formatter, fallback or retry
+ok 68 - actual SDK refuses bad-citation without formatter, fallback or retry
+  ---
+  duration_ms: 17.6468
+  type: 'test'
+  ...
+# Subtest: actual SDK refuses truncated without formatter, fallback or retry
+ok 69 - actual SDK refuses truncated without formatter, fallback or retry
+  ---
+  duration_ms: 23.902
+  type: 'test'
+  ...
+# Subtest: actual SDK refuses wrong-model without formatter, fallback or retry
+ok 70 - actual SDK refuses wrong-model without formatter, fallback or retry
+  ---
+  duration_ms: 17.8259
+  type: 'test'
+  ...
+# Subtest: actual SDK refuses empty-answer without formatter, fallback or retry
+ok 71 - actual SDK refuses empty-answer without formatter, fallback or retry
+  ---
+  duration_ms: 17.2277
+  type: 'test'
+  ...
+# Subtest: actual SDK 429 produces one HTTP attempt and no prompt-only downgrade
+ok 72 - actual SDK 429 produces one HTTP attempt and no prompt-only downgrade
+  ---
+  duration_ms: 17.8856
+  type: 'test'
+  ...
+# Subtest: actual SDK 500 produces one HTTP attempt and no prompt-only downgrade
+ok 73 - actual SDK 500 produces one HTTP attempt and no prompt-only downgrade
+  ---
+  duration_ms: 7.9444
+  type: 'test'
+  ...
+# Subtest: actual SDK deadline cancels a stalled structured request without another dispatch
+ok 74 - actual SDK deadline cancels a stalled structured request without another dispatch
+  ---
+  duration_ms: 156.16
+  type: 'test'
+  ...
+# Subtest: Home guard rejects arbitrary or weakened format declarations before admission
+ok 75 - Home guard rejects arbitrary or weakened format declarations before admission
+  ---
+  duration_ms: 13.3844
+  type: 'test'
+  ...
+# Subtest: legacy transport is exactly unchanged
+ok 76 - legacy transport is exactly unchanged
+  ---
+  duration_ms: 0.9734
+  type: 'test'
+  ...
+# Subtest: qualified none setting is stamped at transport, preserves abort and cannot be supplied by a model
+ok 77 - qualified none setting is stamped at transport, preserves abort and cannot be supplied by a model
+  ---
+  duration_ms: 2.6326
+  type: 'test'
+  ...
+# Subtest: per-role controls do not activate disabled roles or change another model
+ok 78 - per-role controls do not activate disabled roles or change another model
+  ---
+  duration_ms: 3.475
+  type: 'test'
+  ...
+# Subtest: M1 provider, vector, embedding and reranking never forward payloads through redirects
+ok 79 - M1 provider, vector, embedding and reranking never forward payloads through redirects
+  ---
+  duration_ms: 59.8959
+  type: 'test'
+  ...
+1..79
+# tests 79
+# suites 0
+# pass 79
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 2826.3133

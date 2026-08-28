@@ -9,3 +9,12 @@ gate7f/GATE7F-QUALIFICATION-AUTHORIZATION-AND-CRITERIA-2026-08-27.md -text
 gate7f/contracts.mjs -text
 gate7f/evaluation/contracts.mjs -text
 package-lock.json -text
+# Prospective evidence-wire proof pins these exact implementation/probe bytes.
+gate1/adapters/mastra-provider.mjs -text
+gate7f/function-first/provider-transport.mjs -text
+gate7f/function-first/probe-evidence-wire.mjs -text
+gate7f/function-first/evidence-output.mjs -text
+gate7f/function-first/home-runtime/contracts.mjs -text
+gate7f/function-first/home-runtime/runtime-installation.mjs -text
+gate7f/function-first/home-runtime/Runtime-Windows.ps1 -text
+gate7f/function-first/home-runtime/Install-HomeRuntime.ps1 -text

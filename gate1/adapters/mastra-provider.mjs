@@ -2,6 +2,7 @@ import { Agent } from "@mastra/core/agent";
 import { noopLogger } from "@mastra/core/logger";
 import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
 import { controlledProviderFetch } from "../../gate7f/function-first/provider-transport.mjs";
+import { EVIDENCE_STRUCTURED_OUTPUT, isEvidenceOutput } from "../../gate7f/function-first/evidence-output.mjs";
 
 function providerError(code, message) {
   return Object.assign(new Error(message), { code });
@@ -18,7 +19,7 @@ function parseJson(text) {
   let parsed;
   try { parsed = JSON.parse(cleaned); }
   catch { throw providerError("provider-response-invalid", "provider returned invalid typed output"); }
-  if (typeof parsed.answer !== "string" || !Array.isArray(parsed.citations)) {
+  if (!isEvidenceOutput(parsed)) {
     throw providerError("provider-shape-invalid", "provider returned an invalid typed answer");
   }
   return { answer: nonEmptyText(parsed.answer), citations: parsed.citations };
@@ -45,7 +46,7 @@ export class MastraAnswerProvider {
     this.providerName = providerName;
     this.maxOutputTokens = maxOutputTokens;
     const needsProvider = !agent || (role === "code" && !verifierAgent);
-    const provider = needsProvider ? createOpenAICompatible({ name: providerName, baseURL,
+    const provider = needsProvider ? createOpenAICompatible({ name: providerName, baseURL, supportsStructuredOutputs: true,
       fetch: controlledProviderFetch({ baseURL, modelId, reasoningEffort, preventRedirects, fetchImpl }) }) : null;
     this.agent = agent ?? new Agent({
       name: `runaai-${role}`,
@@ -97,7 +98,8 @@ export class MastraAnswerProvider {
       ? { kind: "evidence-json", schema: { answer: "string", citations: [{ sourceId: "string", sectionId: "string" }] } }
       : { kind: "plain-text" };
     const prompt = JSON.stringify({ schemaVersion: "runa2-model-answer-input/v2", ...input, responseFormat });
-    const result = await this.#generate(this.agent, prompt, deadlineAt, this.maxOutputTokens);
+    const result = await this.#generate(this.agent, prompt, deadlineAt, this.maxOutputTokens,
+      evidenceBearing ? EVIDENCE_STRUCTURED_OUTPUT : undefined);
     if (Buffer.byteLength(result.text, "utf8") > maximumOutputBytes) {
       throw providerError("provider-output-limited", "provider response exceeded the byte ceiling");
     }
@@ -115,7 +117,7 @@ export class MastraAnswerProvider {
     };
   }
 
-  async #generate(agent, prompt, deadlineAt, maxOutputTokens) {
+  async #generate(agent, prompt, deadlineAt, maxOutputTokens, structuredOutput) {
     const deadlineMs = deadlineAt - Date.now();
     if (deadlineMs <= 0) throw providerError("provider-timeout", "provider deadline exceeded");
     const controller = new AbortController();
@@ -124,7 +126,8 @@ export class MastraAnswerProvider {
     try {
       result = await agent.generate(prompt, {
         abortSignal: controller.signal,
-        modelSettings: { maxOutputTokens, temperature: 0 },
+        modelSettings: { maxOutputTokens, temperature: 0, maxRetries: 0 },
+        ...(structuredOutput ? { structuredOutput } : {}),
       });
     } catch (error) {
       if (controller.signal.aborted || error?.name === "AbortError") {

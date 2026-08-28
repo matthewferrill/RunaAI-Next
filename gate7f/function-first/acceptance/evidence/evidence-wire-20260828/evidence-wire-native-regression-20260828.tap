@@ -1,0 +1,985 @@
+TAP version 13
+# Subtest: control broker accepts only authenticated, fresh, ordered exact-worker messages
+ok 1 - control broker accepts only authenticated, fresh, ordered exact-worker messages
+  ---
+  duration_ms: 5.6634
+  type: 'test'
+  ...
+# Subtest: native operations, arbitrary data and recovery have no privileged IPC method
+ok 2 - native operations, arbitrary data and recovery have no privileged IPC method
+  ---
+  duration_ms: 0.9081
+  type: 'test'
+  ...
+# Subtest: independent concurrent grants keep generation/acknowledgment and disclose no request content
+ok 3 - independent concurrent grants keep generation/acknowledgment and disclose no request content
+  ---
+  duration_ms: 3.061
+  type: 'test'
+  ...
+# Subtest: expired grants revoke but never falsely acknowledge that the worker request stopped
+ok 4 - expired grants revoke but never falsely acknowledge that the worker request stopped
+  ---
+  duration_ms: 0.5669
+  type: 'test'
+  ...
+# Subtest: only independently confirmed exact-worker death permits unacknowledged-grant release and fault cleanup
+ok 5 - only independently confirmed exact-worker death permits unacknowledged-grant release and fault cleanup
+  ---
+  duration_ms: 0.9112
+  type: 'test'
+  ...
+# Subtest: closing during an asynchronous admission releases the returned native ticket without publishing a grant
+ok 6 - closing during an asynchronous admission releases the returned native ticket without publishing a grant
+  ---
+  duration_ms: 6.2132
+  type: 'test'
+  ...
+# Subtest: body timeout attempts reply before a finite exact-reader destruction
+ok 7 - body timeout attempts reply before a finite exact-reader destruction
+  ---
+  duration_ms: 107.481
+  type: 'test'
+  ...
+# Subtest: unavailable timeout reply falls back to immediate destruction ()=>false
+ok 8 - unavailable timeout reply falls back to immediate destruction ()=>false
+  ---
+  duration_ms: 1.0798
+  type: 'test'
+  ...
+# Subtest: unavailable timeout reply falls back to immediate destruction ()=>{throw Error('synthetic-write-failure');}
+ok 9 - unavailable timeout reply falls back to immediate destruction ()=>{throw Error('synthetic-write-failure');}
+  ---
+  duration_ms: 0.6415
+  type: 'test'
+  ...
+# Subtest: other aborts never wait for a body-timeout reply
+ok 10 - other aborts never wait for a body-timeout reply
+  ---
+  duration_ms: 0.7932
+  type: 'test'
+  ...
+# Subtest: completed body leaves no timeout callback or later destruction
+ok 11 - completed body leaves no timeout callback or later destruction
+  ---
+  duration_ms: 5.279
+  type: 'test'
+  ...
+# Subtest: actual ten-second incomplete HTTP body receives complete408 before close with zero admission
+ok 12 - actual ten-second incomplete HTTP body receives complete408 before close with zero admission
+  ---
+  duration_ms: 10226.0554
+  type: 'test'
+  ...
+# Subtest: actual child-process file IPC authenticates and preserves generation-bound admission control
+ok 13 - actual child-process file IPC authenticates and preserves generation-bound admission control
+  ---
+  duration_ms: 375.61
+  type: 'test'
+  ...
+# Subtest: lost reply faults the client rather than automatically replaying an admission
+ok 14 - lost reply faults the client rather than automatically replaying an admission
+  ---
+  duration_ms: 62.7581
+  type: 'test'
+  ...
+# Subtest: incomplete pending publication is never parsed or treated as an admission request
+ok 15 - incomplete pending publication is never parsed or treated as an admission request
+  ---
+  duration_ms: 13.1821
+  type: 'test'
+  ...
+# Subtest: client rejects altered or oversized replies and retains the unknown request instead of replaying
+ok 16 - client rejects altered or oversized replies and retains the unknown request instead of replaying
+  ---
+  duration_ms: 82.98
+  type: 'test'
+  ...
+# Subtest: server rejects tampered MAC, hardlinked request and unexpected directory entry before broker action
+ok 17 - server rejects tampered MAC, hardlinked request and unexpected directory entry before broker action
+  ---
+  duration_ms: 365.7777
+  type: 'test'
+  ...
+# Subtest: native observation parser rejects malformed/nonfinite numeric readings
+ok 18 - native observation parser rejects malformed/nonfinite numeric readings
+  ---
+  duration_ms: 1.6648
+  type: 'test'
+  ...
+# Subtest: native permission envelope exposes only deny policy metadata, never token entries
+ok 19 - native permission envelope exposes only deny policy metadata, never token entries
+  ---
+  duration_ms: 1.9738
+  type: 'test'
+  ...
+# Subtest: native plain-path checks execute on ordinary files and actual NTFS hardlink/junction fixtures
+ok 20 - native plain-path checks execute on ordinary files and actual NTFS hardlink/junction fixtures
+  ---
+  duration_ms: 14.3295
+  type: 'test'
+  ...
+# Subtest: native adapter constructor has no model calls and refuses non-Home execution or unbound paths
+ok 21 - native adapter constructor has no model calls and refuses non-Home execution or unbound paths
+  ---
+  duration_ms: 10.7951
+  type: 'test'
+  ...
+# Subtest: PowerShell engine observer parses and contains only read-only exact-boundary operations
+ok 22 - PowerShell engine observer parses and contains only read-only exact-boundary operations
+  ---
+  duration_ms: 1566.8414
+  type: 'test'
+  ...
+# Subtest: construction is inert and mandatory owner boundary cannot be omitted
+ok 23 - construction is inert and mandatory owner boundary cannot be omitted
+  ---
+  duration_ms: 21.1221
+  type: 'test'
+  ...
+# Subtest: confirmed settings and server sequence survives reconstruction and hash chaining
+ok 24 - confirmed settings and server sequence survives reconstruction and hash chaining
+  ---
+  duration_ms: 1831.6856
+  type: 'test'
+  ...
+# Subtest: new actual Node process cannot clear intent-only crash or CLI-return-only uncertainty
+ok 25 - new actual Node process cannot clear intent-only crash or CLI-return-only uncertainty
+  ---
+  duration_ms: 435.954
+  type: 'test'
+  ...
+# Subtest: unknown settings child remains pending even when stopped and new bridge is constructed
+ok 26 - unknown settings child remains pending even when stopped and new bridge is constructed
+  ---
+  duration_ms: 189.4539
+  type: 'test'
+  ...
+# Subtest: unknown native child cannot be confirmed from a later snapshot or stopped-child claim
+ok 27 - unknown native child cannot be confirmed from a later snapshot or stopped-child claim
+  ---
+  duration_ms: 201.9217
+  type: 'test'
+  ...
+# Subtest: mismatched, stale or fabricated confirmations never clear pending authority
+ok 28 - mismatched, stale or fabricated confirmations never clear pending authority
+  ---
+  duration_ms: 193.3724
+  type: 'test'
+  ...
+# Subtest: settings receipt must match the exact original intent including already-original restore
+ok 29 - settings receipt must match the exact original intent including already-original restore
+  ---
+  duration_ms: 60.37
+  type: 'test'
+  ...
+# Subtest: concurrent create-only publication allows one intent and never overwrites its competitor
+ok 30 - concurrent create-only publication allows one intent and never overwrites its competitor
+  ---
+  duration_ms: 18.0205
+  type: 'test'
+  ...
+# Subtest: partial records, gaps, unknown files and modified earlier history fail closed without cleanup
+ok 31 - partial records, gaps, unknown files and modified earlier history fail closed without cleanup
+  ---
+  duration_ms: 227.3006
+  type: 'test'
+  ...
+# Subtest: binding is copied at construction and wrong transition or operator cannot reopen history
+ok 32 - binding is copied at construction and wrong transition or operator cannot reopen history
+  ---
+  duration_ms: 30.116
+  type: 'test'
+  ...
+# Subtest: actual hardlink and directory junction are rejected without modifying their targets
+ok 33 - actual hardlink and directory junction are rejected without modifying their targets
+  ---
+  duration_ms: 24.2163
+  type: 'test'
+  ...
+# Subtest: diagnostic transition events, additional private fields and unsupported actions cannot grant authority
+ok 34 - diagnostic transition events, additional private fields and unsupported actions cannot grant authority
+  ---
+  duration_ms: 14.397
+  type: 'test'
+  ...
+# Subtest: native observer has only the supported read-only ps JSON command
+ok 35 - native observer has only the supported read-only ps JSON command
+  ---
+  duration_ms: 2.619
+  type: 'test'
+  ...
+# Subtest: both language and embedding status/count metadata are projected without claiming drain or exposing other data
+ok 36 - both language and embedding status/count metadata are projected without claiming drain or exposing other data
+  ---
+  duration_ms: 24.9395
+  type: 'test'
+  ...
+# Subtest: missing, duplicate, unknown, remote or changing model identities fail closed
+ok 37 - missing, duplicate, unknown, remote or changing model identities fail closed
+  ---
+  duration_ms: 2.7914
+  type: 'test'
+  ...
+# Subtest: stale, future or overly long processing snapshots are never classified as current idle
+ok 38 - stale, future or overly long processing snapshots are never classified as current idle
+  ---
+  duration_ms: 0.4763
+  type: 'test'
+  ...
+# Subtest: real observer construction is inert, source bound and rejects non-Home verification
+ok 39 - real observer construction is inert, source bound and rejects non-Home verification
+  ---
+  duration_ms: 11.4035
+  type: 'test'
+  ...
+# Subtest: native server control has only explicit server stop and pinned port/bind start commands
+ok 40 - native server control has only explicit server stop and pinned port/bind start commands
+  ---
+  duration_ms: 3.3317
+  type: 'test'
+  ...
+# Subtest: native observations reject stale, wrong process and descriptor drift before a command
+ok 41 - native observations reject stale, wrong process and descriptor drift before a command
+  ---
+  duration_ms: 1.5693
+  type: 'test'
+  ...
+# Subtest: native controller construction is inert and requires independent quiescence/retention callbacks
+ok 42 - native controller construction is inert and requires independent quiescence/retention callbacks
+  ---
+  duration_ms: 8.5789
+  type: 'test'
+  ...
+# Subtest: native command gate serializes preflight through final verification and allows confirmed sequential commands
+ok 43 - native command gate serializes preflight through final verification and allows confirmed sequential commands
+  ---
+  duration_ms: 0.5159
+  type: 'test'
+  ...
+# Subtest: native command preflight failure is retryable but dispatched or postflight uncertainty is sticky
+ok 44 - native command preflight failure is retryable but dispatched or postflight uncertainty is sticky
+  ---
+  duration_ms: 1.0883
+  type: 'test'
+  ...
+# Subtest: a bounded actual CLI-shaped child failure cannot be followed by a compensating native command
+ok 45 - a bounded actual CLI-shaped child failure cannot be followed by a compensating native command
+  ---
+  duration_ms: 255.6317
+  type: 'test'
+  ...
+# Subtest: new native command gate requires the same unresolved durable-operation barrier
+ok 46 - new native command gate requires the same unresolved durable-operation barrier
+  ---
+  duration_ms: 0.782
+  type: 'test'
+  ...
+# Subtest: historical baseline is an identity binding, not a substitute for a fresh command observation
+ok 47 - historical baseline is an identity binding, not a substitute for a fresh command observation
+  ---
+  duration_ms: 0.3684
+  type: 'test'
+  ...
+# Subtest: native server observer parses in the actual Windows PowerShell5 parser without executing
+ok 48 - native server observer parses in the actual Windows PowerShell5 parser without executing
+  ---
+  duration_ms: 1072.6898
+  type: 'test'
+  ...
+# Subtest: fixed command projection keeps private candidate off arguments and has no arbitrary path or action
+ok 49 - fixed command projection keeps private candidate off arguments and has no arbitrary path or action
+  ---
+  duration_ms: 6.317
+  type: 'test'
+  ...
+# Subtest: bridge construction is inert and verified operations require two fresh quiescence checks around intent
+ok 50 - bridge construction is inert and verified operations require two fresh quiescence checks around intent
+  ---
+  duration_ms: 4.0171
+  type: 'test'
+  ...
+# Subtest: unknown mutation remains unconfirmed with sanitized error and no automatic or repeated dispatch
+ok 51 - unknown mutation remains unconfirmed with sanitized error and no automatic or repeated dispatch
+  ---
+  duration_ms: 2.9659
+  type: 'test'
+  ...
+# Subtest: stopped-but-unknown child still blocks restore and verify cannot reset the uncertainty
+ok 52 - stopped-but-unknown child still blocks restore and verify cannot reset the uncertainty
+  ---
+  duration_ms: 1.1507
+  type: 'test'
+  ...
+# Subtest: new settings bridge cannot bypass a retained unresolved operation or omit the durable barrier
+ok 53 - new settings bridge cannot bypass a retained unresolved operation or omit the durable barrier
+  ---
+  duration_ms: 1.2311
+  type: 'test'
+  ...
+# Subtest: actual delayed settings child cannot race a compensating restore after an unknown result
+ok 54 - actual delayed settings child cannot race a compensating restore after an unknown result
+  ---
+  duration_ms: 169.6629
+  type: 'test'
+  ...
+# Subtest: stale baseline, changed preparation, unrelated restore and code drift stop before file command
+ok 55 - stale baseline, changed preparation, unrelated restore and code drift stop before file command
+  ---
+  duration_ms: 1.961
+  type: 'test'
+  ...
+# Subtest: lost final quiescence denies dispatch and no in-memory permission claims native idle
+ok 56 - lost final quiescence denies dispatch and no in-memory permission claims native idle
+  ---
+  duration_ms: 0.7399
+  type: 'test'
+  ...
+# Subtest: already-original restore still dispatches conflict-aware recovery and rejects stale expected hash
+ok 57 - already-original restore still dispatches conflict-aware recovery and rejects stale expected hash
+  ---
+  duration_ms: 1.1888
+  type: 'test'
+  ...
+# Subtest: receipt mismatch or post-command mutation never confirms a settings operation
+ok 58 - receipt mismatch or post-command mutation never confirms a settings operation
+  ---
+  duration_ms: 1.9833
+  type: 'test'
+  ...
+# Subtest: real bridge rejects non-Home use and additional path overrides without any read or mutation
+ok 59 - real bridge rejects non-Home use and additional path overrides without any read or mutation
+  ---
+  duration_ms: 15.5884
+  type: 'test'
+  ...
+# Subtest: actual PowerShell5 parser accepts fixed bridge and script refuses wrong host before stdin or path mutation
+ok 60 - actual PowerShell5 parser accepts fixed bridge and script refuses wrong host before stdin or path mutation
+  ---
+  duration_ms: 2023.59
+  type: 'test'
+  ...
+# Subtest: finite transition records intent before effects and does not equate file bytes to enforcement
+ok 61 - finite transition records intent before effects and does not equate file bytes to enforcement
+  ---
+  duration_ms: 6.8363
+  type: 'test'
+  ...
+# Subtest: unrelated baseline drift fails before a native server command
+ok 62 - unrelated baseline drift fails before a native server command
+  ---
+  duration_ms: 0.9616
+  type: 'test'
+  ...
+# Subtest: lost quiescence or hardware guard prevents effects and never opens admission
+ok 63 - lost quiescence or hardware guard prevents effects and never opens admission
+  ---
+  duration_ms: 1.0417
+  type: 'test'
+  ...
+# Subtest: unknown native mutation is not retried or silently compensated
+ok 64 - unknown native mutation is not retried or silently compensated
+  ---
+  duration_ms: 0.6792
+  type: 'test'
+  ...
+# Subtest: restarted outer coordinator denies both apply and restore before any effect with an unresolved durable intent
+ok 65 - restarted outer coordinator denies both apply and restore before any effect with an unresolved durable intent
+  ---
+  duration_ms: 1.9979
+  type: 'test'
+  ...
+# Subtest: denial of an unavailable model or any resident after the real JIT probe is not a pass
+ok 66 - denial of an unavailable model or any resident after the real JIT probe is not a pass
+  ---
+  duration_ms: 8.5583
+  type: 'test'
+  ...
+# Subtest: explicit restore rechecks current bytes, retains closed admission and never raises power
+ok 67 - explicit restore rechecks current bytes, retains closed admission and never raises power
+  ---
+  duration_ms: 2.8011
+  type: 'test'
+  ...
+# Subtest: foreign edit prevents restore before stopping the server
+ok 68 - foreign edit prevents restore before stopping the server
+  ---
+  duration_ms: 2.1335
+  type: 'test'
+  ...
+# Subtest: native settings preparation changes only four fields and retains original bytes exactly
+ok 69 - native settings preparation changes only four fields and retains original bytes exactly
+  ---
+  duration_ms: 3.9714
+  type: 'test'
+  ...
+# Subtest: baseline/schema/type/extra-setting drift rejects before any external action
+ok 70 - baseline/schema/type/extra-setting drift rejects before any external action
+  ---
+  duration_ms: 2.0187
+  type: 'test'
+  ...
+# Subtest: applied file values and formatting normalization never claim native enforcement
+ok 71 - applied file values and formatting normalization never claim native enforcement
+  ---
+  duration_ms: 0.9578
+  type: 'test'
+  ...
+# Subtest: rollback restores exact original CRLF bytes only from the owned candidate or an already-restored original
+ok 72 - rollback restores exact original CRLF bytes only from the owned candidate or an already-restored original
+  ---
+  duration_ms: 2.7678
+  type: 'test'
+  ...
+# Subtest: tampered rollback material cannot authorize overwriting any current settings
+ok 73 - tampered rollback material cannot authorize overwriting any current settings
+  ---
+  duration_ms: 0.6895
+  type: 'test'
+  ...
+# Subtest: duplicate decoded keys are not accepted as formatting normalization or a baseline
+ok 74 - duplicate decoded keys are not accepted as formatting normalization or a baseline
+  ---
+  duration_ms: 1.0229
+  type: 'test'
+  ...
+# Subtest: private child returns bounded JSON only after successful close
+ok 75 - private child returns bounded JSON only after successful close
+  ---
+  duration_ms: 4.3869
+  type: 'test'
+  ...
+# Subtest: bounded private text preserves exact stdout and stderr only after successful close
+ok 76 - bounded private text preserves exact stdout and stderr only after successful close
+  ---
+  duration_ms: 1.0403
+  type: 'test'
+  ...
+# Subtest: malformed private JSON and UTF8 return sanitized stopped-but-unconfirmed failures
+ok 77 - malformed private JSON and UTF8 return sanitized stopped-but-unconfirmed failures
+  ---
+  duration_ms: 1.6196
+  type: 'test'
+  ...
+# Subtest: timeout and output cap stop exactly one owned child and expose no private output
+ok 78 - timeout and output cap stop exactly one owned child and expose no private output
+  ---
+  duration_ms: 28.4727
+  type: 'test'
+  ...
+# Subtest: unconfirmed OS termination still settles and closes owned pipes without claiming the process stopped
+ok 79 - unconfirmed OS termination still settles and closes owned pipes without claiming the process stopped
+  ---
+  duration_ms: 30.1618
+  type: 'test'
+  ...
+# Subtest: actual local child with unread stdin is bounded and termination is observed
+ok 80 - actual local child with unread stdin is bounded and termination is observed
+  ---
+  duration_ms: 257.3369
+  type: 'test'
+  ...
+# Subtest: protected journal recovery consumes actual controller events and unloads only exact owned identities
+ok 81 - protected journal recovery consumes actual controller events and unloads only exact owned identities
+  ---
+  duration_ms: 11.435
+  type: 'test'
+  ...
+# Subtest: partial, malformed, reordered, different-profile journals fail before any recovery mutation
+ok 82 - partial, malformed, reordered, different-profile journals fail before any recovery mutation
+  ---
+  duration_ms: 3.5518
+  type: 'test'
+  ...
+# Subtest: lost load response and returned identity without observed fingerprint remain closed at160W
+ok 83 - lost load response and returned identity without observed fingerprint remain closed at160W
+  ---
+  duration_ms: 3.598
+  type: 'test'
+  ...
+# Subtest: engine/config identity drift never authorizes an unload
+ok 84 - engine/config identity drift never authorizes an unload
+  ---
+  duration_ms: 4.1117
+  type: 'test'
+  ...
+# Subtest: foreign residency is retained and prevents higher-power restoration after owned cleanup
+ok 85 - foreign residency is retained and prevents higher-power restoration after owned cleanup
+  ---
+  duration_ms: 2.1257
+  type: 'test'
+  ...
+# Subtest: both old processes must be independently stopped before pin reads or any native operation
+ok 86 - both old processes must be independently stopped before pin reads or any native operation
+  ---
+  duration_ms: 1.6589
+  type: 'test'
+  ...
+# Subtest: unsafe settings or stale observations reject recovery before mutation and before260W restoration
+ok 87 - unsafe settings or stale observations reject recovery before mutation and before260W restoration
+  ---
+  duration_ms: 8.7184
+  type: 'test'
+  ...
+# Subtest: already absent owned instance is reconciled without repeating an unload; clean state is not permission to repair drift
+ok 88 - already absent owned instance is reconciled without repeating an unload; clean state is not permission to repair drift
+  ---
+  duration_ms: 1.8818
+  type: 'test'
+  ...
+# Subtest: an intent before the first load permits power restoration only at unchanged engine and zero residency
+ok 89 - an intent before the first load permits power restoration only at unchanged engine and zero residency
+  ---
+  duration_ms: 2.9131
+  type: 'test'
+  ...
+# Subtest: installation binds a single exact profile, native runtime, TLS identities and complete fixed code file set
+ok 90 - installation binds a single exact profile, native runtime, TLS identities and complete fixed code file set
+  ---
+  duration_ms: 3.2798
+  type: 'test'
+  ...
+# Subtest: native session/process/output paths cannot be supplied as arbitrary models or filesystem targets
+ok 91 - native session/process/output paths cannot be supplied as arbitrary models or filesystem targets
+  ---
+  duration_ms: 2.6374
+  type: 'test'
+  ...
+# Subtest: importing actual runtime entrypoints has no installation/start side effect and off-Home entry is denied
+ok 92 - importing actual runtime entrypoints has no installation/start side effect and off-Home entry is denied
+  ---
+  duration_ms: 9.4179
+  type: 'test'
+  ...
+# Subtest: operator package copies only the fixed pinned sources and refuses overwriting an existing package
+ok 93 - operator package copies only the fixed pinned sources and refuses overwriting an existing package
+  ---
+  duration_ms: 133.6536
+  type: 'test'
+  ...
+# Subtest: all native runtime scripts parse in PS5 and its handle-based hardlink metadata helper executes
+ok 94 - all native runtime scripts parse in PS5 and its handle-based hardlink metadata helper executes
+  ---
+  duration_ms: 2736.3183
+  type: 'test'
+  ...
+# Subtest: native watchdog child probe has a real finite deadline and bounded output, independent of CIM
+ok 95 - native watchdog child probe has a real finite deadline and bounded output, independent of CIM
+  ---
+  duration_ms: 1432.0365
+  type: 'test'
+  ...
+# Subtest: native task descriptor and worker argv reject executable, extra-action and principal drift
+ok 96 - native task descriptor and worker argv reject executable, extra-action and principal drift
+  ---
+  duration_ms: 844.9097
+  type: 'test'
+  ...
+# Subtest: three pinned profiles keep exact primary/MTP and Nomic settings; unknown profiles denied
+ok 97 - three pinned profiles keep exact primary/MTP and Nomic settings; unknown profiles denied
+  ---
+  duration_ms: 7.9594
+  type: 'test'
+  ...
+# Subtest: unsafe JIT or logging settings fail before load or power change
+ok 98 - unsafe JIT or logging settings fail before load or power change
+  ---
+  duration_ms: 4.6892
+  type: 'test'
+  ...
+# Subtest: native MCP capability drift closes startup and active admissions without adding tool authority
+ok 99 - native MCP capability drift closes startup and active admissions without adding tool authority
+  ---
+  duration_ms: 15.1413
+  type: 'test'
+  ...
+# Subtest: live cleanup never restores higher power after unsafe settings or stale cleanup observation
+ok 100 - live cleanup never restores higher power after unsafe settings or stale cleanup observation
+  ---
+  duration_ms: 16.1191
+  type: 'test'
+  ...
+# Subtest: a returned identity without a verified observed fingerprint cannot authorize live unload
+ok 101 - a returned identity without a verified observed fingerprint cannot authorize live unload
+  ---
+  duration_ms: 1.8311
+  type: 'test'
+  ...
+# Subtest: explicit owned startup, idle polling and stop preserve the exact two-model envelope
+ok 102 - explicit owned startup, idle polling and stop preserve the exact two-model envelope
+  ---
+  duration_ms: 3.926
+  type: 'test'
+  ...
+# Subtest: cancelling startup before native state changes stops without loading or inventing cleanup ownership
+ok 103 - cancelling startup before native state changes stops without loading or inventing cleanup ownership
+  ---
+  duration_ms: 0.8306
+  type: 'test'
+  ...
+# Subtest: drain prevents admissions and waits for both active requests before unloading
+ok 104 - drain prevents admissions and waits for both active requests before unloading
+  ---
+  duration_ms: 42.6327
+  type: 'test'
+  ...
+# Subtest: async observation cannot admit a request into a generation that already stopped
+ok 105 - async observation cannot admit a request into a generation that already stopped
+  ---
+  duration_ms: 3.7338
+  type: 'test'
+  ...
+# Subtest: one client cancelling an observation does not unload models or cancel other users
+ok 106 - one client cancelling an observation does not unload models or cancel other users
+  ---
+  duration_ms: 3.1733
+  type: 'test'
+  ...
+# Subtest: an ambiguous load response never allows original-power restoration or a blind retry
+ok 107 - an ambiguous load response never allows original-power restoration or a blind retry
+  ---
+  duration_ms: 1.0654
+  type: 'test'
+  ...
+# Subtest: changed instance is never treated as ours for cleanup; no power restoration with ambiguity
+ok 108 - changed instance is never treated as ours for cleanup; no power restoration with ambiguity
+  ---
+  duration_ms: 3.6624
+  type: 'test'
+  ...
+# Subtest: foreign resident is retained while only the exact owned instances are unloaded
+ok 109 - foreign resident is retained while only the exact owned instances are unloaded
+  ---
+  duration_ms: 1.7817
+  type: 'test'
+  ...
+# Subtest: engine replacement during cleanup prevents unloading reused instance identities
+ok 110 - engine replacement during cleanup prevents unloading reused instance identities
+  ---
+  duration_ms: 1.3918
+  type: 'test'
+  ...
+# Subtest: restored power is observed, not inferred from a successful setter return
+ok 111 - restored power is observed, not inferred from a successful setter return
+  ---
+  duration_ms: 1.1835
+  type: 'test'
+  ...
+# Subtest: thermal fault aborts existing admissions before owned cleanup
+ok 112 - thermal fault aborts existing admissions before owned cleanup
+  ---
+  duration_ms: 3.0865
+  type: 'test'
+  ...
+# Subtest: freshness, engine epoch and missing residency never trigger a blind reload
+ok 113 - freshness, engine epoch and missing residency never trigger a blind reload
+  ---
+  duration_ms: 4.9094
+  type: 'test'
+  ...
+# Subtest: request contract excludes override/JIT/native/MCP/unselected routes without changing accepted bytes
+ok 114 - request contract excludes override/JIT/native/MCP/unselected routes without changing accepted bytes
+  ---
+  duration_ms: 6.8736
+  type: 'test'
+  ...
+# Subtest: BGE fixed routes use only their loopback backend and preserve exact bodies and failure statuses
+ok 115 - BGE fixed routes use only their loopback backend and preserve exact bodies and failure statuses
+  ---
+  duration_ms: 115.8888
+  type: 'test'
+  ...
+# Subtest: actual disposable HTTP proxy preserves request/reply bytes and upstream failures; no models executed
+# (node:6448) ExperimentalWarning: The MockTimers API is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+ok 116 - actual disposable HTTP proxy preserves request/reply bytes and upstream failures; no models executed
+  ---
+  duration_ms: 61.9049
+  type: 'test'
+  ...
+# Subtest: qualified 60-second answer admission is not clipped by the outer proxy deadline (fake clock)
+ok 117 - qualified 60-second answer admission is not clipped by the outer proxy deadline (fake clock)
+  ---
+  duration_ms: 32.3345
+  type: 'test'
+  ...
+# Subtest: a real incomplete HTTP request body is destroyed on its bounded deadline, with no admission
+ok 118 - a real incomplete HTTP request body is destroyed on its bounded deadline, with no admission
+  ---
+  duration_ms: 10.639
+  type: 'test'
+  ...
+# Subtest: actual Windows atomic swap retains custom ACL and exact original bytes through rollback
+ok 119 - actual Windows atomic swap retains custom ACL and exact original bytes through rollback
+  ---
+  duration_ms: 2312.9912
+  type: 'test'
+  ...
+# Subtest: foreign edit or ACL change before swap is never overwritten
+ok 120 - foreign edit or ACL change before swap is never overwritten
+  ---
+  duration_ms: 5244.144
+  type: 'test'
+  ...
+# Subtest: already-original unstarted recovery does not ignore an unrelated ACL change
+ok 121 - already-original unstarted recovery does not ignore an unrelated ACL change
+  ---
+  duration_ms: 2376.3034
+  type: 'test'
+  ...
+# Subtest: actual atomic preimage retains a late conflict without a second blind compensation
+ok 122 - actual atomic preimage retains a late conflict without a second blind compensation
+  ---
+  duration_ms: 2435.701
+  type: 'test'
+  ...
+# Subtest: a real child exit immediately after Replace is recoverable by a new process
+ok 123 - a real child exit immediately after Replace is recoverable by a new process
+  ---
+  duration_ms: 5800.0212
+  type: 'test'
+  ...
+# Subtest: late ACL edits are retained and post-apply ACL drift denies rollback before any swap
+ok 124 - late ACL edits are retained and post-apply ACL drift denies rollback before any swap
+  ---
+  duration_ms: 4806.0078
+  type: 'test'
+  ...
+# Subtest: a late rollback writer is retained without racing another blind compensation
+ok 125 - a late rollback writer is retained without racing another blind compensation
+  ---
+  duration_ms: 2423.9499
+  type: 'test'
+  ...
+# Subtest: rollback refuses post-apply unrelated bytes and preserves both versions
+ok 126 - rollback refuses post-apply unrelated bytes and preserves both versions
+  ---
+  duration_ms: 2475.4424
+  type: 'test'
+  ...
+# Subtest: direct restore rejects every foreign actual preimage before creating or changing a file
+ok 127 - direct restore rejects every foreign actual preimage before creating or changing a file
+  ---
+  duration_ms: 10183.1227
+  type: 'test'
+  ...
+# Subtest: direct restore accepts a verified current-byte normalization but restores exact owned original
+ok 128 - direct restore accepts a verified current-byte normalization but restores exact owned original
+  ---
+  duration_ms: 2380.0264
+  type: 'test'
+  ...
+# Subtest: hardlinked settings, reparse ancestors and tampered candidate fail before replacement
+ok 129 - hardlinked settings, reparse ancestors and tampered candidate fail before replacement
+  ---
+  duration_ms: 4506.61
+  type: 'test'
+  ...
+# TLS bounded transport lengths [{"action":"UploadHome","rawScriptChars":4671,"oldDirectRemoteChars":12538,"actualRemoteChars":3630,"actualNestedChars":3677,"maximumWrappedChars":3933},{"action":"UploadControl","rawScriptChars":4708,"oldDirectRemoteChars":12638,"actualRemoteChars":3630,"actualNestedChars":3630,"maximumWrappedChars":3886},{"action":"HomeOffer","rawScriptChars":4233,"oldDirectRemoteChars":11370,"actualRemoteChars":3630,"actualNestedChars":3677,"maximumWrappedChars":3933},{"action":"ControlRequest","rawScriptChars":4657,"oldDirectRemoteChars":12502,"actualRemoteChars":3630,"actualNestedChars":3630,"maximumWrappedChars":3886},{"action":"HomeSign","rawScriptChars":4532,"oldDirectRemoteChars":12170,"actualRemoteChars":3630,"actualNestedChars":3677,"maximumWrappedChars":3933},{"action":"ControlImport","rawScriptChars":4403,"oldDirectRemoteChars":11826,"actualRemoteChars":3630,"actualNestedChars":3630,"maximumWrappedChars":3886}]
+# Subtest: offline package contains only the six raw source files and separate observed host runtime pins
+ok 130 - offline package contains only the six raw source files and separate observed host runtime pins
+  ---
+  duration_ms: 4577.3756
+  type: 'test'
+  ...
+# Subtest: descriptor, source bytes, and linked source paths fail before any SSH operation
+ok 131 - descriptor, source bytes, and linked source paths fail before any SSH operation
+  ---
+  duration_ms: 63.9225
+  type: 'test'
+  ...
+# Subtest: strict public transfer refuses private material, unknown fields, duplicate keys and foreign identity
+ok 132 - strict public transfer refuses private material, unknown fields, duplicate keys and foreign identity
+  ---
+  duration_ms: 3.5785
+  type: 'test'
+  ...
+# Subtest: all remote commands use fixed host context, create-only files and no lifecycle authority
+ok 133 - all remote commands use fixed host context, create-only files and no lifecycle authority
+  ---
+  duration_ms: 50.0732
+  type: 'test'
+  ...
+# Subtest: transport driver retains exact public responses and follows all four steps without private key transport
+ok 134 - transport driver retains exact public responses and follows all four steps without private key transport
+  ---
+  duration_ms: 371.5603
+  type: 'test'
+  ...
+# Subtest: invalid remote envelope is never retained or silently retried
+ok 135 - invalid remote envelope is never retained or silently retried
+  ---
+  duration_ms: 60.9368
+  type: 'test'
+  ...
+# Subtest: generated upload and enrollment commands parse in actual Windows PowerShell5 without executing them
+ok 136 - generated upload and enrollment commands parse in actual Windows PowerShell5 without executing them
+  ---
+  duration_ms: 3719.018
+  type: 'test'
+  ...
+# Subtest: actual Windows cmd and PowerShell5 execute only the pinned stdin script with exact UTF8 input/output
+ok 137 - actual Windows cmd and PowerShell5 execute only the pinned stdin script with exact UTF8 input/output
+  ---
+  duration_ms: 3231.5658
+  type: 'test'
+  ...
+# Subtest: actual bootstrap rejects wrong script hash, extra envelope fields and invalid encoding before executing
+ok 138 - actual bootstrap rejects wrong script hash, extra envelope fields and invalid encoding before executing
+  ---
+  duration_ms: 1985.792
+  type: 'test'
+  ...
+# Subtest: TLS package binds the complete source set and separate host-specific executable pins
+ok 139 - TLS package binds the complete source set and separate host-specific executable pins
+  ---
+  duration_ms: 2.9484
+  type: 'test'
+  ...
+# Subtest: exact standalone enrollment package imports without model/lifecycle dependencies
+ok 140 - exact standalone enrollment package imports without model/lifecycle dependencies
+  ---
+  duration_ms: 193.7591
+  type: 'test'
+  ...
+# Subtest: actual Windows PowerShell5 parser accepts the sealed ACL entrypoints
+ok 141 - actual Windows PowerShell5 parser accepts the sealed ACL entrypoints
+  ---
+  duration_ms: 1031.006
+  type: 'test'
+  ...
+# Subtest: real OpenSSL enrollment transfers only pinned public CSR/certificates across two owning directories
+ok 142 - real OpenSSL enrollment transfers only pinned public CSR/certificates across two owning directories
+  ---
+  duration_ms: 3621.9979
+  type: 'test'
+  ...
+# Subtest: wrong packet pins, extra fields and duplicate decoded keys are refused before creating a Control key
+ok 143 - wrong packet pins, extra fields and duplicate decoded keys are refused before creating a Control key
+  ---
+  duration_ms: 2.2006
+  type: 'test'
+  ...
+# Subtest: generation and completed imports refuse existing roots and exact output files without overwriting
+ok 144 - generation and completed imports refuse existing roots and exact output files without overwriting
+  ---
+  duration_ms: 14.9164
+  type: 'test'
+  ...
+# Subtest: ACL verification precedes private material and is rechecked for an existing enrollment
+ok 145 - ACL verification precedes private material and is rechecked for an existing enrollment
+  ---
+  duration_ms: 10.7691
+  type: 'test'
+  ...
+# Subtest: a real valid CSR with the wrong subject is never signed
+ok 146 - a real valid CSR with the wrong subject is never signed
+  ---
+  duration_ms: 3005.0766
+  type: 'test'
+  ...
+# Subtest: a correctly signed peer certificate cannot be imported against a different local Control key
+ok 147 - a correctly signed peer certificate cannot be imported against a different local Control key
+  ---
+  duration_ms: 832.024
+  type: 'test'
+  ...
+# Subtest: wrong CSR digest and wrong certificate issuer are refused without a publication
+ok 148 - wrong CSR digest and wrong certificate issuer are refused without a publication
+  ---
+  duration_ms: 2975.7411
+  type: 'test'
+  ...
+# Subtest: pinned OpenSSL drift fails before any enrollment root is created
+ok 149 - pinned OpenSSL drift fails before any enrollment root is created
+  ---
+  duration_ms: 2.4337
+  type: 'test'
+  ...
+# Subtest: mutual TLS requires exact Control identity and preserves bytes over an actual encrypted local request
+ok 150 - mutual TLS requires exact Control identity and preserves bytes over an actual encrypted local request
+  ---
+  duration_ms: 3468.2654
+  type: 'test'
+  ...
+# Subtest: synthetic proof has no model endpoints, listener creation or broad deletion
+ok 151 - synthetic proof has no model endpoints, listener creation or broad deletion
+  ---
+  duration_ms: 13.1445
+  type: 'test'
+  ...
+# Subtest: proof uses no-overwrite JSON publication and exact native process identity
+ok 152 - proof uses no-overwrite JSON publication and exact native process identity
+  ---
+  duration_ms: 2.3883
+  type: 'test'
+  ...
+# Subtest: all PowerShell proof scripts parse in Windows PowerShell 5.1
+ok 153 - all PowerShell proof scripts parse in Windows PowerShell 5.1
+  ---
+  duration_ms: 2380.1145
+  type: 'test'
+  ...
+# Subtest: retained actual Mastra answer/planner/Nomic/BGE requests satisfy the unmodified guard contract
+ok 154 - retained actual Mastra answer/planner/Nomic/BGE requests satisfy the unmodified guard contract
+  ---
+  duration_ms: 7.3072
+  type: 'test'
+  ...
+# Subtest: all23 actual synthetic request/reply projections pass through real local HTTP unchanged, no model calls
+ok 155 - all23 actual synthetic request/reply projections pass through real local HTTP unchanged, no model calls
+  ---
+  duration_ms: 245.5501
+  type: 'test'
+  ...
+# Subtest: worker binds fresh status and exact generation then waits for idempotent release acknowledgement
+ok 156 - worker binds fresh status and exact generation then waits for idempotent release acknowledgement
+  ---
+  duration_ms: 8.0376
+  type: 'test'
+  ...
+# Subtest: worker native revocation aborts but does not release until actual request finalization
+ok 157 - worker native revocation aborts but does not release until actual request finalization
+  ---
+  duration_ms: 2.8243
+  type: 'test'
+  ...
+# Subtest: graceful drain denies new admissions without aborting an unrevoked in-flight request
+ok 158 - graceful drain denies new admissions without aborting an unrevoked in-flight request
+  ---
+  duration_ms: 0.7027
+  type: 'test'
+  ...
+# Subtest: supervisor loss closes all admissions without replaying or releasing unknown requests
+ok 159 - supervisor loss closes all admissions without replaying or releasing unknown requests
+  ---
+  duration_ms: 2.0457
+  type: 'test'
+  ...
+# Subtest: stale status and generation drift reject before upstream inference
+ok 160 - stale status and generation drift reject before upstream inference
+  ---
+  duration_ms: 1.083
+  type: 'test'
+  ...
+# Subtest: cancellation while awaiting admission explicitly releases returned grant without dispatch
+ok 161 - cancellation while awaiting admission explicitly releases returned grant without dispatch
+  ---
+  duration_ms: 1.169
+  type: 'test'
+  ...
+# Subtest: worker close/deadline revoke without fabricating completion
+ok 162 - worker close/deadline revoke without fabricating completion
+  ---
+  duration_ms: 0.5892
+  type: 'test'
+  ...
+1..162
+# tests 162
+# suites 0
+# pass 162
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 45450.6117

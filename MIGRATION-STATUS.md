@@ -15,7 +15,7 @@ are unchanged. M1 is authorized, not complete; its first local wiring result is 
 The steward authorized necessary non-destructive work and commit/push to RunaAI-Next without recurring
 permission requests. Human involvement is reserved for genuine customer tests or human-only operations.
 
-### Current checkpoint: R4b functional campaign and operator correction
+### Current checkpoint: complete baseline; corrected-stack qualification continues
 
 The frozen application is `9556ed01f9dbabe8c93eea309e482aad60bf809f`, common runtime seal
 `416102ff7129e5adb00de51b2f0fc3e5ca542c18a82941a32fdc4075b6a1c89f`. The complete actual Control
@@ -25,8 +25,35 @@ the original raw-proof verifier, including actual browser observation. See
 `gate7f/function-first/acceptance/R4B-CONTROLS-RESULTS-2026-08-28.md`. Earlier failed/partial arms
 below remain historical evidence, not retroactively passed. The replacement Coder batch has
 completed 120/120 and independent review of 148 actual role-provider outputs:
-73 passed, 10 failed, 37 inconclusive. Qwen3.6 is running its matched batch;
-Gemma remains next. No winner is selected.
+73 passed, 10 failed, 37 inconclusive. Qwen3.6 completed120/120 and independent
+review of147 actual outputs:79 passed,6 failed,35 inconclusive. Gemma also
+completed120/120, with independent semantic review still in progress. Thus all
+360 planned baseline task attempts are recorded; runner completion is not model
+qualification. No winner is selected. Separate immutable Coder and Qwen reports
+are under `gate7f/function-first/acceptance/evidence/campaign-20260828-r4b/`.
+
+Gemma's independent Control cleanup at23:30:11Z found zero owned processes and
+listeners and all six disposable runtime/data directories absent. No stop or
+cleanup error was recorded. Home's owner independently unloaded the test models,
+restored both260-W limits and removed owned campaign tasks at23:31Z. All original
+abandoned arms, timing failures and per-attempt model failures remain retained.
+
+Shared corrections are implemented separately from that frozen baseline:
+exact source-byte preservation (`f2b6112`), whole-plan argument/receipt preflight
+(`5a1f0c2`), native evidence JSON-schema transport (`801a8c3`) and continuing-user-
+constraint instructions (`793ebc4`). These do not rewrite earlier grades.
+Actual local request/service/SDK/HTTP regression is91/91, zero skips; the separate
+native-runtime suite is162/162, zero skips. Synthetic model responses prove
+integration only. Actual model quality and live auxiliary/source-byte validation
+on the corrected application still require the fresh matched run.
+
+The next-work authority is
+`gate7f/function-first/CORRECTED-STACK-CONTINUATION-2026-08-28.md`. Complete actual
+native owner/caller-drain and bounded deployment recovery, freeze the common
+corrected source/runtime, run all three models without changing thresholds,
+then perform rollback-protected release validation and the real customer trial.
+No new permission gate is introduced. The production release and protected data
+remain unchanged by this baseline/correction work.
 
 The first R4b Coder batch is retained at 32/120, with 21 passes, two failures and
 nine inconclusive attempts after independent review of all 41 model outputs. An

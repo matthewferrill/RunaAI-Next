@@ -118,6 +118,11 @@ outputs or functional grades. Their request-byte reconstruction is disclosed in 
 Assembled-source verification2026-08-28: the combined runtime and Windows-proof command passed67/67
 with0 skips; `npm run verify:roadmap` passed15/15. These supersede the older local test counts above,
 not the explicit limits of the retained Control mechanics and still-pending actual Home qualification.
+The [native transition plan](NATIVE-TRANSITION-PLAN.md) now binds private original-byte retention,
+compared replacement, coordinated Control quiescence and actual in-memory enforcement proof. Its
+pure settings module passes5 additional tests for exact rollback and unrelated-setting drift; it has
+no host effect. Fresh [Home native pins](evidence/20260828-native-transition-pins.json) remain separate
+from the Control packaged Node pin. These facts do not activate the prepared operator.
 
 Not yet proved: assembled native watchdog/install/recovery on Home, startup without Matthew login,
 post-campaign JIT/sensitive-log transition, authenticated deployment binding, long-idle native

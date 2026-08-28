@@ -1,0 +1,33 @@
+{
+  "schemaVersion": "runaai-home-transition-pins/v1",
+  "observedAt": "2026-08-28T19:43:22.0605763Z",
+  "host": "RUNA-HOME",
+  "accessIdentity": "RUNA-HOME\\codex-audit",
+  "rawObservationSha256": "0ee101a9ae77373fcab703c3aa6e51872b5d1495192b200ed43418e93f7c7f6b",
+  "nodeVersion": "v22.22.1",
+  "pins": [
+    {"path": "C:\\Program Files\\nodejs\\node.exe", "bytes": 87059456, "sha256": "923a41f268ab49ede2e3363fbdd9e790609e385c6f3ca880b4ee9a56a8133e5a"},
+    {"path": "C:\\Users\\Matthew\\AppData\\Local\\Programs\\LM Studio\\LM Studio.exe", "bytes": 210352824, "sha256": "428c46865482aef24712eb5bcbbc7b966e0d8173a946b0b2f307672e4c1529c1"},
+    {"path": "C:\\Users\\Matthew\\.lmstudio\\bin\\lms.exe", "bytes": 120772792, "sha256": "976d4389f97b2cf95b38a4eb673855d8a846f2db21a20eb4fe5e79f7179722f5"},
+    {"path": "C:\\Program Files\\Git\\usr\\bin\\openssl.exe", "bytes": 947097, "sha256": "6c2e01defbbeb057ee5cd2f69396363c0e7a0ce90df900c95072139fec7ce757"}
+  ],
+  "settings": {
+    "autoStartOnLaunch": true,
+    "port": 1234,
+    "cors": false,
+    "logSensitiveData": true,
+    "logIncomingTokens": false,
+    "verbose": true,
+    "logLinesLimit": 500,
+    "networkInterface": "0.0.0.0",
+    "justInTimeModelLoading": true,
+    "fileLoggingMode": "succinct"
+  },
+  "loadedInstances": [],
+  "cliStartFlagsVerified": ["--port", "--bind", "--cors"],
+  "readOnly": true,
+  "settingsChanged": false,
+  "modelsCalled": false,
+  "privateValuesIncluded": false,
+  "qualification": "Native metadata only; not settings transition, in-memory enforcement, unattended boot or production qualification."
+}

@@ -36,6 +36,11 @@ progress is not an authority substitute. Every call takes fresh server-derived
   executes or reconciles. The caller may execute automatic proposals, and must pause for ask-profile
   approvals. `workflow.run(context, {proposalId}, {resume})` wraps this with durable LangGraph checkpoints.
 - `reconcile(context, {proposalId})` observes uncertain effects without repeating them.
+- `revalidatePending(context, {proposalId})` rechecks undispatched pending authority.
+  Stale/expired/revoked authority is durably invalidated before rejection; a
+  conversational resume cannot leave it waiting for an impossible approval.
+  Existing intents and receipts still use execution/reconciliation, never a
+  fabricated never-dispatched outcome.
 - `cancel(context, {taskId})`, `revokeGrant(context, {grantId})`, and `status(context, {taskId})` are trusted
   application ports. `restore(...)` is a convenience proposal for `project.restore`, not a bypass.
 - `listTasks(context)` returns `{tasks:[...]}` with at most twenty recent, scoped summaries.

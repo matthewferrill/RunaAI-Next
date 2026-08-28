@@ -7,9 +7,10 @@ import { fail } from "./runner-contract.mjs";
 // Operator bridge for the parent agent's actual in-app browser. This module never
 // claims a DOM observation itself. The one-use nonce is synthetic-session access,
 // retained only in the owned temporary evidence directory, not a production key.
-export function createBrowserCheckpoint({ directory, maximumWaitMs = 300000, announce = () => {} }) {
+export function createBrowserCheckpoint({ directory, maximumWaitMs = 300000, announce = () => {}, signal = null }) {
   if (!Number.isInteger(maximumWaitMs) || maximumWaitMs < 1000 || maximumWaitMs > 300000) throw fail("m1-browser-checkpoint-budget-invalid");
   return async ({ client, phase, stage }) => {
+    if (signal?.aborted) throw fail("m1-browser-checkpoint-aborted");
     const descriptors = enumerateCaseChecks(client.ledger.observation.caseId).filter(value => value.kind.startsWith("ui."));
     if (!descriptors.length) return;
     const checkpointId = randomUUID(), checkpointDirectory = path.join(directory, `browser-${checkpointId}`);
@@ -28,6 +29,7 @@ export function createBrowserCheckpoint({ directory, maximumWaitMs = 300000, ann
     announce({ checkpointId, requestPath, baseUrl: request.baseUrl, caseId: request.caseId, phase, stage });
     const deadline = Date.now() + maximumWaitMs;
     while (Date.now() < deadline) {
+      if (signal?.aborted) throw fail("m1-browser-checkpoint-aborted");
       let raw;
       try {
         const info = await lstat(request.ackPath);

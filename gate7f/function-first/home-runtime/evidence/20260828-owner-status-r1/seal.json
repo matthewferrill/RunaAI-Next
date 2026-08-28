@@ -1,0 +1,17 @@
+{
+  "schemaVersion": "runaai-owner-status-package/v1",
+  "id": "5df4f2bef1d4f505aae95b6f3353d23b",
+  "root": "C:\\Users\\codex-audit\\AppData\\Local\\RunaM1Readiness\\owner-status-5df4f2bef1d4f505aae95b6f3353d23b",
+  "taskName": "Runa-M1-OwnerStatus-5df4f2bef1d4f505aae95b6f3353d23b",
+  "engine": {
+    "pid": 14568,
+    "startedAt": "2026-08-23T14:19:15.3385098Z"
+  },
+  "engineSha256": "428c46865482aef24712eb5bcbbc7b966e0d8173a946b0b2f307672e4c1529c1",
+  "cliSha256": "976d4389f97b2cf95b38a4eb673855d8a846f2db21a20eb4fe5e79f7179722f5",
+  "descriptorSha256": "0aeff4b66f35f258f6ec60fc661add55e4e2d38fbc1791278ab0c0c4713ec8c3",
+  "sourceFiles": {
+    "Run-HomeOwnerStatus.ps1": "9532a1f6c431b8a2e43d2d8dcec8a6d2a9de851d037c8df57b3cf0b773699730",
+    "Runtime-Windows.ps1": "98954955f04bdb2646b2dec1209f025817d5e995c7203db4a9ffe27997a32b6f"
+  }
+}

@@ -19,3 +19,4 @@ gate7f/function-first/home-runtime/runtime-installation.mjs -text
 gate7f/function-first/home-runtime/Runtime-Windows.ps1 -text
 gate7f/function-first/home-runtime/Install-HomeRuntime.ps1 -text
 gate7f/function-first/request-coverage.test.mjs -text
+gate7f/function-first/home-runtime/evidence/20260828-owner-status-r*/** -text

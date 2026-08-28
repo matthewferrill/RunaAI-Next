@@ -421,3 +421,11 @@ Home has no C:\AI parent. The next fresh package therefore uses only a verified 
 `C:\ProgramData\RunaAI-Next-OwnerStatus-<id>` leaf, preserving all ancestor/link checks and protected
 ACLs. It separates worker-identity and worker-path diagnostic phases and flushes a create-only start
 intent before task dispatch; retiring a failed task cannot make that same package eligible to rerun.
+
+R3 subsequently passed the actual owner-context status command at23:45:56–58Z; its exact task was
+verified stopped and unregistered. All three attempts, original code/seals and raw metadata are retained
+under `evidence/20260828-owner-status-r{1,2,3}`; see `evidence/20260828-OWNER-STATUS-RESULTS.md`.
+The new ProgramData leaf passed unchanged ancestor/link checks. This supports the earlier ancestor-
+access explanation but does not identify the exact denied path in R1/R2. No credential, native setting,
+model or route was changed. The next owner-command implementation is governed prospectively by
+`OWNER-COMMAND-CRITERIA.md` and remains contingent on real managed-caller drain and legacy access.

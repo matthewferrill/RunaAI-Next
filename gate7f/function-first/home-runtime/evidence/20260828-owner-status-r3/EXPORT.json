@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "runaai-owner-status-retention/v1",
+  "packageSha256": "b970faac2f0647a4d8769825a644d2d9c73609de1a4fc169b0c4bcd907e7139b",
+  "root": "C:\\ProgramData\\RunaAI-Next-OwnerStatus-940317acaf09a192b2c6d0fe31120498",
+  "taskName": "Runa-M1-OwnerStatus-940317acaf09a192b2c6d0fe31120498",
+  "passed": true,
+  "cleanup": "Cleanup",
+  "credentialsIncluded": false,
+  "drainProved": false,
+  "files": {
+    "seal.json": {
+      "bytes": 818,
+      "sha256": "b970faac2f0647a4d8769825a644d2d9c73609de1a4fc169b0c4bcd907e7139b"
+    },
+    "Run-HomeOwnerStatus.ps1": {
+      "bytes": 6837,
+      "sha256": "8c26bac49bd896d9e1a0ffabf18d6bbdb8bb7db24774ee2aeb30bcd29bf9d51a"
+    },
+    "Runtime-Windows.ps1": {
+      "bytes": 11290,
+      "sha256": "98954955f04bdb2646b2dec1209f025817d5e995c7203db4a9ffe27997a32b6f"
+    },
+    "Stage-result.json": {
+      "bytes": 295,
+      "sha256": "cc29a84c922ae5778b12e11b532750c3d0373129bbfedfca3964d8e40c830419"
+    },
+    "Run-result.json": {
+      "bytes": 293,
+      "sha256": "91c7c7b69c1112e8f0f0c92bf8124b37706b5566b038f0af910e530681be5080"
+    },
+    "Inspect-result.json": {
+      "bytes": 562,
+      "sha256": "28a74e5b0e11d88a65e828e93a128756fb53086aee03a69af32f255dc84926e4"
+    },
+    "Collect-result.json": {
+      "bytes": 1379,
+      "sha256": "8f8c04ebe064da91cc00c073d2129902a1d8b1f174605c2502f4f3b64e44b0f3"
+    },
+    "Cleanup-result.json": {
+      "bytes": 297,
+      "sha256": "c17a01a3d5493406d4288818cc8bfc21a29c7ca1cdf2d1a2607f4886a194e247"
+    },
+    "result.json": {
+      "bytes": 797,
+      "sha256": "3a48acdcb681d49609b29d3e17a87c5e2077bfcf00757bf7ce5cb784a8d70a45"
+    }
+  }
+}

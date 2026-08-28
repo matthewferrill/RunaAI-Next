@@ -70,24 +70,26 @@ $file=Join-Path $directory 'home-live.json';$temporary=Join-Path $directory 'hom
 foreach($path in @($file,$temporary)){if((Test-Path -LiteralPath $path)-and((Get-Item -LiteralPath $path).Attributes-band[IO.FileAttributes]::ReparsePoint)){throw 'mirror-file-reparse'}}
 if(Test-Path -LiteralPath $temporary){throw 'mirror-staged-write-exists'}
 if(Test-Path -LiteralPath $file){$previous=Get-Content -LiteralPath $file -Raw|ConvertFrom-Json;if($previous.leaseId-ne'__LEASE__'-or$previous.sealSha256-ne'__SEAL__'){throw 'mirror-existing-binding-mismatch'}}
-[IO.File]::WriteAllText($temporary,$raw,[Text.UTF8Encoding]::new($false))
-# Windows PowerShell5 needs an explicit null string, not $null coerced to an empty backup path.
-if(Test-Path -LiteralPath $file){[IO.File]::Replace($temporary,$file,[System.Management.Automation.Language.NullString]::Value)}else{[IO.File]::Move($temporary,$file)}
-[Console]::Out.Write('{"mirrored":true}')
+$publication=Publish-CampaignMetadata -Target $file -Raw $raw
+[Console]::Out.Write(([ordered]@{mirrored=$true;sharingRetries=$publication.sharingRetries}|ConvertTo-Json -Compress))
 '@
+$publicationHelper=Get-Content -LiteralPath (Join-Path $PSScriptRoot 'Publish-CampaignMetadata.ps1') -Raw
+$writeMirror=$publicationHelper+"`n"+$writeMirror
 $writeMirror=$writeMirror.Replace('__ROOT__',$target).Replace('__COMMIT__',$ExpectedControlSourceCommit).Replace('__LEASE__',$LeaseId).Replace('__SEAL__',$ExpectedSeal)
 $controlEncoded=[Convert]::ToBase64String([Text.Encoding]::Unicode.GetBytes($writeMirror))
 $controlArguments='-F "'+$sshConfig+'" -o ClearAllForwardings=yes -o BatchMode=yes -o ConnectTimeout=8 runa-control powershell.exe -NoProfile -NonInteractive -EncodedCommand '+$controlEncoded
-$deadline=[DateTime]::UtcNow.AddSeconds($MaximumSeconds);$samples=0
+$deadline=[DateTime]::UtcNow.AddSeconds($MaximumSeconds);$samples=0;$sharingRetries=0
 do{
   $raw=Invoke-BoundedSsh $homeArguments
   $value=$raw|ConvertFrom-Json
   if($value.schemaVersion-ne'runaai-m1-campaign-live/v1'-or$value.leaseId-ne$LeaseId-or$value.sealSha256-ne$ExpectedSeal){throw 'm1-mirror-response-invalid'}
   $ack=(Invoke-BoundedSsh $controlArguments $raw)|ConvertFrom-Json
   if($ack.mirrored-ne$true){throw 'm1-mirror-write-unconfirmed'}
+  if($ack.sharingRetries-isnot[int]-or$ack.sharingRetries-lt0){throw 'm1-mirror-publication-evidence-invalid'}
+  $sharingRetries+=$ack.sharingRetries
   $samples++
   if($samples-eq1){[ordered]@{schemaVersion='runaai-m1-campaign-mirror-start/v1';leaseId=$LeaseId;mirrorPath=(Join-Path $target 'acceptance-evidence\home-live.json');readOnlyOnHome=$true}|ConvertTo-Json -Compress}
   if($value.completionPresent-or-not$value.workerAlive-or-not$value.taskRunning){break}
   Start-Sleep -Seconds 5
 }while([DateTime]::UtcNow-lt$deadline)
-[ordered]@{schemaVersion='runaai-m1-campaign-mirror-end/v1';leaseId=$LeaseId;samples=$samples;readOnlyOnHome=$true;productionChanged=$false}|ConvertTo-Json -Compress
+[ordered]@{schemaVersion='runaai-m1-campaign-mirror-end/v1';leaseId=$LeaseId;samples=$samples;metadataSharingRetries=$sharingRetries;readOnlyOnHome=$true;productionChanged=$false}|ConvertTo-Json -Compress

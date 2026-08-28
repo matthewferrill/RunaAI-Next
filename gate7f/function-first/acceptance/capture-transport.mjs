@@ -8,6 +8,39 @@ async function bytes(stream, maximum) {
   return Buffer.concat(chunks);
 }
 
+function managedServer(handler) {
+  const active = new Set(); let closing = false, closePromise = null;
+  const server = createServer((request, response) => {
+    if (closing) { response.writeHead(503); response.end(); return; }
+    const controller = new AbortController(), entry = { controller, promise: null };
+    const disconnected = () => { if (!response.writableFinished) controller.abort(); };
+    response.once("close", disconnected); request.once("aborted", disconnected);
+    active.add(entry);
+    entry.promise = Promise.resolve().then(() => handler(request, response, controller.signal))
+      .catch(() => { if (!response.destroyed) response.destroy(); })
+      .finally(() => { active.delete(entry); response.off("close", disconnected); request.off("aborted", disconnected); });
+  });
+  async function drain({ maximumMs = 5000 } = {}) {
+    if (!Number.isInteger(maximumMs) || maximumMs < 1 || maximumMs > 120000) throw fail("m1-transport-drain-budget-invalid");
+    const deadline = Date.now() + maximumMs;
+    while (active.size) {
+      const remaining = deadline - Date.now(); if (remaining <= 0) throw fail("m1-transport-undrained");
+      let timer;
+      try { await Promise.race([Promise.allSettled([...active].map(entry => entry.promise)),
+        new Promise((resolve, reject) => { timer = setTimeout(() => reject(fail("m1-transport-undrained")), remaining); })]); }
+      finally { clearTimeout(timer); }
+    }
+    return { activeCount: 0 };
+  }
+  return { server, drain, get activeCount() { return active.size; }, close() {
+    if (closePromise) return closePromise;
+    closing = true;
+    for (const entry of active) entry.controller.abort();
+    closePromise = (async () => { await new Promise(resolve => { server.close(resolve); server.closeAllConnections(); }); await drain(); })();
+    return closePromise;
+  } };
+}
+
 // Transparent owned capture/denial proxy. It does not synthesize a successful model
 // response, normalize a model ID, retry or insert expected answers. Controls mode
 // categorically forbids model/embedding/reranker inference and records every attempt.
@@ -17,7 +50,7 @@ export async function startCaptureTransport({ mode, targetBaseUrl, modelId, kind
   const target = new URL(targetBaseUrl);
   if (target.protocol !== "http:" || !["127.0.0.1", "192.168.50.165", "192.168.50.169"].includes(target.hostname)
       || target.username || target.password || target.search || target.hash) throw fail("m1-capture-target-invalid");
-  const server = createServer(async (request, response) => {
+  const managed = managedServer(async (request, response, signal) => {
     const ledger = getLedger?.(); const startedAt = new Date().toISOString(); let body = null;
     const path = new URL(request.url, "http://127.0.0.1").pathname;
     const expected = kind === "provider" ? "/chat/completions" : kind === "embedding" ? "/embeddings" : "/rerank";
@@ -36,7 +69,7 @@ export async function startCaptureTransport({ mode, targetBaseUrl, modelId, kind
       validateRequest?.(body, ledger.observation.role);
       const upstream = await fetch(`${targetBaseUrl.replace(/\/$/, "")}${expected}`, { method: "POST",
         headers: { "content-type": "application/json" }, body: JSON.stringify(body), redirect: "error",
-        signal: AbortSignal.timeout(deadlineMs) });
+        signal: AbortSignal.any([signal, AbortSignal.timeout(deadlineMs)]) });
       const raw = await bytes(upstream.body, maximumBytes);
       item.httpStatus = upstream.status;
       try { item.response = JSON.parse(raw.toString("utf8")); } catch { item.responseText = raw.toString("utf8"); }
@@ -46,7 +79,7 @@ export async function startCaptureTransport({ mode, targetBaseUrl, modelId, kind
     } catch (error) {
       item.errorCode = error.code ?? "m1-capture-upstream-failed";
       ledger?.observation.provider.unexpectedCalls.push({ ...item, request: body });
-      response.writeHead(503, { "content-type": "application/json" }); response.end(JSON.stringify({ errorCode: item.errorCode }));
+      if (!response.destroyed && !response.headersSent) { response.writeHead(503, { "content-type": "application/json" }); response.end(JSON.stringify({ errorCode: item.errorCode })); }
     } finally {
       item.finishedAt = new Date().toISOString();
       if (kind === "provider") ledger?.observation.provider.calls.push(item);
@@ -54,10 +87,10 @@ export async function startCaptureTransport({ mode, targetBaseUrl, modelId, kind
       ledger?.evidence("host-runtime", kind === "provider" ? "transport-provider" : "retrieval-operation", item);
     }
   });
+  const { server } = managed;
   server.listen(0, "127.0.0.1"); await once(server, "listening");
-  return { baseUrl: `http://127.0.0.1:${server.address().port}`, async close() {
-    await new Promise(resolve => { server.close(resolve); server.closeAllConnections(); });
-  } };
+  return { baseUrl: `http://127.0.0.1:${server.address().port}`, drain: managed.drain,
+    get activeCount() { return managed.activeCount; }, close: managed.close };
 }
 
 // Qdrant faults happen at a real owned HTTP boundary. The production adapter is
@@ -68,7 +101,7 @@ export async function startOwnedIndexProxy({ targetBaseUrl, collection, getLedge
       || target.username || target.password || target.search || target.hash || !/^m1_[a-z0-9_]{1,70}$/.test(collection)) throw fail("m1-owned-index-target-invalid");
   const collectionPath = `/collections/${collection}`;
   let unavailable = false;
-  const server = createServer(async (request, response) => {
+  const managed = managedServer(async (request, response, signal) => {
     const ledger = getLedger?.(), url = new URL(request.url, "http://127.0.0.1");
     const item = { adapter: "qdrant", operation: url.pathname.endsWith("/points/query") ? "search" : "index",
       phase: ledger?.phase ?? "setup", path: url.pathname, method: request.method, startedAt: new Date().toISOString() };
@@ -84,16 +117,17 @@ export async function startOwnedIndexProxy({ targetBaseUrl, collection, getLedge
       }
       if (unavailable) throw fail("m1-owned-index-unavailable");
       const upstream = await fetch(`${targetBaseUrl}${url.pathname}${url.search}`, { method: request.method,
-        headers: { "content-type": "application/json" }, ...(body ? { body } : {}), redirect: "error", signal: AbortSignal.timeout(10000) });
+        headers: { "content-type": "application/json" }, ...(body ? { body } : {}), redirect: "error", signal: AbortSignal.any([signal, AbortSignal.timeout(10000)]) });
       const raw = await bytes(upstream.body, 2_000_000); item.httpStatus = upstream.status;
       try { item.response = JSON.parse(raw.toString("utf8")); } catch { item.responseText = raw.toString("utf8"); }
       response.writeHead(upstream.status, { "content-type": upstream.headers.get("content-type") ?? "application/json", "content-length": raw.length }); response.end(raw);
     } catch (error) { item.errorCode = error.code ?? "m1-owned-index-forward-failed";
-      response.writeHead(503, { "content-type": "application/json" }); response.end(JSON.stringify({ errorCode: item.errorCode }));
+      if (!response.destroyed && !response.headersSent) { response.writeHead(503, { "content-type": "application/json" }); response.end(JSON.stringify({ errorCode: item.errorCode })); }
     } finally { item.finishedAt = new Date().toISOString(); ledger?.observation.sources.indexOperations.push(item);
       ledger?.evidence("host-runtime", "retrieval-operation", item); }
   });
+  const { server } = managed;
   server.listen(0, "127.0.0.1"); await once(server, "listening");
   return { collection, baseUrl: `http://127.0.0.1:${server.address().port}`, setIndexUnavailable(value) { unavailable = value === true; },
-    async close() { await new Promise(resolve => { server.close(resolve); server.closeAllConnections(); }); } };
+    drain: managed.drain, get activeCount() { return managed.activeCount; }, close: managed.close };
 }

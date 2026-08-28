@@ -70,6 +70,7 @@ export async function runControlFunctional(args, { checkpoint = null } = {}) {
     testbed = await createFunctionalTestbed({ resources, mode: "controls", getLedger: () => ledger });
     for (const item of selected) {
       ledger = new ObservationLedger(newObservation({ ...item, role: "control" }, { runtimeSealSha256: report.runtimeSealSha256 }));
+      ledger.observation.sourceCommit = identity.sourceCommit;
       const observed = await runModelFreeControl({ host: testbed.host, item, ledger, support: { resources, testbed, checkpoint } });
       observed.grade = evaluateControl(item, observed, { runtimeSealSha256: report.runtimeSealSha256 }); report.attempts.push(observed);
       if (observed.provider.calls.length) report.modelsInvoked = true; // Attempted only; controls proxy never sends it upstream.

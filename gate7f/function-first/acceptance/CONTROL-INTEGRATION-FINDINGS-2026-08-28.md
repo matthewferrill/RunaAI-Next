@@ -50,3 +50,27 @@ seal remain integration-only and cannot be relabeled later as same-seal campaign
 Local targeted checks after these corrections: 19/19 passed. They cover transport denial, bootstrap
 one-use/same-session semantics, aggregate diagnostics, complete public-status fields and shared-seal
 mismatch rejection. They do not replace a fresh actual Control run or browser observation.
+
+## Fresh complete control practice
+
+Source `2e24cada063c533320bb7f424d4516b676085712`, archive SHA-256
+`a792ec277bf2be458be0dd4d547ff3aee11fac13f7fc6afe490d5f46f1fec62c`.
+Owned stage `m1-task-native-0d1f359b44ce4c4cb4701e8344f27a30`; raw report
+`acceptance-evidence/controls-1787936967753.json`, SHA-256
+`66521fe28aad8ab482affd34cc5e1e0f37e9234c7a1320eb07e2f8476bcb26d0`.
+Eleven controls independently passed. The parent agent completed the actual in-app browser login,
+opened the saved Code project/task, and observed `project.run-tests — unknown`, reconciliation and
+no execution receipts; no approval or continuation was offered. That bound browser evidence is in
+the raw report. The test-only external-JavaScript bootstrap worked on the first attempt.
+
+Control05 reached the private-row scan but its identifier guard rejected the actual versioned names
+`runa_m1` / `route_responses_v2`, because the regex allowed no digits. No plaintext disclosure was
+observed or inferred; the privacy control remained inconclusive. The scanner now permits digits after
+the first valid identifier character and still rejects SQL punctuation/leading digits. A fresh run is
+required. The shortened containment fixture now passed actual Windows handle/hardlink/symlink/junction
+and partial-revision controls. Cleanup succeeded with no models or production changes.
+
+The capture proxies additionally expose bounded `drain({maximumMs})` and `activeCount`; closing aborts
+their own upstream fetches and waits for final evidence capture. Actual local socket tests prove that
+an undrained request fails explicitly, closing disconnects the upstream, and a successful drain leaves
+no late capture before the campaign exports an attempt. These are transport tests, not model scores.

@@ -2,9 +2,8 @@ import assert from "node:assert/strict";
 import { randomBytes } from "node:crypto";
 import { prepare, propose, recordCheck, denial } from "./model-free-controls.mjs";
 import { M1TaskOrchestrator } from "../tasks/orchestrator.mjs";
-import { digest } from "../tasks/contracts.mjs";
 import { startApplicationFaultWorker } from "./fault-worker.mjs";
-import { fail } from "./runner-contract.mjs";
+import { scanRawOwnedRows } from "./private-row-scan.mjs";
 
 function fixtureOrchestrator(host, text) {
   const service = host.m1.tasks;
@@ -24,22 +23,6 @@ const startInput = client => ({ taskId: client.task.taskId, grantId: client.gran
   grantRevision: client.grant.revision, requestId: client.id("control-run") });
 const continuityScope = client => ({ participantId: client.principalId, projectId: client.projectId,
   threadId: client.threadId, experience: client.experience });
-
-async function scanRawOwnedRows(pool, canaries) {
-  const tables = (await pool.query(`SELECT table_schema,table_name FROM information_schema.tables
-    WHERE table_type='BASE TABLE' AND table_schema IN
-    ('runa_core','runa_runtime','runa_workspace','runa_m1_sources','runa_m1','runa_m1_checkpoints') ORDER BY table_schema,table_name`)).rows;
-  const result = [];
-  for (const table of tables) {
-    if (!/^[a-z_]+$/.test(table.table_schema) || !/^[a-z_]+$/.test(table.table_name)) throw fail("m1-control-table-invalid");
-    const rows = (await pool.query(`SELECT to_jsonb(t) AS raw FROM "${table.table_schema}"."${table.table_name}" t`)).rows;
-    const serialized = JSON.stringify(rows);
-    result.push({ schema: table.table_schema, table: table.table_name, rowCount: rows.length,
-      privateCanaryMatches: canaries.reduce((count, value) => count + (serialized.split(value).length - 1), 0),
-      rawSha256: digest(rows) });
-  }
-  return result;
-}
 
 async function encryptedRecords(host, item, ledger, { testbed }) {
   const canary = `m1-private-canary-${randomBytes(16).toString("hex")}`;

@@ -63,6 +63,30 @@ test("capture denies mismatchedmodel andunsealedrequest beforeupstream",async()=
 test("capture neverfollowsredirects",async()=>{let reached=0;const second=await endpoint((q,s)=>{reached++;s.end("{}");}),first=await endpoint((q,s)=>{s.writeHead(307,{location:second.url});s.end();});
   const l=ledger(),capture=await startCaptureTransport({mode:"scored",targetBaseUrl:first.url,modelId:"pinned",getLedger:()=>l});
   try{assert.equal((await post(`${capture.baseUrl}/chat/completions`,{model:"pinned"})).status,503);assert.equal(reached,0);}finally{await capture.close();await first.close();await second.close();}});
+
+test("capture drain refuses unfinished requests and close aborts its actual upstream socket",async()=>{
+  for(const kind of ["provider","index"]){
+    let reached,upstreamClosed;const started=new Promise(resolve=>{reached=resolve;}),closed=new Promise(resolve=>{upstreamClosed=resolve;});
+    const target=await endpoint((q,s)=>{s.once("close",upstreamClosed);reached();});const l=ledger();
+    const capture=kind==="provider"?await startCaptureTransport({mode:"scored",targetBaseUrl:target.url,modelId:"pinned",getLedger:()=>l}):
+      await startOwnedIndexProxy({targetBaseUrl:target.url,collection:"m1_drain",getLedger:()=>l});
+    const pending=kind==="provider"?post(`${capture.baseUrl}/chat/completions`,{model:"pinned"}):fetch(`${capture.baseUrl}/collections/m1_drain`);pending.catch(()=>{});
+    try{await started;assert.equal(capture.activeCount,1);await assert.rejects(capture.drain({maximumMs:20}),/m1-transport-undrained/);
+      await capture.close();await pending.catch(()=>{});await closed;assert.equal(capture.activeCount,0);
+      assert.deepEqual(await capture.drain(),{activeCount:0});assert.equal(kind==="provider"?l.observation.provider.calls.length:l.observation.sources.indexOperations.length,1);
+    }finally{await capture.close();await target.close();}
+  }
+});
+
+test("successful drain waits for final immutable capture evidence",async()=>{
+  let reached,release;const started=new Promise(resolve=>{reached=resolve;});
+  const target=await endpoint((q,s)=>{release=()=>{s.setHeader("content-type","application/json");s.end('{"model":"pinned","choices":[]}');};reached();});
+  const l=ledger(),capture=await startCaptureTransport({mode:"scored",targetBaseUrl:target.url,modelId:"pinned",getLedger:()=>l});
+  try{const pending=post(`${capture.baseUrl}/chat/completions`,{model:"pinned"});await started;
+    let drained=false;const drain=capture.drain({maximumMs:1000}).then(()=>{drained=true;});assert.equal(drained,false);release();
+    await drain;assert.equal((await pending).status,200);assert.equal(l.observation.provider.calls.length,1);assert.ok(l.observation.provider.calls[0].finishedAt);
+  }finally{await capture.close();await target.close();}
+});
 test("ownedindex fault deniesactualendpoint andrecoverswithoutreplacingadapter",async()=>{let reached=0;const target=await endpoint((q,s)=>{reached++;s.setHeader("content-type","application/json");s.end('{"status":"ok"}');}),l=ledger();
   const index=await startOwnedIndexProxy({targetBaseUrl:target.url,collection:"m1_control",getLedger:()=>l});
   try{index.setIndexUnavailable(true);assert.equal((await fetch(`${index.baseUrl}/collections/m1_control`)).status,503);assert.equal(reached,0);

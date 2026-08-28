@@ -28,3 +28,26 @@ reject one-byte changes, CRLF and mixed newlines; parse the complete generated
 companion; rerun all deployment assembly/child/transaction checks. Retain new raw
 proof with the corrected source pin. Tests may start only existing isolated local
 children; no Home/Control requests, real enrollment, deployment or model load.
+
+## Correction from exact retained archive inspection
+
+The preceding LF-archive assertion was an unverified inference from the Git blob
+and is superseded here before the source correction is committed. Directly read
+the retained `m1-task-native-ed104b1f647343cca570352b63851a77/source.tar` from
+the root's local artifacts: its full SHA is exactly
+`e10adce53387bcf31b639738e2d7ae26c2b5dd17e2914f1870ba0ef1949b31dc`;
+the deployer entry is23939 bytes/328CRLF and SHA
+`9834fb63f7c56428fa965f39ac2985ff6a3d132b06f4244e108ebb3cde6aa6f5`.
+Plain Git archive with the installed core.autocrlf=true also produces those
+bytes; the23611-byte LF Git blob is not the retained campaign archive entry.
+Root independently accepted this observed correction. Preserve the earlier
+criteria in history and29/25 failed integration evidence, not as a corrected pass.
+
+Final implementation requirement: keep strict archive SHA9834 and CRLF
+derivation, and replace the tests' mutable working-file read with an exact
+archive-extracted23939-byte fixture. Preserve fixture bytes with -text. Verify
+the whole e10adce archive before extracting that exact entry; retain its hashes
+and the distinct Git blob hash as provenance. Reject LF, mixed and any other
+changed source. Do not accept both variants, normalize production input, edit
+the frozen application, or use a fallback source read. This fixes reproducible
+operator inputs without changing the successful original raw-byte contract.

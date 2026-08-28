@@ -4,7 +4,8 @@ This directory is separate from the frozen M1 application/campaign. Read
 [the prospective criteria](HOME-RUNTIME-GUARD-PLAN.md) first.
 
 Implemented locally: exact-profile contracts, a single-primary-plus-Nomic lifecycle/admission
-controller, a pinned Home native adapter/read-only engine observer, and a transparent bounded HTTP proxy factory. The factory does not listen until its
+controller, a pinned Home native adapter/read-only engine observer, transparent bounded HTTP proxy and
+mutual-TLS proxy factories. The factories do not listen until their
 caller binds it. The controller cannot invoke a command, file, network request or native model operation
 without the supplied operator adapter. Tests supply explicit doubles and ephemeral local HTTP servers;
 no actual model inference or Home/Control mutation occurs.
@@ -35,6 +36,12 @@ implicit decompression, prompt suffix or replay is introduced. Client access by 
 not cryptographic authentication. A production package must prove its authenticated/private binding and
 close bypass paths before this factory is exposed beyond a disposable test.
 
+`createRuntimeTlsProxy` supplies the authenticated version: TLS1.3, verified private issuer and exact
+Control certificate fingerprint, current certificate/issuer validity on each request, no resumed-session
+admission, and the same IP allowlist. Private material never enters upstream headers or model traffic.
+It does not provision certificates or install a listener; the future operational package owns protected
+key handling and the separately validated Caddy route. See [private binding criteria](PRIVATE-BINDING-PLAN.md).
+
 The outer request ceiling is65seconds, preserving the application's qualified60second answer and
 30second planner limits; graceful drain permits70seconds. An incomplete request body has its own10second
 deadline and is explicitly destroyed on abort. Only the actual qualified wire fields are accepted:
@@ -48,10 +55,13 @@ paths, zero-bypass loopback LM Studio binding, and engine PID/start-time/owner p
 again on observations; owned model IDs are required for unload. The independent protected installation,
 exclusive lifecycle lock and crash supervisor remain necessary before this adapter may be activated.
 
-Run `node --test gate7f/function-first/home-runtime/runtime.test.mjs gate7f/function-first/home-runtime/native-adapter.test.mjs`.
-Local verification2026-08-28:22/22 pass. The60second test uses a controlled clock, not a long inference;
+Run `node --test gate7f/function-first/home-runtime/*.test.mjs`.
+Local verification2026-08-28:23/23 pass. The60second test uses a controlled clock, not a long inference;
 the incomplete-body regression uses an actual disposable HTTP socket. Native file-link rejection uses
 actual NTFS hardlinks/junctions; the observer was parsed by Windows PowerShell. None is live Home proof.
+The real local TLS regression creates disposable certificates using the installed Git OpenSSL and
+checks the valid identity, wrong identity/issuer/server name, missing and expired certificate, byte
+preservation and no credential forwarding. No machine trust store or production credential is changed.
 
 Not yet implemented or proved: independent crash watchdog/persistence, service
 installation, startup without Matthew login, post-campaign JIT/sensitive-log transition, authenticated

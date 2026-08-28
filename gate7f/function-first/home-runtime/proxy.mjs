@@ -17,11 +17,12 @@ export async function readRequestBody(req,{signal,limit=RUNTIME_LIMITS.requestBy
       demand(size<=limit,'request-cap');chunks.push(chunk);}signal.throwIfAborted();return Buffer.concat(chunks);
   }finally{signal.removeEventListener('abort',stop);}
 }
-export function createRuntimeProxy({controller,upstream='http://127.0.0.1:1234',allowedClients=['192.168.50.169'],fetchImpl=rawHttpRequest,event=()=>{}}){
+export function createRuntimeProxy({controller,upstream='http://127.0.0.1:1234',allowedClients=['192.168.50.169'],fetchImpl=rawHttpRequest,event=()=>{},
+  serverFactory=createServer,authorizeClient=()=>true}){
   const base=new URL(upstream);demand(base.protocol==='http:'&&base.hostname==='127.0.0.1'&&!base.username&&!base.password
     &&base.pathname==='/'&&!base.search&&!base.hash,'upstream');
   const clients=new Set(allowedClients);demand(clients.size>0&&[...clients].every(v=>/^\d{1,3}(?:\.\d{1,3}){3}$/.test(v)),'clients');
-  const server=createServer(async(req,res)=>{
+  const server=serverFactory(async(req,res)=>{
     let ticket=null,bodyTimeout=null;const abort=new AbortController();const closed=()=>{if(!res.writableEnded)abort.abort(error('client-disconnected'));};
     req.once('aborted',closed);res.once('close',closed);
     const timeout=setTimeout(()=>abort.abort(error('request-timeout')),RUNTIME_LIMITS.requestMs);
@@ -29,7 +30,7 @@ export function createRuntimeProxy({controller,upstream='http://127.0.0.1:1234',
       const bytes=Buffer.from(JSON.stringify({schemaVersion:'runaai-home-runtime-error/v1',errorCode:code,privateValuesIncluded:false}));
       res.writeHead(status,{'content-type':'application/json','content-length':bytes.length,'cache-control':'no-store'});res.end(bytes);};
     try{
-      const remote=(req.socket.remoteAddress??'').replace(/^::ffff:/,'');demand(clients.has(remote),'client-denied');
+      const remote=(req.socket.remoteAddress??'').replace(/^::ffff:/,'');demand(clients.has(remote)&&authorizeClient(req),'client-denied');
       if(req.method==='GET'&&req.url==='/healthz'){
         const healthy=(await controller.poll()).phase==='ready';res.writeHead(healthy?200:503,{'content-type':'application/json','cache-control':'no-store'});
         res.end(JSON.stringify({ready:healthy}));return;

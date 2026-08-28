@@ -49,5 +49,7 @@ PostgreSQL + Qdrant integration then passed 8/8 checks, including exact canonica
 source preservation through selected-vector references and reranking, with
 embedding/reranker HTTP test doubles explicitly identified. Both stores stopped
 and only their owned synthetic data was removed. Old source rows and the
-three-model campaign remain untouched. Independent review and corrected-source
-live-auxiliary/application integration and sealing remain pending.
+three-model campaign remain untouched. Independent review of commit `f2b6112`
+found no blocking issue and independently reran all 25 input/index unit tests,
+zero skips. That reviewer did not rerun the stores or live auxiliaries. Corrected-
+source live-auxiliary/application integration and sealing remain pending.

@@ -24,8 +24,9 @@ the original raw-proof verifier, including actual browser observation. See
 `gate7f/function-first/acceptance/R4B-CONTROL-REGRESSION-RESULTS-2026-08-28.md` and
 `gate7f/function-first/acceptance/R4B-CONTROLS-RESULTS-2026-08-28.md`. Earlier failed/partial arms
 below remain historical evidence, not retroactively passed. The replacement Coder batch has
-completed 120/120; its independent review and the full Qwen3.6/Gemma batches remain open.
-No winner is selected.
+completed 120/120 and independent review of 148 actual role-provider outputs:
+73 passed, 10 failed, 37 inconclusive. Qwen3.6 is running its matched batch;
+Gemma remains next. No winner is selected.
 
 The first R4b Coder batch is retained at 32/120, with 21 passes, two failures and
 nine inconclusive attempts after independent review of all 41 model outputs. An
@@ -49,8 +50,11 @@ unchanged. New Coder hardware lease R5 is the same candidate, not a fourth model
 the new full batch uses its own fresh stage and retains the abandoned batch.
 R5 completed all 120 attempts with no unexecuted slots and no runner stop. A fresh
 Control check at 21:47:11Z found zero owned processes/listeners and all six owned
-temporary directories absent. Independent model grading remains open; completion
-is not qualification. It contains a critical Coder agent-role failure: an explicit claim
+temporary directories absent. Home separately completed owned cleanup at 21:50Z:
+zero models/tasks and both original 260 W limits restored; root revalidated all 19
+raw outcome pins. Independent grading retained every slot and exactly one definite
+critical model behavior. Completion is not qualification. The Coder agent-role
+failure is an explicit claim
 that tests ran against corrected code contradicts the unchanged canonical file
 and actual original-file test receipts. That role cannot qualify. The contained
 model failure stays in the denominator; it does not authorize production changes
@@ -68,8 +72,9 @@ regrading has been applied to hide that mismatch. Complete the matched diagnosti
 comparison and correct the canonical-source contract before qualification.
 The development-only exact-source correction now passes 25 input/index unit tests,
 16 real disposable PostgreSQL checks, and 8 real PostgreSQL/Qdrant integration
-checks with explicit embedding/reranker HTTP test doubles. Its live auxiliary and
-application/citation qualification and independent review remain pending. See
+checks with explicit embedding/reranker HTTP test doubles. Independent review of
+`f2b6112` found no blocker and independently reran the 25 unit tests. Its live
+auxiliary and application/citation qualification remain pending. See
 `gate7f/function-first/SOURCE-BYTE-PRESERVATION-CRITERIA-2026-08-28.md`.
 
 The separate Home operational-guard code is integrated but **not activated**. Its root local

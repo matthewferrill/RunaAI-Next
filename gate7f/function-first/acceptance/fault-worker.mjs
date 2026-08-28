@@ -99,6 +99,8 @@ export async function startApplicationFaultWorker({ initialization, getLedger, b
   const worker = {
     armMaterializationHold: scope => call("fault.arm-materialization", scope),
     waitMaterializationHeld: () => call("fault.wait-materialization", null, 60000),
+    armNativeReceiptHold: scope => call("fault.arm-native-receipt", scope),
+    waitNativeReceiptHeld: () => call("fault.wait-native-receipt", null, 60000),
     async crash() {
       if (!child || child.exitCode !== null || child.signalCode !== null) throw fail("m1-worker-not-running");
       const pid = child.pid;

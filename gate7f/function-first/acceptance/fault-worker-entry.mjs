@@ -47,6 +47,8 @@ async function command(operation, input) {
     case "continuity.prepare": return host.continuity.prepareAnswerContext(input);
     case "fault.arm-materialization": faults.armMaterializationHold(input); return null;
     case "fault.wait-materialization": return faults.waitMaterializationHeld();
+    case "fault.arm-native-receipt": faults.armNativeReceiptHold(input); return null;
+    case "fault.wait-native-receipt": return faults.waitNativeReceiptHeld();
     case "close": faults.clear(); await host.close(); return { closed: true };
     default: throw fail("m1-worker-command-denied");
   }

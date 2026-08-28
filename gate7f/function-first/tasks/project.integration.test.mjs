@@ -28,13 +28,19 @@ async function fixture() {
   const store = new PostgresTaskStore({ pool, schema, allowPlaintextForSynthetic: true });
   await store.initialize();
   const runtimeRoot = process.env.M1_EXECUTOR_RUNTIME_ROOT ?? path.resolve(import.meta.dirname, "../../..");
-  const executor = new MxcJavascriptExecutor({ runtimeRoot, runnerPath: path.join(runtimeRoot, "gate7e/quickjs-child.mjs") });
-  const adapter = new DisposableJavascriptProjectAdapter({ baseDirectory: directory, executor, suites: { addition: suite } });
+  const executor = new MxcJavascriptExecutor({ runtimeRoot,
+    runnerPath: process.env.M1_EXECUTOR_RUNNER_PATH ?? path.join(runtimeRoot, "gate7e/quickjs-child.mjs"),
+    nodeExecutable: process.env.M1_EXECUTOR_NODE_PATH ?? process.execPath,
+    temporaryRoot: process.env.M1_EXECUTOR_TEMP_ROOT ?? tmpdir() });
+  const isolationSuite = { suiteId: "isolation", cases: [{ testId: "host-objects", exportName: "probe", args: [],
+    expected: ["undefined", "undefined", "undefined", "undefined"] }] };
+  const adapter = new DisposableJavascriptProjectAdapter({ baseDirectory: directory, executor,
+    suites: { addition: suite, isolation: isolationSuite } });
   const service = new M1TaskService({ store, adapter, allowSyntheticAuthority: true });
   const project = await service.registerProject(context, { environmentId: "m1-disposable-js", files: { "index.js": "exports.add=(a,b)=>a-b;" } });
   const task = await service.createTask(context, { requestId: "create-task", objective: "Correct and verify a generated addition function." });
   const grant = await service.createGrant(context, { taskId: task.taskId, profile: "safe-autopilot",
-    allowedPaths: ["index.js", "extra.js"], allowedSuites: ["addition"], expiresAt: new Date(Date.now() + 180_000).toISOString() });
+    allowedPaths: ["index.js", "extra.js"], allowedSuites: ["addition", "isolation"], expiresAt: new Date(Date.now() + 180_000).toISOString() });
   const propose = async (capabilityId, args) => service.propose(context, { taskId: task.taskId, grantId: grant.grantId,
     grantRevision: grant.revision, requestId: `real-${randomBytes(6).toString("hex")}`, capabilityId, arguments: args });
   const run = async (capabilityId, args) => {
@@ -119,6 +125,47 @@ integration("actual bounded MXC result is retained when cancellation occurs afte
     assert.deepEqual(result.receipt.output.checks.map(check => check.actual), [2, -3]);
     assert.equal((await service.status(context, { taskId: f.task.taskId })).task.status, "cancelled");
   } finally { release(); await f.close(); }
+});
+
+integration("actual MXC exposes no host filesystem/process/network interfaces and rejects escaping paths", async () => {
+  const f = await fixture();
+  try {
+    await assert.rejects(f.propose("project.inspect", { path: "../outside.js" }), /m1-invalid-request/);
+    await f.run("project.apply-change", { path: "index.js",
+      content: "exports.probe=()=>[typeof process,typeof require,typeof fetch,typeof WebSocket];",
+      expectedSha256: f.project.reference.files[0].sha256 });
+    const result = await f.run("project.run-tests", { suiteId: "isolation" });
+    assert.equal(result.receipt.executionStatus, "ran", JSON.stringify(result.receipt.output));
+    assert.equal(result.receipt.output.passed, true);
+    assert.equal(result.receipt.output.executionReceipt.isolation.network, "deny-all");
+    assert.equal(result.receipt.output.executionReceipt.limits.stdin, "closed");
+    assert.equal(result.receipt.output.executionReceipt.limits.processLimit, 1);
+  } finally { await f.close(); }
+});
+
+integration("actual infinite JavaScript is bounded by the retained native runtime deadline", async () => {
+  const f = await fixture();
+  try {
+    await f.run("project.apply-change", { path: "index.js", content: "exports.add=()=>{while(true){}};",
+      expectedSha256: f.project.reference.files[0].sha256 });
+    const result = await f.run("project.run-tests", { suiteId: "addition" });
+    assert.equal(result.receipt.executionStatus, "timed-out", JSON.stringify(result.receipt.output));
+    assert.equal(result.receipt.output.passed, false);
+    assert.equal(result.receipt.output.executionReceipt.limits.quickJsDeadlineMs, 1200);
+    assert.equal(result.receipt.output.executionReceipt.output.partialDelivered, false);
+  } finally { await f.close(); }
+});
+
+integration("actual excessive output is rejected without presenting a partial successful result", async () => {
+  const f = await fixture();
+  try {
+    await f.run("project.apply-change", { path: "index.js", content: "exports.add=()=>{console.log('x'.repeat(17000));return 26;};",
+      expectedSha256: f.project.reference.files[0].sha256 });
+    const result = await f.run("project.run-tests", { suiteId: "addition" });
+    assert.equal(result.receipt.executionStatus, "output-limited", JSON.stringify(result.receipt.output));
+    assert.equal(result.receipt.output.passed, false);
+    assert.equal(result.receipt.output.executionReceipt.output.partialDelivered, false);
+  } finally { await f.close(); }
 });
 
 function crashWorker(input) {

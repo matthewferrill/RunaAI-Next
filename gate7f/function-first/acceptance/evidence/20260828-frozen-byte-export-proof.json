@@ -1,0 +1,314 @@
+{
+  "schemaVersion": "runa2-m1-frozen-byte-export-proof/v1",
+  "proofId": "frozen-byte-export-a3b640ee4de147cb846b86da359e5747",
+  "sourceCommit": "61d6856f313368986df9e06ae1b0dfb3d3809660",
+  "baseSourceCommit": "ec0a63d974e53ac7e19a2a6bae1c6caa40fc1a8a",
+  "observedAt": "2026-08-28T20:06:07.902Z",
+  "historicalSealSha256": "cf1a6877bf022e18dc123f945e4389e37c568ba2b1fa07878d99caa5847a459e",
+  "originalSealUnchanged": true,
+  "files": [
+    {
+      "path": "gate7f/GATE7F-QUALIFICATION-AUTHORIZATION-AND-CRITERIA-2026-08-27.md",
+      "bytes": 8377,
+      "sha256": "623c52fb907c3708ebbc50ec63e47235019d38a5dce8e754701d276055ebd034",
+      "baseGitSha256": "623c52fb907c3708ebbc50ec63e47235019d38a5dce8e754701d276055ebd034",
+      "currentGitSha256": "623c52fb907c3708ebbc50ec63e47235019d38a5dce8e754701d276055ebd034",
+      "workingSha256": "623c52fb907c3708ebbc50ec63e47235019d38a5dce8e754701d276055ebd034",
+      "baseGitUnchanged": true
+    },
+    {
+      "path": "gate7f/contracts.mjs",
+      "bytes": 11245,
+      "sha256": "8ad0e09b67652939d0aec3c7d55f3494528efa629ad20496463c94f10c8d213c",
+      "baseGitSha256": "8ad0e09b67652939d0aec3c7d55f3494528efa629ad20496463c94f10c8d213c",
+      "currentGitSha256": "8ad0e09b67652939d0aec3c7d55f3494528efa629ad20496463c94f10c8d213c",
+      "workingSha256": "8ad0e09b67652939d0aec3c7d55f3494528efa629ad20496463c94f10c8d213c",
+      "baseGitUnchanged": true
+    },
+    {
+      "path": "gate7f/evaluation/contracts.mjs",
+      "bytes": 5665,
+      "sha256": "6f55299051817b313188cba8350984025a98b9e2f491dc65791096ed6f2e7ab0",
+      "baseGitSha256": "6f55299051817b313188cba8350984025a98b9e2f491dc65791096ed6f2e7ab0",
+      "currentGitSha256": "6f55299051817b313188cba8350984025a98b9e2f491dc65791096ed6f2e7ab0",
+      "workingSha256": "6f55299051817b313188cba8350984025a98b9e2f491dc65791096ed6f2e7ab0",
+      "baseGitUnchanged": true
+    },
+    {
+      "path": "package-lock.json",
+      "bytes": 224034,
+      "sha256": "2b443060beac09e89779ab2e4b60a22e7bf89e26880f14d0d4cdc04db9d8328e",
+      "baseGitSha256": "dfad61b35b009d1483daa0923e91234e20b337c541660423a701978c9a4c7e23",
+      "currentGitSha256": "2b443060beac09e89779ab2e4b60a22e7bf89e26880f14d0d4cdc04db9d8328e",
+      "workingSha256": "2b443060beac09e89779ab2e4b60a22e7bf89e26880f14d0d4cdc04db9d8328e",
+      "baseGitUnchanged": false
+    },
+    {
+      "path": "gate7f/qualification/acceptance/.gitattributes",
+      "bytes": 14,
+      "sha256": "a79691a93b46e49ce460c26ef22afcc03d6eca1e63bf2edbc20e96159510f6c9",
+      "baseGitSha256": "a79691a93b46e49ce460c26ef22afcc03d6eca1e63bf2edbc20e96159510f6c9",
+      "currentGitSha256": "a79691a93b46e49ce460c26ef22afcc03d6eca1e63bf2edbc20e96159510f6c9",
+      "workingSha256": "a79691a93b46e49ce460c26ef22afcc03d6eca1e63bf2edbc20e96159510f6c9",
+      "baseGitUnchanged": true
+    },
+    {
+      "path": "gate7f/qualification/acceptance/tools.mjs",
+      "bytes": 2283,
+      "sha256": "f3fd84f9b26c97ec1777898b97d395df210a151484c56791e6efbdf7aa5e093c",
+      "baseGitSha256": "f3fd84f9b26c97ec1777898b97d395df210a151484c56791e6efbdf7aa5e093c",
+      "currentGitSha256": "f3fd84f9b26c97ec1777898b97d395df210a151484c56791e6efbdf7aa5e093c",
+      "workingSha256": "f3fd84f9b26c97ec1777898b97d395df210a151484c56791e6efbdf7aa5e093c",
+      "baseGitUnchanged": true
+    },
+    {
+      "path": "gate7f/qualification/acceptance/corpus.mjs",
+      "bytes": 29417,
+      "sha256": "3750fbfb00358c71e32ca9736486beb4bc94cf5139436143c714425099416753",
+      "baseGitSha256": "3750fbfb00358c71e32ca9736486beb4bc94cf5139436143c714425099416753",
+      "currentGitSha256": "3750fbfb00358c71e32ca9736486beb4bc94cf5139436143c714425099416753",
+      "workingSha256": "3750fbfb00358c71e32ca9736486beb4bc94cf5139436143c714425099416753",
+      "baseGitUnchanged": true
+    },
+    {
+      "path": "gate7f/qualification/acceptance/inputs.mjs",
+      "bytes": 757,
+      "sha256": "c5fc4d3b1a3e1f8a7a1e6d40d070d9b7d110d4ffb132b62c9fad4e506cb69a94",
+      "baseGitSha256": "c5fc4d3b1a3e1f8a7a1e6d40d070d9b7d110d4ffb132b62c9fad4e506cb69a94",
+      "currentGitSha256": "c5fc4d3b1a3e1f8a7a1e6d40d070d9b7d110d4ffb132b62c9fad4e506cb69a94",
+      "workingSha256": "c5fc4d3b1a3e1f8a7a1e6d40d070d9b7d110d4ffb132b62c9fad4e506cb69a94",
+      "baseGitUnchanged": true
+    },
+    {
+      "path": "gate7f/qualification/acceptance/checks.mjs",
+      "bytes": 5034,
+      "sha256": "d8138dfb0dc691085131991857a4654477aecd71caa429fb824b2d4251470d53",
+      "baseGitSha256": "d8138dfb0dc691085131991857a4654477aecd71caa429fb824b2d4251470d53",
+      "currentGitSha256": "d8138dfb0dc691085131991857a4654477aecd71caa429fb824b2d4251470d53",
+      "workingSha256": "d8138dfb0dc691085131991857a4654477aecd71caa429fb824b2d4251470d53",
+      "baseGitUnchanged": true
+    },
+    {
+      "path": "gate7f/qualification/acceptance/validate.mjs",
+      "bytes": 2539,
+      "sha256": "4ccc8dbaa3578d2fbdc4a05f77595286c676b72929e1f33e49c5a80307138c2f",
+      "baseGitSha256": "4ccc8dbaa3578d2fbdc4a05f77595286c676b72929e1f33e49c5a80307138c2f",
+      "currentGitSha256": "4ccc8dbaa3578d2fbdc4a05f77595286c676b72929e1f33e49c5a80307138c2f",
+      "workingSha256": "4ccc8dbaa3578d2fbdc4a05f77595286c676b72929e1f33e49c5a80307138c2f",
+      "baseGitUnchanged": true
+    },
+    {
+      "path": "gate7f/qualification/acceptance/seal.mjs",
+      "bytes": 2179,
+      "sha256": "69afaebe28b0481b8f3832fbc6012c3564c785176cb18aff7730a51752706934",
+      "baseGitSha256": "69afaebe28b0481b8f3832fbc6012c3564c785176cb18aff7730a51752706934",
+      "currentGitSha256": "69afaebe28b0481b8f3832fbc6012c3564c785176cb18aff7730a51752706934",
+      "workingSha256": "69afaebe28b0481b8f3832fbc6012c3564c785176cb18aff7730a51752706934",
+      "baseGitUnchanged": true
+    },
+    {
+      "path": "gate7f/qualification/acceptance/acceptance.test.mjs",
+      "bytes": 8467,
+      "sha256": "7b02a46b8ad697029cab0991a9994d2b25312c9bb0c2a4cd610a44d725961342",
+      "baseGitSha256": "7b02a46b8ad697029cab0991a9994d2b25312c9bb0c2a4cd610a44d725961342",
+      "currentGitSha256": "7b02a46b8ad697029cab0991a9994d2b25312c9bb0c2a4cd610a44d725961342",
+      "workingSha256": "7b02a46b8ad697029cab0991a9994d2b25312c9bb0c2a4cd610a44d725961342",
+      "baseGitUnchanged": true
+    },
+    {
+      "path": "gate7f/qualification/acceptance/RUBRIC.md",
+      "bytes": 8100,
+      "sha256": "15a5ec61b404eb386340a2b172fa5d638c6728e5bf99db3d533967f6de4697f4",
+      "baseGitSha256": "15a5ec61b404eb386340a2b172fa5d638c6728e5bf99db3d533967f6de4697f4",
+      "currentGitSha256": "15a5ec61b404eb386340a2b172fa5d638c6728e5bf99db3d533967f6de4697f4",
+      "workingSha256": "15a5ec61b404eb386340a2b172fa5d638c6728e5bf99db3d533967f6de4697f4",
+      "baseGitUnchanged": true
+    },
+    {
+      "path": "gate7f/qualification/acceptance/README.md",
+      "bytes": 3125,
+      "sha256": "495317d6f02ae7cbe966688d5d336888f755f0bbddd315f8b29b6f02038cbb35",
+      "baseGitSha256": "495317d6f02ae7cbe966688d5d336888f755f0bbddd315f8b29b6f02038cbb35",
+      "currentGitSha256": "495317d6f02ae7cbe966688d5d336888f755f0bbddd315f8b29b6f02038cbb35",
+      "workingSha256": "495317d6f02ae7cbe966688d5d336888f755f0bbddd315f8b29b6f02038cbb35",
+      "baseGitUnchanged": true
+    }
+  ],
+  "lockfileJsonUnchanged": true,
+  "archives": [
+    {
+      "coreAutocrlf": "true",
+      "archiveSha256": "ea15e18fe9ef448a09d6781c6d9e48f6868492754b615b99f701b43c324d0758",
+      "originalSealUnchanged": true,
+      "files": [
+        {
+          "path": "gate7f/GATE7F-QUALIFICATION-AUTHORIZATION-AND-CRITERIA-2026-08-27.md",
+          "bytes": 8377,
+          "sha256": "623c52fb907c3708ebbc50ec63e47235019d38a5dce8e754701d276055ebd034"
+        },
+        {
+          "path": "gate7f/contracts.mjs",
+          "bytes": 11245,
+          "sha256": "8ad0e09b67652939d0aec3c7d55f3494528efa629ad20496463c94f10c8d213c"
+        },
+        {
+          "path": "gate7f/evaluation/contracts.mjs",
+          "bytes": 5665,
+          "sha256": "6f55299051817b313188cba8350984025a98b9e2f491dc65791096ed6f2e7ab0"
+        },
+        {
+          "path": "package-lock.json",
+          "bytes": 224034,
+          "sha256": "2b443060beac09e89779ab2e4b60a22e7bf89e26880f14d0d4cdc04db9d8328e"
+        },
+        {
+          "path": "gate7f/qualification/acceptance/.gitattributes",
+          "bytes": 14,
+          "sha256": "a79691a93b46e49ce460c26ef22afcc03d6eca1e63bf2edbc20e96159510f6c9"
+        },
+        {
+          "path": "gate7f/qualification/acceptance/tools.mjs",
+          "bytes": 2283,
+          "sha256": "f3fd84f9b26c97ec1777898b97d395df210a151484c56791e6efbdf7aa5e093c"
+        },
+        {
+          "path": "gate7f/qualification/acceptance/corpus.mjs",
+          "bytes": 29417,
+          "sha256": "3750fbfb00358c71e32ca9736486beb4bc94cf5139436143c714425099416753"
+        },
+        {
+          "path": "gate7f/qualification/acceptance/inputs.mjs",
+          "bytes": 757,
+          "sha256": "c5fc4d3b1a3e1f8a7a1e6d40d070d9b7d110d4ffb132b62c9fad4e506cb69a94"
+        },
+        {
+          "path": "gate7f/qualification/acceptance/checks.mjs",
+          "bytes": 5034,
+          "sha256": "d8138dfb0dc691085131991857a4654477aecd71caa429fb824b2d4251470d53"
+        },
+        {
+          "path": "gate7f/qualification/acceptance/validate.mjs",
+          "bytes": 2539,
+          "sha256": "4ccc8dbaa3578d2fbdc4a05f77595286c676b72929e1f33e49c5a80307138c2f"
+        },
+        {
+          "path": "gate7f/qualification/acceptance/seal.mjs",
+          "bytes": 2179,
+          "sha256": "69afaebe28b0481b8f3832fbc6012c3564c785176cb18aff7730a51752706934"
+        },
+        {
+          "path": "gate7f/qualification/acceptance/acceptance.test.mjs",
+          "bytes": 8467,
+          "sha256": "7b02a46b8ad697029cab0991a9994d2b25312c9bb0c2a4cd610a44d725961342"
+        },
+        {
+          "path": "gate7f/qualification/acceptance/RUBRIC.md",
+          "bytes": 8100,
+          "sha256": "15a5ec61b404eb386340a2b172fa5d638c6728e5bf99db3d533967f6de4697f4"
+        },
+        {
+          "path": "gate7f/qualification/acceptance/README.md",
+          "bytes": 3125,
+          "sha256": "495317d6f02ae7cbe966688d5d336888f755f0bbddd315f8b29b6f02038cbb35"
+        }
+      ]
+    },
+    {
+      "coreAutocrlf": "false",
+      "archiveSha256": "f30e2d9b4e793c4b33061d24194ec042cd656350f3ee39cfc44667dbc342df4d",
+      "originalSealUnchanged": true,
+      "files": [
+        {
+          "path": "gate7f/GATE7F-QUALIFICATION-AUTHORIZATION-AND-CRITERIA-2026-08-27.md",
+          "bytes": 8377,
+          "sha256": "623c52fb907c3708ebbc50ec63e47235019d38a5dce8e754701d276055ebd034"
+        },
+        {
+          "path": "gate7f/contracts.mjs",
+          "bytes": 11245,
+          "sha256": "8ad0e09b67652939d0aec3c7d55f3494528efa629ad20496463c94f10c8d213c"
+        },
+        {
+          "path": "gate7f/evaluation/contracts.mjs",
+          "bytes": 5665,
+          "sha256": "6f55299051817b313188cba8350984025a98b9e2f491dc65791096ed6f2e7ab0"
+        },
+        {
+          "path": "package-lock.json",
+          "bytes": 224034,
+          "sha256": "2b443060beac09e89779ab2e4b60a22e7bf89e26880f14d0d4cdc04db9d8328e"
+        },
+        {
+          "path": "gate7f/qualification/acceptance/.gitattributes",
+          "bytes": 14,
+          "sha256": "a79691a93b46e49ce460c26ef22afcc03d6eca1e63bf2edbc20e96159510f6c9"
+        },
+        {
+          "path": "gate7f/qualification/acceptance/tools.mjs",
+          "bytes": 2283,
+          "sha256": "f3fd84f9b26c97ec1777898b97d395df210a151484c56791e6efbdf7aa5e093c"
+        },
+        {
+          "path": "gate7f/qualification/acceptance/corpus.mjs",
+          "bytes": 29417,
+          "sha256": "3750fbfb00358c71e32ca9736486beb4bc94cf5139436143c714425099416753"
+        },
+        {
+          "path": "gate7f/qualification/acceptance/inputs.mjs",
+          "bytes": 757,
+          "sha256": "c5fc4d3b1a3e1f8a7a1e6d40d070d9b7d110d4ffb132b62c9fad4e506cb69a94"
+        },
+        {
+          "path": "gate7f/qualification/acceptance/checks.mjs",
+          "bytes": 5034,
+          "sha256": "d8138dfb0dc691085131991857a4654477aecd71caa429fb824b2d4251470d53"
+        },
+        {
+          "path": "gate7f/qualification/acceptance/validate.mjs",
+          "bytes": 2539,
+          "sha256": "4ccc8dbaa3578d2fbdc4a05f77595286c676b72929e1f33e49c5a80307138c2f"
+        },
+        {
+          "path": "gate7f/qualification/acceptance/seal.mjs",
+          "bytes": 2179,
+          "sha256": "69afaebe28b0481b8f3832fbc6012c3564c785176cb18aff7730a51752706934"
+        },
+        {
+          "path": "gate7f/qualification/acceptance/acceptance.test.mjs",
+          "bytes": 8467,
+          "sha256": "7b02a46b8ad697029cab0991a9994d2b25312c9bb0c2a4cd610a44d725961342"
+        },
+        {
+          "path": "gate7f/qualification/acceptance/RUBRIC.md",
+          "bytes": 8100,
+          "sha256": "15a5ec61b404eb386340a2b172fa5d638c6728e5bf99db3d533967f6de4697f4"
+        },
+        {
+          "path": "gate7f/qualification/acceptance/README.md",
+          "bytes": 3125,
+          "sha256": "495317d6f02ae7cbe966688d5d336888f755f0bbddd315f8b29b6f02038cbb35"
+        }
+      ]
+    }
+  ],
+  "tests": {
+    "tests": 24,
+    "pass": 24,
+    "fail": 0,
+    "skipped": 0,
+    "exitCode": 0,
+    "command": [
+      "--test",
+      "--test-reporter=tap",
+      "gate7f/function-first/acceptance/frozen-bytes.test.mjs",
+      "gate7f/qualification/reporting/publication.test.mjs"
+    ],
+    "nodeVersion": "v22.22.0",
+    "gitless": true,
+    "logSha256": "cc7a6517cdb82b8e5bc61899d3b8c03224c8b13d82ec184f0678e89d683d0b1c"
+  },
+  "modelCalls": 0,
+  "productionChanges": false,
+  "historicalEvidenceChanged": false,
+  "originalRawProofSha256": "65715e041bebf573eb63118fa4f62c9b3f7f0965a9fd2b71ed5fc97f4abe39dc"
+}

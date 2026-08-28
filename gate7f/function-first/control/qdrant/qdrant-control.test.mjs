@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {readFileSync,mkdtempSync,writeFileSync,mkdirSync,linkSync,symlinkSync,rmSync,realpathSync} from 'node:fs';
+import {readFileSync,mkdtempSync,writeFileSync,mkdirSync,linkSync,symlinkSync,rmSync,realpathSync,existsSync} from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import {execFileSync,spawnSync} from 'node:child_process';
@@ -49,7 +49,9 @@ test('rollback is exact-task/child only and leaves data recoverable',()=>{
 test('real pinned package and native link/config/task guards execute without a service',()=>{
   const tempParent=realpathSync(os.tmpdir()),root=mkdtempSync(path.join(tempParent,'runa-m1-qdrant-contract-'));
   try{
-    const output=JSON.parse(execFileSync(process.execPath,[path.join(here,'build-package.mjs'),path.join(root,'package')],{encoding:'utf8',windowsHide:true}));
+    const binary=process.env.M1_QDRANT_BINARY??'D:\\Projects\\Runalab\\artifacts\\tools\\qdrant\\bin\\qdrant.exe';
+    assert.ok(path.isAbsolute(binary),'explicit test binary must be an absolute path');
+    const output=JSON.parse(execFileSync(process.execPath,[path.join(here,'build-package.mjs'),path.join(root,'package'),binary],{encoding:'utf8',windowsHide:true}));
     assert.equal(output.servicesStarted,false);
     const manifest=JSON.parse(readFileSync(path.join(root,'package/package.json')));
     const files=Object.fromEntries(manifest.files.map(f=>[f.name,readFileSync(path.join(root,'package',f.name))]));
@@ -69,6 +71,22 @@ test('real pinned package and native link/config/task guards execute without a s
     assert.equal(result.status,0,`${result.stdout}\n${result.stderr}`);
     const evidence=JSON.parse(result.stdout.trim());assert.equal(evidence.servicesStarted,false);assert.equal(evidence.tests.length,15);
     assert.ok(evidence.tests.every(t=>t.passed));
+  }finally{
+    const resolved=realpathSync(root);assert.equal(path.dirname(resolved),tempParent);assert.ok(path.basename(resolved).startsWith('runa-m1-qdrant-contract-'));
+    rmSync(resolved,{recursive:true,force:false});
+  }
+});
+
+test('an explicit unpinned binary cannot create a package or bypass artifact validation',()=>{
+  const tempParent=realpathSync(os.tmpdir()),root=mkdtempSync(path.join(tempParent,'runa-m1-qdrant-contract-'));
+  try{
+    const binary=path.join(root,'untrusted-qdrant.exe'),target=path.join(root,'rejected-package');
+    writeFileSync(binary,'synthetic invalid binary',{flag:'wx'});
+    const result=spawnSync(process.execPath,[path.join(here,'build-package.mjs'),target,binary],
+      {encoding:'utf8',windowsHide:true,timeout:30000});
+    assert.equal(result.status,1);
+    assert.match(result.stderr,/m1-qdrant-binary-drift/);
+    assert.equal(existsSync(target),false,'invalid input must fail before any output package is created');
   }finally{
     const resolved=realpathSync(root);assert.equal(path.dirname(resolved),tempParent);assert.ok(path.basename(resolved).startsWith('runa-m1-qdrant-contract-'));
     rmSync(resolved,{recursive:true,force:false});

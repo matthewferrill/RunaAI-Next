@@ -139,6 +139,15 @@ compact envelope; original failure output is retained. Fresh Control staging, fu
 regression and twelve qualified controls are required before the R4 model requests. No failed
 invocation is relabeled green. Production remains unchanged and M1 remains in progress.
 
+The first full compact Control regression completed: 1,241/1,259 passed, eighteen failed,
+zero skips. All six actual filesystem/PostgreSQL/MXC cases passed. Seventeen other tests
+detected line-ending conversion of frozen modules in the archive, and the Qdrant package
+test assumed Omen's local binary path. These are retained validation/packaging failures,
+not successful qualification. The narrow test-path correction passed seven local tests;
+see `gate7f/function-first/control/qdrant/TEST-PORTABILITY-RESULTS-2026-08-28.md`.
+Strict original-byte archive preservation and a fresh source/seal/full run are required.
+No R4 model inference began; its existing source/seal and failed preflight remain preserved.
+
 ### 2026-08-28 stopped-campaign independent semantic record
 
 Independent review of the stopped Gemma arm covers 23/120 attempts and all 32 captured model outputs;

@@ -148,6 +148,14 @@ see `gate7f/function-first/control/qdrant/TEST-PORTABILITY-RESULTS-2026-08-28.md
 Strict original-byte archive preservation and a fresh source/seal/full run are required.
 No R4 model inference began; its existing source/seal and failed preflight remain preserved.
 
+Packaging/test portability is corrected at `9556ed01f9dbabe8c93eea309e482aad60bf809f`.
+All fourteen original historical pins now survive both archive line-ending modes, without
+changing their seals, and the root focused suite passed 31/31 with zero skips. The fresh
+common seal and unchanged qualification contract are recorded in
+`gate7f/function-first/acceptance/R4B-FREEZE-2026-08-28.md`. Fresh stages and the complete
+actual-runtime regression precede the new controls/model requests; no partial result
+qualifies a model or closes M1.
+
 ### 2026-08-28 stopped-campaign independent semantic record
 
 Independent review of the stopped Gemma arm covers 23/120 attempts and all 32 captured model outputs;

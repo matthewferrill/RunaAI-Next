@@ -45,7 +45,10 @@ try {
     reranker: new WindowedBgeReranker({ baseURL: rerankerUrl, timeoutMs: 15_000 }), timeoutMs: 15_000 });
   await index.initialize(); const sources = new PostgresSuppliedSourceStore({ pool, cipher, index }); await sources.initialize();
   const alice = { principalId: "alice", projectId: "project-atlas", sessionId: "session-a" };
-  const first = await sources.attach(alice, { requestId: "atlas", label: "Atlas decision", content: "Atlas launches on April 9. The review owner is Lena." });
+  const exactContent = "\ufeff  Atlas launches on April 9. The review owner is Lena.\r\n\tUnicode note: π 😀\n";
+  const exactDigest = createHash("sha256").update(exactContent, "utf8").digest("hex");
+  const first = await sources.attach(alice, { requestId: "atlas", label: "Atlas decision", content: exactContent });
+  assert.equal(first.contentSha256, exactDigest); assert.equal(first.characters, exactContent.length);
   assert.equal(first.indexed, true); checks.push("real-vector-completed-acknowledgement");
   const second = await sources.attach(alice, { requestId: "beacon", label: "Beacon decision", content: "Beacon launches on May 16. The review owner is Jules." });
   assert.equal(second.indexed, true);
@@ -53,11 +56,14 @@ try {
     { requestId: "bob", label: "Bob only", content: "Atlas launches on January 1. This foreign project must never be supplied." });
   assert.equal(foreign.indexed, true);
   const selected = await sources.selected(alice, [first.sourceId]);
+  assert.equal(selected[0].content, exactContent); assert.equal(selected[0].contentSha256, exactDigest);
   const references = selected.map(({ projectId, sourceId, sectionId, contentSha256 }) => ({ projectId, sourceId, sectionId, contentSha256 }));
   const found = await index.searchSelected({ projectId: alice.projectId, query: "When does Atlas launch?", references, maximumPassages: 6 });
   assert.deepEqual(found.references, references); checks.push("actual-vector-project-source-revision-filter");
   const reranked = await index.rerank("When does Atlas launch?", selected, 6);
   assert.equal(reranked.degraded, false); assert.equal(reranked.sources[0].contentSha256, first.contentSha256); checks.push("actual-http-explicit-window-rerank");
+  assert.equal(reranked.sources[0].content, exactContent);
+  checks.push("exact-canonical-source-bytes-survive-vector-and-rerank-reference-binding");
   await assert.rejects(sources.selected(alice, [foreign.sourceId]), /selection-denied/); checks.push("foreign-registry-denied");
   const stale = await index.searchSelected({ projectId: alice.projectId, query: "When does Atlas launch?",
     references: references.map(value => ({ ...value, contentSha256: "f".repeat(64) })), maximumPassages: 6 });

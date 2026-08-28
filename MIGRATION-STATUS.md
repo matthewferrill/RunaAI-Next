@@ -23,8 +23,9 @@ regression passed **1,266/1,266, zero skips**; all **12/12 formal functional con
 the original raw-proof verifier, including actual browser observation. See
 `gate7f/function-first/acceptance/R4B-CONTROL-REGRESSION-RESULTS-2026-08-28.md` and
 `gate7f/function-first/acceptance/R4B-CONTROLS-RESULTS-2026-08-28.md`. Earlier failed/partial arms
-below remain historical evidence, not retroactively passed. Coder, Qwen3.6 and Gemma each still
-require their full 120 fresh attempts and independent review; no winner is selected.
+below remain historical evidence, not retroactively passed. The replacement Coder batch has
+completed 120/120; its independent review and the full Qwen3.6/Gemma batches remain open.
+No winner is selected.
 
 The first R4b Coder batch is retained at 32/120, with 21 passes, two failures and
 nine inconclusive attempts after independent review of all 41 model outputs. An
@@ -46,8 +47,10 @@ reads with zero reader errors; all owned test processes exited.
 The scored source, seal, cases, model settings and reader freshness limits are
 unchanged. New Coder hardware lease R5 is the same candidate, not a fourth model;
 the new full batch uses its own fresh stage and retains the abandoned batch.
-R5 has advanced through the third repetition; independent model grading remains
-open. It already contains a critical Coder agent-role failure: an explicit claim
+R5 completed all 120 attempts with no unexecuted slots and no runner stop. A fresh
+Control check at 21:47:11Z found zero owned processes/listeners and all six owned
+temporary directories absent. Independent model grading remains open; completion
+is not qualification. It contains a critical Coder agent-role failure: an explicit claim
 that tests ran against corrected code contradicts the unchanged canonical file
 and actual original-file test receipts. That role cannot qualify. The contained
 model failure stays in the denominator; it does not authorize production changes
@@ -63,6 +66,11 @@ trailing whitespace while the frozen citation verifier expects the supplied
 bytes. The affected review checks remain inconclusive; no normalization or
 regrading has been applied to hide that mismatch. Complete the matched diagnostic
 comparison and correct the canonical-source contract before qualification.
+The development-only exact-source correction now passes 25 input/index unit tests,
+16 real disposable PostgreSQL checks, and 8 real PostgreSQL/Qdrant integration
+checks with explicit embedding/reranker HTTP test doubles. Its live auxiliary and
+application/citation qualification and independent review remain pending. See
+`gate7f/function-first/SOURCE-BYTE-PRESERVATION-CRITERIA-2026-08-28.md`.
 
 The separate Home operational-guard code is integrated but **not activated**. Its root local
 OS/contract regression most recently passed 104/104, zero skips, after integration of
@@ -73,8 +81,12 @@ operational checks and rollback-protected deployment remain required before the 
 trial. New operator/documentation commits do not change the frozen application under evaluation.
 Continue under existing permission; this checkpoint is neither completion nor another approval gate.
 
-The later TLS operator regression passed 113/113 in its development checkout;
+The later operator regression passed 115/115 in its development checkout, including
+direct native-settings restore ownership validation;
 root independently reran the nine new enrollment/transport cases, all passing.
+Root also independently reran all 23 settings/transition cases, including actual
+Windows late-writer, ACL-drift, crash-recovery and direct-restore ownership checks;
+all passed with zero skips.
 No private enrollment or route is activated. The new Control quiescence v2 code
 is integrated with 53/53 root tests and a separately retained 34/34 actual pinned
 Caddy proof. Independent review reproduced and verified corrections for both

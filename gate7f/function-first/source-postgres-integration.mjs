@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import path from "node:path";
 import pg from "pg";
+import { createHash } from "node:crypto";
 import { startSyntheticPostgres } from "./synthetic-postgres.mjs";
 import { PostgresSuppliedSourceStore } from "./sources.mjs";
 import { PostgresWorkspaceStore } from "../../gate6b/adapters/postgres-continuity.mjs";
@@ -40,6 +41,28 @@ try {
   const repaired = await sources.retry(alice, { sourceId: pending.sourceId, contentSha256: pending.contentSha256 });
   assert.equal(repaired.sourceId, pending.sourceId); assert.equal(repaired.indexed, true); checks.push("idempotent-index-repair");
   assert.equal((await sources.list(alice)).length, 2); checks.push("no-duplicate-canonical-source");
+  const exactSamples = ["function add(a, b) { return a + b; }\n",
+    "  // indented\r\n\tconst message = 'π 😀';\r\n", "\ufeffSource with BOM\n\n", " ".repeat(7_999) + "x"];
+  for (const [number, content] of exactSamples.entries()) {
+    const exactInput = { requestId: `exact-source-${number}`, label: "Exact source", content };
+    const attached = await sources.attach(alice, exactInput);
+    const expectedHash = createHash("sha256").update(content, "utf8").digest("hex");
+    assert.equal(attached.contentSha256, expectedHash); assert.equal(attached.characters, content.length);
+    assert.equal((await restarted.selected(alice, [attached.sourceId]))[0].content, content);
+    assert.equal(index.calls.at(-1).content, content);
+    assert.equal((await sources.attach(alice, exactInput)).sourceId, attached.sourceId);
+    await assert.rejects(sources.attach(alice, { ...exactInput, content: content.trim() }), /request-conflict/);
+    const retried = await sources.retry(alice, { sourceId: attached.sourceId, contentSha256: expectedHash });
+    assert.equal(retried.indexed, true); assert.equal(index.calls.at(-1).content, content);
+  }
+  checks.push("exact-lf-crlf-indentation-bom-unicode-and-raw-boundary",
+    "exact-source-hash-length-reopen-and-derived-repair", "whitespace-change-is-not-an-idempotent-retry");
+  const beforeInvalid = (await sources.list(alice)).length, beforeIndexCalls = index.calls.length;
+  for (const content of ["", " \t\r\n", " ".repeat(8_000) + "x", "bad\ud800", "\udc00bad"])
+    await assert.rejects(sources.attach(alice, { requestId: "invalid-source", label: "Invalid", content }),
+      error => error.name === "ZodError");
+  assert.equal((await sources.list(alice)).length, beforeInvalid); assert.equal(index.calls.length, beforeIndexCalls);
+  checks.push("invalid-and-raw-over-limit-source-has-no-store-or-index-effect");
   await pool.query("UPDATE runa_workspace.source_sections SET content_sha256=$1 WHERE source_id=$2", ["f".repeat(64), first.sourceId]);
   await assert.rejects(sources.selected(alice, [first.sourceId]), /integrity-invalid/); checks.push("source-tamper-denied");
 } finally {

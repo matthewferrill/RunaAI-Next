@@ -34,3 +34,20 @@ Implement only in the development checkout while the matched diagnostic campaign
 continues unchanged. Qualification of corrected code requires a new explicit
 source/seal and corresponding integration evidence; old results are not promoted
 by this document or by a local unit-test pass.
+
+## Development verification
+
+The narrow store-input correction is implemented without changing the running
+baseline. The combined input/index unit suite passed 25/25, zero skips. A real
+disposable local PostgreSQL integration passed all 16 checks, including exact
+LF/CRLF/indentation/BOM/Unicode preservation, returned hashes and lengths, fresh
+store reads, exact retries, changed-whitespace conflicts, and invalid-input
+non-mutation. Its database stopped and only its owned synthetic data was removed.
+The index in that database test is explicitly a test double; this is not a new
+live Nomic/Qdrant/BGE or citation qualification claim. A separate disposable real
+PostgreSQL + Qdrant integration then passed 8/8 checks, including exact canonical
+source preservation through selected-vector references and reranking, with
+embedding/reranker HTTP test doubles explicitly identified. Both stores stopped
+and only their owned synthetic data was removed. Old source rows and the
+three-model campaign remain untouched. Independent review and corrected-source
+live-auxiliary/application integration and sealing remain pending.

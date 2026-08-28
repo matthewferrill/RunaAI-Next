@@ -50,3 +50,8 @@ observer. Actual browser observation: 21:28:09.560Z; publication completed:
 the attempt including the observe-drain phase. This qualifies that particular
 browser timing observation, not the model's unresolved semantic grade. The first
 repetition remains inconclusive. No deadline, hold, case or model setting changed.
+
+Repetition 3 independently retained the same result: actual browser observation
+at 21:39:18.131Z, publication at 21:39:24.833Z, and unchanged-runner consumption
+at 21:39:25.191Z before the original 21:39:28.065Z expiry. Both later observations
+stay distinct from the first repetition's missed deadline.

@@ -7,7 +7,11 @@ const fail = code => Object.assign(new Error(code), { code });
 const id = z.string().min(1).max(160).regex(/^[^\u0000-\u001f\u007f]+$/);
 const contextSchema = z.object({ principalId: id, projectId: id, sessionId: id }).strict();
 const attachSchema = z.object({ requestId: id, label: z.string().trim().min(1).max(120),
-  content: z.string().trim().min(1).max(8_000) }).strict();
+  // Validate emptiness without transforming canonical source text. Citations,
+  // encrypted storage and retries must bind the exact supplied UTF-8 bytes.
+  content: z.string().min(1).max(8_000)
+    .refine(value => value.trim().length > 0, "Source must contain non-whitespace text")
+    .refine(value => Buffer.from(value, "utf8").toString("utf8") === value, "Source must be valid Unicode") }).strict();
 const referenceSchema = z.object({ projectId: id, sourceId: id, sectionId: id,
   contentSha256: z.string().regex(/^[a-f0-9]{64}$/) }).strict();
 const privateContext = (projectId, sourceId) => ({ recordType: "workspace-section",

@@ -18,6 +18,14 @@ export function restoredWorkspaceNotice(result) {
     ? "Current workspace: restored to the earlier recorded files. Prior successful runs remain in history; they do not describe the current restored files."
     : null;
 }
+export function taskPresentation(result) {
+  if (result?.task?.status !== "cancelled") return { status: result?.run?.status ?? result?.task?.status ?? "unknown", notice: null };
+  const unsettled = (result.pendingReconciliation ?? []).length > 0
+    || (result.proposals ?? []).some(proposal => ["dispatching", "unknown"].includes(proposal.status));
+  return { status: "cancelled", notice: unsettled
+    ? "Cancellation requested. No new steps will start. An already-dispatched step may still be finishing or awaiting reconciliation; its actual result will be retained when observed."
+    : "Task cancelled. No new steps will start. Already-recorded receipts remain historical results." };
+}
 const publicErrors = new Set(["m1-grant-session-mismatch", "m1-grant-expired", "m1-stale-project",
   "m1-restore-stale", "m1-operation-in-progress", "m1-source-index-unavailable",
   "m1-source-content-mismatch", "m1-authentication-required", "identity-token-invalid"]);
@@ -233,11 +241,13 @@ export async function initializeFunctionPanel({ root = document, request, getCon
   function renderTask(result, token, ids) {
     if (!visible(token)) return;
     const { taskId, runId, restored } = ids, run = result.run;
+    const presentation = taskPresentation(result);
     taskView.replaceChildren(element(root, "h3", result.task?.objective ?? run?.objective ?? "Saved task"),
-      element(root, "p", `Task: ${run?.status ?? result.task?.status ?? "unknown"}`));
+      element(root, "p", `Task: ${presentation.status}`));
+    if (presentation.notice) taskView.append(element(root, "p", presentation.notice));
     const restoredNotice = restoredWorkspaceNotice(result);
     if (restoredNotice) taskView.append(element(root, "p", restoredNotice));
-    if (run?.outcome === "plan-completed") taskView.append(element(root, "p", "The recorded plan completed. This does not prove every part of a broader goal is finished."));
+    if (run?.outcome === "plan-completed" && result.task?.status !== "cancelled") taskView.append(element(root, "p", "The recorded plan completed. This does not prove every part of a broader goal is finished."));
     for (const plan of run?.plans ?? []) {
       const planBox = element(root, "details"), planTitle = element(root, "summary", "Proposed plan — not execution evidence");
       planBox.append(planTitle, element(root, "p", plan.summary)); taskView.append(planBox);

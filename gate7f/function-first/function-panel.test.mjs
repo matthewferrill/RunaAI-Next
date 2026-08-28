@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { functionAnswerSelection, functionDescription, approvalIsAvailable, restoredWorkspaceNotice } from "../../gate6b/public/function-panel.mjs";
+import { functionAnswerSelection, functionDescription, approvalIsAvailable, restoredWorkspaceNotice, taskPresentation } from "../../gate6b/public/function-panel.mjs";
 test("ordinary conversation keeps Chat and Code routes separate", () => {
   assert.deepEqual(functionAnswerSelection("conversation", [], "chat"), { lane: "general" });
   assert.deepEqual(functionAnswerSelection("conversation", [], "code"), { lane: "code" });
@@ -44,4 +44,18 @@ test("restored state is labelled from the current application receipt, not older
   assert.equal(restoredWorkspaceNotice({ currentReceiptIds: ["later"], receipts: [restored] }), null);
   assert.equal(restoredWorkspaceNotice({ currentReceiptIds: ["restored"], receipts: [{ ...restored, effectKind: "not-published" }] }), null);
   assert.equal(restoredWorkspaceNotice({ answer: "restored", receipts: [] }), null);
+});
+
+test("durable cancellation wins over stale run status on reload and explains unsettled effects", () => {
+  for (const status of ["running", "completed", "waiting-approval"]) {
+    const result = { task: { status: "cancelled" }, run: { status }, proposals: [{ status: "dispatching" }] };
+    const shown = taskPresentation(result);
+    assert.equal(shown.status, "cancelled");
+    assert.match(shown.notice, /already-dispatched step may still be finishing or awaiting reconciliation/);
+    assert.doesNotMatch(shown.notice, /immediately|killed|terminated/);
+    assert.match(taskPresentation({ ...result, proposals: [], pendingReconciliation: [{}] }).notice, /awaiting reconciliation/);
+    assert.match(taskPresentation({ ...result, proposals: [], pendingReconciliation: [] }).notice, /historical results/);
+  }
+  assert.deepEqual(taskPresentation({ task: { status: "active" }, run: { status: "waiting-approval" } }),
+    { status: "waiting-approval", notice: null });
 });

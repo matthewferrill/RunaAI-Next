@@ -5,6 +5,7 @@ import { MastraAnswerProvider } from "../../gate1/adapters/mastra-provider.mjs";
 import { OpenAICompatibleEmbedder, WindowedBgeReranker } from "../../gate1/adapters/qdrant.mjs";
 import { m1FunctionConfigSchema, assertM1Roles } from "./config.mjs";
 import { resolveModelRole } from "./model-roles.mjs";
+import { BoundedNomicEmbedder } from "./nomic-windowing.mjs";
 import { MastraM1Planner } from "./planner.mjs";
 import { SelectedSourceIndex, PostgresSuppliedSourceStore } from "./sources.mjs";
 import { DisposableJavascriptProjectAdapter } from "./project/adapter.mjs";
@@ -40,8 +41,8 @@ export async function composeM1Functions({ configuration, provider, pool, cipher
     throw new Error("m1-trusted-project-fixtures-invalid");
   }
   const privateFetch = (input, init) => fetch(input, { ...init, redirect: "error" });
-  const embedder = new OpenAICompatibleEmbedder({ baseURL: config.embedding.baseUrl,
-    modelId: config.embedding.modelId, dimension: config.embedding.dimension, timeoutMs: 10_000, fetchImpl: privateFetch });
+  const embedder = new BoundedNomicEmbedder(new OpenAICompatibleEmbedder({ baseURL: config.embedding.baseUrl,
+    modelId: config.embedding.modelId, dimension: config.embedding.dimension, timeoutMs: 10_000, fetchImpl: privateFetch }));
   const reranker = new WindowedBgeReranker({ baseURL: config.reranker.baseUrl, batchSize: config.reranker.batchSize,
     timeoutMs: 10_000, fetchImpl: privateFetch });
   const index = new SelectedSourceIndex({ endpoint: config.qdrant.endpoint, collection: config.qdrant.collection, embedder, reranker });

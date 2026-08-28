@@ -194,3 +194,34 @@ actual-preimage ownership primitive. A matching original target is not enough if
 evidence disagrees. Before live use, verify the bridge's fixed-path/argument binding, stale state,
 unknown result, no-retry, and private-output behavior with local fixtures; the actual Home transition
 still needs its independently proved caller-maintenance boundary and hardware ownership.
+
+Implemented locally after criteria `32d9e9e`: `createNativeSettingsFileBridge` in
+`native-settings-file.mjs` runs on the pinned Home Node only and supplies `verify`, `readSettings`,
+`prepareFileIntent`, `swapFile`, and `restoreFile` to the finite coordinator. Its fixed vendor target
+cannot be overridden. Its new transaction parent is
+`C:\AI\RunaAI-Next-HomeRuntime-Transactions`; no existing parent ACL or unrelated directory is changed.
+The nine exact source pins are exported as `SETTINGS_FILE_SOURCES`. Original/candidate values stay in
+Home-local buffers, pipes and retained files; public records contain only bound hashes/outcome flags.
+The original and atomic-preimage files preserve the vendor ACL for exact restoration, while the new
+transaction directories have protected SYSTEM/Administrators ACLs. This does not claim that Windows
+directory traversal defeats a trusted local administrator or the original vendor file owner.
+
+Every possible file command requires fresh independent quiescence around a retained intent. Unknown
+command outcomes block further apply steps and same-operation retry. Explicit recovery rechecks the
+current semantic settings, hash, retained actual preimage and conflict artifacts. The outer durable
+coordinator still owns restart/reconciliation decisions; constructing a new adapter is not authority
+to retry an unknown command. A timeout has a15second command ceiling plus a1second termination wait;
+unconfirmed OS termination closes owned pipes and returns unknown, never a stopped-process claim.
+Actual caller/child quiescence must be independently re-established before later recovery.
+
+Focused local tests passed33/33 (including real Windows file/ACL/crash fixtures), then the new bounded
+private-child plus bridge suite passed13/13. The added unstarted-recovery ACL test first reproduced
+acceptance of an unrelated ACL change with original bytes; the primitive now rejects that case.
+An actual local child with unread stdin is terminated at its short test deadline; an injected
+unconfirmed termination still settles with `executionStopped:false`. These are local adapter and OS
+mechanics results, not a live Home settings transition, native-wide idle proof or product qualification.
+
+Full local operator regression with the new bridge passed129/129, zero skips, in42.9seconds using
+Windows OS access; roadmap15/15 also passed. Command remains the complete `home-runtime/*.test.mjs`
+and `home-runtime/windows-proof/*.test.mjs` set shown above. No Home listener, model, TLS enrollment,
+settings file or production route was changed by this verification.

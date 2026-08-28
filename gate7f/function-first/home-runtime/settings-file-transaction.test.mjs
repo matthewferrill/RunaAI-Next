@@ -48,6 +48,13 @@ test('foreign edit or ACL change before swap is never overwritten',{skip:process
     assert.equal(readFileSync(f.target,'utf8'),kind==='bytes'?'unrelated writer':original.toString());
   }
 });
+test('already-original unstarted recovery does not ignore an unrelated ACL change',{skip:process.platform!=='win32'},t=>{
+  const f=fixture(t);ps(f,create);
+  const result=ps(f,`$acl=Get-Acl -LiteralPath $target;$acl.SetAccessRuleProtection($true,$true);Set-Acl -LiteralPath $target -AclObject $acl
+    ${fail('Repair-InterruptedSettingsSwap $directory')}`);
+  assert.match(result.error,/unstarted-unrelated-drift/);assert.deepEqual(readFileSync(f.target),original);
+  assert.equal(existsSync(path.join(f.directory,'actual-preimage.bin')),false);
+});
 test('actual atomic preimage retains a late conflict without a second blind compensation',{skip:process.platform!=='win32'},t=>{
   const f=fixture(t),result=ps(f,`${create}\n${fail("Invoke-SettingsFileSwap $directory -BeforeReplace {[IO.File]::WriteAllText($target,'late unrelated writer')}")}`);
   assert.match(result.error,/apply-conflict-retained/);assert.deepEqual(readFileSync(f.target),candidate);

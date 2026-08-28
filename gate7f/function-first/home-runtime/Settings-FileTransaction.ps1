@@ -108,7 +108,8 @@ function Repair-InterruptedSettingsSwap([string]$Directory){
   $intent=Read-SettingsIntent $Directory
   Assert-SettingsNoRetainedConflict $Directory $intent
   if(-not(Test-Path -LiteralPath ($Directory+'\actual-preimage.bin'))){
-    if((Settings-Hash (Read-SettingsBytes $intent.target))-cne$intent.originalSha256){throw 'settings-unstarted-unrelated-drift'}
+    if((Settings-Hash (Read-SettingsBytes $intent.target))-cne$intent.originalSha256-or
+      (Settings-Acl $intent.target)-cne$intent.aclSddl){throw 'settings-unstarted-unrelated-drift'}
     return @{changed=$false;alreadyOriginal=$true}
   }
   # The actual atomic preimage is retained, but a foreign preimage is not our rollback authority.

@@ -1,4 +1,4 @@
-import {sha,demand} from './contracts.mjs';
+import {sha,demand} from './tls-primitives.mjs';
 const fields=['autoStartOnLaunch','cors','fileLoggingMode','justInTimeModelLoading','logIncomingTokens','logLinesLimit','logSensitiveData','networkInterface','port','verbose'].sort();
 const changes=Object.freeze({networkInterface:'127.0.0.1',justInTimeModelLoading:false,logSensitiveData:false,verbose:false});
 function parse(bytes){

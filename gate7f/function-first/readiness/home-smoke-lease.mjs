@@ -3,16 +3,18 @@ import {createHash} from 'node:crypto';
 import {execFileSync} from 'node:child_process';
 import {hostname,freemem} from 'node:os';
 import path from 'node:path';
-import {LEASE_POLICY as P,NOMICS,sha,assert,checkHardware,checkResidents,residentList,validCompletion,primaryLoad} from './lease-contract.mjs';
+import {policyForLease,NOMICS,sha,assert,checkHardware,checkResidents,residentList,validCompletion,primaryLoad} from './lease-contract.mjs';
 import {readGgufMetadata} from './gguf-metadata.mjs';
 const root=import.meta.dirname,config=JSON.parse(readFileSync(path.join(root,'lease-config.json'),'utf8'));
+const P=policyForLease(config),campaign=config.profile==='campaign';
 const sealBytes=readFileSync(path.join(root,'seal.json')),seal=JSON.parse(sealBytes),sealHash=sha(sealBytes);
 assert(hostname().toUpperCase()==='RUNA-HOME'&&process.version==='v22.22.1','host-runtime');
-assert(root===config.homeRoot&&/^20260828-smoke-(gemma|coder|qwen36)-r[1-9][0-9]*$/.test(config.leaseId),'root');
+assert(root===config.homeRoot,'root');
 for(const [name,hash] of Object.entries(seal.files)){
   assert(/^[a-zA-Z-]+\.(mjs|json|ps1)$/.test(name),'seal-path');
   assert(!lstatSync(path.join(root,name)).isSymbolicLink()&&sha(readFileSync(path.join(root,name)))===hash,'seal-drift');
 }
+if(campaign)assert(sha(readFileSync(path.join(root,'campaign-hardware-plan.json')))===config.campaignHardwarePlanSha256,'campaign-plan-pin');
 const candidate=config.candidate,owned=[],changed=[];
 const output=(name,v)=>writeFileSync(path.join(root,name),JSON.stringify(v,null,2)+'\n',{flag:'wx'});
 writeFileSync(path.join(root,'events.jsonl'),'',{flag:'wx'});
@@ -39,7 +41,7 @@ async function sample(){
 const monitor=setInterval(()=>{if(sampling||phase==='power-transition'||phase==='cleanup')return;sampling=true;
   sample().catch(e=>{event('watchdog-failure',{code:e.message});controller.abort(e);}).finally(()=>{sampling=false;});},P.sampleMs);
 async function pause(){await new Promise(r=>setTimeout(r,5000));controller.signal.throwIfAborted();}
-async function hash(file){assert(!lstatSync(file).isSymbolicLink(),'pin-link');const h=createHash('sha256');for await(const b of createReadStream(file,{highWaterMark:4194304}))h.update(b);return h.digest('hex');}
+async function hash(file){assert(!lstatSync(file).isSymbolicLink(),'pin-link');const h=createHash('sha256');for await(const b of createReadStream(file,{highWaterMark:4194304})){controller.signal.throwIfAborted();h.update(b);}return h.digest('hex');}
 function power(uuid,watts){execFileSync('nvidia-smi.exe',['-i',uuid,'-pl',String(watts)],{timeout:5000,windowsHide:true});}
 async function load(model,request){
   controller.signal.throwIfAborted();checkResidents(await api('/api/v1/models'),owned);
@@ -58,7 +60,7 @@ async function load(model,request){
 }
 const preparationDeadline=setTimeout(()=>controller.abort(Error('lease-preparation-deadline')),P.preparationMs);
 try{
-  event('start',{config,sealSha256:sealHash,classification:'unscored-actual-adapter-smoke-hardware-only'});
+  event('start',{config,sealSha256:sealHash,classification:campaign?'functional-campaign-hardware-only':'unscored-actual-adapter-smoke-hardware-only'});
   assert(residentList(await api('/api/v1/models')).length===0,'unowned-baseline');checkHardware(hardware(),260);
   phase='hashing';for(const model of [candidate,NOMICS]){
     assert(lstatSync(model.artifactPath).size===model.bytes&&await hash(model.artifactPath)===model.sha256,'artifact-drift');event('artifact-pin',{key:model.key,sha256:model.sha256,bytes:model.bytes});
@@ -76,7 +78,8 @@ try{
   const primary=await load(candidate,primaryLoad(candidate));
   const embedding=await load(NOMICS,{model:NOMICS.key,context_length:2048,echo_load_config:true});
   phase='ready';clearTimeout(preparationDeadline);expiry=Date.now()+P.readyLeaseMs;
-  await sample();output('ready.json',{schemaVersion:'runa-m1-smoke-lease-ready/v1',leaseId:config.leaseId,
+  await sample();output('ready.json',{schemaVersion:campaign?'runa-m1-campaign-lease-ready/v1':'runa-m1-smoke-lease-ready/v1',leaseId:config.leaseId,
+    ...(campaign?{campaignHardwarePlanSha256:config.campaignHardwarePlanSha256}:{}),
     sealSha256:sealHash,candidateId:candidate.id,modelId:candidate.key,primaryInstanceId:primary.id,
     embeddingModelId:NOMICS.key,embeddingInstanceId:embedding.id,primaryArtifactSha256:candidate.sha256,
     embeddingArtifactSha256:NOMICS.sha256,readyAt:new Date().toISOString(),expiresAt:new Date(expiry).toISOString(),
@@ -99,7 +102,7 @@ finally{
     assert(cleanupVerified,'cleanup-unverified');
     for(const uuid of changed)power(uuid,260);checkHardware(hardware(),260);powerRestored=true;
   }catch(e){event('cleanup-failure',{code:e.message});}
-  output('lease-result.json',{schemaVersion:'runa-m1-smoke-lease-result/v1',leaseId:config.leaseId,sealSha256:sealHash,
+  output('lease-result.json',{schemaVersion:campaign?'runa-m1-campaign-lease-result/v1':'runa-m1-smoke-lease-result/v1',leaseId:config.leaseId,sealSha256:sealHash,
     endedAt:new Date().toISOString(),failure,completion,cleanupVerified,powerRestored,owned,
     ambiguousLoad:pendingKey,productionRoutingChanged:false,protectedDataIncluded:false,inferenceCalledByOperator:false});
   if(failure||!cleanupVerified||!powerRestored)process.exitCode=1;

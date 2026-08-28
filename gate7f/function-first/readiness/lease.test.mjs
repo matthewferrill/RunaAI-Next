@@ -1,8 +1,16 @@
 import test from 'node:test';import assert from 'node:assert/strict';
-import {LEASE_POLICY as P,checkHardware,checkResidents,validCompletion,primaryLoad,sha} from './lease-contract.mjs';
+import {LEASE_POLICY as P,CAMPAIGN_POLICY,policyForLease,checkHardware,checkResidents,validCompletion,primaryLoad,sha} from './lease-contract.mjs';
 const hw=()=>({freeMemoryBytes:9*1024**3,gpus:P.gpuUuids.map((uuid,index)=>({uuid,index,name:'Quadro RTX 6000',memoryTotalMiB:23040,memoryUsedMiB:100,temperatureC:45,powerLimitWatts:160}))});
 test('exact hardware and headroom fail closed',()=>{checkHardware(hw(),160,true);for(const mutation of [h=>h.gpus[0].uuid='wrong',h=>h.gpus[0].temperatureC=85,h=>h.gpus[1].memoryUsedMiB=23000,h=>h.freeMemoryBytes=1,h=>h.gpus[1].powerLimitWatts=260]){const h=hw();mutation(h);assert.throws(()=>checkHardware(h),/^Error: lease-/);}});
 test('owned IDs and configs not names confer ownership',()=>{const v={models:[{key:'a',loaded_instances:[{id:'a1',config:{x:1}}]}]};checkResidents(v,[{key:'a',id:'a1',fingerprint:sha(JSON.stringify({x:1}))}]);assert.throws(()=>checkResidents(v,[{key:'a',id:'a2'}]));assert.throws(()=>checkResidents(v,[{key:'a',id:'a1',fingerprint:'wrong'}]));assert.throws(()=>checkResidents(v,[]));checkResidents(v,[],'a');});
 test('same-key duplicate and omitted inventory rejected',()=>{assert.throws(()=>checkResidents({models:[{key:'a'}]},[]));assert.throws(()=>checkResidents({models:[{key:'a',loaded_instances:[{id:'1',config:{}},{id:'2',config:{}}]}]},[],'a'));});
 test('completion exact schema seal and lease binding',()=>{const v={schemaVersion:'runa-m1-smoke-completion/v1',leaseId:'test',sealSha256:'hash',reason:'completed'};assert.equal(validCompletion(v,'hash','test'),'completed');for(const x of [{...v,leaseId:'other'},{...v,sealSha256:'other'},{...v,reason:'retry'},{...v,extra:true}])assert.throws(()=>validCompletion(x,'hash','test'));});
 test('MTP remains exact while other primary profiles disable it',()=>{assert.equal(primaryLoad({key:'g',mtp:false}).speculative_draft_mtp,false);assert.equal(primaryLoad({key:'q',mtp:true}).speculative_draft_max_tokens,2);assert.equal(primaryLoad({key:'q',mtp:true}).context_length,32768);});
+test('campaign60minute window is separate and hard caps cannot be extended by config',()=>{
+ const c={profile:'campaign',schemaVersion:'runa-m1-campaign-lease/v1',leaseId:'20260828-campaign-gemma-r1',policy:CAMPAIGN_POLICY};
+ assert.equal(policyForLease(c).readyLeaseMs,3600000);assert.equal(CAMPAIGN_POLICY.taskDeadlineMs,74*60000);
+ assert.throws(()=>policyForLease({...c,policy:{...CAMPAIGN_POLICY,readyLeaseMs:3600001}}));
+ assert.throws(()=>policyForLease({...c,leaseId:'20260828-smoke-gemma-r1'}));
+ const v={schemaVersion:'runa-m1-campaign-completion/v1',leaseId:c.leaseId,sealSha256:'hash',reason:'completed'};
+ assert.equal(validCompletion(v,'hash',c.leaseId),'completed');assert.throws(()=>validCompletion({...v,schemaVersion:'runa-m1-smoke-completion/v1'},'hash',c.leaseId));
+});

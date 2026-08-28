@@ -1,0 +1,69 @@
+{
+  "schemaVersion": "runa-m1-nomic-static-inspection/v1",
+  "time": "2026-08-28T16:50:12.853Z",
+  "readOnly": true,
+  "inferenceCalled": false,
+  "metadata": {
+    "path": "C:\\Users\\Matthew\\AppData\\Local\\Programs\\LM Studio\\resources\\app\\.webpack\\bin\\bundled-models\\nomic-ai\\nomic-embed-text-v1.5-GGUF\\nomic-embed-text-v1.5.Q4_K_M.gguf",
+    "tensors": 112,
+    "metadataCount": 23,
+    "metadataBytes": 749820,
+    "selected": {
+      "general.architecture": "nomic-bert",
+      "general.name": "nomic-embed-text-v1.5",
+      "nomic-bert.context_length": 2048,
+      "nomic-bert.embedding_length": 768,
+      "nomic-bert.pooling_type": 1,
+      "tokenizer.ggml.token_type_count": 2,
+      "tokenizer.ggml.bos_token_id": 101,
+      "tokenizer.ggml.eos_token_id": 102,
+      "tokenizer.ggml.model": "bert",
+      "tokenizer.ggml.tokens": {
+        "arrayType": 8,
+        "count": 30522,
+        "emptyTokens": 0,
+        "bareContinuation": 0,
+        "phantomSpaceOnly": 0
+      },
+      "tokenizer.ggml.scores": {
+        "arrayType": 6,
+        "count": 30522
+      },
+      "tokenizer.ggml.token_type": {
+        "arrayType": 5,
+        "count": 30522
+      },
+      "tokenizer.ggml.unknown_token_id": 100,
+      "tokenizer.ggml.seperator_token_id": 102,
+      "tokenizer.ggml.padding_token_id": 0
+    }
+  },
+  "indexPath": "C:\\Users\\Matthew\\AppData\\Local\\Programs\\LM Studio\\resources\\app\\.webpack\\main\\index.js",
+  "indexSha256": "6cbb7ba8dfeefee1ce523a88e0f9d64687cdad59564ee5e7fbff6bb95d00f22f",
+  "snippets": [
+    {
+      "term": "/v1/embeddings",
+      "offset": 10913730
+    },
+    {
+      "term": "/v1/embeddings",
+      "offset": 22326850
+    },
+    {
+      "term": "tokenize",
+      "offset": 9924331
+    },
+    {
+      "term": "tokenize",
+      "offset": 10433625
+    },
+    {
+      "term": "tokenize",
+      "offset": 10434405
+    },
+    {
+      "term": "tokenize",
+      "offset": 10483813
+    }
+  ]
+}

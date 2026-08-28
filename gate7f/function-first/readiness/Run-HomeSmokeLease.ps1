@@ -4,7 +4,9 @@ $ErrorActionPreference='Stop';$ProgressPreference='SilentlyContinue'
 if($env:COMPUTERNAME-ne'RUNA-HOME'){throw 'lease-supervisor-host'}
 $root=$PSScriptRoot
 $config=Get-Content -LiteralPath (Join-Path $root 'lease-config.json') -Raw|ConvertFrom-Json
-if($root-ne$config.homeRoot-or$config.leaseId-notmatch'^20260828-smoke-(gemma|coder|qwen36)-r[1-9][0-9]*$'){throw 'lease-supervisor-root'}
+if($root-ne$config.homeRoot-or$config.leaseId-notmatch'^20260828-(smoke|campaign)-(gemma|coder|qwen36)-r[1-9][0-9]*$'){throw 'lease-supervisor-root'}
+$campaign=$config.leaseId-like'20260828-campaign-*'
+if($campaign-and($config.schemaVersion-ne'runa-m1-campaign-lease/v1'-or$config.policy.readyLeaseMs-ne3600000-or$config.policy.preparationMs-ne600000-or$config.policy.supervisorDeadlineMs-ne4440000)){throw 'lease-supervisor-campaign-policy'}
 $seal=Get-Content -LiteralPath (Join-Path $root 'seal.json') -Raw|ConvertFrom-Json
 foreach($file in $seal.files.PSObject.Properties){if($file.Name-notmatch'^[a-zA-Z-]+\.(mjs|json|ps1)$'-or(Get-FileHash -LiteralPath (Join-Path $root $file.Name) -Algorithm SHA256).Hash.ToLowerInvariant()-ne$file.Value){throw 'lease-supervisor-source-drift'}}
 function Evidence($name,$value){$bytes=[Text.UTF8Encoding]::new($false).GetBytes(($value|ConvertTo-Json -Depth 20)+"`n");$s=[IO.File]::Open((Join-Path $root $name),[IO.FileMode]::CreateNew,[IO.FileAccess]::Write);try{$s.Write($bytes,0,$bytes.Length)}finally{$s.Dispose()}}
@@ -24,7 +26,8 @@ try{
  # Keep the native handle while the process is live; otherwise PS5 can expose a null ExitCode after refresh.
  $null=$worker.Handle;$started=$worker.StartTime.ToUniversalTime()
  Evidence 'worker.json' @{pid=$worker.Id;startedAt=$started.ToString('o');sshIndependent=$true}
- $deadline=[DateTime]::UtcNow.AddMinutes(24)
+ $deadline=[DateTime]::UtcNow.AddMinutes($(if($campaign){70}else{24}))
+ $preparationUntil=[DateTime]::UtcNow.AddMinutes(10)
  while(-not$worker.WaitForExit(5000)){
   $lines=@(& nvidia-smi.exe --query-gpu=index,uuid,temperature.gpu,memory.total,memory.used,power.limit --format=csv,noheader,nounits)
   if($LASTEXITCODE-ne0-or$lines.Count-ne2){throw 'lease-supervisor-telemetry'}
@@ -32,6 +35,7 @@ try{
   $bytes=[Text.UTF8Encoding]::new($false).GetBytes((@{time=[DateTime]::UtcNow.ToString('o');pid=$worker.Id;gpus=$hw}|ConvertTo-Json -Depth 8 -Compress)+"`n");$watch.Write($bytes,0,$bytes.Length);$watch.Flush()
   if(@($hw|Where-Object{$_.temperatureC-ge85-or($_.totalMiB-$_.usedMiB)-lt1024}).Count-gt0){throw 'lease-supervisor-hardware'}
   if([DateTime]::UtcNow-gt$deadline){throw 'lease-supervisor-deadline'}
+  if(-not(Test-Path -LiteralPath (Join-Path $root 'ready.json'))-and[DateTime]::UtcNow-gt$preparationUntil){throw 'lease-supervisor-preparation-deadline'}
   if((Get-Item -LiteralPath $out).Length-gt2097152-or(Get-Item -LiteralPath $err).Length-gt2097152){throw 'lease-supervisor-output-cap'}
  }
  $worker.WaitForExit();$code=$worker.ExitCode;if($null-eq$code){throw 'lease-supervisor-exit-code-missing'}

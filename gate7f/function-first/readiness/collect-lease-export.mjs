@@ -4,7 +4,7 @@ import {sha,assert,validCompletion} from './lease-contract.mjs';
 const input=process.argv[2],output=process.argv[3],expectedSeal=process.argv[4];
 assert(input&&output&&/^[a-f0-9]{64}$/.test(expectedSeal)&&!existsSync(output),'export-boundary');
 const packet=JSON.parse(readFileSync(input,'utf8')),files={};
-const allowed=/^(seal|lease-config|runtime|ready|complete|lease-result|worker|supervisor-result)\.json$|^(events|supervisor)\.jsonl$|^worker-(stdout|stderr)\.txt$|^(home-smoke-lease|lease-contract|gguf-metadata)\.mjs$|^Run-HomeSmokeLease\.ps1$/;
+const allowed=/^(seal|lease-config|runtime|ready|complete|lease-result|worker|supervisor-result|campaign-hardware-plan)\.json$|^(events|supervisor)\.jsonl$|^worker-(stdout|stderr)\.txt$|^(home-smoke-lease|lease-contract|gguf-metadata)\.mjs$|^Run-HomeSmokeLease\.ps1$/;
 for(const [n,v]of Object.entries(packet)){
   assert(allowed.test(n)&&typeof v==='string','export-file');const b=Buffer.from(v,'base64');
   assert(b.length<=8388608&&b.toString('base64')===v,'export-data');files[n]=b;

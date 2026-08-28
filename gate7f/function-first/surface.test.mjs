@@ -58,6 +58,24 @@ test("browser cannot replace exercise files or pass a filesystem root", async ()
   const { surface } = fixture(); const value = request("project.prepare", { files: { "evil.js": "bad" } }); value.body.experience = "code";
   await assert.rejects(surface.dispatch(value), /surface-request-invalid/);
 });
+
+test("trusted fixtures resolve only after current identity and scope checks, never from browser input", async () => {
+  const { application, sources, tasks, called } = fixture();
+  const surface = new M1FunctionSurface({ application, sources, tasks, prepareProject: context => {
+    assert.equal(Object.isFrozen(context), true);
+    assert.deepEqual(called.slice(0,4), ["authority", "authenticate", "authorize", "scope"]);
+    return { environmentId: "sealed-test-exercise", files: { "clamp.js": "exports.clamp = x => x;" } };
+  } });
+  const value = request("project.prepare"); value.body.experience = "code";
+  assert.equal((await surface.dispatch(value)).environmentId, "sealed-test-exercise");
+  value.body.input = { fixture: "other", suites: { expected: "model-selected" } };
+  await assert.rejects(surface.dispatch(value), /surface-request-invalid/);
+  const count = called.filter(item => Array.isArray(item) && item[0] === "register").length;
+  application.continuity.prepareAnswerContext = async () => { throw new Error("project-scope-denied"); };
+  value.body.input = {};
+  await assert.rejects(surface.dispatch(value), /scope-denied/);
+  assert.equal(called.filter(item => Array.isArray(item) && item[0] === "register").length, count);
+});
 test("cancel is bound to current authenticated project and browser session", async () => {
   const { surface, called } = fixture(); const value = request("task.cancel", { taskId: "task-1" }); value.body.experience = "code";
   await surface.dispatch(value); assert.equal(called.at(-1)[0], "cancel"); assert.equal(called.at(-1)[1].projectId, "project-alice");

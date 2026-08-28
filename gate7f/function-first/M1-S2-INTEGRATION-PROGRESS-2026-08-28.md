@@ -44,10 +44,48 @@ It verifies exact scope/revision filtering, acknowledgement, idempotency, canoni
 transport composition. It is explicitly **not** Nomic/BGE model proof. Both failed runs and the passing
 run stopped and removed their own disposable services/data. Existing collections were never deleted.
 
+## Integrated verification checkpoint (2026-08-28, 12:08 EDT)
+
+At integration commit `4818e7f`, the complete default suite ran 947 checks: 908 passed,
+39 explicitly skipped database-dependent checks, zero failures. The 39 task/contract/
+PostgreSQL/LangGraph checks were then run with the owned loopback PostgreSQL and all passed,
+with zero skips. `conversation-evidence-postgres.mjs` passed 17/17, including actual
+application -> Gate2 -> PostgreSQL -> reopened Chat and Code review answers. Metadata is
+stamped and schema-validated before persistence. Fabricated execution evidence is not saved.
+The encrypted v2 reply cache has no plaintext fallback; old release rows remain untouched.
+
+An overly broad local test invocation also selected the native MXC integration tests without
+their dedicated runtime staging. It failed closed (`unavailable`, including the expected
+`output-limited` assertion), not as a successful execution. Do not treat the repository root
+as a prepared MXC runtime or relax host ACLs to make that invocation pass. The dedicated,
+isolated Control runner remains the authoritative 6/6 native proof and will be rerun through
+the actual acceptance host with its own prepared runtime.
+
+The in-app browser is available to the integration agent. The loopback-only `ui-fixture.mjs`
+serves the shipped complete interface with clearly labelled in-memory synthetic responses;
+it has no credentials, model, database or execution adapter and expires after 15 minutes.
+Observed in the real browser: separate Chat/Code navigation, reopening saved citations,
+an unavailable index retaining its source and becoming selectable only after explicit retry,
+and reopening a saved task without inheriting permission to execute. This is UI plumbing
+evidence, not an authenticated live-stack/model success claim. The separate agent's 13/13
+isolated browser checks remain described in `M1-S2-UI-AND-PRIVATE-EVIDENCE-RESULTS.md`.
+
+The prospective acceptance bundle is now committed: 40 distinct tasks (eight in each of the
+five functions), three repetitions per candidate across all three models = 360 planned task
+attempts, plus 12 separate product controls. Cases, failures and denominators are retained;
+an unsupported harness action blocks rather than silently passing. Code and Agent use their
+distinct bound roles. Runtime/budget sealing and actual scored inference are not yet complete.
+
+To test those diverse projects without weakening the application surface, composition accepts
+an optional **trusted constructor-only** fixture resolver and fixed host-suite registry. It is
+not a release-JSON option, browser field or model tool. `project.prepare` still accepts no body
+parameters, authenticates and checks scope before resolving a fixture, and passes the same
+contained adapter validation. The production default remains the calculator exercise. The
+13 surface checks pass, including forged fixture/suite input and foreign ownership denial.
+
 ## Still in progress
 
-Customer panel recovery and persisted citation evidence; independent composition review; the full
-integrated suite; real Nomic/BGE composition; freshly frozen matched three-model functional attempts;
+Real Nomic/BGE composition; bounded live-model readiness and matched three-model functional attempts;
 and the exact rollback-protected candidate/customer trial. The long-document budget and actual model
 request controls must be selected from the separate readiness evidence, not inferred from HTTP 200.
 

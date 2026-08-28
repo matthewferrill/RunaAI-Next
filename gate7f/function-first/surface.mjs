@@ -43,8 +43,11 @@ export class M1SessionAuthority {
 }
 
 export class M1FunctionSurface {
-  constructor({ application, sources, tasks, orchestrator = null, sessions = new M1SessionAuthority() }) {
-    Object.assign(this, { application, sources, tasks, orchestrator, sessions });
+  constructor({ application, sources, tasks, orchestrator = null, sessions = new M1SessionAuthority(),
+    prepareProject = context => ({ environmentId: `m1-${createHash("sha256").update(`${context.principalId}:${context.projectId}`).digest("hex").slice(0,32)}`,
+      files: M1_EXERCISE_FILES }) }) {
+    if (typeof prepareProject !== "function") throw fail("m1-trusted-project-fixtures-invalid");
+    Object.assign(this, { application, sources, tasks, orchestrator, sessions, prepareProject });
   }
   async checkedParticipant(credential, projectId, experience) {
     await this.application.authority();
@@ -82,8 +85,8 @@ export class M1FunctionSurface {
     });
     if (operation === "project.prepare") {
       if (input && Object.keys(input).length) throw fail("m1-surface-request-invalid");
-      return this.tasks.registerProject(context, { environmentId: `m1-${createHash("sha256").update(`${context.principalId}:${projectId}`).digest("hex").slice(0,32)}`,
-        files: M1_EXERCISE_FILES });
+      const fixture = await this.prepareProject(Object.freeze({ ...context }));
+      return this.tasks.registerProject(context, fixture);
     }
     if (operation === "project.current") return this.tasks.currentProject(context);
     if (METHODS[operation]) return this.tasks[METHODS[operation]](context, input);

@@ -15,8 +15,16 @@ import { M1TaskOrchestrator } from "./tasks/orchestrator.mjs";
 import { M1RoleOrchestrator } from "./role-orchestrator.mjs";
 import { M1FunctionSurface, M1SessionAuthority, M1_EXERCISE_SUITE } from "./surface.mjs";
 
-export async function composeM1Functions({ configuration, provider, pool, cipher, javascriptExecutor, dataDirectory }) {
+export async function composeM1Functions({ configuration, provider, pool, cipher, javascriptExecutor, dataDirectory, projectFixtures }) {
   const config = m1FunctionConfigSchema.parse(configuration); assertM1Roles(provider);
+  // Trusted construction only: the isolated acceptance host supplies fixed suites and
+  // an authenticated-scope resolver. Neither release JSON nor a browser/model payload
+  // can select filesystem roots, fixture bytes, suites or expected results.
+  if (projectFixtures !== undefined && (!projectFixtures || typeof projectFixtures.prepare !== "function" ||
+      !projectFixtures.suites || typeof projectFixtures.suites !== "object" || Array.isArray(projectFixtures.suites) ||
+      Object.keys(projectFixtures).some(key => !["prepare", "suites"].includes(key)))) {
+    throw new Error("m1-trusted-project-fixtures-invalid");
+  }
   const privateFetch = (input, init) => fetch(input, { ...init, redirect: "error" });
   const embedder = new OpenAICompatibleEmbedder({ baseURL: config.embedding.baseUrl,
     modelId: config.embedding.modelId, dimension: config.embedding.dimension, timeoutMs: 10_000, fetchImpl: privateFetch });
@@ -28,7 +36,7 @@ export async function composeM1Functions({ configuration, provider, pool, cipher
   // Only a fixed application-owned sibling directory, never a browser/model-selected filesystem root.
   const baseDirectory = resolve(dataDirectory, "m1-projects"); await mkdir(baseDirectory, { recursive: true });
   const adapter = new DisposableJavascriptProjectAdapter({ baseDirectory, executor: javascriptExecutor,
-    suites: { [M1_EXERCISE_SUITE.suiteId]: M1_EXERCISE_SUITE } });
+    suites: projectFixtures?.suites ?? { [M1_EXERCISE_SUITE.suiteId]: M1_EXERCISE_SUITE } });
   const store = new PostgresTaskStore({ pool, cipher }); await store.initialize();
   const sessions = new M1SessionAuthority();
   const tasks = new M1TaskService({ store, adapter, authorizeContext: context => sessions.authorize(context) });
@@ -51,5 +59,6 @@ export async function composeM1Functions({ configuration, provider, pool, cipher
     return { qdrant, embedding, reranker, ready: qdrant && embedding && reranker };
   }
   return { index, sources, tasks, orchestrator, review, health,
-    attach(application) { return new M1FunctionSurface({ application, sources, tasks, orchestrator, sessions }); } };
+    attach(application) { return new M1FunctionSurface({ application, sources, tasks, orchestrator, sessions,
+      ...(projectFixtures ? { prepareProject: projectFixtures.prepare } : {}) }); } };
 }

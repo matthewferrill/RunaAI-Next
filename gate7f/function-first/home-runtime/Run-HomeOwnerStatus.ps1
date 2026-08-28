@@ -6,7 +6,7 @@ trap {
  # A failed preflight must retain bounded phase metadata, not an unhandled CLI/error dump.
  try {
   $failureRoot=[IO.Path]::GetDirectoryName($PSScriptRoot)
-  if($failureRoot-match'^C:\\Users\\codex-audit\\AppData\\Local\\RunaM1Readiness\\owner-status-[a-f0-9]{32}$'){
+  if($failureRoot-match'^C:\\ProgramData\\RunaAI-Next-OwnerStatus-[a-f0-9]{32}$'){
    $code=if($_.Exception.Message-match'^owner-status-[a-z0-9-]+$'){$_.Exception.Message}else{'owner-status-preflight-unconfirmed'}
    $note=@{schemaVersion='runaai-owner-status-preflight-failure/v1';packageSha256=$ExpectedSeal;phase=$probePhase;probeDispatched=$probeDispatched;errorCode=$code;exceptionType=$_.Exception.GetType().FullName;identity=[Security.Principal.WindowsIdentity]::GetCurrent().Name;time=[DateTime]::UtcNow.ToString('o');privateValuesIncluded=$false}
    $bytes=[Text.UTF8Encoding]::new($false).GetBytes(($note|ConvertTo-Json -Compress)+"`n")
@@ -20,7 +20,7 @@ $probePhase='identity'
 if($env:COMPUTERNAME-cne'RUNA-HOME'-or[Security.Principal.WindowsIdentity]::GetCurrent().Name-cne'RUNA-HOME\Matthew'){throw 'owner-status-identity'}
 $probePhase='root'
 $root=[IO.Path]::GetDirectoryName($PSScriptRoot)
-if($root-notmatch'^C:\\Users\\codex-audit\\AppData\\Local\\RunaM1Readiness\\owner-status-[a-f0-9]{32}$'){throw 'owner-status-root'}
+if($root-notmatch'^C:\\ProgramData\\RunaAI-Next-OwnerStatus-[a-f0-9]{32}$'){throw 'owner-status-root'}
 $sealFile=$root+'\seal.json'
 $probePhase='seal'
 if((Get-FileHash -LiteralPath $sealFile -Algorithm SHA256).Hash.ToLowerInvariant()-cne$ExpectedSeal){throw 'owner-status-seal'}
@@ -33,8 +33,10 @@ foreach($name in @('Runtime-Windows.ps1','Run-HomeOwnerStatus.ps1')){
 $probePhase='helper'
 . ($PSScriptRoot+'\Runtime-Windows.ps1')
 $script:RuntimeRoot=$root
-$probePhase='worker'
-Write-RuntimeJson ($root+'\results\worker.json') (Get-RuntimeIdentity $PID)
+$probePhase='worker-identity'
+$workerIdentity=Get-RuntimeIdentity $PID
+$probePhase='worker-path'
+Write-RuntimeJson ($root+'\results\worker.json') $workerIdentity
 $cli='C:\Users\Matthew\.lmstudio\bin\lms.exe'
 $descriptor='C:\Users\Matthew\.lmstudio\.internal\http-server.json'
 $engine='C:\Users\Matthew\AppData\Local\Programs\LM Studio\LM Studio.exe'

@@ -412,3 +412,12 @@ all files remain. A fresh package/ID may then diagnose the failed phase. If ance
 inside codex-audit's personal profile is the cause, move only the next fresh package to a verified
 dedicated C:\AI child with the same protected ACLs. Do not grant access to the personal profile or
 skip path/link checks. Five focused tests, including actual PS5 parsing, passed before this new probe.
+
+The new diagnostic proved correct Matthew identity and an UnauthorizedAccessException at the worker
+identity/write phase, before CLI dispatch; its trap successfully wrote a failure file to the same
+result directory. Ancestor metadata access is the leading cause, not yet an exact denied-path proof.
+Both failed tasks were separately verified stopped and retired, retaining their original directories.
+Home has no C:\AI parent. The next fresh package therefore uses only a verified new
+`C:\ProgramData\RunaAI-Next-OwnerStatus-<id>` leaf, preserving all ancestor/link checks and protected
+ACLs. It separates worker-identity and worker-path diagnostic phases and flushes a create-only start
+intent before task dispatch; retiring a failed task cannot make that same package eligible to rerun.

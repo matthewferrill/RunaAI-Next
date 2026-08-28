@@ -9,7 +9,7 @@ const sourceRoot=path.dirname(fileURLToPath(import.meta.url));
 const ID=/^[a-f0-9]{32}$/,HASH=/^[a-f0-9]{64}$/;
 const sources=['Run-HomeOwnerStatus.ps1','Runtime-Windows.ps1'];
 const taskName=id=>'Runa-M1-OwnerStatus-'+id;
-const rootName=id=>'C:\\Users\\codex-audit\\AppData\\Local\\RunaM1Readiness\\owner-status-'+id;
+const rootName=id=>'C:\\ProgramData\\RunaAI-Next-OwnerStatus-'+id;
 const json=value=>Buffer.from(JSON.stringify(value,null,2)+'\n');
 export function prepareOwnerStatus(directory,id=randomBytes(16).toString('hex')){
  demand(path.isAbsolute(directory)&&!existsSync(directory)&&ID.test(id),'owner-status-prepare');
@@ -62,10 +62,11 @@ export function ownerStatusRequest(directory,expected,mode){
  for(const [file,pin]of Object.entries(m.sourceFiles))script+=`if((Get-FileHash -LiteralPath ($root+'\\code\\${file}') -Algorithm SHA256).Hash.ToLowerInvariant()-cne'${pin}'){throw 'owner-status-code'};`;
  const checkTask=`$t=Get-ScheduledTask -TaskName $name -ErrorAction Stop;$a=@($t.Actions);if($t.TaskPath-cne'\\'-or$a.Count-ne1-or$a[0].Execute-cne'C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe'-or$a[0].Arguments-cne'${args}'-or[string]$a[0].WorkingDirectory-cne''-or[string]$t.Principal.LogonType-cne'Interactive'-or[string]$t.Principal.RunLevel-cne'Limited'-or[Xml.XmlConvert]::ToTimeSpan($t.Settings.ExecutionTimeLimit)-ne(New-TimeSpan -Minutes 1)-or[string]$t.Settings.MultipleInstances-cne'IgnoreNew'-or@($t.Triggers|Where-Object{$null-ne$_}).Count-ne0){throw 'owner-status-task-drift'};$sid=[string]$t.Principal.UserId;if($sid-notmatch'^S-1-'){$sid=([Security.Principal.NTAccount]::new($sid)).Translate([Security.Principal.SecurityIdentifier]).Value};if($sid-cne$owner.Value){throw 'owner-status-task-owner'};`;
  if(mode==='Run')script+=
-  "if((Get-ScheduledTask -TaskName $name -ErrorAction SilentlyContinue)-or(Test-Path -LiteralPath ($root+'\\results\\worker.json'))){throw 'owner-status-already-started'};"+
+  "if((Get-ScheduledTask -TaskName $name -ErrorAction SilentlyContinue)-or(Test-Path -LiteralPath ($root+'\\task-start-intent.json'))-or(Test-Path -LiteralPath ($root+'\\results\\worker.json'))){throw 'owner-status-already-started'};"+
   `$a=New-ScheduledTaskAction -Execute 'C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe' -Argument '${args}';`+
   "$p=New-ScheduledTaskPrincipal -UserId 'RUNA-HOME\\Matthew' -LogonType Interactive -RunLevel Limited;$s=New-ScheduledTaskSettingsSet -ExecutionTimeLimit (New-TimeSpan -Minutes 1) -MultipleInstances IgnoreNew -Hidden;"+
-  "$null=Register-ScheduledTask -TaskName $name -Action $a -Principal $p -Settings $s;"+checkTask+"Start-ScheduledTask -TaskName $name;";
+  "$null=Register-ScheduledTask -TaskName $name -Action $a -Principal $p -Settings $s;"+checkTask+
+  "$intent=[Text.UTF8Encoding]::new($false).GetBytes((@{packageSha256=$expected;taskName=$name;time=[DateTime]::UtcNow.ToString('o')}|ConvertTo-Json -Compress));$stream=[IO.File]::Open($root+'\\task-start-intent.json','CreateNew','Write','None');try{$stream.Write($intent,0,$intent.Length);$stream.Flush($true)}finally{$stream.Dispose()};Start-ScheduledTask -TaskName $name;";
  if(mode==='Collect'||mode==='Cleanup'){
   script+=checkTask+"if($t.State-eq'Running'){throw 'owner-status-task-running'};$file=$root+'\\results\\result.json';Plain $file;"+
    "$bytes=[IO.File]::ReadAllBytes($file);if($bytes.Length-gt8192){throw 'owner-status-result-cap'};$value=[Text.UTF8Encoding]::new($false,$true).GetString($bytes)|ConvertFrom-Json;if($value.schemaVersion-cne'runaai-owner-status-result/v1'-or$value.packageSha256-cne$expected){throw 'owner-status-result-binding'};";
@@ -79,7 +80,7 @@ export function ownerStatusRequest(directory,expected,mode){
  script+=`@{schemaVersion='runaai-owner-status-operator/v1';mode='${mode}';packageSha256=$expected;taskName=$name;`+
   (mode==='Collect'?"resultBase64=[Convert]::ToBase64String($bytes);":"")+
   (mode==='Inspect'||mode==='CleanupFailed'?"observation=$observation;":"")+
-  "privateValuesIncluded=$false;inferenceCalled=$false;settingsChanged=$false}|ConvertTo-Json -Compress";
+  "privateValuesIncluded=$false;inferenceCalled=$false;settingsChanged=$false}|ConvertTo-Json -Depth 8 -Compress";
  return tlsTransportRequest({host:'home',command:script,input});
 }
 export function runOwnerStatus(directory,expected,mode){

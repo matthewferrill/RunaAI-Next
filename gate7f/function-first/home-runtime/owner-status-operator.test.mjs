@@ -10,7 +10,7 @@ function fixture(t){const parent=mkdtempSync(path.join(tmpdir(),'runa-owner-stat
  return prepareOwnerStatus(path.join(parent,'package'),'a'.repeat(32));}
 function script(request){return Buffer.from(request.input.toString('utf8').split('\n')[0],'base64').toString('utf8');}
 test('owner status preparation is offline, create-only and source-bound',t=>{
- const prepared=fixture(t);assert.equal(prepared.activated,false);assert.match(prepared.root,/owner-status-a{32}$/);
+ const prepared=fixture(t);assert.equal(prepared.activated,false);assert.match(prepared.root,/^C:\\ProgramData\\RunaAI-Next-OwnerStatus-a{32}$/);
  assert.throws(()=>prepareOwnerStatus(prepared.directory),/prepare/);
  const request=ownerStatusRequest(prepared.directory,prepared.seal,'Stage');assert.ok(request.maximumWrappedChars<=6500);
  assert.match(script(request),/RUNA-HOME/);assert.match(script(request),/owner-status-exists/);
@@ -25,6 +25,7 @@ test('owner status command cannot request lifecycle, arbitrary identity or defau
  const run=script(ownerStatusRequest(prepared.directory,prepared.seal,'Run'));
  assert.match(run,/-LogonType Interactive -RunLevel Limited/);assert.match(run,/-WindowStyle Hidden/);
  assert.match(run,/-ExecutionTimeLimit \(New-TimeSpan -Minutes 1\)/);assert.match(run,/owner-status-already-started/);
+ assert.match(run,/task-start-intent.json/);assert.ok(run.indexOf("$stream.Flush($true)")<run.indexOf('Start-ScheduledTask -TaskName'));
  assert.match(run,/Actions/);assert.match(run,/Principal.LogonType/);assert.match(run,/WorkingDirectory/);
  assert.doesNotMatch(run,/Remove-Item|Stop-Process|server stop|server start/);
 });

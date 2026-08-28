@@ -29,6 +29,8 @@ export class MastraM1Planner {
         "project.inspect arguments: {path}. project.preview-change and project.apply-change arguments: {path,content,expectedSha256}.",
         "expectedSha256 must be the exact current file SHA256 from snapshot, or null only for a new permitted path. Do not guess hashes.",
         "project.run-tests arguments: {suiteId}. project.restore arguments: {receiptId}, only from an owned prior edit receipt.",
+        "Every published edit automatically retains an application-owned undo receipt. Keeping or preserving an undo option does not mean restoring now. Do not add project.restore unless restoration itself is requested and its exact receiptId is already present in the supplied receipts.",
+        "Never invent a future receipt ID or a placeholder for a step in this plan. A restore using a supplied current receipt cannot follow another planned edit or restore, because that would change the revision it belongs to.",
         "The project contains at most four flat synchronous JavaScript files sharing exports. No require, ESM, packages, file, network, shell or async work.",
         "Use one complete replacement per changed file. Put preview before apply and test after apply when those capabilities are available.",
         "Planning an effect does not execute or approve it. Include the requested permitted sequence even when an effect needs approval: the application creates its exact proposal and pauses before the effect under the current approval policy.",

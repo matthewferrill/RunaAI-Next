@@ -226,6 +226,7 @@ export class M1TaskOrchestrator {
     const permittedStep = step => (!step.arguments?.path || grant.allowedPaths.includes(step.arguments.path))
       && (!step.arguments?.suiteId || grant.allowedSuites.includes(step.arguments.suiteId));
     const permittedProposalIds = new Set(taskState.proposals.filter(permittedStep).map(proposal => proposal.proposalId));
+    const permittedReceipts = taskState.receipts.filter(receipt => permittedProposalIds.has(receipt.proposalId));
     const plannerSnapshot = { workspaceSha256: snapshot.workspaceSha256, projectRevision: taskState.project.revision,
       files: snapshot.files.filter(file => grant.allowedPaths.includes(file.path)),
       omittedFileCount: snapshot.files.filter(file => !grant.allowedPaths.includes(file.path)).length };
@@ -248,7 +249,7 @@ export class M1TaskOrchestrator {
       poll.unref?.();
       const rawPlan = await Promise.race([this.planner.plan({ objective: run.objective,
         snapshot: structuredClone(plannerSnapshot),
-        receipts: structuredClone(taskState.receipts.filter(receipt => permittedProposalIds.has(receipt.proposalId))
+        receipts: structuredClone(permittedReceipts
           .map(({ beforeReference, afterReference, rollbackReference, ...receipt }) => receipt)),
         previousPlans: structuredClone(run.plans.filter(plan => plan.steps.every(permittedStep))), repair: run.status === "repair-required",
         allowedPaths: [...grant.allowedPaths], allowedSuites: [...grant.allowedSuites],
@@ -265,8 +266,24 @@ export class M1TaskOrchestrator {
         return { requestId, capabilityId: parsed.capabilityId, arguments: parsed.arguments };
       });
       await this.store.transaction(context, async tx => {
-        await this.service.authority(tx, context, { taskId: run.taskId, grantId: run.grantId,
+        const { project: currentProject, grant: currentGrant } = await this.service.authority(tx, context, { taskId: run.taskId, grantId: run.grantId,
           grantRevision: run.grantRevision, capabilityId: "project.inspect" });
+        assert(currentProject.revision === taskState.project.revision
+          && digest(currentProject.reference) === digest(taskState.project.reference), "m1-plan-snapshot-stale");
+        const suppliedReceiptIds = new Set(permittedReceipts.map(receipt => receipt.receiptId));
+        let precedingMutation = false;
+        // This is whole-plan rejection, not permission to execute. Do not start an earlier
+        // action when a later restore already references unavailable or future-stale evidence.
+        // Each eventual proposal still rechecks current authority and exact revision.
+        for (const step of steps) {
+          assert(currentGrant.capabilityIds.includes(step.capabilityId)
+            && !(currentGrant.profile === "read-only" && CAPABILITIES[step.capabilityId].effectful), "m1-capability-denied");
+          if (step.capabilityId === "project.restore") assert(!precedingMutation
+            && suppliedReceiptIds.has(step.arguments.receiptId), "m1-plan-restore-reference-invalid");
+          await this.service.resolveArguments(tx, { taskId: run.taskId, capabilityId: step.capabilityId,
+            arguments: step.arguments }, currentGrant, currentProject);
+          precedingMutation ||= ["project.apply-change", "project.restore"].includes(step.capabilityId);
+        }
         const current = await tx.get("run", run.runId);
         current.plans.push({ summary: plan.summary, steps, planDigest: digest({ summary: plan.summary, steps }),
           sourceProjectRevision: taskState.project.revision, sourceWorkspaceSha256: snapshot.workspaceSha256 });

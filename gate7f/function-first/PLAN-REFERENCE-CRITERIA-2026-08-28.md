@@ -53,3 +53,34 @@ This is additive validation and planner guidance, with no store rewrite or
 production activation. Rollback is a reviewed code revert before deployment, or
 the separately verified immutable-release rollback after deployment. Retain the
 original diagnostic evidence either way.
+
+## Implemented local result
+
+After criteria commit `f8a1714`, the orchestrator now preflights all step references
+inside the fresh authority transaction before recording a plan. It reuses the
+service's existing owned-restore/integrity/revision/path checks and refuses
+invented, unavailable, and future-invalidated restore references. No placeholder
+resolver, additional model attempt, or approval bypass was added. Both Code and
+Agent planners receive the same undo-retention guidance.
+
+Real disposable PostgreSQL/LangGraph regression: **69/69 passed, zero skips**.
+The nine new orchestration cases include an invalid later restore before an
+otherwise valid edit/test, foreign-task and stale references, invalid later
+paths/suites, valid exact-approved restoration, concurrent snapshot change,
+corrupt receipt rejection, and replay without effects. The existing ordinary
+edit/test case verifies retained undo evidence without an immediate restore.
+Models and filesystem executors in this suite are deterministic test doubles.
+The separate actual Mastra protocol/progress suite passed **38/38, zero skips**;
+its HTTP responses are also fixtures, not actual-model compliance evidence.
+
+The fixed reusable command is
+`node gate7f/function-first/tasks/run-postgres-regression.mjs`. It creates its own
+loopback database, retains bounded raw test output and source hashes, and stops
+and removes only that disposable database. Initial result at
+`artifacts/runs/m1-task-regression-fq1Ied/result.json`, recorded
+`2026-08-28T22:30:37.420Z`; TAP SHA256
+`b34a69983e144bf6f6eaa0857bcc6ef19739fb34d9bb00d11a3f6979b4fcc45a`.
+Source bytes stayed unchanged during the run. Database cleanup passed.
+
+The frozen three-model campaign still uses its original code and evidence. This
+prospective correction has not been activated or given model-qualification credit.

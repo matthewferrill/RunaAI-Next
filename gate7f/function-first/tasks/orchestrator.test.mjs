@@ -36,7 +36,9 @@ class Adapter {
   }
   async materialize({ effectId, prepared, authorize, signal }) {
     await authorize(); assert(!signal.aborted); this.edits++;
-    const reference = this.reference([{ path: prepared.arguments.path, content: prepared.arguments.content }]);
+    const reference = prepared.capabilityId === "project.restore"
+      ? prepared.arguments.targetReference
+      : this.reference([{ path: prepared.arguments.path, content: prepared.arguments.content }]);
     const result = { reference, beforeSha256: prepared.beforeSha256, afterSha256: reference.workspaceSha256,
       output: { changed: true }, rollbackReference: prepared.beforeReference };
     this.staged.set(effectId, result); return result;
@@ -88,6 +90,9 @@ integration("conversational safe-auto plans, edits, observes actual service rece
     const result = await f.start();
     assert.equal(result.run.status, "completed"); assert.equal(result.run.outcome, "plan-completed");
     assert.equal(result.run.actions.length, 2); assert.equal(result.receipts.find(value => value.capabilityId === "project.run-tests").output.passed, true);
+    const published = result.receipts.find(value => value.capabilityId === "project.apply-change");
+    assert(published.rollbackReference); assert.equal(published.executionStatus, "published");
+    assert.equal(result.receipts.some(value => value.capabilityId === "project.restore"), false);
     assert.equal(f.adapter.edits, 1); assert.equal(f.adapter.tests, 1); assert.equal(plans, 1);
     const duplicate = await f.start();
     assert.equal(duplicate.run.runId, result.run.runId); assert.equal(plans, 1);
@@ -414,6 +419,8 @@ for (const role of ["code", "agent"]) for (const mode of ["preview-only", "appro
         calls.push({ request, input });
         assert.match(request.messages[0].content, /application creates its exact proposal and pauses before the effect/);
         assert.match(request.messages[0].content, /preview-change is read-only; it does not create a pending edit approval/);
+        assert.match(request.messages[0].content, /Every published edit automatically retains an application-owned undo receipt/);
+        assert.match(request.messages[0].content, /Never invent a future receipt ID or a placeholder/);
         assert.equal(input.objective, objective);
         if (["read-only", "explain-only"].includes(mode)) assert.deepEqual(input.capabilityIds, ["project.inspect", "project.preview-change"]);
         const change = { path: "index.js", content: "exports.add=(a,b)=>a+b;", expectedSha256: input.snapshot.files[0].sha256 };
@@ -469,3 +476,102 @@ for (const role of ["code", "agent"]) for (const mode of ["preview-only", "appro
     } finally { await f.close(); }
   });
 }
+
+async function seedOwnedEdit(f, { content = "exports.add=(a,b)=>a+b;", requestId = "seed-edit", task = f.task, grant = f.grant } = {}) {
+  const project = await f.service.currentProject(context);
+  const proposal = await f.service.propose(context, { taskId: task.taskId, grantId: grant.grantId,
+    grantRevision: grant.revision, requestId, capabilityId: "project.apply-change",
+    arguments: { path: "index.js", content, expectedSha256: project.reference.files[0].sha256 } });
+  if (proposal.status === "pending-approval") await f.service.approve(context,
+    { proposalId: proposal.proposalId, proposalDigest: proposal.proposalDigest });
+  return (await f.service.execute(context, { proposalId: proposal.proposalId })).receipt;
+}
+
+for (const kind of ["invented", "foreign", "stale", "future-invalidated", "out-of-path", "out-of-suite"]) {
+  integration(`whole-plan preflight rejects ${kind} references before any new action`, async () => {
+    let reference = "future-edit-receipt", plans = 0;
+    const f = await fixture({ planner: { async plan({ snapshot }) {
+      plans++;
+      const steps = [{ capabilityId: "project.inspect", arguments: { path: "index.js" } }];
+      if (kind === "invented" || kind === "future-invalidated") steps.push(...planFor(snapshot, true).steps);
+      if (kind === "out-of-path") steps.push({ capabilityId: "project.inspect", arguments: { path: "hidden.js" } });
+      else if (kind === "out-of-suite") steps.push({ capabilityId: "project.run-tests", arguments: { suiteId: "unregistered-suite" } });
+      else steps.push({ capabilityId: "project.restore", arguments: { receiptId: reference } });
+      return { summary: "Untrusted plan data.", steps };
+    } } });
+    try {
+      if (["stale", "future-invalidated"].includes(kind)) reference = (await seedOwnedEdit(f)).receiptId;
+      if (kind === "stale") await seedOwnedEdit(f, { content: "exports.add=(a,b)=>Number(a)+Number(b);", requestId: "newer-edit" });
+      if (kind === "foreign") {
+        const task = await f.service.createTask(context, { requestId: "foreign-task", objective: "A separate task." });
+        const grant = await f.service.createGrant(context, { taskId: task.taskId, profile: "safe-autopilot", allowedPaths: ["index.js"],
+          allowedSuites: [], expiresAt: new Date(Date.now() + 600_000).toISOString() });
+        reference = (await seedOwnedEdit(f, { task, grant })).receiptId;
+      }
+      const before = await f.service.status(context, { taskId: f.task.taskId });
+      const edits = f.adapter.edits, tests = f.adapter.tests;
+      const result = await f.start();
+      assert.equal(result.run.status, "failed"); assert.equal(result.run.plans.length, 0);
+      assert.equal(result.proposals.length, before.proposals.length); assert.equal(result.receipts.length, before.receipts.length);
+      assert.equal(f.adapter.edits, edits); assert.equal(f.adapter.tests, tests);
+      assert.equal((await f.orchestrator.resume(context, { runId: result.run.runId })).run.status, "failed");
+      assert.equal(plans, 1); assert.equal(f.adapter.edits, edits); assert.equal(f.adapter.tests, tests);
+      const expected = kind === "stale" ? "m1-restore-stale" : kind === "out-of-path" ? "m1-path-outside-grant"
+        : kind === "out-of-suite" ? "m1-suite-outside-grant" : "m1-plan-restore-reference-invalid";
+      assert.equal(result.run.errorCode, expected);
+    } finally { await f.close(); }
+  });
+}
+
+integration("valid supplied current restore still requires exact approval and restores only its owned revision", async () => {
+  let reference, plans = 0;
+  const f = await fixture({ profile: "ask-every-time", planner: { async plan({ receipts }) {
+    plans++; assert(receipts.some(receipt => receipt.receiptId === reference));
+    return { summary: "Restore the requested recorded edit after approval.", steps: [
+      { capabilityId: "project.inspect", arguments: { path: "index.js" } },
+      { capabilityId: "project.restore", arguments: { receiptId: reference } },
+    ] };
+  } } });
+  try {
+    reference = (await seedOwnedEdit(f)).receiptId;
+    const result = await f.start();
+    assert.equal(result.run.status, "waiting-approval"); assert.equal(f.adapter.edits, 1);
+    assert.equal(result.pendingProposal.capabilityId, "project.restore");
+    await f.service.approve(context, { proposalId: result.pendingProposal.proposalId,
+      proposalDigest: result.pendingProposal.proposalDigest });
+    const completed = await f.orchestrator.resume(context, { runId: result.run.runId });
+    assert.equal(completed.run.status, "completed"); assert.equal(f.adapter.edits, 2); assert.equal(plans, 1);
+    const current = await f.service.currentProject(context);
+    assert.equal((await f.adapter.inspectRevision({ reference: current.reference })).files[0].content, "exports.add=(a,b)=>a-b;");
+    assert.equal(completed.receipts.at(-1).capabilityId, "project.restore");
+  } finally { await f.close(); }
+});
+
+integration("a project change during planning rejects the stale whole plan before dispatch", async () => {
+  let f;
+  f = await fixture({ planner: { async plan({ snapshot }) {
+    await seedOwnedEdit(f); return planFor(snapshot, true);
+  } } });
+  try {
+    const result = await f.start();
+    assert.equal(result.run.status, "failed"); assert.equal(result.run.errorCode, "m1-plan-snapshot-stale");
+    assert.equal(result.run.plans.length, 0); assert.equal(result.run.actions.length, 0);
+    assert.equal(result.proposals.length, 1); assert.equal(f.adapter.edits, 1); assert.equal(f.adapter.tests, 0);
+  } finally { await f.close(); }
+});
+
+integration("corrupt prior receipt cannot become a valid restore plan or create an effect", async () => {
+  let reference, plans = 0;
+  const f = await fixture({ planner: { async plan() { plans++;
+    return { summary: "Restore", steps: [{ capabilityId: "project.restore", arguments: { receiptId: reference } }] };
+  } } });
+  try {
+    const receipt = await seedOwnedEdit(f); reference = receipt.receiptId;
+    await f.store.transaction(context, async tx => {
+      const corrupted = await tx.get("receipt", reference); corrupted.receiptDigest = "f".repeat(64);
+      await tx.save("receipt", reference, corrupted);
+    });
+    await assert.rejects(f.start(), /receipt-integrity-failed/);
+    assert.equal(plans, 0); assert.equal(f.adapter.edits, 1); assert.equal(f.adapter.tests, 0);
+  } finally { await f.close(); }
+});

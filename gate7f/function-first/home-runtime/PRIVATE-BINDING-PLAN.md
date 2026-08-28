@@ -43,3 +43,32 @@ TLS while the legacy listener still exists. Do not claim all Home endpoints are 
 
 Primary APIs: [Node22 TLS server client verification](https://nodejs.org/docs/latest-v22.x/api/tls.html)
 and [Caddy upstream mutual TLS](https://caddyserver.com/docs/caddyfile/directives/reverse_proxy).
+
+## Prospective enrollment packet and paths
+
+Root accepted the new exact Control subtree `C:\AI\RunaAI-Next-Candidate\m1-home-runtime-tls`.
+The current Control Caddy task runs as SYSTEM, independently observed2026-08-28; enrollment/private
+client material must be accessible only to SYSTEM and Administrators. Do not reuse the Gate7A server
+keys or change ACLs on any existing candidate directory. Home issuer/server enrollment uses the new
+dedicated sibling `C:\AI\RunaAI-Next-HomeRuntime-Enrollment`; installation may later copy only the
+same-host server leaf key/cert and public CA into the new runtime TLS directory. The issuer key stays
+in the enrollment subtree, never the LocalService-readable runtime TLS directory.
+
+Use a new immutable enrollment ID, RSA3072 keys, SHA256 certificates, a private CA with pathlen0,
+and90-day server/client leaves (CA730days). Server identity is `runa-home-m1.internal`; Control Caddy
+must explicitly verify that name. No system-wide trust-store import is needed. Rotation is a new
+enrollment and a successor config with retained prior material, not in-place key/cert overwrite.
+
+Generate issuer/server keys only on Home; generate the client key/CSR only on Control. Home accepts
+one exactly pinned public CSR with the fixed Control subject and correct RSA3072 key; sign only the
+fixed clientAuth extension, never CSR-requested extensions. Public transfer packets have an exact
+allowlist, no private-key fields, bounded PEM size, enrollment ID, hashes and explicit peer binding.
+Control imports only the matching signed client certificate/CA, verifies its own local private-key
+match and the expected issuer/server pins, then emits non-secret fingerprints. Generation and import
+are create-only and leave failures recoverable. No enrollment command activates a listener or route.
+
+Local proof must exercise real OpenSSL key/CSR/sign/import across two disposable directories, verify
+the private keys never appear in the transfer packets, reject mismatched CSR/issuer/client keys and
+extra packet fields, and refuse existing output paths. Actual SYSTEM ACL, installed OpenSSL pin,
+cross-host transfer and Caddy/mTLS handshakes remain installed proof requirements. No live enrollment
+or Home configuration change occurs while candidate model campaigns are running.

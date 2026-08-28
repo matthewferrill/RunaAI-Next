@@ -2,6 +2,7 @@ import { CHAT_DEADLINE_MS, answerNeedsRetry, boundedHistory, customerMessageFor,
   readJsonResponse } from "./chat-client.mjs";
 import { initializeWorkspaceShell } from "./workspace-shell.mjs";
 import { executionOutput, javascriptSource } from "./code-execution.mjs";
+import { initializeFunctionPanel } from "./function-panel.mjs";
 
 const byId = id => document.getElementById(id);
 const text = (id, value) => { byId(id).textContent = value; };
@@ -18,10 +19,11 @@ const projectName = byId("project-name");
 const experiences = Object.freeze(["chat", "code"]);
 const states = Object.fromEntries(experiences.map(experience => [experience, {
   threadId: `web-${experience}-${crypto.randomUUID()}`,
-  projectId: "runa:personal", projectName: null, activeChatId: null, history: [],
+  projectId: "runa:personal", projectName: null, activeChatId: null, history: [], contextRevision: 0,
 }]));
 const catalogs = Object.fromEntries(experiences.map(experience => [experience, { projects: [], chats: [] }]));
 let activeExperience = "chat";
+let functionPanel = null;
 
 const workspaceHeaders = Object.freeze({ "content-type": "application/json", "x-runa-workspace": "1" });
 const activeState = () => states[activeExperience];
@@ -193,9 +195,11 @@ function startNew(projectId = "runa:personal", selectedProjectName = null) {
   state.projectName = selectedProjectName;
   state.activeChatId = null;
   state.history = [];
+  state.contextRevision = 0;
   resetTranscript();
   renderNavigation();
   text("chat-status", selectedProjectName ? `New chat in ${selectedProjectName}` : "Ready");
+  void functionPanel?.refresh();
   message.focus();
 }
 
@@ -212,6 +216,7 @@ async function selectExperience(experience) {
   });
   renderNavigation();
   await refreshNavigation(experience);
+  await functionPanel?.refresh();
   text("chat-status", state.projectName ? `Ready in ${state.projectName}` : "Ready");
   message.focus();
 }
@@ -228,6 +233,7 @@ async function loadChat(chatId) {
     state.projectName = catalogs[activeExperience].projects
       .find(project => project.projectId === record.projectId)?.displayName ?? null;
     state.activeChatId = record.chatId;
+    state.contextRevision = record.turnCount;
     state.history = record.turns.flatMap(turn => [
       { role: "user", content: turn.user }, { role: "assistant", content: turn.assistant },
     ]);
@@ -236,6 +242,7 @@ async function loadChat(chatId) {
       codeDraft: activeExperience === "code" && turn.role === "assistant", state,
     });
     renderNavigation();
+    await functionPanel?.refresh();
     text("navigation-status", "");
     text("chat-status", state.projectName ? `Ready in ${state.projectName}` : "Ready");
     message.focus();
@@ -284,6 +291,9 @@ async function initialize() {
       updateExperiencePresentation();
       renderNavigation();
       await refreshNavigation();
+      functionPanel = await initializeFunctionPanel({ request: workspaceJson,
+        getContext: () => ({ experience: activeExperience, projectId: activeState().projectId }),
+        onStatus: value => text("chat-status", value) });
       message.focus();
     } else if (session.authenticated) {
       sessionLabel.hidden = false;
@@ -344,6 +354,15 @@ form.addEventListener("submit", async event => {
   event.preventDefault();
   const content = message.value.trim();
   if (!content || send.disabled) return;
+  if (functionPanel?.workSelected()) {
+    send.disabled = true;
+    try { await functionPanel.startWork(content); }
+    finally { send.disabled = false; }
+    return;
+  }
+  let functionSelection;
+  try { functionSelection = functionPanel?.answerSelection() ?? {}; }
+  catch { text("chat-status", "Select one through six source sections before asking for research or review."); return; }
   const state = activeState();
   const submittedExperience = activeExperience;
   const userItem = appendMessage("user", content);
@@ -360,7 +379,9 @@ form.addEventListener("submit", async event => {
         method: "POST", headers: { "content-type": "application/json" }, signal: controller.signal,
         body: JSON.stringify({ requestId: `web-${crypto.randomUUID()}`,
           lane: submittedExperience === "code" ? "code" : "general", experience: submittedExperience,
+          ...functionSelection,
           threadId: state.threadId, projectId: state.projectId, message: content,
+          contextRevision: state.contextRevision,
           history: boundedHistory(state.history) }),
       });
       result = await readJsonResponse(response);
@@ -374,6 +395,7 @@ form.addEventListener("submit", async event => {
     state.history.push({ role: "user", content: content.slice(0, 8_000) },
       { role: "assistant", content: result.answer.slice(0, 8_000) });
     state.activeChatId = state.threadId;
+    state.contextRevision = result.contextRevision ?? state.contextRevision + (result.continuity?.turnRecorded ? 1 : 0);
     appendMessage("assistant", result.answer, {
       codeDraft: submittedExperience === "code" && result.execution?.status === "not-executed",
       state,
@@ -382,6 +404,12 @@ form.addEventListener("submit", async event => {
     await refreshNavigation(submittedExperience);
   } catch (error) {
     const code = error?.name === "AbortError" ? "chat-request-timeout" : error?.code;
+    if (code === "conversation-revision-conflict") {
+      await loadChat(state.threadId);
+      message.value = content;
+      text("chat-status", "This chat changed in another view. The latest record is loaded; your draft is ready to review and resend.");
+      return;
+    }
     appendMessage("assistant", customerMessageFor(code));
     addRetry(userItem, content);
     text("chat-status", "Message not completed — retry available");

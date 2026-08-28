@@ -28,6 +28,7 @@ import { OrdinaryBrowserSessionService } from "../gate7a/ordinary-session.mjs";
 import { PostgresOrdinarySessionStore } from "../gate7a/postgres-ordinary-session.mjs";
 import { HarmlessJavascriptExecutionService, MxcJavascriptExecutor } from "../gate7e/mxc-javascript-executor.mjs";
 import { assertConfiguredReleaseModel, createReleaseAnswerProviders } from "./model-role-providers.mjs";
+import { composeM1Functions } from "../gate7f/function-first/composition.mjs";
 
 const coded = (code, message) => Object.assign(new Error(message), { code });
 
@@ -137,11 +138,14 @@ export async function createProductionComposition({ loadedConfig, releaseRoot })
     loadSource: options => learningSource.load(options), cipher: learningCipher,
     expectedSourceClassification: "protected-or-unknown",
   });
-  const providers = createReleaseAnswerProviders(config.provider);
-  const answerService = new Gate2ReadOnlyService({ records: workspace, index: workspace, providers,
+  const m1 = config.functionFirst ? await composeM1Functions({ configuration: config.functionFirst, provider: config.provider,
+    pool, cipher: coreCipher, javascriptExecutor, dataDirectory: resolve(loadedConfig.directory, "..", "state") }) : null;
+  const providers = { ...createReleaseAnswerProviders(config.provider, { requestControls: config.functionFirst?.requestControls }),
+    ...(m1 ? { review: m1.review } : {}) };
+  const answerService = new Gate2ReadOnlyService({ records: workspace, index: m1?.index ?? workspace, providers,
     continuity, workspaceResolver: workspace, approvedKnowledge,
-    statusProvider: () => ({ provider: "private-openai-compatible", retrieval: "postgres-direct",
-      reranker: "explicit-window-not-required-for-explicit-source-set" }) });
+    statusProvider: () => ({ provider: "private-openai-compatible", retrieval: m1 ? "qdrant-nomic-selected-sources" : "postgres-direct",
+      reranker: m1 ? "explicit-window-bge" : "explicit-window-not-required-for-explicit-source-set" }) });
   const actionService = new Gate3GovernedActionService({ store: actionStore });
   const codeExecution = new HarmlessJavascriptExecutionService({ executor: javascriptExecutor });
 
@@ -201,7 +205,7 @@ export async function createProductionComposition({ loadedConfig, releaseRoot })
   const cutoverStatus = () => cutoverStore.load();
   const application = new SelectedCoreApplication({ mode: config.mode,
     targetGeneration: config.targetGeneration, cutoverStatus, answerService, actionService,
-    authenticator, authorizer, continuity, requestCoordinator: new PostgresRequestCoordinator({ pool }),
+    authenticator, authorizer, continuity, requestCoordinator: new PostgresRequestCoordinator({ pool, cipher: coreCipher }),
     codeExecution,
     totalDeadlineMs: config.limits.totalDeadlineMs });
 
@@ -246,9 +250,11 @@ export async function createProductionComposition({ loadedConfig, releaseRoot })
       probe(`${config.openfga.baseUrl.replace(/\/$/, "")}/healthz`, config.limits.upstreamDeadlineMs),
       probe(`${config.provider.baseUrl.replace(/\/$/, "")}/models`, config.limits.upstreamDeadlineMs),
     ]);
+    const functions = m1 ? await m1.health() : null;
     return Object.freeze({ schemaVersion: "runa2-gate6b-dependency-health/v1",
-      ready: postgresql && keycloak && openfga && provider && sandboxPreflight.ready,
-      dependencies: Object.freeze({ postgresql, keycloak, openfga, provider, sandbox: sandboxPreflight.ready }),
+      ready: postgresql && keycloak && openfga && provider && sandboxPreflight.ready && (!functions || functions.ready),
+      dependencies: Object.freeze({ postgresql, keycloak, openfga, provider, sandbox: sandboxPreflight.ready,
+        ...(functions ? { qdrant: functions.qdrant, embedding: functions.embedding, reranker: functions.reranker } : {}) }),
       privateValuesIncluded: false });
   };
   const protectedImportStatus = () => protectedImportCompleted(pool, config.gate6c?.enabled);
@@ -256,7 +262,7 @@ export async function createProductionComposition({ loadedConfig, releaseRoot })
     configuration: safeConfigurationStatus(loadedConfig, telemetryKey), artifact, browserCeremony,
     protectedImportStatus });
 
-  return Object.freeze({ application, browserCeremony, ordinarySessions,
+  return Object.freeze({ application, browserCeremony, ordinarySessions, m1Functions: m1?.attach(application) ?? null,
     runtimeStatus, readinessStatus, dependencyHealth,
     releaseManifest: manifest,
     async close() { await pool.end(); } });

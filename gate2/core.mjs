@@ -177,6 +177,10 @@ export class Gate2ReadOnlyService {
     let resolvedWorkspace = { references: [], denied: [] };
     let knowledgeDelivery = null;
     let response = deterministicResponse(request);
+    if (!response && knowledgeRequired && !explicitSources && this.index.requiresExplicitSelection === true) {
+      response = emptyV1(request, { answer: "Select the source sections you want me to use, then ask your research or review question.",
+        reason: "selected-sources-required", auditCode: "selected-sources-required", ground: "record-silent" });
+    }
     let knowledgeFallbackReason = response ? "not-evaluated-deterministic-boundary"
       : knowledgeRequired ? "adapter-disabled"
         : request.lane === "code" ? "not-applicable-code-conversation" : "not-applicable-general-conversation";

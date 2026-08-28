@@ -13,6 +13,7 @@ import { syntheticRelease } from "../gate6/fixtures.mjs";
 import { assertReleaseManifest, buildReleaseManifest, releaseRuntimeStatus } from "../gate6/release.mjs";
 import { loadReleaseConfig } from "./release-config.mjs";
 import { assertConfiguredReleaseModel, createReleaseAnswerProviders, releaseModelIdentity } from "./model-role-providers.mjs";
+import { CAPABILITY_SET_DIGEST, CAPABILITY_SET_VERSION } from "../gate7f/function-first/tasks/contracts.mjs";
 
 // Deterministic provider plumbing, not live-model or durable-store qualification.
 const digest = value => sha256(canonicalJson(value));
@@ -44,6 +45,28 @@ function configFor(provider = legacyProvider()) {
     limits: { maxRequestBytes: 262144, totalDeadlineMs: 30000, upstreamDeadlineMs: 10000 },
   };
 }
+
+test("M1 activation requires the real ordinary-session path and exact feature config", async t => {
+  const temporary = await temporaryConfig(t), config = configFor(roleProvider());
+  config.functionFirst = { schemaVersion: "runaai-m1-functions/v1", enabled: true,
+    scope: "supplied-text-and-disposable-javascript", capabilitySetVersion: CAPABILITY_SET_VERSION,
+    capabilitySetDigest: CAPABILITY_SET_DIGEST,
+    requestControls: Object.fromEntries(["chat", "research", "code", "review", "agent"].map(role => [role, { reasoningEffort: null }])),
+    qdrant: { endpoint: "http://127.0.0.1:9773", collection: "m1_candidate_sections" },
+    embedding: { baseUrl: "http://127.0.0.1:9770/v1", modelId: "text-embedding-nomic-embed-text-v1.5", dimension: 768 },
+    reranker: { baseUrl: "http://192.168.50.165:8412", windowCharacters: 2000, overlapCharacters: 300, batchSize: 32 } };
+  await assert.rejects(temporary.load(config), /ordinary browser session/);
+  config.publicBaseUrl = "https://runa.bridgebuildersai.com";
+  config.keycloak.issuer = `${config.publicBaseUrl}/auth/realms/runaai-next`;
+  config.keycloak.backchannelIssuer = "http://127.0.0.1:9762/realms/runaai-next";
+  config.gate6c.enabled = true;
+  config.gate7a = { enabled: true, canonicalOrigin: config.publicBaseUrl, relyingPartyId: "runa.bridgebuildersai.com",
+    predecessorManifestDigest: "c".repeat(64), ordinaryClient: { clientId: "runaai-next-user",
+      redirectUri: `${config.publicBaseUrl}/session/user/callback`, clientCredentialRef: "file:secrets/ordinary-client" } };
+  assert.deepEqual((await temporary.load(config)).value.functionFirst, config.functionFirst);
+  config.schemaVersion = "runa2-gate6b-release-config/v1"; config.provider = legacyProvider();
+  await assert.rejects(temporary.load(config), /configuration could not/);
+});
 
 function manifestInput(config) {
   const old = syntheticRelease();

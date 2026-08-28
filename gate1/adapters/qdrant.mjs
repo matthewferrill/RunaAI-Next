@@ -15,15 +15,16 @@ async function boundedJson(response, maximumBytes) {
 }
 
 export class OpenAICompatibleEmbedder {
-  constructor({ baseURL, modelId, dimension, timeoutMs = 5_000 }) {
+  constructor({ baseURL, modelId, dimension, timeoutMs = 5_000, fetchImpl = fetch }) {
     this.url = `${baseURL.replace(/\/$/, "")}/embeddings`;
     this.modelId = modelId;
     this.dimension = dimension;
     this.timeoutMs = timeoutMs;
+    this.fetchImpl = fetchImpl;
   }
 
   async embed(texts, { deadlineMs = this.timeoutMs } = {}) {
-    const response = await fetch(this.url, {
+    const response = await this.fetchImpl(this.url, {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({ model: this.modelId, input: texts }),
@@ -53,7 +54,7 @@ function windows(text, size = 2_000, overlap = 300) {
 }
 
 export class WindowedBgeReranker {
-  constructor({ baseURL, timeoutMs = 5_000, batchSize = 32 }) {
+  constructor({ baseURL, timeoutMs = 5_000, batchSize = 32, fetchImpl = fetch }) {
     if (!Number.isInteger(batchSize) || batchSize < 1 || batchSize > 256) {
       throw new Error("reranker batchSize must be an integer from 1 through 256");
     }
@@ -61,6 +62,7 @@ export class WindowedBgeReranker {
     this.url = `${normalized}/rerank`;
     this.timeoutMs = timeoutMs;
     this.batchSize = batchSize;
+    this.fetchImpl = fetchImpl;
   }
 
   async rerank(query, sources, maximumPassages, { deadlineMs = this.timeoutMs } = {}) {
@@ -79,7 +81,7 @@ export class WindowedBgeReranker {
         const remaining = deadlineAt - Date.now();
         if (remaining <= 0) throw new DOMException("reranker deadline expired", "TimeoutError");
         const batch = documents.slice(offset, offset + this.batchSize);
-        const response = await fetch(this.url, {
+        const response = await this.fetchImpl(this.url, {
           method: "POST",
           headers: { "content-type": "application/json" },
           body: JSON.stringify({ query, documents: batch, top_n: batch.length }),

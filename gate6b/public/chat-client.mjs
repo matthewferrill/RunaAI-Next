@@ -4,6 +4,7 @@ const retryableCompletionReasons = new Set([
   "timeout", "output-limited", "provider-output-empty", "provider-response-invalid",
   "provider-shape-invalid", "provider-incomplete", "provider-transport-failed",
   "provider-model-mismatch", "provider-role-mismatch", "provider-role-unavailable",
+  "unverified-action-claim",
 ]);
 
 const friendlyErrors = Object.freeze({

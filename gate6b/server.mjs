@@ -19,6 +19,7 @@ const server = createCandidateHttpServer({ application: composition.application,
   dependencyHealth: composition.dependencyHealth,
   browserCeremony: composition.browserCeremony,
   ordinarySessions: composition.ordinarySessions,
+  m1Functions: composition.m1Functions,
   staticRoot: resolve(import.meta.dirname, "public"),
   maxRequestBytes: loadedConfig.value.limits.maxRequestBytes });
 

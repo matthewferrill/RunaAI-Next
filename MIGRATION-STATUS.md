@@ -15,6 +15,17 @@ are unchanged. M1 is authorized, not complete; its first local wiring result is 
 The steward authorized necessary non-destructive work and commit/push to RunaAI-Next without recurring
 permission requests. Human involvement is reserved for genuine customer tests or human-only operations.
 
+### 2026-08-28 M1-S2 continuing integration
+
+M1-S2 is in progress under the existing standing permission. Its preregistered contract is
+`gate7f/function-first/M1-S2-FUNCTIONS-AND-GREEN-CRITERIA.md`; current implementation evidence is
+`gate7f/function-first/M1-S2-INTEGRATION-PROGRESS-2026-08-28.md`. Durable encrypted task/source work,
+server-authoritative conversation context and the ordinary-user function surface are being integrated.
+Actual Control sandbox/project proof passed 6/6 with disposable resources and unchanged production.
+Model readiness, matched function acceptance, full customer UI/recovery and the human trial remain open.
+Do not stop or request another approval at internal commits. Do not claim M1 or the broader roadmap is
+complete from these component results; preserve the historical M1-S1 result below.
+
 ### 2026-08-28 M1-S1 implementation and verified publication
 
 - The full roadmap/retrieval contract was committed as `333912a`; model-role contracts and independent

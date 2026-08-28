@@ -19,6 +19,8 @@ export class M1TaskOrchestrator {
   constructor({ service, planner, workflow, budgets = {}, now = () => Date.now() }) {
     assert(typeof planner?.plan === "function" && typeof workflow?.run === "function", "m1-orchestrator-dependency-invalid");
     this.service = service; this.store = service.store; this.planner = planner; this.workflow = workflow; this.now = now;
+    this.plannerRole = planner.role ?? "agent";
+    assert(["code", "agent"].includes(this.plannerRole), "m1-planner-role-invalid");
     this.budgets = { ...DEFAULT_BUDGETS, ...budgets };
     for (const [key, limit] of Object.entries(DEFAULT_BUDGETS)) assert(Number.isInteger(this.budgets[key])
       && this.budgets[key] > 0 && this.budgets[key] <= limit, "m1-orchestrator-budget-invalid");
@@ -28,11 +30,12 @@ export class M1TaskOrchestrator {
     const context = parseContext(rawContext), input = parse(startSchema, rawInput);
     parseId(input.taskId); parseId(input.grantId); parseId(input.requestId);
     const run = await this.store.transaction(context, async tx => {
-      const key = requestKey(input.taskId, input.requestId), requestDigest = digest(input);
+      const key = requestKey(input.taskId, input.requestId), requestDigest = digest({ ...input, plannerRole: this.plannerRole });
       const prior = await tx.byRequest("run", key);
       if (prior) { assert(prior.requestDigest === requestDigest, "m1-request-id-conflict"); return prior; }
       const { task, grant } = await this.service.authority(tx, context, { ...input, capabilityId: "project.inspect" });
       const run = { schemaVersion: "runa-m1-conversational-run/v1", runId: makeId("run"), ...input,
+        plannerRole: this.plannerRole,
         participantId: context.principalId, projectId: context.projectId, sessionId: context.sessionId,
         requestDigest, grantDefinitionDigest: grant.definitionDigest, objective: task.objective,
         status: "ready-to-plan", planAttempts: 0, plans: [], activePlan: 0, nextStep: 0,
@@ -59,6 +62,7 @@ export class M1TaskOrchestrator {
     const context = parseContext(rawContext);
     return this.store.transaction(context, async tx => ({ runs: (await tx.recent("run")).map(run => ({
       runId: run.runId, taskId: run.taskId, objective: run.objective, status: run.status,
+      plannerRole: run.plannerRole ?? "agent",
       pendingProposalId: run.pendingProposalId, updatedAtMs: run.updatedAtMs, planAttempts: run.planAttempts,
       actionCount: run.actions.length, sessionRebindRequired: run.sessionId !== context.sessionId,
     })) }));
@@ -67,7 +71,8 @@ export class M1TaskOrchestrator {
   async resume(rawContext, rawInput) {
     const context = parseContext(rawContext), { runId, grantId, grantRevision } = parse(resumeSchema, rawInput);
     parseId(runId);
-    await this.load(context, runId);
+    const retained = await this.load(context, runId);
+    assert((retained.plannerRole ?? "agent") === this.plannerRole, "m1-planner-role-mismatch");
     return this.store.operation(`orchestrator:${runId}`, async () => {
       const activeStarted = this.now();
       try {

@@ -96,7 +96,7 @@ async function buildRuntime() {
     answerService, actionService,
     authenticator: { async authenticate() { return participant; } },
     authorizer: { async authorize(input) { return { allowed: true, reason: "synthetic-allow", ...input }; } },
-    requestCoordinator: new PostgresRequestCoordinator({ pool }),
+    requestCoordinator: new PostgresRequestCoordinator({ pool, cipher: coreCipher }),
     now: () => new Date("2026-08-21T20:00:00.000Z") });
   return { pool, coreStore, learningStore, continuity, workspace, actionStore, providers, application,
     async close() { await pool.end(); } };

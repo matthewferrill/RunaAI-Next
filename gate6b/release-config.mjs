@@ -5,6 +5,7 @@ import { z } from "zod";
 import { canonicalJson } from "../gate4/canonical.mjs";
 import { validateReleaseBoundary, secretReferenceStatus } from "../gate5/operations.mjs";
 import { explicitModelRolesSchema } from "../gate7f/function-first/model-roles.mjs";
+import { m1FunctionConfigSchema, assertM1Roles } from "../gate7f/function-first/config.mjs";
 
 const secretRef = z.string().regex(/^(env|file|vault|secret-store):[A-Za-z0-9._/-]{1,200}$/);
 const url = z.string().url().max(500);
@@ -48,6 +49,7 @@ const legacySchema = z.object({
 const roleSchema = legacySchema.extend({
   schemaVersion: z.literal("runa2-gate6b-release-config/v2"),
   provider: explicitModelRolesSchema,
+  functionFirst: m1FunctionConfigSchema.optional(),
 });
 const schema = z.discriminatedUnion("schemaVersion", [legacySchema, roleSchema]);
 
@@ -101,6 +103,10 @@ export async function loadReleaseConfig(path) {
     }
   }
   const explicit = parsed.schemaVersion === "runa2-gate6b-release-config/v2";
+  if (parsed.functionFirst) {
+    assertM1Roles(parsed.provider);
+    if (!parsed.gate7a?.ordinaryClient) throw coded("release-config-m1-session-required", "M1 functions require the ordinary browser session client.");
+  }
   if (explicit && !["chat", "research", "code"].some(role => parsed.provider.models[role] !== null)) {
     throw coded("release-config-invalid", "At least one existing answer role must be configured.");
   }

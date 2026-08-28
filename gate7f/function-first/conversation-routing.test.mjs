@@ -76,6 +76,17 @@ test("actual protected reads and unavailable effects remain closed while draftin
   assert.equal(requestsLiveInformation("Write a poem about today's weather."), false);
 });
 
+test("M1 requires deliberate source selection instead of an undefined search or broader implicit retrieval", async () => {
+  const context = harness(); context.index.requiresExplicitSelection = true;
+  context.index.search = async () => { throw new Error("must not implicitly search"); };
+  for (const lane of ["research", "guarded", "general"]) {
+    const response = await context.service.answer(request(`select-${lane}`, "What does this project's decision say?", { lane }));
+    assert.equal(response.completion.reason, "selected-sources-required");
+    assert.equal(response.model.role, "not-invoked"); assert.equal(response.retrieval.attempted, false);
+    assert.match(response.answer, /Select the source sections/);
+  }
+});
+
 test("a current unrelated question does not inherit the previous project's retrieval requirement", async () => {
   const context = harness();
   const history = [{ role: "user", content: "Explain this project's reranker." },

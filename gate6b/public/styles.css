@@ -829,3 +829,14 @@ body.workspace-active .primary-button:hover { filter: brightness(1.07); }
 @media (prefers-reduced-motion: reduce) {
   .workspace-frame, .rail-toggle, .rail-toggle svg { transition: none; }
 }
+/* M1 controls appear only when the server advertises the corresponding capabilities. */
+.function-panel { display:flex; flex-direction:column; gap:.8rem; padding:.5rem; overflow:auto; }
+.function-panel form, .function-panel section { display:flex; flex-direction:column; gap:.65rem; }
+.function-panel label { display:flex; align-items:flex-start; gap:.5rem; font-size:.85rem; margin:.5rem 0; }
+.function-panel input:not([type="checkbox"]), .function-panel textarea, .function-panel select, #m1-mode {
+  width:100%; box-sizing:border-box; border:1px solid #a8b8b6; border-radius:.6rem; padding:.65rem; background:#ffffffa6; color:#24252d;
+}
+.function-panel button { padding:.55rem .7rem; border:1px solid #a8b8b6; border-radius:.6rem; background:#edf5f3; color:#264e4a; cursor:pointer; }
+.function-panel button:disabled { opacity:.55; cursor:default; }
+.function-panel .execution-output { white-space:pre-wrap; overflow-wrap:anywhere; font-size:.75rem; max-height:22rem; overflow:auto; }
+#m1-mode { margin-top:.6rem; max-width:25rem; }

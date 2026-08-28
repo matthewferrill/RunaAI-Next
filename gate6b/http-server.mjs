@@ -2,7 +2,7 @@ import { createReadStream } from "node:fs";
 import { stat } from "node:fs/promises";
 import { createServer } from "node:http";
 import { extname, join, normalize, resolve } from "node:path";
-import { randomBytes } from "node:crypto";
+import { createHash, randomBytes } from "node:crypto";
 
 const mime = new Map([[".html", "text/html; charset=utf-8"], [".js", "text/javascript; charset=utf-8"],
   [".mjs", "text/javascript; charset=utf-8"],
@@ -91,7 +91,7 @@ async function staticFile(request, response, staticRoot) {
 }
 
 export function createCandidateHttpServer({ application, runtimeStatus, readinessStatus, dependencyHealth,
-  browserCeremony = null, ordinarySessions = null, staticRoot, maxRequestBytes = 1_048_576 }) {
+  browserCeremony = null, ordinarySessions = null, m1Functions = null, staticRoot, maxRequestBytes = 1_048_576 }) {
   return createServer(async (request, response) => {
     const correlationId = randomBytes(12).toString("hex");
     try {
@@ -104,6 +104,22 @@ export function createCandidateHttpServer({ application, runtimeStatus, readines
         return json(response, health.ready ? 200 : 503, health);
       }
       if (request.method === "GET" && url.pathname === "/api/runtime/status") return json(response, 200, await runtimeStatus());
+      if (request.method === "GET" && url.pathname === "/api/m1/capabilities") return json(response, 200, {
+        schemaVersion: "runaai-m1-surface/v1", enabled: m1Functions !== null,
+        suppliedTextOnly: true, disposableJavascriptOnly: true, publicNetworkTools: false,
+      });
+      if (request.method === "POST" && url.pathname === "/api/m1/workspace") {
+        if (!m1Functions) throw coded("m1-functions-unavailable", "M1 functions are unavailable in this release.");
+        if (!ordinarySessions || request.headers.origin !== ordinarySessions.publicBaseUrl
+            || request.headers["x-runa-workspace"] !== "1") throw coded("m1-origin-invalid", "The workspace request origin is invalid.");
+        if (cookie(request, "__Host-runa_owner_session")) throw coded("m1-ordinary-session-required", "Use an ordinary session for this workspace.");
+        const sessionId = cookie(request, "__Host-runa_user_session");
+        if (!sessionId) throw coded("m1-ordinary-session-required", "An ordinary browser session is required.");
+        const resolvedCredential = await ordinarySessions.credentialForSession(sessionId);
+        return json(response, 200, await m1Functions.dispatch({ credential: resolvedCredential,
+          sessionBinding: createHash("sha256").update(sessionId).digest("hex"), body: await body(request, maxRequestBytes),
+          verifySession: () => ordinarySessions.credentialForSession(sessionId) }));
+      }
       if (request.method === "GET" && url.pathname === "/api/readiness/status") return json(response, 200, await readinessStatus());
       if (request.method === "GET" && url.pathname === "/api/session/status") {
         const ownerSession = cookie(request, "__Host-runa_owner_session");

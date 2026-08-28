@@ -111,6 +111,22 @@ integration("ask-profile pauses each effect and survives orchestrator replacemen
   } finally { await f.close(); }
 });
 
+integration("durable run preserves the planner role across restart and rejects role substitution", async () => {
+  const planner = { role: "code", async plan({ snapshot }) { return planFor(snapshot, true); } };
+  const f = await fixture({ profile: "ask-every-time", planner });
+  try {
+    const pending = await f.start(); assert.equal(pending.run.plannerRole, "code");
+    const other = new M1TaskOrchestrator({ service: f.service, workflow: f.workflow,
+      planner: { ...planner, role: "agent" } });
+    await assert.rejects(other.resume(context, { runId: pending.run.runId }), /planner-role-mismatch/);
+    await assert.rejects(other.start(context, f.input), /request-id-conflict/);
+    assert.equal(f.adapter.edits, 0);
+    const replacement = new M1TaskOrchestrator({ service: f.service, workflow: f.workflow, planner });
+    assert.equal((await replacement.status(context, { runId: pending.run.runId })).run.plannerRole, "code");
+    assert.equal((await replacement.list(context)).runs[0].plannerRole, "code");
+  } finally { await f.close(); }
+});
+
 integration("one bounded repair is based on a real failed test receipt and fresh immutable snapshot", async () => {
   let plans = 0;
   const f = await fixture({ planner: { async plan({ snapshot, receipts, repair }) {

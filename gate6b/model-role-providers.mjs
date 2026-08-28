@@ -8,6 +8,7 @@ const coded = (code, message) => Object.assign(new Error(message), { code });
 
 export function createReleaseAnswerProviders(provider, {
   createProvider = options => new MastraAnswerProvider(options),
+  requestControls = null,
 } = {}) {
   const selected = resolveModelRoles(provider);
   return Object.freeze(Object.fromEntries(ANSWER_MODEL_ROLES.map(role => {
@@ -17,7 +18,8 @@ export function createReleaseAnswerProviders(provider, {
     if (modelId === null) return [role, Object.freeze({ role, modelId: null,
       async answer() { throw coded("provider-role-unavailable", "The selected model role is disabled."); },
     })];
-    return [role, createProvider({ baseURL: selected.baseUrl, modelId, role, providerName })];
+    return [role, createProvider({ baseURL: selected.baseUrl, modelId, role, providerName,
+      ...(requestControls ? { reasoningEffort: requestControls[role]?.reasoningEffort ?? null, preventRedirects: true } : {}) })];
   })));
 }
 

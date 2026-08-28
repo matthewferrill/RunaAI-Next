@@ -1,0 +1,94 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import { M1FunctionSurface, M1SessionAuthority, M1_EXERCISE_FILES } from "./surface.mjs";
+import { createConversationContext } from "./conversation-context.mjs";
+
+function fixture() {
+  const called = [];
+  const application = { async authority() { called.push("authority"); },
+    authenticator: { async authenticate(token, options) { assert.equal(token, "server-credential"); assert.equal(options.requireOnline, true);
+      called.push("authenticate"); return { principalId: "alice", verified: true }; } },
+    authorizer: { async authorize() { called.push("authorize"); return { allowed: true }; } },
+    continuity: { async prepareAnswerContext(scope) { called.push("scope"); return createConversationContext(scope); } } };
+  const sources = { async list(context) { called.push(["list", context]); return []; },
+    async attach(context,input) { called.push(["attach",context,input]); return { indexed: true }; } };
+  const tasks = { async registerProject(context, input) { called.push(["register",context,input]); return input; },
+    async cancel(context, input) { called.push(["cancel",context,input]); return { status: "cancelled" }; } };
+  return { called, application, sources, tasks, surface: new M1FunctionSurface({ application, sources, tasks }) };
+}
+const request = (operation="sources.list", input={}) => ({ credential: "server-credential", sessionBinding: "a".repeat(64),
+  verifySession: async () => "server-credential",
+  body: { operation, projectId: "project-alice", experience: "chat", input } });
+test("surface checks current identity and owned experience before source access", async () => {
+  const { surface, called } = fixture(); await surface.dispatch(request());
+  assert.deepEqual(called.slice(0,4), ["authority","authenticate","authorize","scope"]);
+  assert.deepEqual(called[4][1], { principalId: "alice", projectId: "project-alice", sessionId: `browser-${"a".repeat(64)}` });
+});
+test("forged body participant or session fields are rejected", async () => {
+  const { surface, called } = fixture(); const input = request(); input.body.principalId = "owner";
+  await assert.rejects(surface.dispatch(input), /surface-request-invalid/); assert.deepEqual(called, []);
+});
+test("missing server session binding is refused", async () => {
+  const { surface, called } = fixture(); const input = request(); input.sessionBinding = null;
+  await assert.rejects(surface.dispatch(input), /surface-request-invalid/); assert.deepEqual(called, []);
+});
+test("foreign ownership denial prevents every downstream operation", async () => {
+  const { surface, application, called } = fixture();
+  application.continuity.prepareAnswerContext = async () => { throw new Error("project-scope-denied"); };
+  await assert.rejects(surface.dispatch(request()), /scope-denied/);
+  assert.equal(called.some(item => Array.isArray(item)), false);
+});
+test("personal or ephemeral roots cannot become project or data import targets", async () => {
+  for (const projectId of ["runa:personal","runa:ephemeral"]) {
+    const { surface } = fixture(); const value = request(); value.body.projectId = projectId;
+    await assert.rejects(surface.dispatch(value), /project-required/);
+  }
+});
+test("Chat cannot perform disposable Code operations", async () => {
+  const { surface, called } = fixture(); await assert.rejects(surface.dispatch(request("project.prepare")), /code-experience-required/);
+  assert.equal(called.some(item => Array.isArray(item)), false);
+});
+test("workspace creation uses only app-owned exercise files and deterministic owned environment", async () => {
+  const { surface, called } = fixture(); const value = request("project.prepare"); value.body.experience = "code";
+  const result = await surface.dispatch(value);
+  assert.deepEqual(result.files, M1_EXERCISE_FILES); assert.match(result.environmentId, /^m1-[a-f0-9]{32}$/);
+  assert.equal(called.at(-1)[1].principalId, "alice");
+});
+test("browser cannot replace exercise files or pass a filesystem root", async () => {
+  const { surface } = fixture(); const value = request("project.prepare", { files: { "evil.js": "bad" } }); value.body.experience = "code";
+  await assert.rejects(surface.dispatch(value), /surface-request-invalid/);
+});
+test("cancel is bound to current authenticated project and browser session", async () => {
+  const { surface, called } = fixture(); const value = request("task.cancel", { taskId: "task-1" }); value.body.experience = "code";
+  await surface.dispatch(value); assert.equal(called.at(-1)[0], "cancel"); assert.equal(called.at(-1)[1].projectId, "project-alice");
+});
+
+test("effect-time verifier rechecks online identity and ownership after dispatch", async () => {
+  const { surface, application } = fixture(); const value = request("project.prepare"); value.body.experience = "code";
+  await surface.dispatch(value);
+  const context = { principalId: "alice", projectId: "project-alice", sessionId: `browser-${"a".repeat(64)}` };
+  assert.equal(await surface.sessions.authorize(context), true);
+  application.continuity.prepareAnswerContext = async () => { throw new Error("archived"); };
+  assert.equal(await surface.sessions.authorize(context), false);
+});
+
+test("session revocation, changed principal, restart and expiry cannot reuse authority", async () => {
+  const context = { principalId: "alice", projectId: "project-alice", sessionId: `browser-${"a".repeat(64)}` };
+  for (const revoke of [value => { value.verifySession = async () => { throw new Error("revoked"); }; },
+    (_, application) => { application.authenticator.authenticate = async () => ({ principalId: "bob", verified: true }); }]) {
+    const { surface, application } = fixture(); const value = request("project.prepare"); value.body.experience = "code";
+    await surface.dispatch(value);
+    if (revoke.length === 1) { surface.sessions.entries.values().next().value.verify = async () => { throw new Error("revoked"); }; }
+    else revoke(value, application);
+    assert.equal(await surface.sessions.authorize(context), false);
+  }
+  let now = 0; const sessions = new M1SessionAuthority({ now: () => now, ttlMs: 10 });
+  sessions.register(context, async () => true); now = 11;
+  assert.equal(await sessions.authorize(context), false);
+  assert.equal(await new M1SessionAuthority().authorize(context), false);
+});
+
+test("code endpoints require a live server-session verifier", async () => {
+  const { surface } = fixture(); const value = request("project.prepare"); value.body.experience = "code"; delete value.verifySession;
+  await assert.rejects(surface.dispatch(value), /session-verifier-required/);
+});

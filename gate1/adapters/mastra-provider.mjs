@@ -1,5 +1,6 @@
 import { Agent } from "@mastra/core/agent";
 import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
+import { controlledProviderFetch } from "../../gate7f/function-first/provider-transport.mjs";
 
 function providerError(code, message) {
   return Object.assign(new Error(message), { code });
@@ -36,14 +37,15 @@ function parseVerification(text) {
 
 export class MastraAnswerProvider {
   constructor({ baseURL, modelId, role = "fast-chat-research", providerName = "private-openai-compatible",
-    maxOutputTokens = 512, agent = null, verifierAgent = null }) {
+    maxOutputTokens = 512, agent = null, verifierAgent = null, reasoningEffort = null, preventRedirects = false }) {
     if (!baseURL || !modelId) throw new Error("baseURL and modelId are required");
     this.modelId = modelId;
     this.role = role;
     this.providerName = providerName;
     this.maxOutputTokens = maxOutputTokens;
     const needsProvider = !agent || (role === "code" && !verifierAgent);
-    const provider = needsProvider ? createOpenAICompatible({ name: providerName, baseURL }) : null;
+    const provider = needsProvider ? createOpenAICompatible({ name: providerName, baseURL,
+      fetch: controlledProviderFetch({ baseURL, modelId, reasoningEffort, preventRedirects }) }) : null;
     this.agent = agent ?? new Agent({
       name: `runaai-${role}`,
       model: provider(modelId),

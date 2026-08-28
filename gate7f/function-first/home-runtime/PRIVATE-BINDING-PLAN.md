@@ -104,3 +104,37 @@ The combined isolated Home-runtime regression after this implementation passed10
 The separate atomic completion companion passed3/3; roadmap regression passed15/15. Native Control
 ACL evidence is retained under `evidence/20260828-tls-acl-*` with original raw file hashes, not folded
 into those local test counts.
+
+## Executable two-host operator (not yet activated)
+
+`tls-enrollment-operator.mjs` adds the bounded offline package and transport assembly. `Prepare`
+creates a fresh local descriptor and separate six-file Home/Control packets. The descriptor pins the
+operator itself; all dependent source bytes and both host-specific Node/OpenSSL digests are checked
+again before any SSH dispatch. Home uses its observed Node22.22.1; Control uses the immutable release's
+observed Node22.22.0. Those binaries are deliberately not substituted for one another.
+
+The explicit actions are `UploadHome`, `UploadControl`, `HomeOffer`, `ControlRequest`, `HomeSign`, and
+`ControlImport`, each taking the descriptor path and its complete raw SHA256. Upload creates only the
+new exact staging root/code directory, protects them for SYSTEM/Administrators before writing source,
+and verifies every source pin before any later Node import. The four enrollment operations follow the
+public packet chain; they cannot select a different host, key path, shell operation, model or service.
+Only strict, at-most32KB flat public CSR/certificate packets cross the hosts. Each successful envelope
+is validated before its original raw response and public bytes are retained locally. Private keys are
+generated and remain on the owning host. The existing native libraries independently verify the CSR
+signature, issuer, certificate usages, names, and local private-key match.
+
+All destinations are create-only. A failed/uncertain operation is not repeated automatically; inspect
+its exact owning host's retained enrollment first. This operator has no delete, task, listener, model,
+trust-store, runtime-setting or routing activation action. Enrollment and actual private-subtree writes
+remain scheduled after the candidate campaigns; no live enrollment was executed for this change.
+
+Seven focused tests passed, covering offline exact-byte packets, drift/hardlink refusal before SSH,
+private/unknown/duplicate public-field refusal, exact operation order with retained raw public replies,
+no replay, and parsing all six generated commands in actual Windows PowerShell5. The transport calls
+are test doubles; their public packets come from real local OpenSSL enrollment. They do not prove a
+cross-host deployment. Actual Control ACL proof remains the separately retained result above.
+
+Full operator regression including this assembly passed111/111, zero skips, with Windows OS access.
+The first restricted run passed110/111 and failed the pre-existing CIM task-settings check with
+access denied; it was not treated as a pass or changed to a skip. The unchanged suite was rerun with
+the required OS access. Roadmap regression passed15/15. No Home or Control TLS operation was dispatched.

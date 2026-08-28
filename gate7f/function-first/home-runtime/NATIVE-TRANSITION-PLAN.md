@@ -121,3 +121,28 @@ That independently tested snapshot does not include the subsequently added trans
 
 Current local full operator regression including the prospective transition code passed93/93,
 zero skips; roadmap15/15 passed. No installed transition/probe/promotion was executed by those tests.
+
+## Native admission/drain investigation
+
+Read-only static inspection at2026-08-28T20:58:27.941Z retained selected exact installed-code sections
+in `evidence/20260828-native-drain-source.json`, SHA256
+`f1dde2e18e5eecfcb803534ec827516a817b0166bba35e9b9acf667a3039fae9`.
+The source matches the already-pinned24,258,428-byte LM Studio index.js; the collector parses its
+literal string table but never imports or executes vendor code and never reads settings, credential
+stores, or inference logs. Its `tryStopServer` implementation closes all connections and destroys the
+tracked sockets. It is not a graceful request-drain primitive.
+
+The official [CLI status reference](https://lmstudio.ai/docs/cli/serve/server-status) exposes running/
+port status, not active request accounting. The public
+[diagnostics namespace](https://github.com/lmstudio-ai/lmstudio-js/blob/main/packages/lms-client/src/diagnostics/DiagnosticsNamespace.ts)
+exposes a raw log stream, not a safe aggregate drain counter. No log stream was opened for this work.
+The initial selected-source search did not establish an externally accessible, native-wide admission/
+drain API; this is a bounded search result, not a proof that none exists. A second bounded static
+collector is prepared for the next between-model window, not run during measured campaign traffic.
+
+The actual Control maintenance overlay independently preserves active upstream counters and allows
+its existing requests to finish. That proves only the selected Caddy-proxied path. Direct Home LAN1234
+and trusted local desktop/CLI/internal41343 callers still need a meaningful controlled maintenance
+boundary before any native stop. A zero TCP or resident-model snapshot does not supply that boundary.
+No native transition is authorized by an empty registry alone, and no active caller is knowingly
+terminated merely to make the deployment test pass.

@@ -48,8 +48,9 @@ unchanged. New Coder hardware lease R5 is the same candidate, not a fourth model
 the new full batch must use its own fresh stage and retain the abandoned batch.
 
 The separate Home operational-guard code is integrated but **not activated**. Its root local
-OS/contract regression passed 81/81, zero skips, after the restricted shell's CIM-access failure
-was retained and the unchanged suite rerun with OS access. This does not prove actual Home
+OS/contract regression most recently passed 104/104, zero skips, after integration of
+native transition and private TLS enrollment. The earlier 81/81 run and restricted
+shell's CIM-access failure remain retained. This does not prove actual Home
 installation, native caller quiescence, TLS admission, long-idle behavior or recovery. Those
 operational checks and rollback-protected deployment remain required before the prepared human
 trial. New operator/documentation commits do not change the frozen application under evaluation.

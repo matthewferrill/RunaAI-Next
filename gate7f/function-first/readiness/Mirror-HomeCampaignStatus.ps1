@@ -73,11 +73,40 @@ if(Test-Path -LiteralPath $file){$previous=Get-Content -LiteralPath $file -Raw|C
 $publication=Publish-CampaignMetadata -Target $file -Raw $raw
 [Console]::Out.Write(([ordered]@{mirrored=$true;sharingRetries=$publication.sharingRetries}|ConvertTo-Json -Compress))
 '@
-$publicationHelper=Get-Content -LiteralPath (Join-Path $PSScriptRoot 'Publish-CampaignMetadata.ps1') -Raw
-$writeMirror=$publicationHelper+"`n"+$writeMirror
+$publicationFile=Join-Path $PSScriptRoot 'Publish-CampaignMetadata.ps1'
+$publicationHelper=Get-Content -LiteralPath $publicationFile -Raw
+$publicationDigest=(Get-FileHash -LiteralPath $publicationFile -Algorithm SHA256).Hash.ToLowerInvariant()
+# Keep the SSH/default-command-shell argv bounded. Transfer the exact companion
+# once through stdin, never embed the entire source in every EncodedCommand.
+$installPublisher=@'
+$ErrorActionPreference='Stop';$ProgressPreference='SilentlyContinue'
+$root='__ROOT__';$digest='__HELPER_SHA__'
+if([Security.Principal.WindowsIdentity]::GetCurrent().Name-ne'RUNA-CONTROL\Matthew'){throw 'mirror-owner-invalid'}
+if([IO.Path]::GetDirectoryName($root)-ne'C:\AI\RunaAI-Next-Candidate\staging'-or((Get-Item -LiteralPath $root).Attributes-band[IO.FileAttributes]::ReparsePoint)){throw 'mirror-target-invalid'}
+$identity=Get-Content -LiteralPath (Join-Path $root 'SOURCE-IDENTITY.json') -Raw|ConvertFrom-Json
+if($identity.sourceCommit-ne'__COMMIT__'){throw 'mirror-source-drift'}
+$directory=Join-Path $root 'acceptance-evidence'
+if(-not(Test-Path -LiteralPath $directory -PathType Container)-or((Get-Item -LiteralPath $directory).Attributes-band[IO.FileAttributes]::ReparsePoint)){throw 'mirror-evidence-invalid'}
+$bytes=[Text.UTF8Encoding]::new($false).GetBytes([Console]::In.ReadToEnd())
+if($bytes.Length-lt1-or$bytes.Length-gt65536){throw 'mirror-helper-size-invalid'}
+$sha=[Security.Cryptography.SHA256]::Create()
+try{$actual=([BitConverter]::ToString($sha.ComputeHash($bytes))).Replace('-','').ToLowerInvariant()}finally{$sha.Dispose()}
+if($actual-cne$digest){throw 'mirror-helper-transfer-drift'}
+$file=Join-Path $directory ('metadata-publisher-'+$digest+'.ps1')
+if(Test-Path -LiteralPath $file){if(((Get-Item -LiteralPath $file).Attributes-band[IO.FileAttributes]::ReparsePoint)-or(Get-FileHash -LiteralPath $file -Algorithm SHA256).Hash.ToLowerInvariant()-cne$digest){throw 'mirror-helper-existing-drift'}}
+else{$s=[IO.File]::Open($file,[IO.FileMode]::CreateNew,[IO.FileAccess]::Write,[IO.FileShare]::None);try{$s.Write($bytes,0,$bytes.Length);$s.Flush($true)}finally{$s.Dispose()}}
+[Console]::Out.Write('{"publisherReady":true}')
+'@
+$installPublisher=$installPublisher.Replace('__ROOT__',$target).Replace('__COMMIT__',$ExpectedControlSourceCommit).Replace('__HELPER_SHA__',$publicationDigest)
+$installEncoded=[Convert]::ToBase64String([Text.Encoding]::Unicode.GetBytes($installPublisher))
+$installArguments='-F "'+$sshConfig+'" -o ClearAllForwardings=yes -o BatchMode=yes -o ConnectTimeout=8 runa-control powershell.exe -NoProfile -NonInteractive -EncodedCommand '+$installEncoded
+$installed=(Invoke-BoundedSsh $installArguments $publicationHelper)|ConvertFrom-Json
+if($installed.publisherReady-ne$true){throw 'mirror-helper-install-unconfirmed'}
+$remotePublisher=Join-Path $target ('acceptance-evidence\metadata-publisher-'+$publicationDigest+'.ps1')
+$writeMirror="`$ErrorActionPreference='Stop';`$publisher='"+$remotePublisher+"';if((Get-FileHash -LiteralPath `$publisher -Algorithm SHA256).Hash.ToLowerInvariant()-cne'"+$publicationDigest+"'){throw 'mirror-helper-drift'};. `$publisher`n"+$writeMirror
 $writeMirror=$writeMirror.Replace('__ROOT__',$target).Replace('__COMMIT__',$ExpectedControlSourceCommit).Replace('__LEASE__',$LeaseId).Replace('__SEAL__',$ExpectedSeal)
 $controlEncoded=[Convert]::ToBase64String([Text.Encoding]::Unicode.GetBytes($writeMirror))
-$controlArguments='-F "'+$sshConfig+'" -o ClearAllForwardings=yes -o BatchMode=yes -o ConnectTimeout=8 runa-control powershell.exe -NoProfile -NonInteractive -EncodedCommand '+$controlEncoded
+$controlArguments='-F "'+$sshConfig+'" -o ClearAllForwardings=yes -o BatchMode=yes -o ConnectTimeout=8 runa-control powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -EncodedCommand '+$controlEncoded
 $deadline=[DateTime]::UtcNow.AddSeconds($MaximumSeconds);$samples=0;$sharingRetries=0
 do{
   $raw=Invoke-BoundedSsh $homeArguments

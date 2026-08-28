@@ -64,6 +64,9 @@ function Restore-SettingsActualPreimage([string]$Directory,[string]$ExpectedCurr
   $intent=Read-SettingsIntent $Directory;$backup=$Directory+'\actual-preimage.bin';$target=$intent.target
   Assert-SettingsNoRetainedConflict $Directory $intent
   $prior=Read-SettingsBytes $backup;$priorAcl=Settings-Acl $backup
+  # Direct explicit restoration has the same ownership boundary as interrupted-swap recovery.
+  # A retained foreign atomic preimage is evidence, not authority to write those foreign bytes.
+  if((Settings-Hash $prior)-cne$intent.originalSha256-or$priorAcl-cne$intent.aclSddl){throw 'settings-unowned-preimage-retained'}
   if((Settings-Hash (Read-SettingsBytes $target))-cne$ExpectedCurrentSha256-or(Settings-Acl $target)-cne$priorAcl){throw 'settings-rollback-unrelated-drift'}
   $id=[Guid]::NewGuid().ToString('N');$pending=$Directory+'\restore-'+$id+'.bin';$displaced=$Directory+'\displaced-'+$id+'.bin'
   Write-SettingsNew $pending $prior;Set-SettingsAcl $pending $priorAcl

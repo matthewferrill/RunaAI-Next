@@ -158,3 +158,10 @@ replacing the target. Test direct invocation after a late apply conflict and aft
 it must reject without changing the owned candidate or producing a displaced/restore artifact.
 Normal direct restore and verified formatting-only current-candidate normalization remain supported.
 These are local filesystem regressions only; no Home transition or model call is part of the fix.
+
+Implemented after criteria `ed2fa70`: the direct-call late-preimage regression first reproduced the
+unexpected success, then the helper gained its own exact original hash/ACL check. Focused native
+settings, coordinator and actual Windows file tests passed23/23 with zero skips. Four direct-call
+foreign-preimage variants reject before new files/writes; normalization restores the exact original.
+The earlier unsafe result is retained in the task output, not relabeled as a pass. No live deployment
+or campaign qualification follows from these local filesystem tests.

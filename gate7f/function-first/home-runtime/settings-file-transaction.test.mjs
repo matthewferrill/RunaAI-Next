@@ -85,6 +85,34 @@ test('rollback refuses post-apply unrelated bytes and preserves both versions',{
   assert.match(result.error,/rollback-unrelated-drift/);assert.equal(readFileSync(f.target,'utf8'),'new unrelated settings');
   assert.deepEqual(readFileSync(path.join(f.directory,'actual-preimage.bin')),original);
 });
+test('direct restore rejects every foreign actual preimage before creating or changing a file',{skip:process.platform!=='win32'},t=>{
+  for(const kind of ['late-bytes','late-acl','tampered-bytes','tampered-acl']){
+    const f=fixture(t);
+    const changeAcl=target=>`$acl=Get-Acl -LiteralPath ${target};$acl.SetAccessRuleProtection($true,$true);Set-Acl -LiteralPath ${target} -AclObject $acl`;
+    if(kind.startsWith('late')){
+      const race=kind==='late-bytes'?"[IO.File]::WriteAllText($target,'late-foreign-preimage')":changeAcl('$target');
+      const failed=ps(f,`${create}\n${fail(`Invoke-SettingsFileSwap $directory -BeforeReplace {${race}}`)}`);
+      assert.match(failed.error,/apply-conflict-retained/);
+    }else{
+      ps(f,`${create}\n$null=Invoke-SettingsFileSwap $directory`);
+      if(kind==='tampered-bytes')writeFileSync(path.join(f.directory,'actual-preimage.bin'),'tampered-foreign-preimage');
+      else ps(f,changeAcl("($directory+'\\actual-preimage.bin')"));
+    }
+    const names=readdirSync(f.directory).sort(),current=readFileSync(f.target);
+    const denied=ps(f,fail(`Restore-SettingsActualPreimage $directory '${sha(current)}'`));
+    assert.match(denied.error,/unowned-preimage-retained/);
+    assert.deepEqual(readFileSync(f.target),current);
+    assert.deepEqual(readdirSync(f.directory).sort(),names);
+  }
+});
+
+test('direct restore accepts a verified current-byte normalization but restores exact owned original',{skip:process.platform!=='win32'},t=>{
+  const f=fixture(t);ps(f,`${create}\n$null=Invoke-SettingsFileSwap $directory`);
+  const normalized=Buffer.from(JSON.stringify(JSON.parse(candidate),null,2)+'\r\n');writeFileSync(f.target,normalized);
+  const restored=ps(f,`Restore-SettingsActualPreimage $directory '${sha(normalized)}'|ConvertTo-Json -Compress`);
+  assert.equal(restored.restoredSha256,sha(original));assert.deepEqual(readFileSync(f.target),original);
+});
+
 test('hardlinked settings, reparse ancestors and tampered candidate fail before replacement',{skip:process.platform!=='win32'},t=>{
   const hard=fixture(t);linkSync(hard.target,path.join(hard.root,'alias.json'));
   assert.match(ps(hard,fail(create)).error,/file-bounds/);assert.deepEqual(readFileSync(hard.target),original);

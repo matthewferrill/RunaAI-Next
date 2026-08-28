@@ -75,8 +75,21 @@ ownership evidence. A lost/tampered/oversized reply faults the client and is not
 cross-process flow is tested with a disposable child process. Exclusive process ownership and Windows
 directory ACLs remain installer prerequisites; same-user tests do not prove cross-principal isolation.
 
+`BrokerWorkerController` supplies the proxy-facing unprivileged facade. It validates fresh supervisor
+status, exact profile/generation and every admission/acknowledgment. Revocation, supervisor loss,
+expired grant, or local stop aborts pending requests without declaring them finished. The proxy awaits
+asynchronous release in `finally`; a lost release reply is retained as unknown, never replayed.
+The worker has no native load/unload/power interface. This is separation of code and authority, not
+sandboxing of a compromised local worker: native loopback HTTP remains host-local trusted-process
+access. The installed token permissions do not provide a proved inference-only lifecycle boundary.
+See [native permission findings](NATIVE-PERMISSIONS-2026-08-28.md).
+
+Native preflight and fresh observations now require both existing MCP avenues explicitly denied.
+The parser handles the installed two-stage permission-store envelope and emits only non-secret policy
+metadata, never token entries. Drift or missing permissions closes admission; no model can enable MCP.
+
 Run `node --test gate7f/function-first/home-runtime/*.test.mjs`.
-Local verification2026-08-28:35/35 pass. The60second test uses a controlled clock, not a long inference;
+Local verification2026-08-28:43/43 pass. The60second test uses a controlled clock, not a long inference;
 the incomplete-body regression uses an actual disposable HTTP socket. Native file-link rejection uses
 actual NTFS hardlinks/junctions; the observer was parsed by Windows PowerShell. None is live Home proof.
 The real local TLS regression creates disposable certificates using the installed Git OpenSSL and

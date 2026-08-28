@@ -16,7 +16,7 @@ for(const id of ['gemma','coder','qwen36']){
   for(const event of events.filter(e=>e.type==='load-response'))responses.set(event.key,event.value);
 }
 function fixture(id='gemma'){
-  const values={settings:{justInTimeModelLoading:false,logSensitiveData:false,verbose:false},engine:'engine-process-start-pin',power:260,loaded:[],events:[],loads:[],unloads:[],temperature:40};
+  const values={settings:{justInTimeModelLoading:false,logSensitiveData:false,verbose:false,dynamicRemoteMcpServer:'deny',pluginUse:'deny'},engine:'engine-process-start-pin',power:260,loaded:[],events:[],loads:[],unloads:[],temperature:40};
   const adapter={
     verifyPins:async()=>{},
     observe:async()=>({observedAt:Date.now(),settings:structuredClone(values.settings),engineIdentity:values.engine,
@@ -50,6 +50,15 @@ test('three pinned profiles keep exact primary/MTP and Nomic settings; unknown p
 test('unsafe JIT or logging settings fail before load or power change',async()=>{
   for(const key of ['justInTimeModelLoading','logSensitiveData','verbose']){const f=fixture();f.values.settings[key]=true;
     await assert.rejects(f.controller.start(),/unsafe-server-settings/);assert.equal(f.values.loads.length,0);assert.equal(f.values.power,260);}
+});
+test('native MCP capability drift closes startup and active admissions without adding tool authority',async()=>{
+  for(const key of ['dynamicRemoteMcpServer','pluginUse']){
+    const f=fixture();f.values.settings[key]='allowAll';await assert.rejects(f.controller.start(),/unsafe-native-mcp/);
+    assert.equal(f.values.loads.length,0);assert.equal(f.values.power,260);
+    const active=fixture();await active.controller.start();active.values.settings[key]='allowAll';
+    await assert.rejects(active.controller.admit(),/unsafe-native-mcp/);assert.equal(active.controller.status.phase,'faulted');
+    assert.equal(active.values.loaded.length,0);
+  }
 });
 test('explicit owned startup, idle polling and stop preserve the exact two-model envelope',async()=>{
   const f=fixture();await f.controller.start();assert.equal(f.controller.status.phase,'ready');assert.equal(f.values.power,160);

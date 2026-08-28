@@ -57,7 +57,11 @@ export function createRuntimeProxy({controller,upstream='http://127.0.0.1:1234',
       res.end(body);event({type:'forwarded',method:req.method,path:req.url,requestBytes:raw.length,responseBytes:body.length,status:response.status,generation:ticket.generation});
     }catch(e){abort.abort(e);const code=/^(runtime|lease)-[a-z0-9-]+$/.test(e?.code??'')?e.code:'runtime-request-unavailable';
       reject(code==='runtime-client-denied'?403:503,code);event({type:'denied',code});
-    }finally{clearTimeout(timeout);clearTimeout(bodyTimeout);ticket?.release();req.removeListener('aborted',closed);res.removeListener('close',closed);}
+    }finally{clearTimeout(timeout);clearTimeout(bodyTimeout);
+      // IPC acknowledgement is asynchronous. Never drop its rejection or acknowledge a request
+      // before its upstream iterator settles; a lost reply leaves the privileged grant unknown.
+      try{await ticket?.release();}catch{event({type:'release-unconfirmed',code:'runtime-release-unconfirmed'});}
+      req.removeListener('aborted',closed);res.removeListener('close',closed);}
   });
   server.requestTimeout=RUNTIME_LIMITS.requestMs;server.headersTimeout=10000;server.maxHeadersCount=32;server.maxConnections=32;
   return server;

@@ -8,6 +8,7 @@ import {demand,error,NOMICS,LEASE_POLICY,loadRequest,residentList} from './contr
 const execute=promisify(execFile);
 export const HOME_RUNTIME_ROOT='C:\\AI\\RunaAI-Next-HomeRuntime';
 const SETTINGS='C:\\Users\\Matthew\\.lmstudio\\.internal\\http-server-config.json';
+const PERMISSIONS='C:\\Users\\Matthew\\.lmstudio\\.internal\\permissions-store.json';
 const ENGINE='C:\\Users\\Matthew\\AppData\\Local\\Programs\\LM Studio\\LM Studio.exe';
 const NVIDIA='C:\\Windows\\System32\\nvidia-smi.exe';
 const POWERSHELL='C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe';
@@ -25,6 +26,17 @@ export function assertPlainPath(file,{directory=false}={}){
 export function parseGpuTelemetry(raw){return raw.trim().split(/\r?\n/).map(line=>{
   const f=line.split(',').map(s=>s.trim());demand(f.length===9&&[0,3,4,5,6,7,8].every(i=>f[i]!==''&&Number.isFinite(+f[i])),'gpu-observation');return {index:+f[0],name:f[1],uuid:f[2],
     memoryTotalMiB:+f[3],memoryUsedMiB:+f[4],temperatureC:+f[5],powerLimitWatts:+f[6],powerWatts:+f[7],utilization:+f[8]};});}
+export function parseServerPermissionMetadata(raw){
+  // The existing vendor store may contain token entries. Return only non-secret policy fields;
+  // never forward, serialize, hash or log credential entries or this raw store.
+  demand(Buffer.byteLength(raw)<=1024*1024,'native-permissions-cap');let envelope,value;
+  try{envelope=JSON.parse(raw);value=typeof envelope.json==='string'?JSON.parse(envelope.json):envelope.json;}
+  catch{throw error('native-permissions-format');}
+  demand(value&&['disabled','required'].includes(value.tokenMode),'native-permissions-mode');
+  const permissions=value.serverPermissions;
+  demand(permissions?.dynamicRemoteMcpServer==='deny'&&permissions.pluginUse==='deny','unsafe-native-mcp');
+  return {tokenMode:value.tokenMode,dynamicRemoteMcpServer:'deny',pluginUse:'deny'};
+}
 async function hashFile(file,signal){
   assertPlainPath(file);const descriptor=openSync(file,'r'),before=fstatSync(descriptor),hash=createHash('sha256');
   try{demand(before.nlink===1,'native-file-links');for await(const chunk of createReadStream(file,{fd:descriptor,autoClose:false,highWaterMark:4*1024*1024})){
@@ -72,13 +84,15 @@ export function createPinnedNativeAdapter({operatorPins,stateRoot=HOME_RUNTIME_R
       requireVerified();checkMetadata();assertPlainPath(SETTINGS);
       const settings=JSON.parse(readFileSync(SETTINGS,'utf8'));
       demand(settings.networkInterface==='127.0.0.1','native-server-bypass');
+      assertPlainPath(PERMISSIONS);const permissions=parseServerPermissionMetadata(readFileSync(PERMISSIONS,'utf8'));
       const [inventory,hardware,engine]=await Promise.all([
         api('/api/v1/models',undefined,{signal,timeoutMs:3000}),
         execute(NVIDIA,['--query-gpu=index,name,uuid,memory.total,memory.used,temperature.gpu,power.limit,power.draw,utilization.gpu','--format=csv,noheader,nounits'],{encoding:'utf8',timeout:5000,maxBuffer:8192,windowsHide:true,signal}),
         execute(POWERSHELL,['-NoProfile','-NonInteractive','-ExecutionPolicy','Bypass','-File',script],{encoding:'utf8',timeout:5000,maxBuffer:8192,windowsHide:true,signal})]);
       const identity=JSON.parse(engine.stdout);return {observedAt:identity.observedAt,engineIdentity:identity.engineIdentity,inventory,
         hardware:{freeMemoryBytes:freemem(),gpus:parseGpuTelemetry(hardware.stdout)},
-        settings:{justInTimeModelLoading:settings.justInTimeModelLoading,logSensitiveData:settings.logSensitiveData,verbose:settings.verbose}};
+        settings:{justInTimeModelLoading:settings.justInTimeModelLoading,logSensitiveData:settings.logSensitiveData,verbose:settings.verbose,
+          dynamicRemoteMcpServer:permissions.dynamicRemoteMcpServer,pluginUse:permissions.pluginUse}};
     },
     async setPower(watts,{signal}={}){
       requireVerified();demand(watts===160||watts===260,'native-power');

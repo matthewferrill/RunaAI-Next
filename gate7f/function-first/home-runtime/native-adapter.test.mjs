@@ -4,7 +4,7 @@ import {mkdtempSync,writeFileSync,linkSync,mkdirSync,symlinkSync,rmSync,realpath
 import {execFileSync} from 'node:child_process';
 import path from 'node:path';
 import os from 'node:os';
-import {assertPlainPath,parseGpuTelemetry,createPinnedNativeAdapter,HOME_RUNTIME_ROOT} from './native-adapter.mjs';
+import {assertPlainPath,parseGpuTelemetry,parseServerPermissionMetadata,createPinnedNativeAdapter,HOME_RUNTIME_ROOT} from './native-adapter.mjs';
 import {validateProfile} from './contracts.mjs';
 
 test('native observation parser rejects malformed/nonfinite numeric readings',()=>{
@@ -12,6 +12,18 @@ test('native observation parser rejects malformed/nonfinite numeric readings',()
   assert.equal(v[0].temperatureC,44);assert.equal(v[0].powerLimitWatts,160);
   assert.throws(()=>parseGpuTelemetry('0, bad'),/gpu-observation/);
   assert.throws(()=>parseGpuTelemetry('0,x,id,23040,NaN,40,160,25,0'),/gpu-observation/);
+});
+test('native permission envelope exposes only deny policy metadata, never token entries',()=>{
+  const value={tokenMode:'disabled',tokens:[{syntheticCredential:'never-output'}],serverPermissions:{dynamicRemoteMcpServer:'deny',pluginUse:'deny'}};
+  for(const json of [value,JSON.stringify(value)]){
+    const result=parseServerPermissionMetadata(JSON.stringify({json}));
+    assert.deepEqual(result,{tokenMode:'disabled',dynamicRemoteMcpServer:'deny',pluginUse:'deny'});
+    assert.doesNotMatch(JSON.stringify(result),/never-output|tokens/);
+  }
+  for(const grant of ['allowAll',null,undefined]){
+    assert.throws(()=>parseServerPermissionMetadata(JSON.stringify({json:{...value,serverPermissions:{dynamicRemoteMcpServer:grant,pluginUse:'deny'}}})),/unsafe-native-mcp/);
+  }
+  assert.throws(()=>parseServerPermissionMetadata(JSON.stringify(value)),/native-permissions-mode/);
 });
 test('native plain-path checks execute on ordinary files and actual NTFS hardlink/junction fixtures',()=>{
   const parent=realpathSync(os.tmpdir()),root=mkdtempSync(path.join(parent,'runa-runtime-path-'));

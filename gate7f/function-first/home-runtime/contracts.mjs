@@ -20,6 +20,7 @@ export function validateProfile(input){
 }
 export function settingsSafe(settings){
   demand(settings?.justInTimeModelLoading===false&&settings.logSensitiveData===false&&settings.verbose===false,'unsafe-server-settings');
+  demand(settings.dynamicRemoteMcpServer==='deny'&&settings.pluginUse==='deny','unsafe-native-mcp');
 }
 export function loadRequest(profile,auxiliary=false){return auxiliary?{model:NOMICS.key,context_length:2048,echo_load_config:true}:primaryLoad(profile.candidate);}
 export function verifyLoaded(profile,response,auxiliary=false){

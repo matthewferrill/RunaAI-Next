@@ -127,6 +127,52 @@ integration("durable run preserves the planner role across restart and rejects r
   } finally { await f.close(); }
 });
 
+for (const approveFirst of [false, true]) integration(`a stale pending edit is durably stopped on ${approveFirst ? "approval then resume" : "resume without approval"}`, async () => {
+  let plans = 0;
+  const f = await fixture({ profile: "ask-every-time", planner: { async plan({ snapshot }) { plans++; return planFor(snapshot, true); } } });
+  try {
+    const paused = await f.start(), original = paused.pendingProposal;
+    const otherTask = await f.service.createTask(context, { requestId: "concurrent-task", objective: "Publish another approved correction." });
+    const otherGrant = await f.service.createGrant(context, { taskId: otherTask.taskId, profile: "ask-every-time",
+      allowedPaths: ["index.js"], allowedSuites: [], expiresAt: new Date(Date.now() + 600_000).toISOString() });
+    const current = await f.service.currentProject(context);
+    const other = await f.service.propose(context, { taskId: otherTask.taskId, grantId: otherGrant.grantId,
+      grantRevision: otherGrant.revision, requestId: "concurrent-edit", capabilityId: "project.apply-change",
+      arguments: { path: "index.js", content: "exports.add=(a,b)=>Number(a)+Number(b);", expectedSha256: current.reference.files[0].sha256 } });
+    await f.service.approve(context, { proposalId: other.proposalId, proposalDigest: other.proposalDigest });
+    await f.service.execute(context, { proposalId: other.proposalId });
+    const concurrent = await f.service.currentProject(context);
+    if (approveFirst) await assert.rejects(f.service.approve(context,
+      { proposalId: original.proposalId, proposalDigest: original.proposalDigest }), /m1-stale-project/);
+    const restarted = new M1TaskOrchestrator({ service: f.service, planner: f.chosen, workflow: f.workflow });
+    const stopped = await restarted.resume(context, { runId: paused.run.runId });
+    assert.equal(stopped.run.status, "failed"); assert.equal(stopped.run.errorCode, "m1-stale-project");
+    assert.equal(stopped.pendingProposal.status, "stale");
+    assert.equal(stopped.pendingProposal.proposalDigest, original.proposalDigest);
+    assert.equal(stopped.receipts.length, 0);
+    assert.deepEqual((await f.service.status(context, { taskId: f.task.taskId })).approvableProposalIds, []);
+    assert.deepEqual(await f.service.currentProject(context), concurrent);
+    const replay = await restarted.resume(context, { runId: paused.run.runId });
+    assert.equal(replay.run.status, "failed"); assert.equal(plans, 1);
+    assert.equal(f.adapter.edits, 1); assert.equal(f.adapter.tests, 0);
+    const durable = await f.store.transaction(context, tx => tx.get("proposal", original.proposalId));
+    assert.equal(durable.status, "stale"); assert.equal(durable.errorCode, "m1-stale-project");
+  } finally { await f.close(); }
+});
+
+integration("revoked pending authority fails on resume instead of waiting for an impossible approval", async () => {
+  const f = await fixture({ profile: "ask-every-time" });
+  try {
+    const pending = await f.start();
+    await f.service.revokeGrant(context, { grantId: f.grant.grantId });
+    const stopped = await f.orchestrator.resume(context, { runId: pending.run.runId });
+    assert.equal(stopped.run.status, "failed"); assert.equal(stopped.run.errorCode, "m1-grant-revoked");
+    assert.equal(stopped.pendingProposal.status, "denied");
+    assert.equal(f.adapter.edits, 0); assert.equal(f.adapter.tests, 0);
+    assert.equal(stopped.run.planAttempts, 1);
+  } finally { await f.close(); }
+});
+
 integration("one bounded repair is based on a real failed test receipt and fresh immutable snapshot", async () => {
   let plans = 0;
   const f = await fixture({ planner: { async plan({ snapshot, receipts, repair }) {

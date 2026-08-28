@@ -124,7 +124,7 @@ export class M1TaskOrchestrator {
           }
           let proposal;
           if (run.pendingProposalId) {
-            proposal = (await this.service.proposalState(context, run.pendingProposalId)).proposal;
+            proposal = await this.service.revalidatePending(context, { proposalId: run.pendingProposalId });
           } else {
             const step = currentPlan.steps[run.nextStep];
             proposal = await this.service.propose(context, { taskId: run.taskId, grantId: run.grantId,
@@ -136,8 +136,9 @@ export class M1TaskOrchestrator {
             await this.update(context, runId, state => { state.status = "waiting-approval"; });
             return this.status(context, { runId });
           }
-          if (proposal.status === "denied") {
-            await this.update(context, runId, state => { state.status = "failed"; state.errorCode = "m1-capability-denied"; });
+          if (["denied", "stale", "cancelled", "failed", "not-published"].includes(proposal.status)) {
+            await this.update(context, runId, state => { state.status = "failed";
+              state.errorCode = proposal.errorCode ?? "m1-capability-denied"; });
             return this.status(context, { runId });
           }
           await this.update(context, runId, state => { state.status = "running"; });

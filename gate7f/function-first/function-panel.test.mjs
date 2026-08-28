@@ -59,3 +59,13 @@ test("durable cancellation wins over stale run status on reload and explains uns
   assert.deepEqual(taskPresentation({ task: { status: "active" }, run: { status: "waiting-approval" } }),
     { status: "waiting-approval", notice: null });
 });
+
+test("reopened stale and revoked runs explain the actual durable stop without implying success", () => {
+  const stale = taskPresentation({ task: { status: "active" }, run: { status: "failed", errorCode: "m1-stale-project" } });
+  assert.equal(stale.status, "failed");
+  assert.match(stale.notice, /newer files were preserved/);
+  assert.match(stale.notice, /old action was not applied/);
+  const revoked = taskPresentation({ task: { status: "active" }, run: { status: "failed", errorCode: "m1-grant-revoked" } });
+  assert.match(revoked.notice, /permission is no longer valid/);
+  assert.equal(taskPresentation({ task: { status: "active" }, run: { status: "needs-reconciliation", errorCode: "m1-stale-project" } }).notice, null);
+});

@@ -160,11 +160,13 @@ export class M1TaskService {
 
   async approve(rawContext, rawInput) {
     const context = parseContext(rawContext), input = parseApproval(rawInput);
-    return this.store.transaction(context, async tx => {
+    await this.checkContext(context);
+    const result = await this.store.transaction(context, async tx => {
       const proposal = await this.requireProposal(tx, input.proposalId);
       assert(proposal.proposalDigest === input.proposalDigest, "m1-proposal-digest-mismatch");
       if (proposal.status === "completed") return this.result(tx, proposal, true);
-      await this.authority(tx, context, proposal, { proposal });
+      const errorCode = await this.pendingAuthority(tx, context, proposal);
+      if (errorCode) return { errorCode };
       assert(["pending-approval", "authorized"].includes(proposal.status), "m1-proposal-not-approvable");
       proposal.approval = { principalId: context.principalId, sessionId: context.sessionId,
         proposalDigest: proposal.proposalDigest, grantRevision: proposal.grantRevision,
@@ -174,6 +176,42 @@ export class M1TaskService {
       await tx.audit("proposal-approved", proposal.proposalId, proposal.approval);
       return { proposal, receipt: null };
     });
+    // Commit the precise rejection before throwing to the HTTP caller. Throwing
+    // inside the transaction would leave the obsolete proposal waiting forever.
+    if (result.errorCode) throw failure(result.errorCode);
+    return result;
+  }
+
+  async revalidatePending(rawContext, rawInput) {
+    const context = parseContext(rawContext), { proposalId } = parseProposalId(rawInput);
+    await this.checkContext(context);
+    const result = await this.store.transaction(context, async tx => {
+      const proposal = await this.requireProposal(tx, proposalId);
+      // Once there is an intent, only the normal execution/reconciliation path
+      // may resolve its outcome. A stale authority is not proof it never ran.
+      if (!["pending-approval", "authorized"].includes(proposal.status) || await tx.get("intent", proposalId)) return { proposal };
+      return { proposal, errorCode: await this.pendingAuthority(tx, context, proposal) };
+    });
+    if (result.errorCode) throw failure(result.errorCode);
+    return result.proposal;
+  }
+
+  async pendingAuthority(tx, context, proposal, { requireApproval = false } = {}) {
+    assert(proposal.sessionId === context.sessionId, "m1-grant-session-mismatch");
+    try {
+      await this.authority(tx, context, proposal, { proposal, requireApproval });
+      return null;
+    } catch (error) {
+      const status = error.code === "m1-stale-project" ? "stale"
+        : ["m1-grant-revoked", "m1-grant-expired", "m1-stale-grant"].includes(error.code) ? "denied" : null;
+      if (!status || !["pending-approval", "authorized"].includes(proposal.status)
+          || await tx.get("intent", proposal.proposalId)) throw error;
+      proposal.status = status; proposal.errorCode = error.code; proposal.updatedAt = this.timestamp();
+      await tx.save("proposal", proposal.proposalId, proposal);
+      await tx.audit("pending-proposal-invalidated", proposal.proposalId,
+        { proposalDigest: proposal.proposalDigest, errorCode: error.code });
+      return error.code;
+    }
   }
 
   async execute(rawContext, rawInput) {
@@ -185,7 +223,9 @@ export class M1TaskService {
         const intent = await tx.get("intent", proposalId);
         // An existing dispatch means a previous process may have executed. Never invoke it again.
         if (intent) return { reconcile: true };
-        await this.authority(tx, context, proposal, { proposal, requireApproval: true });
+        await this.checkContext(context);
+        const errorCode = await this.pendingAuthority(tx, context, proposal, { requireApproval: true });
+        if (errorCode) return { errorCode };
         assert(proposal.status === "authorized", "m1-approval-required");
         const nextIntent = { schemaVersion: "runa-m1-effect-intent/v1", effectId: makeId("effect"),
           proposalId, taskId: proposal.taskId, participantId: context.principalId, projectId: context.projectId,
@@ -194,6 +234,7 @@ export class M1TaskService {
         await tx.audit("effect-intent-recorded", nextIntent.effectId, { proposalDigest: proposal.proposalDigest });
         return { proposal, intent: nextIntent };
       });
+      if (start.errorCode) throw failure(start.errorCode);
       if (start.result) return start.result;
       if (start.reconcile) return this.reconcileUnlocked(context, proposalId);
       await this.hooks.afterIntent?.(clone(start));

@@ -19,7 +19,16 @@ export function restoredWorkspaceNotice(result) {
     : null;
 }
 export function taskPresentation(result) {
-  if (result?.task?.status !== "cancelled") return { status: result?.run?.status ?? result?.task?.status ?? "unknown", notice: null };
+  if (result?.task?.status !== "cancelled") {
+    const status = result?.run?.status ?? result?.task?.status ?? "unknown";
+    const code = result?.run?.errorCode;
+    const notice = status === "failed" && code === "m1-stale-project"
+      ? "Stopped: the project changed after this action was proposed. The newer files were preserved; this old action was not applied. Start a new task to work from the current files."
+      : status === "failed" && ["m1-grant-revoked", "m1-grant-expired", "m1-stale-grant"].includes(code)
+        ? "Stopped: this task's permission is no longer valid. No pending action was authorized by this failure."
+        : null;
+    return { status, notice };
+  }
   const unsettled = (result.pendingReconciliation ?? []).length > 0
     || (result.proposals ?? []).some(proposal => ["dispatching", "unknown"].includes(proposal.status));
   return { status: "cancelled", notice: unsettled

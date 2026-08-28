@@ -1,0 +1,68 @@
+{
+  "schemaVersion": "runaai-native-maintenance-static/v1",
+  "observedAt": "2026-08-28T22:58:54.965Z",
+  "sourceSha256": "6cbb7ba8dfeefee1ce523a88e0f9d64687cdad59564ee5e7fbff6bb95d00f22f",
+  "sourceBytes": 24258428,
+  "decodedSha256": "634a4c5805ff239c77f135631a7e3634ccdb8dcfc2cb767aa5be4d197c1f509e",
+  "decoder": "analyze-native-cache.mjs",
+  "decoderSha256": "13608708bbe9ff98fa45eea02adf678189d28cfef1fc9ec82b19e1250c1f8b69",
+  "literalTableRotation": 104,
+  "readOnly": true,
+  "cacheOnly": true,
+  "vendorCodeExecuted": false,
+  "credentialRead": false,
+  "installedOperationProved": false,
+  "admissionClosed": false,
+  "drainProved": false,
+  "sections": [
+    {
+      "name": "cli-passkey-check",
+      "index": 11428595,
+      "length": 1060,
+      "code": ":_0x4db733,'holder':_0x2d346c};}[\"isClientAllowedOrThrow\"]({clientIdentifier:_0x42726f,clientPasskey:_0x4899a2}){const _0x58904d=_0x48d587;if(\"LM Studio\"===_0x42726f){if('internal'===this['type'])return;throw new Error('Client\\x20identifier\\x20\\x27LM\\x20Studio\\x27\\x20is\\x20reserved.');}if(\"LM Link\"===_0x42726f)throw new Error(\"Client identifier 'LM Link' is reserved.\");if(_0x42726f===_0x475e07[\"lmsCliClientIdentifier\"]){if(null===this[\"lmsProviderOrNull\"])throw new Error(\"LMS Provider is not available.\");if(_0x4899a2===this[\"lmsProviderOrNull\"][\"getLmsFullKey\"]())return;throw new Error(_0x5dcc44[\"text\"]`\n            Invalid passkey for lms CLI client. Please make sure you are using the lms shipped with\n            LM Studio.\n          `);}if(_0x42726f[\"startsWith\"](\"plugin:\"))throw new Error(\"Plugin client identifiers are reserved.\");if(null===this[\"permissionsProviderOrNull\"])throw new Error(\"No permissions provider is available to check credentials.\");const _0x3e7045=this[\"permissionsProviderOrNull\"][\"checkCredentials\"](_0x42726f,_0x4899a2);i",
+      "codeSha256": "f7ea58e3b3f8e1fd3d860ae45b1953665417f27f848cd907b11d627047f62f97"
+    },
+    {
+      "name": "native-processing-rpc",
+      "index": 11322020,
+      "length": 490,
+      "code": "4a493c['collapseKVStack'])(_0x14b069);}}),_0x2a6564[\"handleRpcEndpoint\"](\"getInstanceProcessingState\",async({logger:_0x3a0766},{specifier:_0x5c33db})=>(_0x3a0766[\"debug\"]('Getting\\x20instance\\x20processing\\x20state\\x20for\\x20specifier:\\x20'+JSON[\"stringify\"](_0x5c33db)),(await this[\"multiplexedModelLoadingProvider\"][\"getInstanceBySpecifierOrThrow\"](_0x5c33db,this[\"modelDomainType\"]))['processingState'])),_0x2a6564[\"handleRpcEndpoint\"]('estimateModelUsage',async({logger:_0x36aee2},{mode",
+      "codeSha256": "c3536360039f7a176c345af128ddcc5341189882da0fcc20f7992918f70c2c71"
+    },
+    {
+      "name": "embedding-queue-state",
+      "index": 9935990,
+      "length": 1650,
+      "code": "agArgs\"])(_0x3f2f40,_0x1c148f)};}constructor(_0x386989){const _0x2e6eac=_0x4ba6b0;super(_0x386989),this[\"logger\"]=new _0x595177[(\"SimpleLogger\")]('EmbeddingProxyObject'),this['workerFileName']=\"embeddingworker.js\",this[\"embedStringQueue\"]=new _0x595177[(\"WaitQueue\")](),this['embedStringQueue']['queueLengthSignal']['subscribe'](_0x29d70d=>{const _0x52ac01=_0x2e6eac;this[\"setProcessingState\"]['withProducer'](_0x1e7cde=>{const _0x51d5c0=_0x52ac01;_0x1e7cde[\"queued\"]=_0x29d70d;});});}async[\"embedString\"](_0x4fd50c,_0x4c4df2){const _0x36f008=_0x4ba6b0,_0x2a483e={'stack':[],'error':void 0x0,'hasError':!0x1};try{_0x15dfa0(_0x2a483e,this[\"trackBeingUsed\"](),!0x1);const _0x2f847d=_0x15dfa0(_0x2a483e,new _0x595177[(\"Cleaner\")](),!0x1),_0x117221=this[\"embedStringQueue\"][\"enterQueue\"](),_0x16e8a1=await _0x117221[\"wait\"]()[\"catch\"](_0xd3ce02=>{const _0x52b677=_0x36f008;if(_0xd3ce02 instanceof _0x595177[\"QueueClearedError\"])throw new Error(\"Model was unloaded while the request was still in queue.\");throw _0xd3ce02;});_0x2f847d[\"register\"](()=>_0x16e8a1[\"drop\"]()),await this['ensureModelLoaded']();const _0x5156aa=await this[\"getClientPort\"]();return this[\"setProcessingState\"][\"withProducer\"](_0x45eafd=>{const _0x5e347c=_0x36f008;_0x45eafd['status']=\"computingEmbedding\";}),_0x2f847d[\"register\"](()=>{const _0x5b40f7=_0x36f008;this[\"setProcessingState\"]['withProducer'](_0x5ba75f=>{const _0x3b1ba0=_0x5b40f7;_0x5ba75f[\"status\"]='idle';});}),(await _0x5156aa['callRpc'](\"embedString\",{'inputString':_0x4fd50c,'embedConfigStack':_0x4c4df2}))[\"embedding\"];}catch(_0x20095b){_0x2a483e[\"error\"]=_0x20095b,_0x2a483e[\"hasError\"]=!0x0;}finally{_0x40bd59(",
+      "codeSha256": "ffa19f0b2c8593dff08b39c0c5c60a06c09ec1f8baaf30f7ab01beb4b4a798f6"
+    },
+    {
+      "name": "embedding-unload-clears-queue",
+      "index": 9938950,
+      "length": 520,
+      "code": "nally{_0x40bd59(_0xaf2307);}}['onUnload'](_0x4b24e8){const _0x1f7832=_0x4ba6b0;switch(_0x4b24e8[\"type\"]){case'requested':this[\"embedStringQueue\"][\"clearQueue\"]();break;case'crashed':this[\"embedStringQueue\"][\"clearQueue\"](new Error(\"The model has crashed without additional information. (Exit code: \"+_0x4b24e8[\"exitCode\"]+')'));}}['onReload'](){const _0x44ffb0=_0x4ba6b0;this['embedStringQueue'][\"clearQueue\"]();}}_0x5dfe95[\"EmbeddingProxyObject\"]=_0x10c265;},0x18661:function(_0x331ae6,_0x47934a,_0x2e9966){'use strict'",
+      "codeSha256": "efe8e253d0b08831f0a01bd6a54e9e1ea56fdae55980071a2bc93c54948245a3"
+    },
+    {
+      "name": "llm-queue-state",
+      "index": 9962860,
+      "length": 700,
+      "code": "PredictionCount\"]=0x0,this[\"draftModelLoadingState\"]={'type':\"idle\",'indexedModelIdentifier':null},this[\"predictionQueue\"]=new _0x5e9ea2['ParallelPredictionQueue'](()=>this[\"getMaxConcurrentPredictionCount\"]()),[this['processingStatsSignal'],this['setProcessingStats']]=_0x272de5[\"Signal\"][\"create\"]({..._0x3fdb81[\"emptyLlmProcessingStats\"]}),[this[\"processingStatsByRequestSignal\"],this[\"setProcessingStatsByRequest\"]]=_0x272de5['Signal'][\"create\"](new Map()),this[\"predictionQueue\"][\"queueLengthSignal\"][\"subscribe\"](_0x116fff=>{const _0x55ad19=_0x1af263;this[\"setProcessingState\"]['withProducer'](_0x4c801d=>{_0x4c801d['queued']=_0x116fff;});});}['generateRequestId'](){const _0x117f92=_0x319854;r",
+      "codeSha256": "c99046cc45abec001c573608128c6aa5d24e0ead99c548d03c5ac0297ea3c66f"
+    },
+    {
+      "name": "llm-unload-clears-queue",
+      "index": 9987350,
+      "length": 680,
+      "code": "x1efe7c);}}async[\"onUnload\"](_0x2410f1){const _0x26d6a1=_0x319854;if(this['draftModelLoadingState']={'type':\"idle\",'indexedModelIdentifier':null},this[\"clearAllRequestProcessingStats\"](),\"crashed\"===_0x2410f1[\"type\"])this[\"predictionQueue\"]['clearQueue'](new Error(\"The model has crashed without additional information. (Exit code: \"+_0x2410f1['exitCode']+')'));else{if('requested'===_0x2410f1[\"type\"]){const _0x234408=\"explicit\"===_0x2410f1[\"intent\"]?new _0x3d1250[(\"ExplicitModelUnloadError\")](\"Model unloaded.\"):new Error('Model\\x20unloaded.');this[\"predictionQueue\"][\"clearQueue\"](_0x234408);}}}async[\"onReload\"](){const _0x466152=_0x319854;this[\"predictionQueue\"][\"clearQueue",
+      "codeSha256": "9553d1cf19fd579fdab7ef4171c26b9553d651cd314b188ff174b981d9781628"
+    },
+    {
+      "name": "model-unload-terminates-worker",
+      "index": 10013600,
+      "length": 1740,
+      "code": " call: \"+_0x48ccc3);}}async[\"unloadInternal\"](){const _0x14a4a8=_0x5a9a20,_0x4b36ac='loading'===this['loadingStateSignal']['get']()[\"status\"];this[\"setLoadingState\"]({'status':\"unloading\"});const {promise:_0x284fcd,resolve:_0x54d5e5}=(0x0,_0xeb9f55['makePromise'])();if(void 0x0!==this['childUtilityProcess']){void 0x0!==this[\"childUtilityProcess\"]['pid']&&await this['systemResourcesObserver'][\"removePid\"](this[\"childUtilityProcess\"]['pid']);const _0x134a37=this[\"backendInfo\"][\"manifest\"][\"engine\"];'mlx-llm'===_0x134a37&&_0x4b36ac?(0x0,_0x5f4cba[\"log_dev\"])(\"[ModelProxyObject] Canceling MLX model load by terminating the worker process\"):\"vllm\"!==_0x134a37&&\"mlx-llm\"!==_0x134a37||await this['callEngineUnloadAPI']();let _0x42d7c4=0x0;const _0x25b9a0=setInterval(()=>_0xf50cb4(),0xc8),_0x120c10=this[\"childUtilityProcess\"];this[\"childUtilityProcess\"]=void 0x0;const _0xf50cb4=()=>{const _0x470f0a=_0x14a4a8,_0x16f75d=_0x120c10?.[\"kill\"]();_0x42d7c4++,_0x16f75d?((0x0,_0x5f4cba[\"log_dev\"])(_0x42d7c4+\"th kill successful!!!\"),clearInterval(_0x25b9a0),_0x54d5e5()):((0x0,_0x5f4cba[\"log_dev\"])(_0x42d7c4+\"th kill failed\"),_0x42d7c4>0x5&&((0x0,_0x5f4cba[\"log_dev\"])(\"Too many fails, giving up.\"),clearInterval(_0x25b9a0),_0x54d5e5()));};_0xf50cb4();}else _0x54d5e5();await _0x284fcd;}async[\"unload\"](_0x2242fa={}){const _0x3a24fa=_0x5a9a20;null===this[\"unloadReason\"]&&(this[\"crashMonitoring\"]=!0x1,this[\"unloadReason\"]={'type':'requested','intent':_0x2242fa[\"intent\"]},this['onUnload'](this['unloadReason']),await this['unloadInternal'](),this[\"resolveUnloadPromise\"]());}[\"onUnload\"](_0x279a69){}[\"onReload\"](){}[\"getLoadTimeConfigSchematics\"](){const _0x334a9e=_0x5a9a20;return(0x0,_0xf101e4[\"getLoadTimeConfigSchematics\"])(this[\"model\"]",
+      "codeSha256": "005674931e305105c83ea0c4ca4b9d2be746036916b2989be8d4663e48dafb40"
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "schemaVersion": "runaai-native-static-source-cache/v1",
+  "observedAt": "2026-08-28T22:41:58.903Z",
+  "sourceSha256": "6cbb7ba8dfeefee1ce523a88e0f9d64687cdad59564ee5e7fbff6bb95d00f22f",
+  "sourceBytes": 24258428,
+  "collectorScriptSha256": "15c9ae0c49db6cccb27b2f0d3beaadf3e9d3e66d600dff7c5f160ebe7c8534cd",
+  "readOnly": true,
+  "vendorCodeExecuted": false,
+  "modelsCalled": false,
+  "settingsRead": false,
+  "credentialsRead": false,
+  "cachedOnlyInIgnoredLocalArtifacts": true,
+  "vendorBundlePublished": false
+}

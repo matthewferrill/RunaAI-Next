@@ -324,3 +324,51 @@ read-only. Forty focused native, file, child and coordinator tests passed, zero 
 local child termination. These are callback-contract and local OS tests, not an implemented Home-wide
 durable maintenance transaction. Its real private journal/reconciliation and installed native busy/
 caller-closure proof remain required. No live command, configuration or model behavior changed.
+
+The complete local operator suite subsequently passed144/144, zero skips, in41.6seconds. Parent
+independently repeated144/144 in44.5seconds. These do not change the installed-proof limits above.
+
+After Qwen's verified cleanup, the exact public24,258,428-byte vendor bundle was cached in ignored
+local artifacts at22:41:58Z for offline inspection, with SHA6cbb7ba8...d00f22f. No vendor code was
+executed or published. Static CLI inspection at22:42:05Z retained the exact installed `ps --json`
+branch: it calls `getInstanceProcessingState()` and projects status/queued for both model domains.
+The raw static receipt SHA is9b228891db967b818f5bf92566d0aa61b6e4cb0b278b32ee7d8b28abc39ce603.
+
+The actual bounded empty-state CLI probe at22:43:18Z failed, with confirmed child termination and
+zero residency before/after. A separate metadata-only diagnostic at22:44:37Z returned exit1,
+zero stdout and1493bytes stderr; only the categories `passkey` and `Error` matched. Raw error content
+was neither exported nor retained. The specific authentication mechanism is not yet established;
+this is not a successful empty/queued-state qualification. Both failure receipts remain immutable.
+No settings, private credential, native lifecycle or production routing change was made. The exact
+installed client-passkey branch and scoped caller/admission behavior will be investigated offline
+while the next sealed Gemma campaign runs; no further Home inspection overlaps its measurements.
+
+## Prospective supported CLI identity proof
+
+Offline exact-source tracing identifies the `lms-cli` passkey comparison and the native processing
+RPC. It also proves unload is not a drain: both LLM and embedding requested-unload handlers clear
+their queues, and the model proxy terminates its utility worker. Do not use successful unload as
+evidence that accepted work finished. The earlier failed probe ran as codex-audit against Matthew's
+existing engine/profile; a client-identity mismatch is the leading explanation, not yet an actual
+owner-context result. The selected-descriptor branch skips the normal post-discovery key refresh;
+the earlier phrase "omits the default machine-specific key-file read" must not be generalized to all
+initial authentication code. The official [CLI createClient source](https://github.com/lmstudio-ai/lms/blob/main/src/createClient.ts)
+still reads the caller profile's normal key initially. No such key is read or copied by our collector.
+
+After Gemma's complete cleanup, inspect the pinned CLI's exact explicit `--host`/`--port` branch.
+If it matches the supported unprivileged remote-client path, one bounded loopback `ps --json --host
+127.0.0.1 --port 1234` probe can test aggregate state without privileged credentials, discovery, daemon
+startup, or lifecycle calls. Retain its raw metadata or sanitized failure, matching the unchanged
+engine/descriptor and zero resident-model inventories before/after. A negative result is not a reason
+to try reserved client identifiers, alter permissions, create a token, or copy a machine key.
+
+For privileged lifecycle authorization, use the pinned CLI under the real Matthew Windows identity
+in a new uniquely named, finite Interactive scheduled task, not HOME/USERPROFILE overrides. First
+prove only `ps --json`, using the existing exact descriptor and five-second child/output limits.
+The CLI may consume its ordinary local credential privately; the wrapper must not read, print, hash,
+transport, persist or expose that credential. Code/output ACLs and exact task/action/PID/start-time
+ownership must be verified, with a finite supervisor and retained task removal. Only after this actual
+status path succeeds may a separately sealed helper implement the already-bounded start/stop commands
+under the durable journal and independent caller-closure barrier. Neither probe is a native-wide
+admission gate. Positive busy/queued observation and the real controlled-maintenance proof remain
+required; no Home command in these paragraphs runs while a candidate lease is active.

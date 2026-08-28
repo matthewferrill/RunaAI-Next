@@ -5,7 +5,8 @@ contract. Completed r2/r3/r4 diagnostics and three10min smoke packages/records r
 
 The common `campaign-hardware-plan.json` freezes exact operator source bytes, six runtime hashes,
 all three primary artifact/template/load profiles, existing Nomic artifact/context and resource policy.
-Its exact byte SHA256 binds `runtimeSeal.hardwareTelemetryPlanSha256` for the whole360-row campaign.
+Its exact byte SHA256 binds `runtimeSeal.residency.telemetryPolicySha256` for the whole360-row campaign.
+Use that existing strict-schema field, not a new top-level hardware-telemetry field.
 Each candidate's separate create-only lease package binds this common plan plus its own lease ID.
 The returned primary/Nomic instance IDs and per-lease seal are receipts, not a replacement for the
 single common campaign runtime seal. A model key is not substituted for an observed load receipt.

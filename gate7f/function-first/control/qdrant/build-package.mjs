@@ -1,0 +1,13 @@
+import {readFileSync,writeFileSync,mkdirSync,existsSync,lstatSync} from 'node:fs';
+import path from 'node:path';
+import {CONTRACT,SOURCE_FILES,configuration,sha,validatePackage} from './contract.mjs';
+const target=process.argv[2],binary=process.argv[3]??'D:\\Projects\\Runalab\\artifacts\\tools\\qdrant\\bin\\qdrant.exe';
+if(!target||!path.isAbsolute(target)||existsSync(target))throw Error('m1-qdrant-new-absolute-package-required');
+if(lstatSync(binary).isSymbolicLink())throw Error('m1-qdrant-binary-link');
+const files=Object.fromEntries(SOURCE_FILES.map(name=>[name,readFileSync(path.join(import.meta.dirname,name))]));
+files['qdrant.exe']=readFileSync(binary);files['qdrant.yaml']=Buffer.from(configuration());
+const manifest={...CONTRACT,files:Object.entries(files).map(([name,bytes])=>({name,bytes:bytes.length,sha256:sha(bytes)}))};
+validatePackage(manifest,files);
+mkdirSync(target);for(const[name,bytes]of Object.entries(files))writeFileSync(path.join(target,name),bytes,{flag:'wx'});
+const bytes=Buffer.from(JSON.stringify(manifest,null,2)+'\n');writeFileSync(path.join(target,'package.json'),bytes,{flag:'wx'});
+console.log(JSON.stringify({schemaVersion:'runaai-m1-qdrant-package-built/v1',target,packageSha256:sha(bytes),servicesStarted:false,productionChanged:false}));

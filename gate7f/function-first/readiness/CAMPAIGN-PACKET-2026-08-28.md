@@ -4,7 +4,9 @@ Operator source baseline: `dd2caaa`. All packets were created before any campaig
 The common exact-byte hardware plan is
 `evidence/20260828-campaign-hardware-plan-r1.json`, SHA256
 `d4e0d0b96ff4d1c15fb05801dff5c9b0f166c1c308cbbbf4e1a5eeed404e6c80`.
-This value binds the prospective campaign runtime seal's `hardwareTelemetryPlanSha256`.
+This value binds the prospective campaign runtime seal's `residency.telemetryPolicySha256`.
+Use the existing strict-schema field; no new top-level field is added. No frozen packet bytes were
+changed by this integration clarification.
 
 Separate create-only candidate packages:
 

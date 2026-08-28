@@ -14,7 +14,7 @@ separate qualified successor deployment. PostgreSQL remains authoritative; this 
   it has no owner credential or network identity. LocalService is shared with other Windows services,
   so this is least-privilege task separation, not a unique per-service account/security sandbox.
 - Explicit protected ACLs on only the three newly created root/code/state directories: Administrators
-  and SYSTEM retain control; LocalService reads code and modifies only state. Ancestors are inspected,
+  and SYSTEM retain control; within this new subtree LocalService reads code and modifies only state. Ancestors are inspected,
   never repaired recursively. Links, unexpected files, pins or task definitions fail closed.
 - Only loopback HTTP 9774 and gRPC 9775; both must be free before new installation/start. Telemetry,
   cluster mode, CORS and remote snapshot-URL recovery are disabled. Child environment is constructed,
@@ -38,3 +38,44 @@ Task identity follows Microsoft's [LocalService scheduled-task principal](https:
 No operating-system egress sandbox is claimed: disabling known outbound features is configuration,
 not a substitute for a separately tested firewall policy. Loopback is not authorization; application
 actor/project filtering and reference-only derived payload rules remain mandatory.
+
+## Operator entry points
+
+`build-package.mjs ABSOLUTE-NEW-PACKAGE-DIRECTORY` reuses and hashes the existing RunaLab executable,
+copies only the five lifecycle scripts/binary/canonical YAML, and emits the exact `package.json` SHA256.
+It creates no service and downloads nothing. Binary bytes are not committed to Git.
+
+On Control, `Install-ControlM1Qdrant.ps1 -PackageDirectory $packageDirectory
+-ExpectedPackageSha256 $expectedPackageSha256` verifies that package and creates/registers only the
+disabled dedicated installation. `Start-ControlM1Qdrant.ps1 -ExpectedPackageSha256 $expectedPackageSha256`
+is a distinct activation operation; the deployment orchestrator must call it only at the coordinated
+stage. `Rollback-ControlM1Qdrant.ps1` takes the same digest, stops/unregisters only that exact task,
+and retains every file. Re-running installation after a verified rollback can re-register the same
+retained bytes disabled; it does not copy over or rebuild them. A partial/mismatched installation
+fails closed for inspection.
+
+The runner checks binary/code/config before each start, uses an exclusive owned runtime lock, closes
+stdin, monitors both exact loopback listeners, and retains bounded32KiB stdout/stderr tails per run
+under the protected state directory. It never emits raw logs through the public operation receipt.
+Stopping a Windows Qdrant child is a process stop, not a proven graceful database shutdown; the
+rebuildable index and its WAL remain. Actual restart/recovery must be tested before service readiness
+is claimed. No PostgreSQL data is rolled back.
+
+## Local verification and remaining live proof
+
+`node --test gate7f/function-first/control/qdrant/qdrant-control.test.mjs` runs six tests including
+fourteen executed PowerShell contract checks. They hash the actual pinned binary, build a disposable
+package, parse all lifecycle sources, compare JS/PowerShell canonical config bytes, test exact task/
+child/listener contracts with explicit system-API doubles, and create actual NTFS hardlink/junction
+fixtures to verify native rejection. No scheduled task or Qdrant service is started by these tests.
+
+Initial test failures were local harness issues: PowerShell5 inherited a restricted execution policy,
+then a PowerShell7 module path hid Get-FileHash, and one compact Where-Object argument was malformed.
+The harness now uses process-scoped execution policy only, hashing uses .NET directly, and the filter
+is an explicit script block. These are not presented as live Control failures or passing service proof.
+
+Still required in the coordinated Control deployment: verify parent traversal without ACL repair;
+install disabled and re-read task/SID/ACL/pins; start and verify exact listeners/readyz; create a synthetic
+reference-only collection; stop/restart and verify it; rehearse rollback/re-registration; confirm all
+unrelated listeners, registrations, configuration and protected stores unchanged. Keep the task disabled
+or rolled back if any check fails. Human account testing and model/function qualification remain separate.

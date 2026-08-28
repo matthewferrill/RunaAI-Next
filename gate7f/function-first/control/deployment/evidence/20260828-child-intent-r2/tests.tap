@@ -1,0 +1,338 @@
+TAP version 13
+# Subtest: pure provider projection preserves every non-provider byte and exact TLS paths/timeouts
+ok 1 - pure provider projection preserves every non-provider byte and exact TLS paths/timeouts
+  ---
+  duration_ms: 4.0219
+  type: 'test'
+  ...
+# Subtest: closed candidate adds exact GET readiness/framing prefilter before provider maintenance
+ok 2 - closed candidate adds exact GET readiness/framing prefilter before provider maintenance
+  ---
+  duration_ms: 0.8103
+  type: 'test'
+  ...
+# Subtest: raw CRLF predecessor bytes remain CRLF outside the replaced provider block
+ok 3 - raw CRLF predecessor bytes remain CRLF outside the replaced provider block
+  ---
+  duration_ms: 0.697
+  type: 'test'
+  ...
+# Subtest: Caddy binding is reconstructed from the exact original, not self-consistent supplied hashes
+ok 4 - Caddy binding is reconstructed from the exact original, not self-consistent supplied hashes
+  ---
+  duration_ms: 2.6845
+  type: 'test'
+  ...
+# Subtest: unknown provider/TLS preimage or unsafe enrollment is denied v=>v.originalBytes=Buffer.from(caddyfile.replace('http://192.168.50.165:1234','http://other:1234'))
+ok 5 - unknown provider/TLS preimage or unsafe enrollment is denied v=>v.originalBytes=Buffer.from(caddyfile.replace('http://192.168.50.165:1234','http://other:1234'))
+  ---
+  duration_ms: 0.2597
+  type: 'test'
+  ...
+# Subtest: unknown provider/TLS preimage or unsafe enrollment is denied v=>v.originalBytes=Buffer.concat([v.originalBytes,Buffer.from('http://127.0.0.1:9770 {}\\n')])
+ok 6 - unknown provider/TLS preimage or unsafe enrollment is denied v=>v.originalBytes=Buffer.concat([v.originalBytes,Buffer.from('http://127.0.0.1:9770 {}\\n')])
+  ---
+  duration_ms: 0.2653
+  type: 'test'
+  ...
+# Subtest: unknown provider/TLS preimage or unsafe enrollment is denied v=>v.enrollment.enrollmentId='..\\\\secrets'
+ok 7 - unknown provider/TLS preimage or unsafe enrollment is denied v=>v.enrollment.enrollmentId='..\\\\secrets'
+  ---
+  duration_ms: 0.2158
+  type: 'test'
+  ...
+# Subtest: unknown provider/TLS preimage or unsafe enrollment is denied v=>v.enrollment.serverName='other'
+ok 8 - unknown provider/TLS preimage or unsafe enrollment is denied v=>v.enrollment.serverName='other'
+  ---
+  duration_ms: 0.1434
+  type: 'test'
+  ...
+# Subtest: unknown provider/TLS preimage or unsafe enrollment is denied v=>v.enrollment.clientExpiresAt='2000-01-01'
+ok 9 - unknown provider/TLS preimage or unsafe enrollment is denied v=>v.enrollment.clientExpiresAt='2000-01-01'
+  ---
+  duration_ms: 0.4248
+  type: 'test'
+  ...
+# Subtest: unknown provider/TLS preimage or unsafe enrollment is denied v=>v.enrollment.privateMaterialIncluded=true
+ok 10 - unknown provider/TLS preimage or unsafe enrollment is denied v=>v.enrollment.privateMaterialIncluded=true
+  ---
+  duration_ms: 0.6474
+  type: 'test'
+  ...
+# Subtest: unknown provider/TLS preimage or unsafe enrollment is denied v=>v.enrollment.key='secret'
+ok 11 - unknown provider/TLS preimage or unsafe enrollment is denied v=>v.enrollment.key='secret'
+  ---
+  duration_ms: 0.3206
+  type: 'test'
+  ...
+# Subtest: configuration projection changes only enumerated M1 data and does not imply qualification
+ok 12 - configuration projection changes only enumerated M1 data and does not imply qualification
+  ---
+  duration_ms: 34.1458
+  type: 'test'
+  ...
+# Subtest: mixed primary, bypass route or deadline widening is denied v=>v.provider.models.code='qwen3-coder-30b-a3b-instruct'
+ok 13 - mixed primary, bypass route or deadline widening is denied v=>v.provider.models.code='qwen3-coder-30b-a3b-instruct'
+  ---
+  duration_ms: 26.5679
+  type: 'test'
+  ...
+# Subtest: mixed primary, bypass route or deadline widening is denied v=>v.provider.baseUrl='http://127.0.0.1:1234/v1'
+ok 14 - mixed primary, bypass route or deadline widening is denied v=>v.provider.baseUrl='http://127.0.0.1:1234/v1'
+  ---
+  duration_ms: 17.2466
+  type: 'test'
+  ...
+# Subtest: mixed primary, bypass route or deadline widening is denied v=>v.functionFirst.reranker.baseUrl='http://192.168.50.165:8412'
+ok 15 - mixed primary, bypass route or deadline widening is denied v=>v.functionFirst.reranker.baseUrl='http://192.168.50.165:8412'
+  ---
+  duration_ms: 17.1308
+  type: 'test'
+  ...
+# Subtest: mixed primary, bypass route or deadline widening is denied v=>v.functionFirst.qdrant.endpoint='http://127.0.0.1:9773'
+ok 16 - mixed primary, bypass route or deadline widening is denied v=>v.functionFirst.qdrant.endpoint='http://127.0.0.1:9773'
+  ---
+  duration_ms: 16.4806
+  type: 'test'
+  ...
+# Subtest: mixed primary, bypass route or deadline widening is denied v=>v.functionFirst.embedding.baseUrl='http://192.168.50.165:1234/v1'
+ok 17 - mixed primary, bypass route or deadline widening is denied v=>v.functionFirst.embedding.baseUrl='http://192.168.50.165:1234/v1'
+  ---
+  duration_ms: 18.395
+  type: 'test'
+  ...
+# Subtest: mixed primary, bypass route or deadline widening is denied v=>v.prior.limits.totalDeadlineMs=120000
+ok 18 - mixed primary, bypass route or deadline widening is denied v=>v.prior.limits.totalDeadlineMs=120000
+  ---
+  duration_ms: 19.0635
+  type: 'test'
+  ...
+# Subtest: synthetic verifier fixture cannot qualify the frozen real runtime seal
+ok 19 - synthetic verifier fixture cannot qualify the frozen real runtime seal
+  ---
+  duration_ms: 38.392
+  type: 'test'
+  ...
+# Subtest: pinned Caddy offline adaptation accepts mTLS and literal closed-candidate routing
+ok 20 - pinned Caddy offline adaptation accepts mTLS and literal closed-candidate routing
+  ---
+  duration_ms: 775.7536
+  type: 'test'
+  ...
+# Subtest: actual child intent, PID/start identity and terminal are durable and exactly linked
+ok 21 - actual child intent, PID/start identity and terminal are durable and exactly linked
+  ---
+  duration_ms: 2523.3529
+  type: 'test'
+  ...
+# {"coordinatorProcessId":28836,"exitCode":0,"processId":37432,"records":3,"stopped":true,"errorCode":null,"firstUnknown":false,"restartErrorCode":null,"restartUnknown":false,"sideEffect":"effect\\n","rawRecords":[{"schemaVersion":"runaai-m1-deployment-child-intent/v1","stage":"intent","transitionId":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","childId":"d5245f8d32044bd380abb5c5048a0b86","operation":"qualification","executableSha256":"bae898add4643fcf890a83ad8ae56e20dce7e781cab161a53991ceba70c99ffb","argumentsSha256":"cbf973a0b0b368c63605064d69f631f5dd1dd174c629a03a9f250a875e4043b7","maximumMs":5000,"preparedAt":"2026-08-28T22:10:35.3341393Z","privateValuesIncluded":false},{"schemaVersion":"runaai-m1-deployment-child-started/v1","stage":"started","intentSha256":"c6388e66fbf99aa7bb3329ce3e3ce18562903e871b5e84aa1c2e7c18c9bc2abd","childId":"d5245f8d32044bd380abb5c5048a0b86","transitionId":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","operation":"qualification","executableSha256":"bae898add4643fcf890a83ad8ae56e20dce7e781cab161a53991ceba70c99ffb","argumentsSha256":"cbf973a0b0b368c63605064d69f631f5dd1dd174c629a03a9f250a875e4043b7","maximumMs":5000,"processId":37432,"processStartedAt":"2026-08-28T22:10:35.3954007Z","observedAt":"2026-08-28T22:10:35.4045977Z","privateValuesIncluded":false},{"schemaVersion":"runaai-m1-deployment-child/v1","stage":"terminal","transitionId":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","childId":"d5245f8d32044bd380abb5c5048a0b86","operation":"qualification","executableSha256":"bae898add4643fcf890a83ad8ae56e20dce7e781cab161a53991ceba70c99ffb","maximumMs":5000,"argumentsSha256":"cbf973a0b0b368c63605064d69f631f5dd1dd174c629a03a9f250a875e4043b7","intentSha256":"c6388e66fbf99aa7bb3329ce3e3ce18562903e871b5e84aa1c2e7c18c9bc2abd","startedRecordSha256":"09d23d63bb513d024d80360d7a7362dd6c47c72137e92f356cd4d7f898657cc3","started":true,"processId":37432,"processStartedAt":"2026-08-28T22:10:35.3954007Z","startedAt":"2026-08-28T22:10:35.3900905Z","finishedAt":"2026-08-28T22:10:35.4705380Z","stopConfirmed":true,"timedOut":false,"outputLimited":false,"outputComplete":true,"exitCode":0,"stdoutBytes":0,"stderrBytes":0,"outcome":"terminal","privateValuesIncluded":false}]}
+# Subtest: actual child side effect followed by start-observer throw remains unknown; exact child stops and restart cannot replay
+ok 22 - actual child side effect followed by start-observer throw remains unknown; exact child stops and restart cannot replay
+  ---
+  duration_ms: 4330.5091
+  type: 'test'
+  ...
+# {"coordinatorProcessId":4048,"exitCode":-1,"processId":24628,"records":1,"stopped":true,"errorCode":"m1-deploy-child-outcome-unknown","firstUnknown":true,"restartCoordinatorProcessId":13660,"restartUnknown":true,"restartErrorCode":"m1-deploy-reconciliation-required","sideEffect":"effect\\n","rawRecords":[{"schemaVersion":"runaai-m1-deployment-child-intent/v1","stage":"intent","transitionId":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","childId":"63ed6cabd89d4c4c92cb52d5c3181d98","operation":"qualification","executableSha256":"bae898add4643fcf890a83ad8ae56e20dce7e781cab161a53991ceba70c99ffb","argumentsSha256":"c44b1a763e91433a91f796620d0c269ba1b1bebccc885240698686645e9d27b7","maximumMs":5000,"preparedAt":"2026-08-28T22:10:37.7114286Z","privateValuesIncluded":false}]}
+# Subtest: actual completed child with lost terminal record retains unknown despite successful effect; restart cannot replay
+ok 23 - actual completed child with lost terminal record retains unknown despite successful effect; restart cannot replay
+  ---
+  duration_ms: 3930.0472
+  type: 'test'
+  ...
+# {"coordinatorProcessId":424,"exitCode":-1,"processId":34840,"records":2,"stopped":true,"errorCode":"m1-deploy-child-receipt-unretained","firstUnknown":true,"restartCoordinatorProcessId":18636,"restartUnknown":true,"restartErrorCode":"m1-deploy-reconciliation-required","sideEffect":"effect\\n","rawRecords":[{"schemaVersion":"runaai-m1-deployment-child-intent/v1","stage":"intent","transitionId":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","childId":"58a35a7fa84f40bd8bd7b106ff6387b6","operation":"qualification","executableSha256":"bae898add4643fcf890a83ad8ae56e20dce7e781cab161a53991ceba70c99ffb","argumentsSha256":"d7e066b5964375149236d694e17b762141451d56092aa92a76cbd7f6c056e2da","maximumMs":5000,"preparedAt":"2026-08-28T22:10:41.8460988Z","privateValuesIncluded":false},{"schemaVersion":"runaai-m1-deployment-child-started/v1","stage":"started","intentSha256":"fc8fc7027b5543a78f24d034a4b389596735b52e2210388b4c6d03d02ecda355","childId":"58a35a7fa84f40bd8bd7b106ff6387b6","transitionId":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","operation":"qualification","executableSha256":"bae898add4643fcf890a83ad8ae56e20dce7e781cab161a53991ceba70c99ffb","argumentsSha256":"d7e066b5964375149236d694e17b762141451d56092aa92a76cbd7f6c056e2da","maximumMs":5000,"processId":34840,"processStartedAt":"2026-08-28T22:10:41.9072077Z","observedAt":"2026-08-28T22:10:41.9161570Z","privateValuesIncluded":false}]}
+# Subtest: a successful terminal from a different child cannot resolve the retained exact intent after restart
+ok 24 - a successful terminal from a different child cannot resolve the retained exact intent after restart
+  ---
+  duration_ms: 4139.6851
+  type: 'test'
+  ...
+# {"coordinatorProcessId":11316,"exitCode":0,"processId":37756,"records":3,"stopped":true,"errorCode":null,"firstUnknown":false,"restartCoordinatorProcessId":37572,"restartUnknown":true,"restartErrorCode":"m1-deploy-reconciliation-required","sideEffect":"effect\\n","rawRecords":[{"schemaVersion":"runaai-m1-deployment-child-intent/v1","stage":"intent","transitionId":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","childId":"f4cc9a3effcb4c03a652dff214cfd93d","operation":"qualification","executableSha256":"bae898add4643fcf890a83ad8ae56e20dce7e781cab161a53991ceba70c99ffb","argumentsSha256":"0996c41df4e18a10522af2518fca44d9a61bc817f53440ae6a683e6bb5a1e6ee","maximumMs":5000,"preparedAt":"2026-08-28T22:10:45.8684158Z","privateValuesIncluded":false},{"schemaVersion":"runaai-m1-deployment-child-started/v1","stage":"started","intentSha256":"e610e1433c02e1c4fa1fcb95ba3fa40d2035eb7cc937f48e4176193711a77d7f","childId":"f4cc9a3effcb4c03a652dff214cfd93d","transitionId":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","operation":"qualification","executableSha256":"bae898add4643fcf890a83ad8ae56e20dce7e781cab161a53991ceba70c99ffb","argumentsSha256":"0996c41df4e18a10522af2518fca44d9a61bc817f53440ae6a683e6bb5a1e6ee","maximumMs":5000,"processId":37756,"processStartedAt":"2026-08-28T22:10:45.9338807Z","observedAt":"2026-08-28T22:10:45.9484510Z","privateValuesIncluded":false},{"schemaVersion":"runaai-m1-deployment-child/v1","stage":"terminal","transitionId":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","childId":"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb","operation":"qualification","executableSha256":"bae898add4643fcf890a83ad8ae56e20dce7e781cab161a53991ceba70c99ffb","maximumMs":5000,"argumentsSha256":"0996c41df4e18a10522af2518fca44d9a61bc817f53440ae6a683e6bb5a1e6ee","intentSha256":"e610e1433c02e1c4fa1fcb95ba3fa40d2035eb7cc937f48e4176193711a77d7f","startedRecordSha256":"80565dac9e6cc3e022ff51b3162b74b48487f8c8bd9e6abede7d0029df92fe10","started":true,"processId":37756,"processStartedAt":"2026-08-28T22:10:45.9338807Z","startedAt":"2026-08-28T22:10:45.9281809Z","finishedAt":"2026-08-28T22:10:46.0088213Z","stopConfirmed":true,"timedOut":false,"outputLimited":false,"outputComplete":true,"exitCode":0,"stdoutBytes":0,"stderrBytes":0,"outcome":"terminal","privateValuesIncluded":false}]}
+# Subtest: frozen deployer is retained and companion is a separate four-file package
+ok 25 - frozen deployer is retained and companion is a separate four-file package
+  ---
+  duration_ms: 5.1016
+  type: 'test'
+  ...
+# Subtest: one-byte source drift and newline rewriting are denied, never silently normalized
+ok 26 - one-byte source drift and newline rewriting are denied, never silently normalized
+  ---
+  duration_ms: 2.0933
+  type: 'test'
+  ...
+# Subtest: companion retains ordinary identity/readiness and removes all Caddy publication/rollback
+ok 27 - companion retains ordinary identity/readiness and removes all Caddy publication/rollback
+  ---
+  duration_ms: 1.3289
+  type: 'test'
+  ...
+# Subtest: bounded wrappers preserve exact argument arrays and packaged node, not PATH node
+ok 28 - bounded wrappers preserve exact argument arrays and packaged node, not PATH node
+  ---
+  duration_ms: 1.2955
+  type: 'test'
+  ...
+# Subtest: generated complete PowerShell script parses without executing its operational statements
+ok 29 - generated complete PowerShell script parses without executing its operational statements
+  ---
+  duration_ms: 896.7226
+  type: 'test'
+  ...
+# Subtest: actual isolated bounded child retains complete stdout and an observed exit
+ok 30 - actual isolated bounded child retains complete stdout and an observed exit
+  ---
+  duration_ms: 1083.0205
+  type: 'test'
+  ...
+# Subtest: actual isolated hanging child is stopped within deadline and not reported successful
+ok 31 - actual isolated hanging child is stopped within deadline and not reported successful
+  ---
+  duration_ms: 1173.793
+  type: 'test'
+  ...
+# Subtest: actual isolated output flood is bounded and never returned as complete output
+ok 32 - actual isolated output flood is bounded and never returned as complete output
+  ---
+  duration_ms: 1109.9825
+  type: 'test'
+  ...
+# Subtest: private child receipt path is create-only and unknown forbids blind retry/rollback
+ok 33 - private child receipt path is create-only and unknown forbids blind retry/rollback
+  ---
+  duration_ms: 1.6218
+  type: 'test'
+  ...
+# Subtest: synthetic packaging plan binds exact source and all supplied bytes without claiming qualification/activation
+ok 34 - synthetic packaging plan binds exact source and all supplied bytes without claiming qualification/activation
+  ---
+  duration_ms: 73.5736
+  type: 'test'
+  ...
+# Subtest: packaging rejects changed identity
+ok 35 - packaging rejects changed identity
+  ---
+  duration_ms: 39.8728
+  type: 'test'
+  ...
+# Subtest: packaging rejects wrong app source
+ok 36 - packaging rejects wrong app source
+  ---
+  duration_ms: 28.7922
+  type: 'test'
+  ...
+# Subtest: packaging rejects wrong frozen seal
+ok 37 - packaging rejects wrong frozen seal
+  ---
+  duration_ms: 23.7113
+  type: 'test'
+  ...
+# Subtest: packaging rejects mixed Home profile
+ok 38 - packaging rejects mixed Home profile
+  ---
+  duration_ms: 31.9825
+  type: 'test'
+  ...
+# Subtest: packaging rejects wrong grades
+ok 39 - packaging rejects wrong grades
+  ---
+  duration_ms: 27.5073
+  type: 'test'
+  ...
+# Subtest: packaging rejects wrong candidate route bytes
+ok 40 - packaging rejects wrong candidate route bytes
+  ---
+  duration_ms: 28.3117
+  type: 'test'
+  ...
+# Subtest: packaging rejects unknown TLS file
+ok 41 - packaging rejects unknown TLS file
+  ---
+  duration_ms: 26.3411
+  type: 'test'
+  ...
+# Subtest: packaging rejects path-injected companion
+ok 42 - packaging rejects path-injected companion
+  ---
+  duration_ms: 39.7363
+  type: 'test'
+  ...
+# Subtest: packaging rejects altered helper byte
+ok 43 - packaging rejects altered helper byte
+  ---
+  duration_ms: 38.1188
+  type: 'test'
+  ...
+# Subtest: packaging rejects manifest stale role selection
+ok 44 - packaging rejects manifest stale role selection
+  ---
+  duration_ms: 32.5625
+  type: 'test'
+  ...
+# Subtest: packaging rejects wrong launcher
+ok 45 - packaging rejects wrong launcher
+  ---
+  duration_ms: 26.9596
+  type: 'test'
+  ...
+# Subtest: later closed-phase argv is exact data only and keeps final config separate from held candidate-closed Caddy
+ok 46 - later closed-phase argv is exact data only and keeps final config separate from held candidate-closed Caddy
+  ---
+  duration_ms: 22.5231
+  type: 'test'
+  ...
+# Subtest: closed/drained Control transaction stops at real missing Home adapter, with exact safe rollback available
+ok 47 - closed/drained Control transaction stops at real missing Home adapter, with exact safe rollback available
+  ---
+  duration_ms: 98.9402
+  type: 'test'
+  ...
+# Subtest: unknown admission blocks retry and rollback even when snapshot appears closed
+ok 48 - unknown admission blocks retry and rollback even when snapshot appears closed
+  ---
+  duration_ms: 36.756
+  type: 'test'
+  ...
+# Subtest: pending restore remains unknown until exact same request terminates; never becomes quiescent again
+ok 49 - pending restore remains unknown until exact same request terminates; never becomes quiescent again
+  ---
+  duration_ms: 40.8845
+  type: 'test'
+  ...
+# Subtest: outer state and inner quiescence revision must both be current before any decision
+ok 50 - outer state and inner quiescence revision must both be current before any decision
+  ---
+  duration_ms: 36.2948
+  type: 'test'
+  ...
+# Subtest: stale zero counters are not transferable native authority
+ok 51 - stale zero counters are not transferable native authority
+  ---
+  duration_ms: 36.3595
+  type: 'test'
+  ...
+# Subtest: cached Home boolean and listener marker cannot activate an unimplemented path
+ok 52 - cached Home boolean and listener marker cannot activate an unimplemented path
+  ---
+  duration_ms: 29.6066
+  type: 'test'
+  ...
+# Subtest: effect identity/terminal history cannot be rewritten while retaining apparent valid snapshots
+ok 53 - effect identity/terminal history cannot be rewritten while retaining apparent valid snapshots
+  ---
+  duration_ms: 37.1098
+  type: 'test'
+  ...
+# Subtest: claims that app/Home already changed cannot use the pre-native rollback contract to reopen old routes
+ok 54 - claims that app/Home already changed cannot use the pre-native rollback contract to reopen old routes
+  ---
+  duration_ms: 26.394
+  type: 'test'
+  ...
+1..54
+# tests 54
+# suites 0
+# pass 54
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 15064.2322

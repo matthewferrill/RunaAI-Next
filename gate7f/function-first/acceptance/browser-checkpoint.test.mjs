@@ -17,7 +17,7 @@ test("campaign cancellation ends a pending browser checkpoint without consuming 
   const directory=await mkdtemp(path.join(tmpdir(),"m1-browser-abort-"));t.after(()=>rm(directory,{recursive:true,force:true}));
   const item=CONTROL_CASES.find(item=>item.id==="control-10-unknown-execution"),ledger=new ObservationLedger(newObservation({...item,role:"control"}));
   const controller=new AbortController(),checkpoint=createBrowserCheckpoint({directory,signal:controller.signal,announce(){controller.abort();}});
-  await assert.rejects(checkpoint({client:{ledger,item,principalId:"m1-test-"+"a".repeat(32),session:{},projectId:"fixture",experience:"code",
+  await assert.rejects(checkpoint({client:{ledger,item:{setup:{project:"fixture"}},principalId:"m1-test-"+"a".repeat(32),session:{},projectId:"fixture",experience:"code",
     host:{baseUrl:"http://127.0.0.1:12345",async createBootstrap(){return{nonce:"synthetic-unit-nonce"};}}},phase:"unknown",stage:"unknown"}),/m1-browser-checkpoint-aborted/);
   assert.equal(ledger.observation.checks.length,0);
 });

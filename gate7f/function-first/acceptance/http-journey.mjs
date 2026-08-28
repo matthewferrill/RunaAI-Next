@@ -69,7 +69,7 @@ export class FunctionalHttpJourney {
   async answer(action) {
     const sources = [...this.sources.values()].filter(source => this.item.setup.selected?.includes(source.alias));
     const request = { requestId: this.id("answer"), projectId: this.projectId, threadId: this.threadId,
-      experience: this.experience, lane: this.item.role === "research" || this.item.role === "review" ? this.item.role : "general",
+      experience: this.experience, lane: this.item.role === "research" || this.item.role === "review" ? this.item.role : this.experience === "code" ? "code" : "general",
       message: action.message, history: [], contextRevision: this.contextRevision,
       ...(sources.length ? { workspace: { sources: sources.map(({ sourceId, sectionId }) => ({ sourceId, sectionId })) } } : {}) };
     const response = await this.http("answer", "/api/selected/answer", request);

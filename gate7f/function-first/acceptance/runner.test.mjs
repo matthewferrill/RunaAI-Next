@@ -5,8 +5,9 @@ import { once } from "node:events";
 import { inventory, newObservation, ObservationLedger, assertOwnedStage, validateRuntimeSeal, QDRANT_PIN } from "./runner-contract.mjs";
 import { CASE_BUNDLE_SHA256, ACCEPTANCE_POLICY, MODEL_CASES } from "./cases.mjs";
 import { startCaptureTransport, startOwnedIndexProxy } from "./capture-transport.mjs";
-import { parseArguments, runControlFunctional } from "./control-functional.mjs";
+import { parseArguments, runControlFunctional, bindControlRuntimeSeal } from "./control-functional.mjs";
 import { withSyntheticBootstrap } from "./browser-bootstrap.mjs";
+import { acceptancePublicStatus } from "./functional-host.mjs";
 
 async function endpoint(handler) { const server = createServer(handler); server.listen(0,"127.0.0.1"); await once(server,"listening");
   return { url:`http://127.0.0.1:${server.address().port}`, async close(){await new Promise(resolve=>{server.close(resolve);server.closeAllConnections();});} }; }
@@ -38,6 +39,14 @@ test("runtime seal requiresall3candidates and onlyenforcedrolebudgets",()=>{vali
 test("runtime seal rejects publicauxiliary or embeddedcredentials",()=>{for(const url of ["https://external.example","http://user@127.0.0.1:5555"]){const value=seal();value.embedding.baseUrl=url;assert.throws(()=>validateRuntimeSeal(value));}});
 test("candidate reasoningcontrols remain separate whilefunction budgets stayidentical",()=>{const value=seal();value.candidates[0].requestControls.chat.reasoningEffort="none";
   const checked=validateRuntimeSeal(value);assert.equal(checked.candidates[0].requestControls.chat.reasoningEffort,"none");assert.equal(checked.candidates[1].requestControls.chat.reasoningEffort,null);});
+
+test("model-free controls bind the common prospective seal only after every shared artifact matches",()=>{
+  const value=seal(), control={sourceCommit:value.sourceCommit,...value.runtime};
+  const bound=bindControlRuntimeSeal(value,control,Buffer.from(JSON.stringify(value)));assert.match(bound.runtimeSealSha256,/^[a-f0-9]{64}$/);
+  for(const field of ["sourceArchiveSha256","packageLockSha256","nodeSha256","qdrantSha256"])
+    assert.throws(()=>bindControlRuntimeSeal(value,{...control,[field]:"f".repeat(64)},Buffer.from("x")),/mismatch/);
+  assert.throws(()=>bindControlRuntimeSeal(value,{...control,sourceCommit:"c".repeat(40)},Buffer.from("x")),/mismatch/);
+});
 test("native evidence doesnot mutate versionedreceipt withphase metadata",()=>{const l=ledger(),receipt={schemaVersion:"example/v1",value:7};l.evidence("host-runtime","native-receipt",receipt);
   assert.deepEqual(l.observation.evidence[0].data,receipt);assert.equal(l.observation.evidence[0].phase,"setup");});
 test("controls transport deniesall model,embedding andreranker inference beforeupstream",async()=>{let reached=0;const target=await endpoint((q,s)=>{reached++;s.end("{}");});
@@ -66,6 +75,13 @@ test("bootstrap onlyissuescookie once fromnonce; doesnotexposesessiontoscript",a
   try{const call=()=>fetch(bootstrap.url,{method:"POST",headers:{origin:identities.publicBaseUrl,"content-type":"application/x-www-form-urlencoded"},body:`nonce=${bootstrap.nonce}`,redirect:"manual"});
     const response=await call();assert.equal(response.status,303);assert.match(response.headers.get("set-cookie"),/HttpOnly/);assert.equal(await response.text(),"");assert.equal((await call()).status,403);assert.equal(issued,1);
     assert.equal(await(await fetch(identities.publicBaseUrl)).text(),"shipped-route");
+    const page=await fetch(bootstrap.url),html=await page.text();assert.match(html,/bootstrap\.js/);assert.match(html,/type='text'/);
+    assert.match(page.headers.get("content-security-policy"),/script-src 'self'/);
+    const script=await(await fetch(`${identities.publicBaseUrl}/__acceptance/bootstrap.js`)).text();
+    assert.match(script,/event\.preventDefault/);assert.match(script,/credentials:'same-origin'/);assert.doesNotMatch(script,/document\.cookie/);
+    const counts=await(await fetch(`${identities.publicBaseUrl}/__acceptance/bootstrap-status`)).json();
+    assert.equal(counts.get,1);assert.equal(counts.post,2);assert.equal(counts.issued,1);assert.equal(counts.denied,1);
+    assert.doesNotMatch(JSON.stringify(counts),new RegExp(bootstrap.nonce));
   }finally{await new Promise(resolve=>{fixture.server.close(resolve);fixture.server.closeAllConnections();});}});
 test("bootstrap reattaches anexistingactivesession without mintingnewgrant authority",async()=>{
   const principalId="m1-test-"+"a".repeat(32),sessionId="b".repeat(64);let revoked=false,issued=0;
@@ -78,4 +94,15 @@ test("bootstrap reattaches anexistingactivesession without mintingnewgrant autho
     const second=await fixture.createBootstrap(principalId,{session:{principalId,sessionId}});revoked=true;
     assert.equal((await fetch(second.url,{method:"POST",headers:{origin:identities.publicBaseUrl},body:`nonce=${second.nonce}`,redirect:"manual"})).status,403);
   }finally{await new Promise(resolve=>{fixture.server.close(resolve);fixture.server.closeAllConnections();});}
+});
+
+test("isolated publicstatus uses actual authority and complete shippedUI fields",async()=>{
+  let allowed=true;const status=acceptancePublicStatus({sourceIdentity:{sourceCommit:"a".repeat(40),sourceArchiveSha256:"b".repeat(64)},
+    application:{async cutoverStatus(){return{phase:"closed",authorityGeneration:"synthetic",revision:4};},async authority(){if(!allowed)throw new Error("closed");}},
+    async dependencyHealth(){return{ready:true};}});
+  const runtime=await status.runtimeStatus(),ready=await status.readinessStatus();
+  assert.equal(runtime.cutover.phase,"closed");assert.equal(runtime.cutover.revision,4);assert.equal(runtime.running.commit,"a".repeat(40));
+  assert.equal(ready.authority,"active");assert.equal(ready.productionTrafficChanged,false);allowed=false;
+  assert.equal((await status.readinessStatus()).authority,"unavailable");
+  assert.throws(()=>acceptancePublicStatus({sourceIdentity:{},application:{}}),/source-invalid/);
 });

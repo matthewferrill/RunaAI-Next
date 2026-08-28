@@ -142,19 +142,23 @@ async function outboundRedirect(_host, item, ledger) {
 }
 
 async function pathContainment(host, item, ledger, { resources }) {
+  ledger.phase = "containment-http-paths";
   const client = await prepare(host, item, ledger), initial = await host.snapshot(client.context()), denials = [];
   for (const target of ["../outside.js", "C:\\outside.js", "\\\\server\\share\\x.js", "\\\\?\\C:\\x.js", "control.js:secret", "CON.js", "a/control.js"]) {
     denials.push(await denial(ledger, "path", () => propose(client, "project.apply-change", { path: target, content: "exports.value=()=>8;", expectedSha256: initial.files[0].sha256 })));
   }
-  const fixtureRoot = path.join(resources.dataDirectory, ownName("containment")); await mkdir(fixtureRoot);
-  const root = path.join(fixtureRoot, "project"); await mkdir(root);
-  const outside = path.join(fixtureRoot, "outside"); await mkdir(outside);
+  // Keep all owned fixture paths inside the retained native Windows path budget.
+  ledger.phase = "containment-owned-fixture";
+  const fixtureRoot = path.join(resources.dataDirectory, `c${randomBytes(2).toString("hex")}`); await mkdir(fixtureRoot);
+  const root = path.join(fixtureRoot, "p"); await mkdir(root);
+  const outside = path.join(fixtureRoot, "o"); await mkdir(outside);
   const sentinel = path.join(outside, "sentinel.js"), sentinelText = "exports.value=()=>713;"; await writeFile(sentinel, sentinelText);
   const adapter = new DisposableJavascriptProjectAdapter({ baseDirectory: root });
   const binding = { participantId: client.principalId, projectId: client.projectId, environmentId: "containment" };
   const reference = await adapter.createEnvironment({ ...binding, files: [{ path: "control.js", content: "exports.value=()=>7;" }] });
   const directory = path.join(root, `e-${bindingDigest(binding)}`, reference.revisionId), file = path.join(directory, "control.js");
   const nativeProbe = fileURLToPath(new URL("../project/handle-lock-probe.ps1", import.meta.url));
+  ledger.phase = "containment-native-handle-lock";
   const child = spawn(path.join(process.env.SystemRoot ?? "C:\\Windows", "System32", "WindowsPowerShell", "v1.0", "powershell.exe"),
     ["-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass", "-File", nativeProbe, "-Directory", directory, "-File", file],
     { windowsHide: true, stdio: ["pipe", "pipe", "pipe"] });
@@ -166,18 +170,22 @@ async function pathContainment(host, item, ledger, { resources }) {
     await assert.rejects(rename(root, `${root}-swapped`));
     await assert.rejects(writeFile(file, "unauthorized-write"));
   } finally { child.stdin.end("release\n"); await closed; }
+  ledger.phase = "containment-hardlink";
   await rm(file); await link(sentinel, file);
   await assert.rejects(adapter.inspectRevision({ binding, reference }), /project-/);
   await rm(file); await writeFile(file, "exports.value=()=>7;");
   const junction = path.join(fixtureRoot, "junction"); await symlink(outside, junction, "junction");
+  ledger.phase = "containment-junction";
   try { const escaped = new DisposableJavascriptProjectAdapter({ baseDirectory: path.join(junction, "child") });
     await assert.rejects(escaped.createEnvironment({ ...binding, files: [{ path: "control.js", content: "forbidden" }] }), /project-/); }
   finally { await rm(junction); }
   // Symlink file case needs the OS privilege; absence remains an explicit failure,
   // not a silently skipped containment check.
+  ledger.phase = "containment-file-symlink";
   await rm(file); await symlink(sentinel, file, "file");
   await assert.rejects(adapter.inspectRevision({ binding, reference }), /project-/);
   await rm(file); await writeFile(file, "exports.value=()=>7;");
+  ledger.phase = "containment-partial-revision";
   const prepared = await adapter.prepare({ binding, reference, capabilityId: "project.apply-change", args: {
     path: "control.js", content: "exports.value=()=>8;", expectedSha256: reference.files[0].sha256 } });
   const staged = await adapter.materialize({ binding, effectId: "partial-revision", prepared });

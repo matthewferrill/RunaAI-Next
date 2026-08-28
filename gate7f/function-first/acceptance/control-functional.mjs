@@ -1,8 +1,8 @@
-import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { mkdir, readFile, writeFile, lstat } from "node:fs/promises";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 import { CASE_BUNDLE_SHA256, CONTROL_CASES } from "./cases.mjs";
-import { inventory, newObservation, ObservationLedger, fail, assertOwnedStage, sha256 } from "./runner-contract.mjs";
+import { inventory, newObservation, ObservationLedger, fail, assertOwnedStage, sha256, validateRuntimeSeal } from "./runner-contract.mjs";
 import { createOwnedControlResources, fileSha256 } from "./owned-control-resources.mjs";
 import { createFunctionalTestbed } from "./functional-testbed.mjs";
 import { runModelFreeControl, SUPPORTED_CONTROLS } from "./model-free-controls.mjs";
@@ -12,12 +12,20 @@ import { createBrowserCheckpoint } from "./browser-checkpoint.mjs";
 export function parseArguments(args) {
   const result = { mode: "inventory" }, seen = new Set();
   for (let index = 0; index < args.length; index += 2) {
-    if (!["--mode", "--owned-root", "--source-commit", "--case-id", "--browser-checkpoints"].includes(args[index]) || !args[index + 1]) throw fail("m1-runner-argument-invalid");
+    if (!["--mode", "--owned-root", "--source-commit", "--case-id", "--browser-checkpoints", "--runtime-seal"].includes(args[index]) || !args[index + 1]) throw fail("m1-runner-argument-invalid");
     const key = args[index].slice(2); if (seen.has(key)) throw fail("m1-runner-duplicate-argument"); seen.add(key); result[key] = args[index + 1];
   }
   if (!["inventory", "controls"].includes(result.mode)) throw fail("m1-scored-runner-readiness-not-yet-sealed");
   if (result["browser-checkpoints"] !== undefined && result["browser-checkpoints"] !== "true") throw fail("m1-browser-checkpoint-argument-invalid");
   return result;
+}
+
+export function bindControlRuntimeSeal(campaign, control, bytes) {
+  const parsed = validateRuntimeSeal(campaign, { sourceCommit: control.sourceCommit });
+  for (const key of ["sourceArchiveSha256", "packageLockSha256", "nodeSha256", "qdrantSha256"]) {
+    if (parsed.runtime[key] !== control[key]) throw fail(`m1-control-runtime-${key}-mismatch`);
+  }
+  return { runtimeSealSha256: sha256(bytes), campaign: parsed };
 }
 
 export async function runControlFunctional(args, { checkpoint = null } = {}) {
@@ -42,11 +50,23 @@ export async function runControlFunctional(args, { checkpoint = null } = {}) {
       packageLockSha256: await fileSha256(path.join(root, "package-lock.json")),
       runtime: resources.report.nativePreflight.receipt.runtime, isolation: resources.report.nativePreflight.receipt.isolation,
       limits: resources.report.nativePreflight.receipt.limits, modelInference: "denied-before-upstream" };
-    report.runtimeSealSha256 = sha256(JSON.stringify(report.controlSeal));
+    report.controlAttestationSha256 = sha256(JSON.stringify(report.controlSeal));
+    report.runtimeSealSha256 = report.controlAttestationSha256;
+    report.qualificationScope = "integration-only; no common prospective campaign seal supplied";
+    if (args["runtime-seal"]) {
+      const sealPath = path.resolve(root, args["runtime-seal"]);
+      if (!sealPath.startsWith(root + path.sep)) throw fail("m1-control-seal-path-denied");
+      const info = await lstat(sealPath);
+      if (!info.isFile() || info.isSymbolicLink() || info.size > 262144) throw fail("m1-control-seal-file-invalid");
+      const bytes = await readFile(sealPath), common = bindControlRuntimeSeal(JSON.parse(bytes.toString("utf8")), report.controlSeal, bytes);
+      report.runtimeSealSha256 = common.runtimeSealSha256;
+      report.campaignRuntimeSeal = common.campaign;
+      report.qualificationScope = "prospectively bound common campaign; model-free controls only, no model-residency claim";
+    }
     const evidenceDirectory = path.join(root, "acceptance-evidence"); await mkdir(evidenceDirectory, { recursive: true });
     checkpoint ??= args["browser-checkpoints"] === "true" ? createBrowserCheckpoint({ directory: evidenceDirectory,
       announce: value => process.stdout.write(JSON.stringify({ schemaVersion: "runaai-m1-browser-checkpoint-ready/v1", ...value }) + "\n") }) : null;
-    await writeFile(path.join(evidenceDirectory, `control-seal-${report.runtimeSealSha256}.json`), JSON.stringify(report.controlSeal, null, 2) + "\n", { flag: "wx" });
+    await writeFile(path.join(evidenceDirectory, `control-seal-${report.controlAttestationSha256}.json`), JSON.stringify(report.controlSeal, null, 2) + "\n", { flag: "wx" });
     testbed = await createFunctionalTestbed({ resources, mode: "controls", getLedger: () => ledger });
     for (const item of selected) {
       ledger = new ObservationLedger(newObservation({ ...item, role: "control" }, { runtimeSealSha256: report.runtimeSealSha256 }));

@@ -49,7 +49,7 @@ async function encryptedRecords(host, item, ledger, { testbed }) {
     allowedSuites: [], expiresAt: new Date(Date.now() + 600000).toISOString() });
   const source = await client.m1("sources.attach", { requestId: client.id("source"), label: canary, content: `Synthetic private source ${canary}` });
   const ask = message => client.http("answer", "/api/selected/answer", { requestId: client.id("private-answer"), projectId: client.projectId,
-    threadId: client.threadId, experience: "code", lane: "general", message, history: [], contextRevision: client.contextRevision });
+    threadId: client.threadId, experience: "code", lane: "code", message, history: [], contextRevision: client.contextRevision });
   const first = await ask(`What was my previous question? ${canary}`); client.contextRevision = first.contextRevision;
   const second = await ask("What was my previous question?"); client.contextRevision = second.contextRevision;
   assert.ok(second.answer.includes(canary));
@@ -116,7 +116,7 @@ async function logoutMidPlan(host, item, ledger, { testbed }) {
     allowedSuites: [], expiresAt: new Date(Date.now() + 600000).toISOString() });
   const rebound = await orchestrator.resume(client.context(), { runId: started.run.runId, grantId: replacement.grantId, grantRevision: replacement.revision });
   assert.equal(rebound.run.status, "waiting-approval"); assert.notEqual(rebound.pendingProposal.proposalId, pending.proposalId);
-  assert.equal(rebound.pendingProposal.approval, null); assert.equal(rebound.run.planAttempts, 2);
+  assert.equal(rebound.pendingProposal.approval ?? null, null); assert.equal(rebound.run.planAttempts, 2);
   const afterRebind = await host.snapshot(client.context()); assert.equal(afterRebind.workspaceSha256, initial.workspaceSha256);
   recordCheck(ledger, item, "effects.oldSessionAfterLogout", afterLogout.projectRevision - initial.projectRevision,
     { initial, afterLogout, directError, restarted }, "postgresql");
@@ -127,7 +127,7 @@ async function logoutMidPlan(host, item, ledger, { testbed }) {
 async function unknownExecution(_host, item, ledger, { testbed, checkpoint }) {
   let worker;
   try {
-    worker = await startApplicationFaultWorker({ initialization: testbed.workerInit, getLedger: () => ledger });
+    worker = await startApplicationFaultWorker({ initialization: testbed.workerInit, getLedger: () => ledger, maximumLifetimeMs: 600000 });
     const client = await prepare(worker, item, ledger);
     const proposal = await propose(client, "project.run-tests", { suiteId: "control-value-v1" });
     ledger.phase = "actual-dispatch";

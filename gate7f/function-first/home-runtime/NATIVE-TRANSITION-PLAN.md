@@ -225,3 +225,28 @@ Full local operator regression with the new bridge passed129/129, zero skips, in
 Windows OS access; roadmap15/15 also passed. Command remains the complete `home-runtime/*.test.mjs`
 and `home-runtime/windows-proof/*.test.mjs` set shown above. No Home listener, model, TLS enrollment,
 settings file or production route was changed by this verification.
+
+## Prospective native processing-state observation
+
+The official [API changelog](https://lmstudio.ai/docs/developer/api-changelog) documents generation
+state and queued requests in `lms ps --json` since0.3.27. The current upstream
+[CLI source](https://github.com/lmstudio-ai/lms/blob/main/src/subcommands/list.ts) obtains
+`getInstanceProcessingState()` for both language and embedding instances. Its
+[shared type](https://github.com/lmstudio-ai/lmstudio-js/blob/main/packages/lms-shared-types/src/ModelProcessingStatus.ts)
+distinguishes idle, prompt processing, generation and embedding computation; queued includes the
+current request. This is an experimental API, so current upstream documentation is orientation,
+not evidence that the exact installed Home binary exposes the same result.
+
+Prepare a read-only observer using only the exact installed `ps --json` command and previously
+verified explicit internal descriptor context. Pin CLI/Node/engine/source, refuse auto-launch or
+default profile fallback, bound time/output, and emit only model identity/status/count metadata.
+Reject malformed, duplicate, missing, unknown, stale or changing identities; never copy prompts,
+credentials, logs, tool state or CLI raw errors. No load/unload/stop/start/settings command belongs
+to this observer. Validate the pure projection with adversarial fixtures first. During the next
+between-model window, verify the exact installed implementation and empty-state response; a later
+bounded synthetic active/queued case is required before claiming busy-state coverage.
+
+Even a valid idle observation does not close admission or prove native-wide drain. It must be
+combined with the existing fresh Control closure, accounted direct-LAN/native-local callers and
+exclusive lifecycle ownership. The observer must explicitly say `admissionClosed:false` and
+`drainProved:false`; no processing snapshot alone authorizes stopping a server or loading a model.

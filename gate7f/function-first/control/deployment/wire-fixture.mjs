@@ -13,13 +13,13 @@ import {caddyfile} from '../../../../gate7a/lan-release.mjs';
 export const digest=bytes=>createHash('sha256').update(bytes).digest('hex');
 export const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
 export const SOURCE_PINS=Object.freeze({
-  'home-runtime/tls-proxy.mjs':'9d5068d1a3a0c09a0b4bb580fb192011730f40cbdb9ef26bb04402ea5869e1f6',
+  'home-runtime/tls-proxy.mjs':'1c063e289ad2f1fc5be25c32fc7b39796d0a415943a868f0de5ae977ed0ef7f9',
   'home-runtime/proxy.mjs':'e965a57eed957e6797f8883e4d71f69c6a7c01911f39f44dd426db8043edaa2c',
   'home-runtime/contracts.mjs':'995339141c0928312827ed7169a98d8ab2f2de7d7fbbf52e6ae1b54377de39e0',
   'evidence-output.mjs':'ef61fd605d598dfda83782c54c8a1d019bc8a3d21a08aa81aa709ebe691d9f9a',
-  'home-runtime/controller.mjs':'53fd576f52e2dc51f25200548232367756602f0ac70a00b865ba3eee6af0a354',
-  'readiness/manifest.mjs':'21757455f9bf2274f495cf0bc538bd684b35a7c0a60196b612eb61ab8903bed6',
-  'readiness/lease-contract.mjs':'9000ea05b54214bc27f394b078e50df6b10d8df231ef32954a143e6d10256c13',
+  'home-runtime/controller.mjs':'6e05d363c882fd1909d31893c0ab3cfee1eef4bdf148e2c6a177cb07d9957daa',
+  'readiness/manifest.mjs':'16f780c577b670a640d84a1c28ebbe11efef53235beb712825db4fd7ec1ef88d',
+  'readiness/lease-contract.mjs':'0fe24a0ee7bb7258bb76264bf57a69f602b6fdd9658d9012739cc45c24ed8269',
   'readiness/evidence/20260828-smoke-gemma-r1/events.jsonl':'e8329085a4bd3eccbe0ba9ae2be5afe32a85f9e5c774c2f83bd34fdf19cd6eaf',
 });
 export function verifySources(root){return Object.entries(SOURCE_PINS).map(([file,sha256])=>{

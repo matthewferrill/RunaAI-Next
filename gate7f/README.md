@@ -4,6 +4,11 @@ Current planning authority: `../PRODUCT-ROADMAP.md` and `../roadmap/CURRENT-SLIC
 Run `node roadmap/read-next-slice.mjs` from the repository root before choosing further work. The
 historical foundation below is a component of Milestone 1, not the full Runa product roadmap.
 
+The 2026-08-28 function-first increment is in `function-first/`. Its model-role contract is wired into
+the existing release composition; `function-first/M1-S1-RESULTS-2026-08-28.md` records local validation
+and `function-first/QWEN36-READINESS-PLAN-2026-08-28.md` records the third-model diagnosis design.
+Run `npm run test:m1:roles` for the focused tests. This is not live qualification, a deployment or full M1.
+
 Gate 7F-0 is the inert control plane for conversational project work. It implements task scope,
 capability schemas, deterministic approval profiles, exact proposals, remembered decisions, synthetic
 execution receipts, idempotency, restart continuity, and governed rollback without touching a real

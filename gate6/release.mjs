@@ -1,7 +1,9 @@
 import { canonicalJson, sha256 } from "../gate4/canonical.mjs";
+import { explicitModelRolesSchema } from "../gate7f/function-first/model-roles.mjs";
 
 export const GATE6_SCOPE_VERSION = "runa2-selected-core/2026-08-21";
 export const GATE6_RELEASE_VERSION = "runa2-gate6-release/v1";
+export const GATE6_ROLE_RELEASE_VERSION = "runa2-gate6-release/v2";
 
 const coded = (code, message) => Object.assign(new Error(message), { code });
 const digest = value => sha256(canonicalJson(value));
@@ -26,7 +28,10 @@ function parseService(service) {
   return { name: service.name, version: service.version, configurationDigest: service.configurationDigest };
 }
 
-export function buildReleaseManifest(input) {
+export function buildReleaseManifest(input, { schemaVersion = GATE6_RELEASE_VERSION } = {}) {
+  if (![GATE6_RELEASE_VERSION, GATE6_ROLE_RELEASE_VERSION].includes(schemaVersion)) {
+    throw coded("release-version-invalid", "The release manifest version is unsupported.");
+  }
   rejectSecretFields(input);
   if (!exactKeys(input, ["releaseId", "commit", "artifactDigest", "configurationDigest", "applicationEntryPoint", "model", "services"])) {
     throw coded("release-manifest-shape-invalid", "The release manifest input has missing or unexpected fields.");
@@ -34,22 +39,34 @@ export function buildReleaseManifest(input) {
   if (!/^[A-Za-z0-9._-]{1,100}$/.test(String(input.releaseId))) throw coded("release-id-invalid", "The release id is invalid.");
   if (!hex40(input.commit) || !hex64(input.artifactDigest) || !hex64(input.configurationDigest)) throw coded("release-digest-invalid", "Release commit and digests must be exact.");
   if (!bounded(input.applicationEntryPoint, 240) || input.applicationEntryPoint.includes("..")) throw coded("release-entrypoint-invalid", "The production application entry point is invalid.");
-  if (!exactKeys(input.model, ["provider", "modelId", "configurationDigest"]) || !bounded(input.model.provider, 100)
-      || !bounded(input.model.modelId, 160) || !hex64(input.model.configurationDigest)) throw coded("release-model-invalid", "The exact model identity is required.");
+  let model;
+  if (schemaVersion === GATE6_RELEASE_VERSION) {
+    if (!exactKeys(input.model, ["provider", "modelId", "configurationDigest"]) || !bounded(input.model.provider, 100)
+        || !bounded(input.model.modelId, 160) || !hex64(input.model.configurationDigest)) throw coded("release-model-invalid", "The exact model identity is required.");
+    model = { ...input.model };
+  } else {
+    const checked = explicitModelRolesSchema.shape.models.safeParse(input.model?.models);
+    if (!exactKeys(input.model, ["provider", "models", "configurationDigest"]) || !bounded(input.model.provider, 100)
+        || !hex64(input.model.configurationDigest) || !checked.success
+        || !["chat", "research", "code"].some(role => checked.data[role] !== null)) {
+      throw coded("release-model-invalid", "Exact model selections for every role are required.");
+    }
+    model = Object.freeze({ ...input.model, models: Object.freeze(checked.data) });
+  }
   if (!Array.isArray(input.services) || input.services.length < 4) throw coded("release-services-incomplete", "PostgreSQL, Keycloak, OpenFGA, and Caddy service identities are required.");
   const services = input.services.map(parseService).sort((left, right) => left.name.localeCompare(right.name));
   const names = new Set(services.map(service => service.name));
   for (const required of ["caddy", "keycloak", "openfga", "postgresql"]) if (!names.has(required)) throw coded("release-services-incomplete", `Required service identity is missing: ${required}.`);
   if (names.size !== services.length) throw coded("release-service-duplicate", "Service identities must be unique.");
   const base = {
-    schemaVersion: GATE6_RELEASE_VERSION,
+    schemaVersion,
     selectedScopeVersion: GATE6_SCOPE_VERSION,
     releaseId: input.releaseId,
     commit: input.commit,
     artifactDigest: input.artifactDigest,
     configurationDigest: input.configurationDigest,
     applicationEntryPoint: input.applicationEntryPoint,
-    model: { ...input.model },
+    model,
     services,
   };
   return Object.freeze({ ...base, manifestDigest: digest(base) });
@@ -61,7 +78,8 @@ export function assertReleaseManifest(manifest) {
   }
   const rebuilt = buildReleaseManifest({ releaseId: manifest.releaseId, commit: manifest.commit,
     artifactDigest: manifest.artifactDigest, configurationDigest: manifest.configurationDigest,
-    applicationEntryPoint: manifest.applicationEntryPoint, model: manifest.model, services: manifest.services });
+    applicationEntryPoint: manifest.applicationEntryPoint, model: manifest.model, services: manifest.services },
+  { schemaVersion: manifest.schemaVersion });
   if (rebuilt.schemaVersion !== manifest.schemaVersion || rebuilt.selectedScopeVersion !== manifest.selectedScopeVersion
       || rebuilt.manifestDigest !== manifest.manifestDigest) throw coded("release-manifest-digest-mismatch", "The release manifest does not match its digest or selected scope.");
   return rebuilt;
@@ -70,7 +88,8 @@ export function assertReleaseManifest(manifest) {
 export function releaseRuntimeStatus({ manifest, authorityGeneration, phase, revision }) {
   const accepted = assertReleaseManifest(manifest);
   return Object.freeze({
-    schemaVersion: "runa2-gate6-runtime-status/v1",
+    schemaVersion: accepted.schemaVersion === GATE6_RELEASE_VERSION
+      ? "runa2-gate6-runtime-status/v1" : "runa2-gate6-runtime-status/v2",
     running: { commit: accepted.commit, artifactDigest: accepted.artifactDigest,
       releaseId: accepted.releaseId, applicationEntryPoint: accepted.applicationEntryPoint },
     selectedScopeVersion: accepted.selectedScopeVersion,

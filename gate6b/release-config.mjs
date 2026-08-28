@@ -4,6 +4,7 @@ import { dirname, isAbsolute, resolve } from "node:path";
 import { z } from "zod";
 import { canonicalJson } from "../gate4/canonical.mjs";
 import { validateReleaseBoundary, secretReferenceStatus } from "../gate5/operations.mjs";
+import { explicitModelRolesSchema } from "../gate7f/function-first/model-roles.mjs";
 
 const secretRef = z.string().regex(/^(env|file|vault|secret-store):[A-Za-z0-9._/-]{1,200}$/);
 const url = z.string().url().max(500);
@@ -19,7 +20,7 @@ const gate7a = z.object({ enabled: z.literal(true), canonicalOrigin: url,
     clientCredentialRef: secretRef,
   }).strict(),
 }).strict();
-const schema = z.object({
+const legacySchema = z.object({
   schemaVersion: z.literal("runa2-gate6b-release-config/v1"),
   profile: z.literal("release"),
   mode: z.enum(["shadow", "active"]),
@@ -44,10 +45,16 @@ const schema = z.object({
     upstreamDeadlineMs: z.number().int().min(50).max(119_999) }).strict(),
 }).strict();
 
+const roleSchema = legacySchema.extend({
+  schemaVersion: z.literal("runa2-gate6b-release-config/v2"),
+  provider: explicitModelRolesSchema,
+});
+const schema = z.discriminatedUnion("schemaVersion", [legacySchema, roleSchema]);
+
 const coded = (code, message) => Object.assign(new Error(message), { code });
 const sha256 = value => createHash("sha256").update(value).digest("hex");
 
-function releaseBoundary(config) {
+function releaseBoundary(config, modelId = config.provider.modelId) {
   const secretRefs = { databaseUrl: config.databaseUrlRef, ...config.keyRefs,
     keycloakClient: config.keycloak.clientCredentialRef,
     ...(config.gate7a?.ordinaryClient
@@ -59,16 +66,23 @@ function releaseBoundary(config) {
     effectRetries: 0,
     deadlines: { totalMs: config.limits.totalDeadlineMs, upstreamMs: config.limits.upstreamDeadlineMs },
     maxRequestBytes: config.limits.maxRequestBytes,
-    provider: { baseUrl: config.provider.baseUrl, expectedModel: config.provider.modelId,
-      presentedModel: config.provider.modelId },
+    provider: { baseUrl: config.provider.baseUrl, expectedModel: modelId, presentedModel: modelId },
     secretRefs,
   };
+}
+
+function freezeConfig(value) {
+  if (value && typeof value === "object") {
+    for (const child of Object.values(value)) freezeConfig(child);
+    Object.freeze(value);
+  }
+  return value;
 }
 
 export async function loadReleaseConfig(path) {
   let parsed;
   try { parsed = schema.parse(JSON.parse((await readFile(path, "utf8")).replace(/^\uFEFF/, ""))); }
-  catch (error) { throw coded("release-config-invalid", error.message); }
+  catch { throw coded("release-config-invalid", "The release configuration could not be read or validated."); }
   if (parsed.limits.upstreamDeadlineMs >= parsed.limits.totalDeadlineMs) {
     throw coded("release-config-invalid", "The upstream deadline must be shorter than the total deadline.");
   }
@@ -86,11 +100,19 @@ export async function loadReleaseConfig(path) {
       throw coded("release-config-gate7a-invalid", "The Gate 7A origin, issuer, backchannel, RP ID, and owner-session boundary must be exact.");
     }
   }
-  const boundary = releaseBoundary(parsed);
-  const checked = validateReleaseBoundary(boundary);
-  if (!checked.passed) throw coded("release-config-boundary-invalid", checked.problems.join(","));
-  return Object.freeze({ path: resolve(path), directory: dirname(resolve(path)), value: Object.freeze(parsed),
-    configurationDigest: sha256(canonicalJson(parsed)), boundary: Object.freeze(boundary) });
+  const explicit = parsed.schemaVersion === "runa2-gate6b-release-config/v2";
+  if (explicit && !["chat", "research", "code"].some(role => parsed.provider.models[role] !== null)) {
+    throw coded("release-config-invalid", "At least one existing answer role must be configured.");
+  }
+  const modelIds = explicit ? Object.values(parsed.provider.models).filter(value => value !== null)
+    : [parsed.provider.modelId];
+  const boundaries = modelIds.map(modelId => releaseBoundary(parsed, modelId));
+  for (const boundary of boundaries) {
+    const checked = validateReleaseBoundary(boundary);
+    if (!checked.passed) throw coded("release-config-boundary-invalid", checked.problems.join(","));
+  }
+  return Object.freeze({ path: resolve(path), directory: dirname(resolve(path)), value: freezeConfig(parsed),
+    configurationDigest: sha256(canonicalJson(parsed)), boundary: freezeConfig(boundaries[0]) });
 }
 
 export async function readSecretReference(reference, configDirectory, { maximumBytes = 16_384 } = {}) {

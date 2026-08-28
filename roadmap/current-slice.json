@@ -3,11 +3,11 @@
   "roadmapRevision": "2026-08-28.1",
   "milestone": "M1",
   "sliceId": "M1-S1",
-  "state": "authorized-not-complete",
-  "completionEvidence": [],
+  "state": "in-progress",
+  "completionEvidence": ["gate7f/function-first/M1-S1-RESULTS-2026-08-28.md"],
   "scopeDocument": "roadmap/CURRENT-SLICE.md",
   "capabilityIds": ["C01", "C02", "C03", "C04", "C06", "C07", "C12", "C15", "C16"],
-  "nextWork": "Implement independently selectable model roles and compatibility tests before matched functional runs.",
+  "nextWork": "M1-S1 wiring is locally validated, not deployed. Retrieve the full roadmap before the next chat/context function slice and parallel bounded Qwen3.6 readiness; M1 and all remaining capability families stay open.",
   "remainingRoadmapRequired": true,
   "completionClaim": "M1 completion is not whole-product completion."
 }

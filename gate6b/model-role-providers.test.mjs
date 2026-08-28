@@ -199,6 +199,28 @@ test("v2 config preserves explicit nulls and assignments without expanding roles
   assert.equal(loaded.configurationDigest, digest(config));
   assert.equal(loaded.value.provider.models.review, null);
   assert.equal(loaded.value.provider.models.research, null);
+  assert.throws(() => { loaded.value.provider.models.chat = "changed-after-digest"; }, TypeError);
+  assert.throws(() => { loaded.value.limits.totalDeadlineMs = 120000; }, TypeError);
+});
+
+test("historical config hashes remain reproducible but unsafe legacy values cannot build or start a successor", async t => {
+  const fixture = await temporaryConfig(t);
+  for (const provider of [
+    { ...legacyProvider(), baseUrl: "https://model.example/v1?key=private-canary" },
+    { ...legacyProvider(), baseUrl: "https://model.example/v1#private-canary" },
+    { ...legacyProvider(), baseUrl: "https://user:private-canary@model.example/v1" },
+    { ...legacyProvider(), modelId: " model-with-surrounding-whitespace " },
+    { ...legacyProvider(), modelId: "model\ncontrol" },
+  ]) {
+    const config = configFor(provider);
+    const loaded = await fixture.load(config);
+    assert.equal(loaded.configurationDigest, digest(config));
+    assert.deepEqual(loaded.value.provider, provider);
+    for (const operation of [releaseModelIdentity, createReleaseAnswerProviders]) {
+      assert.throws(() => operation(loaded.value.provider), error =>
+        error.code === "model-role-invalid" && !String(error).includes("private-canary"));
+    }
+  }
 });
 
 test("config version paths reject mixed schemas, missing/extra roles, invalid URLs and no enabled answer role", async t => {
@@ -292,6 +314,29 @@ test("disabled Code role cannot fall back or record a false completed conversati
   assert.equal(context.records.turns.length, 0);
   assert.equal(calls.some(value => value.role === "code"), false);
   assert.equal(selected.chat.calls.length, 0);
+  assert.equal(selected.research.calls.length, 0);
+  assert.deepEqual(response.effects, []);
+});
+
+test("role selection preserves request history and denies cross-project workspace reads before a model call", async () => {
+  const selected = createReleaseAnswerProviders(roleProvider(), { createProvider: options =>
+    new ScriptedProvider({ modelId: options.modelId, role: options.role,
+      reply: () => ({ answer: "Synthetic answer", citations: [] }) }) });
+  const context = serviceWith(selected);
+  const chat = request("history", "general", "And what about France?");
+  chat.history = [{ role: "user", content: "What is the capital of Italy?" },
+    { role: "assistant", content: "Rome." }];
+  await context.service.answer(chat);
+  assert.deepEqual(selected.chat.calls[0].request.history, chat.history);
+  assert.equal(selected.chat.calls[0].request.message, chat.message);
+  const denied = request("foreign-scope", "workspace", "Explain the selected material");
+  denied.project.projectId = "synthetic-other-project";
+  context.continuity.seedProject({ participantId: principalId, projectId: denied.project.projectId,
+    displayName: "Other project without source access" });
+  const response = await context.service.answer(denied);
+  assert.equal(response.completion.reason, "workspace-cross-project-denied");
+  assert.equal(response.model.role, "not-invoked");
+  assert.equal(selected.code.calls.length, 0);
   assert.equal(selected.research.calls.length, 0);
   assert.deepEqual(response.effects, []);
 });

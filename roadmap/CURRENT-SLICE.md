@@ -3,7 +3,7 @@
 Roadmap revision: 2026-08-28.1
 Milestone: M1
 Slice ID: M1-S1
-Status: authorized, acceptance frozen before implementation; not complete or production-qualified.
+Status: in progress, acceptance frozen before implementation; not complete or production-qualified.
 
 Read `PRODUCT-ROADMAP.md` first. This slice is the first milestone only; it does not replace, complete
 or retire the rest of the roadmap. All 17 capability families remain tracked in `capabilities.json`.
@@ -25,6 +25,9 @@ evidence; this dated amendment does not rewrite them.
 ## Immediate order and finite deliverables
 
 1. Publish the roadmap, retrieval guard and this acceptance contract before product implementation.
+   The local contract commit is `333912a`. GitHub publication is environment-blocked; no alternative
+   publication route is permitted. Safe local implementation may proceed under the standing authorization,
+   but publication remains outstanding and must not be reported as completed.
 2. Add independently selectable model roles behind the existing provider interface. Preserve legacy
    single-model configuration and exact rollback. No model chooses its own authority or fallback.
 3. Diagnose Qwen3.6's retained timeout failure and validate three-model runtime readiness; do not silently
@@ -101,3 +104,10 @@ M1-S1: role-separated provider contract and compatibility wiring, with current-s
 requirements captured for the later project tools. This is first because all three model comparisons and
 real functions need a common boundary. No three-model result, new project executor or product release is
 claimed by M1-S1. Human testing is not needed until the candidate customer journey is ready.
+
+Local implementation update, 2026-08-28: M1-S1 source wiring and deterministic verification now pass;
+see `../gate7f/function-first/M1-S1-RESULTS-2026-08-28.md`. This does not close the five-function milestone.
+The next-slice decision must retrieve this roadmap and record its own finite acceptance before extending
+chat/context and real project functions. The Qwen3.6 readiness plan is
+`../gate7f/function-first/QWEN36-READINESS-PLAN-2026-08-28.md`; it can run alongside shared function work.
+Neither the old two-arm runner nor its seals may be widened in place.

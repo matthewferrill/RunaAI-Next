@@ -11,9 +11,33 @@ and `roadmap/CURRENT-SLICE.md`. The 2026-08-28 steward direction makes the exist
 **Milestone 1 only**, with all 17 broader capability families retained. Three primary candidates are in
 scope: Gemma 4 26B A4B, Qwen3 Coder 30B-A3B, Qwen3.6 27B MTP. Build/test real shared functions before
 model-role selection; do not repeat the stack bakeoff or silently omit Qwen3.6. Existing frozen results
-are unchanged. M1 is authorized, not complete; no new implementation/deployment result is claimed here.
+are unchanged. M1 is authorized, not complete; its first local wiring result is recorded below.
 The steward authorized necessary non-destructive work and commit/push to RunaAI-Next without recurring
 permission requests. Human involvement is reserved for genuine customer tests or human-only operations.
+
+### 2026-08-28 M1-S1 local implementation and publication status
+
+- The full roadmap/retrieval contract was committed as `333912a`; model-role contracts and independent
+  test additions followed in `daf92c6` and `c5ea7d1`. These are local commits on
+  `codex/gate7f-agent-foundation`, not an integration merge or deployment.
+- M1-S1 now wires independent chat/research/code selections into the actual answer-service composition,
+  with separate v2 configuration/manifest schemas and exact startup model binding. Review/agent selections
+  remain inert; no route, executor or grant is created. Legacy ordinary v1 values/digests are preserved.
+- Local validation: full suite **797/797**, role contracts **12/12**, role integration **15/15**, roadmap
+  **15/15**, all three prior seals intact. Independent review found no blocking issue. The tests use
+  synthetic inputs and provider doubles; they do not qualify a model, live stack or production release.
+- Results and limitations: `gate7f/function-first/M1-S1-RESULTS-2026-08-28.md`. Specific Qwen3.6 runtime
+  diagnosis: `gate7f/function-first/QWEN36-READINESS-PLAN-2026-08-28.md`. Historical timeouts are not a
+  demonstrated model-quality failure; the old reasoning directive and transport need controlled diagnosis.
+- GitHub publication was rejected by the execution environment before the push ran. No indirect push
+  was attempted. Local work is saved, but remote publication is **outstanding**. Last observed branch tip
+  on GitHub was `be094bd`; the intended destination remains the same RunaAI-Next feature branch.
+- No Home/Control command, model load/download, service change, production routing change, protected-data
+  access or source-repository edit was made for this increment. The running-release details below are
+  retained prior evidence, not a fresh 2026-08-28 live-status check.
+- Next: retrieve the full roadmap, finish the M1 customer-function work (starting chat/context) and run
+  bounded third-model readiness in parallel. Freeze the actual functional acceptance cases/runtime before
+  matched three-model runs. Do not declare M1 or any of the 17 complete from this wiring result.
 
 ## Repository identity and authority
 

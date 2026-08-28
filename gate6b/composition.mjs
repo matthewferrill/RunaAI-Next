@@ -1,7 +1,6 @@
 import { mkdir, readFile } from "node:fs/promises";
 import { isAbsolute, resolve } from "node:path";
 import pg from "pg";
-import { MastraAnswerProvider } from "../gate1/adapters/mastra-provider.mjs";
 import { Gate2ReadOnlyService } from "../gate2/core.mjs";
 import { Gate3GovernedActionService } from "../gate3/core.mjs";
 import { createEnvelopeCipher } from "../gate4/envelope.mjs";
@@ -28,6 +27,7 @@ import { GATE6C_BINDING_VERSION } from "../gate6c/formats.mjs";
 import { OrdinaryBrowserSessionService } from "../gate7a/ordinary-session.mjs";
 import { PostgresOrdinarySessionStore } from "../gate7a/postgres-ordinary-session.mjs";
 import { HarmlessJavascriptExecutionService, MxcJavascriptExecutor } from "../gate7e/mxc-javascript-executor.mjs";
+import { assertConfiguredReleaseModel, createReleaseAnswerProviders } from "./model-role-providers.mjs";
 
 const coded = (code, message) => Object.assign(new Error(message), { code });
 
@@ -75,6 +75,7 @@ export async function createProductionComposition({ loadedConfig, releaseRoot })
   const config = loadedConfig.value;
   const relative = value => isAbsolute(value) ? value : resolve(loadedConfig.directory, value);
   const manifest = assertReleaseManifest(await jsonFile(relative(config.releaseManifestPath), "release-manifest-unavailable"));
+  assertConfiguredReleaseModel(manifest, config);
   if (manifest.configurationDigest !== loadedConfig.configurationDigest) {
     throw coded("release-configuration-digest-mismatch", "The running configuration is not the reviewed release configuration.");
   }
@@ -136,9 +137,7 @@ export async function createProductionComposition({ loadedConfig, releaseRoot })
     loadSource: options => learningSource.load(options), cipher: learningCipher,
     expectedSourceClassification: "protected-or-unknown",
   });
-  const providers = Object.fromEntries(["chat", "research", "code"].map(role => [role,
-    new MastraAnswerProvider({ baseURL: config.provider.baseUrl, modelId: config.provider.modelId,
-      role, providerName: "private-openai-compatible" })]));
+  const providers = createReleaseAnswerProviders(config.provider);
   const answerService = new Gate2ReadOnlyService({ records: workspace, index: workspace, providers,
     continuity, workspaceResolver: workspace, approvedKnowledge,
     statusProvider: () => ({ provider: "private-openai-compatible", retrieval: "postgres-direct",

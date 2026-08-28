@@ -16,14 +16,14 @@ test("full roadmap is retrievable, references exist and remaining families stay 
   assert.match(result.roadmapDigest, /^[a-f0-9]{64}$/);
 });
 const mutations = [
-  ["dropped capability", c => c.capabilities.pop(), /capability-coverage/],
+  ["dropped capability", c => { c.capabilities = c.capabilities.filter(item => item.id !== REQUIRED_CAPABILITIES[0]); }, /capability-coverage/],
   ["duplicate capability", c => c.capabilities.push(c.capabilities[0]), /capability-coverage/],
   ["M1 equated to product", c => { c.milestone1CompletesRoadmap = true; }, /milestone-is-not-destination/],
   ["omitted third model", c => c.primaryModels.pop(), /three-primary-models/],
   ["unknown dependency", c => c.capabilities[0].dependsOn.push("missing"), /dependencies/],
   ["dependency cycle", c => c.capabilities[0].dependsOn.push("C02"), /dependency-cycle/],
   ["hidden future work", c => { c.capabilities[0].remainingAfterM1 = ""; }, /capability-fields/],
-  ["unsupported complete claim", c => { c.capabilities[0].state = "accepted"; }, /acceptance-proof/],
+  ["unsupported complete claim", c => { c.capabilities[0].state = "accepted"; c.capabilities[0].releaseEvidence = []; }, /acceptance-proof/],
   ["missing evidence", c => { c.capabilities[0].evidence = []; }, /evidence/],
   ["missing milestone", c => { c.capabilities[0].milestones = []; }, /milestone-coverage/],
 ];

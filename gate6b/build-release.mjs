@@ -2,11 +2,12 @@ import { execFile } from "node:child_process";
 import { cp, copyFile, lstat, mkdir, readFile, stat, writeFile } from "node:fs/promises";
 import { dirname, isAbsolute, relative, resolve } from "node:path";
 import { promisify } from "node:util";
-import { canonicalJson, sha256 } from "../gate4/canonical.mjs";
+import { canonicalJson } from "../gate4/canonical.mjs";
 import { buildReleaseManifest } from "../gate6/release.mjs";
 import { ARTIFACT_FILE, buildArtifactManifest, verifyReleaseArtifact } from "./artifact.mjs";
 import { loadReleaseConfig } from "./release-config.mjs";
 import { stageSandboxRuntime } from "./sandbox-runtime.mjs";
+import { releaseModelIdentity } from "./model-role-providers.mjs";
 
 const run = promisify(execFile);
 const coded = (code, message) => Object.assign(new Error(message), { code });
@@ -99,8 +100,9 @@ async function main() {
   const release = buildReleaseManifest({ releaseId: args["release-id"], commit,
     artifactDigest: artifact.artifactDigest, configurationDigest: loadedConfig.configurationDigest,
     applicationEntryPoint: "gate6b/server.mjs",
-    model: { provider: "private-openai-compatible", modelId: config.provider.modelId,
-      configurationDigest: sha256(canonicalJson(config.provider)) }, services });
+    model: releaseModelIdentity(config.provider), services },
+  { schemaVersion: config.schemaVersion === "runa2-gate6b-release-config/v1"
+    ? "runa2-gate6-release/v1" : "runa2-gate6-release/v2" });
   await mkdir(dirname(releaseManifestPath), { recursive: true });
   await writeFile(releaseManifestPath, `${JSON.stringify(release, null, 2)}\n`, { encoding: "utf8", flag: "wx" });
   const retained = JSON.parse(await readFile(releaseManifestPath, "utf8"));

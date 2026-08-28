@@ -33,7 +33,8 @@
       "state": "partial",
       "evidence": [
         "gate7b/customer-journey.test.mjs",
-        "gate7d/navigation.test.mjs"
+        "gate7d/navigation.test.mjs",
+        "gate7f/function-first/M1-S1-RESULTS-2026-08-28.md"
       ],
       "scope": "Personal conversation and explicitly selected project context.",
       "acceptance": "Continue a reopened conversation and satisfy new instructions without mixing users or old questions.",

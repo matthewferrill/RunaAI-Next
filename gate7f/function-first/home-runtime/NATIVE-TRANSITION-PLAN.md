@@ -289,3 +289,19 @@ still required before any later recovery; it is not supplied or waived by these 
 Complete local operator regression including the processing observer and corrected recovery barrier
 passed136/136, zero skips, in41.5seconds with Windows OS access. This retains the same live-proof
 limitations: no installed Home settings transition, native busy/queued qualification or activation.
+
+## Prospective native-command uncertainty barrier
+
+The adjacent native-server controller records an uncertain CLI result but currently has no sticky
+barrier against a later start/stop, nor a controller-wide concurrent-dispatch guard. Add both before
+connecting it to live recovery. Hold the gate across preflight, durable intent, dispatch and final
+verification; once dispatched, any failure or unconfirmed result blocks every later mutation. A
+fresh listener snapshot, successful re-verification or opposite command must not clear it. A failure
+before dispatch remains safely retryable. Bound the exact-owned CLI child and its private output with
+the existing finite-settlement helper; uncertain termination must return unknown, not hang or expose
+raw command output. Retain all actual command-output hashes only after a successful child termination.
+
+Use local concurrent/delayed-outcome fixtures to prove the gate and actual short-lived child output/
+deadline fixtures to prove bounded settlement. These do not prove that terminating a CLI cancels its
+already-dispatched native RPC. Native operation reconciliation remains independently required before
+any subsequent recovery. Do not call installed CLI lifecycle endpoints or alter an active campaign.

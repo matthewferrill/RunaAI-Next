@@ -15,7 +15,21 @@ import { M1TaskOrchestrator } from "./tasks/orchestrator.mjs";
 import { M1RoleOrchestrator } from "./role-orchestrator.mjs";
 import { M1FunctionSurface, M1SessionAuthority, M1_EXERCISE_SUITE } from "./surface.mjs";
 
-export async function composeM1Functions({ configuration, provider, pool, cipher, javascriptExecutor, dataDirectory, projectFixtures }) {
+const TRUSTED_TASK_HOOK_NAMES = new Set(["afterIntent", "beforeDispatch", "afterMaterialize", "afterTests", "afterCommit", "beforeCommit"]);
+export function validateTrustedTaskHooks(value) {
+  if (value === undefined) return Object.freeze({});
+  if (!value || Object.getPrototypeOf(value) !== Object.prototype ||
+      Reflect.ownKeys(value).some(key => typeof key !== "string" || !TRUSTED_TASK_HOOK_NAMES.has(key) ||
+        typeof Object.getOwnPropertyDescriptor(value, key)?.value !== "function")) {
+    throw new Error("m1-trusted-task-hooks-invalid");
+  }
+  return Object.freeze({ ...value });
+}
+
+export async function composeM1Functions({ configuration, provider, pool, cipher, javascriptExecutor, dataDirectory, projectFixtures, taskHooks }) {
+  // Construction-time fault injection for the isolated acceptance host only. These
+  // hooks never enter a release schema, request, task, model plan or capability.
+  const hooks = validateTrustedTaskHooks(taskHooks);
   const config = m1FunctionConfigSchema.parse(configuration); assertM1Roles(provider);
   // Trusted construction only: the isolated acceptance host supplies fixed suites and
   // an authenticated-scope resolver. Neither release JSON nor a browser/model payload
@@ -39,7 +53,7 @@ export async function composeM1Functions({ configuration, provider, pool, cipher
     suites: projectFixtures?.suites ?? { [M1_EXERCISE_SUITE.suiteId]: M1_EXERCISE_SUITE } });
   const store = new PostgresTaskStore({ pool, cipher }); await store.initialize();
   const sessions = new M1SessionAuthority();
-  const tasks = new M1TaskService({ store, adapter, authorizeContext: context => sessions.authorize(context) });
+  const tasks = new M1TaskService({ store, adapter, authorizeContext: context => sessions.authorize(context), hooks });
   const checkpointer = new PostgresSaver(pool, undefined, { schema: "runa_m1_checkpoints" }); await checkpointer.setup();
   const workflow = createM1TaskWorkflow({ service: tasks, checkpointer });
   const forRole = role => new M1TaskOrchestrator({ service: tasks,

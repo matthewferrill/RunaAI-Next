@@ -15,11 +15,12 @@ are unchanged. M1 is authorized, not complete; its first local wiring result is 
 The steward authorized necessary non-destructive work and commit/push to RunaAI-Next without recurring
 permission requests. Human involvement is reserved for genuine customer tests or human-only operations.
 
-### 2026-08-28 M1-S1 local implementation and publication status
+### 2026-08-28 M1-S1 implementation and verified publication
 
 - The full roadmap/retrieval contract was committed as `333912a`; model-role contracts and independent
-  test additions followed in `daf92c6` and `c5ea7d1`. These are local commits on
-  `codex/gate7f-agent-foundation`, not an integration merge or deployment.
+  test additions followed in `daf92c6` and `c5ea7d1`, with final wiring/results in `2549413`. All five
+  commits, including the prior `0702210` documentation, are published on `codex/gate7f-agent-foundation`.
+  This is not an integration merge or deployment.
 - M1-S1 now wires independent chat/research/code selections into the actual answer-service composition,
   with separate v2 configuration/manifest schemas and exact startup model binding. Review/agent selections
   remain inert; no route, executor or grant is created. Legacy ordinary v1 values/digests are preserved.
@@ -29,9 +30,11 @@ permission requests. Human involvement is reserved for genuine customer tests or
 - Results and limitations: `gate7f/function-first/M1-S1-RESULTS-2026-08-28.md`. Specific Qwen3.6 runtime
   diagnosis: `gate7f/function-first/QWEN36-READINESS-PLAN-2026-08-28.md`. Historical timeouts are not a
   demonstrated model-quality failure; the old reasoning directive and transport need controlled diagnosis.
-- GitHub publication was rejected by the execution environment before the push ran. No indirect push
-  was attempted. Local work is saved, but remote publication is **outstanding**. Last observed branch tip
-  on GitHub was `be094bd`; the intended destination remains the same RunaAI-Next feature branch.
+- The initial environment publication block is resolved. The steward reaffirmed already-given permission;
+  a fresh fetch confirmed ancestry, then the normal non-force push advanced GitHub from `be094bd` to
+  `25494137b755828adaef66b72822a4b1258446d3`. `git ls-remote` independently confirmed the exact branch tip.
+  No indirect route, force push or new product approval gate was used. Continue under the recorded M1
+  authorization; ask only for genuinely needed human testing/presence, not repeat permission for this work.
 - No Home/Control command, model load/download, service change, production routing change, protected-data
   access or source-repository edit was made for this increment. The running-release details below are
   retained prior evidence, not a fresh 2026-08-28 live-status check.
@@ -623,9 +626,10 @@ No dependency was changed during the prerequisite disposition. Full evidence is 
 
 ## Next operation
 
-Publish the 2026-08-28 roadmap/retrieval guard and M1 acceptance contract, then implement M1-S1:
-independently selectable model roles with backward-compatible provider wiring and tests. The full
-sequence, failure criteria, human-test boundary and remaining work are in `roadmap/CURRENT-SLICE.md`.
+The roadmap/retrieval guard and M1-S1 role wiring are implemented, tested and published through `2549413`.
+Retrieve the full roadmap before the next bounded chat/context function slice, alongside the separate
+Qwen3.6 readiness diagnosis. The full sequence, failure criteria, human-test boundary and remaining work
+are in `roadmap/CURRENT-SLICE.md`. The publication blocker is resolved, not a reason to re-request permission.
 Model identity, tool authority and durable records remain application-owned. Preserve the current
 Control release and all protected data while validating the candidate. This replaces the old
 two-model/qualification-before-disposable-functions next-step sequence below.

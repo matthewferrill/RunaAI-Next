@@ -25,9 +25,11 @@ evidence; this dated amendment does not rewrite them.
 ## Immediate order and finite deliverables
 
 1. Publish the roadmap, retrieval guard and this acceptance contract before product implementation.
-   The local contract commit is `333912a`. GitHub publication is environment-blocked; no alternative
-   publication route is permitted. Safe local implementation may proceed under the standing authorization,
-   but publication remains outstanding and must not be reported as completed.
+   The contract commit is `333912a`. Publication initially stopped at the environment check; after the
+   steward reaffirmed the existing permission, an ordinary fast-forward push succeeded on 2026-08-28.
+   GitHub's `codex/gate7f-agent-foundation` tip was verified as
+   `25494137b755828adaef66b72822a4b1258446d3`, including the roadmap and M1-S1 wiring. The publication
+   blocker is resolved; it is not a new permission gate for the already authorized M1 work.
 2. Add independently selectable model roles behind the existing provider interface. Preserve legacy
    single-model configuration and exact rollback. No model chooses its own authority or fallback.
 3. Diagnose Qwen3.6's retained timeout failure and validate three-model runtime readiness; do not silently

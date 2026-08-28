@@ -22,3 +22,9 @@ deployment. No Home/Control service, model, production route, protected store or
 for this package. The prior 755/755 product result remains historical; it is not relabeled as this run.
 The steward requested publication to `matthewferrill/RunaAI-Next`; remote push confirmation belongs in
 the subsequent handoff after it actually succeeds.
+
+Publication follow-up, 2026-08-28: the normal fast-forward push to `codex/gate7f-agent-foundation`
+succeeded after the steward reaffirmed existing permission. An independent `git ls-remote` query
+confirmed tip `25494137b755828adaef66b72822a4b1258446d3`, including this roadmap package and the first
+M1 source increment. The initial environment blocker is resolved. See `MIGRATION-STATUS.md` for current
+implementation state; publication does not imply product acceptance, integration merge or deployment.

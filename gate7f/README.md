@@ -1,5 +1,9 @@
 # Gate 7F — Runa Agent Mode foundation
 
+Current planning authority: `../PRODUCT-ROADMAP.md` and `../roadmap/CURRENT-SLICE.md`.
+Run `node roadmap/read-next-slice.mjs` from the repository root before choosing further work. The
+historical foundation below is a component of Milestone 1, not the full Runa product roadmap.
+
 Gate 7F-0 is the inert control plane for conversational project work. It implements task scope,
 capability schemas, deterministic approval profiles, exact proposals, remembered decisions, synthetic
 execution receipts, idempotency, restart continuity, and governed rollback without touching a real

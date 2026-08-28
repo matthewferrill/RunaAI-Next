@@ -1,8 +1,19 @@
 # RunaAI migration status
 
-Status date: 2026-08-27. This is the living migration handoff for RunaAI-Next. Update it in the same
+Status date: 2026-08-28. This is the living migration handoff for RunaAI-Next. Update it in the same
 commit whenever a gate changes repository direction, authority, implementation status, safety
 boundaries, verification state, or the next planned work.
+
+## Required product-roadmap retrieval
+
+Before choosing the next slice, run `node roadmap/read-next-slice.mjs` and read `PRODUCT-ROADMAP.md`
+and `roadmap/CURRENT-SLICE.md`. The 2026-08-28 steward direction makes the existing five-function plan
+**Milestone 1 only**, with all 17 broader capability families retained. Three primary candidates are in
+scope: Gemma 4 26B A4B, Qwen3 Coder 30B-A3B, Qwen3.6 27B MTP. Build/test real shared functions before
+model-role selection; do not repeat the stack bakeoff or silently omit Qwen3.6. Existing frozen results
+are unchanged. M1 is authorized, not complete; no new implementation/deployment result is claimed here.
+The steward authorized necessary non-destructive work and commit/push to RunaAI-Next without recurring
+permission requests. Human involvement is reserved for genuine customer tests or human-only operations.
 
 ## Repository identity and authority
 
@@ -543,7 +554,8 @@ plain-language steward experience, or governed action pathway.
 | 7D | Identity-aware Chat/Code navigation and end-to-end flow correction | Complete; accepted and merged as `3d95e50`; current-turn verifier successor active on Control at `e10e3db`; post-merge and exact-Control suites 423/423 | Complete |
 | 7E-0/1 | Truthful execution status and harmless bounded JavaScript Run | Complete; exact successor active and ordinary-browser acceptance green; local, Control, and active-runtime suites 441/441 | Complete |
 | 7F | Conversational Agent Mode with selectable approval profiles | Matched qualification complete: 256 requests and one-hour endurance per model; independent blind review and provenance complete; 755/755 repository tests; neither meets a complete frozen role threshold | Gemma is the stronger development candidate; fix and requalify the bounded workflow before any model switch or effectful activation |
-| 7F+ | Broader product extensions | Model-independent foundation precedes Gemma/incumbent agent burn-in; effectful activation follows accepted model and capability gates | New baseline and separate decision per extension group |
+| M1 | First useful agent milestone; five functions, three primary model candidates | Authorized, not complete; scope and acceptance in `roadmap/CURRENT-SLICE.md` | Standing 2026-08-28 authorization; human customer test before closure |
+| M2-M5 | Remaining full-product capability families | Required destination in `PRODUCT-ROADMAP.md`; not satisfied by M1 | Preserve explicit scope, governance and evidence for each capability |
 
 ## Bootstrap validation
 
@@ -586,6 +598,15 @@ No dependency was changed during the prerequisite disposition. Full evidence is 
 `gate0/GATE1-PREREQUISITES-2026-08-20.md`.
 
 ## Next operation
+
+Publish the 2026-08-28 roadmap/retrieval guard and M1 acceptance contract, then implement M1-S1:
+independently selectable model roles with backward-compatible provider wiring and tests. The full
+sequence, failure criteria, human-test boundary and remaining work are in `roadmap/CURRENT-SLICE.md`.
+Model identity, tool authority and durable records remain application-owned. Preserve the current
+Control release and all protected data while validating the candidate. This replaces the old
+two-model/qualification-before-disposable-functions next-step sequence below.
+
+## Previous qualification closeout (2026-08-27, retained evidence)
 
 The steward has now authorized the coordinated qualification package, reversible environment work on
 Omen/Home/Control, parallel agents, documentation, commits and branch pushes, with no destructive work.

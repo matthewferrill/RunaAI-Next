@@ -1,0 +1,13 @@
+{
+  "schemaVersion": "runaai-current-slice/v1",
+  "roadmapRevision": "2026-08-28.1",
+  "milestone": "M1",
+  "sliceId": "M1-S1",
+  "state": "authorized-not-complete",
+  "completionEvidence": [],
+  "scopeDocument": "roadmap/CURRENT-SLICE.md",
+  "capabilityIds": ["C01", "C02", "C03", "C04", "C06", "C07", "C12", "C15", "C16"],
+  "nextWork": "Implement independently selectable model roles and compatibility tests before matched functional runs.",
+  "remainingRoadmapRequired": true,
+  "completionClaim": "M1 completion is not whole-product completion."
+}

@@ -12,12 +12,18 @@ conversion is authorized merely because this repository exists.
 
 Start with:
 
+- `PRODUCT-ROADMAP.md` for the complete product destination (the current slice is Milestone 1 only);
+- `node roadmap/read-next-slice.mjs` and `roadmap/CURRENT-SLICE.md` before selecting any next slice;
 - `MIGRATION-STATUS.md` for current authority, branches, gates, and next decision;
 - `AGENTS.md` for mandatory working and safety rules;
 - `RUNA-2-ARCHITECTURE-ASSESSMENT-2026-08-20.md` for subsystem dispositions and migration gates; and
 - `LAB-COMPLETION-REPORT-2026-08-20.md` for the inherited stack evidence.
 
 ## Inherited RunaLab baseline
+
+The text below is historical lab context. Current product authority, selected storage/agents and
+implementation permission are governed by `AGENTS.md`, `PRODUCT-ROADMAP.md` and the current slice;
+the lab's original purity language must not be mistaken for today's implementation instructions.
 
 ### Reference stack — the pure standard arm
 

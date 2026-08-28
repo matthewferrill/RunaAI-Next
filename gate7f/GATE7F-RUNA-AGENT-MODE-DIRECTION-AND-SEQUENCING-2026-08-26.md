@@ -3,6 +3,12 @@
 Date: 2026-08-26
 Status: product direction accepted; implementation scope not yet authorized
 
+> Historical status/sequence above and below describe 2026-08-26. The steward's 2026-08-28 direction
+> supersedes the next-work order and supplies M1 implementation authorization: retrieve
+> `../PRODUCT-ROADMAP.md` and `../roadmap/CURRENT-SLICE.md` with `node roadmap/read-next-slice.mjs`.
+> Real disposable functions now precede model-role selection; all three primary models remain in scope.
+> Milestone 1 is not the complete product. Preserve this document as the original decision record.
+
 ## Direction
 
 RunaAI will grow from separate conversational Chat and bounded Code drafting into a conversational

@@ -1,0 +1,505 @@
+{
+  "schemaVersion": "runaai-product-roadmap/v1",
+  "revision": "2026-08-28.1",
+  "destination": "Practical coding-agent and general-assistant capability, retaining Runa identity and governance.",
+  "currentMilestone": "M1",
+  "milestone1CompletesRoadmap": false,
+  "primaryModels": [
+    "gemma-4-26b-a4b-it-qat",
+    "qwen3-coder-30b-a3b-instruct",
+    "qwen3.6-27b-mtp"
+  ],
+  "retainedInfrastructure": [
+    "qwen3-4b-fallback",
+    "nomic-embed-text-v1.5",
+    "windowed-bge-v2-m3"
+  ],
+  "milestones": [
+    "M1",
+    "M2",
+    "M3",
+    "M4",
+    "M5"
+  ],
+  "capabilities": [
+    {
+      "id": "C01",
+      "title": "Conversation and writing",
+      "milestones": [
+        "M1",
+        "M2"
+      ],
+      "dependsOn": [],
+      "state": "partial",
+      "evidence": [
+        "gate7b/customer-journey.test.mjs",
+        "gate7d/navigation.test.mjs"
+      ],
+      "scope": "Personal conversation and explicitly selected project context.",
+      "acceptance": "Continue a reopened conversation and satisfy new instructions without mixing users or old questions.",
+      "remainingAfterM1": "Searchable history, broader writing quality and supported conversation journeys.",
+      "proof": {
+        "source": "partial",
+        "deterministic": "partial",
+        "integration": "not-verified",
+        "modelQualification": "not-verified",
+        "release": "not-verified",
+        "humanAcceptance": "not-verified"
+      },
+      "releaseEvidence": [],
+      "note": "Family-level coverage is incomplete; historical slice evidence is not full-family acceptance."
+    },
+    {
+      "id": "C02",
+      "title": "Context, memory and learning",
+      "milestones": [
+        "M1",
+        "M3"
+      ],
+      "dependsOn": [
+        "C01"
+      ],
+      "state": "partial",
+      "evidence": [
+        "gate4c/answer-context.mjs",
+        "gate7f/README.md"
+      ],
+      "scope": "Personal/project knowledge; owner-governed learning changes remain distinct.",
+      "acceptance": "Use approved knowledge, exclude revoked material and preserve scope across model changes.",
+      "remainingAfterM1": "Full teach/correct/revoke UX, context compaction and long-task continuity.",
+      "proof": {
+        "source": "partial",
+        "deterministic": "partial",
+        "integration": "not-verified",
+        "modelQualification": "not-verified",
+        "release": "not-verified",
+        "humanAcceptance": "not-verified"
+      },
+      "releaseEvidence": [],
+      "note": "Family-level coverage is incomplete; historical slice evidence is not full-family acceptance."
+    },
+    {
+      "id": "C03",
+      "title": "Files and visual inputs",
+      "milestones": [
+        "M1",
+        "M2",
+        "M5"
+      ],
+      "dependsOn": [
+        "C01"
+      ],
+      "state": "partial",
+      "evidence": [
+        "gate6b/composition.mjs"
+      ],
+      "scope": "Explicit attachments and project-authorized files only.",
+      "acceptance": "Extract correct content from supported inputs without executing macros or following unsafe external references.",
+      "remainingAfterM1": "General file upload/parsing, archive safety, document and visual inputs.",
+      "proof": {
+        "source": "partial",
+        "deterministic": "partial",
+        "integration": "not-verified",
+        "modelQualification": "not-verified",
+        "release": "not-verified",
+        "humanAcceptance": "not-verified"
+      },
+      "releaseEvidence": [],
+      "note": "Family-level coverage is incomplete; historical slice evidence is not full-family acceptance."
+    },
+    {
+      "id": "C04",
+      "title": "Live and source-grounded research",
+      "milestones": [
+        "M1",
+        "M2"
+      ],
+      "dependsOn": [
+        "C03"
+      ],
+      "state": "partial",
+      "evidence": [
+        "gate1/core.mjs",
+        "gate6b/composition.mjs"
+      ],
+      "scope": "Approved sources; later scoped outbound research.",
+      "acceptance": "Produce supported citations, distinguish missing/conflicting evidence and exclude unauthorized sources.",
+      "remainingAfterM1": "Live web search/fetch, freshness and multi-source investigation.",
+      "proof": {
+        "source": "partial",
+        "deterministic": "partial",
+        "integration": "not-verified",
+        "modelQualification": "not-verified",
+        "release": "not-verified",
+        "humanAcceptance": "not-verified"
+      },
+      "releaseEvidence": [],
+      "note": "Family-level coverage is incomplete; historical slice evidence is not full-family acceptance."
+    },
+    {
+      "id": "C05",
+      "title": "Documents, data and artifacts",
+      "milestones": [
+        "M2"
+      ],
+      "dependsOn": [
+        "C03",
+        "C07"
+      ],
+      "state": "not-verified",
+      "evidence": [
+        "PRODUCT-ROADMAP.md"
+      ],
+      "scope": "User-provided data and isolated generated artifacts.",
+      "acceptance": "Create and independently inspect a real file with correct calculations and readable rendering.",
+      "remainingAfterM1": "Executable analysis and usable document, spreadsheet, slide and chart outputs.",
+      "proof": {
+        "source": "not-verified",
+        "deterministic": "not-verified",
+        "integration": "not-verified",
+        "modelQualification": "not-verified",
+        "release": "not-verified",
+        "humanAcceptance": "not-verified"
+      },
+      "releaseEvidence": [],
+      "note": "Family-level coverage is incomplete; historical slice evidence is not full-family acceptance."
+    },
+    {
+      "id": "C06",
+      "title": "Real software development",
+      "milestones": [
+        "M1",
+        "M2"
+      ],
+      "dependsOn": [
+        "C03",
+        "C07"
+      ],
+      "state": "partial",
+      "evidence": [
+        "gate7e/contracts.mjs",
+        "gate7f/README.md"
+      ],
+      "scope": "Disposable M1 projects; later explicitly granted retained project roots.",
+      "acceptance": "Edit a real project, observe failing tests, fix the code and verify actual passing results.",
+      "remainingAfterM1": "Retained repositories, broader languages, multi-file refactoring and debugging.",
+      "proof": {
+        "source": "partial",
+        "deterministic": "partial",
+        "integration": "not-verified",
+        "modelQualification": "not-verified",
+        "release": "not-verified",
+        "humanAcceptance": "not-verified"
+      },
+      "releaseEvidence": [],
+      "note": "Family-level coverage is incomplete; historical slice evidence is not full-family acceptance."
+    },
+    {
+      "id": "C07",
+      "title": "Execution and environments",
+      "milestones": [
+        "M1",
+        "M2"
+      ],
+      "dependsOn": [],
+      "state": "partial",
+      "evidence": [
+        "gate7e/mxc-javascript-executor.mjs"
+      ],
+      "scope": "Per-executor filesystem/network/secret/resource envelope.",
+      "acceptance": "Run actual code and report exact source-bound output, limits and errors without escaping the sandbox.",
+      "remainingAfterM1": "Broader commands, builds, dependency/process management and supported runtime profiles.",
+      "proof": {
+        "source": "partial",
+        "deterministic": "partial",
+        "integration": "not-verified",
+        "modelQualification": "not-verified",
+        "release": "not-verified",
+        "humanAcceptance": "not-verified"
+      },
+      "releaseEvidence": [],
+      "note": "Family-level coverage is incomplete; historical slice evidence is not full-family acceptance."
+    },
+    {
+      "id": "C08",
+      "title": "Git and delivery workflows",
+      "milestones": [
+        "M2",
+        "M3"
+      ],
+      "dependsOn": [
+        "C06"
+      ],
+      "state": "not-verified",
+      "evidence": [
+        "PRODUCT-ROADMAP.md"
+      ],
+      "scope": "Exact repository/branch/remote/action grant; publication distinct from local editing.",
+      "acceptance": "Produce reviewed changes and trace a permitted delivery with recovery, preserving unrelated work.",
+      "remainingAfterM1": "Local Git, worktrees, PR/CI integration and governed deployment.",
+      "proof": {
+        "source": "not-verified",
+        "deterministic": "not-verified",
+        "integration": "not-verified",
+        "modelQualification": "not-verified",
+        "release": "not-verified",
+        "humanAcceptance": "not-verified"
+      },
+      "releaseEvidence": [],
+      "note": "Family-level coverage is incomplete; historical slice evidence is not full-family acceptance."
+    },
+    {
+      "id": "C09",
+      "title": "Browser and application interaction",
+      "milestones": [
+        "M2",
+        "M5"
+      ],
+      "dependsOn": [
+        "C07"
+      ],
+      "state": "not-verified",
+      "evidence": [
+        "PRODUCT-ROADMAP.md"
+      ],
+      "scope": "Exact authorized origins/apps; browser data cannot expand authority.",
+      "acceptance": "Operate a real UI, verify its visible result and stop safely on unexpected navigation or authentication.",
+      "remainingAfterM1": "Product browser automation, visual verification and later desktop tools.",
+      "proof": {
+        "source": "not-verified",
+        "deterministic": "not-verified",
+        "integration": "not-verified",
+        "modelQualification": "not-verified",
+        "release": "not-verified",
+        "humanAcceptance": "not-verified"
+      },
+      "releaseEvidence": [],
+      "note": "Family-level coverage is incomplete; historical slice evidence is not full-family acceptance."
+    },
+    {
+      "id": "C10",
+      "title": "Connected tools and services",
+      "milestones": [
+        "M3"
+      ],
+      "dependsOn": [
+        "C07"
+      ],
+      "state": "not-verified",
+      "evidence": [
+        "PRODUCT-ROADMAP.md"
+      ],
+      "scope": "Individual account/tool capabilities; read is not send/publish permission.",
+      "acceptance": "Complete one real authorized integration workflow and deny revoked or wrong-account operations.",
+      "remainingAfterM1": "Selected MCP/connectors, credential custody and scoped external actions.",
+      "proof": {
+        "source": "not-verified",
+        "deterministic": "not-verified",
+        "integration": "not-verified",
+        "modelQualification": "not-verified",
+        "release": "not-verified",
+        "humanAcceptance": "not-verified"
+      },
+      "releaseEvidence": [],
+      "note": "Family-level coverage is incomplete; historical slice evidence is not full-family acceptance."
+    },
+    {
+      "id": "C11",
+      "title": "Skills and reusable workflows",
+      "milestones": [
+        "M3"
+      ],
+      "dependsOn": [
+        "C12"
+      ],
+      "state": "not-verified",
+      "evidence": [
+        "PRODUCT-ROADMAP.md"
+      ],
+      "scope": "Trusted workflow packages cannot exceed underlying capabilities.",
+      "acceptance": "Use a reusable workflow, pin its version and reject attempted permission expansion.",
+      "remainingAfterM1": "Versioned skill discovery, instructions, scripts and governance.",
+      "proof": {
+        "source": "not-verified",
+        "deterministic": "not-verified",
+        "integration": "not-verified",
+        "modelQualification": "not-verified",
+        "release": "not-verified",
+        "humanAcceptance": "not-verified"
+      },
+      "releaseEvidence": [],
+      "note": "Family-level coverage is incomplete; historical slice evidence is not full-family acceptance."
+    },
+    {
+      "id": "C12",
+      "title": "Autonomous task completion",
+      "milestones": [
+        "M1",
+        "M3"
+      ],
+      "dependsOn": [
+        "C07",
+        "C02"
+      ],
+      "state": "partial",
+      "evidence": [
+        "gate7f/core.mjs",
+        "gate7f/README.md"
+      ],
+      "scope": "Current actor/project/task grants checked at every effect.",
+      "acceptance": "Plan, act, inspect, correct, stop/resume and reconcile exact effects across restart.",
+      "remainingAfterM1": "Broader retained task types and capability profiles beyond M1's bounded loop.",
+      "proof": {
+        "source": "partial",
+        "deterministic": "partial",
+        "integration": "not-verified",
+        "modelQualification": "not-verified",
+        "release": "not-verified",
+        "humanAcceptance": "not-verified"
+      },
+      "releaseEvidence": [],
+      "note": "Family-level coverage is incomplete; historical slice evidence is not full-family acceptance."
+    },
+    {
+      "id": "C13",
+      "title": "Parallel agents and independent review",
+      "milestones": [
+        "M4"
+      ],
+      "dependsOn": [
+        "C12"
+      ],
+      "state": "not-verified",
+      "evidence": [
+        "PRODUCT-ROADMAP.md"
+      ],
+      "scope": "Workers inherit narrower or equal task scope and cannot grant authority.",
+      "acceptance": "Join isolated worker results, handle worker loss/conflicts and independently verify completion.",
+      "remainingAfterM1": "Product delegation, conflict isolation, independent review and capacity scheduling.",
+      "proof": {
+        "source": "not-verified",
+        "deterministic": "not-verified",
+        "integration": "not-verified",
+        "modelQualification": "not-verified",
+        "release": "not-verified",
+        "humanAcceptance": "not-verified"
+      },
+      "releaseEvidence": [],
+      "note": "Family-level coverage is incomplete; historical slice evidence is not full-family acceptance."
+    },
+    {
+      "id": "C14",
+      "title": "Background and scheduled work",
+      "milestones": [
+        "M4"
+      ],
+      "dependsOn": [
+        "C12"
+      ],
+      "state": "not-verified",
+      "evidence": [
+        "PRODUCT-ROADMAP.md"
+      ],
+      "scope": "Per-job grant/expiry/budget revalidated when work executes.",
+      "acceptance": "Survive restart and duplicate events, cancel promptly and notify once with truthful state.",
+      "remainingAfterM1": "Durable schedules/events, monitors and notification lifecycle.",
+      "proof": {
+        "source": "not-verified",
+        "deterministic": "not-verified",
+        "integration": "not-verified",
+        "modelQualification": "not-verified",
+        "release": "not-verified",
+        "humanAcceptance": "not-verified"
+      },
+      "releaseEvidence": [],
+      "note": "Family-level coverage is incomplete; historical slice evidence is not full-family acceptance."
+    },
+    {
+      "id": "C15",
+      "title": "Complete working interface",
+      "milestones": [
+        "M1",
+        "M2",
+        "M3"
+      ],
+      "dependsOn": [
+        "C01"
+      ],
+      "state": "partial",
+      "evidence": [
+        "gate6b/public/workspace-shell.mjs",
+        "gate7c/ui-shell.test.mjs"
+      ],
+      "scope": "Only the authenticated user's authorized task/project surfaces.",
+      "acceptance": "Inspect real outputs, act on understandable approvals and recover from failure without losing work.",
+      "remainingAfterM1": "File/artifact/diff previews, advanced navigation, accessibility and complete progress controls.",
+      "proof": {
+        "source": "partial",
+        "deterministic": "partial",
+        "integration": "not-verified",
+        "modelQualification": "not-verified",
+        "release": "not-verified",
+        "humanAcceptance": "not-verified"
+      },
+      "releaseEvidence": [],
+      "note": "Family-level coverage is incomplete; historical slice evidence is not full-family acceptance."
+    },
+    {
+      "id": "C16",
+      "title": "Multi-user and remote access",
+      "milestones": [
+        "M1",
+        "M5"
+      ],
+      "dependsOn": [
+        "C01"
+      ],
+      "state": "partial",
+      "evidence": [
+        "gate7a/ordinary-session.test.mjs",
+        "MIGRATION-STATUS.md"
+      ],
+      "scope": "Ordinary users isolated; protected owner/admin actions retain step-up.",
+      "acceptance": "Complete supported cross-device journeys while cross-user/session access is denied.",
+      "remainingAfterM1": "Phone and off-LAN access, cross-device recovery and access operations.",
+      "proof": {
+        "source": "partial",
+        "deterministic": "partial",
+        "integration": "not-verified",
+        "modelQualification": "not-verified",
+        "release": "not-verified",
+        "humanAcceptance": "not-verified"
+      },
+      "releaseEvidence": [],
+      "note": "Family-level coverage is incomplete; historical slice evidence is not full-family acceptance."
+    },
+    {
+      "id": "C17",
+      "title": "Voice and other media",
+      "milestones": [
+        "M5"
+      ],
+      "dependsOn": [
+        "C03",
+        "C07"
+      ],
+      "state": "not-verified",
+      "evidence": [
+        "PRODUCT-ROADMAP.md"
+      ],
+      "scope": "Explicit modality inputs, consent, retention and output rights.",
+      "acceptance": "Demonstrate real supported modality input/output with declared model/runtime and privacy limits.",
+      "remainingAfterM1": "Voice/vision and separately selected image/media generation workflows.",
+      "proof": {
+        "source": "not-verified",
+        "deterministic": "not-verified",
+        "integration": "not-verified",
+        "modelQualification": "not-verified",
+        "release": "not-verified",
+        "humanAcceptance": "not-verified"
+      },
+      "releaseEvidence": [],
+      "note": "Family-level coverage is incomplete; historical slice evidence is not full-family acceptance."
+    }
+  ]
+}

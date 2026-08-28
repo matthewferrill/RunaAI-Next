@@ -18,6 +18,14 @@ RunaAI; `Next` is only a temporary repository and checkout label during migratio
 
 ## Working method
 
+0. Before deciding or proposing any next slice, run `node roadmap/read-next-slice.mjs` and read its
+   complete planning context, `PRODUCT-ROADMAP.md`, `roadmap/CURRENT-SLICE.md`, and `MIGRATION-STATUS.md`.
+   Use `roadmap/SLICE-TEMPLATE.md`; record the printed roadmap digest and capability IDs. Milestone 1
+   is the first delivery only, never a replacement for the remaining 17-family roadmap. A previous
+   gate's exclusions do not retire a future capability. Run `npm run verify:roadmap` before committing
+   a changed plan or handoff. This dated roadmap supersedes older next-step/sequencing prose, not
+   historical evidence, product security, or the selected-stack contracts.
+
 1. Use a separate worktree or clone per agent. Never run Codex and Claude in the same checkout.
 2. Create a short-lived branch from `runa2/integration` for one approved migration gate.
 3. Baseline the behavior before implementing it and commit the green criteria before the implementation.
@@ -33,6 +41,10 @@ RunaAI; `Next` is only a temporary repository and checkout label during migratio
 - Do not copy DPAPI, Windows Hello, credential, protected-store, or machine-local ciphertext.
 - Do not download models, start persistent services, expose networking, spend money, or change production
   without separate approval.
+  Approval may already be present in the current steward authorization: do not request it again for
+  the same work. The 2026-08-28 authorization in `roadmap/CURRENT-SLICE.md` covers non-destructive M1
+  implementation/testing/environment work and GitHub publication, with human involvement when actual
+  presence/testing is needed. Unrelated capability activation is not implied by a roadmap entry.
 - PostgreSQL owns authoritative product records; LangGraph owns durable workflow checkpoints; Qdrant is a
   rebuildable derived index. Mastra memory or snapshots must not become a second authority.
 - Preserve Runa's constitution, authority rules, consent-first learning, typed knowledge, project and
@@ -44,6 +56,7 @@ RunaAI; `Next` is only a temporary repository and checkout label during migratio
 
 Read these before proposing a gate:
 
+- `PRODUCT-ROADMAP.md`, `roadmap/capabilities.json`, and `roadmap/CURRENT-SLICE.md` first;
 - `RUNA-2-ARCHITECTURE-ASSESSMENT-2026-08-20.md`
 - `RUNA-PORT-ESTIMATE-2026-08-20.md`
 - `LAB-COMPLETION-REPORT-2026-08-20.md`

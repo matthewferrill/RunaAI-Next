@@ -4,6 +4,11 @@ Date: 2026-08-27. Documentation follow-up to the completed qualification at `be0
 The steward requested that the four-area coverage and next steps be documented. This record clarifies
 the result; it does not alter the frozen evaluation or authorize a model switch, merge or new effect.
 
+> Superseded next-work sequence, 2026-08-28: retrieve `../PRODUCT-ROADMAP.md` and
+> `../roadmap/CURRENT-SLICE.md` before selecting a slice. The current authorized work is function-first
+> Milestone 1 with Gemma, Qwen3 Coder and Qwen3.6, not a new two-model-only benchmark. The full roadmap
+> remains required after M1. Scores and the historical publication status below are unchanged records.
+
 ## Outcome in plain language
 
 Gemma is a promising candidate, especially for ordinary chat and the small code-drafting subset.

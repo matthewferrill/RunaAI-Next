@@ -104,8 +104,23 @@ outer and7 LocalService checks passed; both tasks exited0 and were unregistered.
 is not Home22.22.1 qualification. The combined local command with `windows-proof/*.test.mjs` passed46/46,
 including Windows PowerShell5.1 parsing. Actual model lifecycle recovery remains unproved.
 
-Not yet implemented or proved: independent crash watchdog/persistence, service
-installation, startup without Matthew login, post-campaign JIT/sensitive-log transition, authenticated
-deployment binding, long-idle native persistence, real fault/restart/rollback and production activation.
+The [assembled operator](ASSEMBLED-OPERATOR.md) now includes fixed privileged/unprivileged/recovery
+entrypoints, native supervision, private journal replay, a source-only package builder, disabled
+installation preparation and scoped stop/unregister. This is code, not actual assembled Home proof.
+Recovery has9 focused tests including unsafe/stale observations and no higher-power restoration after
+settings drift. Graceful drain now preserves unrevoked in-flight worker tickets while denying new ones.
+Independent review found and corrected live-cleanup safe-settings drift, an unbounded native GPU probe,
+and task/argv matching that did not bind the complete executable descriptor. Live cleanup now refuses
+unobserved fingerprints and unsafe higher-power restoration. Native probe timeout/cap and exact task/
+argv checks have actual local PowerShell regressions. The23 retained actual synthetic adapter/campaign
+wire projections pass the strict contract and byte-preserving local HTTP proxy; they are not new model
+outputs or functional grades. Their request-byte reconstruction is disclosed in each fixture.
+Assembled-source verification2026-08-28: the combined runtime and Windows-proof command passed67/67
+with0 skips; `npm run verify:roadmap` passed15/15. These supersede the older local test counts above,
+not the explicit limits of the retained Control mechanics and still-pending actual Home qualification.
+
+Not yet proved: assembled native watchdog/install/recovery on Home, startup without Matthew login,
+post-campaign JIT/sensitive-log transition, authenticated deployment binding, long-idle native
+persistence, real fault/restart/rollback and production activation.
 Do not claim this core is ready to deploy. The existing finite campaign operator remains the sole live
 Home lifecycle authority until explicitly handed over after cleanup.

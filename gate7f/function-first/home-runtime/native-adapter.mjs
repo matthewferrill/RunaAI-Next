@@ -4,7 +4,7 @@ import {hostname,freemem} from 'node:os';
 import {execFile} from 'node:child_process';
 import {promisify} from 'node:util';
 import path from 'node:path';
-import {demand,error,NOMICS,LEASE_POLICY,loadRequest,residentList} from './contracts.mjs';
+import {demand,error,NOMICS,LEASE_POLICY,RUNTIME_LIMITS,loadRequest,residentList,sha,settingsSafe} from './contracts.mjs';
 const execute=promisify(execFile);
 export const HOME_RUNTIME_ROOT='C:\\AI\\RunaAI-Next-HomeRuntime';
 const SETTINGS='C:\\Users\\Matthew\\.lmstudio\\.internal\\http-server-config.json';
@@ -96,7 +96,10 @@ export function createPinnedNativeAdapter({operatorPins,stateRoot=HOME_RUNTIME_R
     },
     async setPower(watts,{signal}={}){
       requireVerified();demand(watts===160||watts===260,'native-power');
-      if(watts===260)demand(residentList(await api('/api/v1/models',undefined,{signal})).length===0,'native-power-with-residents');
+      if(watts===260){const current=await this.observe({signal});settingsSafe(current.settings);
+        demand(Number.isFinite(current.observedAt)&&Date.now()>=current.observedAt
+          &&Date.now()-current.observedAt<=RUNTIME_LIMITS.maximumObservationAgeMs,'native-power-stale');
+        demand(residentList(current.inventory).length===0,'native-power-with-residents');}
       for(const uuid of LEASE_POLICY.gpuUuids)await execute(NVIDIA,['-i',uuid,'-pl',String(watts)],{timeout:5000,maxBuffer:8192,windowsHide:true,signal});
     },
     async load(request,options={}){
@@ -108,6 +111,19 @@ export function createPinnedNativeAdapter({operatorPins,stateRoot=HOME_RUNTIME_R
     async unload(request){requireVerified();demand(request&&Object.keys(request).join()==='instance_id'&&typeof request.instance_id==='string','native-unload-shape');
       demand(ownedIds.has(request.instance_id),'native-unload-ownership');const response=await api('/api/v1/models/unload',request,{timeoutMs:120000});
       ownedIds.delete(request.instance_id);return response;},
+    async adoptRecoveredOwnership(request){
+      // Privileged recovery entry only, never exposed through broker/proxy. The caller replays the
+      // protected fsync'd journal and independently proves both old workers stopped under its lock.
+      requireVerified();demand(request&&Object.keys(request).sort().join()==='engineIdentity,owned','native-recovery-shape');
+      const {engineIdentity,owned}=request;demand(typeof engineIdentity==='string'&&engineIdentity.length>0,'native-recovery-engine');
+      demand(owned&&Object.keys(owned).sort().join()==='fingerprint,id,key'
+        &&[selectedProfile.candidate.key,NOMICS.key].includes(owned.key)&&typeof owned.id==='string'
+        &&hashPattern.test(owned.fingerprint),'native-recovery-ownership');
+      const observation=await this.observe();settingsSafe(observation.settings);demand(observation.engineIdentity===engineIdentity,'native-recovery-engine');
+      const match=residentList(observation.inventory).filter(item=>item.id===owned.id&&item.key===owned.key);
+      demand(match.length===1&&sha(JSON.stringify(match[0].config))===owned.fingerprint,'native-recovery-fingerprint');
+      ownedIds.add(owned.id);
+    },
     async record(event){
       requireHome();assertPlainPath(stateRoot,{directory:true});const file=stateRoot+'\\operator-events.jsonl';
       try{assertPlainPath(file);}catch(e){if(e.code!=='ENOENT')throw e;}

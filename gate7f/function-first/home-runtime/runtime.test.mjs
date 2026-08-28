@@ -60,6 +60,29 @@ test('native MCP capability drift closes startup and active admissions without a
     assert.equal(active.values.loaded.length,0);
   }
 });
+
+test('live cleanup never restores higher power after unsafe settings or stale cleanup observation',async()=>{
+  for(const [name,value]of [['justInTimeModelLoading',true],['logSensitiveData',true],['verbose',true],
+    ['dynamicRemoteMcpServer','allowAll'],['pluginUse','allowAll']]){
+    const f=fixture();await f.controller.start();f.values.settings[name]=value;
+    await f.controller.poll();assert.equal(f.controller.status.phase,'faulted');
+    assert.equal(f.values.loaded.length,0,'only exact observed owned instances were removed');
+    assert.equal(f.values.power,160,'unsafe settings never permit the higher ceiling');
+    assert.ok(!f.values.events.some(event=>event.type==='cleanup-complete'));
+  }
+  const f=fixture();await f.controller.start();const original=f.adapter.observe;
+  f.adapter.observe=async()=>({...await original(),observedAt:Date.now()-10000});
+  await assert.rejects(f.controller.stop(),/cleanup-stale-observation/);assert.equal(f.values.power,160);
+});
+
+test('a returned identity without a verified observed fingerprint cannot authorize live unload',async()=>{
+  const f=fixture();const original=f.adapter.load;
+  f.adapter.load=async request=>{const response=await original(request);response.load_config.context_length=1;return response;};
+  await assert.rejects(f.controller.start(),/primary-profile/);
+  assert.equal(f.values.loads.length,1);assert.equal(f.values.unloads.length,0);assert.equal(f.values.power,160);
+  assert.ok(!f.values.events.some(event=>event.type==='owned'||event.type==='cleanup-complete'));
+  await assert.rejects(f.controller.stop(),/cleanup-ownership/);
+});
 test('explicit owned startup, idle polling and stop preserve the exact two-model envelope',async()=>{
   const f=fixture();await f.controller.start();assert.equal(f.controller.status.phase,'ready');assert.equal(f.values.power,160);
   assert.deepEqual(f.values.loads.map(v=>v.model),[f.controller.profile.candidate.key,NOMICS.key]);

@@ -35,7 +35,9 @@ export class BrokerWorkerController {
       this.#status={phase:value.phase,generation:value.generation,profileSha256:value.profileSha256,closing:value.closing};
       for(const[id,local]of this.#grants){
         const remote=value.grants.find(grant=>grant.grantId===id);
-        if(value.phase!=='ready'||value.closing||value.generation!==local.generation||!remote||remote.revoked
+        // Graceful drain closes new admissions but lets existing, still-valid requests finish.
+        // The native controller explicitly revokes tickets for faults or the bounded drain timeout.
+        if(!['ready','draining'].includes(value.phase)||value.generation!==local.generation||!remote||remote.revoked
           ||remote.generation!==local.generation||remote.deadlineAt!==local.deadlineAt)local.abort.abort(error('worker-grant-revoked'));
       }
       return this.status;

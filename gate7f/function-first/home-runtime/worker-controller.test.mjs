@@ -29,6 +29,11 @@ test('worker native revocation aborts but does not release until actual request 
   [...f.grants.values()][0].revoked=true;await f.worker.poll();assert.equal(grant.signal.aborted,true);
   assert.equal(f.grants.size,1);await grant.release();assert.equal(f.grants.size,0);
 });
+test('graceful drain denies new admissions without aborting an unrevoked in-flight request',async()=>{
+  const f=fixture();await f.worker.poll();const grant=await f.worker.admit();f.setPhase('draining');
+  await f.worker.poll();assert.equal(grant.signal.aborted,false);await assert.rejects(f.worker.admit(),/status-stale/);
+  await grant.release();assert.equal(f.grants.size,0);
+});
 test('supervisor loss closes all admissions without replaying or releasing unknown requests',async()=>{
   const f=fixture();await f.worker.poll();const grant=await f.worker.admit();
   f.setFail(Error('lost supervisor'));await assert.rejects(f.worker.poll(),/lost supervisor/);

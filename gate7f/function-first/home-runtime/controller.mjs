@@ -1,5 +1,5 @@
 import {randomUUID} from 'node:crypto';
-import {validateProfile,verifyLoaded,verifyObservation,loadRequest,residentList,sha,error,demand,RUNTIME_LIMITS,LEASE_POLICY} from './contracts.mjs';
+import {validateProfile,verifyLoaded,verifyObservation,loadRequest,residentList,sha,error,demand,settingsSafe,RUNTIME_LIMITS,LEASE_POLICY} from './contracts.mjs';
 
 const wait=ms=>new Promise(resolve=>setTimeout(resolve,ms));
 /** Operator core only. No startup side effect, sockets, commands, persistence or native adapter.
@@ -96,16 +96,27 @@ export class QualifiedRuntimeController {
       demand(observation.engineIdentity===this.#engineIdentity,'cleanup-engine-changed');
       const found=residentList(observation.inventory).filter(i=>i.key===owned.key&&i.id===owned.id);
       if(found.length===0){this.#owned=this.#owned.filter(o=>o!==owned);continue;}
-      demand(found.length===1&&(!owned.fingerprint||sha(JSON.stringify(found[0].config))===owned.fingerprint),'cleanup-ownership');
+      demand(found.length===1&&typeof owned.fingerprint==='string'
+        &&sha(JSON.stringify(found[0].config))===owned.fingerprint,'cleanup-ownership');
       await this.#adapter.unload({instance_id:owned.id});this.#owned=this.#owned.filter(o=>o!==owned);
       await this.#record('unloaded',{key:owned.key,id:owned.id});observation=await this.#adapter.observe();
     }
     demand(residentList(observation.inventory).length===0,'cleanup-unexpected-residency');
     demand(this.#pendingKey===null,'cleanup-ambiguous-load');
     if(this.#powerChanged){
+      // The fault may itself be a settings change. Exact-owned unload can still reduce exposure,
+      // but neither that cleanup nor an empty registry permits restoring a higher power ceiling
+      // while JIT/logging/MCP has drifted. Reobserve immediately before the setter.
+      observation=await this.#adapter.observe();settingsSafe(observation.settings);
+      demand(Number.isFinite(observation.observedAt)&&this.#clock()>=observation.observedAt
+        &&this.#clock()-observation.observedAt<=RUNTIME_LIMITS.maximumObservationAgeMs,'cleanup-stale-observation');
       demand(observation.engineIdentity===this.#engineIdentity,'cleanup-engine-changed');
+      demand(residentList(observation.inventory).length===0,'cleanup-unexpected-residency');
       await this.#adapter.setPower(260);const restored=await this.#adapter.observe();
-      demand(restored.engineIdentity===this.#engineIdentity&&residentList(restored.inventory).length===0
+      settingsSafe(restored.settings);
+      demand(Number.isFinite(restored.observedAt)&&this.#clock()>=restored.observedAt
+        &&this.#clock()-restored.observedAt<=RUNTIME_LIMITS.maximumObservationAgeMs
+        &&restored.engineIdentity===this.#engineIdentity&&residentList(restored.inventory).length===0
         &&restored.hardware?.gpus?.length===2&&restored.hardware.gpus.every((g,index)=>g.index===index
           &&g.uuid===LEASE_POLICY.gpuUuids[index]&&g.powerLimitWatts===260),'restore-unconfirmed');
       this.#powerChanged=false;

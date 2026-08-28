@@ -60,8 +60,22 @@ canonical PostgreSQL state, LangGraph checkpoints and native receipts are retain
 Browser checkpoints occur only at the frozen pending, cancel-drain, unknown,
 reopen, restored or final-result states. The nonce-bound browser bridge requires
 actual independent DOM evidence. It never converts an HTTP result into UI proof.
-The cancel-drain checkpoint is bounded by the existing 15-second hold and needs
-the automated browser operator ready; a late observation fails honestly.
+The cancel-drain journey has an additional **ungraded** `before-native-dispatch`
+rendezvous: the real browser consumes its same-session nonce and opens the exact
+project/task before any model dispatch/native hold. This request has
+`preparationOnly:true`, `checks:[]`, and `scope`. Its acknowledgement must contain
+`preparedScope` equal to that scope and one `browser-preparation` record from the
+actual browser with `data.scope`, `url`, `observedAt`, `projectName` and
+`taskObjective`. The host must also have observed the same-session nonce consumption.
+No frozen check or graded browser flag is credited by preparation.
+
+The later `in-flight` request has `bootstrap:null`, `reusePreparedBrowser:true` and
+the preparation checkpoint ID. Refresh/observe that already-open task directly;
+do not start another login/navigation sequence. This acknowledgement remains
+graded and has at most 10 seconds inside the unchanged 15-second native-delivery
+hold. Stale or different-session/task preparation fails closed. Other browser
+cases observe stable pending/revoked/unknown/restored states with the ordinary
+five-minute bridge bound and do not need a pre-dispatch rendezvous.
 
 `--mode inventory` performs no inference and reports driver coverage only.
 Scored output includes deterministic grades plus unresolved checks. Independent

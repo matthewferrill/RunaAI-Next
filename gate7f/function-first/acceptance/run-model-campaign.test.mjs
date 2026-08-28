@@ -7,7 +7,7 @@ import { ACCEPTANCE_POLICY, MODEL_CASES, CONTROL_CASES, CASE_BUNDLE_SHA256 } fro
 import { QDRANT_PIN, sha256, newObservation } from "./runner-contract.mjs";
 import { enumerateCaseChecks, evaluateAttempt, evaluateControl } from "./assertions.mjs";
 import { parseCampaignArguments, campaignPlan, qualifiedControlSuite, validateHomeReady, validateLiveHome,
-  verifyExtractedArchive, createCampaignWriter, needsBrowserCheckpoint, executeCandidateAttempts, runModelCampaign } from "./run-model-campaign.mjs";
+  verifyExtractedArchive, createCampaignWriter, needsBrowserCheckpoint, createCampaignActionExtensions, executeCandidateAttempts, runModelCampaign } from "./run-model-campaign.mjs";
 
 // These are deliberately model-free unit fixtures. They test the runner's
 // serialization, immutable evidence and fail-closed contracts, not acceptance.
@@ -139,9 +139,30 @@ test("browser checkpoints select realpending/cancel/unknown/finalstates only", (
   assert.equal(check("agent-03-ask-every-time", "after-action", "login.fresh"), false);
   assert.equal(check("agent-03-ask-every-time", "reload-and-list"), true);
   assert.equal(check("agent-05-cancel-drain", "in-flight"), true);
+  assert.equal(check("agent-05-cancel-drain", "before-native-dispatch"), true);
   assert.equal(check("agent-06-crash-reconcile", "unknown"), true);
   assert.equal(check("agent-04-revoked-plan", "after-action", "run.resume-original"), true);
   assert.equal(check("code-08-owned-restore", "after-action", "tests.run-restored"), true);
+});
+test("cancel run does not arm its native hold until ungraded browser preparation completes", async () => {
+  const events = [], client = { item: { id: "agent-05-cancel-drain" }, principalId: "owner", projectId: "project", task: { taskId: "task" }, ledger: { phase: "run" } };
+  let release;
+  const gate = new Promise(resolve => { release = resolve; });
+  const extensions = createCampaignActionExtensions({ faultActions: { async "run.start"() { events.push("native-hold-armed"); } },
+    async checkpoint(value) { assert.equal(value.stage, "before-native-dispatch"); events.push("browser-preparing"); await gate;
+      events.push("browser-ready"); return { preparationOnly: true, scope: { principalId: "owner", projectId: "project", taskId: "task" } }; } });
+  const running = extensions["run.start"](client, {}); await new Promise(resolve => setImmediate(resolve));
+  assert.deepEqual(events, ["browser-preparing"]); release(); await running;
+  assert.deepEqual(events, ["browser-preparing", "browser-ready", "native-hold-armed"]);
+});
+test("failed or mismatched browser prep cannot dispatch; non-timed cases keep ordinary flow", async () => {
+  let calls = 0, checkpoints = 0;
+  const extensions = createCampaignActionExtensions({ faultActions: { async "run.start"() { calls++; } },
+    async checkpoint() { checkpoints++; return { preparationOnly: false }; } });
+  await assert.rejects(extensions["run.start"]({ item: { id: "agent-05-cancel-drain" }, ledger: { phase: "run" } }, {}), /not-prepared/u);
+  assert.equal(calls, 0);
+  await extensions["run.start"]({ item: { id: "agent-06-crash-reconcile" } }, {});
+  assert.equal(calls, 1); assert.equal(checkpoints, 1);
 });
 
 function tar(entries) {

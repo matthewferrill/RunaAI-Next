@@ -245,6 +245,7 @@ export async function createCampaignWriter(directory, plan) {
 
 export function needsBrowserCheckpoint({ client, stage, action }) {
   const id = client.item.id;
+  if (stage === "before-native-dispatch") return id === "agent-05-cancel-drain";
   if (stage === "reload-and-list") return true;
   if (stage === "in-flight") return id === "agent-05-cancel-drain";
   if (stage === "unknown") return id === "agent-06-crash-reconcile";
@@ -252,6 +253,24 @@ export function needsBrowserCheckpoint({ client, stage, action }) {
   return id === "code-08-owned-restore" && action?.action === "tests.run-restored"
     || id === "agent-01-safe-auto" && action?.action === "project.verify-independent"
     || id === "agent-04-revoked-plan" && action?.action === "run.resume-original";
+}
+
+export function createCampaignActionExtensions({ faultActions, checkpoint }) {
+  return { ...faultActions,
+    "run.start": async (client, action) => {
+      if (client.item.id === "agent-05-cancel-drain") {
+        const prepared = await checkpoint({ client, phase: client.ledger.phase, stage: "before-native-dispatch" });
+        if (prepared?.preparationOnly !== true || prepared.scope?.principalId !== client.principalId
+            || prepared.scope.projectId !== client.projectId || prepared.scope.taskId !== client.task?.taskId) throw fail("m1-campaign-browser-not-prepared");
+      }
+      return faultActions["run.start"](client, action);
+    },
+    "browser.reload-and-list": async client => {
+      const before = client.ledger.observation.evidence.filter(value => value.source === "browser").length;
+      await checkpoint({ client, phase: client.ledger.phase, stage: "reload-and-list" });
+      if (client.ledger.observation.evidence.filter(value => value.source === "browser").length <= before) throw fail("m1-campaign-browser-reload-unproven");
+    },
+  };
 }
 
 /** Serialization is explicit and independently unit tested. Tests may inject a
@@ -348,19 +367,16 @@ export async function runModelCampaign(args, { checkpoint = null, getLeaseObserv
       getLedger: () => ledger, faults: controllerFaults, taskHooks: controllerFaults.taskHooks });
     if (signal.aborted) throw abortError(signal);
     const bridge = checkpoint ?? createBrowserCheckpoint({ directory, signal, announce: value => announce({ schemaVersion: "runaai-m1-browser-checkpoint-ready/v1", ...value }) });
-    const observe = async value => { if (signal.aborted) throw abortError(signal); if (needsBrowserCheckpoint(value)) await bridge(value); if (signal.aborted) throw abortError(signal); };
-    const reloadAndList = async client => {
-      const before = client.ledger.observation.evidence.filter(value => value.source === "browser").length;
-      await observe({ client, phase: client.ledger.phase, stage: "reload-and-list" });
-      if (client.ledger.observation.evidence.filter(value => value.source === "browser").length <= before) throw fail("m1-campaign-browser-reload-unproven");
-    };
+    const observe = async value => { if (signal.aborted) throw abortError(signal);
+      const result = needsBrowserCheckpoint(value) ? await bridge(value) : undefined;
+      if (signal.aborted) throw abortError(signal); return result; };
     result = await executeCandidateAttempts({ plan, writer, signal, announce, beforeAttempt: checkLease,
       runAttempt: async slot => {
         ledger = new ObservationLedger(newObservation(MODEL_CASES.find(value => value.id === slot.caseId), { ...slot, runtimeSealSha256: plan.runtimeSealSha256 }));
         ledger.observation.sourceCommit = plan.sourceCommit;
         await checkLease(true);
         faults = createFaultActions({ checkpoint: observe });
-        const extensions = { ...faults.actions, "browser.reload-and-list": reloadAndList };
+        const extensions = createCampaignActionExtensions({ faultActions: faults.actions, checkpoint: observe });
         let host = testbed.host, journey;
         try {
           if (slot.caseId === "agent-06-crash-reconcile") {

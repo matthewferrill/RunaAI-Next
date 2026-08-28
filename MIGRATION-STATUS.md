@@ -113,6 +113,14 @@ database checks and a fresh common seal/full controls are required before the ne
 The planner correction's 40/40 wire/planner tests and actual 46/46 PostgreSQL regressions now pass
 with zero skips; see `gate7f/function-first/APPROVAL-PLANNING-RESULTS-2026-08-28.md`. Those tests
 use deterministic provider/executor fixtures and do not establish any model's compliance.
+The independent R3 semantic record is
+`gate7f/function-first/acceptance/STOPPED-CODER-R3-INDEPENDENT-REVIEW-2026-08-28.md`: all 23
+attempts and 32 outputs reviewed, 18 pass, three fail and two inconclusive. The shared read-only
+explanation gap is corrected prospectively in
+`gate7f/function-first/READ-ONLY-EXPLANATION-RESULTS-2026-08-28.md`: 40 wire/planner, 48 actual
+PostgreSQL and 19 UI/routing tests pass. An actual browser using the product module plus synthetic
+response fixtures confirmed literal summary text and separate observed receipts; it is not a model
+or signed-in customer test. Initial-snapshot explanations do not claim a new post-tool synthesis phase.
 Home is unloaded with both 260 W limits restored. No production or protected-data changes were made.
 The operational Home guard continues in parallel; do not stop at this internal correction or request
 new permission. Continue until the qualified deployment is ready for genuine customer testing.

@@ -399,10 +399,11 @@ integration("actual planner cannot gain a third attempt by disregarding the repa
 
 // These are real PostgreSQL/orchestration checks with deliberately deterministic
 // model and executor fixtures. They do not claim a real model obeyed the prompt.
-for (const role of ["code", "agent"]) for (const mode of ["preview-only", "approval-sequence", "read-only"]) {
+for (const role of ["code", "agent"]) for (const mode of ["preview-only", "approval-sequence", "read-only", "explain-only"]) {
   integration(`${role} planner protocol keeps ${mode} separate from actual effect authority`, async () => {
     const calls = [], modelId = `synthetic-${role}-approval-model`;
-    const objective = mode === "approval-sequence"
+    const objective = mode === "explain-only" ? "Inspect and explain the supplied addition helper without changing or running it."
+      : mode === "approval-sequence"
       ? "Correct the addition function, preview it, wait for approval before changing it, and run the registered tests."
       : "Preview a possible addition correction only; do not change or test files.";
     const provider = { schemaVersion: "runaai-model-roles/v1", baseUrl: "http://127.0.0.1:1234/v1",
@@ -414,25 +415,35 @@ for (const role of ["code", "agent"]) for (const mode of ["preview-only", "appro
         assert.match(request.messages[0].content, /application creates its exact proposal and pauses before the effect/);
         assert.match(request.messages[0].content, /preview-change is read-only; it does not create a pending edit approval/);
         assert.equal(input.objective, objective);
-        if (mode === "read-only") assert.deepEqual(input.capabilityIds, ["project.inspect", "project.preview-change"]);
+        if (["read-only", "explain-only"].includes(mode)) assert.deepEqual(input.capabilityIds, ["project.inspect", "project.preview-change"]);
         const change = { path: "index.js", content: "exports.add=(a,b)=>a+b;", expectedSha256: input.snapshot.files[0].sha256 };
-        const steps = [{ capabilityId: "project.preview-change", arguments: change }];
+        const steps = mode === "explain-only" ? [{ capabilityId: "project.inspect", arguments: { path: "index.js" } }]
+          : [{ capabilityId: "project.preview-change", arguments: change }];
         if (mode === "approval-sequence") steps.push({ capabilityId: "project.apply-change", arguments: change },
           { capabilityId: "project.run-tests", arguments: { suiteId: "addition" } });
+        const summary = mode === "explain-only"
+          ? "From the supplied snapshot, the helper subtracts b from a rather than adding them. No change or test has run."
+          : "Proposed selected work, not execution.";
         return Response.json({ id: "synthetic-approval-completion", object: "chat.completion", created: 1, model: modelId,
-          choices: [{ index: 0, message: { role: "assistant", content: JSON.stringify({ summary: "Proposed selected work, not execution.", steps }) }, finish_reason: "stop" }],
+          choices: [{ index: 0, message: { role: "assistant", content: JSON.stringify({ summary, steps }) }, finish_reason: "stop" }],
           usage: { prompt_tokens: 40, completion_tokens: 40, total_tokens: 80 } });
       } });
-    const f = await fixture({ planner, objective, profile: mode === "read-only" ? "read-only" : "ask-every-time", cipher: testCipher() });
+    const f = await fixture({ planner, objective, profile: ["read-only", "explain-only"].includes(mode) ? "read-only" : "ask-every-time", cipher: testCipher() });
     try {
       const initial = await f.start();
       assert.equal(initial.run.plannerRole, role); assert.equal(calls.length, 1);
       assert.equal(f.adapter.edits, 0); assert.equal(f.adapter.tests, 0);
-      assert.deepEqual(initial.receipts.map(value => value.capabilityId), ["project.preview-change"]);
+      const readCapability = mode === "explain-only" ? "project.inspect" : "project.preview-change";
+      assert.deepEqual(initial.receipts.map(value => value.capabilityId), [readCapability]);
+      if (mode === "explain-only") {
+        assert.match(initial.run.plans[0].summary, /From the supplied snapshot, the helper subtracts b from a/);
+        assert.equal(initial.receipts[0].executionStatus, "observed");
+        assert.equal(initial.receipts[0].effectKind, "observed");
+      }
       if (mode !== "approval-sequence") {
         assert.equal(initial.run.status, "completed");
         assert.equal(initial.run.pendingProposalId, null);
-        assert(initial.proposals.every(value => value.capabilityId === "project.preview-change"));
+        assert(initial.proposals.every(value => value.capabilityId === readCapability));
         const replay = await f.orchestrator.resume(context, { runId: initial.run.runId });
         assert.equal(replay.run.status, "completed"); assert.equal(calls.length, 1);
         assert.equal(f.adapter.edits, 0); assert.equal(f.adapter.tests, 0);

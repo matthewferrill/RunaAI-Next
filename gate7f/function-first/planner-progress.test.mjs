@@ -136,6 +136,9 @@ for (const [modelId, reasoningEffort] of candidates) for (const role of ["code",
       assert.match(body.messages[0].content, /project\.preview-change is read-only; it does not create a pending edit approval/);
       assert.match(body.messages[0].content, /If the user requests only a preview, inspection, or no changes, do not add apply, test, or restore effects/);
       assert.match(body.messages[0].content, /approval pause is not such a branch/);
+      assert.match(body.messages[0].content, /use summary to answer the actual question from the supplied current snapshot/);
+      assert.match(body.messages[0].content, /Do not say an inspection, change or test already ran unless a supplied application receipt proves it/);
+      assert.doesNotMatch(body.messages[0].content, /Code01|negative means debt|positive means credit|balance\.js/);
       assert.doesNotMatch(body.messages[0].content, /Code05|unique|Set\(|square|index\.js|115|140|\/no_think/);
       assert.doesNotMatch(body.messages[0].content, /Code07|stock\.js|remaining\(stock|5660a7d38368|Gemma|Qwen/);
     }

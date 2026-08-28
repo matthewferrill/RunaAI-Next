@@ -2,9 +2,13 @@
 
 Criteria were committed first in `b87d285`, with the child-intent correction
 recorded before implementation in `6285d76` and immutable-source correction in
-`418ee42`/observed correction`9a2183f`. This directory does not deploy,
-contact Home/Control, open a listener, enroll TLS, read a private key, or invoke
-the generated operational script. It does not complete Milestone 1. Roadmap
+`418ee42`/observed correction`9a2183f`. Supervisor criteria are in
+`SUPERVISOR-CRITERIA.md`. No live Home/Control deployment, TLS enrollment or
+private-key access was performed. Isolated tests include loopback listeners and
+a real generated companion that rejects a forced synthetic host context before
+production reads. Importing these modules does not activate anything; the
+concrete executor still requires trusted live boundary adapters. This does not
+complete Milestone 1. Roadmap
 digest `613920536543bcc87dbd1d8bc2e9dca9920f82552c302fc69f92a2fd4a262521`
 and all 17 capability families remain in force.
 
@@ -33,7 +37,9 @@ and all 17 capability families remain in force.
   Unknown is the default until the exact terminal record is durable. An uncertain
   result, interrupted start observer or lost durable receipt blocks automatic
   rollback/retry, including in a new coordinator process. These are not a general
-  descendant-process sandbox. The enclosing operational script has not been run.
+  descendant-process sandbox. A separate atomic-job supervisor now bounds the
+  enclosing script; the only actual companion invocation so far is the isolated
+  host-context denial, not a deployment.
 - `descriptor.mjs`: binds exact supplied config/manifest/artifact/launcher/plan
   bytes, expected qualification and archive hashes, each separate operator file,
   TLS enrollment, Home installation and profile, and each Caddy phase. Launcher
@@ -48,6 +54,28 @@ and all 17 capability families remain in force.
   retained. Unknown admission or restore cannot become quiescent from a snapshot.
   Exact terminal reconciliation may restore or close, never silently retry.
   Three actual zero counter records must be fresh within five seconds.
+- `watchdog.mjs`, `Watchdog-Host.mjs`, `Invoke-ClosedCompanionWatchdog.ps1` and
+  `ClosedCompanionJob.cs`: a new private create-only request pins both executable
+  identities, argv and the seven-file operator package. Detached pinned Node
+  survives caller loss; its normal hidden PowerShell child owns a non-inherited
+  atomic kill-on-close job. The companion is created suspended, its actual
+  PID/start is fsynced, and only then resumed. Maximum lifetime is ten minutes
+  plus five seconds cleanup, stdout/stderr caps are 262144 each, and stderr is
+  never retained. Host death, wrapper death, observer stall and lost terminal
+  remain unknown, never an excuse to replay or reopen admission. The sole link
+  exception is the exact pinned Windows PowerShell path with its measured two
+  NTFS links; ordinary source/package/journal files remain single-link.
+- `closed-adapter.mjs`: constructs the seven-file package and invokes only the
+  fixed companion. Trusted constructor hooks must own the durable exclusive
+  transition, reject any prior unresolved/completed dispatch for that transition,
+  verify actual qualification/Home readiness/closed Caddy, and persist the new
+  outer intent before launch. Second Home/Caddy checks occur after that intent;
+  failure leaves it pending with no process. The exact result must match this
+  newly prepared operation/request/package, and all twelve raw child records
+  must belong to the current actual companion lifetime. Child argv hashes bind
+  records to each other: the pinned companion defines commands; this is not an
+  independent reconstruction of private arguments. No automatic rollback,
+  replay, Caddy publication or fabricated live authority is provided.
 
 The caller must authenticate the descriptor, hold the one owner-private target
 writer, read both journals fresh and persist each reducer result by revision CAS
@@ -69,9 +97,9 @@ read parsed headers; Go may remove transfer-encoding framing. Do not treat a
 missing header as evidence that a chunked body was absent. The separately pinned
 Home `proxy.mjs` reads the bounded actual body and invokes `validateRequest`
 before `controller.admit`; that is the required GET-body rejection boundary.
-Its current source has been inspected, not deployed here. Actual negative-wire
-tests (body/chunked/slow/malformed framing, query, wrong method, unknown route,
-invalid certificate, timeout) across Caddy plus mTLS guard remain required.
+Its current source has been tested in isolated loopback, not deployed here.
+The actual 36-case proof and retained failed approaches are in `WIRE-RESULTS.md`.
+Later proxy/contract changes require fresh wire qualification, not old grades.
 No native request may be credited from offline adaptation or a textual matcher.
 See the [pinned Caddy replacer source](https://github.com/caddyserver/caddy/blob/v2.11.4/modules/caddyhttp/replacer.go)
 and [reverse-proxy TLS documentation](https://caddyserver.com/docs/caddyfile/directives/reverse_proxy).
@@ -126,7 +154,7 @@ then publish final Caddy. That executable outer integration is not claimed here.
 
 ## Verification in this bounded task
 
-`node --test gate7f/function-first/control/deployment/*.test.mjs`: 54/54 passed,
+Historical pre-supervisor `node --test gate7f/function-first/control/deployment/*.test.mjs`: 54/54 passed,
 zero skipped. This includes actual Caddy **adapt only**, actual isolated Windows
 child success/timeout/output-cap checks, side effects followed by a start-observer
 throw or lost terminal, foreign-child terminal rejection, and a genuinely new
@@ -155,5 +183,8 @@ including sanitized child records and distinct coordinator PIDs. The earlier
 `20260828-child-intent/` proof is preserved as an initial 54/54 run with an
 in-process reset only; it is not relabeled as a real coordinator restart. Owned
 temporary fixture files are removed by each test after proof collection. The
-whole-companion finite outer watchdog is still an unimplemented activation
-requirement; per-child bounds do not establish that enclosing deadline.
+whole-companion finite outer watchdog is now implemented and has passed 11 actual
+Windows recovery tests; the concrete adapter passed 17 scoped tests. The new
+`run-supervisor-proof.mjs` retains a fresh complete suite, exact raw source/runtime
+pins and logs in a new directory. Actual deployment, Home caller closure, live
+authority adapters and the assembled two-host rollback remain unqualified.

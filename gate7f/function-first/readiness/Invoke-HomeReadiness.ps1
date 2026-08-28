@@ -1,5 +1,5 @@
-param([ValidateSet('Upload','Inventory','Run','Export')][string]$Mode,
- [string]$LocalFile, [string]$Candidate='qwen36', [string]$DiagnosticId='20260828-readiness-r2')
+param([ValidateSet('Upload','Inventory','Run','PowerRun','Export')][string]$Mode,
+ [string]$LocalFile, [string]$Candidate='qwen36', [string]$DiagnosticId='20260828-readiness-r3')
 Set-StrictMode -Version Latest
 $ErrorActionPreference='Stop'
 if ($DiagnosticId -notmatch '^20260828-readiness-r[1-9][0-9]*$') { throw 'readiness-id-invalid' }
@@ -8,13 +8,15 @@ $remoteRoot='C:\Users\codex-audit\AppData\Local\RunaM1Readiness\'+$DiagnosticId
 $remote='$ErrorActionPreference=''Stop''; $ProgressPreference=''SilentlyContinue''; '
 if ($Mode -eq 'Upload') {
  $remote += 'if(Test-Path -LiteralPath '''+$remoteRoot+'''){throw ''readiness-target-exists''}; [IO.Directory]::CreateDirectory('''+$remoteRoot+''')|Out-Null; $f=[IO.File]::Open('''+$remoteRoot+'\transfer.json'',[IO.FileMode]::CreateNew,[IO.FileAccess]::Write); try{[Console]::OpenStandardInput().CopyTo($f)}finally{$f.Dispose()}; '
- $unpack='const fs=require(''fs''),p=require(''path'');const root=process.argv[1];const packet=JSON.parse(fs.readFileSync(p.join(root,''transfer.json''),''utf8''));const names=[''runner.mjs'',''cases.mjs'',''manifest.mjs'',''gguf-metadata.mjs'',''runtime.json'',''seal.json''];if(Object.keys(packet).sort().join()!=names.sort().join())throw Error(''packet-files'');for(const name of names)fs.writeFileSync(p.join(root,name),Buffer.from(packet[name],''base64''),{flag:''wx''});console.log(''readiness-package-transferred'');'
+ $unpack='const fs=require(''fs''),p=require(''path'');const root=process.argv[1];const packet=JSON.parse(fs.readFileSync(p.join(root,''transfer.json''),''utf8''));const names=[''runner.mjs'',''cases.mjs'',''manifest.mjs'',''gguf-metadata.mjs'',''runtime.json'',''seal.json'',''Run-HomePower.ps1''];if(Object.keys(packet).sort().join()!=names.sort().join())throw Error(''packet-files'');for(const name of names)fs.writeFileSync(p.join(root,name),Buffer.from(packet[name],''base64''),{flag:''wx''});console.log(''readiness-package-transferred'');'
  $unpack64=[Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes($unpack))
  $remote += '$program=[Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('''+$unpack64+''')); & node -e $program '''+$remoteRoot+''''
 } elseif($Mode -eq 'Export') {
- $export='const fs=require(''fs''),p=require(''path'');const root=process.argv[1];const items={};for(const name of fs.readdirSync(root)){if(/^(capture-(qwen36|gemma|coder)\.jsonl|result-(qwen36|gemma|coder)\.json|inventory\.json)$/.test(name))items[name]=fs.readFileSync(p.join(root,name),''base64'');}process.stdout.write(JSON.stringify(items));'
+ $export='const fs=require(''fs''),p=require(''path'');const root=process.argv[1];const items={};for(const name of fs.readdirSync(root)){if(/^(capture-(qwen36|gemma|coder)\.jsonl|result-(qwen36|gemma|coder)\.json|inventory\.json|seal\.json|power-(before|applied|result)\.json)$/.test(name))items[name]=fs.readFileSync(p.join(root,name),''base64'');}process.stdout.write(JSON.stringify(items));'
  $export64=[Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes($export))
  $remote += '$program=[Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('''+$export64+''')); & node -e $program '''+$remoteRoot+''''
+} elseif($Mode -eq 'PowerRun') {
+ $remote += '& '''+$remoteRoot+'\Run-HomePower.ps1''; exit $LASTEXITCODE'
 } else {
  $argument=if($Mode -eq 'Inventory'){'--inventory'}else{$Candidate}
  $remote += '& node '''+$remoteRoot+'\runner.mjs'' '''+$argument+''''

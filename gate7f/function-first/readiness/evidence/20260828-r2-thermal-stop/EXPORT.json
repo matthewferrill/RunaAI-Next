@@ -1,0 +1,23 @@
+{
+  "schemaVersion": "runa-m1-readiness-export/v1",
+  "retrievedAt": "2026-08-28T15:34:51.675Z",
+  "files": [
+    {
+      "name": "capture-qwen36.jsonl",
+      "bytes": 76751,
+      "sha256": "edd4abafbfb0c5517fa3a4f6c83d95cd5752c326864516639e5a9c22039f6c21"
+    },
+    {
+      "name": "inventory.json",
+      "bytes": 4931,
+      "sha256": "51613c3d6b4de91653132ab57f148922267bcb185f275b8ae0cfd96682284f4a"
+    },
+    {
+      "name": "result-qwen36.json",
+      "bytes": 2420,
+      "sha256": "8a68cf0aafedd5bca711f6ef119293db69aaeb6ee0295f3a1b622ef0db010bb9"
+    }
+  ],
+  "syntheticOnly": true,
+  "protectedDataIncluded": false
+}

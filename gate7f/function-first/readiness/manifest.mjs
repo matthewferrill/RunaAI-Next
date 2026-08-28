@@ -1,12 +1,12 @@
 export const MANIFEST = Object.freeze({
-  schemaVersion: "runa-m1-readiness-manifest/v1", diagnosticId: "20260828-readiness-r2", sourceCommit: "2fc9bc20fe3484a7df857298c4a85ff6bdffc970",
+  schemaVersion: "runa-m1-readiness-manifest/v1", diagnosticId: "20260828-readiness-r3", sourceCommit: "b1a4009",
   classification: "prospective-unscored-readiness-not-function-qualification", expectedHost: "RUNA-HOME", expectedNode: "v22.22.1",
   api: "http://127.0.0.1:1234", contextLength: 32768, requestDeadlineMs: 30000, lateDiagnosticDeadlineMs: 120000,
   loadDeadlineMs: 180000, armDeadlineMs: 1800000, maximumResponseBytes: 1048576, maximumOutputTokens: 512,
   repetitions: 3, telemetryIntervalMs: 5000, maximumTelemetryGapMs: 30000,
   contextLadderRows: [250, 750, 1400], contextOutputTokens: 128,
   hardware: { gpuUuids: ["GPU-15ea3e34-292b-3333-5e43-e5b133f9a30c", "GPU-1f2f6459-b688-3466-5b49-a65c538be843"],
-    gpuPowerLimitWatts: 260, maximumStartTemperatureC: 50, temperatureCutoffC: 85, minimumFreeHostBytes: 8589934592 },
+    gpuPowerLimitWatts: 160, originalPowerLimitWatts: 260, maximumStartTemperatureC: 50, temperatureCutoffC: 85, minimumFreeHostBytes: 8589934592 },
   runtime: { name: "llama.cpp-win-x86_64-vulkan-avx2", version: "2.28.2" },
   candidates: [
     { id: "qwen36", key: "qwen3.6-27b-mtp", artifactPath: "C:\\lm-studio-models\\unsloth\\Qwen3.6-27B-MTP-GGUF\\Qwen3.6-27B-Q4_K_M.gguf",

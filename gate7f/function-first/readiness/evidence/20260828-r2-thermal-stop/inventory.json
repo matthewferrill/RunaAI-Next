@@ -1,0 +1,163 @@
+{
+  "observedAt": "2026-08-28T15:30:40.896Z",
+  "host": "RUNA-HOME",
+  "node": "v22.22.1",
+  "runtime": [
+    {
+      "path": "C:\\Users\\Matthew\\AppData\\Local\\Programs\\LM Studio\\resources\\app\\.webpack\\main\\index.js",
+      "sha256": "6cbb7ba8dfeefee1ce523a88e0f9d64687cdad59564ee5e7fbff6bb95d00f22f"
+    },
+    {
+      "path": "C:\\Users\\Matthew\\.lmstudio\\extensions\\backends\\llama.cpp-win-x86_64-vulkan-avx2-2.28.2\\llama-server-impl.dll",
+      "sha256": "4d54ebfb12797403104095a4c551feecee93520bf6326e76d2ac163615816ee3"
+    },
+    {
+      "path": "C:\\Users\\Matthew\\.lmstudio\\extensions\\backends\\llama.cpp-win-x86_64-vulkan-avx2-2.28.2\\llm_engine.dll",
+      "sha256": "67b78025b78c5d36a4de23d16e1c405c9634585c93c446eaefe7acd7d49bdc37"
+    },
+    {
+      "path": "C:\\Users\\Matthew\\.lmstudio\\extensions\\backends\\llama.cpp-win-x86_64-vulkan-avx2-2.28.2\\llama.dll",
+      "sha256": "d16ff1ecbc6bb29a0e2e9136ceb111477df69a82df19d2bfad8fa6dc8f0bff64"
+    },
+    {
+      "path": "C:\\Users\\Matthew\\.lmstudio\\extensions\\backends\\llama.cpp-win-x86_64-vulkan-avx2-2.28.2\\ggml-vulkan.dll",
+      "sha256": "1f84a7113734e5de76636a2b38609796219bd2e2c4ef3ee75b0f39f0f3e6eb7a"
+    },
+    {
+      "path": "C:\\Users\\Matthew\\.lmstudio\\extensions\\backends\\llama.cpp-win-x86_64-vulkan-avx2-2.28.2\\backend-manifest.json",
+      "sha256": "220daa1d7061d0b4ef179ff421c116f255330a5aa072f6187b099a4f598d11f8"
+    }
+  ],
+  "metadata": [
+    {
+      "key": "qwen3.6-27b-mtp",
+      "actualBytes": 17106773120,
+      "templateSha256": "55d4931433fe502b794226ee7f4d206a6bdd436ac9f80eb7d8ebb4c639f9ea0c",
+      "architecture": "qwen35",
+      "metadataBytes": 10943570
+    },
+    {
+      "key": "gemma-4-26b-a4b-it-qat",
+      "actualBytes": 14439363584,
+      "templateSha256": "ae53464bf3be25802b3a5b37def7fd89667067d7577049b3b2d74c4d8de4c6d4",
+      "architecture": "gemma4",
+      "metadataBytes": 15783604
+    },
+    {
+      "key": "qwen3-coder-30b-a3b-instruct",
+      "actualBytes": 25104724288,
+      "templateSha256": "672e747c77e990320152343b0a4951222e40de5645297905d89afba05586d827",
+      "architecture": "qwen3moe",
+      "metadataBytes": 5935891
+    }
+  ],
+  "hardware": {
+    "label": "inventory",
+    "time": "2026-08-28T15:30:33.167Z",
+    "freeMemoryBytes": 127078076416,
+    "totalMemoryBytes": 137353744384,
+    "gpus": [
+      {
+        "index": 0,
+        "name": "Quadro RTX 6000",
+        "uuid": "GPU-15ea3e34-292b-3333-5e43-e5b133f9a30c",
+        "memoryTotalMiB": 23040,
+        "memoryUsedMiB": 1572,
+        "temperatureC": 41,
+        "powerLimitWatts": 260,
+        "powerWatts": 26.09,
+        "utilization": 0
+      },
+      {
+        "index": 1,
+        "name": "Quadro RTX 6000",
+        "uuid": "GPU-1f2f6459-b688-3466-5b49-a65c538be843",
+        "memoryTotalMiB": 23040,
+        "memoryUsedMiB": 0,
+        "temperatureC": 36,
+        "powerLimitWatts": 260,
+        "powerWatts": 22.94,
+        "utilization": 0
+      }
+    ]
+  },
+  "identities": [
+    {
+      "type": "llm",
+      "publisher": "google",
+      "key": "gemma-4-26b-a4b-it-qat",
+      "display_name": "Gemma 4 26B Instruct",
+      "architecture": "gemma4",
+      "quantization": {
+        "name": "Q4_0",
+        "bits_per_weight": 4
+      },
+      "size_bytes": 14439363584,
+      "params_string": "128x2.6B",
+      "loaded_instances": [],
+      "max_context_length": 262144,
+      "format": "gguf",
+      "capabilities": {
+        "vision": false,
+        "trained_for_tool_use": true,
+        "reasoning": {
+          "allowed_options": [
+            "off",
+            "on"
+          ],
+          "default": "on"
+        }
+      },
+      "description": null
+    },
+    {
+      "type": "llm",
+      "publisher": "unsloth",
+      "key": "qwen3.6-27b-mtp",
+      "display_name": "Qwen3.6 27B",
+      "architecture": "qwen35",
+      "quantization": {
+        "name": "Q4_K_M",
+        "bits_per_weight": 4
+      },
+      "size_bytes": 17106773120,
+      "params_string": "27B",
+      "loaded_instances": [],
+      "max_context_length": 262144,
+      "format": "gguf",
+      "capabilities": {
+        "vision": false,
+        "trained_for_tool_use": true,
+        "reasoning": {
+          "allowed_options": [
+            "off",
+            "on"
+          ],
+          "default": "on"
+        }
+      },
+      "description": null
+    },
+    {
+      "type": "llm",
+      "publisher": "lmstudio-community",
+      "key": "qwen3-coder-30b-a3b-instruct",
+      "display_name": "Qwen3 Coder 30B A3B Instruct",
+      "architecture": "qwen3moe",
+      "quantization": {
+        "name": "Q6_K",
+        "bits_per_weight": 6
+      },
+      "size_bytes": 25104724288,
+      "params_string": "30B-A3B",
+      "loaded_instances": [],
+      "max_context_length": 262144,
+      "format": "gguf",
+      "capabilities": {
+        "vision": false,
+        "trained_for_tool_use": true
+      },
+      "description": null
+    }
+  ]
+}

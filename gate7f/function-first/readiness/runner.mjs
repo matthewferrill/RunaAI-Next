@@ -14,7 +14,7 @@ const progress = value => console.log(JSON.stringify({ readiness: true, ...value
 fail(hostname().toUpperCase() === plan.expectedHost && process.version === plan.expectedNode, "host-runtime");
 const seal = JSON.parse(readFileSync(path.join(here, "seal.json"), "utf8"));
 for (const [name, expected] of Object.entries(seal.files)) {
-  fail(/^[a-z-]+\.(?:mjs|json)$/.test(name), "seal-path");
+  fail(/^[a-zA-Z-]+\.(?:mjs|json|ps1)$/.test(name), "seal-path");
   fail(sha(readFileSync(path.join(here, name))) === expected, "package-drift");
 }
 const runtime = JSON.parse(readFileSync(path.join(here, "runtime.json"), "utf8"));
@@ -138,7 +138,9 @@ if (process.argv[2] === "--inventory") {
       const response = await api(condition.endpoint, request, deadline, controller.signal);
       record("response", { id, ...response });
       const observed = normalize(response, candidate, instance, condition.endpoint);
-      const attempt = { id, endpoint: condition.endpoint, elapsedMs: Date.now() - started, deadlineMs: deadline, ...observed };
+      if(observed.accepted)fail(observed.completionTokens <= (request.max_tokens ?? request.max_output_tokens), "actual-request-token-cap");
+      const elapsedMs = Date.now() - started;
+      const attempt = { id, endpoint: condition.endpoint, elapsedMs, deadlineMs: deadline, deadlineMet: elapsedMs <= deadline, ...observed };
       attempts.push(attempt); record("observation", { attempt }); progress({ candidate: candidate.id, status: "observed", ...attempt });
       sample(`${id}:after`); await residency(candidate, instance, fingerprint); return attempt;
     } catch (error) {
@@ -231,7 +233,8 @@ if (process.argv[2] === "--inventory") {
     } catch (error) { cleanupVerified = false; record("cleanup-failure", { code: error.message }); }
     const result = { schemaVersion: "runa-m1-readiness-result/v1", candidate: candidate.id, diagnosticId: plan.diagnosticId,
       classification: plan.classification, errorCode, attempts, cleanupVerified, productionRoutingChanged: false,
-      powerSettingsChanged: false, protectedDataIncluded: false, qualityQualified: false, endedAt: new Date().toISOString() };
+      powerSettingsChangedByRunner: false, requiredPowerWatts: plan.hardware.gpuPowerLimitWatts,
+      powerRestorationOwnedByWrapper: true, protectedDataIncluded: false, qualityQualified: false, endedAt: new Date().toISOString() };
     writeFileSync(resultPath, JSON.stringify(result, null, 2), { flag: "wx" });
     progress({ status: "finished", candidate: candidate.id, errorCode, attempts: attempts.length, cleanupVerified });
     if (errorCode || !cleanupVerified) process.exitCode = 1;

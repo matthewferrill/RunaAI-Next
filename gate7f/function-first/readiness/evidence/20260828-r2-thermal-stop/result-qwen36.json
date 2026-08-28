@@ -1,0 +1,87 @@
+{
+  "schemaVersion": "runa-m1-readiness-result/v1",
+  "candidate": "qwen36",
+  "diagnosticId": "20260828-readiness-r2",
+  "classification": "prospective-unscored-readiness-not-function-qualification",
+  "errorCode": "readiness-hardware-boundary",
+  "attempts": [
+    {
+      "id": "warmup-unscored",
+      "endpoint": "/v1/chat/completions",
+      "elapsedMs": 1639,
+      "deadlineMs": 120000,
+      "accepted": true,
+      "answerPresent": true,
+      "reasoningTokens": 0,
+      "reasoningChannelPresent": false,
+      "promptTokens": 107,
+      "completionTokens": 19,
+      "firstTokenMs": null,
+      "runtimeEcho": null,
+      "contextEcho": null,
+      "finishReason": "stop",
+      "effectiveReasoningEcho": null
+    },
+    {
+      "id": "v0-text-suffix-1",
+      "endpoint": "/api/v0/chat/completions",
+      "elapsedMs": 19114,
+      "deadlineMs": 30000,
+      "accepted": true,
+      "answerPresent": false,
+      "reasoningTokens": 512,
+      "reasoningChannelPresent": true,
+      "promptTokens": 244,
+      "completionTokens": 512,
+      "firstTokenMs": 929.434,
+      "runtimeEcho": {
+        "name": "llama.cpp-win-x86_64-vulkan-avx2",
+        "version": "2.28.2",
+        "supported_formats": [
+          "gguf"
+        ]
+      },
+      "contextEcho": 32768,
+      "finishReason": "length",
+      "effectiveReasoningEcho": null
+    },
+    {
+      "id": "v0-text-suffix-2",
+      "endpoint": "/api/v0/chat/completions",
+      "elapsedMs": 19131,
+      "deadlineMs": 30000,
+      "accepted": true,
+      "answerPresent": false,
+      "reasoningTokens": 512,
+      "reasoningChannelPresent": true,
+      "promptTokens": 244,
+      "completionTokens": 512,
+      "firstTokenMs": 278.561,
+      "runtimeEcho": {
+        "name": "llama.cpp-win-x86_64-vulkan-avx2",
+        "version": "2.28.2",
+        "supported_formats": [
+          "gguf"
+        ]
+      },
+      "contextEcho": 32768,
+      "finishReason": "length",
+      "effectiveReasoningEcho": null
+    },
+    {
+      "id": "v0-text-suffix-3",
+      "endpoint": "/api/v0/chat/completions",
+      "elapsedMs": 11765,
+      "deadlineMs": 30000,
+      "accepted": false,
+      "timeout": false,
+      "error": "readiness-hardware-boundary"
+    }
+  ],
+  "cleanupVerified": true,
+  "productionRoutingChanged": false,
+  "powerSettingsChanged": false,
+  "protectedDataIncluded": false,
+  "qualityQualified": false,
+  "endedAt": "2026-08-28T15:34:15.593Z"
+}

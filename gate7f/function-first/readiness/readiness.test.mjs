@@ -23,7 +23,8 @@ test("three exact artifacts stay separate and MTP cannot silently substitute the
 test("short diagnostic deadlines, hardware cutoffs and context ladder are prospectively bounded", () => {
   assert.equal(MANIFEST.requestDeadlineMs, 30000); assert.equal(MANIFEST.lateDiagnosticDeadlineMs, 120000);
   assert.equal(MANIFEST.maximumOutputTokens, 512); assert.equal(MANIFEST.telemetryIntervalMs, 5000);
-  assert.equal(MANIFEST.hardware.temperatureCutoffC, 85); assert.equal(MANIFEST.hardware.gpuPowerLimitWatts, 260);
+  assert.equal(MANIFEST.hardware.temperatureCutoffC, 85); assert.equal(MANIFEST.hardware.gpuPowerLimitWatts, 160);
+  assert.equal(MANIFEST.hardware.originalPowerLimitWatts, 260);
   assert.ok(contextPrompt(250).length < contextPrompt(750).length);
   assert.ok(contextPrompt(1400).length < 200000);
 });

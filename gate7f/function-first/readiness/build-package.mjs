@@ -9,7 +9,8 @@ if (existsSync(target)) throw new Error("readiness-package-already-exists");
 mkdirSync(target, { recursive: true });
 const sourceFiles = { "runner.mjs": path.join(here, "runner.mjs"), "cases.mjs": path.join(here, "cases.mjs"),
   "manifest.mjs": path.join(here, "manifest.mjs"), "gguf-metadata.mjs": path.join(root, "gate7f/evaluation/home/gguf-metadata.mjs"),
-  "runtime.json": path.join(root, "gate7f/evaluation/home/HOME-RUNTIME-2026-08-27.json") };
+  "runtime.json": path.join(root, "gate7f/evaluation/home/HOME-RUNTIME-2026-08-27.json"),
+  "Run-HomePower.ps1": path.join(here, "Run-HomePower.ps1") };
 const files = Object.fromEntries(Object.entries(sourceFiles).map(([name, file]) => [name, readFileSync(file)]));
 const seal = { schemaVersion: "runa-m1-readiness-package-seal/v1", createdAt: new Date().toISOString(),
   diagnosticId: MANIFEST.diagnosticId, createdBeforeInference: true,

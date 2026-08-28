@@ -50,3 +50,24 @@ Primary API references checked2026-08-28:
 The compatible documentation omits reasoning_effort; the exact installed index.js contains its
 validation and mapReasoningEffortToReasoningSetting -> per-request config/enableThinking. The diagnostic
 must still establish actual behavior. Readiness success cannot promote a model or certify product roles.
+
+## Retained thermal stop and prospective controlled-power r3
+
+r2 stopped during its third text-suffix request. The failing sample is retained: GPU1 reached85C at
+2026-08-28T15:34:13Z while GPU0 was79C. The exact Qwen instance was unloaded and cleanup verified. Two
+completed text-suffix attempts each used512 reasoning tokens, no answer, finish=length, approximately
+19.1s. This demonstrates that textual /no_think did not disable reasoning in this present configuration;
+it does not prove the unrecorded historical Gate1 timeout cause. r2 is incomplete, not a passing arm.
+
+The next package restarts all three candidates with the same reviewed160W envelope used successfully
+by the earlier lab, unchanged85C cutoff, exact UUIDs, <=45C cooldown before each arm and original260W
+restoration in `finally` after verified model cleanup. Only GPU power limits change temporarily; no
+clock, firmware, fan curve, service, production route or unrelated process changes. If160W also reaches
+85C, stop and retain evidence rather than raising the thermal boundary. Readiness performance under
+160W must not be represented as default260W production performance.
+
+The r3 package seal is `4a17bf88c5d77af50b2c46b9063d1ded7f42dd114f9bb78f7d0754cd048bbe10`, created before
+any r3 model call. r2/raw failures remain immutable. The new power wrapper follows the already-reviewed
+target-UUID before/apply/restore method, preserves original settings, and retains create-only power
+evidence. Source checks6/6 and PowerShell parse check passed before restarting. Runner result logging
+also records literal request token-cap enforcement and whether observed elapsed time met its budget.

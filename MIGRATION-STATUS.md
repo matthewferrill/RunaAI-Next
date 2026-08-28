@@ -53,6 +53,9 @@ ambiguous semantic criterion, and does not qualify any role or alter the frozen 
 The prospective model-neutral repair continuation contract is
 `gate7f/function-first/REPAIR-PHASE-CRITERIA-2026-08-28.md`; implementation and new matched acceptance
 remain separate from the stopped campaign and do not increase its repair budget.
+Implemented and verified locally: `gate7f/function-first/REPAIR-PHASE-RESULTS-2026-08-28.md`
+records 43/43 deterministic adapter/smoke checks and 20/20 real PostgreSQL orchestration checks,
+including unchanged two-plan exhaustion. These are workflow/plumbing results, not model qualification.
 
 ### 2026-08-28 M1-S1 implementation and verified publication
 

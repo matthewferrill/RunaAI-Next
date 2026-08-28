@@ -9,6 +9,7 @@ import { M1TaskService } from "./service.mjs";
 import { createM1TaskWorkflow } from "./workflow.mjs";
 import { M1TaskOrchestrator } from "./orchestrator.mjs";
 import { testCipher } from "../../../gate4/fixtures.mjs";
+import { MastraM1Planner } from "../planner.mjs";
 
 const integration = process.env.M1_TASK_PG_URL ? test : test.skip;
 const context = { principalId: "orch-alice", projectId: "orch-project", sessionId: "orch-session" };
@@ -52,7 +53,7 @@ class Adapter {
 }
 
 async function fixture({ planner, profile = "safe-autopilot", hooks = {}, budgets = {}, cipher = null, authorizeContext = null,
-  files = { "index.js": "exports.add=(a,b)=>a-b;" } } = {}) {
+  files = { "index.js": "exports.add=(a,b)=>a-b;" }, objective = "Fix and test the addition function." } = {}) {
   const pool = new pg.Pool({ connectionString: process.env.M1_TASK_PG_URL });
   const schema = `m1_orch_${randomBytes(6).toString("hex")}`;
   const store = new PostgresTaskStore({ pool, schema, cipher, allowPlaintextForSynthetic: !cipher }); await store.initialize();
@@ -60,7 +61,7 @@ async function fixture({ planner, profile = "safe-autopilot", hooks = {}, budget
   const service = new M1TaskService({ store, adapter, hooks,
     ...(authorizeContext ? { authorizeContext } : { allowSyntheticAuthority: true }) });
   await service.registerProject(context, { environmentId: "orch-environment", files });
-  const task = await service.createTask(context, { requestId: "task-create", objective: "Fix and test the addition function." });
+  const task = await service.createTask(context, { requestId: "task-create", objective });
   const grant = await service.createGrant(context, { taskId: task.taskId, profile, allowedPaths: ["index.js"],
     allowedSuites: ["addition"], expiresAt: new Date(Date.now() + 600_000).toISOString() });
   const saver = new PostgresSaver(pool, undefined, { schema: `${schema}_cp` }); await saver.setup();
@@ -327,4 +328,71 @@ integration("planner receives only grant-selected file contents and no opaque fu
     } } });
   try { assert.equal((await f.start()).run.status, "completed"); }
   finally { await f.close(); }
+});
+
+integration("actual planner receives durable failed-test progress before the sole permitted repair", async () => {
+  const calls = [], objective = "First run the registered suite, then fix any defect and rerun that suite.";
+  const modelId = "synthetic-repair-model", provider = { baseUrl: "http://127.0.0.1:1234/v1", modelId };
+  const planner = new MastraM1Planner({ provider, role: "code", agent: { async generate(raw, options) {
+    const input = JSON.parse(raw); calls.push(input);
+    assert.equal(input.objective, objective); assert.equal(options.modelSettings.maxOutputTokens, 1536);
+    assert.equal(input.snapshot.files.length, 1); assert.deepEqual(input.allowedPaths, ["index.js"]);
+    assert.deepEqual(input.allowedSuites, ["addition"]);
+    const change = { path: "index.js", content: "exports.add=(a,b)=>a+b;", expectedSha256: input.snapshot.files[0].sha256 };
+    const steps = [{ capabilityId: "project.preview-change", arguments: change },
+      { capabilityId: "project.apply-change", arguments: change },
+      { capabilityId: "project.run-tests", arguments: { suiteId: "addition" } }];
+    if (input.progress.phase === "initial") {
+      assert.deepEqual(input.progress.observations, []);
+      steps.unshift({ capabilityId: "project.run-tests", arguments: { suiteId: "addition" } });
+    } else {
+      assert.equal(input.repair, true); assert.equal(input.progress.observations.length, 1);
+      const observation = input.progress.observations[0], actual = input.receipts[0];
+      assert.equal(observation.outcome, "test-failed"); assert.equal(actual.output.passed, false);
+      assert.equal(input.previousPlans[0].steps.length, 4, "three planned actions have no receipts and are still pending");
+      assert.equal(actual.beforeRevision, input.snapshot.projectRevision);
+      assert.match(actual.receiptDigest, /^[a-f0-9]{64}$/); assert.match(actual.afterSha256, /^[a-f0-9]{64}$/);
+      assert.equal(actual.afterSha256, input.snapshot.workspaceSha256);
+      assert.equal(input.progress.currentFailedTests[0].receiptId, actual.receiptId);
+      assert.equal(input.progress.currentFailedTests[0].suiteSha256, actual.output.suiteSha256);
+      assert.equal(actual.beforeReference, undefined); assert.equal(actual.afterReference, undefined);
+      assert.equal(actual.rollbackReference, undefined);
+    }
+    return { text: JSON.stringify({ summary: "Continue only the outstanding selected work.", steps }),
+      finishReason: "stop", response: { modelId } };
+  } } });
+  const f = await fixture({ planner, objective, cipher: testCipher() });
+  try {
+    const result = await f.start();
+    assert.equal(result.run.status, "completed"); assert.equal(result.run.planAttempts, 2);
+    assert.equal(result.run.budgets.maxPlans, 2); assert.equal(result.run.budgets.maxActions, 12);
+    assert.equal(calls.length, 2); assert.equal(f.adapter.tests, 2); assert.equal(f.adapter.edits, 1);
+    assert.deepEqual(result.receipts.map(value => value.capabilityId),
+      ["project.run-tests", "project.preview-change", "project.apply-change", "project.run-tests"]);
+    assert.deepEqual(result.receipts.filter(value => value.capabilityId === "project.run-tests").map(value => value.output.passed), [false, true]);
+    assert.equal(result.run.actions.length, 4);
+    const replay = await f.orchestrator.resume(context, { runId: result.run.runId });
+    assert.equal(replay.run.status, "completed"); assert.equal(calls.length, 2);
+    assert.equal(f.adapter.edits, 1); assert.equal(f.adapter.tests, 2);
+  } finally { await f.close(); }
+});
+
+integration("actual planner cannot gain a third attempt by disregarding the repair progress", async () => {
+  let calls = 0;
+  const modelId = "synthetic-unrepaired-model";
+  const planner = new MastraM1Planner({ provider: { baseUrl: "http://127.0.0.1:1234/v1", modelId }, role: "code",
+    agent: { async generate(raw) {
+      const input = JSON.parse(raw); calls++; assert.equal(input.progress.phase, calls === 1 ? "initial" : "repair");
+      return { text: JSON.stringify({ summary: "Repeat the unchanged test.",
+        steps: [{ capabilityId: "project.run-tests", arguments: { suiteId: "addition" } }] }),
+        finishReason: "stop", response: { modelId } };
+    } } });
+  const f = await fixture({ planner });
+  try {
+    const result = await f.start();
+    assert.equal(result.run.status, "failed"); assert.equal(result.run.errorCode, "m1-tests-failed");
+    assert.equal(result.run.planAttempts, 2); assert.equal(calls, 2);
+    assert.equal(f.adapter.tests, 2); assert.equal(f.adapter.edits, 0);
+    assert.equal(result.receipts.length, 2);
+  } finally { await f.close(); }
 });

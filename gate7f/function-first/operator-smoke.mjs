@@ -62,9 +62,13 @@ export async function runOperatorSmoke(seal, { fetchImpl = fetch, record = async
     const input = JSON.parse(init.body); assert.doesNotMatch(JSON.stringify(input), /\/no_think/);
     const start = Date.now(); await record({ type: "request", role, url: String(url), input });
     try {
-      const response = await fetchImpl(url, init), text = await boundedText(response.clone());
-      const event = { type: "response", role, url: String(url), status: response.status, elapsedMs: Date.now() - start, body: JSON.parse(text) };
-      calls.push(event); await record(event); return response;
+      // Consume one branch only: cancelling an oversized tee branch while its
+      // sibling is idle can otherwise await the sibling indefinitely.
+      const response = await fetchImpl(url, init), text = await boundedText(response);
+      const event = { type: "response", role, url: String(url), status: response.status, elapsedMs: Date.now() - start, rawText: text };
+      calls.push(event); await record(event); // malformed/truncated JSON is evidence too
+      const headers = new Headers(response.headers); headers.delete("content-encoding"); headers.delete("content-length");
+      return new Response(text, { status: response.status, statusText: response.statusText, headers });
     } catch (error) { await record({ type: "transport-failure", role, elapsedMs: Date.now() - start, errorCode: error.code ?? error.name }); throw error; }
   };
   await inventory();

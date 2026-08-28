@@ -52,3 +52,27 @@ test("an extra or wrong resident model aborts before any inference", async () =>
     return new Response(JSON.stringify({ models: [{ key: "foreign", loaded_instances: [{ id: "foreign-instance" }] }] })); } }));
   assert.equal(calls, 1);
 });
+
+test("malformed model JSON retains the exact bounded wire response before the SDK rejects it", async () => {
+  const value = seal(), events = [], consoleErrors = [], originalError = console.error;
+  const inventory = { models: [{ key: value.modelId, loaded_instances: [{ id: value.primaryInstanceId }] },
+    { key: value.embeddingModelId, loaded_instances: [{ id: value.embeddingInstanceId }] }] };
+  console.error = (...args) => consoleErrors.push(args);
+  try { await assert.rejects(runOperatorSmoke(value, { record: async event => events.push(event), fetchImpl: async url =>
+    new Response(url === value.inventoryUrl ? JSON.stringify(inventory) : '{"unfinished":', { headers: { "content-type": "application/json" } }) })); }
+  finally { console.error = originalError; }
+  const response = events.find(event => event.type === "response");
+  assert.equal(response.status, 200); assert.equal(response.rawText, '{"unfinished":');
+  assert.equal(events.filter(event => event.type === "residency").length, 2);
+  assert.deepEqual(consoleErrors, [], "raw SDK private prompt/response objects must not leak into application console logs");
+});
+
+test("oversized model wire response cancels its sole stream without a stalled tee branch", async () => {
+  const value = seal(); let cancelled = false;
+  const inventory = { models: [{ key: value.modelId, loaded_instances: [{ id: value.primaryInstanceId }] },
+    { key: value.embeddingModelId, loaded_instances: [{ id: value.embeddingInstanceId }] }] };
+  await assert.rejects(runOperatorSmoke(value, { fetchImpl: async url => url === value.inventoryUrl
+    ? new Response(JSON.stringify(inventory))
+    : new Response(new ReadableStream({ pull(controller) { controller.enqueue(new Uint8Array(1_000_000)); }, cancel() { cancelled = true; } })) }));
+  assert.equal(cancelled, true);
+});

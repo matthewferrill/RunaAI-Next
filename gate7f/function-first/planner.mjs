@@ -1,4 +1,5 @@
 import { Agent } from "@mastra/core/agent";
+import { noopLogger } from "@mastra/core/logger";
 import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
 import { z } from "zod";
 import { resolveModelRole } from "./model-roles.mjs";
@@ -31,6 +32,7 @@ export class MastraM1Planner {
         "Use at most six steps. Do not include approvals, grants, identities, host paths, receipts or completion claims as extra fields.",
         "If the objective exceeds the envelope, give a concise limitation summary and one inspect step rather than pretending it is possible.",
       ].join(" ") });
+    if (!agent) this.agent.__setLogger(noopLogger);
   }
   async plan({ signal, ...input }) {
     const prompt = JSON.stringify({ schemaVersion: "runaai-m1-planner-input/v1", ...input });

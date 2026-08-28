@@ -1,4 +1,5 @@
 import { Agent } from "@mastra/core/agent";
+import { noopLogger } from "@mastra/core/logger";
 import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
 import { controlledProviderFetch } from "../../gate7f/function-first/provider-transport.mjs";
 
@@ -82,6 +83,11 @@ export class MastraAnswerProvider {
         "Do not describe hidden reasoning.",
       ].join(" "),
     }) : null;
+    // The pinned SDK's standalone Agent ignores a constructor `logger` field.
+    // Use its logger primitive on only our instances. Raw SDK errors can include
+    // private bodies; application typed errors/allowlisted telemetry still report failures.
+    if (!agent) this.agent.__setLogger(noopLogger);
+    if (this.verifierAgent && !verifierAgent) this.verifierAgent.__setLogger(noopLogger);
   }
 
   async answer(input, { deadlineMs, maximumOutputBytes }) {

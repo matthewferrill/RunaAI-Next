@@ -31,10 +31,20 @@ Invocation after prospective sealing and verified residency:
 node gate7f/function-first/operator-smoke.mjs --seal <exact-local-seal> --seal-sha256 <exact-hash>
 ```
 
-The three authoring tests use HTTP response doubles through the actual SDK and class
+The five authoring tests use HTTP response doubles through the actual SDK and class
 implementations. They validate seven correctly bound adapter calls, absence of the
 text suffix, request-level reasoning control, all source pins, fail-closed residency,
-and no lifecycle API. They do **not** prove a live model responded.
+and no lifecycle API. Malformed JSON is retained as bounded raw wire evidence before
+the SDK rejects it. Oversized streams use one consumed branch, avoiding a cancellation
+wait on an idle cloned branch. They do **not** prove a live model responded.
+
+The malformed-response regression exposed the SDK's default raw error-object logging.
+Those objects can include private prompt/response bodies. For owned standalone Agents,
+the pinned Mastra1.59.0 logger primitive is set to `noopLogger`; an ignored constructor
+`logger` option was tested and rejected as ineffective. Application typed errors and
+existing allowlisted telemetry remain in place. The real-SDK regression asserts that
+raw response objects do not reach the application console. No global console suppression
+or change to the provider's error/timeout behavior is used in the implementation.
 
 Additional auxiliary hardening requires finite vectors with unique complete input
 indices and exactly one valid reranker score per requested window. A partial or

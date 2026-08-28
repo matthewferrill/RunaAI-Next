@@ -15,6 +15,25 @@ are unchanged. M1 is authorized, not complete; its first local wiring result is 
 The steward authorized necessary non-destructive work and commit/push to RunaAI-Next without recurring
 permission requests. Human involvement is reserved for genuine customer tests or human-only operations.
 
+### Current checkpoint: R4b ready for the three-model functional campaign
+
+The frozen application is `9556ed01f9dbabe8c93eea309e482aad60bf809f`, common runtime seal
+`416102ff7129e5adb00de51b2f0fc3e5ca542c18a82941a32fdc4075b6a1c89f`. The complete actual Control
+regression passed **1,266/1,266, zero skips**; all **12/12 formal functional controls** then passed
+the original raw-proof verifier, including actual browser observation. See
+`gate7f/function-first/acceptance/R4B-CONTROL-REGRESSION-RESULTS-2026-08-28.md` and
+`gate7f/function-first/acceptance/R4B-CONTROLS-RESULTS-2026-08-28.md`. Earlier failed/partial arms
+below remain historical evidence, not retroactively passed. Coder, Qwen3.6 and Gemma each still
+require their full 120 fresh attempts and independent review; no winner is selected.
+
+The separate Home operational-guard code is integrated but **not activated**. Its root local
+OS/contract regression passed 81/81, zero skips, after the restricted shell's CIM-access failure
+was retained and the unchanged suite rerun with OS access. This does not prove actual Home
+installation, native caller quiescence, TLS admission, long-idle behavior or recovery. Those
+operational checks and rollback-protected deployment remain required before the prepared human
+trial. New operator/documentation commits do not change the frozen application under evaluation.
+Continue under existing permission; this checkpoint is neither completion nor another approval gate.
+
 ### 2026-08-28 M1-S2 continuing integration
 
 M1-S2 is in progress under the existing standing permission. Its preregistered contract is

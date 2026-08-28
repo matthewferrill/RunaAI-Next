@@ -50,6 +50,9 @@ Independent review of the stopped Gemma arm covers 23/120 attempts and all 32 ca
 `gate7f/function-first/acceptance/STOPPED-GEMMA-INDEPENDENT-REVIEW-2026-08-28.md`.
 It preserves every original failed/inconclusive check, identifies three task-quality failures and one
 ambiguous semantic criterion, and does not qualify any role or alter the frozen campaign.
+The prospective model-neutral repair continuation contract is
+`gate7f/function-first/REPAIR-PHASE-CRITERIA-2026-08-28.md`; implementation and new matched acceptance
+remain separate from the stopped campaign and do not increase its repair budget.
 
 ### 2026-08-28 M1-S1 implementation and verified publication
 

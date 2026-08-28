@@ -626,6 +626,11 @@ No dependency was changed during the prerequisite disposition. Full evidence is 
 
 ## Next operation
 
+Active continuation is M1-S2. Its committed green criteria are
+`gate7f/function-first/M1-S2-FUNCTIONS-AND-GREEN-CRITERIA.md`: real conversation/context, supplied-source
+research/review, disposable project execution, durable governed tasks and customer integration. Continue
+under standing permission until completion or meaningful human testing; do not stop after internal commits.
+
 The roadmap/retrieval guard and M1-S1 role wiring are implemented, tested and published through `2549413`.
 Retrieve the full roadmap before the next bounded chat/context function slice, alongside the separate
 Qwen3.6 readiness diagnosis. The full sequence, failure criteria, human-test boundary and remaining work

@@ -2,7 +2,7 @@
 
 Roadmap revision: 2026-08-28.1
 Milestone: M1
-Slice ID: M1-S1
+Slice ID: M1-S2
 Status: in progress, acceptance frozen before implementation; not complete or production-qualified.
 
 Read `PRODUCT-ROADMAP.md` first. This slice is the first milestone only; it does not replace, complete
@@ -101,6 +101,10 @@ only the candidate route/owned effects, preserving later user data. A failed tri
 function to work without erasing passed historical evidence or unrelated roadmap items.
 
 ## Next implementation slice
+
+Active work is M1-S2, specified in `../gate7f/function-first/M1-S2-FUNCTIONS-AND-GREEN-CRITERIA.md`.
+The steward reaffirmed continuation until completion or genuinely needed human testing. Internal module,
+commit and publication checkpoints are not turn-ending gates. The M1-S1 result below is retained history.
 
 M1-S1: role-separated provider contract and compatibility wiring, with current-state/receipt acceptance
 requirements captured for the later project tools. This is first because all three model comparisons and

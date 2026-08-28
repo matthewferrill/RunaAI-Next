@@ -2,12 +2,12 @@
   "schemaVersion": "runaai-current-slice/v1",
   "roadmapRevision": "2026-08-28.1",
   "milestone": "M1",
-  "sliceId": "M1-S1",
+  "sliceId": "M1-S2",
   "state": "in-progress",
-  "completionEvidence": ["gate7f/function-first/M1-S1-RESULTS-2026-08-28.md"],
+  "completionEvidence": [],
   "scopeDocument": "roadmap/CURRENT-SLICE.md",
   "capabilityIds": ["C01", "C02", "C03", "C04", "C06", "C07", "C12", "C15", "C16"],
-  "nextWork": "M1-S1 wiring is locally validated, not deployed. Retrieve the full roadmap before the next chat/context function slice and parallel bounded Qwen3.6 readiness; M1 and all remaining capability families stay open.",
+  "nextWork": "Complete M1-S2 real customer functions, durable governed project work and matched three-model validation; continue until complete or human testing is needed, not after internal commits.",
   "remainingRoadmapRequired": true,
   "completionClaim": "M1 completion is not whole-product completion."
 }

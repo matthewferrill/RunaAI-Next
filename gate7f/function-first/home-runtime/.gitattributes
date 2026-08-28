@@ -1,0 +1,2 @@
+# Retained native observations are byte-pinned; never normalize their line endings.
+evidence/** -text

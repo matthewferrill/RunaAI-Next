@@ -10,6 +10,12 @@ Check 'wrong package digest denied' {Rejected {$null=Get-M1QdrantManifest $packa
 Check 'alternate stream path denied' {Rejected {Assert-M1QdrantPath ($FixtureRoot+'\ordinary.txt:hidden')}}
 Check 'path normalization and UNC denied' {foreach($p in @('C:\AI\..\outside','\\server\share\value','C:\path.\file')){Rejected {Assert-M1QdrantPath $p}}}
 Check 'ordinary file allowed' {Assert-M1QdrantPath (Join-Path $FixtureRoot 'ordinary.txt') -File}
+Check 'actual mutable receipt replacement succeeds twice' {
+  $file=Join-Path $FixtureRoot 'mutable-receipt.json'
+  Write-M1QdrantJson $file @{revision=1}
+  Write-M1QdrantJson $file @{revision=2}
+  Assert-M1Qdrant ((Get-Content -LiteralPath $file -Raw|ConvertFrom-Json).revision-eq2) 'test-replacement'
+}
 Check 'hardlink rejected by actual native handle metadata' {Rejected {Assert-M1QdrantPath (Join-Path $FixtureRoot 'hardlink-a.txt') -File}}
 Check 'junction rejected without traversing it' {Rejected {Assert-M1QdrantTree (Join-Path $FixtureRoot 'linked')}}
 Check 'ACL constructor gives LocalService no code write' {

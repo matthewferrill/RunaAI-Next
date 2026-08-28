@@ -60,8 +60,11 @@ finally{
       $child.Kill();Assert-M1Qdrant ($child.WaitForExit(10000)) 'stop-timeout'
     }
     if($outRing){Write-M1QdrantJson (Join-Path $state ('logs\'+$runId+'.json')) (@{time=[DateTime]::UtcNow.ToString('o');stdout=$outRing.Snapshot();stderr=$errRing.Snapshot()})}
+  }catch{$exitCode=1;if(-not$failure){$failure='m1-qdrant-cleanup-failed'}}
+  # A log-update failure must not suppress the independent terminal receipt.
+  try{
     Write-M1QdrantJson (Join-Path $state ('run-'+$runId+'.json')) (@{schemaVersion='runaai-m1-qdrant-run-result/v1';runId=$runId;packageSha256=$ExpectedPackageSha256;exitCode=$exitCode;failure=$failure;endedAt=[DateTime]::UtcNow.ToString('o');dataRetained=$true}) -New
-  }catch{$exitCode=1}
-  $lock.Dispose()
+  }catch{$exitCode=1;[Console]::Error.WriteLine('m1-qdrant-result-unavailable')}
+  finally{$lock.Dispose()}
 }
 exit $exitCode

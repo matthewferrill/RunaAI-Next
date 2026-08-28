@@ -67,7 +67,7 @@ test('real pinned package and native link/config/task guards execute without a s
     symlinkSync(path.join(root,'target'),path.join(root,'linked/junction'),'junction');
     const result=spawnSync('powershell.exe',['-NoProfile','-NonInteractive','-ExecutionPolicy','Bypass','-File',path.join(here,'Test-M1QdrantContract.ps1'),'-FixtureRoot',root,'-PackageSha256',output.packageSha256],{encoding:'utf8',timeout:30000,windowsHide:true});
     assert.equal(result.status,0,`${result.stdout}\n${result.stderr}`);
-    const evidence=JSON.parse(result.stdout.trim());assert.equal(evidence.servicesStarted,false);assert.equal(evidence.tests.length,14);
+    const evidence=JSON.parse(result.stdout.trim());assert.equal(evidence.servicesStarted,false);assert.equal(evidence.tests.length,15);
     assert.ok(evidence.tests.every(t=>t.passed));
   }finally{
     const resolved=realpathSync(root);assert.equal(path.dirname(resolved),tempParent);assert.ok(path.basename(resolved).startsWith('runa-m1-qdrant-contract-'));

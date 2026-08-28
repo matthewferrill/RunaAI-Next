@@ -71,7 +71,8 @@ foreach($path in @($file,$temporary)){if((Test-Path -LiteralPath $path)-and((Get
 if(Test-Path -LiteralPath $temporary){throw 'mirror-staged-write-exists'}
 if(Test-Path -LiteralPath $file){$previous=Get-Content -LiteralPath $file -Raw|ConvertFrom-Json;if($previous.leaseId-ne'__LEASE__'-or$previous.sealSha256-ne'__SEAL__'){throw 'mirror-existing-binding-mismatch'}}
 [IO.File]::WriteAllText($temporary,$raw,[Text.UTF8Encoding]::new($false))
-if(Test-Path -LiteralPath $file){[IO.File]::Replace($temporary,$file,$null)}else{[IO.File]::Move($temporary,$file)}
+# Windows PowerShell5 needs an explicit null string, not $null coerced to an empty backup path.
+if(Test-Path -LiteralPath $file){[IO.File]::Replace($temporary,$file,[System.Management.Automation.Language.NullString]::Value)}else{[IO.File]::Move($temporary,$file)}
 [Console]::Out.Write('{"mirrored":true}')
 '@
 $writeMirror=$writeMirror.Replace('__ROOT__',$target).Replace('__COMMIT__',$ExpectedControlSourceCommit).Replace('__LEASE__',$LeaseId).Replace('__SEAL__',$ExpectedSeal)

@@ -150,7 +150,8 @@ function Write-M1QdrantJson([string]$Path,$Value,[switch]$New){
   $temporary=$Path+'.'+[Guid]::NewGuid().ToString('N')+'.tmp'
   $stream=[IO.File]::Open($temporary,[IO.FileMode]::CreateNew,[IO.FileAccess]::Write)
   try{$bytes=[Text.UTF8Encoding]::new($false).GetBytes(($Value|ConvertTo-Json -Depth 12 -Compress)+"`n");$stream.Write($bytes,0,$bytes.Length);$stream.Flush($true)}finally{$stream.Dispose()}
-  if(Test-Path -LiteralPath $Path){[IO.File]::Replace($temporary,$Path,$null)}else{[IO.File]::Move($temporary,$Path)}
+  # Windows PowerShell5 coerces ordinary $null to an empty string for this .NET string argument.
+  if(Test-Path -LiteralPath $Path){[IO.File]::Replace($temporary,$Path,[System.Management.Automation.Language.NullString]::Value)}else{[IO.File]::Move($temporary,$Path)}
 }
 function Get-M1QdrantInstallation([string]$Sha){
   $root=$script:M1QdrantRoot;Assert-M1QdrantPath $root

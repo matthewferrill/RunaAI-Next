@@ -64,7 +64,7 @@ is claimed. No PostgreSQL data is rolled back.
 ## Local verification and remaining live proof
 
 `node --test gate7f/function-first/control/qdrant/qdrant-control.test.mjs` runs six tests including
-fourteen executed PowerShell contract checks. They hash the actual pinned binary, build a disposable
+fifteen executed PowerShell contract checks. They hash the actual pinned binary, build a disposable
 package, parse all lifecycle sources, compare JS/PowerShell canonical config bytes, test exact task/
 child/listener contracts with explicit system-API doubles, and create actual NTFS hardlink/junction
 fixtures to verify native rejection. No scheduled task or Qdrant service is started by these tests.
@@ -73,6 +73,13 @@ Initial test failures were local harness issues: PowerShell5 inherited a restric
 then a PowerShell7 module path hid Get-FileHash, and one compact Where-Object argument was malformed.
 The harness now uses process-scoped execution policy only, hashing uses .NET directly, and the filter
 is an explicit script block. These are not presented as live Control failures or passing service proof.
+
+The first live Control rehearsal reached readiness but failed on the second mutable log write.
+Windows PowerShell5 converts ordinary `$null` to an empty backup-path string in `File.Replace`;
+an executed two-write regression reproduced the invalid-path failure. The replacement uses explicit
+`NullString.Value`, also applied to the Home campaign mirror before campaign activation. The runtime
+now attempts its terminal receipt independently of log-update failure. The failed new task was stopped
+and unregistered, with its files retained; it is not counted as a successful lifecycle rehearsal.
 
 Still required in the coordinated Control deployment: verify parent traversal without ACL repair;
 install disabled and re-read task/SID/ACL/pins; start and verify exact listeners/readyz; create a synthetic

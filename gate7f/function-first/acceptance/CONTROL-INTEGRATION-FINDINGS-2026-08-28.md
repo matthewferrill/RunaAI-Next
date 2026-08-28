@@ -74,3 +74,20 @@ The capture proxies additionally expose bounded `drain({maximumMs})` and `active
 their own upstream fetches and waits for final evidence capture. Actual local socket tests prove that
 an undrained request fails explicitly, closing disconnects the upstream, and a successful drain leaves
 no late capture before the campaign exports an attempt. These are transport tests, not model scores.
+
+## Encrypted control correction verified on Control
+
+The isolated rerun of Control05 passed independently on source
+`ac2572c72c395753adfd80fad051071c900161a0`, archive SHA-256
+`b218ba583cc0ea654c8e91785803e4e229ab382b79ec9b4a567925fd7c5f76e5`, stage
+`m1-task-native-a9d3b2ac2597406991c8ac93e6d65041`.
+Raw report `acceptance-evidence/controls-1787937181375.json`, SHA-256
+`111d422c757a1f636a05911e2b5ff8ee981de91229c925f37a8cf1e69e845cab`.
+It exercised actual PostgreSQL encrypted source/chat/replay/task/plan/proposal records, a foreign-record
+envelope swap rejection, and process exit/restart with same-scope decryption. Raw canary matches were
+zero. Owned data/runtime/process cleanup succeeded. No models or production changes occurred.
+
+All twelve controls have now succeeded during integration development, including the actual browser
+unknown-state check. They have **not** yet passed together under the final common campaign source/seal.
+Do not combine practice grades into a formal qualification suite. Run all twelve again with the final
+prospective seal; retain every prior failed/inconclusive attempt as development evidence.

@@ -277,3 +277,15 @@ reconciled. This change does not implement that recovery authority. Also test st
 invalid-receipt and post-command-drift barriers. The earlier129-test pass remains historical evidence
 with this newly identified gap, not qualification of the corrected recovery behavior. No Home command,
 settings mutation, TLS enrollment or campaign operation is part of these local regressions.
+
+Implemented after criteria `69c504f`: the actual local delayed-child regression first reproduced
+`Missing expected rejection` when Restore dispatched despite the original child still being alive.
+The corrected barrier denies all further mutation and has no in-memory reset. After releasing the
+fixture's late write and observing its normal exit, Restore remains denied; this also covers
+stopped-but-unknown, invalid receipts and post-command drift. The focused bridge, bounded-child and
+finite-coordinator suite passed22/22, zero skips. A separately durable exact-child reconciliation is
+still required before any later recovery; it is not supplied or waived by these passing local tests.
+
+Complete local operator regression including the processing observer and corrected recovery barrier
+passed136/136, zero skips, in41.5seconds with Windows OS access. This retains the same live-proof
+limitations: no installed Home settings transition, native busy/queued qualification or activation.

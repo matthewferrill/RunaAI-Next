@@ -39,7 +39,10 @@ export function createSettingsFileBridgeCore({transactionId,prepared,io,assertQu
     demand(Buffer.isBuffer(bytes)&&bytes.length>0&&bytes.length<=4096,'settings-file-read-bounds');return Buffer.from(bytes);
   }
   async function operation(mode,{expectedCurrentSha256,alreadyOriginal}={}){
-    demand(verified&&!busy&&!dispatched.has(mode)&&(!uncertain||mode==='Restore'),'settings-file-replay-or-busy');busy=true;
+    // Unknown is a barrier to every mutation, not just replay of the original verb. Even Restore
+    // could race a still-live writer. This bridge has no reset/reconcile capability; later recovery
+    // needs an independently durable terminal-operation and exact-child-stop proof first.
+    demand(verified&&!busy&&!dispatched.has(mode)&&!uncertain,'settings-file-replay-or-busy');busy=true;
     try{
       await io.verify();const current=await readSettings();
       if(mode==='Restore'){

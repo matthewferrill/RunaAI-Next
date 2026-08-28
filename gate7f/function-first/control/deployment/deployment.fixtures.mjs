@@ -31,7 +31,7 @@ export function syntheticAssembly(){
     services:Object.entries(config.services).map(([name,value])=>({name,...value}))},
     {schemaVersion:config.schemaVersion==='runa2-gate6b-release-config/v1'?'runa2-gate6-release/v1':'runa2-gate6-release/v2'});
   const read=value=>readFileSync(new URL(value,import.meta.url));
-  const companion=createClosedPhaseCompanion({sourceBytes:read('../../../../gate7a/control/Deploy-ControlOrdinaryAccessSuccessor.ps1'),
+  const companion=createClosedPhaseCompanion({sourceBytes:read('./fixtures/frozen-9556-deployer.ps1'),
     childBytes:read('./Bounded-DeploymentChild.cs'),functionsBytes:read('./Closed-Phase-Functions.ps1'),aclBytes:read('../../../../gate7e/control/TargetOnlyAcl.cs')});
   const homeProfile={schemaVersion:'runaai-qualified-home-profile/v1',appSourceCommit:APPLICATION.sourceCommit,
     runtimeSealSha256:APPLICATION.runtimeSealSha256,qualificationGradesSha256:plan.acceptanceGradesSha256,candidateId:'gemma'};

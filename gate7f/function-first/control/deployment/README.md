@@ -1,7 +1,8 @@
 # M1 deployment assembly — non-activating operator preparation
 
 Criteria were committed first in `b87d285`, with the child-intent correction
-recorded before implementation in `6285d76`. This directory does not deploy,
+recorded before implementation in `6285d76` and immutable-source correction in
+`418ee42`/observed correction`9a2183f`. This directory does not deploy,
 contact Home/Control, open a listener, enroll TLS, read a private key, or invoke
 the generated operational script. It does not complete Milestone 1. Roadmap
 digest `613920536543bcc87dbd1d8bc2e9dca9920f82552c302fc69f92a2fd4a262521`
@@ -15,10 +16,14 @@ and all 17 capability families remain in force.
   final Caddy bytes. Every non-provider original byte is preserved. Final role
   qualification calls the existing complete combined verifier, not a new score.
 - `companion.mjs`: derives a separate four-file operator package from the exact
-  frozen deployer raw CRLF SHA `9834fb63f7c56428fa965f39ac2985ff6a3d132b06f4244e108ebb3cde6aa6f5`.
+  frozen deployer raw CRLF SHA `9834fb63f7c56428fa965f39ac2985ff6a3d132b06f4244e108ebb3cde6aa6f5`
+  (23939 bytes; actual e10adce archive entry, not the mutable working copy).
   Checked substitutions preserve its application, ordinary identity, owner
   rebind and readiness checks. All Caddy publication/restoration is deferred to
-  the outer transaction; held file SHA/admin ETag are checked repeatedly.
+  the outer transaction; held file SHA/admin ETag are checked repeatedly. Tests use
+  the -text-preserved exact archive source fixture with explicit byte/CRLF checks;
+  LF, mixed newlines and any other byte change fail before derivation. Caller
+  source bytes are never normalized or substituted automatically.
 - `Bounded-DeploymentChild.cs` and `Closed-Phase-Functions.ps1`: no shell or
   stdin, bounded waits/output for the exact trusted tar/Caddy/Node child, typed
   results, create-only sanitized intent/start/terminal records in the pre-created
@@ -134,7 +139,17 @@ and an unnecessary repeated test-directory ACL write on restart) were corrected;
 none was represented as successful production evidence. `npm run verify:roadmap`
 passed15/15. No application, frozen case, historical grade or live host changed.
 
-Raw local proof lives under `evidence/20260828-child-intent-r2/`; its `proof.json`
+Current raw proof is under `evidence/20260828-archive-bytes/`; its `proof.json`
+binds the corrected exact source fixture as well as all tested modules. Root's
+prior54-check integration result (29pass/25source-drift failures) is retained,
+not regraded. Tests had read its mixed-newline working deployer instead of a
+reproducible immutable input. An initial correction inferred an LF archive from
+the Git blob; direct inspection of the exact e10adce tar disproved that inference.
+The strict original CRLF pin remains correct; tests now read its archive-backed
+fixture. Git blob LF5b606 and archive CRLF9834 are recorded distinctly. No frozen
+application file, production hash check or historical grade was rewritten.
+
+Earlier local proof under `evidence/20260828-child-intent-r2/` has `proof.json` that
 binds the actual Node binary and each tested module to the complete TAP log,
 including sanitized child records and distinct coordinator PIDs. The earlier
 `20260828-child-intent/` proof is preserved as an initial 54/54 run with an

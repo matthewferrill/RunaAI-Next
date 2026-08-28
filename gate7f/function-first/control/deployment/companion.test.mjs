@@ -10,7 +10,7 @@ import {APPLICATION} from './assembly.mjs';
 import {createClosedPhaseCompanion} from './companion.mjs';
 
 const read=value=>readFileSync(new URL(value,import.meta.url));
-const inputs=()=>({sourceBytes:read('../../../../gate7a/control/Deploy-ControlOrdinaryAccessSuccessor.ps1'),
+const inputs=()=>({sourceBytes:read('./fixtures/frozen-9556-deployer.ps1'),
   childBytes:read('./Bounded-DeploymentChild.cs'),functionsBytes:read('./Closed-Phase-Functions.ps1'),aclBytes:read('../../../../gate7e/control/TargetOnlyAcl.cs')});
 function powershell(script){
   const binary=String.raw`C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe`;
@@ -23,12 +23,17 @@ function powershell(script){
 test('frozen deployer is retained and companion is a separate four-file package',()=>{
   const value=inputs(),before=Buffer.from(value.sourceBytes),result=createClosedPhaseCompanion(value);
   assert.deepEqual(value.sourceBytes,before);assert.equal(sha256(before),APPLICATION.deployerSourceSha256);
+  assert.equal(before.length,23939);assert.equal(before.toString().split('\r\n').length-1,328);
+  assert.equal(before.toString().replaceAll('\r\n','').includes('\n'),false);
+  assert.equal(result.bytes.toString().replaceAll('\r\n','').includes('\n'),false,'derivation preserves the exact archived CRLF convention');
   assert.equal(result.files.length,4);assert.equal(result.applicationArtifactChanged,false);assert.equal(result.activated,false);
   assert.equal(result.sha256,sha256(result.bytes));assert.ok(result.files.every(file=>file.sha256===sha256(file.bytes)));
 });
 
 test('one-byte source drift and newline rewriting are denied, never silently normalized',()=>{
-  for(const mutate of [v=>v.sourceBytes[0]^=1,v=>v.sourceBytes=Buffer.from(v.sourceBytes.toString().replaceAll('\r\n','\n'))]){
+  for(const mutate of [v=>v.sourceBytes[0]^=1,
+    v=>v.sourceBytes=Buffer.from(v.sourceBytes.toString().replaceAll('\r\n','\n')),
+    v=>v.sourceBytes=Buffer.from(v.sourceBytes.toString().replace('\r\n','\n'))]){
     const value=inputs();mutate(value);assert.throws(()=>createClosedPhaseCompanion(value),/deployer-source-drift/u);
   }
 });

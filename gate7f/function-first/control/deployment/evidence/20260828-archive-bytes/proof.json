@@ -1,0 +1,78 @@
+{
+  "schemaVersion": "runaai-m1-deployer-archive-proof/v1",
+  "observedAt": "2026-08-28T22:23:36.263Z",
+  "nodeVersion": "v22.22.0",
+  "nodeSha256": "bae898add4643fcf890a83ad8ae56e20dce7e781cab161a53991ceba70c99ffb",
+  "exitCode": 0,
+  "errorCode": null,
+  "stdoutSha256": "f3dc3acdafb075086219ffe98e289db31a536c9e7f9777a0bb09ffd0315f93a9",
+  "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "frozenSource": {
+    "commit": "9556ed01f9dbabe8c93eea309e482aad60bf809f",
+    "entry": "gate7a/control/Deploy-ControlOrdinaryAccessSuccessor.ps1",
+    "archiveSha256": "e10adce53387bcf31b639738e2d7ae26c2b5dd17e2914f1870ba0ef1949b31dc",
+    "archiveEntryBytes": 23939,
+    "archiveEntrySha256": "9834fb63f7c56428fa965f39ac2985ff6a3d132b06f4244e108ebb3cde6aa6f5",
+    "fixtureSha256": "9834fb63f7c56428fa965f39ac2985ff6a3d132b06f4244e108ebb3cde6aa6f5",
+    "gitBlobBytes": 23611,
+    "gitBlobSha256": "5b606b1b9dff1fb6d0bc3132fc852bdc1f82996999c832ed7ef12fbc2f9d8fb9",
+    "gitBlobId": "ec2ade2e1f5adc3642718441c2f1ce018d4f1478"
+  },
+  "files": [
+    {
+      "path": "Bounded-DeploymentChild.cs",
+      "sha256": "7952b9a92e7680854b7b83481b311dce9558cbce4f5619ac3d51f523c0cab5cf"
+    },
+    {
+      "path": "Closed-Phase-Functions.ps1",
+      "sha256": "a250c475da99cb97b07c1b808a813c07afdfea4e3fa66d1d0294b8b5da692c0e"
+    },
+    {
+      "path": "assembly.mjs",
+      "sha256": "de1f247695a9780a1b3278ca53151dd011d12526df7af69abdb1f784a49b2d07"
+    },
+    {
+      "path": "assembly.test.mjs",
+      "sha256": "8d5e834df30789b7ef3d633634892a44d48a23a7b4929d082e516f201c8506ee"
+    },
+    {
+      "path": "child-intent.test.mjs",
+      "sha256": "19bd92291d5ec613b79d787426a88a0d9380439058ebb27eed9a50dfbd8a3550"
+    },
+    {
+      "path": "companion.mjs",
+      "sha256": "fa4c2d3d5d368424cc1ef00f0fb3d8fa5730e6b9e5f575e34121471c26848b54"
+    },
+    {
+      "path": "companion.test.mjs",
+      "sha256": "39a0866a1a4b88274a13e2debaa4641d9359752ce5eefce3b2b1922343df1089"
+    },
+    {
+      "path": "deployment.fixtures.mjs",
+      "sha256": "2d18144159c1558de7c56f75902698733170a7d1d59ac0cef10f996d927c0639"
+    },
+    {
+      "path": "descriptor.mjs",
+      "sha256": "24c1ba754388cee4c877821684411eb895de23546370affe4721eae7e47a9412"
+    },
+    {
+      "path": "descriptor.test.mjs",
+      "sha256": "b54d0479c6b15fe9446f40008b4696558f1ea572eea2fc2c69d5c00010b81897"
+    },
+    {
+      "path": "transaction.mjs",
+      "sha256": "99d6084afb9b1c9aa61a418dac132912c2cebeabca131c95ef5c6fd65cd2c392"
+    },
+    {
+      "path": "transaction.test.mjs",
+      "sha256": "1f691035620bb330be65822861e50499453bb58a92871c512d00d5c4e460a63b"
+    }
+  ],
+  "boundaries": {
+    "operationalDeployerExecuted": false,
+    "homeContacted": false,
+    "controlContacted": false,
+    "modelsLoaded": false,
+    "applicationSourceChanged": false
+  }
+}

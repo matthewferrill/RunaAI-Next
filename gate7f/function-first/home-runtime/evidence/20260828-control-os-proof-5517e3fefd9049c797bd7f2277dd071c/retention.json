@@ -1,0 +1,47 @@
+{
+  "schemaVersion": "runaai-windows-os-proof-retention/v1",
+  "id": "5517e3fefd9049c797bd7f2277dd071c",
+  "rawExportSha256": "45d0fa062b415f96f481fbee00c02c65c53451c62a36272e95a50f81799c2fb6",
+  "packageSha256": "528a9eb415348782874ac51e4254586f3899455746ac100d298ee14961872d31",
+  "pass": true,
+  "scope": "Control Windows principals, ACLs, exclusive native lock, independent watchdog and exact cleanup only",
+  "nativeHomeRuntimeQualified": false,
+  "files": {
+    "state\\node-stdout.txt": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "state\\node-stderr.txt": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "public\\supervisor-result.json": {
+      "bytes": 274,
+      "sha256": "038174634e1fcd2c7f91d2f5d105124ef5b0b14d213929e736f897aa558d353c"
+    },
+    "public\\child.json": {
+      "bytes": 107,
+      "sha256": "822c948381f4c577489bad46c0574ae221f35fb9c34aac916dd6d7e9644f717b"
+    },
+    "requests\\localservice-result.json": {
+      "bytes": 286,
+      "sha256": "8064a63b9bab48c1f031552adb2232a47716ea44094811dc2e725bb683909aff"
+    },
+    "config.json": {
+      "bytes": 213,
+      "sha256": "cba00a5489ffbcdf1ccafce06959c758fd171792cc95d01849f0970fd59ffb04"
+    },
+    "state\\synthetic-ownership.jsonl": {
+      "bytes": 134,
+      "sha256": "56ceda1aba8ec592711550323e17e8fa4fa6aad45b25dd01c016ad1f6cd89011"
+    },
+    "public\\watchdog.json": {
+      "bytes": 134,
+      "sha256": "a568f85067195c68a0a943620bd37120805c012b00aae6ff4fce5500ee0969d6"
+    },
+    "result.json": {
+      "bytes": 845,
+      "sha256": "02ced31d8b005d6c4a4e8f0354fc85e2dad98b5a6387b6b1baddd60209f0bfe5"
+    }
+  }
+}

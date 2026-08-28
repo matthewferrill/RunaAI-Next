@@ -96,6 +96,14 @@ The real local TLS regression creates disposable certificates using the installe
 checks the valid identity, wrong identity/issuer/server name, missing and expired certificate, byte
 preservation and no credential forwarding. No machine trust store or production credential is changed.
 
+The separate [Windows mechanics proof](windows-proof/README.md) also executed on Control in an isolated
+new subtree. [Retained results](evidence/20260828-control-os-proof-5517e3fefd9049c797bd7f2277dd071c/README.md)
+prove actual SYSTEM/LocalService ACL boundaries, an exclusive native lock, an independent PowerShell
+watchdog surviving an exact synthetic Node child termination, and scoped task/process cleanup. All7
+outer and7 LocalService checks passed; both tasks exited0 and were unregistered. Its Node24.19.0 fixture
+is not Home22.22.1 qualification. The combined local command with `windows-proof/*.test.mjs` passed46/46,
+including Windows PowerShell5.1 parsing. Actual model lifecycle recovery remains unproved.
+
 Not yet implemented or proved: independent crash watchdog/persistence, service
 installation, startup without Matthew login, post-campaign JIT/sensitive-log transition, authenticated
 deployment binding, long-idle native persistence, real fault/restart/rollback and production activation.

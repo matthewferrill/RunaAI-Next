@@ -1,0 +1,1 @@
+{"modelOperations":false,"schemaVersion":"runaai-localservice-os-proof/v1","principalSid":"S-1-5-19","checks":{"codeReadable":true,"replyReadable":true,"requestWritable":true,"privateStateDenied":true,"replyWriteDenied":true,"codeWriteDenied":true,"rootWriteDenied":true},"passed":true}

@@ -1,0 +1,15 @@
+{
+  "schemaVersion": "runaai-windows-os-proof-package/v1",
+  "createdAt": "2026-08-28T18:58:10.493Z",
+  "root": "C:\\AI\\RunaAI-Next-Candidate\\staging\\m1-runtime-os-proof-5517e3fefd9049c797bd7f2277dd071c",
+  "packageRoot": "C:\\AI\\RunaAI-Next-Candidate\\staging\\m1-runtime-os-package-5517e3fefd9049c797bd7f2277dd071c",
+  "nodePath": "C:\\Program Files\\nodejs\\node.exe",
+  "nodeVersion": "v24.19.0",
+  "nodeSha256": "3602f2bb1a10f2cbab4c36886218a33c1ab3db87290e73b033c46c77147d0237",
+  "files": {
+    "Windows-Ownership.ps1": "f1dc00349d2103b17be26c7a304183aca91358d68fef18a0028c676b36fd59ee",
+    "Invoke-ControlOsProof.ps1": "cbb238b427a1476b7f1fa0819cf27c78f9df37d863e69c03ea17fca86cb6feda",
+    "Run-OsProofWorker.ps1": "67c3fd63a3f948afb2095ca162f8d8b33683fc5a5965196bc7975bd047c99826",
+    "node-fixture.mjs": "6e81034dc63caa7f85fb271e1c50da6bd91b210005436d3012972e6de083ef3d"
+  }
+}

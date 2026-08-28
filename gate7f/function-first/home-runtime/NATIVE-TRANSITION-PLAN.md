@@ -146,3 +146,15 @@ and trusted local desktop/CLI/internal41343 callers still need a meaningful cont
 boundary before any native stop. A zero TCP or resident-model snapshot does not supply that boundary.
 No native transition is authorized by an empty registry alone, and no active caller is knowingly
 terminated merely to make the deployment test pass.
+
+## Prospective direct-restore ownership hardening
+
+Before wiring the file bridge, a local source review found that `Repair-InterruptedSettingsSwap`
+checks the actual preimage against the original intent, but its directly exported
+`Restore-SettingsActualPreimage` helper did not repeat that check. An explicit restore callback must
+not be able to bypass preimage ownership merely by choosing the lower-level helper. Require the
+actual backup bytes and ACL to match the retained original intent before creating a restore draft or
+replacing the target. Test direct invocation after a late apply conflict and after backup tampering;
+it must reject without changing the owned candidate or producing a displaced/restore artifact.
+Normal direct restore and verified formatting-only current-candidate normalization remain supported.
+These are local filesystem regressions only; no Home transition or model call is part of the fix.

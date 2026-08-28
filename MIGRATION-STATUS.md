@@ -15,7 +15,7 @@ are unchanged. M1 is authorized, not complete; its first local wiring result is 
 The steward authorized necessary non-destructive work and commit/push to RunaAI-Next without recurring
 permission requests. Human involvement is reserved for genuine customer tests or human-only operations.
 
-### Current checkpoint: R4b ready for the three-model functional campaign
+### Current checkpoint: R4b functional campaign and operator correction
 
 The frozen application is `9556ed01f9dbabe8c93eea309e482aad60bf809f`, common runtime seal
 `416102ff7129e5adb00de51b2f0fc3e5ca542c18a82941a32fdc4075b6a1c89f`. The complete actual Control
@@ -25,6 +25,27 @@ the original raw-proof verifier, including actual browser observation. See
 `gate7f/function-first/acceptance/R4B-CONTROLS-RESULTS-2026-08-28.md`. Earlier failed/partial arms
 below remain historical evidence, not retroactively passed. Coder, Qwen3.6 and Gemma each still
 require their full 120 fresh attempts and independent review; no winner is selected.
+
+The first R4b Coder batch is retained at 32/120, with 21 passes, two failures and
+nine inconclusive attempts after independent review of all 41 model outputs. An
+operator browser-preparation acknowledgement exceeded the unchanged 30-second
+freshness bound before any model call in Agent05. The parent closed the lease
+during Agent08's browser checkpoint; 88 Coder and 240 other-model slots remain
+unexecuted. No result was pooled, retried individually, regraded or qualified.
+The independent report and complete denominator manifest are under
+`gate7f/function-first/acceptance/evidence/campaign-20260828-r4b/aborted-coder-first-batch/`.
+Actual Control cleanup has no error; Home separately verified zero models/tasks
+and restored 260 W after a retained completion-marker publication failure.
+
+A synthetic Windows reproduction demonstrated a separate `File.Replace`
+metadata publication race. The prospective operator-only writer correction is
+`gate7f/function-first/readiness/CAMPAIGN-METADATA-PUBLICATION-CRITERIA.md`.
+Its seven-case actual Windows suite passed on both Omen and Control. Control's
+three stress repetitions completed 600 publications and 61,021 valid concurrent
+reads with zero reader errors; all owned test processes exited.
+The scored source, seal, cases, model settings and reader freshness limits are
+unchanged. New Coder hardware lease R5 is the same candidate, not a fourth model;
+the new full batch must use its own fresh stage and retain the abandoned batch.
 
 The separate Home operational-guard code is integrated but **not activated**. Its root local
 OS/contract regression passed 81/81, zero skips, after the restricted shell's CIM-access failure

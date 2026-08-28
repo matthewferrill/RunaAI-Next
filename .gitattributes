@@ -3,6 +3,7 @@ gate7f/qualification/results/** -text
 gate7f/qualification/evidence/*-POWER-V2-VERIFIED-SUMMARY.json -text
 gate7f/function-first/acceptance/evidence/campaign-20260828-r4/runtime-seal.json -text
 gate7f/function-first/acceptance/evidence/campaign-20260828-r4b/runtime-seal.json -text
+gate7f/function-first/acceptance/evidence/campaign-20260828-r4b/aborted-coder-first-batch/** -text
 # Exact historical acceptance bytes outside its existing sealed eol=lf directory.
 gate7f/GATE7F-QUALIFICATION-AUTHORIZATION-AND-CRITERIA-2026-08-27.md -text
 gate7f/contracts.mjs -text

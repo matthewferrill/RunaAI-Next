@@ -8,6 +8,15 @@ const publicErrors = new Set(["m1-grant-session-mismatch", "m1-grant-expired", "
   "m1-restore-stale", "m1-operation-in-progress", "m1-source-index-unavailable",
   "m1-source-content-mismatch", "m1-authentication-required", "identity-token-invalid"]);
 
+export function functionDescription(mode, experience) {
+  if (mode === "work" && experience === "code") return "Describe a change to this disposable JavaScript project. Runa can plan, inspect, edit and run its fixed tests under your selected approval profile. Your own files, repositories, network and systems remain inaccessible.";
+  if (mode === "research") return "Ask questions about the source sections you attach and explicitly select. Runa retrieves only those sections and shows their references. This is not live web research and cannot perform actions.";
+  if (mode === "review") return "Ask Runa to review the source sections you attach and explicitly select. Findings must distinguish supported evidence from uncertainty. Reviewing does not edit or execute anything.";
+  return experience === "code"
+    ? "Discuss, explain, and draft code. A draft is not execution. Choose Run in sandbox for a JavaScript block, or Work in disposable Code project for a governed multi-step task. Neither can access your own files or network."
+    : "Ask questions, brainstorm, draft writing, and work with text you paste here. Ordinary chat does not browse the live web or perform actions. Select Research or Review to work with explicitly supplied project sources.";
+}
+
 export function functionAnswerSelection(mode, sources, experience) {
   if (!["research", "review"].includes(mode)) return { lane: experience === "code" ? "code" : "general" };
   if (!Array.isArray(sources) || sources.length < 1 || sources.length > 6) throw new Error("Select one through six source sections first.");
@@ -57,6 +66,11 @@ export async function initializeFunctionPanel({ root = document, request, getCon
     const option = element(root, "option", label); option.value = value; select.append(option);
   }
   heading.append(select);
+  const presentMode = () => {
+    const description = root.getElementById("experience-description");
+    if (description) description.textContent = functionDescription(select.value, getContext().experience);
+  };
+  select.addEventListener("change", presentMode);
   host.classList.add("function-panel");
   host.append(element(root, "h2", "Selected sources"), element(root, "p", "Only text you attach and select is supplied. Up to six sections per answer; 8,000 characters each.", "navigation-empty"));
   const list = element(root, "div"), sourceForm = element(root, "form"), label = element(root, "input"), content = element(root, "textarea");
@@ -147,6 +161,7 @@ export async function initializeFunctionPanel({ root = document, request, getCon
     codePanel.hidden = context.experience !== "code";
     select.querySelector('option[value="work"]').disabled = context.experience !== "code";
     if (context.experience !== "code" && select.value === "work") select.value = "conversation";
+    presentMode();
     const managed = !["runa:personal", "runa:ephemeral"].includes(context.projectId);
     sourceForm.hidden = !managed; prepare.disabled = !managed; reload.disabled = !managed;
     list.replaceChildren(element(root, "p", managed ? "Loading sources…" : "Create or select a project on the left to attach sources.", "navigation-empty"));
@@ -179,7 +194,7 @@ export async function initializeFunctionPanel({ root = document, request, getCon
     const token = ticket(); prepare.disabled = true;
     try {
       await call("project.prepare", {}, token); if (!alive(token)) return;
-      select.value = "work"; setStatus("Disposable exercise ready. Choose a profile and describe the change in the message box.", token);
+      select.value = "work"; presentMode(); setStatus("Disposable exercise ready. Choose a profile and describe the change in the message box.", token);
     } catch (error) { reportError(error, token); } finally { if (alive(token)) prepare.disabled = false; }
   });
   async function readTask(token, taskId, runId) {

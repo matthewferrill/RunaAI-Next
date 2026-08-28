@@ -37,7 +37,7 @@ function parseVerification(text) {
 
 export class MastraAnswerProvider {
   constructor({ baseURL, modelId, role = "fast-chat-research", providerName = "private-openai-compatible",
-    maxOutputTokens = 512, agent = null, verifierAgent = null, reasoningEffort = null, preventRedirects = false }) {
+    maxOutputTokens = 512, agent = null, verifierAgent = null, reasoningEffort = null, preventRedirects = false, fetchImpl = fetch }) {
     if (!baseURL || !modelId) throw new Error("baseURL and modelId are required");
     this.modelId = modelId;
     this.role = role;
@@ -45,7 +45,7 @@ export class MastraAnswerProvider {
     this.maxOutputTokens = maxOutputTokens;
     const needsProvider = !agent || (role === "code" && !verifierAgent);
     const provider = needsProvider ? createOpenAICompatible({ name: providerName, baseURL,
-      fetch: controlledProviderFetch({ baseURL, modelId, reasoningEffort, preventRedirects }) }) : null;
+      fetch: controlledProviderFetch({ baseURL, modelId, reasoningEffort, preventRedirects, fetchImpl }) }) : null;
     this.agent = agent ?? new Agent({
       name: `runaai-${role}`,
       model: provider(modelId),

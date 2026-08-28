@@ -5,12 +5,17 @@ const stablePointId = source => Number.parseInt(createHash("sha256")
   .update(`${source.projectId}\u0000${source.sourceId}\u0000${source.sectionId}`).digest("hex").slice(0, 12), 16);
 
 async function boundedJson(response, maximumBytes) {
-  const text = await response.text();
-  if (Buffer.byteLength(text, "utf8") > maximumBytes) {
-    const error = new Error("dependency response exceeded its byte ceiling");
-    error.code = "dependency-output-limited";
-    throw error;
-  }
+  if (!response.body) return null;
+  const reader = response.body.getReader(), chunks = []; let bytes = 0;
+  try {
+    while (true) {
+      const next = await reader.read(); if (next.done) break;
+      bytes += next.value.length;
+      if (bytes > maximumBytes) throw Object.assign(new Error("dependency response exceeded its byte ceiling"), { code: "dependency-output-limited" });
+      chunks.push(Buffer.from(next.value));
+    }
+  } finally { await reader.cancel().catch(() => {}); }
+  const text = Buffer.concat(chunks).toString("utf8");
   return text ? JSON.parse(text) : null;
 }
 
@@ -32,8 +37,10 @@ export class OpenAICompatibleEmbedder {
     });
     if (!response.ok) throw Object.assign(new Error(`embedding dependency returned ${response.status}`), { code: "embedding-unavailable" });
     const body = await boundedJson(response, 8_000_000);
-    const vectors = [...(body?.data ?? [])].sort((a, b) => a.index - b.index).map(item => item.embedding);
-    if (vectors.length !== texts.length || vectors.some(vector => !Array.isArray(vector) || vector.length !== this.dimension)) {
+    const data = Array.isArray(body?.data) ? [...body.data].sort((a, b) => a.index - b.index) : [];
+    const vectors = data.map(item => item.embedding);
+    if (vectors.length !== texts.length || data.some((item, index) => item.index !== index)
+        || vectors.some(vector => !Array.isArray(vector) || vector.length !== this.dimension || vector.some(value => !Number.isFinite(value)))) {
       throw Object.assign(new Error("embedding response shape mismatch"), { code: "embedding-shape-invalid" });
     }
     if (body.model && body.model !== this.modelId) {
@@ -89,10 +96,12 @@ export class WindowedBgeReranker {
         });
         if (!response.ok) throw new Error(`reranker returned ${response.status}`);
         const body = await boundedJson(response, 1_000_000);
-        if (!Array.isArray(body?.results) || !body.results.length) throw new Error("reranker response was empty");
+        if (!Array.isArray(body?.results) || body.results.length !== batch.length) throw new Error("reranker response did not cover every window");
+        const indices = new Set();
         for (const item of body.results) {
           if (!Number.isInteger(item.index) || item.index < 0 || item.index >= batch.length ||
-            typeof item.score !== "number" || !Number.isFinite(item.score)) throw new Error("reranker response was malformed");
+            indices.has(item.index) || typeof item.score !== "number" || !Number.isFinite(item.score)) throw new Error("reranker response was malformed");
+          indices.add(item.index);
           const owner = owners[offset + item.index];
           sourceScores.set(owner, Math.max(sourceScores.get(owner) ?? Number.NEGATIVE_INFINITY, item.score));
         }

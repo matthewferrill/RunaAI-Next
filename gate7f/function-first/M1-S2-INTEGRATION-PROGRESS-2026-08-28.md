@@ -69,6 +69,12 @@ an unavailable index retaining its source and becoming selectable only after exp
 and reopening a saved task without inheriting permission to execute. This is UI plumbing
 evidence, not an authenticated live-stack/model success claim. The separate agent's 13/13
 isolated browser checks remain described in `M1-S2-UI-AND-PRIVATE-EVIDENCE-RESULTS.md`.
+The same browser verified fresh profile selection before showing exact-action approval,
+revocation removing that approval, and mode-specific descriptions distinguishing drafts,
+selected-source research/review and real governed disposable work. No console warnings or
+errors were observed. The three-pane desktop layout was inspected visually without document
+horizontal overflow. The temporary tab was closed. The owned PostgreSQL lifecycle finished
+and verified stop/removal of its own data; no production stores were removed.
 
 The prospective acceptance bundle is now committed: 40 distinct tasks (eight in each of the
 five functions), three repetitions per candidate across all three models = 360 planned task
@@ -82,6 +88,18 @@ not a release-JSON option, browser field or model tool. `project.prepare` still 
 parameters, authenticates and checks scope before resolving a fixture, and passes the same
 contained adapter validation. The production default remains the calculator exercise. The
 13 surface checks pass, including forged fixture/suite input and foreign ownership denial.
+
+Latest integrated rerun after mode descriptions and auxiliary integrity checks: **955 tests,
+916 passed, zero failed, 39 database skips** (those task/database checks were separately run
+above). The real PostgreSQL/Qdrant integration rerun passed **7/7**, with complete owned
+service/data cleanup and HTTP auxiliary doubles clearly identified. Its first launch was
+blocked at PostgreSQL startup inside the tool sandbox; the authorized unsandboxed rerun
+succeeded. This is not being attributed to a model or rewritten as an initial success.
+
+`OPERATOR-SMOKE.md` specifies the separate unscored actual-Mastra readiness check. Its
+authoring tests prove request shapes and no-suffix transport using doubles; live results
+must be recorded separately after exact runtime/resource sealing. No acceptance case is
+used in that smoke, and the model/provider budgets have not been increased.
 
 ## Still in progress
 

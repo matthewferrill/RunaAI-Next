@@ -1,13 +1,22 @@
 # M1 durable project tasks
 
 This is the M1-S2 implementation of the previously frozen real-function contract, not completion of M1
-or production qualification. It is side-by-side with the old synthetic Gate 7F core. It uses only
-generated, non-private candidate projects; private payload encryption/retention is not established here.
+or production qualification. It is side-by-side with the old synthetic Gate 7F core. It uses generated,
+non-private candidate projects for its tests. Candidate composition must provide the core envelope cipher;
+project/task/grant/proposal/intent/receipt/run JSON is encrypted with participant/project/kind/record-ID
+binding. Only IDs and digests remain public. Plaintext is rejected unless an explicit
+`allowPlaintextForSynthetic: true` option is supplied by a synthetic fixture. Encryption does not by
+itself establish broader private-project retention, deletion or production qualification.
 
 ## Composition API
 
-`PostgresTaskStore({pool, schema = "runa_m1"})` has additive `initialize()` and no drop/reset operation.
-`M1TaskService({store, adapter, now})` uses the project's `DisposableJavascriptProjectAdapter`.
+`PostgresTaskStore({pool, cipher, schema = "runa_m1"})` has additive `initialize()` and no drop/reset operation.
+`M1TaskService({store, adapter, now, authorizeContext})` uses the project's `DisposableJavascriptProjectAdapter`.
+The required `authorizeContext(context)` hook must return `true` or `{allowed:true}` after validating the
+current ordinary session and project ownership. Missing/expired/offline authority fails closed; only
+explicit synthetic fixtures may use `allowSyntheticAuthority:true`. This hook runs before dispatch,
+before revision publication and in cooperative cancellation checks. It does not erase a receipt for an
+already-dispatched bounded test when the user logs out.
 `createM1TaskWorkflow({service, checkpointer})` receives a real PostgreSQL `PostgresSaver`; checkpoint
 progress is not an authority substitute. Every call takes fresh server-derived
 `{principalId, projectId, sessionId}`. Never derive that tuple from planner/source/browser payloads.
@@ -29,6 +38,32 @@ progress is not an authority substitute. Every call takes fresh server-derived
 - `reconcile(context, {proposalId})` observes uncertain effects without repeating them.
 - `cancel(context, {taskId})`, `revokeGrant(context, {grantId})`, and `status(context, {taskId})` are trusted
   application ports. `restore(...)` is a convenience proposal for `project.restore`, not a bypass.
+- `listTasks(context)` returns `{tasks:[...]}` with at most twenty recent, scoped summaries.
+
+## Conversational orchestration
+
+`M1TaskOrchestrator({service, planner, workflow, budgets?})` receives the same service, its checkpointed
+workflow, and `planner.plan({objective,snapshot,receipts,previousPlans,repair,allowedPaths,allowedSuites,
+capabilityIds,signal})`. The planner returns strict data: `{summary,steps:[{capabilityId,arguments}]}`.
+No model-supplied approval, receipt, completion or runtime instruction is accepted. Initial maximums are
+six steps/plan, two plan attempts (one repair), twelve actions, 120 seconds/planning call, five minutes
+active work and one hour run age. Callers may narrow, not widen, these limits.
+
+- `start(context,{taskId,grantId,grantRevision,requestId})` plans and advances through ordinary authority.
+- `resume(context,{runId})` continues a persisted run. Ask-profile work pauses for exact service approval;
+  approving a proposal then resuming advances it without a fresh model-issued authority decision.
+- `status(context,{runId})` returns `{run,task,project,proposals,receipts,pendingProposal,pendingReconciliation}`.
+- `list(context)` returns `{runs:[...]}` with at most twenty scoped summaries for reload/login recovery.
+- On explicit user Continue after login/profile change, the application creates a fresh grant and calls
+  `resume(context,{runId,grantId,grantRevision})`. This revokes old pending work and plans afresh; it does
+  not transfer old approvals to a new session/profile. Existing plans/receipts remain historical and
+  budgets do not reset. Any unknown old effect first requires reconciliation and blocks new actions.
+
+Run/plan/step IDs, exact proposal and receipt references are durable/encrypted PostgreSQL records.
+LangGraph checkpoints resume each effect through the same service. A lost acknowledgement is reconciled,
+not retried as another mutation. A failed real test may request one repair from a fresh snapshot; another
+failure stops. `outcome:"plan-completed"` means the governed plan completed, not that an LLM proved every
+possible interpretation of the user's goal. Current test success is independently present in receipts.
 
 Capabilities are `project.inspect {path}`, `project.preview-change` and `project.apply-change
 {path, content, expectedSha256}`, `project.run-tests {suiteId}`, and `project.restore {receiptId}`.
@@ -68,9 +103,11 @@ authority lock. Source staging that never became current is not represented as a
 Set `M1_TASK_PG_URL` to an owned disposable PostgreSQL instance, then run
 `node --test gate7f/function-first/tasks/postgres.test.mjs` for real database authority, transaction,
 duplicate, revocation, cancellation, restore and fresh-process LangGraph checkpoint recovery checks.
-These executor doubles are explicitly not filesystem or sandbox proof. The separate real-project
+These executor doubles are explicitly not filesystem or sandbox proof. Run `orchestrator.test.mjs` with
+the same disposable URL for real PostgreSQL/LangGraph planning, approval, repair, encryption, login and
+logout recovery. The separate real-project
 integration uses actual immutable files and the retained Gate 7E executor. Root owns the disposable
 PostgreSQL lifecycle; these tests never stop it or access a production/private database.
 
-This module does not implement the authenticated HTTP/UI adapter, model planner, matched three-model
+This module does not implement the authenticated HTTP/UI adapter, a particular model provider, matched three-model
 qualification or steward customer trial. Root composes those; no module test is M1 completion evidence.

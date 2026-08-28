@@ -8,6 +8,7 @@ import { digest } from "./contracts.mjs";
 import { PostgresTaskStore } from "./postgres.mjs";
 import { M1TaskService } from "./service.mjs";
 import { createM1TaskWorkflow } from "./workflow.mjs";
+import { testCipher } from "../../../gate4/fixtures.mjs";
 
 const url = process.env.M1_TASK_PG_URL;
 const integration = url ? test : test.skip;
@@ -68,11 +69,12 @@ class DeterministicAdapter {
 async function fixture(options = {}) {
   const pool = new pg.Pool({ connectionString: url });
   const schema = `m1_task_${randomBytes(6).toString("hex")}`;
-  const store = new PostgresTaskStore({ pool, schema });
+  const store = new PostgresTaskStore({ pool, schema, cipher: options.cipher ?? null, allowPlaintextForSynthetic: !options.cipher });
   await store.initialize();
   const adapter = new DeterministicAdapter();
   const clock = { now: Date.now() };
-  const service = new M1TaskService({ store, adapter, now: () => new Date(clock.now), hooks: options.hooks ?? {} });
+  const service = new M1TaskService({ store, adapter, now: () => new Date(clock.now), hooks: options.hooks ?? {},
+    ...(options.authorizeContext ? { authorizeContext: options.authorizeContext } : { allowSyntheticAuthority: true }) });
   const project = await service.registerProject(context, { environmentId: "m1-generated-environment", files: { "index.js": initial } });
   const task = await service.createTask(context, { requestId: "task-request", objective: "Edit a generated addition function." });
   const grant = await service.createGrant(context, { taskId: task.taskId, profile: options.profile ?? "safe-autopilot",
@@ -172,7 +174,7 @@ integration("real PG: two concurrent dispatchers do not execute the same proposa
   try {
     const proposal = await f.propose(), one = f.service.execute(context, { proposalId: proposal.proposalId });
     await entered;
-    const two = new M1TaskService({ store: f.store, adapter: f.adapter });
+    const two = new M1TaskService({ store: f.store, adapter: f.adapter, allowSyntheticAuthority: true });
     await assert.rejects(two.execute(context, { proposalId: proposal.proposalId }), /m1-operation-in-progress/);
     release(); await one;
     assert.equal(f.adapter.materializeCalls, 1);
@@ -186,7 +188,7 @@ integration("real PG: failed publication commit leaves pointer unchanged, then r
     await assert.rejects(f.service.execute(context, { proposalId: proposal.proposalId }));
     assert.equal((await f.service.currentProject(context)).revision, 1);
     assert.equal((await f.service.status(context, { taskId: f.task.taskId })).receipts.length, 0);
-    const restarted = new M1TaskService({ store: f.store, adapter: f.adapter });
+    const restarted = new M1TaskService({ store: f.store, adapter: f.adapter, allowSyntheticAuthority: true });
     const result = await restarted.execute(context, { proposalId: proposal.proposalId });
     assert.equal(result.reconciled, true);
     assert.equal(result.receipt.afterRevision, 2);
@@ -212,7 +214,7 @@ integration("real PG: unknown test outcome is not inferred or blindly rerun", as
   try {
     const proposal = await f.propose("project.run-tests", { suiteId: "addition" });
     await assert.rejects(f.service.execute(context, { proposalId: proposal.proposalId }));
-    const restarted = new M1TaskService({ store: f.store, adapter: f.adapter });
+    const restarted = new M1TaskService({ store: f.store, adapter: f.adapter, allowSyntheticAuthority: true });
     const retry = await restarted.execute(context, { proposalId: proposal.proposalId });
     assert.equal(retry.proposal.status, "unknown"); assert.equal(retry.receipt, null);
     assert.equal(f.adapter.testCalls, 1);
@@ -286,6 +288,80 @@ integration("real PG/LangGraph: a fresh process resumes an actual checkpoint wit
     assert.equal(f.adapter.materializeCalls, 1);
     const checkpoints = await f.pool.query(`SELECT count(*)::int n FROM "${f.schema}_cp".checkpoints`);
     assert(checkpoints.rows[0].n >= 3);
+  } finally { await f.close(); }
+});
+
+integration("encrypted PG roundtrip and fresh-process checkpoint resume do not retain source canaries in raw rows", async () => {
+  const f = await fixture({ cipher: testCipher() });
+  const saver = new PostgresSaver(f.pool, undefined, { schema: `${f.schema}_cp` });
+  const canary = "M1_SOURCE_ENCRYPTION_CANARY_NEVER_PLAINTEXT";
+  try {
+    await saver.setup();
+    const proposal = await f.propose("project.apply-change", { path: "index.js", content: `exports.note=()=>\"${canary}\";`,
+      expectedSha256: f.project.reference.files[0].sha256 });
+    const workflow = createM1TaskWorkflow({ service: f.service, checkpointer: saver });
+    const first = await workflow.run(context, { proposalId: proposal.proposalId });
+    const raw = await f.pool.query(`SELECT payload::text value FROM "${f.schema}".records
+      UNION ALL SELECT payload::text value FROM "${f.schema}".projects`);
+    assert(raw.rows.every(row => !row.value.includes(canary) && row.value.includes("ciphertext")));
+    const result = await runWorker({ schema: f.schema, checkpointSchema: `${f.schema}_cp`, context,
+      proposalId: proposal.proposalId, encrypted: true });
+    assert.equal(result.receiptId, first.receipt.receiptId);
+    const replacement = new PostgresTaskStore({ pool: f.pool, schema: f.schema, cipher: testCipher() });
+    const service = new M1TaskService({ store: replacement, adapter: f.adapter, allowSyntheticAuthority: true });
+    assert.equal((await service.status(context, { taskId: f.task.taskId })).receipts.length, 1);
+  } finally { await f.close(); }
+});
+
+integration("encrypted records reject same-kind record swaps and foreign-project envelope substitution", async () => {
+  const f = await fixture({ cipher: testCipher() });
+  try {
+    const other = await f.service.createTask(context, { requestId: "other-task", objective: "Another generated task." });
+    await f.pool.query(`UPDATE "${f.schema}".records destination SET payload=source.payload,payload_sha256=source.payload_sha256
+      FROM "${f.schema}".records source WHERE source.kind='task' AND source.record_id=$1
+      AND destination.kind='task' AND destination.record_id=$2`, [f.task.taskId, other.taskId]);
+    await assert.rejects(f.service.status(context, { taskId: other.taskId }), /m1-authority-envelope-invalid/);
+    const foreign = { ...context, projectId: "other-generated-project" };
+    await f.service.registerProject(foreign, { environmentId: "other-environment", files: { "index.js": "exports.x=()=>1;" } });
+    await f.pool.query(`UPDATE "${f.schema}".projects destination SET payload=source.payload,payload_sha256=source.payload_sha256
+      FROM "${f.schema}".projects source WHERE source.project_id=$1 AND destination.project_id=$2`,
+    [context.projectId, foreign.projectId]);
+    await assert.rejects(f.service.currentProject(foreign), /m1-authority-envelope-invalid/);
+  } finally { await f.close(); }
+});
+
+integration("session logout after intent and before dispatch prevents the executor", async () => {
+  let active = true, release, reached;
+  const barrier = new Promise(resolve => { release = resolve; }), entered = new Promise(resolve => { reached = resolve; });
+  const f = await fixture({ authorizeContext: async () => active,
+    hooks: { beforeDispatch: async () => { reached(); await barrier; } } });
+  try {
+    const proposal = await f.propose(), running = f.service.execute(context, { proposalId: proposal.proposalId });
+    await entered; active = false; release();
+    await assert.rejects(running, /m1-session-authority-unavailable/);
+    assert.equal(f.adapter.materializeCalls, 0);
+    assert.equal((await f.service.reconcile(context, { proposalId: proposal.proposalId })).proposal.status, "not-published");
+  } finally { release(); await f.close(); }
+});
+
+integration("session logout after staging prevents logical revision publication", async () => {
+  let active = true;
+  const f = await fixture({ authorizeContext: async () => active, hooks: { afterMaterialize: () => { active = false; } } });
+  try {
+    const proposal = await f.propose();
+    await assert.rejects(f.service.execute(context, { proposalId: proposal.proposalId }), /m1-session-authority-unavailable/);
+    assert.equal((await f.service.currentProject(context)).revision, 1);
+    assert.equal((await f.service.status(context, { taskId: f.task.taskId })).receipts.length, 0);
+  } finally { await f.close(); }
+});
+
+integration("task listing is owner/project scoped and bounded to twenty", async () => {
+  const f = await fixture();
+  try {
+    for (let index = 0; index < 23; index++) await f.service.createTask(context, { requestId: `task-${index}`, objective: `Generated task ${index}` });
+    const listed = await f.service.listTasks(context);
+    assert.equal(listed.tasks.length, 20);
+    assert.equal((await f.service.listTasks({ ...context, principalId: "foreign-owner" })).tasks.length, 0);
   } finally { await f.close(); }
 });
 

@@ -11,14 +11,24 @@ const clone = value => structuredClone(value);
 
 /** Application-owned ports. Models may only receive bindModel(...). */
 export class M1TaskService {
-  constructor({ store, adapter, now = () => new Date(), hooks = {}, cancellationPollMs = 100 }) {
-    Object.assign(this, { store, adapter, now, hooks, cancellationPollMs });
+  constructor({ store, adapter, now = () => new Date(), hooks = {}, cancellationPollMs = 100,
+    authorizeContext = null, allowSyntheticAuthority = false }) {
+    assert(typeof authorizeContext === "function" || allowSyntheticAuthority === true, "m1-session-authority-required");
+    Object.assign(this, { store, adapter, now, hooks, cancellationPollMs,
+      authorizeContext: authorizeContext ?? (async () => true) });
     this.running = new Map();
   }
   timestamp() { return this.now().toISOString(); }
+  async checkContext(context) {
+    try {
+      const result = await this.authorizeContext(context);
+      assert(result === true || result?.allowed === true, "m1-session-authority-unavailable");
+    } catch { throw failure("m1-session-authority-unavailable"); }
+  }
 
   async registerProject(rawContext, rawInput) {
     const context = parseContext(rawContext), input = parseProject(rawInput);
+    await this.checkContext(context);
     const registrationDigest = digest(input);
     const existing = await this.store.transaction(context, tx => tx.project());
     if (existing) {
@@ -29,6 +39,7 @@ export class M1TaskService {
       files: Object.entries(input.files).map(([path, content]) => ({ path, content })) });
     await this.adapter.verifyMaterialized({ binding: binding(context, input.environmentId), reference });
     return this.store.transaction(context, async tx => {
+      await this.checkContext(context);
       const raced = await tx.project();
       if (raced) {
         assert(raced.registrationDigest === registrationDigest, "m1-project-already-registered");
@@ -72,6 +83,7 @@ export class M1TaskService {
 
   async createGrant(rawContext, rawInput) {
     const context = parseContext(rawContext), input = parseGrant(rawInput);
+    await this.checkContext(context);
     assert(new Date(input.expiresAt).valueOf() > this.now().valueOf()
       && new Date(input.expiresAt).valueOf() - this.now().valueOf() <= 86_400_000, "m1-grant-expiry-invalid");
     assert(new Set(input.allowedPaths).size === input.allowedPaths.length
@@ -192,6 +204,7 @@ export class M1TaskService {
       let poll;
       try {
         await this.store.transaction(context, async tx => {
+          await this.checkContext(context);
           const current = await this.requireProposal(tx, proposalId);
           const dispatchAuthority = await this.authority(tx, context, current, { proposal: current, requireApproval: true });
           const recorded = await tx.get("intent", proposalId);
@@ -257,11 +270,40 @@ export class M1TaskService {
     });
     if (state.result) return state.result;
     if (!state.intent) return { proposal: state.proposal, receipt: null, reconciled: false };
+    if (!state.intent.dispatchAuthority) {
+      return this.store.transaction(context, async tx => {
+        const proposal = await this.requireProposal(tx, proposalId), intent = await tx.get("intent", proposalId);
+        assert(!intent.dispatchAuthority, "m1-reconciliation-race");
+        proposal.status = "not-published"; proposal.errorCode = "m1-not-dispatched"; proposal.updatedAt = this.timestamp();
+        intent.status = "not-published"; intent.updatedAt = this.timestamp();
+        await tx.save("proposal", proposalId, proposal); await tx.save("intent", proposalId, intent);
+        await tx.audit("effect-reconciled-not-dispatched", intent.effectId);
+        return { proposal, receipt: null, reconciled: true, executionRepeated: false };
+      });
+    }
     if (!mutation(state.proposal.capabilityId)) {
       // Test stdout cannot be reconstructed from source or predicted by a model. Lost test results stay unknown.
       await this.markUncertain(context, proposalId, failure("m1-execution-outcome-unknown"));
       return this.proposalState(context, proposalId, { reconciled: true, executionRepeated: false });
     }
+    const abandoned = await this.store.transaction(context, async tx => {
+      const proposal = await this.requireProposal(tx, proposalId);
+      if (proposal.status === "completed") return this.result(tx, proposal, true);
+      const task = await this.requireTask(tx, proposal.taskId), grant = await tx.get("grant", proposal.grantId);
+      const cannotPublish = task.status !== "active" || !grant || grant.status !== "active"
+        || grant.revision !== proposal.grantRevision || new Date(grant.expiresAt).valueOf() <= this.now().valueOf();
+      if (!cannotPublish) return null;
+      // No receipt exists and pointer+receipt are atomic. Revoked authority can never publish the
+      // staged revision later, even if an old worker still holds unreferenced filesystem bytes.
+      proposal.status = "not-published"; proposal.errorCode = "m1-original-authority-ended"; proposal.updatedAt = this.timestamp();
+      await tx.save("proposal", proposalId, proposal);
+      const intent = await tx.get("intent", proposalId);
+      intent.status = "not-published"; intent.updatedAt = this.timestamp();
+      await tx.save("intent", proposalId, intent);
+      await tx.audit("effect-reconciled-not-published", intent.effectId);
+      return { proposal, receipt: null, reconciled: true, executionRepeated: false };
+    });
+    if (abandoned) return abandoned;
     assert(typeof this.adapter.observeMaterialized === "function", "m1-reconciliation-unavailable");
     const observation = await this.adapter.observeMaterialized({ binding: binding(context, state.proposal.environmentId),
       effectId: state.intent.effectId, prepared: state.proposal.prepared });
@@ -313,6 +355,7 @@ export class M1TaskService {
       const currentProject = await tx.project();
       const currentTask = await this.requireTask(tx, proposal.taskId);
       const currentGrant = await tx.get("grant", proposal.grantId);
+      if (isMutation) await this.checkContext(context);
       const liveAuthority = isMutation ? await this.authority(tx, context, proposal, { proposal, requireApproval: true }) : null;
       const project = isMutation ? liveAuthority.project : { ...currentProject,
         revision: dispatch.projectRevision, reference: dispatch.reference };
@@ -367,6 +410,7 @@ export class M1TaskService {
   }
 
   async checkActive(context, proposal) {
+    await this.checkContext(context);
     return this.store.transaction(context, async tx => {
       const current = await this.requireProposal(tx, proposal.proposalId);
       return this.authority(tx, context, current, { proposal: current, requireApproval: true });
@@ -420,11 +464,21 @@ export class M1TaskService {
       for (const proposal of proposals) this.verifyProposal(proposal);
       const receipts = await tx.list("receipt", taskId);
       for (const receipt of receipts) this.verifyReceipt(receipt);
+      proposals.sort((a, b) => a.createdAt.localeCompare(b.createdAt) || a.proposalId.localeCompare(b.proposalId));
+      receipts.sort((a, b) => a.recordedAt.localeCompare(b.recordedAt) || a.receiptId.localeCompare(b.receiptId));
       return { task, project, grants: await tx.list("grant", taskId), proposals, receipts,
         pendingReconciliation: (await tx.list("intent", taskId)).filter(intent => !["recorded", "not-published"].includes(intent.status)),
         currentReceiptIds: receipts.filter(receipt => receipt.afterRevision === project.revision
           && digest(receipt.afterReference) === digest(project.reference)).map(receipt => receipt.receiptId) };
     });
+  }
+
+  async listTasks(rawContext) {
+    const context = parseContext(rawContext);
+    return this.store.transaction(context, async tx => ({ tasks: (await tx.recent("task")).map(task => ({
+      taskId: task.taskId, objective: task.objective, status: task.status, createdAt: task.createdAt,
+      updatedAt: task.updatedAt, environmentId: task.environmentId,
+    })) }));
   }
 
   async restore(context, input) {

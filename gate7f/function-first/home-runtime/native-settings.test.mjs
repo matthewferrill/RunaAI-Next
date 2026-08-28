@@ -37,3 +37,12 @@ test('tampered rollback material cannot authorize overwriting any current settin
     {...prepared,rawCandidate:Buffer.from('{}')},{...prepared,changedFields:[]}]){
     assert.throws(()=>prepareNativeSettingsRollback(changed,prepared.rawCandidate));}
 });
+test('duplicate decoded keys are not accepted as formatting normalization or a baseline',()=>{
+  const bytes=original(),prepared=prepareNativeSettings(bytes,sha(bytes));
+  for(const prefix of ['"autoStartOnLaunch":false,','"autoStartOnLaunch":true,','"autoStartOnLaun\\u0063h":true,']){
+    const raw=Buffer.from(prepared.rawCandidate.toString().replace('{','{'+prefix));
+    assert.throws(()=>prepareNativeSettings(raw,sha(raw)),/duplicate-key/);
+    assert.throws(()=>verifyAppliedNativeSettings(prepared,raw),/duplicate-key/);
+    assert.throws(()=>prepareNativeSettingsRollback(prepared,raw),/duplicate-key/);
+  }
+});

@@ -3,8 +3,9 @@
 Prospective continuation of the existing M1 operator slice, 2026-08-28. No live settings, listener,
 firewall, route, model or power change is made by this plan or its pure byte-preparation module.
 Fresh Home observation at19:43:22Z confirmed Node22.22.1, zero loaded instances and the existing
-`0.0.0.0`/JIT/sensitive-log/verbose settings unchanged. Control's packaged Node24 pin is a different
-binary; it must not be substituted for Home's Node pin.
+`0.0.0.0`/JIT/sensitive-log/verbose settings unchanged. Control's packaged Node pin is a different
+binary; its version needs its own actual observation and must not be inferred from a digest or
+substituted for Home's Node pin. The separate Control OS-proof system Node is not that packaged binary.
 
 The installed CLI supports `server start --port 1234 --bind 127.0.0.1` and `server stop`. The official
 [CLI start documentation](https://lmstudio.ai/docs/cli/serve/server-start) agrees, and the official
@@ -29,15 +30,16 @@ is therefore insufficient qualification.
    Stop only the bound existing HTTP server through the pinned supported CLI, after the coordinated
    quiescence. Do not stop the whole desktop process or invoke daemon up/down/default auto-launch.
 4. Change only `networkInterface`, `justInTimeModelLoading`, `logSensitiveData` and `verbose`. Use a
-   compared atomic replacement with a private original-byte backup and preserve the original ACL.
+   pre-compared atomic replacement with a private actual-preimage backup and preserve the original ACL.
    Leave port, CORS, auto-start and all other values untouched. Unexpected field/value/config changes
    fail closed. The candidate raw-byte digest is separate from semantic equivalence after vendor
    normalization; any difference in an unrelated setting is not an acceptable normalization.
 5. Restart via the exact CLI/profile context and explicit loopback binding. Independently verify actual
    listener address, runtime process identity, settings and denied MCP policy. Prove JIT is disabled
-   through a bounded prospective negative test or a trustworthy native in-memory configuration
-   observation, not merely a fake unknown model ID. Any unexpected residency remains a recorded failure;
-   never infer ownership from its name or raise power while ambiguous.
+   through an actual bounded negative test with an available exact-pinned nonresident model and a
+   predeclared owned test intent, not a fake unknown model ID. Capture native instances before/after,
+   retain any unexpected load as a failure, and reconcile only unambiguously test-owned instances.
+   Keep the independent160W/thermal/headroom watchdog during this test; ambiguity never permits260W.
 6. Run the assembled supervisor and worker under their real principals. Prove mTLS caller isolation,
    exact profile/load/response path, dependency loss, graceful drain, process crash, restart, long idle
    beyond the prior3600second JIT TTL, and exact cleanup. Root then switches the Control Caddy successor
@@ -55,3 +57,28 @@ firewall behavior or the Control swap. Those remain actual-environment proof req
 desktop dependency on Matthew login is unchanged; startup-trigger registration alone is not boot
 availability. No new runtime upgrade, public access, protected-data read, or mixed-model scheduler is
 introduced here.
+
+## Filesystem proof and concurrency limit
+
+`Settings-FileTransaction.ps1` is a real Windows file primitive. Local tests exercise native atomic
+replacement, preserved custom ACLs/CRLF bytes, before/after conflicts, late byte/ACL writers, hardlink
+and junction refusal, and a child process exiting immediately after replacement followed by recovery
+in a new process. JSON preparation rejects duplicate decoded keys, including same-value duplicates;
+they are not formatting-only normalization. Omen's PowerShell7-to-Node test child explicitly selects
+Windows PowerShell5 system modules; this does not change Home's environment.
+
+Windows ReplaceFile retains the exact displaced file, but it is **not general compare-and-swap**.
+Thus meaningful application/native-client quiescence and the exclusive operator lock remain entry
+criteria. A late uncoordinated writer may have its version moved to the actual-preimage backup while
+the candidate occupies the target. This is detected, every version is retained, and activation stays
+closed. There is no blind compensating write: that could overwrite a still newer writer. Such a
+conflict needs fresh reconciliation after renewed quiescence, not automatic rollback authority over
+foreign bytes/ACLs. Normal crash recovery restores only the pinned original from the unchanged owned
+candidate. A later unrelated edit is never knowingly replaced by that recovery.
+
+The earlier CLI-help inspection's profile-pointer bookkeeping was checked separately: both Home
+pointer files predate it (codex-audit2026-08-27, Matthew2026-08-08); no pointer was created by that probe.
+
+Verification2026-08-28: native-settings plus Windows file-transaction tests14/14 passed, no skips;
+roadmap15/15 passed. Initial duplicate-key and second-writer-compensation findings were independently
+reported, reproduced, then corrected prospectively. These results do not assert a live Home transition.

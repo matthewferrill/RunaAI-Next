@@ -2,8 +2,17 @@ import {sha,demand} from './contracts.mjs';
 const fields=['autoStartOnLaunch','cors','fileLoggingMode','justInTimeModelLoading','logIncomingTokens','logLinesLimit','logSensitiveData','networkInterface','port','verbose'].sort();
 const changes=Object.freeze({networkInterface:'127.0.0.1',justInTimeModelLoading:false,logSensitiveData:false,verbose:false});
 function parse(bytes){
-  demand(Buffer.isBuffer(bytes)&&bytes.length>0&&bytes.length<=4096,'settings-bytes');let value;
-  try{value=JSON.parse(new TextDecoder('utf8',{fatal:true}).decode(bytes));}catch{demand(false,'settings-json');}
+  demand(Buffer.isBuffer(bytes)&&bytes.length>0&&bytes.length<=4096,'settings-bytes');let value,text;
+  try{text=new TextDecoder('utf8',{fatal:true}).decode(bytes);value=JSON.parse(text);}catch{demand(false,'settings-json');}
+  // JSON.parse silently keeps the last duplicate. Do not call that formatting-only: a vendor
+  // could interpret an earlier value, and rollback must not erase ambiguous or foreign edits.
+  // Tokenize every string (including values) before selecting keys, so quotes in values cannot
+  // accidentally become key boundaries. The schema below permits one flat primitive object only.
+  const keys=new Set();
+  for(const token of text.matchAll(/"(?:\\[\s\S]|[^"\\])*"/g)){
+    if(!/^\s*:/.test(text.slice(token.index+token[0].length)))continue;
+    const key=JSON.parse(token[0]);demand(!keys.has(key),'settings-duplicate-key');keys.add(key);
+  }
   demand(value&&typeof value==='object'&&!Array.isArray(value)&&Object.keys(value).sort().join()===fields.join(),'settings-fields');
   for(const key of ['autoStartOnLaunch','cors','justInTimeModelLoading','logIncomingTokens','logSensitiveData','verbose'])demand(typeof value[key]==='boolean','settings-type');
   demand(value.port===1234&&value.cors===false&&value.logIncomingTokens===false,'settings-boundary');

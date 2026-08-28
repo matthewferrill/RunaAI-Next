@@ -21,6 +21,7 @@ export const Gate2AnswerRequestSchema = z.object({
   thread: z.object({ threadId: boundedId }).strict(),
   message: z.string().trim().min(1).max(4_000),
   history: z.array(historyTurn).max(24),
+  contextRevision: z.number().int().nonnegative().optional(),
   workspace: z.nullable(z.object({ sources: z.array(sourceLocator).min(1).max(6) }).strict()).default(null),
   budgets: z.object({
     deadlineMs: z.number().int().min(100).max(120_000),
@@ -62,6 +63,7 @@ export const Gate2AnswerResponseSchema = z.object({
   participantId: boundedId,
   projectId: boundedId,
   threadId: boundedId,
+  contextRevision: z.number().int().nonnegative().optional(),
   lane: z.enum(["general", "research", "guarded", "workspace", "code", "review"]),
   answer: z.string(),
   ground: z.enum(["record-answers", "record-silent", "not-a-question-of-fact", "no-ground-needed"]),

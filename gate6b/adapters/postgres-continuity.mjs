@@ -3,6 +3,7 @@ import pg from "pg";
 import { PERSONAL_SCOPE } from "../application.mjs";
 import { createConversationContext, parseConversationScope, CONVERSATION_CONTEXT_LIMITS }
   from "../../gate7f/function-first/conversation-context.mjs";
+import { isRetryableConversationFailure } from "../../gate7f/function-first/conversation-outcome.mjs";
 
 const coded = (code, message) => Object.assign(new Error(message), { code });
 const sha256 = value => createHash("sha256").update(String(value)).digest("hex");
@@ -193,6 +194,10 @@ export class PostgresSelectedContinuityStore {
       await client.query("SELECT pg_advisory_lock($1::bigint)", [key]);
       locked = true;
       await client.query("BEGIN");
+      // A row lock cannot serialize two first turns when the chat row does not
+      // exist yet. Lock the authenticated conversation key for this transaction.
+      await client.query("SELECT pg_advisory_xact_lock($1::bigint)",
+        [lockKey(`conversation:${participantId}:${request.thread.threadId}`)]);
       const prior = (await client.query("SELECT request_digest FROM runa_runtime.answer_requests WHERE request_id=$1", [request.requestId])).rows[0];
       if (prior) {
         if (prior.request_digest !== requestDigest(request)) throw coded("request-id-conflict", "The request id is bound to different input.");
@@ -211,9 +216,13 @@ export class PostgresSelectedContinuityStore {
           throw coded("project-experience-denied", "The selected project belongs to another experience.");
         }
       }
-      const current = (await client.query(`SELECT participant_id,project_id,turn_count,title_envelope FROM runa_core.chats
+      const current = (await client.query(`SELECT participant_id,project_id,turn_count,archived,title_envelope FROM runa_core.chats
         WHERE participant_id=$1 AND chat_id=$2 FOR UPDATE`, [participantId, request.thread.threadId])).rows[0];
+      if (current?.archived) throw coded("chat-scope-denied", "The selected conversation was not found.");
       if (current && current.project_id !== projectId) throw coded("chat-scope-denied", "The chat belongs to another project scope.");
+      if (request.contextRevision !== undefined && request.contextRevision !== (current?.turn_count ?? 0)) {
+        throw coded("conversation-revision-conflict", "The conversation changed while this answer was being prepared. Reload the chat before retrying.");
+      }
       if (current) {
         const privateChat = this.cipher.decrypt(privateContext("chat", participantId, request.thread.threadId), current.title_envelope);
         const routeRows = (await client.query(`SELECT route FROM runa_core.chat_turns
@@ -342,11 +351,15 @@ export class PostgresRequestCoordinator {
         WHERE operation=$1 AND request_id=$2`, [operation, requestId])).rows[0];
       if (prior) {
         if (prior.actor_id !== actorId || prior.input_digest !== inputDigest) throw coded("request-id-conflict", "The request id is bound to different input.");
-        return clone(prior.response_json);
+        if (operation !== "answer" || !isRetryableConversationFailure(prior.response_json)) return clone(prior.response_json);
       }
       const response = await execute();
       await client.query(`INSERT INTO runa_runtime.route_responses
-        (operation,request_id,actor_id,input_digest,response_json) VALUES($1,$2,$3,$4,$5::jsonb)`,
+        (operation,request_id,actor_id,input_digest,response_json) VALUES($1,$2,$3,$4,$5::jsonb)
+        ON CONFLICT(operation,request_id) DO UPDATE SET response_json=excluded.response_json,
+          completed_at=clock_timestamp()
+        WHERE runa_runtime.route_responses.actor_id=excluded.actor_id
+          AND runa_runtime.route_responses.input_digest=excluded.input_digest`,
       [operation, requestId, actorId, inputDigest, JSON.stringify(response)]);
       return response;
     } finally {

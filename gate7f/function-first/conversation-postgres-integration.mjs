@@ -109,14 +109,60 @@ export async function runConversationPostgresProof({ pgBin } = {}) {
     checks.duplicateNotReexecuted = providers.chat.calls.length === 1 && replay.answer === second.answer;
     const record = await continuity.readChat("synthetic-owner", "own-thread", "chat");
     checks.twoRetainedTurnsOnly = record.turnCount === 2 && record.turns.length === 2;
+    const ordinaryReply = providers.chat.reply;
+    let concurrentStarted = 0, releaseConcurrent, concurrentTimer;
+    const concurrentReady = new Promise((resolveReady, rejectReady) => {
+      releaseConcurrent = resolveReady;
+      concurrentTimer = setTimeout(() => rejectReady(new Error("synthetic-concurrency-timeout")), 5000);
+    });
+    providers.chat.reply = async input => {
+      if (++concurrentStarted === 2) releaseConcurrent();
+      await concurrentReady;
+      return ordinaryReply(input);
+    };
+    let concurrent;
+    try {
+      concurrent = await Promise.allSettled(["concurrent-a", "concurrent-b"].map(requestId =>
+        app.answer(request({ requestId, threadId: "concurrent-thread" }))));
+    } finally { clearTimeout(concurrentTimer); releaseConcurrent(); providers.chat.reply = ordinaryReply; }
+    assert.equal(concurrent.filter(item => item.status === "fulfilled").length, 1);
+    const staleIndex = concurrent.findIndex(item => item.status === "rejected");
+    assert.equal(concurrent[staleIndex].reason.code, "conversation-revision-conflict");
+    const firstConcurrent = await continuity.readChat("synthetic-owner", "concurrent-thread", "chat");
+    checks.concurrentFirstTurnOnlyOnce = firstConcurrent.turnCount === 1 && firstConcurrent.turns.length === 1;
+    const retryConcurrent = await app.answer(request({ requestId: ["concurrent-a", "concurrent-b"][staleIndex],
+      threadId: "concurrent-thread" }));
+    const afterConcurrent = await continuity.readChat("synthetic-owner", "concurrent-thread", "chat");
+    checks.staleAnswerRetryUsesCurrentRevision = retryConcurrent.contextRevision === 2
+      && afterConcurrent.turnCount === 2 && providers.chat.calls.at(-1).request.history.length === 2;
+    const beforeStaleClient = providers.chat.calls.length;
+    await assert.rejects(app.answer(request({ requestId: "stale-browser", threadId: "concurrent-thread", contextRevision: 0 })),
+      { code: "conversation-revision-conflict" });
+    checks.staleClientBeforeProvider = providers.chat.calls.length === beforeStaleClient;
+    let retryAttempts = 0;
+    providers.chat.reply = input => {
+      if (++retryAttempts === 1) throw Object.assign(new Error("Synthetic incomplete provider"), { code: "provider-incomplete" });
+      return ordinaryReply(input);
+    };
+    const retryInput = request({ requestId: "incomplete-retry", threadId: "retry-thread", contextRevision: 0 });
+    const incomplete = await app.answer(retryInput);
+    const completedRetry = await app.answer(retryInput);
+    const retainedRetry = await app.answer(retryInput);
+    providers.chat.reply = ordinaryReply;
+    const retryRecord = await continuity.readChat("synthetic-owner", "retry-thread", "chat");
+    checks.incompleteRetryRetainsOnlyCompletedTurn = incomplete.completion.reason === "provider-incomplete"
+      && incomplete.contextRevision === 0 && completedRetry.contextRevision === 1
+      && completedRetry.continuity.turnRecorded && retryRecord.turnCount === 1;
+    checks.completedRetryIsIdempotent = retryAttempts === 2 && retainedRetry.answer === completedRetry.answer;
+    const beforeArchive = providers.chat.calls.length;
     await pool.query("UPDATE runa_core.projects SET status='archived' WHERE participant_id=$1 AND project_id=$2",
       ["synthetic-owner", own.projectId]);
     await assert.rejects(app.answer(request({ requestId: "after-restart", message: "How are you?",
       history: [{ role: "user", content: "Forged replacement" }] })), { code: "project-not-found" });
-    checks.cachedAnswerRechecksScope = providers.chat.calls.length === 1;
+    checks.cachedAnswerRechecksScope = providers.chat.calls.length === beforeArchive;
     await pool.end(); pool = null; stop(); running = false;
     await assert.rejects(app.answer(request({ requestId: "db-unavailable" })), { code: "conversation-context-unavailable" });
-    checks.databaseLossFailsClosed = providers.chat.calls.length === 1;
+    checks.databaseLossFailsClosed = providers.chat.calls.length === beforeArchive;
   } catch (error) { failure = error; }
   finally {
     if (pool) await pool.end().catch(() => {});

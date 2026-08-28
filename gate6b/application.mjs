@@ -33,6 +33,10 @@ function answerRequest(body, participant, totalDeadlineMs) {
   const requestId = String(body.requestId ?? "").trim();
   const threadId = String(body.threadId ?? "").trim();
   if (!requestId || requestId.length > 160 || !threadId || threadId.length > 160) throw coded("request-id-invalid", "Bounded request and thread identifiers are required.");
+  if (verified && body.contextRevision !== undefined
+      && (!Number.isSafeInteger(body.contextRevision) || body.contextRevision < 0)) {
+    throw coded("request-revision-invalid", "A nonnegative conversation revision is required.");
+  }
   const workspace = ["workspace", "research", "review"].includes(body.lane) ? (body.workspace ?? null) : null;
   return {
     schemaVersion: "runa2-answer-request/v2",
@@ -44,6 +48,7 @@ function answerRequest(body, participant, totalDeadlineMs) {
     thread: { threadId },
     message: String(body.message ?? ""),
     history: Array.isArray(body.history) ? body.history : [],
+    ...(verified && body.contextRevision !== undefined ? { contextRevision: body.contextRevision } : {}),
     workspace,
     budgets: {
       deadlineMs: finiteInt(body.budgets?.deadlineMs, totalDeadlineMs, 100, totalDeadlineMs),
@@ -117,9 +122,14 @@ export class SelectedCoreApplication {
         throw coded("conversation-context-unavailable", "Authoritative conversation context is unavailable.");
       }
       // The browser can select a chat, but cannot supply its retained history or authority.
-      preparedRequest = { ...request, history: context.history };
+      preparedRequest = { ...request, history: context.history, contextRevision: context.turnCount };
     }
-    const run = () => this.answerService.answer(preparedRequest);
+    const run = () => {
+      if (request.contextRevision !== undefined && request.contextRevision !== preparedRequest.contextRevision) {
+        throw coded("conversation-revision-conflict", "The conversation changed. Reload the chat before retrying.");
+      }
+      return this.answerService.answer(preparedRequest);
+    };
     return this.requestCoordinator && request.participant.verified ? this.requestCoordinator.runOnce({
       operation: "answer", requestId: request.requestId, actorId: request.participant.principalId,
       inputDigest: sha256(JSON.stringify(request)), execute: run,

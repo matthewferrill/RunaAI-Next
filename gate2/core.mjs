@@ -5,6 +5,7 @@ import { approvedKnowledgeReceipt, providerAdvisoryFromDelivery } from "../gate4
 import { answerExecutionStamp } from "../gate7e/contracts.mjs";
 import { requestsProtectedRead, requestsUnavailableEffect, requestsLiveInformation, claimsUnperformedAction }
   from "../gate7f/function-first/conversation-policy.mjs";
+import { INCOMPLETE_ANSWER_REASONS } from "../gate7f/function-first/conversation-outcome.mjs";
 
 const sha256 = value => createHash("sha256").update(String(value)).digest("hex");
 const sessionRecallPattern = /\bwhat did i (?:ask|say) before|previous (?:question|message)\b/i;
@@ -217,7 +218,11 @@ export class Gate2ReadOnlyService {
       const selectedIndex = explicitSources
         ? new ExplicitIndex(this.index, resolvedWorkspace.references)
         : this.index;
-      const selectedRecords = request.participant.verified ? this.records : new EphemeralRecordProxy(this.records);
+      // Application-bound conversations use the outer durable coordinator and
+      // revision-checked continuity store. An inner answer cache must not replay
+      // stale/incomplete output after the authoritative context advances.
+      const selectedRecords = request.participant.verified && request.contextRevision === undefined
+        ? this.records : new EphemeralRecordProxy(this.records);
       const advisoryContext = providerAdvisoryFromDelivery(knowledgeDelivery);
       try {
         const provider = providerFor(this.providers, role);
@@ -248,10 +253,7 @@ export class Gate2ReadOnlyService {
     const knowledgeReceipt = approvedKnowledgeReceipt(knowledgeDelivery, knowledgeFallbackReason, {
       delivered: response.auditCodes.includes("approved-knowledge-delivered"),
     });
-    const incompleteReasons = new Set(["timeout", "output-limited", "provider-output-empty",
-      "provider-response-invalid", "provider-shape-invalid", "provider-incomplete",
-      "provider-transport-failed", "provider-model-mismatch", "provider-role-mismatch",
-      "provider-role-unavailable", "unverified-action-claim"]);
+    const incompleteReasons = new Set(INCOMPLETE_ANSWER_REASONS);
     const continuityResult = incompleteReasons.has(response.completion.reason) || Boolean(knowledgeReceipt.errorCode)
       ? { turnRecorded: false, source: "not-recorded-incomplete-answer" }
       : await this.continuity.recordAnswer(request, response);
@@ -282,6 +284,9 @@ export class Gate2ReadOnlyService {
       turnRecorded: continuityResult.turnRecorded === true,
       source: continuityResult.source,
     };
+    if (request.contextRevision !== undefined) {
+      response.contextRevision = request.contextRevision + (continuityResult.turnRecorded ? 1 : 0);
+    }
     response.approvedKnowledge = knowledgeReceipt;
     response.effects = [];
     return parseGate2AnswerResponse(response);

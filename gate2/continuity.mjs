@@ -119,8 +119,12 @@ export class MemoryContinuityStore {
     }
     const project = this.readProject(request.participant.principalId, request.project.projectId);
     const existing = this.chats.get(request.thread.threadId);
+    if (existing?.archived) throw coded("chat-scope-denied", "The selected conversation was not found.");
     if (existing && (existing.participantId !== request.participant.principalId || existing.projectId !== project.projectId)) {
       throw coded("chat-scope-denied", "The synthetic chat belongs to another participant or project.");
+    }
+    if (request.contextRevision !== undefined && request.contextRevision !== (existing?.turns.length ?? 0)) {
+      throw coded("conversation-revision-conflict", "The conversation changed while this answer was being prepared. Reload the chat before retrying.");
     }
     const chat = existing ?? {
       chatId: request.thread.threadId,

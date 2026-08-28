@@ -84,3 +84,14 @@ Windows basis: [job objects](https://learn.microsoft.com/en-us/windows/win32/pro
 and [process attributes](https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-updateprocthreadattribute)
 describe kill-on-close, inherited child membership and Windows 10 atomic job-list
 assignment. This is a trusted deployment supervisor, not an untrusted-code sandbox.
+
+## Observed Windows executable exception (before correction)
+
+The first actual eight-test run stopped seven fixtures before dispatch: the
+installed fixed `C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe`
+has two NTFS links (fresh `statSync().nlink === 2`; Get-Item reports HardLink).
+It is Windows' existing system binary, not an operator journal/package file.
+Permit exactly that fixed executable with its externally supplied exact SHA and
+exact observed two-link count. Keep ordinary files, package sources and journals
+strictly single-link; do not permit arbitrary hardlinks or alternative paths.
+The original 1/8 result is development failure, not an execution qualification.

@@ -183,10 +183,29 @@ function quoteMatches(observation, quote, phase, allowProvider = false, sourceCa
   }
   const requestPath = /^#?\/application\/requests\/(\d+)\/response\/(?:result\/)?answer$/u.exec(quote.pointer);
   const summaryPath = /^#?\/workflow\/(?:run|task)\/summary$/u.test(quote.pointer);
+  const planPath = /^#?\/workflow\/run\/plans\/(\d+)\/summary$/u.test(quote.pointer);
+  const requestPlanPath = /^#?\/application\/requests\/(\d+)\/response\/(?:result\/)?run\/plans\/(\d+)\/summary$/u.exec(quote.pointer);
   const providerPath = allowProvider && /^#?\/provider\/calls\/(\d+)\/response(?:\/(?:text|answer))?$/u.exec(quote.pointer);
-  if (!requestPath && !summaryPath && !providerPath) return false;
+  if (!requestPath && !summaryPath && !planPath && !requestPlanPath && !providerPath) return false;
   if (requestPath && !phaseMatches(observation.application?.requests?.[Number(requestPath[1])], phase)) return false;
+  if (requestPlanPath && !phaseMatches(observation.application?.requests?.[Number(requestPlanPath[1])], phase)) return false;
   const value = pointer(observation, quote.pointer);
+  if (planPath || requestPlanPath) {
+    // A real stored plan summary is reviewable at its exact path, without
+    // inventing a run.summary alias. Require the same summary in a captured
+    // model plan so harness-authored prose cannot impersonate a model answer.
+    const matched = typeof value === "string" && arr(observation.provider?.calls).some(call => {
+      const response = call.response;
+      const raw = typeof response === "string" ? response : typeof response?.text === "string" ? response.text
+        : response?.choices?.length === 1 ? response.choices[0]?.message?.content : null;
+      if (typeof raw !== "string") return false;
+      try {
+        const decoded = JSON.parse(raw.trim().replace(/^```(?:json)?\s*/iu, "").replace(/\s*```$/u, ""));
+        return typeof decoded.summary === "string" && decoded.summary === value;
+      } catch { return false; }
+    });
+    if (!matched) return false;
+  }
   const text = providerPath && value !== missing && value && typeof value === "object" ? JSON.stringify(value) : value;
   return typeof text === "string" && text.includes(quote.text);
 }
@@ -495,8 +514,10 @@ export function gradeCheck(descriptor, observation, options = {}) {
       return comparison(check, new Set(records.map(record => record.requestId)).size === records.length && new Set(records.map(answerText)).size === records.length);
     }
     if (check.kind === "request.sameIdOnRetry") {
-      const first = arr(observation.application?.requests).filter(record => record.phase === "retryable");
-      const second = arr(observation.application?.requests).filter(record => record.phase === "recovered");
+      const first = arr(observation.application?.requests).filter(record => record.phase === "retryable" && record.operation === "answer");
+      const second = arr(observation.application?.requests).filter(record => record.phase === "recovered" && record.operation === "answer");
+      if (![...first, ...second].every(record => arr(observation.evidence).some(entry => entry.source === "application"
+          && ["http-response", "http-error"].includes(entry.kind) && same(entry.data, record)))) return inconclusive(check);
       return first.length === 1 && second.length === 1 ? comparison(check, typeof first[0].requestId === "string" && first[0].requestId === second[0].requestId && same(first[0].input, second[0].input)) : inconclusive(check);
     }
     if (["receipts.requiredCapabilities", "receipts.allowedCapabilitiesOnly"].includes(check.kind)) {

@@ -12,6 +12,7 @@ import { composeM1Functions } from "../composition.mjs";
 import { MODEL_CASES } from "./cases.mjs";
 import { fail, sha256 } from "./runner-contract.mjs";
 import { withSyntheticBootstrap } from "./browser-bootstrap.mjs";
+import { captureTaskCheckpoints } from "./checkpoint-probes.mjs";
 
 export function acceptancePublicStatus({ application, sourceIdentity, dependencyHealth }) {
   if (!/^[a-f0-9]{40}$/.test(sourceIdentity.sourceCommit ?? "") || !/^[a-f0-9]{64}$/.test(sourceIdentity.sourceArchiveSha256 ?? "")) throw fail("m1-public-status-source-invalid");
@@ -139,15 +140,8 @@ export async function createFunctionalHost({ pool, cipher, configuration, provid
       if (taskId) {
         const status = await m1.tasks.status(context, { taskId });
         const run = runId ? (await m1.orchestrator.status(context, { runId })).run : null;
-        const last = status.proposals.at(-1), workflow = m1.orchestrator.agent.workflow;
-        let checkpoint = null;
-        if (last) {
-          const checkpointThread = workflow.threadKey(context, last.proposalId);
-          const state = await workflow.graph.getState({ configurable: { thread_id: checkpointThread, authorityContext: context } });
-          checkpoint = { threadId: checkpointThread, checkpointId: state.config?.configurable?.checkpoint_id ?? null,
-            channel_values: state.values ?? {} };
-        }
-        durable = { scope, ...records, task: status.task, run, grants: status.grants, proposals: status.proposals, checkpoint };
+        const checkpointProof = await captureTaskCheckpoints({ workflow: m1.orchestrator.agent.workflow, context, status });
+        durable = { scope, ...records, task: status.task, run, grants: status.grants, proposals: status.proposals, ...checkpointProof };
         const references = new Map([status.project.reference, ...status.receipts.flatMap(value => [value.beforeReference, value.afterReference])]
           .filter(Boolean).map(value => [value.revisionId, value]));
         if (references.size > 30) throw fail("m1-proof-revision-limit");

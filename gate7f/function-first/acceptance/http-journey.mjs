@@ -61,7 +61,8 @@ export class FunctionalHttpJourney {
     for (const retained of proof.retained) this.ledger.evidence("host-filesystem", "retained-project-revision", retained);
     this.ledger.evidence("host-runtime", "attempt-capture-complete", {
       requestCount: this.ledger.observation.application.requests.length, providerCallCount: this.ledger.observation.provider.calls.length,
-      nativeCallCount: this.ledger.observation.native.calls.length, scope: { participantId: this.principalId, projectId: this.projectId, threadId: this.threadId },
+      nativeCallCount: this.ledger.observation.native.calls.length, scope: { participantId: this.principalId, projectId: this.projectId,
+        threadId: this.threadId, experience: this.experience },
       sourceCommit: this.ledger.observation.sourceCommit, runtimeSealSha256: this.ledger.observation.runtimeSealSha256, capabilitySetDigest: CAPABILITY_SET_DIGEST });
   }
   async navigation() { return this.http("navigation", "/api/selected/navigation/query", { experience: this.experience }); }

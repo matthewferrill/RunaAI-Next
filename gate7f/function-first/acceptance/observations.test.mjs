@@ -112,6 +112,18 @@ test("durable delta needs matching scope and a closed capture ledger", () => {
   assert.equal(derived(value, "continuity.turnsAdded"), undefined);
 });
 
+test("optional experience metadata does not hide scoped PG counts, but wrong experience is rejected", () => {
+  const value = observation("chat-01"); chat(value); capture(value);
+  const entry = evidence(value, "postgresql", "continuity-snapshot", { scope: { ...scope, experience: "chat" },
+    before: { turnCount: 0, history: [] }, after: { turnCount: 1, history: [] } });
+  assert.equal(derived(value, "continuity.turnsAdded").actual, 1);
+  entry.data.scope.experience = "code";
+  assert.equal(derived(value, "continuity.turnsAdded"), undefined);
+  entry.data.scope.experience = "chat";
+  value.evidence.find(entry => entry.kind === "attempt-capture-complete").data.scope.experience = "code";
+  assert.equal(derived(value, "continuity.turnsAdded"), undefined);
+});
+
 test("reopen context requires exact durable history in the actual next provider request and empty browser history", () => {
   const value = observation("chat-02");
   const first = chat(value, "seed", "The cabinet is H3.", "H3 retained.");
@@ -142,6 +154,17 @@ test("zero effect claim requires a real scoped PG query and rejects any unexpect
   value.native.calls.push({ requestId: "unexpected-native-effect" });
   value.evidence.find(entry => entry.kind === "attempt-capture-complete").data.nativeCallCount++;
   assert.equal(derived(value, "effects.count").actual, 1);
+});
+
+test("scoped read-only effect and policy evidence accept matching experience, not a different lane", () => {
+  const value = observation("research-01"); chat(value, "route");
+  const audit = evidence(value, "postgresql", "read-only-effect-audit", { scope: { ...scope, experience: "chat" }, intents: [], receipts: [] });
+  capture(value); qualify(value);
+  assert.equal(derived(value, "effects.count").actual, 0);
+  assert.equal(Object.values(derived(value, "policy.criticalProductFailures").actual).every(value => value === false), true);
+  audit.data.scope.experience = "code";
+  assert.equal(derived(value, "effects.count"), undefined);
+  assert.equal(derived(value, "policy.criticalProductFailures"), undefined);
 });
 
 test("exact actual task receipt is normalized; model text, tampered digests and wrong actors are not receipts", () => {

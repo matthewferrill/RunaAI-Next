@@ -232,11 +232,39 @@ test("injected failure phase is excluded from complete-answer checks but exact r
   const retryInput = { message: "What is the opposite of clockwise?", contextRevision: 0 };
   answer(observed, "retryable", "Temporary failure.", { input: retryInput, requestId: "same-request", response: { completion: { reason: "timeout", timedOut: true, outputLimited: false } } });
   answer(observed, "recovered", "Counterclockwise.", { input: retryInput, requestId: "same-request" });
+  for (const record of observed.application.requests) observed.evidence.push({ id: `http-${record.sequence}`,
+    source: "application", kind: "http-response", data: record });
   assert.equal(gradeCheck(checkFor(observed.caseId, "answer.completion"), observed, sealed).passed, true);
   const check = checkFor(observed.caseId, "request.sameIdOnRetry");
   assert.equal(gradeCheck(check, observed, sealed).passed, true);
+  observed.application.requests.push({ operation: "chat.read", phase: "recovered", requestId: null, input: { chatId: "synthetic" }, response: {} });
+  assert.equal(gradeCheck(check, observed, sealed).passed, true, "unrelated follow-up read is not a second retry");
   observed.application.requests[1].requestId = "invented-success-request";
   assert.equal(gradeCheck(check, observed, sealed).status, "fail");
+  observed.evidence = observed.evidence.filter(entry => entry.kind !== "http-response");
+  assert.equal(gradeCheck(check, observed, sealed).status, "inconclusive", "unbacked request records cannot prove retry");
+});
+
+test("plan-summary review resolves exact retained plan paths and requires the actual captured model summary", () => {
+  const observed = observation("code-01-inspect-branch"), check = checkFor(observed.caseId, "summary.semanticFacts");
+  const summary = "The express branch adds three; the regular branch doubles the fee.";
+  observed.workflow.run = { plans: [{ summary }] };
+  observed.provider.calls.push({ role: "code", response: { choices: [{ message: { content: JSON.stringify({ summary, steps: [] }) } }] } });
+  observed.application.requests.push({ operation: "run.start", phase: "1:run.start", response: { run: { plans: [{ summary }] } } });
+  review(observed, check);
+  const reviewed = observed.evidence.at(-1).data;
+  for (const path of ["#/workflow/run/plans/0/summary", "#/application/requests/0/response/run/plans/0/summary"]) {
+    reviewed.quotes = [{ pointer: path, text: summary }];
+    assert.equal(gradeCheck(check, observed, sealed).passed, true, path);
+  }
+  observed.application.requests[0].response = { result: { run: { plans: [{ summary }] } } };
+  reviewed.quotes = [{ pointer: "#/application/requests/0/response/result/run/plans/0/summary", text: summary }];
+  assert.equal(gradeCheck(check, observed, sealed).passed, true);
+  reviewed.quotes = [{ pointer: "#/workflow/run/plans/1/summary", text: summary }];
+  assert.equal(gradeCheck(check, observed, sealed).status, "inconclusive");
+  reviewed.quotes = [{ pointer: "#/workflow/run/plans/0/summary", text: summary }];
+  observed.provider.calls[0].response.choices[0].message.content = JSON.stringify({ summary: "Different actual model output.", steps: [] });
+  assert.equal(gradeCheck(check, observed, sealed).status, "inconclusive");
 });
 
 function selectedSources(observed) {

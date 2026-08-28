@@ -88,3 +88,22 @@ failures require reconciliation and do not silently reopen admission.
 
 The proof requires a new output directory; do not rerun with an existing evidence
 path or overwrite any earlier report.
+
+## Follow-up race audit and final repeat
+
+Self-review identified a public-API gap: a caller could ask for rollback while
+an earlier admission reload remained uncertain. Commit `cb62b4e` requires
+read-back reconciliation first, and rechecks the exact overlay file immediately
+before sending the runtime change. Two additional regressions prove that an
+unresolved reload cannot be rolled back directly and a foreign post-CAS file is
+retained without any runtime reload. The suite is now **30/30**, no skips.
+
+The real Caddy proof was repeated on this final implementation, with fresh
+[r4 evidence](quiescence/evidence/20260828-r4.json): **19/19**,
+2026-08-28T20:48:40.720Z–2026-08-28T20:48:42.650Z. Exact own-process stop and all eight
+closed ports were observed. Raw report SHA256
+`66bb2a0455ede9d0730b95fb3979df25ff8df2f2f0bc42151addc5b421e0ef3d`; full retained Caddy log SHA256
+`09878351105ff3e59669b8583b231d5d10b1402c3a14f6f06fdcef5ae62ded88`, under
+`artifacts/runs/quiescence-real-caddy-r4/`. Earlier r1/r2/r3 reports and claims
+retain their original implementation and test counts. No production, Home,
+model, frozen application or campaign/evaluator change occurred.

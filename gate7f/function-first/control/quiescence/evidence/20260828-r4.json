@@ -1,0 +1,334 @@
+{
+  "schemaVersion": "runaai-caddy-quiescence-proof/v1",
+  "startedAt": "2026-08-28T20:48:40.720Z",
+  "binarySha256": "5cb9ab71e5756ce72840b8234177a2f40c8b4ab47a806b8e841e2b784e9df62b",
+  "fixture": "C:\\Users\\matth\\AppData\\Local\\Temp\\m1-caddy-quiescence-T2zBHQ",
+  "checks": [
+    {
+      "name": "every synthetic Caddy listener is explicitly loopback",
+      "actual": true,
+      "expected": true
+    },
+    {
+      "name": "actual slow request counted before reload",
+      "actual": 1,
+      "expected": 1
+    },
+    {
+      "name": "actual same slow request still counted after reload",
+      "actual": 1,
+      "expected": 1
+    },
+    {
+      "name": "actual stale ETag leaves maintenance config unchanged",
+      "actual": "025a4edb3ef907929758864cdf20607d185788697d2ffc85c0af8b4fa9832d4e",
+      "expected": "025a4edb3ef907929758864cdf20607d185788697d2ffc85c0af8b4fa9832d4e"
+    },
+    {
+      "name": "new application API rejected",
+      "actual": 503,
+      "expected": 503
+    },
+    {
+      "name": "new private-address API rejected",
+      "actual": 503,
+      "expected": 503
+    },
+    {
+      "name": "new provider request rejected",
+      "actual": 503,
+      "expected": 503
+    },
+    {
+      "name": "unrelated host continues",
+      "actual": {
+        "status": 200,
+        "text": "unrelated"
+      },
+      "expected": {
+        "status": 200,
+        "text": "unrelated"
+      }
+    },
+    {
+      "name": "authentication route preserved",
+      "actual": {
+        "status": 200,
+        "text": "unrelated"
+      },
+      "expected": {
+        "status": 200,
+        "text": "unrelated"
+      }
+    },
+    {
+      "name": "static application route preserved",
+      "actual": {
+        "status": 200,
+        "text": "application"
+      },
+      "expected": {
+        "status": 200,
+        "text": "application"
+      }
+    },
+    {
+      "name": "held request completes normally",
+      "actual": {
+        "status": 200,
+        "text": "completed original request"
+      },
+      "expected": {
+        "status": 200,
+        "text": "completed original request"
+      }
+    },
+    {
+      "name": "control receipt requires actual stable drain",
+      "actual": "control-quiescent",
+      "expected": "control-quiescent"
+    },
+    {
+      "name": "control receipt does not claim Home quiescence",
+      "actual": false,
+      "expected": false
+    },
+    {
+      "name": "rollback recorded",
+      "actual": "restored",
+      "expected": "restored"
+    },
+    {
+      "name": "exact original file restored",
+      "actual": "0b163abe53005b0c1f5c14ae2aa8fba403a629bc663e1ed5714d004a470b5da1",
+      "expected": "0b163abe53005b0c1f5c14ae2aa8fba403a629bc663e1ed5714d004a470b5da1"
+    },
+    {
+      "name": "exact original active config restored",
+      "actual": "e7b9018b253c7e811e2bdd5e9fd74bd81a67ebfae8f4cee1dee26a90d9168015",
+      "expected": "e7b9018b253c7e811e2bdd5e9fd74bd81a67ebfae8f4cee1dee26a90d9168015"
+    },
+    {
+      "name": "application works after restore",
+      "actual": {
+        "status": 200,
+        "text": "application"
+      },
+      "expected": {
+        "status": 200,
+        "text": "application"
+      }
+    },
+    {
+      "name": "provider works after restore",
+      "actual": {
+        "status": 200,
+        "text": "provider"
+      },
+      "expected": {
+        "status": 200,
+        "text": "provider"
+      }
+    },
+    {
+      "name": "real stale byte CAS left original intact",
+      "actual": "0b163abe53005b0c1f5c14ae2aa8fba403a629bc663e1ed5714d004a470b5da1",
+      "expected": "0b163abe53005b0c1f5c14ae2aa8fba403a629bc663e1ed5714d004a470b5da1"
+    }
+  ],
+  "events": [
+    {
+      "phase": "prepared",
+      "event": {
+        "phase": "prepared",
+        "at": "2026-08-28T20:48:40.907Z",
+        "counters": [
+          {
+            "address": "127.0.0.1:64882",
+            "num_requests": 0
+          },
+          {
+            "address": "127.0.0.1:64883",
+            "num_requests": 0
+          }
+        ]
+      }
+    },
+    {
+      "phase": "admission-intent",
+      "event": {
+        "phase": "admission-intent",
+        "at": "2026-08-28T20:48:40.920Z"
+      }
+    },
+    {
+      "phase": "admission-closed",
+      "event": {
+        "phase": "admission-closed",
+        "at": "2026-08-28T20:48:41.301Z",
+        "acknowledgementLost": false,
+        "counters": [
+          {
+            "address": "127.0.0.1:64882",
+            "num_requests": 1
+          },
+          {
+            "address": "127.0.0.1:64883",
+            "num_requests": 0
+          }
+        ]
+      }
+    },
+    {
+      "phase": "admission-closed",
+      "event": {
+        "phase": "admission-closed",
+        "at": "2026-08-28T20:48:41.320Z",
+        "counters": [
+          {
+            "address": "127.0.0.1:64882",
+            "num_requests": 1
+          },
+          {
+            "address": "127.0.0.1:64883",
+            "num_requests": 0
+          }
+        ],
+        "stableZeroSamples": 0
+      }
+    },
+    {
+      "phase": "admission-closed",
+      "event": {
+        "phase": "admission-closed",
+        "at": "2026-08-28T20:48:41.438Z",
+        "counters": [
+          {
+            "address": "127.0.0.1:64882",
+            "num_requests": 1
+          },
+          {
+            "address": "127.0.0.1:64883",
+            "num_requests": 0
+          }
+        ],
+        "stableZeroSamples": 0
+      }
+    },
+    {
+      "phase": "admission-closed",
+      "event": {
+        "phase": "admission-closed",
+        "at": "2026-08-28T20:48:41.546Z",
+        "counters": [
+          {
+            "address": "127.0.0.1:64882",
+            "num_requests": 1
+          },
+          {
+            "address": "127.0.0.1:64883",
+            "num_requests": 0
+          }
+        ],
+        "stableZeroSamples": 0
+      }
+    },
+    {
+      "phase": "admission-closed",
+      "event": {
+        "phase": "admission-closed",
+        "at": "2026-08-28T20:48:41.653Z",
+        "counters": [
+          {
+            "address": "127.0.0.1:64882",
+            "num_requests": 0
+          },
+          {
+            "address": "127.0.0.1:64883",
+            "num_requests": 0
+          }
+        ],
+        "stableZeroSamples": 1
+      }
+    },
+    {
+      "phase": "admission-closed",
+      "event": {
+        "phase": "admission-closed",
+        "at": "2026-08-28T20:48:41.760Z",
+        "counters": [
+          {
+            "address": "127.0.0.1:64882",
+            "num_requests": 0
+          },
+          {
+            "address": "127.0.0.1:64883",
+            "num_requests": 0
+          }
+        ],
+        "stableZeroSamples": 2
+      }
+    },
+    {
+      "phase": "admission-closed",
+      "event": {
+        "phase": "admission-closed",
+        "at": "2026-08-28T20:48:41.869Z",
+        "counters": [
+          {
+            "address": "127.0.0.1:64882",
+            "num_requests": 0
+          },
+          {
+            "address": "127.0.0.1:64883",
+            "num_requests": 0
+          }
+        ],
+        "stableZeroSamples": 3
+      }
+    },
+    {
+      "phase": "control-quiescent",
+      "event": {
+        "phase": "control-quiescent",
+        "at": "2026-08-28T20:48:41.870Z",
+        "stableZeroSamples": 3
+      }
+    },
+    {
+      "phase": "restore-intent",
+      "event": {
+        "phase": "restore-intent",
+        "at": "2026-08-28T20:48:41.875Z"
+      }
+    },
+    {
+      "phase": "restored",
+      "event": {
+        "phase": "restored",
+        "at": "2026-08-28T20:48:42.240Z"
+      }
+    }
+  ],
+  "modelCalls": 0,
+  "homeChanges": false,
+  "productionChanges": false,
+  "passed": true,
+  "ownedCaddyPid": 32180,
+  "cleanup": {
+    "ownedCaddyStopped": true,
+    "ownedPortsClosed": [
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "retainedSyntheticFixtureAndJournal": true,
+    "productionChanges": false
+  },
+  "finishedAt": "2026-08-28T20:48:42.650Z"
+}

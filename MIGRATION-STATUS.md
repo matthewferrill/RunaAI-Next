@@ -43,6 +43,31 @@ admission/startup guard is being developed and must be proved before a reliable 
 Do not stop or request another approval at internal commits. Do not claim M1 or the broader roadmap is
 complete from these component results; preserve the historical M1-S1 result below.
 
+### 2026-08-28 second campaign retained; readiness-capture correction
+
+The fresh source `b0758dbae7f3db53bdee23c66ab08269f6152447` passed all 12 formal controls under
+seal `c85583188c65df5d446f83fc6ba414ea32ba234d2c955ae8f923419440ef93c9`. The second Gemma arm
+recorded 24/120 attempts and stopped; 96 slots remain unexecuted and no role is qualified by that arm.
+The actual stale-edit and observed-repair checks passed. The real browser verified exact restoration
+and showed the restored baseline's failed tests, retaining the earlier successful run as history.
+
+The stop was a capture-harness defect, not an unauthorized restore or wrong model: opening the
+application's readiness view caused legitimate embedding `GET /models` and reranker `GET /health`
+requests. The POST-only capture proxy classified them as disallowed inference routes. The retained
+Code08 raw SHA-256 is `2aff2c4dd8615d44da49385b8cc6c2652af25ac6704bccdf9b46d9b1e9b59d4a`;
+it has no critical product failures, but its original role-check failure and stop remain unchanged.
+Do not rewrite this evidence as a pass. A prospective strict health-read capture correction and fresh
+common seal/controls are required before the next matched campaign. Ordinary answer-quality failures
+remain independent findings and are not excused by this harness defect.
+
+Home cleanup was independently observed: zero loaded instances, both original 260 W limits, no owned
+lease tasks, unchanged existing listeners, with retained telemetry/receipts in
+`gate7f/function-first/readiness/evidence/20260828-campaign-gemma-r2-outcome/README.md`.
+Fresh offline R3 hardware packets retain the same limits and three-model roster; the next order is
+Coder, Qwen3.6, then Gemma, still 120 attempts each. No model is loaded by packet preparation.
+Continue the authorized work; no new approval is needed. Deployment and meaningful human trial remain
+pending exact qualification and the separately tested operational runtime guard.
+
 ### 2026-08-28 stopped-campaign independent semantic record
 
 Independent review of the stopped Gemma arm covers 23/120 attempts and all 32 captured model outputs;

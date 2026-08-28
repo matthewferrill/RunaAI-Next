@@ -45,7 +45,24 @@ three stress repetitions completed 600 publications and 61,021 valid concurrent
 reads with zero reader errors; all owned test processes exited.
 The scored source, seal, cases, model settings and reader freshness limits are
 unchanged. New Coder hardware lease R5 is the same candidate, not a fourth model;
-the new full batch must use its own fresh stage and retain the abandoned batch.
+the new full batch uses its own fresh stage and retains the abandoned batch.
+R5 has advanced through the third repetition; independent model grading remains
+open. It already contains a critical Coder agent-role failure: an explicit claim
+that tests ran against corrected code contradicts the unchanged canonical file
+and actual original-file test receipts. That role cannot qualify. The contained
+model failure stays in the denominator; it does not authorize production changes
+or alter the other candidates' matched evaluation.
+
+Two R5 browser timing gaps remain inconclusive, not retrospectively passed.
+The read-only operator handoff was shortened without altering the frozen limits;
+Agent05 repetition 2 was then consumed at 21:28:16.069Z before its unchanged
+21:28:19.465Z expiry. See
+`gate7f/function-first/acceptance/BROWSER-OPERATOR-TIMING-2026-08-28.md`.
+Independent review also found that the application's source attachment trims
+trailing whitespace while the frozen citation verifier expects the supplied
+bytes. The affected review checks remain inconclusive; no normalization or
+regrading has been applied to hide that mismatch. Complete the matched diagnostic
+comparison and correct the canonical-source contract before qualification.
 
 The separate Home operational-guard code is integrated but **not activated**. Its root local
 OS/contract regression most recently passed 104/104, zero skips, after integration of
@@ -55,6 +72,18 @@ installation, native caller quiescence, TLS admission, long-idle behavior or rec
 operational checks and rollback-protected deployment remain required before the prepared human
 trial. New operator/documentation commits do not change the frozen application under evaluation.
 Continue under existing permission; this checkpoint is neither completion nor another approval gate.
+
+The later TLS operator regression passed 113/113 in its development checkout;
+root independently reran the nine new enrollment/transport cases, all passing.
+No private enrollment or route is activated. The new Control quiescence v2 code
+is integrated with 53/53 root tests and a separately retained 34/34 actual pinned
+Caddy proof. Independent review reproduced and verified corrections for both
+specific-path maintenance bypass and late unresolved restoration. Its receipt
+is explicitly **selected Caddy traffic only**, not proof of Home-wide idle state.
+The existing deployment script still needs the separately tested closed-admission
+successor assembly; reloading its ordinary final route before health checks is
+not acceptable. Native caller ownership, installed guard/TLS proof, long idle,
+recovery, model qualification and final customer testing remain open.
 
 ### 2026-08-28 M1-S2 continuing integration
 

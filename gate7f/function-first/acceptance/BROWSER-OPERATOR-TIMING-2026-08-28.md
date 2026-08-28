@@ -40,3 +40,13 @@ already verified disposable campaign directory. It does not read production
 sessions or protected content, create services, or change application state.
 Operational success still requires an on-time consumed acknowledgement in later
 unchanged cases; preparation or a visually correct message alone is not a pass.
+
+## First observed correction result
+
+The same Coder batch's Agent05 repetition 2 used the read-only direct request
+observer. Actual browser observation: 21:28:09.560Z; publication completed:
+21:28:15.607Z. The unchanged runner's retained `consumed.json` records
+21:28:16.069Z, before its original expiry of 21:28:19.465Z. The runner completed
+the attempt including the observe-drain phase. This qualifies that particular
+browser timing observation, not the model's unresolved semantic grade. The first
+repetition remains inconclusive. No deadline, hold, case or model setting changed.

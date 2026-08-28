@@ -172,8 +172,13 @@ integration("real PG: effect-time revocation, expiry and stale project state fai
     f.clock.now += 60_001;
     await assert.rejects(f.service.execute(context, { proposalId: current.proposalId }), /m1-grant-expired/);
     f.clock.now -= 60_001;
+    const expiredReplay = await f.service.execute(context, { proposalId: current.proposalId });
+    assert.equal(expiredReplay.proposal.status, "denied");
+    assert.equal(expiredReplay.proposal.errorCode, "m1-grant-expired");
+    assert.equal(expiredReplay.receipt, null, "rolling back a test clock cannot revive an invalidated action");
+    const revocable = await f.propose("project.inspect", { path: "index.js" });
     await f.service.revokeGrant(context, { grantId: f.grant.grantId });
-    await assert.rejects(f.service.execute(context, { proposalId: current.proposalId }), /m1-grant-revoked/);
+    await assert.rejects(f.service.execute(context, { proposalId: revocable.proposalId }), /m1-grant-revoked/);
     assert.equal(f.adapter.materializeCalls, 1);
   } finally { await f.close(); }
 });

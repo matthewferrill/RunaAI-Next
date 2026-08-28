@@ -43,6 +43,14 @@ admission/startup guard is being developed and must be proved before a reliable 
 Do not stop or request another approval at internal commits. Do not claim M1 or the broader roadmap is
 complete from these component results; preserve the historical M1-S1 result below.
 
+### 2026-08-28 stopped-campaign independent semantic record
+
+Independent review of the stopped Gemma arm covers 23/120 attempts and all 32 captured model outputs;
+97 attempts remain unexecuted. The raw-hash-bound record and limitations are in
+`gate7f/function-first/acceptance/STOPPED-GEMMA-INDEPENDENT-REVIEW-2026-08-28.md`.
+It preserves every original failed/inconclusive check, identifies three task-quality failures and one
+ambiguous semantic criterion, and does not qualify any role or alter the frozen campaign.
+
 ### 2026-08-28 M1-S1 implementation and verified publication
 
 - The full roadmap/retrieval contract was committed as `333912a`; model-role contracts and independent

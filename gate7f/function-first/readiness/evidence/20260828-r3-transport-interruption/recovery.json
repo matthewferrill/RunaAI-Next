@@ -1,0 +1,17 @@
+{
+    "unloaded":  true,
+    "failure":  null,
+    "sourceSeal":  "4a17bf88c5d77af50b2c46b9063d1ded7f42dd114f9bb78f7d0754cd048bbe10",
+    "modelQualityQualified":  false,
+    "incompleteCaptureRetained":  true,
+    "ownedInstance":  "gemma-4-26b-a4b-it-qat",
+    "time":  "2026-08-28T15:57:42.3667683Z",
+    "protectedDataIncluded":  false,
+    "productionRoutingChanged":  false,
+    "powerRestored":  true,
+    "schemaVersion":  "runa-m1-readiness-recovery/v1",
+    "gpus":  [
+                 "0, GPU-15ea3e34-292b-3333-5e43-e5b133f9a30c, 260.00, 42, 1572",
+                 "1, GPU-1f2f6459-b688-3466-5b49-a65c538be843, 260.00, 37, 0"
+             ]
+}

@@ -9,7 +9,8 @@ The new create-only package freezes source, synthetic prompts, all three artifac
 binary hashes, 32,768 context, 512 output tokens, three repetitions, 30-second requests and a separately
 labelled 120-second late diagnostic. Qwen3.6 MTP is not replaced by its differently sized base artifact.
 It requests instance-local MTP with draft2/min0/probability0.75 and verifies the echoed configuration.
-No global model default, service, production route, power setting, or Control file is changed.
+No global model default, service, production route or Control file is changed. Initial r2 preserved260W;
+its thermal stop led to the prospectively sealed r3 temporary160W envelope described below.
 
 Conditions for Qwen3.6 are historical-style v0 text suffix, matched v1 text suffix, v1 API reasoning-off,
 and native API reasoning-off. Only the matched v1 pair supports a single-factor reasoning-control
@@ -22,7 +23,7 @@ HTTP 200 alone never proves reasoning disabled. No generated instruction is exec
 Every arm verifies the package, files, host, Node, templates, registry and one-owned-instance residency;
 records cold loading separately; samples exact GPU UUIDs/memory/temperature/power every five seconds;
 aborts on85C, low memory, drift, evidence failure or a finite arm deadline; and unloads only its known
-instance in `finally`. Current260W limits are preserved (this is not the earlier160W soak). A30-second
+instance in `finally`. r2 preserved260W; r3 restores the original260W after all controlled160W arms. A30-second
 timeout is retained even if a120-second diagnostic later completes. Post-timeout GPU idleness is only
 observed idleness, not a server cancellation acknowledgement or proof of exclusive endpoint traffic.
 
@@ -71,3 +72,33 @@ any r3 model call. r2/raw failures remain immutable. The new power wrapper follo
 target-UUID before/apply/restore method, preserves original settings, and retains create-only power
 evidence. Source checks6/6 and PowerShell parse check passed before restarting. Runner result logging
 also records literal request token-cap enforcement and whether observed elapsed time met its budget.
+
+`verify-export.mjs` independently recomputes retained byte/request hashes, captured observation/result
+binding, raw response/answer binding and actual output caps. Its negative tests reject byte tampering,
+invented answers and incorrect request hashes. This checks evidence integrity, not semantic answer
+quality or product functionality. `Invoke-HomeReadiness.ps1 -Mode Status` is a read-only residency,
+temperature, power and listener check; it creates no model instance or host file.
+
+## r3 child interruption and SSH-independent r4
+
+Qwen's complete r3 arm is retained. Gemma's r3 process stopped immediately after its successful warmup,
+before a runner result or model cleanup. The power wrapper recorded failure and refused restoration
+while the model remained. Exact child-exit/native-stream evidence was absent, so the underlying cause
+is not established. An orphan Omen SSH process remained after the Home child/wrapper had gone.
+`Recover-HomeReadiness.ps1` verified the r3 seal and captured load identity, unloaded only that Gemma
+instance and restored both original260W limits; `recovery.json` records the recovery at15:57:42Z.
+No partial model arm is represented as complete.
+
+r4 keeps the same models, requests, context, token limits, deadlines,160W envelope and85C cutoff.
+Only the interrupted Gemma and unstarted Coder arms run again. A one-off, no-trigger Home Task Scheduler
+job owns the supervisor independently of SSH. The supervisor captures bounded local child stdout/stderr,
+records5s watchdog evidence, binds child termination to PID/start time, and can unload only an instance
+proven by the captured load response. It refuses ambiguous/unowned cleanup. Each child is bounded to31min
+(runner itself30min); the one-off task limit is100min including finite cooldowns, with no automatic retry.
+The task registration is removed after retained results and verified power restoration, not left recurring.
+
+Before r4, the no-model S4U scheduler probe retained seven5s heartbeats across a closed dispatch SSH
+connection, correctcodex-audit identity and TaskResult0. Its completed one-off registration was removed;
+the proof remains in `evidence/20260828-scheduler-probe/probe.jsonl`. This proves lifecycle independence,
+not model readiness. Relevant Windows contracts are [task principals](https://learn.microsoft.com/en-us/powershell/module/scheduledtasks/new-scheduledtaskprincipal)
+and [bounded task settings](https://learn.microsoft.com/en-us/powershell/module/scheduledtasks/new-scheduledtasksettingsset).

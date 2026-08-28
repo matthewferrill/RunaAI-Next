@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "runa-m1-readiness-export/v1",
+  "retrievedAt": "2026-08-28T16:00:19.022Z",
+  "files": [
+    {
+      "name": "capture-gemma.jsonl",
+      "bytes": 77886,
+      "sha256": "96667cf255bfb6e4cdcb48809affae5d263f0a8699a0d5ffa324e84824cceb28"
+    },
+    {
+      "name": "capture-qwen36.jsonl",
+      "bytes": 326297,
+      "sha256": "461fcc81c748c9c21642d90172eeb07a9e7326d7ec30e5bf7779cb47e28b453c"
+    },
+    {
+      "name": "power-applied.json",
+      "bytes": 838,
+      "sha256": "0ec3318e117eaf9ff94e4daacee8248395de1fe142b054a5dc70781416968adf"
+    },
+    {
+      "name": "power-before.json",
+      "bytes": 838,
+      "sha256": "af308638aca35e2a4a8eaac15bb83ef19a0f129fd4ebf4c3299f037a70cc384a"
+    },
+    {
+      "name": "power-result.json",
+      "bytes": 29263,
+      "sha256": "b801c85a4233ffed84b412f3a7c8645a066faf7f89a4f39831b211e79af5127b"
+    },
+    {
+      "name": "recovery.json",
+      "bytes": 672,
+      "sha256": "ef6f24d509a0cf3bfef7a2011c4de8f91033e1f723e7c60bfd691cb0760f7014"
+    },
+    {
+      "name": "result-qwen36.json",
+      "bytes": 9758,
+      "sha256": "d96d156303b07af75a6ff9c44759f0e92359cf5eff707a76e00db12685a7dc2a"
+    },
+    {
+      "name": "seal.json",
+      "bytes": 729,
+      "sha256": "4a17bf88c5d77af50b2c46b9063d1ded7f42dd114f9bb78f7d0754cd048bbe10"
+    }
+  ],
+  "syntheticOnly": true,
+  "protectedDataIncluded": false
+}

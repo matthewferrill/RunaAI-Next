@@ -4,7 +4,7 @@ import path from "node:path";
 const input = process.argv[2], output = process.argv[3];
 if (!input || !output || existsSync(output)) throw new Error("readiness-export-boundary");
 const packet = JSON.parse(readFileSync(input, "utf8"));
-const allowed = /^(capture-(qwen36|gemma|coder)\.jsonl|result-(qwen36|gemma|coder)\.json|inventory\.json|seal\.json|power-(before|applied|result)\.json)$/;
+const allowed = /^(capture-(qwen36|gemma|coder)\.jsonl|result-(qwen36|gemma|coder)\.json|inventory\.json|seal\.json|recovery\.json|power-(before|applied|result)\.json|watchdog\.jsonl|worker-(gemma|coder)(-(exit|recovery))?\.json|worker-(gemma|coder)-(stdout|stderr)\.txt)$/;
 if (!Object.keys(packet).length || Object.keys(packet).some(name => !allowed.test(name))) throw new Error("readiness-export-files");
 const files = Object.entries(packet).map(([name, data]) => {
   if (typeof data !== "string") throw new Error("readiness-export-data");

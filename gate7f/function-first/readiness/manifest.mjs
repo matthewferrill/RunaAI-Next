@@ -1,5 +1,7 @@
 export const MANIFEST = Object.freeze({
-  schemaVersion: "runa-m1-readiness-manifest/v1", diagnosticId: "20260828-readiness-r3", sourceCommit: "b1a4009",
+  schemaVersion: "runa-m1-readiness-manifest/v1", diagnosticId: "20260828-readiness-r4", sourceBaseCommit: "0fb2fe5",
+  plannedArms: ["gemma", "coder"], operatorLifecycle: "home-scheduled-supervisor/v1",
+  completedQwenPredecessorSeal: "4a17bf88c5d77af50b2c46b9063d1ded7f42dd114f9bb78f7d0754cd048bbe10",
   classification: "prospective-unscored-readiness-not-function-qualification", expectedHost: "RUNA-HOME", expectedNode: "v22.22.1",
   api: "http://127.0.0.1:1234", contextLength: 32768, requestDeadlineMs: 30000, lateDiagnosticDeadlineMs: 120000,
   loadDeadlineMs: 180000, armDeadlineMs: 1800000, maximumResponseBytes: 1048576, maximumOutputTokens: 512,

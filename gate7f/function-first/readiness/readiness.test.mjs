@@ -39,3 +39,22 @@ test("source syntax parses without making a model call", () => {
   const result = spawnSync(process.execPath, ["--check", new URL("./runner.mjs", import.meta.url).pathname.replace(/^\//, "")], { encoding: "utf8" });
   assert.equal(result.status, 0, result.stderr);
 });
+test("r4 preserves Qwen evidence and freezes only the remaining two arms", () => {
+  assert.deepEqual(MANIFEST.plannedArms, ["gemma", "coder"]);
+  assert.match(MANIFEST.completedQwenPredecessorSeal, /^[a-f0-9]{64}$/);
+  assert.equal(MANIFEST.operatorLifecycle, "home-scheduled-supervisor/v1");
+});
+test("supervisor captures child streams and binds targeted cancellation to process start time", () => {
+  const source = readFileSync(new URL("./Run-HomePower.ps1", import.meta.url), "utf8");
+  assert.match(source, /-WindowStyle Hidden -RedirectStandardOutput \$stdout -RedirectStandardError \$stderr/);
+  assert.match(source, /WaitForExit\(5000\)/); assert.match(source, /StartTime\.ToUniversalTime\(\)-ne\$workerStarted/);
+  assert.match(source, /Stop-Process -Id \$worker.Id/); assert.doesNotMatch(source, /Stop-Process -Name|taskkill|unloadAll/);
+  assert.match(source, /loads\[0\]\.value\.instance_id/); assert.match(source, /readiness-child-recovery-ambiguous/);
+});
+test("task dispatch is one-off, owner-bound, bounded and has no retry or recurring trigger", () => {
+  const source = readFileSync(new URL("./Invoke-HomeReadiness.ps1", import.meta.url), "utf8");
+  assert.match(source, /-LogonType S4U -RunLevel Highest/);
+  assert.match(source, /-ExecutionTimeLimit \(New-TimeSpan -Minutes 100\) -MultipleInstances IgnoreNew -Hidden/);
+  assert.doesNotMatch(source, /New-ScheduledTaskTrigger|RestartCount|RestartInterval/);
+  assert.match(source, /readiness-task-seal-drift/); assert.match(source, /readiness-task-cleanup-boundary/);
+});

@@ -1,5 +1,6 @@
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from "node:fs";
 import { createHash } from "node:crypto";
+import { execFileSync } from "node:child_process";
 import path from "node:path";
 import { MANIFEST } from "./manifest.mjs";
 const here = import.meta.dirname;
@@ -13,6 +14,7 @@ const sourceFiles = { "runner.mjs": path.join(here, "runner.mjs"), "cases.mjs": 
   "Run-HomePower.ps1": path.join(here, "Run-HomePower.ps1") };
 const files = Object.fromEntries(Object.entries(sourceFiles).map(([name, file]) => [name, readFileSync(file)]));
 const seal = { schemaVersion: "runa-m1-readiness-package-seal/v1", createdAt: new Date().toISOString(),
+  sourceCommit: execFileSync("git", ["rev-parse", "HEAD"], { cwd: root, encoding: "utf8" }).trim(),
   diagnosticId: MANIFEST.diagnosticId, createdBeforeInference: true,
   files: Object.fromEntries(Object.entries(files).map(([name, bytes]) => [name, createHash("sha256").update(bytes).digest("hex")])) };
 files["seal.json"] = Buffer.from(JSON.stringify(seal, null, 2) + "\n");

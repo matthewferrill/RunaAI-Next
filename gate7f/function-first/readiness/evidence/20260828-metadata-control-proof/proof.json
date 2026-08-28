@@ -1,0 +1,205 @@
+{
+    "schemaVersion":  "runaai-m1-metadata-publication-control-proof/v1",
+    "startedAt":  "2026-08-28T20:58:27.7642444Z",
+    "finishedAt":  "2026-08-28T20:58:52.6311609Z",
+    "directory":  "C:\\AI\\RunaAI-Next-Candidate\\staging\\m1-operator-proof-3ddb465faf57a89fd32c23384a274c39\\metadata-publication-r3",
+    "inputPins":  {
+                      "value":  [
+                                    {
+                                        "name":  "Publish-CampaignMetadata.ps1",
+                                        "sha256":  "4ac32d92a302d619272995bf3e10217838bf06f66a535188b69e606ae97036b6",
+                                        "bytes":  3042
+                                    },
+                                    {
+                                        "name":  "metadata-publication.test.mjs",
+                                        "sha256":  "3905c6d4e25d45282420bb754a98d380e5156e2b0dd4a0a9eb490d58c87db63d",
+                                        "bytes":  6373
+                                    },
+                                    {
+                                        "name":  "CAMPAIGN-METADATA-PUBLICATION-CRITERIA.md",
+                                        "sha256":  "99ba44a1ca1fd3557fa77c8a5a66d543ca6d147c0c6208846cbe9c4a610e5d04",
+                                        "bytes":  2857
+                                    }
+                                ],
+                      "Count":  3
+                  },
+    "nodeVersion":  "v22.22.0",
+    "nodeSha256":  "bae898add4643fcf890a83ad8ae56e20dce7e781cab161a53991ceba70c99ffb",
+    "openssl":  {
+                    "path":  "C:\\Program Files\\Git\\usr\\bin\\openssl.exe",
+                    "sha256":  "78340fb01dea2df5caab73dcf28833b31329226a4c9e02f717f1d399592265b9",
+                    "bytes":  1005028
+                },
+    "exitCode":  0,
+    "timedOut":  false,
+    "trackedOwnedProcesses":  [
+                                  {
+                                      "processId":  17964,
+                                      "name":  "powershell.exe",
+                                      "startedAt":  "2026-08-28T20:58:27.9395180Z"
+                                  },
+                                  {
+                                      "processId":  14448,
+                                      "name":  "conhost.exe",
+                                      "startedAt":  "2026-08-28T20:58:42.9495650Z"
+                                  },
+                                  {
+                                      "processId":  14828,
+                                      "name":  "powershell.exe",
+                                      "startedAt":  "2026-08-28T20:58:49.3689890Z"
+                                  },
+                                  {
+                                      "processId":  7068,
+                                      "name":  "node.exe",
+                                      "startedAt":  "2026-08-28T20:58:27.8658100Z"
+                                  },
+                                  {
+                                      "processId":  16568,
+                                      "name":  "conhost.exe",
+                                      "startedAt":  "2026-08-28T20:58:35.7961500Z"
+                                  },
+                                  {
+                                      "processId":  10824,
+                                      "name":  "conhost.exe",
+                                      "startedAt":  "2026-08-28T20:58:50.6959580Z"
+                                  },
+                                  {
+                                      "processId":  16004,
+                                      "name":  "powershell.exe",
+                                      "startedAt":  "2026-08-28T20:58:50.0186650Z"
+                                  },
+                                  {
+                                      "processId":  9840,
+                                      "name":  "conhost.exe",
+                                      "startedAt":  "2026-08-28T20:58:27.7947790Z"
+                                  },
+                                  {
+                                      "processId":  10612,
+                                      "name":  "powershell.exe",
+                                      "startedAt":  "2026-08-28T20:58:51.1309450Z"
+                                  },
+                                  {
+                                      "processId":  7812,
+                                      "name":  "powershell.exe",
+                                      "startedAt":  "2026-08-28T20:58:35.7753200Z"
+                                  },
+                                  {
+                                      "processId":  17388,
+                                      "name":  "conhost.exe",
+                                      "startedAt":  "2026-08-28T20:58:51.5723220Z"
+                                  },
+                                  {
+                                      "processId":  6940,
+                                      "name":  "powershell.exe",
+                                      "startedAt":  "2026-08-28T20:58:42.9293260Z"
+                                  },
+                                  {
+                                      "processId":  11836,
+                                      "name":  "powershell.exe",
+                                      "startedAt":  "2026-08-28T20:58:50.6767520Z"
+                                  },
+                                  {
+                                      "processId":  15004,
+                                      "name":  "conhost.exe",
+                                      "startedAt":  "2026-08-28T20:58:27.9606030Z"
+                                  },
+                                  {
+                                      "processId":  6648,
+                                      "name":  "node.exe",
+                                      "startedAt":  "2026-08-28T20:58:27.7877400Z"
+                                  },
+                                  {
+                                      "processId":  14780,
+                                      "name":  "conhost.exe",
+                                      "startedAt":  "2026-08-28T20:58:50.0421690Z"
+                                  },
+                                  {
+                                      "processId":  12980,
+                                      "name":  "csc.exe",
+                                      "startedAt":  "2026-08-28T20:58:43.3721260Z"
+                                  }
+                              ],
+    "remainingOwnedProcesses":  [
+
+                                ],
+    "stress":  [
+                   {
+                       "path":  "C:\\AI\\RunaAI-Next-Candidate\\staging\\m1-operator-proof-3ddb465faf57a89fd32c23384a274c39\\metadata-publication-r3\\temporary\\runa-mirror-publication-3J5brh\\result.json",
+                       "sha256":  "19b4a3e2bcb49b11e1f7ebde338a28e53785633a47e9007c91b1b7c8c651d335",
+                       "data":  {
+                                    "repetition":  1,
+                                    "node":  "v22.22.0",
+                                    "code":  0,
+                                    "signal":  null,
+                                    "stdout":  "{\"published\":200,\"sharingRetries\":178}",
+                                    "stderr":  "",
+                                    "observed":  {
+                                                     "reads":  22247,
+                                                     "valid":  22247,
+                                                     "errors":  [
+
+                                                                ]
+                                                 },
+                                    "timedOut":  false,
+                                    "final":  {
+                                                  "sequence":  200,
+                                                  "padding":  "synthetic"
+                                              }
+                                }
+                   },
+                   {
+                       "path":  "C:\\AI\\RunaAI-Next-Candidate\\staging\\m1-operator-proof-3ddb465faf57a89fd32c23384a274c39\\metadata-publication-r3\\temporary\\runa-mirror-publication-a3OPFi\\result.json",
+                       "sha256":  "beea7f2ef006769356d357ec0408c6a2ce2855e6e0ef1f1a6333a50d82afb954",
+                       "data":  {
+                                    "repetition":  2,
+                                    "node":  "v22.22.0",
+                                    "code":  0,
+                                    "signal":  null,
+                                    "stdout":  "{\"published\":200,\"sharingRetries\":214}",
+                                    "stderr":  "",
+                                    "observed":  {
+                                                     "reads":  20356,
+                                                     "valid":  20356,
+                                                     "errors":  [
+
+                                                                ]
+                                                 },
+                                    "timedOut":  false,
+                                    "final":  {
+                                                  "sequence":  200,
+                                                  "padding":  "synthetic"
+                                              }
+                                }
+                   },
+                   {
+                       "path":  "C:\\AI\\RunaAI-Next-Candidate\\staging\\m1-operator-proof-3ddb465faf57a89fd32c23384a274c39\\metadata-publication-r3\\temporary\\runa-mirror-publication-u6gnfz\\result.json",
+                       "sha256":  "a13f3442598dbeaddcc5d10f2364597a840ae0a8d7f811d496076ac1990897b3",
+                       "data":  {
+                                    "repetition":  3,
+                                    "node":  "v22.22.0",
+                                    "code":  0,
+                                    "signal":  null,
+                                    "stdout":  "{\"published\":200,\"sharingRetries\":180}",
+                                    "stderr":  "",
+                                    "observed":  {
+                                                     "reads":  18418,
+                                                     "valid":  18418,
+                                                     "errors":  [
+
+                                                                ]
+                                                 },
+                                    "timedOut":  false,
+                                    "final":  {
+                                                  "sequence":  200,
+                                                  "padding":  "synthetic"
+                                              }
+                                }
+                   }
+               ],
+    "stdoutSha256":  "9e8424aafffe85e9c44353ecad3879b142cd73d4d10b56802d6d7065f0350ace",
+    "stderrSha256":  "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "modelsInvoked":  false,
+    "servicesStarted":  false,
+    "productionChanged":  false,
+    "frozenSourceChanged":  false
+}

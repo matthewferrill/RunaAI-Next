@@ -1,0 +1,52 @@
+TAP version 13
+# Subtest: Windows publication keeps actual concurrent reads complete, repeat 1
+ok 1 - Windows publication keeps actual concurrent reads complete, repeat 1
+  ---
+  duration_ms: 7839.4256
+  type: 'test'
+  ...
+# Subtest: Windows publication keeps actual concurrent reads complete, repeat 2
+ok 2 - Windows publication keeps actual concurrent reads complete, repeat 2
+  ---
+  duration_ms: 7153.2501
+  type: 'test'
+  ...
+# Subtest: Windows publication keeps actual concurrent reads complete, repeat 3
+ok 3 - Windows publication keeps actual concurrent reads complete, repeat 3
+  ---
+  duration_ms: 6437.2937
+  type: 'test'
+  ...
+# Subtest: stale temporary file and wrong filename fail before altering either file
+ok 4 - stale temporary file and wrong filename fail before altering either file
+  ---
+  duration_ms: 652.8765
+  type: 'test'
+  ...
+# Subtest: a deterministic foreign byte change is retained and stops publication
+ok 5 - a deterministic foreign byte change is retained and stops publication
+  ---
+  duration_ms: 659.5286
+  type: 'test'
+  ...
+# Subtest: initial publication is create-only and retains exact UTF8 bytes
+ok 6 - initial publication is create-only and retains exact UTF8 bytes
+  ---
+  duration_ms: 452.8908
+  type: 'test'
+  ...
+# Subtest: persistent sharing denial is bounded and retains old and staged bytes
+ok 7 - persistent sharing denial is bounded and retains old and staged bytes
+  ---
+  duration_ms: 1320.3171
+  type: 'test'
+  ...
+1..7
+# tests 7
+# suites 0
+# pass 7
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 24616.2336

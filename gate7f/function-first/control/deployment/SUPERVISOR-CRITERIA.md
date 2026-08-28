@@ -95,3 +95,28 @@ Permit exactly that fixed executable with its externally supplied exact SHA and
 exact observed two-link count. Keep ordinary files, package sources and journals
 strictly single-link; do not permit arbitrary hardlinks or alternative paths.
 The original 1/8 result is development failure, not an execution qualification.
+
+## Observed detached-host correction (before implementation)
+
+The next actual suite reached 9/11; its controller-loss case exposed that a
+normal Node child belongs to the caller's kill-on-close job. Directly detaching
+Windows PowerShell then returned exit 0 without entering the script, including
+an owner-context reproduction. Neither outcome is successful supervision.
+
+Use a separately pinned, detached Node host with ignored inherited standard
+handles. It starts the fixed PowerShell wrapper normally, so Node's own Windows
+job contains the wrapper. Host death closes that job; wrapper death closes the
+companion's non-inherited atomic job. A host absolute-deadline timer covers
+compilation and journal writes as well as execution. Both executable identities
+and the host source are bound; retain the host PID and the actual OS start time
+before companion dispatch. The package gains this seventh fixed source file,
+not a general shell entry point. Test actual controller loss and actual host
+loss, including owned descendant cleanup, before claiming this correction.
+
+A closed result must belong to the newly created request/operation and all child
+records must fall inside that actual companion lifetime. Old completed records
+cannot authorize a fresh transition. Failure of the second fresh Home/held-phase
+check after durable outer intent leaves that intent unresolved without launch.
+Child argv digests bind the retained records to each other; the exact pinned
+companion defines the four allowed command implementations. The verifier does
+not independently reconstruct all private child arguments.

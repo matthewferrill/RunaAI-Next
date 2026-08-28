@@ -1,1 +1,3 @@
 evidence/** -text
+Write-HomeCampaignCompletion.ps1 -text
+complete-campaign.mjs -text

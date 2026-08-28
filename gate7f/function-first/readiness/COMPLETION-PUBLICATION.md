@@ -15,3 +15,9 @@ hash and publication receipt alongside the next outcome; do not claim it was the
 
 Before Home use, exercise actual Windows publication with a concurrent reader, an existing marker,
 and an interrupted pre-publication temporary file. No private values or live model call is needed.
+
+Implementation: `Write-HomeCampaignCompletion.ps1` and its one-call Omen dispatcher
+`complete-campaign.mjs`. Three tests passed on Omen: actual closed publication/duplicate refusal,
+actual separate PowerShell reader, and source lifecycle/no-overwrite ordering checks. These do not
+prove a future live Home publication; its receipt and source hash must be retained when used. The
+helper is a prospective companion to the frozen hardware operator, not a replacement old artifact.

@@ -305,3 +305,12 @@ Use local concurrent/delayed-outcome fixtures to prove the gate and actual short
 deadline fixtures to prove bounded settlement. These do not prove that terminating a CLI cancels its
 already-dispatched native RPC. Native operation reconciliation remains independently required before
 any subsequent recovery. Do not call installed CLI lifecycle endpoints or alter an active campaign.
+
+Restart must not clear this rule. Require an explicit, independently implemented
+`assertMutationSettled` callback on both real adapters and the outer transition coordinator, with no
+default. It must inspect the latest private durable journal under exclusive ownership and reject any
+unresolved settings/native intent before every mutation, including opposite-command recovery. A
+native CLI-return record is not terminal proof: append a distinct confirmed event only after fresh
+native postconditions and quiescence are verified. A newly constructed adapter must call the same
+barrier. Local new-instance tests will exercise a retained unresolved record; actual private journal/
+child reconciliation remains a separate assembly requirement and cannot be replaced by a no-op callback.

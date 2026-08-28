@@ -41,6 +41,14 @@ async function command(operation, input) {
       if (typeof input?.phase !== "string" || input.phase.length > 160) throw fail("m1-worker-phase-invalid");
       ledger.phase = input.phase; ledger.requestScope = structuredClone(input.requestScope); return null;
     case "identity.issue": return host.identities.issue(input);
+    case "browser.bootstrap": return host.createBootstrap(input.principalId, input.options);
+    case "task.execute-without-session-registration":
+      // This deliberately does not traverse HTTP or register a session checker.
+      // The real restarted service must fail closed, using the exact proposal ID.
+      if (!input?.input || Object.keys(input.input).length !== 1 || typeof input.input.proposalId !== "string") {
+        throw fail("m1-worker-proposal-input-invalid");
+      }
+      return host.m1.tasks.execute(input.context, input.input);
     case "fixture.bind": await host.bindFixture(input.context, input.item); return null;
     case "project.snapshot": return host.snapshot(input);
     case "sources.selected": return host.m1.sources.selected(input.context, input.sourceIds);

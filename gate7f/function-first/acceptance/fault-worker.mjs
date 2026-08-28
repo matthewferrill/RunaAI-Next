@@ -97,6 +97,7 @@ export async function startApplicationFaultWorker({ initialization, getLedger, b
   }
 
   const worker = {
+    executeWithoutRegisteredVerifier: (context, input) => call("task.execute-without-session-registration", { context, input }),
     armMaterializationHold: scope => call("fault.arm-materialization", scope),
     waitMaterializationHeld: () => call("fault.wait-materialization", null, 60000),
     armNativeReceiptHold: scope => call("fault.arm-native-receipt", scope),
@@ -129,6 +130,7 @@ export async function startApplicationFaultWorker({ initialization, getLedger, b
   const host = {
     get baseUrl() { return baseUrl; }, worker,
     identities: { issue: principalId => call("identity.issue", principalId) },
+    createBootstrap: (principalId, options) => call("browser.bootstrap", { principalId, options }),
     bindFixture: (context, item) => call("fixture.bind", { context, item }),
     snapshot: context => call("project.snapshot", context),
     continuity: { prepareAnswerContext: input => call("continuity.prepare", input) },

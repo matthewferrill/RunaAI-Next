@@ -6,7 +6,8 @@ import net from 'node:net';
 import {createServer} from 'node:http';
 import {fileURLToPath} from 'node:url';
 import {digest,verifySources,modules,certificates,realController,listen,unusedPort,portClosed,closeServer,
-  observeSockets,backend,localCaddyConfig,startCaddy,stopCaddy,send,raw,removeFixture,sleep,SLOW_COMPLETION_RESPONSE} from './wire-fixture.mjs';
+  observeSockets,backend,localCaddyConfig,startCaddy,stopCaddy,send,raw,removeFixture,sleep,SLOW_COMPLETION_RESPONSE,
+  EVIDENCE_WIRE_RESPONSE,evidenceWireFrames} from './wire-fixture.mjs';
 
 /** Local transport integration only. Real proxy/controller/Caddy, synthetic
  * lifecycle observation and ordinary loopback HTTP servers; never a real model. */
@@ -27,7 +28,7 @@ export async function runClosedWireProof({sourceRoot,binary,openssl,outputDirect
   const snapshot=()=>({admitAttempts:fixtureController.state.admitAttempts,admitted:fixtureController.state.admitted,released:fixtureController.state.released,
     active:fixtureController.controller.status.activeRequests,polls:fixtureController.state.polls,
     primary:report.nativeRequests.filter(v=>v.kind==='primary').length,bge:report.nativeRequests.filter(v=>v.kind==='bge').length,redirects});
-  const record=async(name,action,{status=[503],admissions=0,primary=0,bge=0,minimumMs=0,maximumMs=7000,allowSocketError=false,check=()=>{}}={})=>{
+  const record=async(name,action,{status=[503],admissions=0,primary=0,bge=0,minimumMs=0,maximumMs=7000,allowSocketError=false,requestFrame=null,check=()=>{}}={})=>{
     if(Date.now()>proofDeadline)throw Error('wire-proof-deadline');
     const before=snapshot(),eventStart=report.proxyEvents.length,nativeStart=report.nativeRequests.length;let result,error,errorMessage;
     try{
@@ -43,7 +44,7 @@ export async function runClosedWireProof({sourceRoot,binary,openssl,outputDirect
       assert.equal(after.redirects-before.redirects,0,'redirect target reached');assert.equal(after.active,0,'active ticket leaked');
       check(result,report.nativeRequests.slice(nativeStart));
     }catch(e){error=e.code??e.message;errorMessage=e.message;}
-    const observation={name,passed:!error,error:error??null,errorMessage:errorMessage??null,result:result??null,before,after:snapshot(),
+    const observation={name,passed:!error,error:error??null,errorMessage:errorMessage??null,result:result??null,requestFrame,before,after:snapshot(),
       nativeRequests:report.nativeRequests.slice(nativeStart),proxyEvents:report.proxyEvents.slice(eventStart)};
     report.cases.push(observation);writeFileSync(path.join(output,`case-${String(report.cases.length).padStart(2,'0')}.json`),JSON.stringify(observation,null,2)+'\n',{flag:'wx'});
     onProgress({case:name,passed:observation.passed,error:observation.error});return observation;
@@ -124,6 +125,19 @@ export async function runClosedWireProof({sourceRoot,binary,openssl,outputDirect
     const stalledTls=net.createServer();servers.push(stalledTls);observeSockets(stalledTls,allSockets);const stalledPort=await listen(stalledTls);ports.push(stalledPort);
     await switchCaddy({tlsPort:stalledPort});await record('actual 10 second TLS handshake timeout has zero controller admission',()=>send(frontPort,{timeout:16000}),
       {status:[502,504],minimumMs:9000,maximumMs:15000});
+    await switchCaddy({phase:'final'});modes.primary='evidence';
+    for(const frame of evidenceWireFrames(JSON.parse(completionBody),loaded.evidence.EVIDENCE_RESPONSE_FORMAT)){
+      const body=JSON.stringify(frame.body),route='/v1/chat/completions';
+      await record(frame.name,()=>send(frontPort,{method:'POST',route,headers:{'content-type':'application/json','content-length':Buffer.byteLength(body)},body}),
+        {status:frame.denied?[503]:[200],admissions:frame.denied?0:1,primary:frame.denied?0:1,
+          requestFrame:{method:'POST',route,body,bodySha256:digest(Buffer.from(body))},check:(response,requests)=>{
+            if(frame.denied){assert.ok(response.body.includes('runtime-response-format-not-qualified'));return;}
+            assert.equal(response.body,EVIDENCE_WIRE_RESPONSE);assert.equal(requests.length,1);assert.equal(requests[0].method,'POST');assert.equal(requests[0].path,route);
+            assert.equal(requests[0].bodySha256,digest(Buffer.from(body)));
+            assert.equal(loaded.evidence.isEvidenceOutput(JSON.parse(JSON.parse(response.body).choices[0].message.content)),true);
+          }});
+    }
+    modes.primary='good';
     verifySources(sourceRoot);report.passed=report.cases.every(c=>c.passed);
   }catch(error){report.error=error.code??error.message;}
   finally{

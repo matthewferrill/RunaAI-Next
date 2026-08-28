@@ -15,7 +15,8 @@ export const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
 export const SOURCE_PINS=Object.freeze({
   'home-runtime/tls-proxy.mjs':'9d5068d1a3a0c09a0b4bb580fb192011730f40cbdb9ef26bb04402ea5869e1f6',
   'home-runtime/proxy.mjs':'e965a57eed957e6797f8883e4d71f69c6a7c01911f39f44dd426db8043edaa2c',
-  'home-runtime/contracts.mjs':'d977fcc68f6fc8959b76e8ff1b3cc165ec697f0a0cf01bb6e7e3dcea4131c52e',
+  'home-runtime/contracts.mjs':'995339141c0928312827ed7169a98d8ab2f2de7d7fbbf52e6ae1b54377de39e0',
+  'evidence-output.mjs':'ef61fd605d598dfda83782c54c8a1d019bc8a3d21a08aa81aa709ebe691d9f9a',
   'home-runtime/controller.mjs':'53fd576f52e2dc51f25200548232367756602f0ac70a00b865ba3eee6af0a354',
   'readiness/manifest.mjs':'21757455f9bf2274f495cf0bc538bd684b35a7c0a60196b612eb61ab8903bed6',
   'readiness/lease-contract.mjs':'9000ea05b54214bc27f394b078e50df6b10d8df231ef32954a143e6d10256c13',
@@ -24,7 +25,8 @@ export const SOURCE_PINS=Object.freeze({
 export function verifySources(root){return Object.entries(SOURCE_PINS).map(([file,sha256])=>{
   const bytes=readFileSync(path.join(root,file));assert.equal(digest(bytes),sha256,'wire-source-drift:'+file);return {file,sha256,bytes:bytes.length};});}
 export async function modules(root){verifySources(root);const load=file=>import(pathToFileURL(path.join(root,file)).href);
-  return {tls:await load('home-runtime/tls-proxy.mjs'),contracts:await load('home-runtime/contracts.mjs'),controller:await load('home-runtime/controller.mjs')};}
+  return {tls:await load('home-runtime/tls-proxy.mjs'),contracts:await load('home-runtime/contracts.mjs'),controller:await load('home-runtime/controller.mjs'),
+    evidence:await load('evidence-output.mjs')};}
 
 // Only generated disposable certificates; the directory has no inherited access
 // for ordinary other users. No production enrollment/keys are opened here.
@@ -77,6 +79,7 @@ export function backend(kind,report,modes,held){return createServer(async(req,re
   const chunks=[];for await(const chunk of req)chunks.push(chunk);const body=Buffer.concat(chunks);
   report.nativeRequests.push({kind,path:req.url,method:req.method,bodyBytes:body.length,bodySha256:digest(body),headers:req.headers,at:Date.now()});
   const mode=modes[kind];if(mode==='stall'){held.add(res);res.once('close',()=>held.delete(res));return;}
+  if(mode==='evidence'){res.writeHead(200,{'content-type':'application/json'});res.end(EVIDENCE_WIRE_RESPONSE);return;}
   if(mode==='redirect'){res.writeHead(302,{location:modes.redirect});res.end();return;}
   if(mode==='slow-completion'){
     held.add(res);await new Promise(resolve=>{const timer=setTimeout(resolve,60000);res.once('close',()=>{clearTimeout(timer);resolve();});});held.delete(res);
@@ -85,6 +88,20 @@ export function backend(kind,report,modes,held){return createServer(async(req,re
   const status=mode==='failure'?503:200;res.writeHead(status,{'content-type':'application/json'});res.end(kind==='primary'?' {"data":[]}\n':' {"ok":true}\n');
 });}
 export const SLOW_COMPLETION_RESPONSE=' {"id":"synthetic-sixty-second","choices":[{"message":{"role":"assistant","content":"Complete unchanged response after sixty seconds."}}]}\n';
+export const EVIDENCE_WIRE_RESPONSE=JSON.stringify({id:'synthetic-evidence-wire',choices:[{message:{role:'assistant',
+  content:JSON.stringify({answer:'The synthetic lantern is amber.',citations:[{sourceId:'synthetic-lantern',sectionId:'color'}]})}}]})+'\n';
+export function evidenceWireFrames(base,format){
+  const create=()=>({...structuredClone(base),response_format:structuredClone(format)});
+  const strict=create();strict.response_format.json_schema.strict=false;
+  const extra=create();extra.response_format.json_schema.schema.additionalProperties=true;
+  const arbitrary=create();arbitrary.response_format.json_schema.schema={type:'object',properties:{command:{type:'string'}},required:['command']};
+  return [
+    {name:'exact static evidence schema passes once byte exact',denied:false,body:create()},
+    {name:'weakened evidence strictness denied before admission',denied:true,body:strict},
+    {name:'weakened evidence additional properties denied before admission',denied:true,body:extra},
+    {name:'arbitrary evidence schema denied before admission',denied:true,body:arbitrary},
+  ];
+}
 
 export function localCaddyConfig({binary,certificates:certs,frontPort,tlsPort,client='control',issuer='issuer',serverName='runa-home-m1.internal',phase='candidate-closed'}){
   assert.equal(digest(readFileSync(binary)),APPLICATION.caddyBinarySha256);

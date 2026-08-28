@@ -2,3 +2,6 @@
 evidence/** -text
 run-wire-proof.mjs -text
 wire-fixture.mjs -text
+*.mjs -text
+*.cs -text
+*.ps1 -text

@@ -20,3 +20,9 @@ gate7f/function-first/home-runtime/Runtime-Windows.ps1 -text
 gate7f/function-first/home-runtime/Install-HomeRuntime.ps1 -text
 gate7f/function-first/request-coverage.test.mjs -text
 gate7f/function-first/home-runtime/evidence/20260828-owner-status-r*/** -text
+gate7f/function-first/home-runtime/tls-proxy.mjs -text
+gate7f/function-first/home-runtime/proxy.mjs -text
+gate7f/function-first/home-runtime/controller.mjs -text
+gate7f/function-first/readiness/manifest.mjs -text
+gate7f/function-first/readiness/lease-contract.mjs -text
+gate7f/function-first/readiness/evidence/20260828-smoke-gemma-r1/events.jsonl -text

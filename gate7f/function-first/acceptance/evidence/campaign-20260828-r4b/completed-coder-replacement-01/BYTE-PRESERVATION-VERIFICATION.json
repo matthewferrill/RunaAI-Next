@@ -1,0 +1,99 @@
+{
+  "schemaVersion": "runaai-retained-report-byte-preservation/v1",
+  "verified": true,
+  "gitObject": "0d4f3f9552b8f65a03f4e39615710666994589b6",
+  "comparison": "exact raw bytes; no normalization",
+  "attributesSha256": "c460d4d03e2c26df2917acedb49725b05eba1a157bf905c751b0acda61a9f738",
+  "attributes": [
+    "gate7f/function-first/acceptance/evidence/campaign-20260828-r4b/completed-coder-replacement-01/completed-coder-review.json: text: unset",
+    "gate7f/function-first/acceptance/evidence/campaign-20260828-r4b/completed-coder-replacement-01/completed-coder-full-manifest.json: text: unset",
+    "gate7f/function-first/acceptance/evidence/campaign-20260828-r4b/completed-coder-replacement-01/completed-coder-dual-grade-ledger.json: text: unset",
+    "gate7f/function-first/acceptance/evidence/campaign-20260828-r4b/completed-coder-replacement-01/COMPLETED-CODER-INDEPENDENT-REVIEW.md: text: unset"
+  ],
+  "originalReportCommit": "ae1760124e73a4f42aa0d4d308b6fc37dd6abfab",
+  "finding": "Automatic-text CRLF conversion in an integrated checkout changed working bytes while original artifacts and Git blobs retained their authoritative hashes. Exact directory attributes now protect these reports.",
+  "semanticChanges": false,
+  "rawObservationChanges": false,
+  "records": [
+    {
+      "name": "completed-coder-review.json",
+      "bytes": 8558,
+      "originalArtifactSha256": "ac4cb0d25ab2d0616464ac3643bbfe3a410654d132b3c52c70509bfd1ebdcd0c",
+      "workingSha256": "ac4cb0d25ab2d0616464ac3643bbfe3a410654d132b3c52c70509bfd1ebdcd0c",
+      "gitBlobSha256": "ac4cb0d25ab2d0616464ac3643bbfe3a410654d132b3c52c70509bfd1ebdcd0c",
+      "archiveSha256": "ac4cb0d25ab2d0616464ac3643bbfe3a410654d132b3c52c70509bfd1ebdcd0c",
+      "checkouts": [
+        {
+          "autocrlf": "true",
+          "directory": "D:\\AI\\CodexHome\\visualizations\\2026\\08\\20\\01a02109-d801-7c71-a69e-511f1ddd5278\\independent-semantic-9556ed0-r4b-replacement-01\\coder-byte-checkout-true-hceMqT",
+          "sha256": "ac4cb0d25ab2d0616464ac3643bbfe3a410654d132b3c52c70509bfd1ebdcd0c"
+        },
+        {
+          "autocrlf": "false",
+          "directory": "D:\\AI\\CodexHome\\visualizations\\2026\\08\\20\\01a02109-d801-7c71-a69e-511f1ddd5278\\independent-semantic-9556ed0-r4b-replacement-01\\coder-byte-checkout-false-yrnzF2",
+          "sha256": "ac4cb0d25ab2d0616464ac3643bbfe3a410654d132b3c52c70509bfd1ebdcd0c"
+        }
+      ]
+    },
+    {
+      "name": "completed-coder-full-manifest.json",
+      "bytes": 142211,
+      "originalArtifactSha256": "ef36ed4b8376b093bc63e99b43c683af70f2b0173c06e0db5de934952a46f4d2",
+      "workingSha256": "ef36ed4b8376b093bc63e99b43c683af70f2b0173c06e0db5de934952a46f4d2",
+      "gitBlobSha256": "ef36ed4b8376b093bc63e99b43c683af70f2b0173c06e0db5de934952a46f4d2",
+      "archiveSha256": "ef36ed4b8376b093bc63e99b43c683af70f2b0173c06e0db5de934952a46f4d2",
+      "checkouts": [
+        {
+          "autocrlf": "true",
+          "directory": "D:\\AI\\CodexHome\\visualizations\\2026\\08\\20\\01a02109-d801-7c71-a69e-511f1ddd5278\\independent-semantic-9556ed0-r4b-replacement-01\\coder-byte-checkout-true-hceMqT",
+          "sha256": "ef36ed4b8376b093bc63e99b43c683af70f2b0173c06e0db5de934952a46f4d2"
+        },
+        {
+          "autocrlf": "false",
+          "directory": "D:\\AI\\CodexHome\\visualizations\\2026\\08\\20\\01a02109-d801-7c71-a69e-511f1ddd5278\\independent-semantic-9556ed0-r4b-replacement-01\\coder-byte-checkout-false-yrnzF2",
+          "sha256": "ef36ed4b8376b093bc63e99b43c683af70f2b0173c06e0db5de934952a46f4d2"
+        }
+      ]
+    },
+    {
+      "name": "completed-coder-dual-grade-ledger.json",
+      "bytes": 494231,
+      "originalArtifactSha256": "8097f615cf543108f6795d8c0378ff9783c7b7b0b94a99a31b798a084fe26476",
+      "workingSha256": "8097f615cf543108f6795d8c0378ff9783c7b7b0b94a99a31b798a084fe26476",
+      "gitBlobSha256": "8097f615cf543108f6795d8c0378ff9783c7b7b0b94a99a31b798a084fe26476",
+      "archiveSha256": "8097f615cf543108f6795d8c0378ff9783c7b7b0b94a99a31b798a084fe26476",
+      "checkouts": [
+        {
+          "autocrlf": "true",
+          "directory": "D:\\AI\\CodexHome\\visualizations\\2026\\08\\20\\01a02109-d801-7c71-a69e-511f1ddd5278\\independent-semantic-9556ed0-r4b-replacement-01\\coder-byte-checkout-true-hceMqT",
+          "sha256": "8097f615cf543108f6795d8c0378ff9783c7b7b0b94a99a31b798a084fe26476"
+        },
+        {
+          "autocrlf": "false",
+          "directory": "D:\\AI\\CodexHome\\visualizations\\2026\\08\\20\\01a02109-d801-7c71-a69e-511f1ddd5278\\independent-semantic-9556ed0-r4b-replacement-01\\coder-byte-checkout-false-yrnzF2",
+          "sha256": "8097f615cf543108f6795d8c0378ff9783c7b7b0b94a99a31b798a084fe26476"
+        }
+      ]
+    },
+    {
+      "name": "COMPLETED-CODER-INDEPENDENT-REVIEW.md",
+      "bytes": 4212,
+      "originalArtifactSha256": "1f08dea7009df25b5b9dc8af1b9d823e8edf9afca466008be62be459548b0b02",
+      "workingSha256": "1f08dea7009df25b5b9dc8af1b9d823e8edf9afca466008be62be459548b0b02",
+      "gitBlobSha256": "1f08dea7009df25b5b9dc8af1b9d823e8edf9afca466008be62be459548b0b02",
+      "archiveSha256": "1f08dea7009df25b5b9dc8af1b9d823e8edf9afca466008be62be459548b0b02",
+      "checkouts": [
+        {
+          "autocrlf": "true",
+          "directory": "D:\\AI\\CodexHome\\visualizations\\2026\\08\\20\\01a02109-d801-7c71-a69e-511f1ddd5278\\independent-semantic-9556ed0-r4b-replacement-01\\coder-byte-checkout-true-hceMqT",
+          "sha256": "1f08dea7009df25b5b9dc8af1b9d823e8edf9afca466008be62be459548b0b02"
+        },
+        {
+          "autocrlf": "false",
+          "directory": "D:\\AI\\CodexHome\\visualizations\\2026\\08\\20\\01a02109-d801-7c71-a69e-511f1ddd5278\\independent-semantic-9556ed0-r4b-replacement-01\\coder-byte-checkout-false-yrnzF2",
+          "sha256": "1f08dea7009df25b5b9dc8af1b9d823e8edf9afca466008be62be459548b0b02"
+        }
+      ]
+    }
+  ]
+}

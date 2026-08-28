@@ -1,0 +1,8 @@
+# These exact report bytes are hash-bound to independent review artifacts.
+.gitattributes -text
+README.md -text
+completed-coder-review.json -text
+completed-coder-full-manifest.json -text
+completed-coder-dual-grade-ledger.json -text
+COMPLETED-CODER-INDEPENDENT-REVIEW.md -text
+BYTE-PRESERVATION-VERIFICATION.json -text

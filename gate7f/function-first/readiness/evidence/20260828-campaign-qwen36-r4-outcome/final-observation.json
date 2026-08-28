@@ -1,0 +1,74 @@
+{
+    "protectedDataIncluded":  false,
+    "readOnly":  true,
+    "listeners":  [
+                      {
+                          "LocalAddress":  "0.0.0.0",
+                          "LocalPort":  8412
+                      },
+                      {
+                          "LocalAddress":  "0.0.0.0",
+                          "LocalPort":  1234
+                      }
+                  ],
+    "time":  "2026-08-28T22:41:39.5980651Z",
+    "host":  "RUNA-HOME",
+    "models":  [
+                   {
+                       "key":  "gemma-4-26b-a4b-it-qat",
+                       "loadedInstances":  [
+
+                                           ]
+                   },
+                   {
+                       "key":  "openai/gpt-oss-20b",
+                       "loadedInstances":  [
+
+                                           ]
+                   },
+                   {
+                       "key":  "llama-3.3-70b-instruct",
+                       "loadedInstances":  [
+
+                                           ]
+                   },
+                   {
+                       "key":  "qwen3.6-27b-mtp",
+                       "loadedInstances":  [
+
+                                           ]
+                   },
+                   {
+                       "key":  "qwen3.6-27b",
+                       "loadedInstances":  [
+
+                                           ]
+                   },
+                   {
+                       "key":  "qwen3-coder-30b-a3b-instruct",
+                       "loadedInstances":  [
+
+                                           ]
+                   },
+                   {
+                       "key":  "qwen/qwen3-4b",
+                       "loadedInstances":  [
+
+                                           ]
+                   },
+                   {
+                       "key":  "text-embedding-nomic-embed-text-v1.5",
+                       "loadedInstances":  [
+
+                                           ]
+                   }
+               ],
+    "ownedTaskRegistrations":  [
+
+                               ],
+    "schemaVersion":  "runa-m1-campaign-final-observation/v1",
+    "gpus":  [
+                 "0, GPU-15ea3e34-292b-3333-5e43-e5b133f9a30c, 260.00, 52, 23040, 1694",
+                 "1, GPU-1f2f6459-b688-3466-5b49-a65c538be843, 260.00, 45, 23040, 0"
+             ]
+}

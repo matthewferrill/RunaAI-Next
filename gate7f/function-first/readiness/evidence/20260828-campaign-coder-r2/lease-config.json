@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "runa-m1-campaign-lease/v1",
+  "leaseId": "20260828-campaign-coder-r2",
+  "candidate": {
+    "id": "coder",
+    "key": "qwen3-coder-30b-a3b-instruct",
+    "artifactPath": "C:\\lm-studio-models\\lmstudio-community\\Qwen3-Coder-30B-A3B-Instruct-GGUF\\Qwen3-Coder-30B-A3B-Instruct-Q6_K.gguf",
+    "bytes": 25104724288,
+    "sha256": "72a9b20a19c70db56e1ccd01fb35b0f0842d67d28e7c3bdff762df860120b769",
+    "architecture": "qwen3moe",
+    "quantization": "Q6_K",
+    "templateSha256": "672e747c77e990320152343b0a4951222e40de5645297905d89afba05586d827",
+    "mtp": false
+  },
+  "auxiliary": {
+    "key": "text-embedding-nomic-embed-text-v1.5",
+    "bytes": 84106624,
+    "sha256": "d4e388894e09cf3816e8b0896d81d265b55e7a9fff9ab03fe8bf4ef5e11295ac",
+    "context": 2048,
+    "artifactPath": "C:\\Users\\Matthew\\AppData\\Local\\Programs\\LM Studio\\resources\\app\\.webpack\\bin\\bundled-models\\nomic-ai\\nomic-embed-text-v1.5-GGUF\\nomic-embed-text-v1.5.Q4_K_M.gguf"
+  },
+  "policy": {
+    "readyLeaseMs": 3600000,
+    "preparationMs": 600000,
+    "loadMs": 180000,
+    "sampleMs": 5000,
+    "maximumGapMs": 30000,
+    "minimumFreeHostBytes": 8589934592,
+    "minimumFreeGpuMiB": 1024,
+    "maximumStartTemperatureC": 45,
+    "cutoffC": 85,
+    "powerWatts": 160,
+    "originalPowerWatts": 260,
+    "gpuUuids": [
+      "GPU-15ea3e34-292b-3333-5e43-e5b133f9a30c",
+      "GPU-1f2f6459-b688-3466-5b49-a65c538be843"
+    ],
+    "workerDeadlineMs": 4200000,
+    "supervisorDeadlineMs": 4440000,
+    "taskDeadlineMs": 4440000
+  },
+  "profile": "campaign",
+  "campaignHardwarePlanSha256": "d4e0d0b96ff4d1c15fb05801dff5c9b0f166c1c308cbbbf4e1a5eeed404e6c80",
+  "homeRoot": "C:\\Users\\codex-audit\\AppData\\Local\\RunaM1Readiness\\20260828-campaign-coder-r2",
+  "createdBeforeInference": true,
+  "inferenceOwner": "root-actual-application-adapters",
+  "lifecycleOwner": "roadmap_review"
+}

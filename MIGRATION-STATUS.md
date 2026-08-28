@@ -22,14 +22,24 @@ M1-S2 is in progress under the existing standing permission. Its preregistered c
 `gate7f/function-first/M1-S2-INTEGRATION-PROGRESS-2026-08-28.md`. Durable encrypted task/source work,
 server-authoritative conversation context and the ordinary-user function surface are being integrated.
 Actual Control sandbox/project proof passed 6/6 with disposable resources and unchanged production.
-The three actual adapter readiness checks passed, and all 12 model-free controls passed in practice
-across their recorded implementation revisions. Those are not one qualified control suite: rerun all
-12 under the same final runtime seal before the fixed 360-attempt, three-model functional campaign.
+The three actual adapter readiness checks passed. All 12 model-free controls then passed together on
+source `aa5deec`, runtime seal `62c9b2f5ea5d65874f7e18ed24d0a056011941b45c674a193ed04d9e3f118eee`.
+The first Gemma campaign stopped after 23/120 slots: a stale edit was correctly denied and the newer
+bytes preserved, but the old task still reported waiting for approval. That raw campaign and its 97
+unexecuted slots remain unqualified; Home was unloaded and both power limits restored. The durable
+pending-action correction is recorded in
+`gate7f/function-first/acceptance/STALE-PENDING-RESULTS-2026-08-28.md`. Corrected source needs a new
+common seal and all 12 controls before the fresh fixed 360-attempt, three-model campaign.
 The campaign runner now retains exact archive/source/runtime pins, actual per-attempt hardware
 observations, browser checkpoints, all failures and unchanged denominators. Task reopen preserves
 only still-valid explicit approvals; Undo uses the original task's owned receipt. The separately
-executed task/orchestrator PostgreSQL regression suite passed 35/35. Source and private rows remain
-isolated. Production deployment and the real customer trial remain open; no model winner is presumed.
+executed task/orchestrator PostgreSQL and pending-authority regression suite passed 44/44 with zero
+skips. Source and private rows remain isolated. The new isolated Qdrant service passed actual
+stop/restart persistence and rollback and is left registered disabled; see
+`gate7f/function-first/control/qdrant/CONTROL-LIFECYCLE-RESULTS-2026-08-28.md`.
+Production deployment and the real customer trial remain open; no model winner is presumed. Home's
+ordinary desktop startup/JIT defaults are not a reliable qualified-model service; a separate exact-profile
+admission/startup guard is being developed and must be proved before a reliable customer trial.
 Do not stop or request another approval at internal commits. Do not claim M1 or the broader roadmap is
 complete from these component results; preserve the historical M1-S1 result below.
 

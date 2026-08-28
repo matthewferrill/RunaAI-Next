@@ -82,3 +82,22 @@ and no appended forbidden request. It proves that bounded case, not blanket
 HTTP-parser security or rejection of the original header pair. Nonempty decoded
 mixed frames remain denied before controller admission. Any second admitted
 request, nonempty forwarded body or missing closure fails the new check.
+
+## Rejected approach and revised implementation, before wire r3
+
+The r2 actual run disproved the proposed Caddy request_body read_timeout: both
+valid empty GET backend waits ended at10s with empty200 replies, and slow input
+also returned empty200. The reader deadline set inside the handler survived into
+Go's background read for a completed/no-body request, cancelling its context.
+The final-route fixture additionally assumed separate routes where Caddy had
+coalesced handlers; it stopped before the60s case. All r2 observations and cleanup
+remain unchanged. No timeout status or empty200 is reclassified as successful.
+
+Remove that Caddy change entirely. The new isolated Home-proxy criteria in
+`home-runtime/BODY-TIMEOUT-RESPONSE-CRITERIA.md` commit41da751 require a typed408
+plus Connection:close at the existing10s body limit, before exact-request
+destruction, with at most100ms for flushing. All other aborts are immediate.
+The direct actual HTTP test passes; this does not yet prove Caddy behavior.
+Wire r3 therefore requires the actual typed408 through the original Caddy route,
+zero admission, and all unchanged long-response/timeout cases. No listener-wide
+read/write timeout, added service or global setting is introduced.

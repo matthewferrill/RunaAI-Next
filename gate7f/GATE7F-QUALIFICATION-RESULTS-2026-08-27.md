@@ -14,6 +14,32 @@ This is a comparative engineering recommendation, not a waiver of the frozen acc
 **neither model passed a complete role under the preregistered thresholds**. The distinction matters:
 the better candidate can still have a production-blocking weakness for a particular capability.
 
+### Role clarification after steward review
+
+"Qwen" in this comparison means **Qwen3 Coder 30B-A3B Q6_K**, the existing coding specialist that
+also serves fast chat/research. It does not mean the separate **Qwen3.6 27B MTP** deliberate-chat/review
+model from the original RunaLab roster. Qwen3.6 was not rerun here; its production integration remains
+deferred after the retained Gate 1 timeout diagnostic. No Gemma-versus-Qwen3.6 conclusion follows.
+
+All four product areas were represented, but they were not four independently qualified roles:
+
+| Product area | Coverage in this comparison | Limit on the conclusion |
+|---|---|---|
+| Coding | Four JavaScript drafting/explanation cases, three attempts each; Gemma 12/12 acceptable | No repository editing, autonomous debugging, package installation or execution of generated code |
+| Tools | Structured/native calls, exact arguments, task scope, permission/receipt handling and four synthetic application flows | Not broad real-world integrations; Gemma's fake-receipt claim and exact-proposal misses remain failures |
+| Fast chat | Conversation, corrections, summaries and bounded response-time/endurance measurement; Gemma 24/27 acceptable case-attempts | Below the 90% quality gate; paced timing is not full household capacity or fresh browser acceptance |
+| Research | Supplied-source grounding, citations, old/current policies, missing evidence and malicious document content | No live web research or open-ended investigation; research shares the read-only evidence/code role and has no separate pass score |
+
+The 12 coding attempts are repetitions of four cases, not twelve distinct programming tasks. The
+frozen role denominators below are unchanged. A preference for Gemma on ordinary chat does not require
+retiring Qwen3 Coder from coding, and tool permissions never come from either model. Current source
+wiring creates distinct Chat/Research/Code providers with one shared configured model ID
+(`gate6b/composition.mjs`); separate tabs therefore do not currently imply separate loaded models.
+
+The role-by-role disposition and ordered follow-up are recorded in
+`GATE7F-ROLE-DISPOSITION-AND-NEXT-STEPS-2026-08-27.md`. This clarification changes no score, seal,
+raw response, adjudication, model routing or production capability.
+
 ## What was compared
 
 - Installed Qwen3-Coder-30B-A3B-Instruct **Q6_K**, versus Gemma 4 26B A4B IT QAT **Q4_0**.
@@ -152,7 +178,8 @@ this hardware/runtime, not all Qwen or Gemma models.
 ## Recommended next work
 
 1. Keep the current production route and accepted harmless sandbox unchanged. Carry Gemma forward as
-   the stronger candidate, not an automatically approved replacement; retain Qwen as a useful baseline.
+   a promising candidate, particularly for ordinary chat and bounded drafting; retain Qwen3 Coder as
+   the incumbent and coding candidate. Select each role independently, not one winner for all work.
 2. Finish the model-independent conversational action path: deterministic grant/revocation enforcement
    for every tool path and authoritative receipt/status presentation. Untrusted file text and model
    prose cannot certify execution. This is required regardless of the eventual model selection.
@@ -161,8 +188,10 @@ this hardware/runtime, not all Qwen or Gemma models.
    workflow with newly sealed independent cases; do not tune against this set and call it a fresh pass.
 4. Correct the source-label specification prospectively. Preserve this run and its original failures.
 5. Qualify a narrowly scoped chat/read-only successor across all applicable application lanes before
-   a rollback-protected canary and human style/continuity check. Broader project execution remains a
-   separate capability step, not a consequence of completing this benchmark.
+   a rollback-protected canary and human style/continuity check. Qualify role routing and Home model
+   residency as well as answer quality before assigning different models to Chat and Code. Broader
+   project execution and live web research remain separate capability steps, not consequences of this
+   benchmark. Qwen3.6 deliberate review remains deferred, not silently replaced or qualified.
 
 The temporary power envelope is a candidate operating profile, not a silently installed permanent
 production policy. A production hardware profile must be deliberately validated and recorded. No

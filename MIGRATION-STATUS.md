@@ -630,12 +630,21 @@ The evidence-backed recommendation, hardware limits, retained-source paths and r
 command are in `gate7f/GATE7F-QUALIFICATION-RESULTS-2026-08-27.md`. Final regression validation is
 755/755 tests with all original/new seals and initial judgment hashes intact.
 
-The next work is a bounded workflow successor: finish model-independent grant/revocation enforcement
-and truthful receipt presentation across every tool path, address exact-proposal and calculation
-reliability, prospectively correct the source-label specification, then qualify the changed workflow
-on newly sealed independent cases. Carry Gemma forward as the stronger development candidate; neither
-model is approved for a production switch or broader autonomous work by these results. Keep the
-accepted production route and harmless sandbox unchanged until the successor's applicable gates pass.
+The follow-up role clarification and ordered work are in
+`gate7f/GATE7F-ROLE-DISPOSITION-AND-NEXT-STEPS-2026-08-27.md`. All four product areas had bounded
+coverage, not four independent role approvals: coding was static drafting/explanation, tools were
+synthetic, and research used supplied sources rather than the live web. Qwen here means Qwen3 Coder,
+not the separately deferred Qwen3.6 deliberate-review model; no comparison with Qwen3.6 was performed.
+
+The next work is a bounded workflow successor: independently selectable role/model contracts,
+model-independent grant/revocation enforcement and truthful receipt presentation, exact-proposal and
+calculation reliability, and a prospective source-label correction. Then qualify the changed workflow
+on newly sealed independent cases before validating exact routing/residency and the customer trial.
+Prioritize Gemma as an ordinary-chat candidate while retaining Qwen3 Coder as the incumbent/coding
+candidate; select each role independently. Neither model is approved for a production switch or
+broader autonomous work by these results. Keep the accepted production route and harmless sandbox
+unchanged until the successor's applicable gates pass; broader code execution and live research remain
+separate capability work, not prerequisites to completing every limited chat improvement.
 
 The original partial v1 and complete v2 records are preserved. V2 recorded
 105 observations per model with zero cutoffs; its verifier accepted them, but later review found

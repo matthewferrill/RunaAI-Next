@@ -5,7 +5,7 @@ import { assertConversationContext } from "../gate7f/function-first/conversation
 
 const coded = (code, message) => Object.assign(new Error(message), { code });
 const sha256 = value => createHash("sha256").update(String(value)).digest("hex");
-const lanes = new Set(["general", "research", "guarded", "workspace", "code"]);
+const lanes = new Set(["general", "research", "guarded", "workspace", "code", "review"]);
 const experiences = new Set(["chat", "code"]);
 const PERSONAL_SCOPE = "runa:personal";
 const EPHEMERAL_SCOPE = "runa:ephemeral";
@@ -22,17 +22,18 @@ function answerRequest(body, participant, totalDeadlineMs) {
   if (!body || typeof body !== "object" || Array.isArray(body)) throw coded("request-invalid", "A JSON request is required.");
   if (!lanes.has(body.lane)) throw coded("request-lane-invalid", "The requested lane is unavailable.");
   const experience = body.experience ?? (body.lane === "code" ? "code" : "chat");
-  if (!experiences.has(experience) || (experience === "code") !== (body.lane === "code")) {
+  if (!experiences.has(experience) || (!["research", "review"].includes(body.lane)
+      && (experience === "code") !== (body.lane === "code"))) {
     throw coded("request-experience-invalid", "The requested Chat or Code experience does not match its route.");
   }
   const verified = participant.verified === true;
-  if (!verified && body.lane === "workspace") throw coded("workspace-authentication-required", "Workspace evidence requires a verified participant.");
+  if (!verified && (body.lane === "workspace" || body.workspace)) throw coded("workspace-authentication-required", "Workspace evidence requires a verified participant.");
   const projectId = verified ? String(body.projectId ?? PERSONAL_SCOPE) : EPHEMERAL_SCOPE;
   if (!/^[^\u0000-\u001f\u007f]{1,160}$/.test(projectId)) throw coded("request-project-invalid", "A bounded project scope is required.");
   const requestId = String(body.requestId ?? "").trim();
   const threadId = String(body.threadId ?? "").trim();
   if (!requestId || requestId.length > 160 || !threadId || threadId.length > 160) throw coded("request-id-invalid", "Bounded request and thread identifiers are required.");
-  const workspace = body.lane === "workspace" ? body.workspace : null;
+  const workspace = ["workspace", "research", "review"].includes(body.lane) ? (body.workspace ?? null) : null;
   return {
     schemaVersion: "runa2-answer-request/v2",
     requestId,
@@ -95,7 +96,7 @@ export class SelectedCoreApplication {
     const action = body?.lane === "workspace" ? "use-local-workspace-evidence" : "chat-ephemeral";
     const projectId = participant.verified ? String(body?.projectId ?? PERSONAL_SCOPE) : EPHEMERAL_SCOPE;
     const personalExperienceLane = body?.experience
-      && (body?.lane === "general" || body?.lane === "code");
+      && ["general", "code", "research", "review"].includes(body?.lane);
     const authorizationProjectId = personalExperienceLane ? PERSONAL_SCOPE : projectId;
     const decision = await this.authorizer.authorize({ participant, action, resource: `project:${authorizationProjectId}` });
     if (!decision?.allowed) throw coded(decision?.reason ?? "authorization-denied", "The selected read route was denied.");

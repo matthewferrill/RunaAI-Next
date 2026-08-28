@@ -1,15 +1,15 @@
 import { createHash, randomBytes } from "node:crypto";
 import { parseAnswerRequest, parseAnswerResponse } from "./contracts.mjs";
 import { containsRetrievedAuthorityInstruction } from "./content-policy.mjs";
+import { requestsProtectedRead } from "../gate7f/function-first/conversation-policy.mjs";
 
 const sha256 = value => createHash("sha256").update(String(value)).digest("hex");
-const protectedPattern = /\b(device vault|dpapi|windows hello|credential store|private key|machine[- ]bound ciphertext)\b/i;
 const metaphysicalPattern = /\b(god|deity|soul|meaning of life|afterlife)\b/i;
 const policySuspensionPattern = /\b(turn off|disable|suspend|ignore|bypass)\b.{0,40}\b(approval|policy|guard|gate)s?\b/i;
 const crossProjectPattern = /\b(?:other|another) project(?:'s)?\b/i;
-const strongProjectArtifactPattern = /\b(repository|repo|codebase|workspace|handoff|readme|commits?|branches?|pull requests?|reranker)\b/i;
+const strongProjectArtifactPattern = /\b(repository|repo|codebase|workspace|handoff|readme|commits?|branch(?:es)?|pull requests?|reranker)\b/i;
 const scopedProjectReferencePattern = /\b(?:this|the|my|our|selected|current)\s+(?:project|documents?|documentation|files?|folders?|sources?|records?|evidence|implementation|configuration|config|settings?|migration|release|deployment|architecture|database|schema|runtime|dependency|boundary)\b/i;
-const contextualFollowUpPattern = /^\s*(why|how|what|where|when|who|which|that|it|this|can you|could you|explain|tell me more|continue|summarize|what about)\b/i;
+const contextualFollowUpPattern = /^\s*(?:(?:why|how|what about|explain|summarize|tell me more about)\s+(?:is |does |did |would |can |was )?(?:that|it|this|those|these)\b|(?:that|it|this|those|these)\b|tell me more\b|continue\b|why\s*[?.!]?\s*$)/i;
 const stopWords = new Set(["a", "an", "and", "does", "explain", "how", "is", "of", "the", "to", "what"]);
 
 function requestTimeoutError() {
@@ -42,7 +42,7 @@ export function planResearchPasses(question, maximumPasses) {
 }
 
 export function deterministicPreflight(message) {
-  if (protectedPattern.test(message)) return {
+  if (requestsProtectedRead(message)) return {
     code: "protected-source-denied",
     answer: "That protected information is not available in this chat.",
   };
@@ -66,8 +66,13 @@ export function classifyGround(message, evidence, advisoryContext = null) {
 }
 
 export function requiresProjectRecord(message, history = []) {
-  const hasProjectReference = value => strongProjectArtifactPattern.test(String(value))
-    || scopedProjectReferencePattern.test(String(value));
+  const hasProjectReference = value => {
+    const text = String(value);
+    if (scopedProjectReferencePattern.test(text)) return true;
+    if (/^\s*(?:(?:please )?(?:define|explain|teach me)|what (?:is|are)|how (?:does|do|can|should))\b/i.test(text)) return false;
+    if (/^\s*(?:please )?(?:draft|write|create)\b/i.test(text)) return false;
+    return strongProjectArtifactPattern.test(text);
+  };
   if (hasProjectReference(message)) return true;
   if (!contextualFollowUpPattern.test(String(message))) return false;
   const priorUserMessage = [...history].reverse().find(turn => turn?.role === "user")?.content ?? "";

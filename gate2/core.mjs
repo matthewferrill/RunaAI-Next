@@ -3,11 +3,10 @@ import { ReadOnlyAnswerSlice, requiresProjectRecord } from "../gate1/core.mjs";
 import { parseGate2AnswerRequest, parseGate2AnswerResponse, GATE2_LANE_CAPABILITIES, GATE2_MODEL_ROLES } from "./contracts.mjs";
 import { approvedKnowledgeReceipt, providerAdvisoryFromDelivery } from "../gate4c/answer-context.mjs";
 import { answerExecutionStamp } from "../gate7e/contracts.mjs";
+import { requestsProtectedRead, requestsUnavailableEffect, requestsLiveInformation, claimsUnperformedAction }
+  from "../gate7f/function-first/conversation-policy.mjs";
 
 const sha256 = value => createHash("sha256").update(String(value)).digest("hex");
-const protectedPattern = /\b(device vault|dpapi|windows hello|credential store|private key|machine[- ]bound ciphertext)\b/i;
-const currentLookupPattern = /\b(today|current weather|current news|current price|live score|near me|showtimes?)\b/i;
-const effectRequestPattern = /\b(write|delete|execute|deploy|approve|learn|remember)\b/i;
 const sessionRecallPattern = /\bwhat did i (?:ask|say) before|previous (?:question|message)\b/i;
 
 function normalizedRequestId(request) {
@@ -57,8 +56,20 @@ class ExplicitIndex {
     this.references = references;
     this.searches = [];
   }
-  async search({ projectId, query, maximumPassages }) {
+  async search({ projectId, query, maximumPassages, deadlineMs }) {
     this.searches.push({ projectId, query });
+    if (typeof this.delegate?.searchSelected === "function") {
+      const result = await this.delegate.searchSelected({ projectId, query, maximumPassages, deadlineMs,
+        references: this.references });
+      const allowed = new Set(this.references.map(reference =>
+        `${reference.projectId}\0${reference.sourceId}\0${reference.sectionId}\0${reference.contentSha256}`));
+      if (!Array.isArray(result?.references) || result.references.some(reference => !allowed.has(
+        `${reference.projectId}\0${reference.sourceId}\0${reference.sectionId}\0${reference.contentSha256}`))) {
+        throw Object.assign(new Error("Selected retrieval returned a reference outside the selected revision."),
+          { code: "selected-source-scope-mismatch" });
+      }
+      return result;
+    }
     return { references: this.references.filter(item => item.projectId === projectId).slice(0, maximumPassages),
       degraded: false, unavailable: [] };
   }
@@ -79,7 +90,7 @@ class EphemeralRecordProxy {
 }
 
 function deterministicResponse(request) {
-  if (protectedPattern.test(request.message)) return emptyV1(request, {
+  if (requestsProtectedRead(request.message)) return emptyV1(request, {
     answer: "That protected information is not available in this chat.",
     reason: "protected-source-denied", auditCode: "protected-source-denied",
   });
@@ -90,11 +101,11 @@ function deterministicResponse(request) {
       reason: "session-recall", auditCode: "session-recall-deterministic",
     });
   }
-  if (currentLookupPattern.test(request.message)) return emptyV1(request, {
+  if (requestsLiveInformation(request.message)) return emptyV1(request, {
     answer: "I don't have live web or weather access in this chat, so I can't verify current information.",
     reason: "current-source-required", auditCode: "external-network-not-used",
   });
-  if (request.lane !== "code" && effectRequestPattern.test(request.message)) return emptyV1(request, {
+  if (request.lane !== "code" && requestsUnavailableEffect(request.message)) return emptyV1(request, {
     answer: "This chat is read-only and cannot perform that action, approve it, or learn from it.",
     reason: "effect-not-available", auditCode: "effects-empty-enforced",
   });
@@ -109,6 +120,12 @@ function citationStatus(response) {
 
 function applyCommonAnswerGates(response, request) {
   const codes = [`answer-checks-performed:${request.lane}`];
+  if (response.completion.reason === "complete" && claimsUnperformedAction(response.answer)) {
+    response.answer = "Runa's response claimed an action without an execution receipt, so it was not accepted. No action was performed by this answer. Please ask for a draft or analysis, or use the available governed action workflow.";
+    response.citations = [];
+    response.completion.reason = "unverified-action-claim";
+    codes.push("unverified-action-claim-withheld");
+  }
   if (response.auditCodes.includes("unknown-citation")) codes.push("citation-unknown-visible");
   if (/\bI (?:checked|looked up|ran)\b/i.test(response.answer) && !response.retrieval.attempted) {
     codes.push("claimed-lookup-without-receipt");
@@ -152,7 +169,9 @@ export class Gate2ReadOnlyService {
 
   async #execute(request) {
     const role = GATE2_MODEL_ROLES[request.lane];
+    const explicitSources = Boolean(request.workspace);
     const knowledgeRequired = ["research", "guarded", "workspace"].includes(request.lane)
+      || explicitSources
       || (request.lane === "general" && requiresProjectRecord(request.message, request.history));
     let resolvedWorkspace = { references: [], denied: [] };
     let knowledgeDelivery = null;
@@ -160,7 +179,7 @@ export class Gate2ReadOnlyService {
     let knowledgeFallbackReason = response ? "not-evaluated-deterministic-boundary"
       : knowledgeRequired ? "adapter-disabled"
         : request.lane === "code" ? "not-applicable-code-conversation" : "not-applicable-general-conversation";
-    if (!response && request.lane === "workspace") {
+    if (!response && explicitSources) {
       resolvedWorkspace = await this.workspaceResolver.resolve(request.project.projectId, request.workspace.sources);
       if (resolvedWorkspace.denied.length) response = emptyV1(request, {
         answer: "That information belongs to another project and is not available in this chat.",
@@ -195,16 +214,16 @@ export class Gate2ReadOnlyService {
     }
 
     if (!response) {
-      const selectedIndex = request.lane === "workspace"
+      const selectedIndex = explicitSources
         ? new ExplicitIndex(this.index, resolvedWorkspace.references)
         : this.index;
       const selectedRecords = request.participant.verified ? this.records : new EphemeralRecordProxy(this.records);
-      const provider = providerFor(this.providers, role);
       const advisoryContext = providerAdvisoryFromDelivery(knowledgeDelivery);
-      const slice = new ReadOnlyAnswerSlice({ records: selectedRecords, index: selectedIndex, provider, advisoryContext,
-        retrievalPolicy: request.lane === "workspace" ? "required"
-          : request.lane === "code" ? "none" : "conversation-aware" });
       try {
+        const provider = providerFor(this.providers, role);
+        const slice = new ReadOnlyAnswerSlice({ records: selectedRecords, index: selectedIndex, provider, advisoryContext,
+          retrievalPolicy: explicitSources ? "required"
+            : ["code", "review"].includes(request.lane) ? "none" : "conversation-aware" });
         response = await slice.answer(gate1Request(request));
       } catch (error) {
         if (!["provider-model-mismatch", "provider-role-unavailable"].includes(error?.code)) throw error;
@@ -232,13 +251,13 @@ export class Gate2ReadOnlyService {
     const incompleteReasons = new Set(["timeout", "output-limited", "provider-output-empty",
       "provider-response-invalid", "provider-shape-invalid", "provider-incomplete",
       "provider-transport-failed", "provider-model-mismatch", "provider-role-mismatch",
-      "provider-role-unavailable"]);
+      "provider-role-unavailable", "unverified-action-claim"]);
     const continuityResult = incompleteReasons.has(response.completion.reason) || Boolean(knowledgeReceipt.errorCode)
       ? { turnRecorded: false, source: "not-recorded-incomplete-answer" }
       : await this.continuity.recordAnswer(request, response);
     const continuityStatus = await this.continuity.status();
     const dependency = await this.statusProvider({ request, response });
-    response.workspace = request.lane === "workspace" ? {
+    response.workspace = explicitSources ? {
       explicitSources: request.workspace.sources.length,
       resolvedSources: resolvedWorkspace.references.length,
       extraReads: 0,

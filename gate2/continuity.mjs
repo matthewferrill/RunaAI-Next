@@ -135,6 +135,7 @@ export class MemoryContinuityStore {
     };
     chat.turns.push({ requestId: request.requestId, lane: request.lane, user: request.message,
       assistant: response.answer, at: this.now().toISOString() });
+    if (["review", "research"].includes(request.lane)) chat.experience = request.experience;
     chat.unread = false;
     this.chats.set(chat.chatId, chat);
     this.requests.set(request.requestId, { digest, chatId: chat.chatId });
@@ -154,7 +155,7 @@ export class MemoryContinuityStore {
     if (chat.archived || chat.participantId !== scope.participantId || chat.projectId !== scope.projectId) {
       throw coded("chat-scope-denied", "The selected conversation was not found.");
     }
-    const experience = chat.turns.some(turn => ["code", "workspace"].includes(turn.lane)) ? "code" : "chat";
+    const experience = chat.experience ?? (chat.turns.some(turn => ["code", "workspace"].includes(turn.lane)) ? "code" : "chat");
     if (experience !== scope.experience) throw coded("chat-experience-denied", "The conversation belongs to another experience.");
     return createConversationContext(scope, { turns: chat.turns, turnCount: chat.turns.length });
   }

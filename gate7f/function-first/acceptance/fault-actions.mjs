@@ -341,7 +341,15 @@ export function createFaultActions({ checkpoint = null } = {}) {
       await inspectCheckpoint(client, "acknowledgement-lost"); return result;
     },
   };
-  return { actions: Object.freeze(actions), close() {
+  return { actions: Object.freeze(actions), async drain({ maximumMs = 10000 } = {}) {
+    if (!Number.isInteger(maximumMs) || maximumMs < 1 || maximumMs > 10000) throw fail("m1-fault-drain-budget-invalid");
+    // Capture these promises before close() releases holds and clears the map.
+    // Settling an HTTP call is not a pass: its actual rejection/output remains
+    // in the same journey ledger and must be graded independently.
+    const pending = [...states.values()].map(value => value.pendingRun).filter(Boolean);
+    await bounded(Promise.allSettled(pending), maximumMs, "m1-fault-work-undrained");
+    return { pendingSettled: pending.length };
+  }, close() {
     for (const [client, current] of states) { current.ack?.close(); client.host.faults?.clear?.(); }
     states.clear();
   } };

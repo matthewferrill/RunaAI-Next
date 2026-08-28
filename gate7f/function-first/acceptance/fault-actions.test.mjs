@@ -157,3 +157,23 @@ test("all five non-browser gap families have concrete action implementations", (
   }
   assert.equal(missingActions.size, 0); extension.close();
 });
+
+test("fault drain waits for the real pending HTTP call after close releases its fixture hold", async () => {
+  let release, requestStarted;
+  const held = new Promise(resolve => { release = resolve; });
+  const arrived = new Promise(resolve => { requestStarted = resolve; });
+  const endpoint = await server(async (_request, response) => { requestStarted(); await held; response.end("settled"); });
+  const extension = createFaultActions(); let completed = false;
+  // Only the hook is a test double; drain observes an actual held TCP request.
+  // This fixture is not a native-execution or model qualification claim.
+  const client = { item: { id: "agent-05-cancel-drain", role: "agent" }, principalId: scope.participantId, projectId: scope.projectId,
+    task: { taskId: "fixture-task" }, grant: { grantId: "fixture-grant", revision: 1 }, id: () => "fixture-request",
+    host: { faults: { armProviderResponseDrop() {}, armNativeReceiptHold() {}, async waitNativeReceiptHeld() { await arrived; return { fixture: true }; }, clear() { release(); } } },
+    async m1() { const response = await fetch(endpoint.baseUrl); const value = await response.text(); completed = true; return value; } };
+  try {
+    await extension.actions["run.start"](client); assert.equal(completed, false);
+    const drained = extension.drain(); extension.close();
+    assert.equal((await drained).pendingSettled, 1); assert.equal(completed, true);
+    await assert.rejects(extension.drain({ maximumMs: 10001 }), /budget-invalid/u);
+  } finally { release(); extension.close(); await endpoint.close(); }
+});

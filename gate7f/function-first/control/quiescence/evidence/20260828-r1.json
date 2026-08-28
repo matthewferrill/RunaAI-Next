@@ -1,0 +1,30 @@
+{
+  "schemaVersion": "runaai-caddy-quiescence-proof/v1",
+  "startedAt": "2026-08-28T20:32:07.177Z",
+  "binarySha256": "5cb9ab71e5756ce72840b8234177a2f40c8b4ab47a806b8e841e2b784e9df62b",
+  "fixture": "C:\\Users\\matth\\AppData\\Local\\Temp\\m1-caddy-quiescence-Y6FZfL",
+  "checks": [],
+  "events": [],
+  "modelCalls": 0,
+  "homeChanges": false,
+  "productionChanges": false,
+  "passed": false,
+  "ownedCaddyPid": 12836,
+  "errorCode": "ERR_ASSERTION",
+  "cleanup": {
+    "ownedCaddyStopped": true,
+    "ownedPortsClosed": [
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "retainedSyntheticFixtureAndJournal": true,
+    "productionChanges": false
+  },
+  "finishedAt": "2026-08-28T20:32:18.756Z"
+}

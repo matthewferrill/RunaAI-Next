@@ -27,6 +27,14 @@ counted. Close/drain exports the journal, including outside-attempt or late heal
 traffic, as ungraded diagnostics: `health-diagnostics.json` for a model campaign,
 `healthDiagnostics` for controls. Completed attempt records are not modified.
 
+A final size-hardening regression counts the retained response's **serialized
+JSON bytes**, including escaping, against that same 8-MiB budget. Twenty-four
+actual 64-KiB non-JSON HTTP responses demonstrated that live reads remain exact
+while excess diagnostic bodies are omitted with their hashes/sizes retained.
+The focused health suite passed **11/11** after this refinement. It changes only
+diagnostic retention accounting, not health eligibility, inference or controls;
+the earlier actual-browser/PG evidence below keeps its exact original source pin.
+
 ## Verification
 
 - `node --test gate7f/function-first/acceptance/*.test.mjs`: 124 passed, zero

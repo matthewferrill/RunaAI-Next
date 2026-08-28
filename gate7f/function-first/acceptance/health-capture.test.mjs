@@ -19,6 +19,24 @@ test("outside-attempt health journal remains exportable after close with explici
   assert.equal(diagnostic.transports.embedding.calls[0].upstreamContacted, false);
 });
 const ledger = () => new ObservationLedger(newObservation(item));
+test("health journal budgets serialized bytes while preserving actual HTTP reads and response hashes", async () => {
+  let actualGets = 0;
+  const raw = Buffer.alloc(HEALTH_CAPTURE_LIMITS.maximumBytes, 0);
+  const upstream = await endpoint((request, response) => { actualGets++; response.writeHead(200); response.end(raw); });
+  const capture = await startCaptureTransport({ mode: "scored", targetBaseUrl: upstream.url, kind: "embedding", getLedger: () => null });
+  try {
+    for (let index = 0; index < 24; index++) {
+      const response = await fetch(`${capture.baseUrl}/models`);
+      assert.equal(response.status, 200); assert.equal((await response.arrayBuffer()).byteLength, raw.length);
+    }
+    await capture.drain();
+    const diagnostic = healthCaptureDiagnostics({ embedding: capture }), calls = diagnostic.transports.embedding.calls;
+    assert.equal(actualGets, 24); assert.equal(calls.length, 24);
+    assert.ok(calls.some(value => value.responseOmitted === "bounded-journal-body-budget"));
+    assert.ok(calls.every(value => value.responseBytes === raw.length && /^[a-f0-9]{64}$/.test(value.responseSha256)));
+    assert.ok(Buffer.byteLength(JSON.stringify(diagnostic)) < HEALTH_CAPTURE_LIMITS.maximumJournalBodyBytes + 65536);
+  } finally { await capture.close(); await upstream.close(); }
+});
 async function endpoint(handler) {
   const server = createServer(handler); server.listen(0, "127.0.0.1"); await once(server, "listening");
   return { url: `http://127.0.0.1:${server.address().port}`, async close() {

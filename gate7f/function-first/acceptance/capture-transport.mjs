@@ -81,9 +81,14 @@ export async function startCaptureTransport({ mode, targetBaseUrl, modelId, kind
         const raw = await bytes(upstream.body, HEALTH_CAPTURE_LIMITS.maximumBytes);
         item.httpStatus = upstream.status;
         item.responseBytes = raw.length; item.responseSha256 = sha256(raw);
-        if (healthJournalBodyBytes + raw.length <= HEALTH_CAPTURE_LIMITS.maximumJournalBodyBytes) {
-          healthJournalBodyBytes += raw.length;
-          try { item.response = JSON.parse(raw.toString("utf8")); } catch { item.responseText = raw.toString("utf8"); }
+        let retained;
+        try { retained = { response: JSON.parse(raw.toString("utf8")) }; } catch { retained = { responseText: raw.toString("utf8") }; }
+        // Count the exported JSON bytes, not only upstream bytes: control
+        // characters in a non-JSON health body expand when JSON-escaped.
+        const retainedBytes = Buffer.byteLength(JSON.stringify(retained));
+        if (healthJournalBodyBytes + retainedBytes <= HEALTH_CAPTURE_LIMITS.maximumJournalBodyBytes) {
+          healthJournalBodyBytes += retainedBytes;
+          Object.assign(item, retained);
         } else item.responseOmitted = "bounded-journal-body-budget";
         response.writeHead(upstream.status, { "content-type": upstream.headers.get("content-type") ?? "application/json", "content-length": raw.length });
         response.end(raw);

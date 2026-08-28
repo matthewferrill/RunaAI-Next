@@ -258,3 +258,22 @@ duplicate, omitted or unsupported model identities and returns status/count meta
 focused observer/controller/bounded-child tests passed locally, including the actual PS5 parser and
 short-lived child deadline fixture. No installed CLI call or busy-state qualification has occurred
 yet; the next between-model static inspection and later positive/queued test remain required.
+
+## Prospective unconfirmed settings-child recovery barrier
+
+Independent parent review of `c08c74f` found that the bridge's unknown-outcome flag blocked apply and
+replay, but allowed a differently named Restore operation. A timed-out child whose termination is
+unconfirmed can still commit after a matching settings snapshot or native-request drain. Those checks
+do not establish that the settings writer is terminal. Block **every subsequent mutation**, including
+Restore, after any unconfirmed command, invalid receipt, or post-command drift. A stopped-child flag
+alone also does not prove the operation's outcome. Do not add an in-memory reset or infer recovery
+permission from current bytes, a later process exit, or construction of another bridge.
+
+Test an actual local delayed child which stays alive after its returned unknown outcome, attempt
+Restore before releasing its late write, and prove no compensating child is dispatched. After the
+original child finishes, Restore must remain blocked until a separately designed durable reconciliation
+proves the exact operation terminal, its exact-owned process stopped, and all retained effects/conflicts
+reconciled. This change does not implement that recovery authority. Also test stopped-but-unknown,
+invalid-receipt and post-command-drift barriers. The earlier129-test pass remains historical evidence
+with this newly identified gap, not qualification of the corrected recovery behavior. No Home command,
+settings mutation, TLS enrollment or campaign operation is part of these local regressions.

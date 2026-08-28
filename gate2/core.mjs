@@ -257,10 +257,8 @@ export class Gate2ReadOnlyService {
     const knowledgeReceipt = approvedKnowledgeReceipt(knowledgeDelivery, knowledgeFallbackReason, {
       delivered: response.auditCodes.includes("approved-knowledge-delivered"),
     });
-    const incompleteReasons = new Set(INCOMPLETE_ANSWER_REASONS);
-    const continuityResult = incompleteReasons.has(response.completion.reason) || Boolean(knowledgeReceipt.errorCode)
-      ? { turnRecorded: false, source: "not-recorded-incomplete-answer" }
-      : await this.continuity.recordAnswer(request, response);
+    // Stamp and validate all application-owned evidence before persistence. The
+    // private turn store must see the same source/execution metadata as the UI.
     const continuityStatus = await this.continuity.status();
     const dependency = await this.statusProvider({ request, response });
     response.workspace = explicitSources ? {
@@ -285,14 +283,27 @@ export class Gate2ReadOnlyService {
     };
     response.continuity = {
       durableChatEligible: request.participant.verified,
+      turnRecorded: false,
+      source: "not-recorded-yet",
+    };
+    if (request.contextRevision !== undefined) {
+      response.contextRevision = request.contextRevision;
+    }
+    response.approvedKnowledge = knowledgeReceipt;
+    response.effects = [];
+    response = parseGate2AnswerResponse(response);
+    const incompleteReasons = new Set(INCOMPLETE_ANSWER_REASONS);
+    const continuityResult = incompleteReasons.has(response.completion.reason) || Boolean(knowledgeReceipt.errorCode)
+      ? { turnRecorded: false, source: "not-recorded-incomplete-answer" }
+      : await this.continuity.recordAnswer(request, response);
+    response.continuity = {
+      durableChatEligible: request.participant.verified,
       turnRecorded: continuityResult.turnRecorded === true,
       source: continuityResult.source,
     };
     if (request.contextRevision !== undefined) {
       response.contextRevision = request.contextRevision + (continuityResult.turnRecorded ? 1 : 0);
     }
-    response.approvedKnowledge = knowledgeReceipt;
-    response.effects = [];
     return parseGate2AnswerResponse(response);
   }
 }

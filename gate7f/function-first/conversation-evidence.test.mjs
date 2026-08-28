@@ -2,6 +2,11 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { answerEvidence, readAnswerEvidence } from "./conversation-evidence.mjs";
 import { PostgresSelectedContinuityStore } from "../../gate6b/adapters/postgres-continuity.mjs";
+import { Gate2ReadOnlyService } from "../../gate2/core.mjs";
+import { parseGate2AnswerResponse } from "../../gate2/contracts.mjs";
+import { MemoryContinuityStore, MemoryWorkspaceResolver } from "../../gate2/continuity.mjs";
+import { MemoryIndex, MemoryRecordStore, ScriptedProvider } from "../../gate1/adapters/memory.mjs";
+import { sourceSection } from "../../gate1/core.mjs";
 
 export const evidenceResponse = () => ({ answer: "Synthetic answer", citations: [{ sourceId: "source-one", sectionId: "provided",
   contentSha256: "a".repeat(64), ordinal: 1 }], ground: "record-answers",
@@ -45,4 +50,29 @@ test("PostgreSQL read adapter returns new evidence and marks historical missing 
   const read = await store.readChat("synthetic-member", "synthetic-chat", "chat");
   assert.equal(read.turns[0].evidence, null); assert.deepEqual(read.turns[1].evidence, retained);
   assert.equal(read.turns[0].assistant, "Old answer");
+});
+
+test("actual Gate2 answer stamps complete trusted metadata before any turn store receives it", async () => {
+  const selected = sourceSection({ projectId: "synthetic-project", sourceId: "synthetic-selected", sectionId: "provided", content: "The service uses a blue marker." });
+  const locator = { sourceId: selected.sourceId, sectionId: selected.sectionId };
+  for (const [lane, role] of [["general", "chat"], ["guarded", "chat"], ["research", "research"], ["workspace", "code"], ["code", "code"], ["review", "review"]]) {
+    const continuity = new MemoryContinuityStore(); let stored;
+    continuity.recordAnswer = async (_request, response) => { stored = structuredClone(response); return { turnRecorded: true, source: "synthetic" }; };
+    const providers = { [role]: new ScriptedProvider({ role, reply: ({ evidence }) => ({ answer: "The selected marker is blue.",
+      citations: evidence.map(({ sourceId, sectionId }) => ({ sourceId, sectionId })) }) }) };
+    const index = new MemoryIndex({ references: [selected] });
+    index.rerank = async (_query, sources) => ({ sources, degraded: false, unavailable: [] });
+    const service = new Gate2ReadOnlyService({ providers, continuity, index, records: new MemoryRecordStore([selected]),
+      workspaceResolver: new MemoryWorkspaceResolver([selected]) });
+    const result = await service.answer({ schemaVersion: "runa2-answer-request/v2", requestId: `stamp-${lane}`, lane,
+      experience: ["code", "workspace"].includes(lane) ? "code" : "chat", participant: { principalId: "synthetic-member", verified: true },
+      project: { projectId: "synthetic-project" }, thread: { threadId: `stamp-${lane}` }, message: "What marker does this project record specify?",
+      history: [], contextRevision: 0, workspace: ["research", "workspace", "review"].includes(lane) ? { sources: [locator] } : null,
+      budgets: { deadlineMs: 1000, maximumPasses: 2, maximumPassages: 6, maximumEvidenceCharacters: 8000 } });
+    assert.ok(stored, lane); assert.equal(parseGate2AnswerResponse(stored).execution.status, "not-executed", lane);
+    assert.ok(answerEvidence(stored), lane); assert.deepEqual(answerEvidence(stored), answerEvidence(result), lane);
+    assert.equal(stored.continuity.turnRecorded, false, "a receipt must not claim persistence before it occurs");
+    assert.equal(result.continuity.turnRecorded, true); assert.equal(result.contextRevision, 1);
+    assert.equal(result.model.role, role);
+  }
 });

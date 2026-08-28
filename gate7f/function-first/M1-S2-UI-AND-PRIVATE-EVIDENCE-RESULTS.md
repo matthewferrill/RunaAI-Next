@@ -89,3 +89,21 @@ users, or databases. Parent-runner lifecycle cleanup owns those fixture records.
 
 Remaining acceptance is integrated stack/model testing and, when ready, genuine human
 customer testing. No production deployment or live model acceptance is asserted here.
+
+## Integration correction: stamp before storage
+
+The first constructed-response fixture proved encryption and readback but missed an
+application ordering defect: Gate2 assigned `workspace` and `execution` **after**
+calling the turn store. Real answers therefore would have retained null evidence.
+This is corrected by assembling and schema-validating application-owned response
+metadata before `recordAnswer`; only the persistence outcome and new revision are
+assigned afterward. The UI and retained turn now receive identical evidence.
+
+The expanded PostgreSQL proof is **17/17**, including actual
+`SelectedCoreApplication -> Gate2ReadOnlyService -> PostgreSQL -> readChat` execution
+for both Chat and Code review. It checks exact citations/evidence on reopen, no
+fallback when review is disabled, and no retained evidence from fabricated execution
+claims. All providers in these tests are deterministic synthetic adapters, not live
+LLMs. A separate regression exercises pre-storage stamping across all six answer
+lanes. The root's selected-source-required guard is preserved unchanged.
+The full default suite after this correction is **834/834**.

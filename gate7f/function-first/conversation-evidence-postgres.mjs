@@ -3,8 +3,11 @@ import { randomUUID } from "node:crypto";
 import pg from "pg";
 import { testCipher } from "../../gate4/fixtures.mjs";
 import { PostgresGate4aStore } from "../../gate4/adapters/postgres.mjs";
-import { PostgresSelectedContinuityStore, PostgresRequestCoordinator } from "../../gate6b/adapters/postgres-continuity.mjs";
+import { PostgresSelectedContinuityStore, PostgresRequestCoordinator, PostgresWorkspaceStore } from "../../gate6b/adapters/postgres-continuity.mjs";
 import { answerEvidence } from "./conversation-evidence.mjs";
+import { Gate2ReadOnlyService } from "../../gate2/core.mjs";
+import { SelectedCoreApplication } from "../../gate6b/application.mjs";
+import { ScriptedProvider } from "../../gate1/adapters/memory.mjs";
 
 // Run only against the explicitly supplied disposable synthetic fixture owned by
 // the parent runner. Add uniquely scoped records; never drop schemas or stop it.
@@ -59,6 +62,52 @@ try {
   await pool.query("UPDATE runa_runtime.route_responses_v2 SET input_digest=$3 WHERE operation=$1 AND request_id=$2", ["answer", cached.requestId, "e".repeat(64)]);
   await assert.rejects(coordinator.runOnce({ ...cached, inputDigest: "e".repeat(64) }), { code: "private-envelope-invalid" });
   checks.cacheRowScopeTamperFailsAuthentication = calls === 1;
+  // Exercise the actual application -> Gate2 -> private turn -> readChat path.
+  // A preconstructed complete response cannot detect late evidence stamping.
+  const workspace = new PostgresWorkspaceStore({ pool, cipher }); await workspace.initialize();
+  for (const experience of ["chat", "code"]) {
+    const project = await continuity.createProject({ participantId: id, requestId: `${id}-${experience}-project`,
+      displayName: "Synthetic evidence project", experience });
+    const sourceId = `${id}-${experience}-source`;
+    await workspace.seedSource({ projectId: project.projectId, sourceId, sectionId: "provided",
+      content: "The synthetic project uses a blue marker." });
+    const providers = Object.fromEntries(["chat", "research", "code", "review"].map(role => [role,
+      new ScriptedProvider({ role, reply: ({ evidence }) => ({ answer: "The project marker is blue.",
+        citations: evidence.map(({ sourceId, sectionId }) => ({ sourceId, sectionId })) }) })]));
+    const service = new Gate2ReadOnlyService({ records: workspace, index: workspace, providers, continuity,
+      workspaceResolver: workspace });
+    const application = new SelectedCoreApplication({ mode: "active", targetGeneration: "synthetic",
+      cutoverStatus: async () => ({ phase: "closed", authorityGeneration: "synthetic" }), answerService: service,
+      continuity, actionService: {}, requestCoordinator: new PostgresRequestCoordinator({ pool, cipher }),
+      authenticator: { async authenticate() { return { verified: true, principalId: id, methods: ["password"] }; } },
+      authorizer: { async authorize() { return { allowed: true }; } } });
+    const input = { credential: "synthetic", body: { requestId: `${id}-${experience}-actual`, threadId: `${id}-${experience}-thread`,
+      projectId: project.projectId, experience, lane: "review", message: "What marker does this project use?",
+      workspace: { sources: [{ sourceId, sectionId: "provided" }] }, contextRevision: 0 } };
+    const actual = await application.answer(input);
+    assert.equal(actual.completion.reason, "complete"); assert.equal(actual.model.role, "review");
+    assert.equal(actual.citations.length, 1); assert.equal(actual.continuity.turnRecorded, true);
+    const reopenedActual = await new PostgresSelectedContinuityStore({ pool, cipher }).readChat(id, input.body.threadId, experience);
+    assert.ok(reopenedActual.turns[0].evidence, "Gate2 must stamp evidence before the store receives its response");
+    assert.deepEqual(reopenedActual.turns[0].evidence, answerEvidence(actual));
+    checks[`${experience}ActualGate2EvidenceMatchesReopenedTurn`] = true;
+    assert.equal(providers.code.calls.length, 0); assert.equal(providers.chat.calls.length, 0);
+    const priorReview = providers.review;
+    delete providers.review;
+    const unavailable = await application.answer({ ...input, body: { ...input.body, requestId: `${id}-${experience}-disabled`,
+      threadId: `${id}-${experience}-disabled-thread` } });
+    assert.equal(unavailable.completion.reason, "provider-role-unavailable"); assert.equal(unavailable.continuity.turnRecorded, false);
+    assert.equal(unavailable.citations.length, 0);
+    await assert.rejects(continuity.readChat(id, `${id}-${experience}-disabled-thread`, experience), { code: "chat-not-found" });
+    checks[`${experience}DisabledReviewNoRoleFallbackOrStoredEvidence`] = providers.code.calls.length === 0 && providers.chat.calls.length === 0;
+    providers.review = new ScriptedProvider({ role: "review", reply: () => ({ answer: "I executed the code and verified the result.", citations: [] }) });
+    const claimed = await application.answer({ ...input, body: { ...input.body, requestId: `${id}-${experience}-claimed`,
+      threadId: `${id}-${experience}-claimed-thread` } });
+    assert.equal(claimed.completion.reason, "unverified-action-claim"); assert.equal(claimed.continuity.turnRecorded, false);
+    await assert.rejects(continuity.readChat(id, `${id}-${experience}-claimed-thread`, experience), { code: "chat-not-found" });
+    checks[`${experience}FakeExecutionClaimNeverStoredAsEvidence`] = claimed.execution.status === "not-executed" && claimed.citations.length === 0;
+    providers.review = priorReview;
+  }
   assert.ok(Object.values(checks).every(Boolean));
   process.stdout.write(JSON.stringify({ schemaVersion: "runaai-m1-evidence-postgres-proof/v1", passed: true,
     checks, productionChanged: false, modelCalled: false, privateValuesIncluded: false }) + "\n");

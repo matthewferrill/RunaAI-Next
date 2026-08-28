@@ -102,6 +102,7 @@ for (const [label, mutate] of [
 
 const candidates = [["gemma-4-26b-a4b-it-qat", "none"], ["qwen3-coder-30b-a3b-instruct", null], ["qwen3.6-27b-mtp", "none"]];
 const validPlan = { summary: "Inspect only", steps: [{ capabilityId: "project.inspect", arguments: { path: "index.js" } }] };
+let firstWireProtocol;
 for (const [modelId, reasoningEffort] of candidates) for (const role of ["code", "agent"]) {
   test(`real Mastra request preserves ${modelId}/${role} controls and uses the same phase contract`, async () => {
     const calls = [], provider = { schemaVersion: "runaai-model-roles/v1", baseUrl: "http://127.0.0.1:1234/v1",
@@ -119,6 +120,8 @@ for (const [modelId, reasoningEffort] of candidates) for (const role of ["code",
     assert.equal(calls.length, 2);
     for (let index = 0; index < calls.length; index++) {
       const { body, options } = calls[index], prompt = JSON.parse(body.messages.at(-1).content);
+      firstWireProtocol ??= body.messages[0].content;
+      assert.equal(body.messages[0].content, firstWireProtocol, "all three models, both roles and both phases receive byte-identical protocol guidance");
       assert.equal(body.model, modelId); assert.equal(body.temperature, 0); assert.equal(body.max_tokens, 1536);
       assert.equal(options.redirect, "error");
       assert.equal(Object.hasOwn(body, "reasoning_effort"), reasoningEffort !== null);
@@ -128,7 +131,13 @@ for (const [modelId, reasoningEffort] of candidates) for (const role of ["code",
       assert.deepEqual(prompt.receipts, input().receipts); assert.deepEqual(prompt.snapshot, input().snapshot);
       assert.match(body.messages[0].content, /remaining unconditional actions/);
       assert.match(body.messages[0].content, /unchanged bytes before the correction/);
+      assert.match(body.messages[0].content, /Planning an effect does not execute or approve it/);
+      assert.match(body.messages[0].content, /application creates its exact proposal and pauses before the effect/);
+      assert.match(body.messages[0].content, /project\.preview-change is read-only; it does not create a pending edit approval/);
+      assert.match(body.messages[0].content, /If the user requests only a preview, inspection, or no changes, do not add apply, test, or restore effects/);
+      assert.match(body.messages[0].content, /approval pause is not such a branch/);
       assert.doesNotMatch(body.messages[0].content, /Code05|unique|Set\(|square|index\.js|115|140|\/no_think/);
+      assert.doesNotMatch(body.messages[0].content, /Code07|stock\.js|remaining\(stock|5660a7d38368|Gemma|Qwen/);
     }
   });
 }

@@ -396,3 +396,65 @@ integration("actual planner cannot gain a third attempt by disregarding the repa
     assert.equal(result.receipts.length, 2);
   } finally { await f.close(); }
 });
+
+// These are real PostgreSQL/orchestration checks with deliberately deterministic
+// model and executor fixtures. They do not claim a real model obeyed the prompt.
+for (const role of ["code", "agent"]) for (const mode of ["preview-only", "approval-sequence", "read-only"]) {
+  integration(`${role} planner protocol keeps ${mode} separate from actual effect authority`, async () => {
+    const calls = [], modelId = `synthetic-${role}-approval-model`;
+    const objective = mode === "approval-sequence"
+      ? "Correct the addition function, preview it, wait for approval before changing it, and run the registered tests."
+      : "Preview a possible addition correction only; do not change or test files.";
+    const provider = { schemaVersion: "runaai-model-roles/v1", baseUrl: "http://127.0.0.1:1234/v1",
+      models: Object.fromEntries(["chat", "research", "code", "review", "agent"].map(value => [value, modelId])) };
+    const planner = new MastraM1Planner({ provider, role,
+      fetchImpl: async (_url, options) => {
+        const request = JSON.parse(options.body), input = JSON.parse(request.messages.at(-1).content);
+        calls.push({ request, input });
+        assert.match(request.messages[0].content, /application creates its exact proposal and pauses before the effect/);
+        assert.match(request.messages[0].content, /preview-change is read-only; it does not create a pending edit approval/);
+        assert.equal(input.objective, objective);
+        if (mode === "read-only") assert.deepEqual(input.capabilityIds, ["project.inspect", "project.preview-change"]);
+        const change = { path: "index.js", content: "exports.add=(a,b)=>a+b;", expectedSha256: input.snapshot.files[0].sha256 };
+        const steps = [{ capabilityId: "project.preview-change", arguments: change }];
+        if (mode === "approval-sequence") steps.push({ capabilityId: "project.apply-change", arguments: change },
+          { capabilityId: "project.run-tests", arguments: { suiteId: "addition" } });
+        return Response.json({ id: "synthetic-approval-completion", object: "chat.completion", created: 1, model: modelId,
+          choices: [{ index: 0, message: { role: "assistant", content: JSON.stringify({ summary: "Proposed selected work, not execution.", steps }) }, finish_reason: "stop" }],
+          usage: { prompt_tokens: 40, completion_tokens: 40, total_tokens: 80 } });
+      } });
+    const f = await fixture({ planner, objective, profile: mode === "read-only" ? "read-only" : "ask-every-time", cipher: testCipher() });
+    try {
+      const initial = await f.start();
+      assert.equal(initial.run.plannerRole, role); assert.equal(calls.length, 1);
+      assert.equal(f.adapter.edits, 0); assert.equal(f.adapter.tests, 0);
+      assert.deepEqual(initial.receipts.map(value => value.capabilityId), ["project.preview-change"]);
+      if (mode !== "approval-sequence") {
+        assert.equal(initial.run.status, "completed");
+        assert.equal(initial.run.pendingProposalId, null);
+        assert(initial.proposals.every(value => value.capabilityId === "project.preview-change"));
+        const replay = await f.orchestrator.resume(context, { runId: initial.run.runId });
+        assert.equal(replay.run.status, "completed"); assert.equal(calls.length, 1);
+        assert.equal(f.adapter.edits, 0); assert.equal(f.adapter.tests, 0);
+      } else {
+        assert.equal(initial.run.status, "waiting-approval");
+        const edit = initial.proposals.find(value => value.proposalId === initial.run.pendingProposalId);
+        assert.equal(edit.capabilityId, "project.apply-change"); assert.equal(edit.status, "pending-approval");
+        await assert.rejects(f.service.approve(context, { proposalId: edit.proposalId, proposalDigest: "f".repeat(64) }));
+        assert.equal(f.adapter.edits, 0);
+        await f.service.approve(context, { proposalId: edit.proposalId, proposalDigest: edit.proposalDigest });
+        const reopened = new M1TaskOrchestrator({ service: f.service, planner, workflow: f.workflow });
+        const testPause = await reopened.resume(context, { runId: initial.run.runId });
+        assert.equal(testPause.run.status, "waiting-approval");
+        assert.equal(f.adapter.edits, 1); assert.equal(f.adapter.tests, 0);
+        const runTests = testPause.proposals.find(value => value.proposalId === testPause.run.pendingProposalId);
+        assert.equal(runTests.capabilityId, "project.run-tests");
+        await f.service.approve(context, { proposalId: runTests.proposalId, proposalDigest: runTests.proposalDigest });
+        const completed = await reopened.resume(context, { runId: initial.run.runId });
+        assert.equal(completed.run.status, "completed"); assert.equal(calls.length, 1);
+        assert.equal(f.adapter.edits, 1); assert.equal(f.adapter.tests, 1);
+        assert.equal(completed.receipts.find(value => value.capabilityId === "project.run-tests").output.passed, true);
+      }
+    } finally { await f.close(); }
+  });
+}

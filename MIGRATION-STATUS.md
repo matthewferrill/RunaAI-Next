@@ -92,6 +92,31 @@ Production routing, protected stores and the existing release are unchanged. Con
 qualification and rollback-protected deployment until a real customer test is ready; internal commits
 and successful component checks are not stopping points or new permission gates.
 
+### 2026-08-28 third campaign retained; approval protocol correction
+
+The fresh source `46070a0` passed a complete repeated 12-control run under common seal
+`63e53f4e851113f6c35ae9aec2df306100ceadefab9e86de5c2243f505b2b467`. The first control report is
+also retained: an incorrectly bound browser acknowledgement made that initial report unqualified.
+Coder then recorded 23/120 attempts and stopped at Code07; no other model arm started. All 337
+unexecuted slots remain in the three-model denominator. No model or role is qualified.
+
+The model proposed only a read-only preview, so there was no original pending edit to approve after
+the concurrent change. No original mutation or unexpected call occurred. The reducer incorrectly
+treated the unexercised stale-denial transition as a demonstrated critical failure. Original raw flags
+remain unchanged. See `gate7f/function-first/acceptance/STOPPED-CODER-R3-FINDING-2026-08-28.md`.
+
+The prospective model-neutral planner clarification follows the criteria committed in
+`gate7f/function-first/APPROVAL-PLANNING-CRITERIA-2026-08-28.md`. Planning a requested effect is not
+approval or execution; the application creates and pauses its exact proposal. Actual preview-only
+requests remain effect-free. Separate evaluator evidence corrections, independent review, real
+database checks and a fresh common seal/full controls are required before the new matched campaign.
+The planner correction's 40/40 wire/planner tests and actual 46/46 PostgreSQL regressions now pass
+with zero skips; see `gate7f/function-first/APPROVAL-PLANNING-RESULTS-2026-08-28.md`. Those tests
+use deterministic provider/executor fixtures and do not establish any model's compliance.
+Home is unloaded with both 260 W limits restored. No production or protected-data changes were made.
+The operational Home guard continues in parallel; do not stop at this internal correction or request
+new permission. Continue until the qualified deployment is ready for genuine customer testing.
+
 ### 2026-08-28 stopped-campaign independent semantic record
 
 Independent review of the stopped Gemma arm covers 23/120 attempts and all 32 captured model outputs;

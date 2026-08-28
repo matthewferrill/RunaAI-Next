@@ -250,3 +250,11 @@ Even a valid idle observation does not close admission or prove native-wide drai
 combined with the existing fresh Control closure, accounted direct-LAN/native-local callers and
 exclusive lifecycle ownership. The observer must explicitly say `admissionClosed:false` and
 `drainProved:false`; no processing snapshot alone authorizes stopping a server or loading a model.
+
+The prospective `native-processing.mjs` wrapper is implemented after criteria `393f531`. It allows
+only `ps --json` under the pinned internal descriptor, verifies the bound Home runtime again before
+each observation, and compares fresh engine identities before/after. It rejects nonlocal, changed,
+duplicate, omitted or unsupported model identities and returns status/count metadata only. Fourteen
+focused observer/controller/bounded-child tests passed locally, including the actual PS5 parser and
+short-lived child deadline fixture. No installed CLI call or busy-state qualification has occurred
+yet; the next between-model static inspection and later positive/queued test remain required.

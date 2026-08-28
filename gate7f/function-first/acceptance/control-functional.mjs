@@ -7,14 +7,16 @@ import { createOwnedControlResources, fileSha256 } from "./owned-control-resourc
 import { createFunctionalTestbed } from "./functional-testbed.mjs";
 import { runModelFreeControl, SUPPORTED_CONTROLS } from "./model-free-controls.mjs";
 import { evaluateControl } from "./assertions.mjs";
+import { createBrowserCheckpoint } from "./browser-checkpoint.mjs";
 
 export function parseArguments(args) {
   const result = { mode: "inventory" }, seen = new Set();
   for (let index = 0; index < args.length; index += 2) {
-    if (!["--mode", "--owned-root", "--source-commit", "--case-id"].includes(args[index]) || !args[index + 1]) throw fail("m1-runner-argument-invalid");
+    if (!["--mode", "--owned-root", "--source-commit", "--case-id", "--browser-checkpoints"].includes(args[index]) || !args[index + 1]) throw fail("m1-runner-argument-invalid");
     const key = args[index].slice(2); if (seen.has(key)) throw fail("m1-runner-duplicate-argument"); seen.add(key); result[key] = args[index + 1];
   }
   if (!["inventory", "controls"].includes(result.mode)) throw fail("m1-scored-runner-readiness-not-yet-sealed");
+  if (result["browser-checkpoints"] !== undefined && result["browser-checkpoints"] !== "true") throw fail("m1-browser-checkpoint-argument-invalid");
   return result;
 }
 
@@ -42,6 +44,8 @@ export async function runControlFunctional(args, { checkpoint = null } = {}) {
       limits: resources.report.nativePreflight.receipt.limits, modelInference: "denied-before-upstream" };
     report.runtimeSealSha256 = sha256(JSON.stringify(report.controlSeal));
     const evidenceDirectory = path.join(root, "acceptance-evidence"); await mkdir(evidenceDirectory, { recursive: true });
+    checkpoint ??= args["browser-checkpoints"] === "true" ? createBrowserCheckpoint({ directory: evidenceDirectory,
+      announce: value => process.stdout.write(JSON.stringify({ schemaVersion: "runaai-m1-browser-checkpoint-ready/v1", ...value }) + "\n") }) : null;
     await writeFile(path.join(evidenceDirectory, `control-seal-${report.runtimeSealSha256}.json`), JSON.stringify(report.controlSeal, null, 2) + "\n", { flag: "wx" });
     testbed = await createFunctionalTestbed({ resources, mode: "controls", getLedger: () => ledger });
     for (const item of selected) {

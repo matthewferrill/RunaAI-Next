@@ -1,0 +1,96 @@
+{
+  "schemaVersion": "runaai-m1-campaign-hardware-outcome/v1",
+  "leaseId": "20260828-campaign-gemma-r4",
+  "sealSha256": "1dc60a50a7b5b084d8d44f778b8d6992e8b7529658c6c96e7dc1d60b1287926e",
+  "completion": "completed",
+  "hardwareFailure": null,
+  "functionalQualityEvaluatedHere": false,
+  "applicationAttemptCountsNotInferred": true,
+  "cleanupVerified": true,
+  "powerRestored": true,
+  "taskUnregistered": true,
+  "finalObservedAt": "2026-08-28T23:31:31.6036463Z",
+  "telemetrySamples": 544,
+  "peakTemperatureC": 74,
+  "maximumSampleGapMs": 5704,
+  "minimumFreeHostBytes": 101270380544,
+  "minimumFreeGpuMiB": 12668,
+  "files": {
+    "worker-stderr.txt": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "worker.json": {
+      "bytes": 105,
+      "sha256": "86de9582724f76e67f9d8ee35e3b7f899863aa785b8a082c2d933eeaa5e4c664"
+    },
+    "runtime.json": {
+      "bytes": 1950,
+      "sha256": "5b13307cd32f48b8d2cd61b563322d02b2f68bbf6d3401b87358ccf0c6735d51"
+    },
+    "lease-result.json": {
+      "bytes": 861,
+      "sha256": "10c2a116a15a3c9adf658f1d027d2790f673943997355e37c6dbda221b175b5a"
+    },
+    "seal.json": {
+      "bytes": 921,
+      "sha256": "1dc60a50a7b5b084d8d44f778b8d6992e8b7529658c6c96e7dc1d60b1287926e"
+    },
+    "lease-contract.mjs": {
+      "bytes": 4019,
+      "sha256": "0fe24a0ee7bb7258bb76264bf57a69f602b6fdd9658d9012739cc45c24ed8269"
+    },
+    "supervisor.jsonl": {
+      "bytes": 165436,
+      "sha256": "6c1ad6ec47332e5ab6bea9c8f8c2e15824e6128e3c7f325a688016cd89858413"
+    },
+    "campaign-hardware-plan.json": {
+      "bytes": 6884,
+      "sha256": "d4e0d0b96ff4d1c15fb05801dff5c9b0f166c1c308cbbbf4e1a5eeed404e6c80"
+    },
+    "events.jsonl": {
+      "bytes": 337087,
+      "sha256": "2fe5afef001de709e914365cd7044d1c5e1c371a2f26461d8c918b7d17413aa8"
+    },
+    "complete.json": {
+      "bytes": 190,
+      "sha256": "6df66baabd1c6034b8aee68d61b7fbd4326f7fcacaa8273a40b2a35371ce1aad"
+    },
+    "worker-stdout.txt": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "ready.json": {
+      "bytes": 952,
+      "sha256": "a9f76e6772b7274af7d5edf05a98785c2466ddbeb1c4babe072233bf7da4ca5b"
+    },
+    "supervisor-result.json": {
+      "bytes": 180,
+      "sha256": "58b81c12b423a3a66b5c274250542917914f4ed09273d817d86d4ceea9d26728"
+    },
+    "gguf-metadata.mjs": {
+      "bytes": 2623,
+      "sha256": "315fae56b2b70d19a817e5a248f91946a4ae46d3bff33f94c1bb96ffc8fe3b71"
+    },
+    "Run-HomeSmokeLease.ps1": {
+      "bytes": 6501,
+      "sha256": "867d3806bb79e46ac127098b348195c1ac458d19c4bd83a3710572e6f0dbc021"
+    },
+    "lease-config.json": {
+      "bytes": 1860,
+      "sha256": "70c452aebeae35fbdeec11c254d4ace2a33b952ac518d7ab3148a3c746f2c277"
+    },
+    "home-smoke-lease.mjs": {
+      "bytes": 9879,
+      "sha256": "836d3159419b5f594724bebc6d0c020ff88a92fb5b6a7402f58fbf63756c3ce4"
+    },
+    "final-observation.json": {
+      "bytes": 2429,
+      "sha256": "a0bd4793de9afb9e530bf3d1ed66e0b1d34f207a48e2036f9070c72ddb5c7e02"
+    },
+    "completion-publication.json": {
+      "bytes": 5480,
+      "sha256": "f9eeab0aa3e974d542582e1283586c8c8db96124f03a7135bb163fb546fb1a5f"
+    }
+  }
+}

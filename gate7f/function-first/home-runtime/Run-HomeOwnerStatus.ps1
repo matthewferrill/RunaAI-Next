@@ -1,30 +1,53 @@
 param([Parameter(Mandatory=$true)][ValidatePattern('^[a-f0-9]{64}$')][string]$ExpectedSeal)
 Set-StrictMode -Version Latest
 $ErrorActionPreference='Stop';$ProgressPreference='SilentlyContinue'
+$probePhase='entry';$probeDispatched=$false
+trap {
+ # A failed preflight must retain bounded phase metadata, not an unhandled CLI/error dump.
+ try {
+  $failureRoot=[IO.Path]::GetDirectoryName($PSScriptRoot)
+  if($failureRoot-match'^C:\\Users\\codex-audit\\AppData\\Local\\RunaM1Readiness\\owner-status-[a-f0-9]{32}$'){
+   $code=if($_.Exception.Message-match'^owner-status-[a-z0-9-]+$'){$_.Exception.Message}else{'owner-status-preflight-unconfirmed'}
+   $note=@{schemaVersion='runaai-owner-status-preflight-failure/v1';packageSha256=$ExpectedSeal;phase=$probePhase;probeDispatched=$probeDispatched;errorCode=$code;exceptionType=$_.Exception.GetType().FullName;identity=[Security.Principal.WindowsIdentity]::GetCurrent().Name;time=[DateTime]::UtcNow.ToString('o');privateValuesIncluded=$false}
+   $bytes=[Text.UTF8Encoding]::new($false).GetBytes(($note|ConvertTo-Json -Compress)+"`n")
+   if($bytes.Length-le8192){$stream=[IO.File]::Open($failureRoot+'\results\preflight-failure.json','CreateNew','Write','None');try{$stream.Write($bytes,0,$bytes.Length);$stream.Flush($true)}finally{$stream.Dispose()}}
+  }
+ }catch{}
+ exit 1
+}
 # A single finite, read-only CLI probe under its real owner identity. No credentials are read here.
+$probePhase='identity'
 if($env:COMPUTERNAME-cne'RUNA-HOME'-or[Security.Principal.WindowsIdentity]::GetCurrent().Name-cne'RUNA-HOME\Matthew'){throw 'owner-status-identity'}
+$probePhase='root'
 $root=[IO.Path]::GetDirectoryName($PSScriptRoot)
 if($root-notmatch'^C:\\Users\\codex-audit\\AppData\\Local\\RunaM1Readiness\\owner-status-[a-f0-9]{32}$'){throw 'owner-status-root'}
 $sealFile=$root+'\seal.json'
+$probePhase='seal'
 if((Get-FileHash -LiteralPath $sealFile -Algorithm SHA256).Hash.ToLowerInvariant()-cne$ExpectedSeal){throw 'owner-status-seal'}
 $seal=[IO.File]::ReadAllText($sealFile)|ConvertFrom-Json
 if($seal.schemaVersion-cne'runaai-owner-status-package/v1'-or$seal.root-cne$root){throw 'owner-status-seal-schema'}
+$probePhase='source'
 foreach($name in @('Runtime-Windows.ps1','Run-HomeOwnerStatus.ps1')){
  if((Get-FileHash -LiteralPath ($PSScriptRoot+'\'+$name) -Algorithm SHA256).Hash.ToLowerInvariant()-cne$seal.sourceFiles.$name){throw 'owner-status-code-pin'}
 }
+$probePhase='helper'
 . ($PSScriptRoot+'\Runtime-Windows.ps1')
 $script:RuntimeRoot=$root
+$probePhase='worker'
 Write-RuntimeJson ($root+'\results\worker.json') (Get-RuntimeIdentity $PID)
 $cli='C:\Users\Matthew\.lmstudio\bin\lms.exe'
 $descriptor='C:\Users\Matthew\.lmstudio\.internal\http-server.json'
 $engine='C:\Users\Matthew\AppData\Local\Programs\LM Studio\LM Studio.exe'
+$probePhase='paths'
 foreach($file in @($cli,$descriptor,$engine)){
  for($current=$file;$current;$current=[IO.Path]::GetDirectoryName($current)){
   if((Get-Item -LiteralPath $current -Force).Attributes-band[IO.FileAttributes]::ReparsePoint){throw 'owner-status-link'}
  }
 }
+$probePhase='runtime-pin'
 if((Get-FileHash -LiteralPath $cli -Algorithm SHA256).Hash.ToLowerInvariant()-cne$seal.cliSha256-or
  (Get-FileHash -LiteralPath $engine -Algorithm SHA256).Hash.ToLowerInvariant()-cne$seal.engineSha256){throw 'owner-status-runtime-pin'}
+$probePhase='descriptor'
 $descriptorHash=(Get-FileHash -LiteralPath $descriptor -Algorithm SHA256).Hash.ToLowerInvariant()
 if($descriptorHash-cne$seal.descriptorSha256){throw 'owner-status-descriptor-drift'}
 function Snapshot {
@@ -43,11 +66,13 @@ function Snapshot {
  return $loaded
 }
 $started=[DateTime]::UtcNow.ToString('o');$passed=$false;$failure=$null;$before=$null;$after=$null;$rawHash=$null;$executionStopped=$true
+$probePhase='read-only-run'
 try{
  $before=Snapshot
  # The supported selector prevents findOrStartLlmster. The real Matthew token supplies normal CLI auth.
  $env:LMS_API_SERVER_INFO_PATH=$descriptor
  $executionStopped=$false
+ $probeDispatched=$true
  $raw=[RunaRuntimeProbe]::RunBounded($cli,'ps --json',5000,8192)
  $executionStopped=$true
  if($raw-cnotmatch'^\s*\[\s*\]\s*$'){throw 'owner-status-empty-unconfirmed'}

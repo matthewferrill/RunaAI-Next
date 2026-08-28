@@ -36,9 +36,16 @@ test('owner status cleanup only unregisters its exact finished task and preserve
 });
 test('generated commands and actual worker parse in Windows PowerShell 5 without execution',t=>{
  const prepared=fixture(t),ps='C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe';
- for(const code of [...['Stage','Run','Collect','Cleanup'].map(mode=>script(ownerStatusRequest(prepared.directory,prepared.seal,mode))),
+ for(const code of [...['Stage','Run','Inspect','Collect','Cleanup','CleanupFailed'].map(mode=>script(ownerStatusRequest(prepared.directory,prepared.seal,mode))),
   readFileSync(path.join(prepared.directory,'Run-HomeOwnerStatus.ps1'),'utf8')]){
   const check="$ErrorActionPreference='Stop';$tokens=$null;$errors=$null;$null=[Management.Automation.Language.Parser]::ParseInput([Console]::In.ReadToEnd(),[ref]$tokens,[ref]$errors);if($errors.Count-ne0){throw 'syntax-errors'};'parsed'";
   assert.equal(execFileSync(ps,['-NoProfile','-NonInteractive','-Command',check],{input:code,encoding:'utf8',windowsHide:true,timeout:5000}).trim(),'parsed');
  }
+});
+test('preflight diagnostics are bounded and failed-task retirement does not claim CLI success',t=>{
+ const prepared=fixture(t),source=readFileSync(path.join(prepared.directory,'Run-HomeOwnerStatus.ps1'),'utf8');
+ assert.match(source,/trap \{/);assert.match(source,/probePhase='helper'/);assert.match(source,/preflight-failure.json/);
+ const code=script(ownerStatusRequest(prepared.directory,prepared.seal,'CleanupFailed'));
+ assert.match(code,/LastTaskResult-ne1/);assert.match(code,/cliCount-ne0/);assert.match(code,/workerCount-ne0/);
+ assert.doesNotMatch(code,/Stop-Process|Stop-ScheduledTask|Remove-Item/);
 });

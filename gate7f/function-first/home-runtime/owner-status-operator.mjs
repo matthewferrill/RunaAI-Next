@@ -37,7 +37,7 @@ function load(directory,expected){
 }
 /** Finite owner-identity status probe only. No server lifecycle command is accepted. */
 export function ownerStatusRequest(directory,expected,mode){
- demand(['Stage','Run','Collect','Cleanup'].includes(mode),'owner-status-mode');
+ demand(['Stage','Run','Inspect','Collect','Cleanup','CleanupFailed'].includes(mode),'owner-status-mode');
  const {manifest:m,packet}=load(directory,expected),root=m.root,name=m.taskName;
  const args='-NoProfile -NonInteractive -WindowStyle Hidden -ExecutionPolicy Bypass -File "'+root+'\\code\\Run-HomeOwnerStatus.ps1" -ExpectedSeal '+expected;
  let script="$ErrorActionPreference='Stop';$ProgressPreference='SilentlyContinue';Set-StrictMode -Version Latest;"+
@@ -71,8 +71,14 @@ export function ownerStatusRequest(directory,expected,mode){
    "$bytes=[IO.File]::ReadAllBytes($file);if($bytes.Length-gt8192){throw 'owner-status-result-cap'};$value=[Text.UTF8Encoding]::new($false,$true).GetString($bytes)|ConvertFrom-Json;if($value.schemaVersion-cne'runaai-owner-status-result/v1'-or$value.packageSha256-cne$expected){throw 'owner-status-result-binding'};";
   if(mode==='Cleanup')script+="if($value.executionStopped-ne$true){throw 'owner-status-unknown-retain-task'};$info=Get-ScheduledTaskInfo -TaskName $name -ErrorAction Stop;$exit=if($value.passed-eq$true){0}else{1};if($info.LastTaskResult-ne$exit){throw 'owner-status-task-terminal-unconfirmed'};$workerFile=$root+'\\results\\worker.json';Plain $workerFile;$worker=[IO.File]::ReadAllText($workerFile)|ConvertFrom-Json;$process=Get-Process -Id ([int]$worker.pid) -ErrorAction SilentlyContinue;if($null-ne$process){try{if($process.StartTime.ToUniversalTime().ToString('o')-ceq$worker.startedAt-and$process.Path-ceq$worker.executable){throw 'owner-status-worker-alive'}}finally{$process.Dispose()}};Unregister-ScheduledTask -TaskName $name -Confirm:$false;if(Get-ScheduledTask -TaskName $name -ErrorAction SilentlyContinue){throw 'owner-status-task-remains'};";
  }
+ if(mode==='Inspect'||mode==='CleanupFailed'){
+  script+=checkTask+"$info=Get-ScheduledTaskInfo -TaskName $name;$files=@(Get-ChildItem -LiteralPath ($root+'\\results') -Force|Select-Object Name,Length);$note=$null;$failureFile=$root+'\\results\\preflight-failure.json';if(Test-Path -LiteralPath $failureFile){Plain $failureFile;$b=[IO.File]::ReadAllBytes($failureFile);if($b.Length-gt8192){throw 'owner-status-result-cap'};$note=[Text.UTF8Encoding]::new($false,$true).GetString($b)|ConvertFrom-Json;if($note.schemaVersion-cne'runaai-owner-status-preflight-failure/v1'-or$note.packageSha256-cne$expected){throw 'owner-status-failure-binding'}};"+
+   "$cliCount=@(Get-CimInstance Win32_Process -Filter \"Name='lms.exe'\" -OperationTimeoutSec 5).Count;$workerCount=@(Get-CimInstance Win32_Process -Filter \"Name='powershell.exe'\" -OperationTimeoutSec 5|Where-Object{$_.CommandLine-and$_.CommandLine.Contains($root+'\\code\\Run-HomeOwnerStatus.ps1')}).Count;$observation=@{time=[DateTime]::UtcNow.ToString('o');state=[string]$t.State;lastTaskResult=$info.LastTaskResult;lastRun=$info.LastRunTime.ToUniversalTime().ToString('o');files=$files;preflightFailure=$note;cliCount=$cliCount;workerCount=$workerCount};";
+  if(mode==='CleanupFailed')script+="if($t.State-cne'Ready'-or$info.LastTaskResult-ne1-or$cliCount-ne0-or$workerCount-ne0-or(Test-Path -LiteralPath ($root+'\\results\\result.json'))){throw 'owner-status-failure-unsettled'};Unregister-ScheduledTask -TaskName $name -Confirm:$false;if(Get-ScheduledTask -TaskName $name -ErrorAction SilentlyContinue){throw 'owner-status-task-remains'};";
+ }
  script+=`@{schemaVersion='runaai-owner-status-operator/v1';mode='${mode}';packageSha256=$expected;taskName=$name;`+
   (mode==='Collect'?"resultBase64=[Convert]::ToBase64String($bytes);":"")+
+  (mode==='Inspect'||mode==='CleanupFailed'?"observation=$observation;":"")+
   "privateValuesIncluded=$false;inferenceCalled=$false;settingsChanged=$false}|ConvertTo-Json -Compress";
  return tlsTransportRequest({host:'home',command:script,input});
 }

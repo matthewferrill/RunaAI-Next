@@ -1,0 +1,17 @@
+{
+  "schemaVersion": "runa-m1-campaign-lease-ready/v1",
+  "leaseId": "20260828-campaign-gemma-r4",
+  "campaignHardwarePlanSha256": "d4e0d0b96ff4d1c15fb05801dff5c9b0f166c1c308cbbbf4e1a5eeed404e6c80",
+  "sealSha256": "1dc60a50a7b5b084d8d44f778b8d6992e8b7529658c6c96e7dc1d60b1287926e",
+  "candidateId": "gemma",
+  "modelId": "gemma-4-26b-a4b-it-qat",
+  "primaryInstanceId": "gemma-4-26b-a4b-it-qat",
+  "embeddingModelId": "text-embedding-nomic-embed-text-v1.5",
+  "embeddingInstanceId": "text-embedding-nomic-embed-text-v1.5",
+  "primaryArtifactSha256": "3eca3b8f6d7baf218a7dd6bba5fb59a56ee25fe2d567b6f5f589b4f697eca51d",
+  "embeddingArtifactSha256": "d4e388894e09cf3816e8b0896d81d265b55e7a9fff9ab03fe8bf4ef5e11295ac",
+  "readyAt": "2026-08-28T22:46:32.187Z",
+  "expiresAt": "2026-08-28T23:46:32.078Z",
+  "reasoningEffort": "none",
+  "completionPath": "C:\\Users\\codex-audit\\AppData\\Local\\RunaM1Readiness\\20260828-campaign-gemma-r4\\complete.json"
+}

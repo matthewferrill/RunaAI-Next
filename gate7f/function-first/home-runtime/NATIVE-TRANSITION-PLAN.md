@@ -390,3 +390,25 @@ and reports only sanitized results. Unknown child termination blocks task cleanu
 probes may be unregistered while all files remain recoverable. The four new local tests passed,
 including actual PowerShell5 parsing of every generated command; they did not stage/run anything on
 Home or prove native authentication. The separate explicit-loopback probe is similarly prospective.
+
+The complete local operator suite at `42327df` subsequently passed145/145, zero skips, in41.585seconds.
+This count is for the tests present in this operator worktree, not a regrade of the application or any
+model. The prepared status package remains offline and does not itself prove the installed identity.
+Before a native bind change, separately inventory legacy RunaAI model/embedding destinations as well
+as Next's Caddy path. A separate direct-LAN consumer is not covered by closing Next's provider route;
+its dependencies must be preserved or explicitly coordinated within the managed maintenance boundary.
+
+Post-Gemma actual unprivileged explicit-loopback `ps --json` succeeded23:32:10–11Z with exact empty
+output, unchanged engine/descriptor and zero residency. Its raw receipt is retained; it still does
+not prove positive busy/queued state or drain. The first Matthew Interactive task then ended with
+Task Scheduler result1 and an empty owned result directory. A23:33:39Z metadata-only check found no
+worker record or remaining CLI process. This is an early helper failure, not an authentication pass.
+Retain its package/directory and exact failed-task metadata; do not replay the same task.
+
+Prospectively add a bounded phase-only preflight trap and metadata inspection, without exporting raw
+exceptions or private CLI text. Failed-task retirement may only unregister that exact finished
+read-only task after its action/principal/source pins and absent worker/CLI processes are verified;
+all files remain. A fresh package/ID may then diagnose the failed phase. If ancestor attribute access
+inside codex-audit's personal profile is the cause, move only the next fresh package to a verified
+dedicated C:\AI child with the same protected ACLs. Do not grant access to the personal profile or
+skip path/link checks. Five focused tests, including actual PS5 parsing, passed before this new probe.

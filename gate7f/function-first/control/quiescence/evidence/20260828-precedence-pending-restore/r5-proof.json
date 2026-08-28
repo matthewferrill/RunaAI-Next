@@ -1,0 +1,599 @@
+{
+  "schemaVersion": "runaai-caddy-quiescence-proof/v1",
+  "startedAt": "2026-08-28T21:18:44.831Z",
+  "binarySha256": "5cb9ab71e5756ce72840b8234177a2f40c8b4ab47a806b8e841e2b784e9df62b",
+  "fixture": "C:\\Users\\matth\\AppData\\Local\\Temp\\m1-caddy-quiescence-poHnxs",
+  "checks": [
+    {
+      "name": "every synthetic Caddy listener is explicitly loopback",
+      "actual": true,
+      "expected": true
+    },
+    {
+      "name": "actual slow request counted before reload",
+      "actual": 1,
+      "expected": 1
+    },
+    {
+      "name": "actual same slow request still counted after reload",
+      "actual": 1,
+      "expected": 1
+    },
+    {
+      "name": "actual stale ETag leaves maintenance config unchanged",
+      "actual": "1602075c25a02a9072d56f55fd3a0e296a695e90a6cc5cad60a29dfd6b8bbe6c",
+      "expected": "1602075c25a02a9072d56f55fd3a0e296a695e90a6cc5cad60a29dfd6b8bbe6c"
+    },
+    {
+      "name": "new application API rejected",
+      "actual": 503,
+      "expected": 503
+    },
+    {
+      "name": "new private-address API rejected",
+      "actual": 503,
+      "expected": 503
+    },
+    {
+      "name": "new provider request rejected",
+      "actual": 503,
+      "expected": 503
+    },
+    {
+      "name": "specific preexisting provider GET handler cannot bypass closure",
+      "actual": 503,
+      "expected": 503
+    },
+    {
+      "name": "specific preexisting provider POST handler cannot bypass closure",
+      "actual": 503,
+      "expected": 503
+    },
+    {
+      "name": "blocked provider requests never reached real backend",
+      "actual": 0,
+      "expected": 0
+    },
+    {
+      "name": "unrelated host continues",
+      "actual": {
+        "status": 200,
+        "text": "unrelated"
+      },
+      "expected": {
+        "status": 200,
+        "text": "unrelated"
+      }
+    },
+    {
+      "name": "authentication route preserved",
+      "actual": {
+        "status": 200,
+        "text": "unrelated"
+      },
+      "expected": {
+        "status": 200,
+        "text": "unrelated"
+      }
+    },
+    {
+      "name": "static application route preserved",
+      "actual": {
+        "status": 200,
+        "text": "application"
+      },
+      "expected": {
+        "status": 200,
+        "text": "application"
+      }
+    },
+    {
+      "name": "held request completes normally",
+      "actual": {
+        "status": 200,
+        "text": "completed original request"
+      },
+      "expected": {
+        "status": 200,
+        "text": "completed original request"
+      }
+    },
+    {
+      "name": "control receipt requires actual stable drain",
+      "actual": "control-quiescent",
+      "expected": "control-quiescent"
+    },
+    {
+      "name": "control receipt does not claim Home quiescence",
+      "actual": false,
+      "expected": false
+    },
+    {
+      "name": "rollback recorded",
+      "actual": "restored",
+      "expected": "restored"
+    },
+    {
+      "name": "exact original file restored",
+      "actual": "1ea4986822552ae76a1b09aff2e3eada1240d8d811a6b4b29c9db86a594cb4a5",
+      "expected": "1ea4986822552ae76a1b09aff2e3eada1240d8d811a6b4b29c9db86a594cb4a5"
+    },
+    {
+      "name": "exact original active config restored",
+      "actual": "d8c6c275fe2efed447d4bb3a26ef6abd0b013c2bc29cec2e5fa731e985306c63",
+      "expected": "d8c6c275fe2efed447d4bb3a26ef6abd0b013c2bc29cec2e5fa731e985306c63"
+    },
+    {
+      "name": "application works after restore",
+      "actual": {
+        "status": 200,
+        "text": "application"
+      },
+      "expected": {
+        "status": 200,
+        "text": "application"
+      }
+    },
+    {
+      "name": "provider works after restore",
+      "actual": {
+        "status": 200,
+        "text": "provider"
+      },
+      "expected": {
+        "status": 200,
+        "text": "provider"
+      }
+    },
+    {
+      "name": "real stale byte CAS left original intact",
+      "actual": "1ea4986822552ae76a1b09aff2e3eada1240d8d811a6b4b29c9db86a594cb4a5",
+      "expected": "1ea4986822552ae76a1b09aff2e3eada1240d8d811a6b4b29c9db86a594cb4a5"
+    },
+    {
+      "name": "actual restore HTTP request is held before Caddy commit",
+      "actual": true,
+      "expected": true
+    },
+    {
+      "name": "old overlay remains active while actual restore is pending",
+      "actual": "7264f7d722230af0281e2ab3ee5965e6597eb8c06e7adcccb173be75872ac78f",
+      "expected": "7264f7d722230af0281e2ab3ee5965e6597eb8c06e7adcccb173be75872ac78f"
+    },
+    {
+      "name": "pending real restore is never reclassified as admission closed",
+      "actual": "needs-reconciliation",
+      "expected": "needs-reconciliation"
+    },
+    {
+      "name": "zero real upstream counters cannot bypass unresolved restore",
+      "actual": true,
+      "expected": true
+    },
+    {
+      "name": "same exact delayed HTTP operation has a terminal success",
+      "actual": "succeeded",
+      "expected": "succeeded"
+    },
+    {
+      "name": "late restore reconciles only to restored",
+      "actual": "restored",
+      "expected": "restored"
+    },
+    {
+      "name": "late restore returns exact original bytes",
+      "actual": "1ea4986822552ae76a1b09aff2e3eada1240d8d811a6b4b29c9db86a594cb4a5",
+      "expected": "1ea4986822552ae76a1b09aff2e3eada1240d8d811a6b4b29c9db86a594cb4a5"
+    },
+    {
+      "name": "late restore returns exact original active config",
+      "actual": "d8c6c275fe2efed447d4bb3a26ef6abd0b013c2bc29cec2e5fa731e985306c63",
+      "expected": "d8c6c275fe2efed447d4bb3a26ef6abd0b013c2bc29cec2e5fa731e985306c63"
+    },
+    {
+      "name": "no quiescent receipt occurs in pending restore transition",
+      "actual": false,
+      "expected": false
+    },
+    {
+      "name": "specific provider route resumes only after completed restore",
+      "actual": {
+        "status": 200,
+        "text": "provider"
+      },
+      "expected": {
+        "status": 200,
+        "text": "provider"
+      }
+    }
+  ],
+  "events": [
+    {
+      "phase": "prepared",
+      "revision": 1,
+      "event": {
+        "phase": "prepared",
+        "at": "2026-08-28T21:18:45.010Z",
+        "counters": [
+          {
+            "address": "127.0.0.1:49905",
+            "num_requests": 0
+          },
+          {
+            "address": "127.0.0.1:49906",
+            "num_requests": 0
+          }
+        ]
+      }
+    },
+    {
+      "phase": "admission-intent",
+      "revision": 2,
+      "event": {
+        "phase": "admission-intent",
+        "at": "2026-08-28T21:18:45.027Z"
+      }
+    },
+    {
+      "phase": "admission-intent",
+      "revision": 3,
+      "event": {
+        "phase": "admission-intent",
+        "at": "2026-08-28T21:18:45.401Z",
+        "mutationId": "04eb124400354b2b8c22b3cea4dba5b8"
+      }
+    },
+    {
+      "phase": "admission-intent",
+      "revision": 4,
+      "event": {
+        "phase": "admission-intent",
+        "at": "2026-08-28T21:18:45.411Z",
+        "mutationId": "04eb124400354b2b8c22b3cea4dba5b8",
+        "terminalOutcome": "succeeded"
+      }
+    },
+    {
+      "phase": "admission-closed",
+      "revision": 5,
+      "event": {
+        "phase": "admission-closed",
+        "at": "2026-08-28T21:18:45.419Z",
+        "counters": [
+          {
+            "address": "127.0.0.1:49905",
+            "num_requests": 1
+          },
+          {
+            "address": "127.0.0.1:49906",
+            "num_requests": 0
+          }
+        ]
+      }
+    },
+    {
+      "phase": "admission-closed",
+      "revision": 6,
+      "event": {
+        "phase": "admission-closed",
+        "at": "2026-08-28T21:18:45.448Z",
+        "counters": [
+          {
+            "address": "127.0.0.1:49905",
+            "num_requests": 1
+          },
+          {
+            "address": "127.0.0.1:49906",
+            "num_requests": 0
+          }
+        ],
+        "stableZeroSamples": 0
+      }
+    },
+    {
+      "phase": "admission-closed",
+      "revision": 7,
+      "event": {
+        "phase": "admission-closed",
+        "at": "2026-08-28T21:18:45.561Z",
+        "counters": [
+          {
+            "address": "127.0.0.1:49905",
+            "num_requests": 1
+          },
+          {
+            "address": "127.0.0.1:49906",
+            "num_requests": 0
+          }
+        ],
+        "stableZeroSamples": 0
+      }
+    },
+    {
+      "phase": "admission-closed",
+      "revision": 8,
+      "event": {
+        "phase": "admission-closed",
+        "at": "2026-08-28T21:18:45.684Z",
+        "counters": [
+          {
+            "address": "127.0.0.1:49905",
+            "num_requests": 1
+          },
+          {
+            "address": "127.0.0.1:49906",
+            "num_requests": 0
+          }
+        ],
+        "stableZeroSamples": 0
+      }
+    },
+    {
+      "phase": "admission-closed",
+      "revision": 9,
+      "event": {
+        "phase": "admission-closed",
+        "at": "2026-08-28T21:18:45.806Z",
+        "counters": [
+          {
+            "address": "127.0.0.1:49905",
+            "num_requests": 0
+          },
+          {
+            "address": "127.0.0.1:49906",
+            "num_requests": 0
+          }
+        ],
+        "stableZeroSamples": 1
+      }
+    },
+    {
+      "phase": "admission-closed",
+      "revision": 10,
+      "event": {
+        "phase": "admission-closed",
+        "at": "2026-08-28T21:18:45.914Z",
+        "counters": [
+          {
+            "address": "127.0.0.1:49905",
+            "num_requests": 0
+          },
+          {
+            "address": "127.0.0.1:49906",
+            "num_requests": 0
+          }
+        ],
+        "stableZeroSamples": 2
+      }
+    },
+    {
+      "phase": "admission-closed",
+      "revision": 11,
+      "event": {
+        "phase": "admission-closed",
+        "at": "2026-08-28T21:18:46.023Z",
+        "counters": [
+          {
+            "address": "127.0.0.1:49905",
+            "num_requests": 0
+          },
+          {
+            "address": "127.0.0.1:49906",
+            "num_requests": 0
+          }
+        ],
+        "stableZeroSamples": 3
+      }
+    },
+    {
+      "phase": "control-quiescent",
+      "revision": 12,
+      "event": {
+        "phase": "control-quiescent",
+        "at": "2026-08-28T21:18:46.026Z",
+        "stableZeroSamples": 3
+      }
+    },
+    {
+      "phase": "restore-intent",
+      "revision": 13,
+      "event": {
+        "phase": "restore-intent",
+        "at": "2026-08-28T21:18:46.035Z"
+      }
+    },
+    {
+      "phase": "restore-intent",
+      "revision": 14,
+      "event": {
+        "phase": "restore-intent",
+        "at": "2026-08-28T21:18:46.039Z",
+        "mutationId": "45be9bb0db074300817a8bce8dcc0160"
+      }
+    },
+    {
+      "phase": "restore-intent",
+      "revision": 15,
+      "event": {
+        "phase": "restore-intent",
+        "at": "2026-08-28T21:18:46.046Z",
+        "mutationId": "45be9bb0db074300817a8bce8dcc0160",
+        "terminalOutcome": "succeeded"
+      }
+    },
+    {
+      "phase": "restored",
+      "revision": 16,
+      "event": {
+        "phase": "restored",
+        "at": "2026-08-28T21:18:46.427Z"
+      }
+    },
+    {
+      "phase": "prepared",
+      "revision": 1,
+      "event": {
+        "phase": "prepared",
+        "at": "2026-08-28T21:18:46.838Z",
+        "counters": [
+          {
+            "address": "127.0.0.1:49905",
+            "num_requests": 0
+          },
+          {
+            "address": "127.0.0.1:49906",
+            "num_requests": 0
+          }
+        ]
+      }
+    },
+    {
+      "phase": "admission-intent",
+      "revision": 2,
+      "event": {
+        "phase": "admission-intent",
+        "at": "2026-08-28T21:18:46.845Z"
+      }
+    },
+    {
+      "phase": "admission-intent",
+      "revision": 3,
+      "event": {
+        "phase": "admission-intent",
+        "at": "2026-08-28T21:18:47.218Z",
+        "mutationId": "8f21a82f78e6426d8fcf29e76551c14f"
+      }
+    },
+    {
+      "phase": "admission-intent",
+      "revision": 4,
+      "event": {
+        "phase": "admission-intent",
+        "at": "2026-08-28T21:18:47.226Z",
+        "mutationId": "8f21a82f78e6426d8fcf29e76551c14f",
+        "terminalOutcome": "succeeded"
+      }
+    },
+    {
+      "phase": "admission-closed",
+      "revision": 5,
+      "event": {
+        "phase": "admission-closed",
+        "at": "2026-08-28T21:18:47.233Z",
+        "counters": [
+          {
+            "address": "127.0.0.1:49905",
+            "num_requests": 0
+          },
+          {
+            "address": "127.0.0.1:49906",
+            "num_requests": 0
+          }
+        ]
+      }
+    },
+    {
+      "phase": "restore-intent",
+      "revision": 6,
+      "event": {
+        "phase": "restore-intent",
+        "at": "2026-08-28T21:18:47.242Z"
+      }
+    },
+    {
+      "phase": "restore-intent",
+      "revision": 7,
+      "event": {
+        "phase": "restore-intent",
+        "at": "2026-08-28T21:18:47.247Z",
+        "mutationId": "f3023d26dc544ba8b6f8cecad627256d"
+      }
+    },
+    {
+      "phase": "needs-reconciliation",
+      "revision": 8,
+      "event": {
+        "phase": "needs-reconciliation",
+        "at": "2026-08-28T21:18:47.360Z",
+        "errorCode": "quiescence-restore-uncertain"
+      }
+    },
+    {
+      "phase": "needs-reconciliation",
+      "revision": 9,
+      "event": {
+        "phase": "needs-reconciliation",
+        "at": "2026-08-28T21:18:47.370Z",
+        "mutationId": "f3023d26dc544ba8b6f8cecad627256d",
+        "terminalOutcome": "unobserved"
+      }
+    },
+    {
+      "phase": "needs-reconciliation",
+      "revision": 10,
+      "event": {
+        "phase": "needs-reconciliation",
+        "at": "2026-08-28T21:18:47.409Z",
+        "mutationId": "f3023d26dc544ba8b6f8cecad627256d",
+        "terminalOutcome": "succeeded"
+      }
+    },
+    {
+      "phase": "restore-intent",
+      "revision": 11,
+      "event": {
+        "phase": "restore-intent",
+        "at": "2026-08-28T21:18:47.414Z",
+        "reconciled": true
+      }
+    },
+    {
+      "phase": "restored",
+      "revision": 12,
+      "event": {
+        "phase": "restored",
+        "at": "2026-08-28T21:18:47.776Z",
+        "reconciled": true
+      }
+    }
+  ],
+  "modelCalls": 0,
+  "homeChanges": false,
+  "productionChanges": false,
+  "passed": true,
+  "ownedCaddyPid": 23660,
+  "delayedRestore": {
+    "receivedAt": "2026-08-28T21:18:47.253Z",
+    "requestBodySha256": "d8c6c275fe2efed447d4bb3a26ef6abd0b013c2bc29cec2e5fa731e985306c63",
+    "ifMatch": "\"/config/ 5219d37cec4bb119\"",
+    "terminalStatus": 200,
+    "completedAt": "2026-08-28T21:18:47.381Z",
+    "terminalReceipt": {
+      "schemaVersion": "runaai-caddy-mutation-result/v1",
+      "mutationId": "f3023d26dc544ba8b6f8cecad627256d",
+      "direction": "restore",
+      "fromConfigSha256": "7264f7d722230af0281e2ab3ee5965e6597eb8c06e7adcccb173be75872ac78f",
+      "toConfigSha256": "d8c6c275fe2efed447d4bb3a26ef6abd0b013c2bc29cec2e5fa731e985306c63",
+      "expectedEtag": "\"/config/ 5219d37cec4bb119\"",
+      "outcome": "succeeded",
+      "completedAt": "2026-08-28T21:18:47.382Z"
+    }
+  },
+  "cleanup": {
+    "ownedCaddyStopped": true,
+    "ownedPortsClosed": [
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "retainedSyntheticFixtureAndJournal": true,
+    "productionChanges": false
+  },
+  "finishedAt": "2026-08-28T21:18:47.798Z"
+}

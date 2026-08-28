@@ -1,0 +1,328 @@
+TAP version 13
+# Subtest: overlay retains original bytes and unrelated block; input scopes are not mutated
+ok 1 - overlay retains original bytes and unrelated block; input scopes are not mutated
+  ---
+  duration_ms: 4.1452
+  type: 'test'
+  ...
+# Subtest: overlay rejects missing site
+ok 2 - overlay rejects missing site
+  ---
+  duration_ms: 0.6977
+  type: 'test'
+  ...
+# Subtest: overlay rejects duplicate scope
+ok 3 - overlay rejects duplicate scope
+  ---
+  duration_ms: 0.1732
+  type: 'test'
+  ...
+# Subtest: overlay rejects invalid mode
+ok 4 - overlay rejects invalid mode
+  ---
+  duration_ms: 0.1458
+  type: 'test'
+  ...
+# Subtest: overlay rejects shared site
+ok 5 - overlay rejects shared site
+  ---
+  duration_ms: 0.2126
+  type: 'test'
+  ...
+# Subtest: overlay rejects duplicate site
+ok 6 - overlay rejects duplicate site
+  ---
+  duration_ms: 0.2764
+  type: 'test'
+  ...
+# Subtest: overlay rejects external import
+ok 7 - overlay rejects external import
+  ---
+  duration_ms: 0.2616
+  type: 'test'
+  ...
+# Subtest: prepare is effect free and full close/drain/restore retains exact original authority
+ok 8 - prepare is effect free and full close/drain/restore retains exact original authority
+  ---
+  duration_ms: 9.9355
+  type: 'test'
+  ...
+# Subtest: positive active counters must finish and stable zero samples cannot be assumed
+ok 9 - positive active counters must finish and stable zero samples cannot be assumed
+  ---
+  duration_ms: 3.1269
+  type: 'test'
+  ...
+# Subtest: bounded drain timeout restores known original state and never yields quiescence
+ok 10 - bounded drain timeout restores known original state and never yields quiescence
+  ---
+  duration_ms: 5.1937
+  type: 'test'
+  ...
+# Subtest: zero counters observed after the deadline never produce late quiescence
+ok 11 - zero counters observed after the deadline never produce late quiescence
+  ---
+  duration_ms: 3.3229
+  type: 'test'
+  ...
+# Subtest: missing, invalid or duplicate counter is not zero
+ok 12 - missing, invalid or duplicate counter is not zero
+  ---
+  duration_ms: 2.2365
+  type: 'test'
+  ...
+# Subtest: missing, invalid or duplicate counter is not zero
+ok 13 - missing, invalid or duplicate counter is not zero
+  ---
+  duration_ms: 1.9756
+  type: 'test'
+  ...
+# Subtest: missing, invalid or duplicate counter is not zero
+ok 14 - missing, invalid or duplicate counter is not zero
+  ---
+  duration_ms: 1.4577
+  type: 'test'
+  ...
+# Subtest: stale file or runtime rejects admission before an effect
+ok 15 - stale file or runtime rejects admission before an effect
+  ---
+  duration_ms: 1.4443
+  type: 'test'
+  ...
+# Subtest: runtime change after file write is retained and never replaced
+ok 16 - runtime change after file write is retained and never replaced
+  ---
+  duration_ms: 0.9616
+  type: 'test'
+  ...
+# Subtest: file change after CAS is retained and the old overlay is not sent to runtime
+ok 17 - file change after CAS is retained and the old overlay is not sent to runtime
+  ---
+  duration_ms: 1.0052
+  type: 'test'
+  ...
+# Subtest: lost acknowledgement after actual reload requires its exact retained terminal receipt
+ok 18 - lost acknowledgement after actual reload requires its exact retained terminal receipt
+  ---
+  duration_ms: 2.0783
+  type: 'test'
+  ...
+# Subtest: lost reload stays unknown when only its successor snapshot becomes visible
+ok 19 - lost reload stays unknown when only its successor snapshot becomes visible
+  ---
+  duration_ms: 2.6616
+  type: 'test'
+  ...
+# Subtest: uncertain admission cannot be rolled back before read-back reconciliation
+ok 20 - uncertain admission cannot be rolled back before read-back reconciliation
+  ---
+  duration_ms: 3.0333
+  type: 'test'
+  ...
+# Subtest: restart reconciliation re-observes counters rather than inheriting a quiescent label
+ok 21 - restart reconciliation re-observes counters rather than inheriting a quiescent label
+  ---
+  duration_ms: 3.964
+  type: 'test'
+  ...
+# Subtest: rollback never overwrites a foreign file or runtime
+ok 22 - rollback never overwrites a foreign file or runtime
+  ---
+  duration_ms: 3.6487
+  type: 'test'
+  ...
+# Subtest: state byte or adapted-config tampering is rejected
+ok 23 - state byte or adapted-config tampering is rejected
+  ---
+  duration_ms: 1.0138
+  type: 'test'
+  ...
+# Subtest: admin endpoint stays loopback with bounded requests and exact ETag
+ok 24 - admin endpoint stays loopback with bounded requests and exact ETag
+  ---
+  duration_ms: 27.5108
+  type: 'test'
+  ...
+# Subtest: admin rejects response caps and stale ETags without exposing bodies
+ok 25 - admin rejects response caps and stale ETags without exposing bodies
+  ---
+  duration_ms: 1.3665
+  type: 'test'
+  ...
+# Subtest: unsupported or interleaved site grammar rejects before effects: custom_plugin foo
+ok 26 - unsupported or interleaved site grammar rejects before effects: custom_plugin foo
+  ---
+  duration_ms: 0.2541
+  type: 'test'
+  ...
+# Subtest: unsupported or interleaved site grammar rejects before effects: respond "before"\\n  tls internal
+ok 27 - unsupported or interleaved site grammar rejects before effects: respond "before"\\n  tls internal
+  ---
+  duration_ms: 0.1345
+  type: 'test'
+  ...
+# Subtest: unsupported or interleaved site grammar rejects before effects: respond "before"\\n  @later path /example
+ok 28 - unsupported or interleaved site grammar rejects before effects: respond "before"\\n  @later path /example
+  ---
+  duration_ms: 0.1165
+  type: 'test'
+  ...
+# Subtest: unsupported or interleaved site grammar rejects before effects: handle {\\n    import unsafe.conf\\n  }
+ok 29 - unsupported or interleaved site grammar rejects before effects: handle {\\n    import unsafe.conf\\n  }
+  ---
+  duration_ms: 0.1118
+  type: 'test'
+  ...
+# Subtest: delayed restore cannot become closed or quiescent from an old-overlay snapshot
+ok 30 - delayed restore cannot become closed or quiescent from an old-overlay snapshot
+  ---
+  duration_ms: 6.8068
+  type: 'test'
+  ...
+# Subtest: terminal result with different mutationId cannot resolve the pending restore
+ok 31 - terminal result with different mutationId cannot resolve the pending restore
+  ---
+  duration_ms: 3.1067
+  type: 'test'
+  ...
+# Subtest: terminal result with different direction cannot resolve the pending restore
+ok 32 - terminal result with different direction cannot resolve the pending restore
+  ---
+  duration_ms: 4.0483
+  type: 'test'
+  ...
+# Subtest: terminal result with different fromConfigSha256 cannot resolve the pending restore
+ok 33 - terminal result with different fromConfigSha256 cannot resolve the pending restore
+  ---
+  duration_ms: 3.2294
+  type: 'test'
+  ...
+# Subtest: terminal result with different toConfigSha256 cannot resolve the pending restore
+ok 34 - terminal result with different toConfigSha256 cannot resolve the pending restore
+  ---
+  duration_ms: 2.4433
+  type: 'test'
+  ...
+# Subtest: terminal result with different expectedEtag cannot resolve the pending restore
+ok 35 - terminal result with different expectedEtag cannot resolve the pending restore
+  ---
+  duration_ms: 2.5525
+  type: 'test'
+  ...
+# Subtest: restart without a retained terminal HTTP result remains unknown after commit
+ok 36 - restart without a retained terminal HTTP result remains unknown after commit
+  ---
+  duration_ms: 3.5979
+  type: 'test'
+  ...
+# Subtest: terminal receipt persisted before restart resolves to restored without another admin mutation
+ok 37 - terminal receipt persisted before restart resolves to restored without another admin mutation
+  ---
+  duration_ms: 3.1958
+  type: 'test'
+  ...
+# Subtest: unresolved restore held concurrently denies stale drain and no second restore dispatches
+ok 38 - unresolved restore held concurrently denies stale drain and no second restore dispatches
+  ---
+  duration_ms: 17.9569
+  type: 'test'
+  ...
+# Subtest: failed mutation-intent persistence prevents admin dispatch
+ok 39 - failed mutation-intent persistence prevents admin dispatch
+  ---
+  duration_ms: 1.7316
+  type: 'test'
+  ...
+# Subtest: old v1 state and same-revision forged status never inherit v2 authority
+ok 40 - old v1 state and same-revision forged status never inherit v2 authority
+  ---
+  duration_ms: 1.4175
+  type: 'test'
+  ...
+# Subtest: a terminal rejected admission restores only the known original bytes without resending
+ok 41 - a terminal rejected admission restores only the known original bytes without resending
+  ---
+  duration_ms: 1.7658
+  type: 'test'
+  ...
+# Subtest: a terminal rejected restore can return to a freshly observed closed admission
+ok 42 - a terminal rejected restore can return to a freshly observed closed admission
+  ---
+  duration_ms: 4.544
+  type: 'test'
+  ...
+# Subtest: synthetic late fetch completion yields only the exact bound terminal receipt
+ok 43 - synthetic late fetch completion yields only the exact bound terminal receipt
+  ---
+  duration_ms: 24.3115
+  type: 'test'
+  ...
+# Subtest: fixed file helper command has no stdin, remains hidden, and captures only bounded stdout
+ok 44 - fixed file helper command has no stdin, remains hidden, and captures only bounded stdout
+  ---
+  duration_ms: 4.0365
+  type: 'test'
+  ...
+# Subtest: timeout waits for actual child close before returning the uncertain write
+ok 45 - timeout waits for actual child close before returning the uncertain write
+  ---
+  duration_ms: 21.4955
+  type: 'test'
+  ...
+# Subtest: output cap kills then drains instead of removing input while child remains alive
+ok 46 - output cap kills then drains instead of removing input while child remains alive
+  ---
+  duration_ms: 15.5312
+  type: 'test'
+  ...
+# Subtest: unconfirmed child stop retains the request and exact owned PID; never invents cleanup
+ok 47 - unconfirmed child stop retains the request and exact owned PID; never invents cleanup
+  ---
+  duration_ms: 31.3083
+  type: 'test'
+  ...
+# Subtest: failure to spawn is typed and does not leak the helper error text
+ok 48 - failure to spawn is typed and does not leak the helper error text
+  ---
+  duration_ms: 1.1035
+  type: 'test'
+  ...
+# Subtest: real append-only journal loads latest revision after restart and rejects stale input
+ok 49 - real append-only journal loads latest revision after restart and rejects stale input
+  ---
+  duration_ms: 26.2965
+  type: 'test'
+  ...
+# Subtest: two actual append attempts at same next revision have exactly one winner
+ok 50 - two actual append attempts at same next revision have exactly one winner
+  ---
+  duration_ms: 19.3459
+  type: 'test'
+  ...
+# Subtest: partial journal tail is retained and blocks recovery instead of skipping it
+ok 51 - partial journal tail is retained and blocks recovery instead of skipping it
+  ---
+  duration_ms: 16.1217
+  type: 'test'
+  ...
+# Subtest: journal directory is bound to one transition and cannot begin a competing operation
+ok 52 - journal directory is bound to one transition and cannot begin a competing operation
+  ---
+  duration_ms: 16.0577
+  type: 'test'
+  ...
+# Subtest: non-synthetic journal requires explicit owner-private validation
+ok 53 - non-synthetic journal requires explicit owner-private validation
+  ---
+  duration_ms: 0.3862
+  type: 'test'
+  ...
+1..53
+# tests 53
+# suites 0
+# pass 53
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 295.5015

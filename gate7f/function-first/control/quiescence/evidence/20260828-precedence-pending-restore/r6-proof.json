@@ -1,0 +1,1329 @@
+{
+  "schemaVersion": "runaai-caddy-quiescence-proof/v1",
+  "startedAt": "2026-08-28T21:21:33.134Z",
+  "binarySha256": "5cb9ab71e5756ce72840b8234177a2f40c8b4ab47a806b8e841e2b784e9df62b",
+  "fixture": "C:\\Users\\matth\\AppData\\Local\\Temp\\m1-caddy-quiescence-dR20cu",
+  "checks": [
+    {
+      "name": "every synthetic Caddy listener is explicitly loopback",
+      "actual": true,
+      "expected": true
+    },
+    {
+      "name": "actual slow request counted before reload",
+      "actual": 1,
+      "expected": 1
+    },
+    {
+      "name": "actual same slow request still counted after reload",
+      "actual": 1,
+      "expected": 1
+    },
+    {
+      "name": "actual stale ETag leaves maintenance config unchanged",
+      "actual": "47848a7544fb20cf58ff94ae07369216a1d55d9d77d5ff6d3f43fa9eb2c9ab42",
+      "expected": "47848a7544fb20cf58ff94ae07369216a1d55d9d77d5ff6d3f43fa9eb2c9ab42"
+    },
+    {
+      "name": "new application API rejected",
+      "actual": 503,
+      "expected": 503
+    },
+    {
+      "name": "new private-address API rejected",
+      "actual": 503,
+      "expected": 503
+    },
+    {
+      "name": "existing explicit route cannot precede maintenance",
+      "actual": 503,
+      "expected": 503
+    },
+    {
+      "name": "new provider request rejected",
+      "actual": 503,
+      "expected": 503
+    },
+    {
+      "name": "specific preexisting provider GET handler cannot bypass closure",
+      "actual": 503,
+      "expected": 503
+    },
+    {
+      "name": "specific preexisting provider POST handler cannot bypass closure",
+      "actual": 503,
+      "expected": 503
+    },
+    {
+      "name": "blocked provider requests never reached real backend",
+      "actual": 0,
+      "expected": 0
+    },
+    {
+      "name": "unrelated host continues",
+      "actual": {
+        "status": 200,
+        "text": "unrelated"
+      },
+      "expected": {
+        "status": 200,
+        "text": "unrelated"
+      }
+    },
+    {
+      "name": "authentication route preserved",
+      "actual": {
+        "status": 200,
+        "text": "unrelated"
+      },
+      "expected": {
+        "status": 200,
+        "text": "unrelated"
+      }
+    },
+    {
+      "name": "static application route preserved",
+      "actual": {
+        "status": 200,
+        "text": "application"
+      },
+      "expected": {
+        "status": 200,
+        "text": "application"
+      }
+    },
+    {
+      "name": "held request completes normally",
+      "actual": {
+        "status": 200,
+        "text": "completed original request"
+      },
+      "expected": {
+        "status": 200,
+        "text": "completed original request"
+      }
+    },
+    {
+      "name": "control receipt requires actual stable drain",
+      "actual": "control-quiescent",
+      "expected": "control-quiescent"
+    },
+    {
+      "name": "control receipt does not claim Home quiescence",
+      "actual": false,
+      "expected": false
+    },
+    {
+      "name": "rollback recorded",
+      "actual": "restored",
+      "expected": "restored"
+    },
+    {
+      "name": "exact original file restored",
+      "actual": "f517381921b2ac76d255fa596fcdb7ef79bf9fe5f143fb0223c1cd61f4823568",
+      "expected": "f517381921b2ac76d255fa596fcdb7ef79bf9fe5f143fb0223c1cd61f4823568"
+    },
+    {
+      "name": "exact original active config restored",
+      "actual": "b54d2870ec6f302ae6e3425e5908f6d69f1ff41ead6e31966c7376f8d983568e",
+      "expected": "b54d2870ec6f302ae6e3425e5908f6d69f1ff41ead6e31966c7376f8d983568e"
+    },
+    {
+      "name": "application works after restore",
+      "actual": {
+        "status": 200,
+        "text": "application"
+      },
+      "expected": {
+        "status": 200,
+        "text": "application"
+      }
+    },
+    {
+      "name": "provider works after restore",
+      "actual": {
+        "status": 200,
+        "text": "provider"
+      },
+      "expected": {
+        "status": 200,
+        "text": "provider"
+      }
+    },
+    {
+      "name": "original explicit route works after restore",
+      "actual": {
+        "status": 200,
+        "text": "original route"
+      },
+      "expected": {
+        "status": 200,
+        "text": "original route"
+      }
+    },
+    {
+      "name": "real stale byte CAS left original intact",
+      "actual": "f517381921b2ac76d255fa596fcdb7ef79bf9fe5f143fb0223c1cd61f4823568",
+      "expected": "f517381921b2ac76d255fa596fcdb7ef79bf9fe5f143fb0223c1cd61f4823568"
+    },
+    {
+      "name": "actual restore HTTP request is held before Caddy commit",
+      "actual": true,
+      "expected": true
+    },
+    {
+      "name": "old overlay remains active while actual restore is pending",
+      "actual": "c8a41bfdcfc5f0c35b06aa2e76bcc85af66278aa22ebc9c68d81dbc87be542fe",
+      "expected": "c8a41bfdcfc5f0c35b06aa2e76bcc85af66278aa22ebc9c68d81dbc87be542fe"
+    },
+    {
+      "name": "pending real restore is never reclassified as admission closed",
+      "actual": "needs-reconciliation",
+      "expected": "needs-reconciliation"
+    },
+    {
+      "name": "zero real upstream counters cannot bypass unresolved restore",
+      "actual": true,
+      "expected": true
+    },
+    {
+      "name": "same exact delayed HTTP operation has a terminal success",
+      "actual": "succeeded",
+      "expected": "succeeded"
+    },
+    {
+      "name": "late restore reconciles only to restored",
+      "actual": "restored",
+      "expected": "restored"
+    },
+    {
+      "name": "late restore returns exact original bytes",
+      "actual": "f517381921b2ac76d255fa596fcdb7ef79bf9fe5f143fb0223c1cd61f4823568",
+      "expected": "f517381921b2ac76d255fa596fcdb7ef79bf9fe5f143fb0223c1cd61f4823568"
+    },
+    {
+      "name": "late restore returns exact original active config",
+      "actual": "b54d2870ec6f302ae6e3425e5908f6d69f1ff41ead6e31966c7376f8d983568e",
+      "expected": "b54d2870ec6f302ae6e3425e5908f6d69f1ff41ead6e31966c7376f8d983568e"
+    },
+    {
+      "name": "no quiescent receipt occurs in pending restore transition",
+      "actual": false,
+      "expected": false
+    },
+    {
+      "name": "specific provider route resumes only after completed restore",
+      "actual": {
+        "status": 200,
+        "text": "provider"
+      },
+      "expected": {
+        "status": 200,
+        "text": "provider"
+      }
+    }
+  ],
+  "events": [
+    {
+      "phase": "prepared",
+      "revision": 1,
+      "event": {
+        "phase": "prepared",
+        "at": "2026-08-28T21:21:33.435Z",
+        "counters": [
+          {
+            "address": "127.0.0.1:61352",
+            "num_requests": 0
+          },
+          {
+            "address": "127.0.0.1:61353",
+            "num_requests": 0
+          }
+        ]
+      }
+    },
+    {
+      "phase": "admission-intent",
+      "revision": 2,
+      "event": {
+        "phase": "admission-intent",
+        "at": "2026-08-28T21:21:33.458Z"
+      }
+    },
+    {
+      "phase": "admission-intent",
+      "revision": 3,
+      "event": {
+        "phase": "admission-intent",
+        "at": "2026-08-28T21:21:33.844Z",
+        "mutationId": "1356193adfcc4fd6abc133fdad2793b1"
+      }
+    },
+    {
+      "phase": "admission-intent",
+      "revision": 4,
+      "event": {
+        "phase": "admission-intent",
+        "at": "2026-08-28T21:21:33.856Z",
+        "mutationId": "1356193adfcc4fd6abc133fdad2793b1",
+        "terminalOutcome": "succeeded"
+      }
+    },
+    {
+      "phase": "admission-closed",
+      "revision": 5,
+      "event": {
+        "phase": "admission-closed",
+        "at": "2026-08-28T21:21:33.866Z",
+        "counters": [
+          {
+            "address": "127.0.0.1:61352",
+            "num_requests": 1
+          },
+          {
+            "address": "127.0.0.1:61353",
+            "num_requests": 0
+          }
+        ]
+      }
+    },
+    {
+      "phase": "admission-closed",
+      "revision": 6,
+      "event": {
+        "phase": "admission-closed",
+        "at": "2026-08-28T21:21:33.899Z",
+        "counters": [
+          {
+            "address": "127.0.0.1:61352",
+            "num_requests": 1
+          },
+          {
+            "address": "127.0.0.1:61353",
+            "num_requests": 0
+          }
+        ],
+        "stableZeroSamples": 0
+      }
+    },
+    {
+      "phase": "admission-closed",
+      "revision": 7,
+      "event": {
+        "phase": "admission-closed",
+        "at": "2026-08-28T21:21:34.008Z",
+        "counters": [
+          {
+            "address": "127.0.0.1:61352",
+            "num_requests": 1
+          },
+          {
+            "address": "127.0.0.1:61353",
+            "num_requests": 0
+          }
+        ],
+        "stableZeroSamples": 0
+      }
+    },
+    {
+      "phase": "admission-closed",
+      "revision": 8,
+      "event": {
+        "phase": "admission-closed",
+        "at": "2026-08-28T21:21:34.130Z",
+        "counters": [
+          {
+            "address": "127.0.0.1:61352",
+            "num_requests": 1
+          },
+          {
+            "address": "127.0.0.1:61353",
+            "num_requests": 0
+          }
+        ],
+        "stableZeroSamples": 0
+      }
+    },
+    {
+      "phase": "admission-closed",
+      "revision": 9,
+      "event": {
+        "phase": "admission-closed",
+        "at": "2026-08-28T21:21:34.250Z",
+        "counters": [
+          {
+            "address": "127.0.0.1:61352",
+            "num_requests": 0
+          },
+          {
+            "address": "127.0.0.1:61353",
+            "num_requests": 0
+          }
+        ],
+        "stableZeroSamples": 1
+      }
+    },
+    {
+      "phase": "admission-closed",
+      "revision": 10,
+      "event": {
+        "phase": "admission-closed",
+        "at": "2026-08-28T21:21:34.357Z",
+        "counters": [
+          {
+            "address": "127.0.0.1:61352",
+            "num_requests": 0
+          },
+          {
+            "address": "127.0.0.1:61353",
+            "num_requests": 0
+          }
+        ],
+        "stableZeroSamples": 2
+      }
+    },
+    {
+      "phase": "admission-closed",
+      "revision": 11,
+      "event": {
+        "phase": "admission-closed",
+        "at": "2026-08-28T21:21:34.479Z",
+        "counters": [
+          {
+            "address": "127.0.0.1:61352",
+            "num_requests": 0
+          },
+          {
+            "address": "127.0.0.1:61353",
+            "num_requests": 0
+          }
+        ],
+        "stableZeroSamples": 3
+      }
+    },
+    {
+      "phase": "control-quiescent",
+      "revision": 12,
+      "event": {
+        "phase": "control-quiescent",
+        "at": "2026-08-28T21:21:34.484Z",
+        "stableZeroSamples": 3
+      }
+    },
+    {
+      "phase": "restore-intent",
+      "revision": 13,
+      "event": {
+        "phase": "restore-intent",
+        "at": "2026-08-28T21:21:34.493Z"
+      }
+    },
+    {
+      "phase": "restore-intent",
+      "revision": 14,
+      "event": {
+        "phase": "restore-intent",
+        "at": "2026-08-28T21:21:34.497Z",
+        "mutationId": "356ab96d1c224041a7d89b4bbfffe7f6"
+      }
+    },
+    {
+      "phase": "restore-intent",
+      "revision": 15,
+      "event": {
+        "phase": "restore-intent",
+        "at": "2026-08-28T21:21:34.504Z",
+        "mutationId": "356ab96d1c224041a7d89b4bbfffe7f6",
+        "terminalOutcome": "succeeded"
+      }
+    },
+    {
+      "phase": "restored",
+      "revision": 16,
+      "event": {
+        "phase": "restored",
+        "at": "2026-08-28T21:21:34.892Z"
+      }
+    }
+  ],
+  "modelCalls": 0,
+  "homeChanges": false,
+  "productionChanges": false,
+  "passed": true,
+  "ownedCaddyPid": 21444,
+  "delayedRestore": {
+    "receivedAt": "2026-08-28T21:21:35.795Z",
+    "requestBodySha256": "b54d2870ec6f302ae6e3425e5908f6d69f1ff41ead6e31966c7376f8d983568e",
+    "ifMatch": "\"/config/ 3b9f665d4288baf4\"",
+    "terminalStatus": 200,
+    "completedAt": "2026-08-28T21:21:35.933Z",
+    "terminalReceipt": {
+      "schemaVersion": "runaai-caddy-mutation-result/v1",
+      "mutationId": "f97946ef626c4a5ea4e85a64c488785b",
+      "direction": "restore",
+      "fromConfigSha256": "c8a41bfdcfc5f0c35b06aa2e76bcc85af66278aa22ebc9c68d81dbc87be542fe",
+      "toConfigSha256": "b54d2870ec6f302ae6e3425e5908f6d69f1ff41ead6e31966c7376f8d983568e",
+      "expectedEtag": "\"/config/ 3b9f665d4288baf4\"",
+      "outcome": "succeeded",
+      "completedAt": "2026-08-28T21:21:35.934Z"
+    },
+    "finalState": {
+      "schemaVersion": "runaai-caddy-quiescence/v2",
+      "revision": 12,
+      "mutations": [
+        {
+          "mutationId": "66118d152ed4471387d4528f4880af11",
+          "direction": "admission",
+          "expectedEtag": "\"/config/ 34536bdbf38b35dd\"",
+          "fromConfigSha256": "b54d2870ec6f302ae6e3425e5908f6d69f1ff41ead6e31966c7376f8d983568e",
+          "toConfigSha256": "c8a41bfdcfc5f0c35b06aa2e76bcc85af66278aa22ebc9c68d81dbc87be542fe",
+          "status": "succeeded",
+          "terminalReceipt": {
+            "schemaVersion": "runaai-caddy-mutation-result/v1",
+            "mutationId": "66118d152ed4471387d4528f4880af11",
+            "direction": "admission",
+            "fromConfigSha256": "b54d2870ec6f302ae6e3425e5908f6d69f1ff41ead6e31966c7376f8d983568e",
+            "toConfigSha256": "c8a41bfdcfc5f0c35b06aa2e76bcc85af66278aa22ebc9c68d81dbc87be542fe",
+            "expectedEtag": "\"/config/ 34536bdbf38b35dd\"",
+            "outcome": "succeeded",
+            "completedAt": "2026-08-28T21:21:35.762Z"
+          }
+        },
+        {
+          "mutationId": "f97946ef626c4a5ea4e85a64c488785b",
+          "direction": "restore",
+          "expectedEtag": "\"/config/ 3b9f665d4288baf4\"",
+          "fromConfigSha256": "c8a41bfdcfc5f0c35b06aa2e76bcc85af66278aa22ebc9c68d81dbc87be542fe",
+          "toConfigSha256": "b54d2870ec6f302ae6e3425e5908f6d69f1ff41ead6e31966c7376f8d983568e",
+          "status": "succeeded",
+          "terminalReceipt": {
+            "schemaVersion": "runaai-caddy-mutation-result/v1",
+            "mutationId": "f97946ef626c4a5ea4e85a64c488785b",
+            "direction": "restore",
+            "fromConfigSha256": "c8a41bfdcfc5f0c35b06aa2e76bcc85af66278aa22ebc9c68d81dbc87be542fe",
+            "toConfigSha256": "b54d2870ec6f302ae6e3425e5908f6d69f1ff41ead6e31966c7376f8d983568e",
+            "expectedEtag": "\"/config/ 3b9f665d4288baf4\"",
+            "outcome": "succeeded",
+            "completedAt": "2026-08-28T21:21:35.934Z"
+          }
+        }
+      ],
+      "transitionId": "05e521c46c4b440c9d0920ed374b9195",
+      "scopes": [
+        {
+          "siteAddress": "http://127.0.0.1:61356",
+          "mode": "api"
+        },
+        {
+          "siteAddress": "http://127.0.0.1:61357",
+          "mode": "api"
+        },
+        {
+          "siteAddress": "http://127.0.0.1:61358",
+          "mode": "all"
+        }
+      ],
+      "upstreams": [
+        "127.0.0.1:61352",
+        "127.0.0.1:61353"
+      ],
+      "originalBase64": "ewogIGFkbWluIDEyNy4wLjAuMTo2MTM1NQogIGRlZmF1bHRfYmluZCAxMjcuMC4wLjEKICBhdXRvX2h0dHBzIG9mZgogIHBlcnNpc3RfY29uZmlnIG9mZgp9Cmh0dHA6Ly8xMjcuMC4wLjE6NjEzNTYgewogIGhhbmRsZV9wYXRoIC9hdXRoLyogewogICAgcmV2ZXJzZV9wcm94eSAxMjcuMC4wLjE6NjEzNTQKICB9CiAgaGFuZGxlIHsKICAgIHJldmVyc2VfcHJveHkgMTI3LjAuMC4xOjYxMzUyCiAgfQp9Cmh0dHA6Ly8xMjcuMC4wLjE6NjEzNTcgewogIHJvdXRlIC9hcGkvc3BlY2lmaWMgewogICAgcmVzcG9uZCAib3JpZ2luYWwgcm91dGUiIDIwMAogIH0KICByZXZlcnNlX3Byb3h5IDEyNy4wLjAuMTo2MTM1Mgp9Cmh0dHA6Ly8xMjcuMC4wLjE6NjEzNTggewogIGhhbmRsZSAvdjEvY2hhdC9jb21wbGV0aW9ucyB7CiAgICByZXZlcnNlX3Byb3h5IDEyNy4wLjAuMTo2MTM1MwogIH0KICBoYW5kbGUgewogICAgcmV2ZXJzZV9wcm94eSAxMjcuMC4wLjE6NjEzNTMKICB9Cn0KaHR0cDovLzEyNy4wLjAuMTo2MTM1OSB7CiAgcmV2ZXJzZV9wcm94eSAxMjcuMC4wLjE6NjEzNTQKfQo=",
+      "overlayBase64": "ewogIGFkbWluIDEyNy4wLjAuMTo2MTM1NQogIGRlZmF1bHRfYmluZCAxMjcuMC4wLjEKICBhdXRvX2h0dHBzIG9mZgogIHBlcnNpc3RfY29uZmlnIG9mZgp9Cmh0dHA6Ly8xMjcuMC4wLjE6NjEzNTYgewogIEBydW5hX20xX21haW50ZW5hbmNlXzA1ZTUyMWM0NmM0YjQ0MGM5ZDA5MjBlZDM3NGI5MTk1IHBhdGggL2FwaS8qIC9oZWFsdGgvKgogIHJvdXRlIHsKICAgIHJlc3BvbmQgQHJ1bmFfbTFfbWFpbnRlbmFuY2VfMDVlNTIxYzQ2YzRiNDQwYzlkMDkyMGVkMzc0YjkxOTUgIlJ1bmEgbWFpbnRlbmFuY2UgMDVlNTIxYzQ2YzRiNDQwYzlkMDkyMGVkMzc0YjkxOTUiIDUwMwogICAgaGFuZGxlIHsKaGFuZGxlX3BhdGggL2F1dGgvKiB7CiAgICByZXZlcnNlX3Byb3h5IDEyNy4wLjAuMTo2MTM1NAogIH0KICBoYW5kbGUgewogICAgcmV2ZXJzZV9wcm94eSAxMjcuMC4wLjE6NjEzNTIKICB9CiAgICB9CiAgfQp9Cmh0dHA6Ly8xMjcuMC4wLjE6NjEzNTcgewogIEBydW5hX20xX21haW50ZW5hbmNlXzA1ZTUyMWM0NmM0YjQ0MGM5ZDA5MjBlZDM3NGI5MTk1IHBhdGggL2FwaS8qIC9oZWFsdGgvKgogIHJvdXRlIHsKICAgIHJlc3BvbmQgQHJ1bmFfbTFfbWFpbnRlbmFuY2VfMDVlNTIxYzQ2YzRiNDQwYzlkMDkyMGVkMzc0YjkxOTUgIlJ1bmEgbWFpbnRlbmFuY2UgMDVlNTIxYzQ2YzRiNDQwYzlkMDkyMGVkMzc0YjkxOTUiIDUwMwogICAgaGFuZGxlIHsKcm91dGUgL2FwaS9zcGVjaWZpYyB7CiAgICByZXNwb25kICJvcmlnaW5hbCByb3V0ZSIgMjAwCiAgfQogIHJldmVyc2VfcHJveHkgMTI3LjAuMC4xOjYxMzUyCiAgICB9CiAgfQp9Cmh0dHA6Ly8xMjcuMC4wLjE6NjEzNTggewogIEBydW5hX20xX21haW50ZW5hbmNlXzA1ZTUyMWM0NmM0YjQ0MGM5ZDA5MjBlZDM3NGI5MTk1IHBhdGggKgogIHJvdXRlIHsKICAgIHJlc3BvbmQgQHJ1bmFfbTFfbWFpbnRlbmFuY2VfMDVlNTIxYzQ2YzRiNDQwYzlkMDkyMGVkMzc0YjkxOTUgIlJ1bmEgbWFpbnRlbmFuY2UgMDVlNTIxYzQ2YzRiNDQwYzlkMDkyMGVkMzc0YjkxOTUiIDUwMwogICAgaGFuZGxlIHsKaGFuZGxlIC92MS9jaGF0L2NvbXBsZXRpb25zIHsKICAgIHJldmVyc2VfcHJveHkgMTI3LjAuMC4xOjYxMzUzCiAgfQogIGhhbmRsZSB7CiAgICByZXZlcnNlX3Byb3h5IDEyNy4wLjAuMTo2MTM1MwogIH0KICAgIH0KICB9Cn0KaHR0cDovLzEyNy4wLjAuMTo2MTM1OSB7CiAgcmV2ZXJzZV9wcm94eSAxMjcuMC4wLjE6NjEzNTQKfQo=",
+      "originalSha256": "f517381921b2ac76d255fa596fcdb7ef79bf9fe5f143fb0223c1cd61f4823568",
+      "overlaySha256": "3a471e30609b075905599652b562ebd79c023abbed28eb1a8196acd3e494ba8a",
+      "originalConfig": {
+        "admin": {
+          "config": {
+            "persist": false
+          },
+          "listen": "127.0.0.1:61355"
+        },
+        "apps": {
+          "http": {
+            "servers": {
+              "srv0": {
+                "automatic_https": {
+                  "disable": true,
+                  "skip": [
+                    "127.0.0.1"
+                  ]
+                },
+                "listen": [
+                  "127.0.0.1:61356"
+                ],
+                "routes": [
+                  {
+                    "handle": [
+                      {
+                        "handler": "subroute",
+                        "routes": [
+                          {
+                            "group": "group5",
+                            "handle": [
+                              {
+                                "handler": "subroute",
+                                "routes": [
+                                  {
+                                    "handle": [
+                                      {
+                                        "handler": "rewrite",
+                                        "strip_path_prefix": "/auth"
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "handle": [
+                                      {
+                                        "handler": "reverse_proxy",
+                                        "upstreams": [
+                                          {
+                                            "dial": "127.0.0.1:61354"
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ],
+                            "match": [
+                              {
+                                "path": [
+                                  "/auth/*"
+                                ]
+                              }
+                            ]
+                          },
+                          {
+                            "group": "group5",
+                            "handle": [
+                              {
+                                "handler": "subroute",
+                                "routes": [
+                                  {
+                                    "handle": [
+                                      {
+                                        "handler": "reverse_proxy",
+                                        "upstreams": [
+                                          {
+                                            "dial": "127.0.0.1:61352"
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ],
+                    "match": [
+                      {
+                        "host": [
+                          "127.0.0.1"
+                        ]
+                      }
+                    ],
+                    "terminal": true
+                  }
+                ]
+              },
+              "srv1": {
+                "automatic_https": {
+                  "disable": true,
+                  "skip": [
+                    "127.0.0.1"
+                  ]
+                },
+                "listen": [
+                  "127.0.0.1:61357"
+                ],
+                "routes": [
+                  {
+                    "handle": [
+                      {
+                        "handler": "subroute",
+                        "routes": [
+                          {
+                            "handle": [
+                              {
+                                "handler": "subroute",
+                                "routes": [
+                                  {
+                                    "handle": [
+                                      {
+                                        "body": "original route",
+                                        "handler": "static_response",
+                                        "status_code": 200
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ],
+                            "match": [
+                              {
+                                "path": [
+                                  "/api/specific"
+                                ]
+                              }
+                            ]
+                          },
+                          {
+                            "handle": [
+                              {
+                                "handler": "reverse_proxy",
+                                "upstreams": [
+                                  {
+                                    "dial": "127.0.0.1:61352"
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ],
+                    "match": [
+                      {
+                        "host": [
+                          "127.0.0.1"
+                        ]
+                      }
+                    ],
+                    "terminal": true
+                  }
+                ]
+              },
+              "srv2": {
+                "automatic_https": {
+                  "disable": true,
+                  "skip": [
+                    "127.0.0.1"
+                  ]
+                },
+                "listen": [
+                  "127.0.0.1:61358"
+                ],
+                "routes": [
+                  {
+                    "handle": [
+                      {
+                        "handler": "subroute",
+                        "routes": [
+                          {
+                            "group": "group8",
+                            "handle": [
+                              {
+                                "handler": "subroute",
+                                "routes": [
+                                  {
+                                    "handle": [
+                                      {
+                                        "handler": "reverse_proxy",
+                                        "upstreams": [
+                                          {
+                                            "dial": "127.0.0.1:61353"
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ],
+                            "match": [
+                              {
+                                "path": [
+                                  "/v1/chat/completions"
+                                ]
+                              }
+                            ]
+                          },
+                          {
+                            "group": "group8",
+                            "handle": [
+                              {
+                                "handler": "subroute",
+                                "routes": [
+                                  {
+                                    "handle": [
+                                      {
+                                        "handler": "reverse_proxy",
+                                        "upstreams": [
+                                          {
+                                            "dial": "127.0.0.1:61353"
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ],
+                    "match": [
+                      {
+                        "host": [
+                          "127.0.0.1"
+                        ]
+                      }
+                    ],
+                    "terminal": true
+                  }
+                ]
+              },
+              "srv3": {
+                "automatic_https": {
+                  "disable": true,
+                  "skip": [
+                    "127.0.0.1"
+                  ]
+                },
+                "listen": [
+                  "127.0.0.1:61359"
+                ],
+                "routes": [
+                  {
+                    "handle": [
+                      {
+                        "handler": "subroute",
+                        "routes": [
+                          {
+                            "handle": [
+                              {
+                                "handler": "reverse_proxy",
+                                "upstreams": [
+                                  {
+                                    "dial": "127.0.0.1:61354"
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ],
+                    "match": [
+                      {
+                        "host": [
+                          "127.0.0.1"
+                        ]
+                      }
+                    ],
+                    "terminal": true
+                  }
+                ]
+              }
+            }
+          }
+        }
+      },
+      "overlayConfig": {
+        "admin": {
+          "listen": "127.0.0.1:61355",
+          "config": {
+            "persist": false
+          }
+        },
+        "apps": {
+          "http": {
+            "servers": {
+              "srv0": {
+                "listen": [
+                  "127.0.0.1:61356"
+                ],
+                "routes": [
+                  {
+                    "match": [
+                      {
+                        "host": [
+                          "127.0.0.1"
+                        ]
+                      }
+                    ],
+                    "handle": [
+                      {
+                        "handler": "subroute",
+                        "routes": [
+                          {
+                            "handle": [
+                              {
+                                "handler": "subroute",
+                                "routes": [
+                                  {
+                                    "handle": [
+                                      {
+                                        "body": "Runa maintenance 05e521c46c4b440c9d0920ed374b9195",
+                                        "handler": "static_response",
+                                        "status_code": 503
+                                      }
+                                    ],
+                                    "match": [
+                                      {
+                                        "path": [
+                                          "/api/*",
+                                          "/health/*"
+                                        ]
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "handle": [
+                                      {
+                                        "handler": "subroute",
+                                        "routes": [
+                                          {
+                                            "group": "group2",
+                                            "handle": [
+                                              {
+                                                "handler": "subroute",
+                                                "routes": [
+                                                  {
+                                                    "handle": [
+                                                      {
+                                                        "handler": "rewrite",
+                                                        "strip_path_prefix": "/auth"
+                                                      }
+                                                    ]
+                                                  },
+                                                  {
+                                                    "handle": [
+                                                      {
+                                                        "handler": "reverse_proxy",
+                                                        "upstreams": [
+                                                          {
+                                                            "dial": "127.0.0.1:61354"
+                                                          }
+                                                        ]
+                                                      }
+                                                    ]
+                                                  }
+                                                ]
+                                              }
+                                            ],
+                                            "match": [
+                                              {
+                                                "path": [
+                                                  "/auth/*"
+                                                ]
+                                              }
+                                            ]
+                                          },
+                                          {
+                                            "group": "group2",
+                                            "handle": [
+                                              {
+                                                "handler": "subroute",
+                                                "routes": [
+                                                  {
+                                                    "handle": [
+                                                      {
+                                                        "handler": "reverse_proxy",
+                                                        "upstreams": [
+                                                          {
+                                                            "dial": "127.0.0.1:61352"
+                                                          }
+                                                        ]
+                                                      }
+                                                    ]
+                                                  }
+                                                ]
+                                              }
+                                            ]
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ],
+                    "terminal": true
+                  }
+                ],
+                "automatic_https": {
+                  "disable": true,
+                  "skip": [
+                    "127.0.0.1"
+                  ]
+                }
+              },
+              "srv1": {
+                "listen": [
+                  "127.0.0.1:61357"
+                ],
+                "routes": [
+                  {
+                    "match": [
+                      {
+                        "host": [
+                          "127.0.0.1"
+                        ]
+                      }
+                    ],
+                    "handle": [
+                      {
+                        "handler": "subroute",
+                        "routes": [
+                          {
+                            "handle": [
+                              {
+                                "handler": "subroute",
+                                "routes": [
+                                  {
+                                    "handle": [
+                                      {
+                                        "body": "Runa maintenance 05e521c46c4b440c9d0920ed374b9195",
+                                        "handler": "static_response",
+                                        "status_code": 503
+                                      }
+                                    ],
+                                    "match": [
+                                      {
+                                        "path": [
+                                          "/api/*",
+                                          "/health/*"
+                                        ]
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "handle": [
+                                      {
+                                        "handler": "subroute",
+                                        "routes": [
+                                          {
+                                            "handle": [
+                                              {
+                                                "handler": "subroute",
+                                                "routes": [
+                                                  {
+                                                    "handle": [
+                                                      {
+                                                        "body": "original route",
+                                                        "handler": "static_response",
+                                                        "status_code": 200
+                                                      }
+                                                    ]
+                                                  }
+                                                ]
+                                              }
+                                            ],
+                                            "match": [
+                                              {
+                                                "path": [
+                                                  "/api/specific"
+                                                ]
+                                              }
+                                            ]
+                                          },
+                                          {
+                                            "handle": [
+                                              {
+                                                "handler": "reverse_proxy",
+                                                "upstreams": [
+                                                  {
+                                                    "dial": "127.0.0.1:61352"
+                                                  }
+                                                ]
+                                              }
+                                            ]
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ],
+                    "terminal": true
+                  }
+                ],
+                "automatic_https": {
+                  "disable": true,
+                  "skip": [
+                    "127.0.0.1"
+                  ]
+                }
+              },
+              "srv2": {
+                "listen": [
+                  "127.0.0.1:61358"
+                ],
+                "routes": [
+                  {
+                    "match": [
+                      {
+                        "host": [
+                          "127.0.0.1"
+                        ]
+                      }
+                    ],
+                    "handle": [
+                      {
+                        "handler": "subroute",
+                        "routes": [
+                          {
+                            "handle": [
+                              {
+                                "handler": "subroute",
+                                "routes": [
+                                  {
+                                    "handle": [
+                                      {
+                                        "body": "Runa maintenance 05e521c46c4b440c9d0920ed374b9195",
+                                        "handler": "static_response",
+                                        "status_code": 503
+                                      }
+                                    ],
+                                    "match": [
+                                      {
+                                        "path": [
+                                          "*"
+                                        ]
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "handle": [
+                                      {
+                                        "handler": "subroute",
+                                        "routes": [
+                                          {
+                                            "group": "group10",
+                                            "handle": [
+                                              {
+                                                "handler": "subroute",
+                                                "routes": [
+                                                  {
+                                                    "handle": [
+                                                      {
+                                                        "handler": "reverse_proxy",
+                                                        "upstreams": [
+                                                          {
+                                                            "dial": "127.0.0.1:61353"
+                                                          }
+                                                        ]
+                                                      }
+                                                    ]
+                                                  }
+                                                ]
+                                              }
+                                            ],
+                                            "match": [
+                                              {
+                                                "path": [
+                                                  "/v1/chat/completions"
+                                                ]
+                                              }
+                                            ]
+                                          },
+                                          {
+                                            "group": "group10",
+                                            "handle": [
+                                              {
+                                                "handler": "subroute",
+                                                "routes": [
+                                                  {
+                                                    "handle": [
+                                                      {
+                                                        "handler": "reverse_proxy",
+                                                        "upstreams": [
+                                                          {
+                                                            "dial": "127.0.0.1:61353"
+                                                          }
+                                                        ]
+                                                      }
+                                                    ]
+                                                  }
+                                                ]
+                                              }
+                                            ]
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ],
+                    "terminal": true
+                  }
+                ],
+                "automatic_https": {
+                  "disable": true,
+                  "skip": [
+                    "127.0.0.1"
+                  ]
+                }
+              },
+              "srv3": {
+                "listen": [
+                  "127.0.0.1:61359"
+                ],
+                "routes": [
+                  {
+                    "match": [
+                      {
+                        "host": [
+                          "127.0.0.1"
+                        ]
+                      }
+                    ],
+                    "handle": [
+                      {
+                        "handler": "subroute",
+                        "routes": [
+                          {
+                            "handle": [
+                              {
+                                "handler": "reverse_proxy",
+                                "upstreams": [
+                                  {
+                                    "dial": "127.0.0.1:61354"
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ],
+                    "terminal": true
+                  }
+                ],
+                "automatic_https": {
+                  "disable": true,
+                  "skip": [
+                    "127.0.0.1"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "originalConfigSha256": "b54d2870ec6f302ae6e3425e5908f6d69f1ff41ead6e31966c7376f8d983568e",
+      "overlayConfigSha256": "c8a41bfdcfc5f0c35b06aa2e76bcc85af66278aa22ebc9c68d81dbc87be542fe",
+      "phase": "restored",
+      "events": [
+        {
+          "phase": "prepared",
+          "at": "2026-08-28T21:21:35.329Z",
+          "counters": [
+            {
+              "address": "127.0.0.1:61352",
+              "num_requests": 0
+            },
+            {
+              "address": "127.0.0.1:61353",
+              "num_requests": 0
+            }
+          ]
+        },
+        {
+          "phase": "admission-intent",
+          "at": "2026-08-28T21:21:35.341Z"
+        },
+        {
+          "phase": "admission-intent",
+          "at": "2026-08-28T21:21:35.753Z",
+          "mutationId": "66118d152ed4471387d4528f4880af11"
+        },
+        {
+          "phase": "admission-intent",
+          "at": "2026-08-28T21:21:35.762Z",
+          "mutationId": "66118d152ed4471387d4528f4880af11",
+          "terminalOutcome": "succeeded"
+        },
+        {
+          "phase": "admission-closed",
+          "at": "2026-08-28T21:21:35.770Z",
+          "counters": [
+            {
+              "address": "127.0.0.1:61352",
+              "num_requests": 0
+            },
+            {
+              "address": "127.0.0.1:61353",
+              "num_requests": 0
+            }
+          ]
+        },
+        {
+          "phase": "restore-intent",
+          "at": "2026-08-28T21:21:35.782Z"
+        },
+        {
+          "phase": "restore-intent",
+          "at": "2026-08-28T21:21:35.788Z",
+          "mutationId": "f97946ef626c4a5ea4e85a64c488785b"
+        },
+        {
+          "phase": "needs-reconciliation",
+          "at": "2026-08-28T21:21:35.907Z",
+          "errorCode": "quiescence-restore-uncertain"
+        },
+        {
+          "phase": "needs-reconciliation",
+          "at": "2026-08-28T21:21:35.918Z",
+          "mutationId": "f97946ef626c4a5ea4e85a64c488785b",
+          "terminalOutcome": "unobserved"
+        },
+        {
+          "phase": "needs-reconciliation",
+          "at": "2026-08-28T21:21:35.959Z",
+          "mutationId": "f97946ef626c4a5ea4e85a64c488785b",
+          "terminalOutcome": "succeeded"
+        },
+        {
+          "phase": "restore-intent",
+          "at": "2026-08-28T21:21:35.965Z",
+          "reconciled": true
+        },
+        {
+          "phase": "restored",
+          "at": "2026-08-28T21:21:36.371Z",
+          "reconciled": true
+        }
+      ],
+      "scope": "selected-caddy-proxied-requests-only",
+      "homeQuiescenceProved": false
+    }
+  },
+  "cleanup": {
+    "ownedCaddyStopped": true,
+    "ownedPortsClosed": [
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "retainedSyntheticFixtureAndJournal": true,
+    "productionChanges": false
+  },
+  "finishedAt": "2026-08-28T21:21:36.395Z"
+}

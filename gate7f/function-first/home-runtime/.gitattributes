@@ -5,3 +5,7 @@ tls-enrollment-operator.mjs -text
 prove-tls-transport.mjs -text
 # The real Caddy wire proof binds the exact body-timeout implementation bytes.
 proxy.mjs -text
+# One-off owner probe packages retain these exact reviewed source bytes.
+Run-HomeOwnerStatus.ps1 -text
+owner-status-operator.mjs -text
+probe-native-remote-status.mjs -text

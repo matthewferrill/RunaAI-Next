@@ -372,3 +372,21 @@ status path succeeds may a separately sealed helper implement the already-bounde
 under the durable journal and independent caller-closure barrier. Neither probe is a native-wide
 admission gate. Positive busy/queued observation and the real controlled-maintenance proof remain
 required; no Home command in these paragraphs runs while a candidate lease is active.
+
+The managed maintenance boundary is now explicit: close and drain every application caller and
+our own native CLI/task activity, inspect actual native queue/active-state and known connections,
+and refuse mutation while unowned active work exists. Local privileged Matthew desktop/CLI activity
+is a trusted, non-concurrent administrator assumption under the operator's exclusive ownership;
+this is not a global atomic admission gate that can lock out a deliberate administrator. Credential-
+store mutation, firewall changes and forced unload are not shortcuts to proving this drain. A fresh
+queue snapshot remains evidence combined with the controlled caller boundary, not a permanent grant.
+
+`Run-HomeOwnerStatus.ps1` and `owner-status-operator.mjs` implement only the prospective read-only
+owner-context probe. Preparation is offline; staging creates one unique application-owned directory
+with protected administrator/SYSTEM ACLs and Matthew read-only code access plus a bounded result
+directory. The one-minute Interactive task uses the real Matthew token, hidden PowerShell5, and a
+fixed five-second/8KB `ps --json` child. It checks the retained engine/descriptor and empty inventories,
+and reports only sanitized results. Unknown child termination blocks task cleanup; confirmed failed
+probes may be unregistered while all files remain recoverable. The four new local tests passed,
+including actual PowerShell5 parsing of every generated command; they did not stage/run anything on
+Home or prove native authentication. The separate explicit-loopback probe is similarly prospective.

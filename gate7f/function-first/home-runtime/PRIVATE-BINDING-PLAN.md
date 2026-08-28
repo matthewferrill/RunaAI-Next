@@ -28,5 +28,18 @@ A single profile supports one selected primary for all five roles. A mixed winne
 blocked until serialized drain/swap and profile routing are built and tested; this binding does not
 silently load extra primaries. The initial guard does not resolve the desktop-login boot dependency.
 
+## Prospective BGE transport addition
+
+Parent review2026-08-28 requires the same authenticated boundary to carry only the fixed BGE
+`POST /rerank` and `GET /health` routes to the existing local8412 service. Preserve request/response bytes,
+windowed batches of at most32 documents, top_n covering the whole batch, and the application10second
+deadline inside a15second outer transport ceiling. Reject unsupported overrides and other BGE routes.
+Exercise routing, limits, exact bytes, dependency failure and authenticated access in local tests.
+
+Before deployment, inspect existing BGE consumers using metadata/source/config references only; do not
+read private prompts or logs. Do not close/reconfigure8412 until its consumers and exact rollback are
+understood. If it remains available for approved legacy consumers, say exactly that: the M1 route uses
+TLS while the legacy listener still exists. Do not claim all Home endpoints are closed or authenticated.
+
 Primary APIs: [Node22 TLS server client verification](https://nodejs.org/docs/latest-v22.x/api/tls.html)
 and [Caddy upstream mutual TLS](https://caddyserver.com/docs/caddyfile/directives/reverse_proxy).

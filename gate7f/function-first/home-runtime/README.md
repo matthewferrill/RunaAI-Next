@@ -60,8 +60,16 @@ paths, zero-bypass loopback LM Studio binding, and engine PID/start-time/owner p
 again on observations; owned model IDs are required for unload. The independent protected installation,
 exclusive lifecycle lock and crash supervisor remain necessary before this adapter may be activated.
 
+`PinnedAdmissionBroker` narrows the future LocalService-worker → SYSTEM-supervisor control channel
+to authenticated `admit`, `release` and `status` messages. It binds an exact worker/session, ordered
+sequence, fresh timestamp and MAC; no native command, model body or path is accepted. Grant expiry
+revokes but does not falsely acknowledge a stopped request. Only independent exact-worker death proof
+permits releasing an unacknowledged grant. The broker is a pure control-plane module: physical IPC,
+Windows ACLs and the independent native supervisor are not implemented by this class. See
+[supervision criteria](SUPERVISOR-PLAN.md).
+
 Run `node --test gate7f/function-first/home-runtime/*.test.mjs`.
-Local verification2026-08-28:24/24 pass. The60second test uses a controlled clock, not a long inference;
+Local verification2026-08-28:30/30 pass. The60second test uses a controlled clock, not a long inference;
 the incomplete-body regression uses an actual disposable HTTP socket. Native file-link rejection uses
 actual NTFS hardlinks/junctions; the observer was parsed by Windows PowerShell. None is live Home proof.
 The real local TLS regression creates disposable certificates using the installed Git OpenSSL and

@@ -8,6 +8,7 @@ import { evaluateAttempt, evaluateControl } from "./assertions.mjs";
 import { populateAttemptChecks } from "./observations.mjs";
 import { createOwnedControlResources, fileSha256 } from "./owned-control-resources.mjs";
 import { createFunctionalTestbed } from "./functional-testbed.mjs";
+import { healthCaptureDiagnostics } from "./capture-transport.mjs";
 import { FunctionalHttpJourney } from "./http-journey.mjs";
 import { AcceptanceFaultController, createFaultActions } from "./fault-actions.mjs";
 import { startApplicationFaultWorker } from "./fault-worker.mjs";
@@ -428,6 +429,8 @@ export async function runModelCampaign(args, { checkpoint = null, getLeaseObserv
   } finally {
     clearTimeout(timer); clearInterval(monitor); process.removeListener("SIGINT", onSignal); process.removeListener("SIGTERM", onSignal);
     try { await cleanup(); } catch (error) { result.cleanupError = safeCode(error); }
+    result.healthDiagnosticArtifact = await writer.write("health-diagnostics.json", { sourceCommit: plan.sourceCommit,
+      runtimeSealSha256: plan.runtimeSealSha256, ...healthCaptureDiagnostics(testbed?.transports) });
     result.finishedAt = stamp(); result.evidenceDirectory = path.relative(root, directory).replaceAll("\\", "/");
     await writer.write("result.json", result);
   }

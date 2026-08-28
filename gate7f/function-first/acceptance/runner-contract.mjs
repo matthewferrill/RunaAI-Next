@@ -82,6 +82,7 @@ export function newObservation(item, { candidateId = null, repetition = 0, runti
   return { schemaVersion: "runaai-m1-functional-attempt/v1", caseId: item.id, candidateId, repetition, role: item.role,
     caseBundleSha256: CASE_BUNDLE_SHA256, runtimeSealSha256, status: "running", startedAt: new Date().toISOString(),
     application: { requests: [], final: null }, provider: { calls: [], unexpectedCalls: [] },
+    health: { calls: [] },
     sources: { bindings: [], selectedAliases: [], indexOperations: [], canonicalBefore: [], canonicalAfter: [] },
     project: { initial: null, final: null, snapshots: [] },
     authority: { grants: [], approvals: [], revocations: [], sessionEvents: [] },

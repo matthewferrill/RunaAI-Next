@@ -1,6 +1,12 @@
 import { createServer } from "node:http";
 import { once } from "node:events";
-import { fail } from "./runner-contract.mjs";
+import { fail, sha256 } from "./runner-contract.mjs";
+
+export const HEALTH_CAPTURE_LIMITS = Object.freeze({ deadlineMs: 2000, maximumBytes: 65_536, maximumRecords: 1024, maximumJournalBodyBytes: 8_388_608 });
+const healthRoutes = Object.freeze({ embedding: "/models", reranker: "/health" });
+const exactHealthRead = (kind, request) => request.method === "GET" && healthRoutes[kind]
+  && request.url === healthRoutes[kind] && !request.headers["transfer-encoding"]
+  && (!request.headers["content-length"] || request.headers["content-length"] === "0");
 
 async function bytes(stream, maximum) {
   const chunks = []; let size = 0;
@@ -50,15 +56,61 @@ export async function startCaptureTransport({ mode, targetBaseUrl, modelId, kind
   const target = new URL(targetBaseUrl);
   if (target.protocol !== "http:" || !["127.0.0.1", "192.168.50.165", "192.168.50.169"].includes(target.hostname)
       || target.username || target.password || target.search || target.hash) throw fail("m1-capture-target-invalid");
+  const healthCalls = []; let healthOverflows = 0, healthJournalBodyBytes = 0;
   const managed = managedServer(async (request, response, signal) => {
     const ledger = getLedger?.(); const startedAt = new Date().toISOString(); let body = null;
     const path = new URL(request.url, "http://127.0.0.1").pathname;
+    // These two fixed application health reads are not inference, retrieval or
+    // model-role evidence. Unknown methods/targets still take the denial path.
+    if (exactHealthRead(kind, request)) {
+      if (healthCalls.length >= HEALTH_CAPTURE_LIMITS.maximumRecords) {
+        healthOverflows++;
+        response.writeHead(503, { "content-type": "application/json" });
+        response.end(JSON.stringify({ errorCode: "m1-health-capture-limited" })); return;
+      }
+      const item = { sequence: healthCalls.length + 1, category: "health", kind, method: "GET", path,
+        phase: ledger?.phase ?? "no-case", startedAt, upstreamContacted: false, inference: false };
+      // Reserve before awaiting so concurrent reads share the same finite cap.
+      healthCalls.push(item);
+      try {
+        if (mode !== "scored") throw fail("m1-health-disabled-in-controls");
+        item.upstreamContacted = true;
+        const upstream = await fetch(`${targetBaseUrl.replace(/\/$/, "")}${healthRoutes[kind]}`, {
+          method: "GET", headers: { accept: "application/json" }, redirect: "error",
+          signal: AbortSignal.any([signal, AbortSignal.timeout(HEALTH_CAPTURE_LIMITS.deadlineMs)]) });
+        const raw = await bytes(upstream.body, HEALTH_CAPTURE_LIMITS.maximumBytes);
+        item.httpStatus = upstream.status;
+        item.responseBytes = raw.length; item.responseSha256 = sha256(raw);
+        if (healthJournalBodyBytes + raw.length <= HEALTH_CAPTURE_LIMITS.maximumJournalBodyBytes) {
+          healthJournalBodyBytes += raw.length;
+          try { item.response = JSON.parse(raw.toString("utf8")); } catch { item.responseText = raw.toString("utf8"); }
+        } else item.responseOmitted = "bounded-journal-body-budget";
+        response.writeHead(upstream.status, { "content-type": upstream.headers.get("content-type") ?? "application/json", "content-length": raw.length });
+        response.end(raw);
+      } catch (error) {
+        item.errorCode = error.code === "m1-health-disabled-in-controls" ? error.code
+          : error.code === "m1-capture-output-limited" ? "m1-health-output-limited" : "m1-health-upstream-failed";
+        if (!response.destroyed && !response.headersSent) {
+          response.writeHead(503, { "content-type": "application/json" }); response.end(JSON.stringify({ errorCode: item.errorCode }));
+        }
+      } finally {
+        item.finishedAt = new Date().toISOString();
+        // Never append late background health traffic to an already exported
+        // attempt. The bounded transport journal still retains the observation.
+        if (ledger?.observation.status === "running") {
+          ledger.observation.health ??= { calls: [] };
+          ledger.observation.health.calls.push(structuredClone(item));
+          ledger.evidence("host-runtime", "auxiliary-health-observation", item);
+        }
+      }
+      return;
+    }
     const expected = kind === "provider" ? "/chat/completions" : kind === "embedding" ? "/embeddings" : "/rerank";
     const item = { sequence: (ledger?.observation.provider.calls.length ?? 0) + 1, kind,
       role: ledger?.observation.role ?? null, phase: ledger?.phase ?? "no-case", path, startedAt,
       scope: structuredClone(ledger?.requestScope ?? null) };
     try {
-      if (request.method !== "POST" || path !== expected) throw fail("m1-capture-route-denied");
+      if (request.method !== "POST" || request.url !== expected) throw fail("m1-capture-route-denied");
       body = JSON.parse((await bytes(request, 196_608)).toString("utf8")); item.request = body;
       if (kind === "embedding") { item.adapter = "nomic";
         item.operation = body.input?.every(text => typeof text === "string" && text.startsWith("search_query: ")) ? "search" : "index"; }
@@ -90,7 +142,19 @@ export async function startCaptureTransport({ mode, targetBaseUrl, modelId, kind
   const { server } = managed;
   server.listen(0, "127.0.0.1"); await once(server, "listening");
   return { baseUrl: `http://127.0.0.1:${server.address().port}`, drain: managed.drain,
+    get healthCalls() { return structuredClone(healthCalls); }, get healthOverflows() { return healthOverflows; },
     get activeCount() { return managed.activeCount; }, close: managed.close };
+}
+
+// Called after transport close/drain. Outside-attempt health remains ungraded
+// diagnostics, but is not silently discarded when a batch/control host closes.
+export function healthCaptureDiagnostics(transports) {
+  return { schemaVersion: "runaai-m1-health-capture-diagnostics/v1", category: "ungraded-health",
+    limits: HEALTH_CAPTURE_LIMITS, modelRoleCredit: false, inferenceCredit: false,
+    transports: Object.fromEntries(["provider", "embedding", "reranker"].map(kind => [kind, {
+      calls: transports?.[kind]?.healthCalls ?? [], overflowCount: transports?.[kind]?.healthOverflows ?? 0,
+      activeCount: transports?.[kind]?.activeCount ?? 0,
+    }])) };
 }
 
 // Qdrant faults happen at a real owned HTTP boundary. The production adapter is

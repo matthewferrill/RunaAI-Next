@@ -8,6 +8,7 @@ import { createFunctionalTestbed } from "./functional-testbed.mjs";
 import { runModelFreeControl, SUPPORTED_CONTROLS } from "./model-free-controls.mjs";
 import { evaluateControl } from "./assertions.mjs";
 import { createBrowserCheckpoint } from "./browser-checkpoint.mjs";
+import { healthCaptureDiagnostics } from "./capture-transport.mjs";
 
 export function parseArguments(args) {
   const result = { mode: "inventory" }, seen = new Set();
@@ -79,6 +80,7 @@ export async function runControlFunctional(args, { checkpoint = null } = {}) {
     report.resources ??= error.resourceReport ?? null; }
   finally {
     try { await testbed?.close(); await resources?.close(); } catch (error) { report.cleanupError = error.code ?? error.message; }
+    report.healthDiagnostics = healthCaptureDiagnostics(testbed?.transports);
     report.finishedAt = new Date().toISOString();
     report.completedDrivers = report.attempts.filter(value => value.status === "completed").length;
     report.failedDrivers = report.attempts.filter(value => value.status === "failed").length;

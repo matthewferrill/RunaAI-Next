@@ -2,8 +2,8 @@ import { randomBytes } from "node:crypto";
 import { caseCoverage, fail, sha256 } from "./runner-contract.mjs";
 
 export class FunctionalHttpJourney {
-  constructor({ host, item, ledger, identitySeed, extensionActions = {} }) {
-    Object.assign(this, { host, item, ledger, extensionActions });
+  constructor({ host, item, ledger, identitySeed, extensionActions = {}, checkpoint = null }) {
+    Object.assign(this, { host, item, ledger, extensionActions, checkpoint });
     this.principalId = `m1-test-${sha256(identitySeed).slice(0,32)}`;
     this.experience = item.setup.experience; this.sources = new Map(); this.phaseNumber = 0;
     this.threadId = `acceptance-chat-${randomBytes(16).toString("hex")}`;
@@ -77,7 +77,7 @@ export class FunctionalHttpJourney {
     }
   }
   async prepareProject() {
-    this.host.bindFixture(this.context(), this.item);
+    await this.host.bindFixture(this.context(), this.item);
     await this.m1("project.prepare", {});
     const initial = await this.host.snapshot(this.context());
     const actual = Object.fromEntries(initial.files.map(value => [value.path, value.content]));
@@ -231,6 +231,7 @@ export class FunctionalHttpJourney {
         this.ledger.phase = action.id ?? `${index}:${action.action}`;
         const result = await this.perform(action);
         this.ledger.evidence("application", "journey-action", { action: action.action, completed: true, result: result ?? null });
+        await this.checkpoint?.({ client: this, phase: this.ledger.phase, stage: "after-action", action, result });
       }
       if (this.task) await this.recordState(); else if (this.contextRevision) await this.readChat();
       this.ledger.observation.status = "completed";

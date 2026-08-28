@@ -2,7 +2,7 @@ import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 import { CASE_BUNDLE_SHA256, CONTROL_CASES } from "./cases.mjs";
-import { inventory, newObservation, ObservationLedger, fail, assertOwnedStage } from "./runner-contract.mjs";
+import { inventory, newObservation, ObservationLedger, fail, assertOwnedStage, sha256 } from "./runner-contract.mjs";
 import { createOwnedControlResources, fileSha256 } from "./owned-control-resources.mjs";
 import { createFunctionalTestbed } from "./functional-testbed.mjs";
 import { runModelFreeControl, SUPPORTED_CONTROLS } from "./model-free-controls.mjs";
@@ -33,9 +33,18 @@ export async function runControlFunctional(args) {
   let resources, testbed, ledger = null;
   try {
     resources = await createOwnedControlResources({ root, maximumMs: 300000 }); report.resources = resources.report;
+    report.controlSeal = { schemaVersion: "runaai-m1-model-free-control-seal/v1", sourceCommit: identity.sourceCommit,
+      sourceArchiveSha256: identity.sourceArchiveSha256, caseBundleSha256: CASE_BUNDLE_SHA256,
+      nodeSha256: resources.report.nodeSha256, qdrantSha256: resources.report.qdrantArtifact.sha256,
+      packageLockSha256: await fileSha256(path.join(root, "package-lock.json")),
+      runtime: resources.report.nativePreflight.receipt.runtime, isolation: resources.report.nativePreflight.receipt.isolation,
+      limits: resources.report.nativePreflight.receipt.limits, modelInference: "denied-before-upstream" };
+    report.runtimeSealSha256 = sha256(JSON.stringify(report.controlSeal));
+    const evidenceDirectory = path.join(root, "acceptance-evidence"); await mkdir(evidenceDirectory, { recursive: true });
+    await writeFile(path.join(evidenceDirectory, `control-seal-${report.runtimeSealSha256}.json`), JSON.stringify(report.controlSeal, null, 2) + "\n", { flag: "wx" });
     testbed = await createFunctionalTestbed({ resources, mode: "controls", getLedger: () => ledger });
     for (const item of selected) {
-      ledger = new ObservationLedger(newObservation({ ...item, role: "control" }));
+      ledger = new ObservationLedger(newObservation({ ...item, role: "control" }, { runtimeSealSha256: report.runtimeSealSha256 }));
       const observed = await runModelFreeControl({ host: testbed.host, item, ledger }); report.attempts.push(observed);
       if (observed.provider.calls.length) report.modelsInvoked = true; // Attempted only; controls proxy never sends it upstream.
     }

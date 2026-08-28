@@ -14,9 +14,10 @@ const ledger = () => new ObservationLedger(newObservation(MODEL_CASES[0]));
 const post = (url, body) => fetch(url,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(body),redirect:"manual"});
 function seal() { const hex="a".repeat(64); return {schemaVersion:"runaai-m1-functional-runtime-seal/v1",sourceCommit:"b".repeat(40),caseBundleSha256:CASE_BUNDLE_SHA256,
   runtime:{nodeSha256:hex,sourceArchiveSha256:hex,packageLockSha256:hex,qdrantSha256:QDRANT_PIN.sha256,modelRuntimeSha256:hex,modelRuntimeVersion:"synthetic-seal-test"},
-  candidates:ACCEPTANCE_POLICY.roster.map(item=>({candidateId:item.candidateId,modelId:item.candidateId,artifactSha256:hex,artifactBytes:1})),
+  candidates:ACCEPTANCE_POLICY.roster.map(item=>({candidateId:item.candidateId,modelId:item.candidateId,artifactSha256:hex,artifactBytes:1,
+    requestControls:Object.fromEntries(ACCEPTANCE_POLICY.roles.map(role=>[role,{reasoningEffort:null}]))})),
   roles:Object.fromEntries(ACCEPTANCE_POLICY.roles.map(role=>[role,{maximumOutputTokens:["code","agent"].includes(role)?1536:512,
-    maximumContextTokens:8192,deadlineMs:["code","agent"].includes(role)?30000:60000,reasoningEffort:null}])),
+    maximumContextTokens:8192,deadlineMs:["code","agent"].includes(role)?30000:60000}])),
   providerBaseUrl:"http://127.0.0.1:9770/v1",embedding:{baseUrl:"http://127.0.0.1:9770/v1",modelId:"text-embedding-nomic-embed-text-v1.5",artifactSha256:hex},
   reranker:{baseUrl:"http://127.0.0.1:9876",artifactSha256:hex,windowCharacters:2000,overlapCharacters:300,batchSize:32},
   residency:{oneLargeModelAtATime:true,readinessEvidenceSha256:hex,effectiveReasoningEvidenceSha256:hex,telemetryPolicySha256:hex},suites:{},evaluatorId:"independent",maximumBatchMs:300000,productionRoutingChanged:false}; }
@@ -35,6 +36,8 @@ test("ownedstage rejects broad/production/sibling targets",()=>{
 test("runtime seal requiresall3candidates and onlyenforcedrolebudgets",()=>{validateRuntimeSeal(seal());const value=seal();value.roles.chat.maximumOutputTokens=2048;
   assert.throws(()=>validateRuntimeSeal(value),/unenforced-budget/);const repeated=seal();repeated.candidates[1]=repeated.candidates[0];assert.throws(()=>validateRuntimeSeal(repeated),/seal-mismatch/);});
 test("runtime seal rejects publicauxiliary or embeddedcredentials",()=>{for(const url of ["https://external.example","http://user@127.0.0.1:5555"]){const value=seal();value.embedding.baseUrl=url;assert.throws(()=>validateRuntimeSeal(value));}});
+test("candidate reasoningcontrols remain separate whilefunction budgets stayidentical",()=>{const value=seal();value.candidates[0].requestControls.chat.reasoningEffort="none";
+  const checked=validateRuntimeSeal(value);assert.equal(checked.candidates[0].requestControls.chat.reasoningEffort,"none");assert.equal(checked.candidates[1].requestControls.chat.reasoningEffort,null);});
 test("native evidence doesnot mutate versionedreceipt withphase metadata",()=>{const l=ledger(),receipt={schemaVersion:"example/v1",value:7};l.evidence("host-runtime","native-receipt",receipt);
   assert.deepEqual(l.observation.evidence[0].data,receipt);assert.equal(l.observation.evidence[0].phase,"setup");});
 test("controls transport deniesall model,embedding andreranker inference beforeupstream",async()=>{let reached=0;const target=await endpoint((q,s)=>{reached++;s.end("{}");});
@@ -59,8 +62,20 @@ test("ownedindex fault deniesactualendpoint andrecoverswithoutreplacingadapter",
   }finally{await index.close();await target.close();}});
 test("bootstrap onlyissuescookie once fromnonce; doesnotexposesessiontoscript",async()=>{let issued=0;const identities={publicBaseUrl:null,async issue(principalId){issued++;return{principalId,sessionId:"f".repeat(64)};}};
   const original=createServer((q,s)=>{s.end("shipped-route");});const fixture=withSyntheticBootstrap(original,{identities,getLedger:()=>null});fixture.server.listen(0,"127.0.0.1");await once(fixture.server,"listening");
-  identities.publicBaseUrl=`http://127.0.0.1:${fixture.server.address().port}`;const bootstrap=fixture.createBootstrap("m1-test-"+"a".repeat(32));
+  identities.publicBaseUrl=`http://127.0.0.1:${fixture.server.address().port}`;const bootstrap=await fixture.createBootstrap("m1-test-"+"a".repeat(32));
   try{const call=()=>fetch(bootstrap.url,{method:"POST",headers:{origin:identities.publicBaseUrl,"content-type":"application/x-www-form-urlencoded"},body:`nonce=${bootstrap.nonce}`,redirect:"manual"});
     const response=await call();assert.equal(response.status,303);assert.match(response.headers.get("set-cookie"),/HttpOnly/);assert.equal(await response.text(),"");assert.equal((await call()).status,403);assert.equal(issued,1);
     assert.equal(await(await fetch(identities.publicBaseUrl)).text(),"shipped-route");
   }finally{await new Promise(resolve=>{fixture.server.close(resolve);fixture.server.closeAllConnections();});}});
+test("bootstrap reattaches anexistingactivesession without mintingnewgrant authority",async()=>{
+  const principalId="m1-test-"+"a".repeat(32),sessionId="b".repeat(64);let revoked=false,issued=0;
+  const identities={publicBaseUrl:null,async issue(){issued++;throw new Error("notnewlogin");},async participant(value){assert.equal(value,sessionId);if(revoked)throw new Error("revoked");return{principalId};}};
+  const fixture=withSyntheticBootstrap(createServer((q,s)=>s.end("ok")),{identities,getLedger:()=>null});fixture.server.listen(0,"127.0.0.1");await once(fixture.server,"listening");
+  identities.publicBaseUrl=`http://127.0.0.1:${fixture.server.address().port}`;
+  try{const bootstrap=await fixture.createBootstrap(principalId,{session:{principalId,sessionId}});
+    const response=await fetch(bootstrap.url,{method:"POST",headers:{origin:identities.publicBaseUrl},body:`nonce=${bootstrap.nonce}`,redirect:"manual"});
+    assert.equal(response.status,303);assert.match(response.headers.get("set-cookie"),new RegExp(sessionId));assert.equal(issued,0);
+    const second=await fixture.createBootstrap(principalId,{session:{principalId,sessionId}});revoked=true;
+    assert.equal((await fetch(second.url,{method:"POST",headers:{origin:identities.publicBaseUrl},body:`nonce=${second.nonce}`,redirect:"manual"})).status,403);
+  }finally{await new Promise(resolve=>{fixture.server.close(resolve);fixture.server.closeAllConnections();});}
+});

@@ -22,16 +22,20 @@ export function withSyntheticBootstrap(shippedServer, { identities, getLedger })
       if (!/^[a-f0-9]{64}$/.test(nonce ?? "")) throw new Error("denied");
       const match = [...pending.entries()].find(([key]) => timingSafeEqual(Buffer.from(key), Buffer.from(nonce)));
       if (!match || match[1].expiresAt <= Date.now()) throw new Error("denied");
-      pending.delete(match[0]); const session = await identities.issue(match[1].principalId);
+      pending.delete(match[0]);
+      const retained = match[1].sessionId;
+      const session = retained ? { ...await identities.participant(retained), sessionId: retained } : await identities.issue(match[1].principalId);
+      if (session.principalId !== match[1].principalId) throw new Error("denied");
       getLedger()?.evidence("browser", "synthetic-session-bootstrap", { principalId: session.principalId, issued: true,
-        oneTimeNonceConsumed: true, sessionCookieExposedToScript: false, productionIdentityUsed: false });
+        oneTimeNonceConsumed: true, sameSessionReattached: Boolean(retained), sessionCookieExposedToScript: false, productionIdentityUsed: false });
       response.writeHead(303, { location: "/", "set-cookie": `__Host-runa_user_session=${session.sessionId}; Path=/; Max-Age=3600; Secure; HttpOnly; SameSite=Lax` });
       return response.end();
     } catch { response.writeHead(403, { "content-type": "application/json" }); response.end('{"errorCode":"m1-synthetic-bootstrap-denied"}'); }
   });
-  return { server, createBootstrap(principalId) {
+  return { server, async createBootstrap(principalId, { session = null } = {}) {
     if (!/^m1-test-[a-f0-9]{24,64}$/.test(principalId) || pending.size >= 8) throw new Error("m1-bootstrap-scope-invalid");
-    const nonce = randomBytes(32).toString("hex"); pending.set(nonce, { principalId, expiresAt: Date.now() + 300000 });
+    if (session && (session.principalId !== principalId || (await identities.participant(session.sessionId)).principalId !== principalId)) throw new Error("m1-bootstrap-session-mismatch");
+    const nonce = randomBytes(32).toString("hex"); pending.set(nonce, { principalId, sessionId: session?.sessionId ?? null, expiresAt: Date.now() + 300000 });
     return { url: `${identities.publicBaseUrl}/__acceptance/session`, nonce, expiresInSeconds: 300 };
   } };
 }

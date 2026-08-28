@@ -14,8 +14,9 @@ const setup = (id, profile = "safe-autopilot") => ({ id, role: "control", object
 function recordCheck(ledger, item, kind, actual, raw) {
   const index = item.expected.findIndex(value => value.kind === kind);
   if (index < 0) throw fail("m1-control-check-not-frozen");
-  const id = ledger.evidence("host-runtime", "control-observation", { actual, raw });
-  ledger.actual(`${item.id}/case/${index}:${kind}`, kind, actual, id, "/actual");
+  const checkId = `${item.id}/case/${index}:${kind}`;
+  const id = ledger.evidence("host-runtime", "control-observation", { checkId, actual, raw });
+  ledger.actual(checkId, kind, actual, id, "/actual");
 }
 async function prepare(host, item, ledger, profile = "safe-autopilot") {
   const client = new FunctionalHttpJourney({ host, item: setup(item.id, profile), ledger, identitySeed: item.id });

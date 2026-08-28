@@ -10,6 +10,7 @@ import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {CaddyAdmin} from './caddy-admin.mjs';
 import {WindowsCaddyFile} from './windows-file.mjs';
+import {QuiescenceJournal} from './journal.mjs';
 import {CaddyQuiescenceCoordinator,configDigest,digest} from './coordinator.mjs';
 
 const binarySha256='5cb9ab71e5756ce72840b8234177a2f40c8b4ab47a806b8e841e2b784e9df62b';
@@ -27,7 +28,7 @@ export async function runCaddyQuiescenceProof({binary,outputDirectory}){
   const fixture=await mkdtemp(path.join(await realpath(tmpdir()),'m1-caddy-quiescence-'));
   const report={schemaVersion:'runaai-caddy-quiescence-proof/v1',startedAt:new Date().toISOString(),binarySha256,
     fixture,checks:[],events:[],modelCalls:0,homeChanges:false,productionChanges:false,passed:false};
-  const servers=[],ports=[],logs=[];let child=null,held=null,startedResolve=null,logBytes=0;
+  const servers=[],ports=[],logs=[];let child=null,held=null,startedResolve=null,logBytes=0,releaseRestore=null;
   const started=new Promise(resolve=>{startedResolve=resolve;});
   const check=(name,actual,expected)=>{report.checks.push({name,actual,expected});assert.deepEqual(actual,expected,name);};
   try{
@@ -35,14 +36,15 @@ export async function runCaddyQuiescenceProof({binary,outputDirectory}){
       if(request.url==='/api/slow'){held=response;startedResolve();return;}
       response.end('application');
     });servers.push(application.server);ports.push(application.port);
-    const provider=await backend((_request,response)=>response.end('provider'));servers.push(provider.server);ports.push(provider.port);
+    let providerRequests=0;
+    const provider=await backend((_request,response)=>{providerRequests++;response.end('provider');});servers.push(provider.server);ports.push(provider.port);
     const other=await backend((_request,response)=>response.end('unrelated'));servers.push(other.server);ports.push(other.port);
     const [adminPort,appPort,privatePort,providerPort,otherPort]=await Promise.all(Array.from({length:5},port));
     ports.push(adminPort,appPort,privatePort,providerPort,otherPort);assert.equal(new Set(ports).size,ports.length);
     const base=`{\n  admin 127.0.0.1:${adminPort}\n  default_bind 127.0.0.1\n  auto_https off\n  persist_config off\n}\n`
       +`http://127.0.0.1:${appPort} {\n  handle_path /auth/* {\n    reverse_proxy 127.0.0.1:${other.port}\n  }\n  handle {\n    reverse_proxy 127.0.0.1:${application.port}\n  }\n}\n`
-      +`http://127.0.0.1:${privatePort} {\n  reverse_proxy 127.0.0.1:${application.port}\n}\n`
-      +`http://127.0.0.1:${providerPort} {\n  reverse_proxy 127.0.0.1:${provider.port}\n}\n`
+      +`http://127.0.0.1:${privatePort} {\n  route /api/specific {\n    respond "original route" 200\n  }\n  reverse_proxy 127.0.0.1:${application.port}\n}\n`
+      +`http://127.0.0.1:${providerPort} {\n  handle /v1/chat/completions {\n    reverse_proxy 127.0.0.1:${provider.port}\n  }\n  handle {\n    reverse_proxy 127.0.0.1:${provider.port}\n  }\n}\n`
       +`http://127.0.0.1:${otherPort} {\n  reverse_proxy 127.0.0.1:${other.port}\n}\n`;
     const original=Buffer.from(base),filename=path.join(fixture,'Caddyfile');await writeFile(filename,original,{flag:'wx'});
     child=spawn(binary,['run','--config',filename,'--adapter','caddyfile'],{cwd:fixture,windowsHide:true,stdio:['ignore','pipe','pipe'],
@@ -57,9 +59,10 @@ export async function runCaddyQuiescenceProof({binary,outputDirectory}){
     check('every synthetic Caddy listener is explicitly loopback',Object.values(snapshot.config.apps.http.servers)
       .flatMap(server=>server.listen).every(address=>address.startsWith('127.0.0.1:')),true);
     const file=new WindowsCaddyFile({directory:fixture,allowSyntheticFixture:true,operationMs:5000});
-    let sequence=0;
-    const journal={async save(state){report.events.push({phase:state.phase,event:state.events.at(-1)});
-      await writeFile(path.join(fixture,'journal-'+String(++sequence).padStart(4,'0')+'.json'),JSON.stringify(state),{flag:'wx'});}};
+    const journalDirectory=path.join(fixture,'journal');await mkdir(journalDirectory);
+    const durableJournal=new QuiescenceJournal({directory:journalDirectory,allowSyntheticFixture:true});
+    const journal={load:id=>durableJournal.load(id),async save(state,options){await durableJournal.save(state,options);
+      report.events.push({phase:state.phase,revision:state.revision,event:state.events.at(-1)});}};
     const coordinator=new CaddyQuiescenceCoordinator({admin,file,journal,maximumDrainMs:5000,pollMs:100,stableSamples:3});
     const scopes=[{siteAddress:`http://127.0.0.1:${appPort}`,mode:'api'},
       {siteAddress:`http://127.0.0.1:${privatePort}`,mode:'api'},
@@ -76,11 +79,17 @@ export async function runCaddyQuiescenceProof({binary,outputDirectory}){
     check('actual slow request counted before reload',(await admin.upstreams()).find(value=>value.address===upstreams[0]).num_requests,1);
     const closedState=await coordinator.closeAdmission(prepared);
     check('actual same slow request still counted after reload',(await admin.upstreams()).find(value=>value.address===upstreams[0]).num_requests,1);
-    await assert.rejects(admin.replace({config:snapshot.config,etag:snapshot.etag}),/quiescence-admin-etag-drift/u);
+    await assert.rejects(admin.request('POST','/config/',JSON.stringify(snapshot.config),{'content-type':'application/json','if-match':snapshot.etag}),/quiescence-admin-etag-drift/u);
     check('actual stale ETag leaves maintenance config unchanged',configDigest((await admin.snapshot()).config),closedState.overlayConfigSha256);
     check('new application API rejected',(await get(`http://127.0.0.1:${appPort}/api/new`)).status,503);
     check('new private-address API rejected',(await get(`http://127.0.0.1:${privatePort}/api/new`)).status,503);
+    check('existing explicit route cannot precede maintenance',(await get(`http://127.0.0.1:${privatePort}/api/specific`)).status,503);
     check('new provider request rejected',(await get(`http://127.0.0.1:${providerPort}/v1/models`)).status,503);
+    const beforeProvider=providerRequests;
+    check('specific preexisting provider GET handler cannot bypass closure',(await get(`http://127.0.0.1:${providerPort}/v1/chat/completions`)).status,503);
+    const rejectedPost=await fetch(`http://127.0.0.1:${providerPort}/v1/chat/completions`,{method:'POST',body:'synthetic request',signal:AbortSignal.timeout(5000)});
+    await rejectedPost.text();check('specific preexisting provider POST handler cannot bypass closure',rejectedPost.status,503);
+    check('blocked provider requests never reached real backend',providerRequests,beforeProvider);
     check('unrelated host continues',await get(`http://127.0.0.1:${otherPort}/`),{status:200,text:'unrelated'});
     check('authentication route preserved',await get(`http://127.0.0.1:${appPort}/auth/check`),{status:200,text:'unrelated'});
     check('static application route preserved',await get(`http://127.0.0.1:${appPort}/`),{status:200,text:'application'});
@@ -95,12 +104,62 @@ export async function runCaddyQuiescenceProof({binary,outputDirectory}){
     check('exact original active config restored',configDigest((await admin.snapshot()).config),configDigest(snapshot.config));
     check('application works after restore',await get(`http://127.0.0.1:${appPort}/api/new`),{status:200,text:'application'});
     check('provider works after restore',await get(`http://127.0.0.1:${providerPort}/v1/models`),{status:200,text:'provider'});
+    check('original explicit route works after restore',await get(`http://127.0.0.1:${privatePort}/api/specific`),{status:200,text:'original route'});
     await assert.rejects(file.compareAndSwap('0'.repeat(64),Buffer.from('not the original')),/quiescence-file-cas-rejected/u);
     check('real stale byte CAS left original intact',digest(await readFile(filename)),digest(original));
+
+    // A real owned loopback HTTP hop holds the second restore before forwarding
+    // to the actual Caddy admin API. No production route or fake Caddy is used.
+    const delayed=await backend(async(request,response)=>{
+      if(request.method!=='POST'||request.url!=='/config/'){response.writeHead(403).end();return;}
+      try{
+        const chunks=[];let count=0;for await(const chunk of request){count+=chunk.length;if(count>1_048_576)throw Error('fixture-request-cap');chunks.push(chunk);}
+        const body=Buffer.concat(chunks);
+        report.delayedRestore={receivedAt:new Date().toISOString(),requestBodySha256:digest(body),ifMatch:request.headers['if-match'],terminalStatus:null};
+        await new Promise(resolve=>{releaseRestore=resolve;});
+        const actual=await fetch(`http://127.0.0.1:${adminPort}/config/`,{method:'POST',body,
+          headers:{origin:`http://127.0.0.1:${adminPort}`,'content-type':'application/json','if-match':request.headers['if-match']},
+          redirect:'error',signal:AbortSignal.timeout(3000)});
+        const actualBody=await actual.text();report.delayedRestore.terminalStatus=actual.status;report.delayedRestore.completedAt=new Date().toISOString();
+        response.writeHead(actual.status,{'content-type':'application/json'}).end(actualBody);
+      }catch(error){report.delayedRestoreError=error.code??error.message;response.writeHead(502).end();}
+    });servers.push(delayed.server);ports.push(delayed.port);
+    const delayedAdmin=new CaddyAdmin({baseUrl:`http://127.0.0.1:${delayed.port}`,operationMs:3000,mutationWaitMs:100});
+    const secondDirectory=path.join(fixture,'journal-delayed-restore');await mkdir(secondDirectory);
+    const secondJournal=new QuiescenceJournal({directory:secondDirectory,allowSyntheticFixture:true});
+    const secondCoordinator=new CaddyQuiescenceCoordinator({admin,file,journal:secondJournal,maximumDrainMs:1000,pollMs:25,stableSamples:2});
+    const secondPrepared=await secondCoordinator.prepare({transitionId:randomUUID().replaceAll('-',''),expectedFileSha256:digest(original),
+      expectedConfigSha256:configDigest(snapshot.config),scopes,upstreams});
+    const closedAgain=await secondCoordinator.closeAdmission(secondPrepared);
+    const restoreCoordinator=new CaddyQuiescenceCoordinator({file,journal:secondJournal,
+      admin:{snapshot:options=>admin.snapshot(options),upstreams:options=>admin.upstreams(options),
+        replace:input=>delayedAdmin.replace(input),mutationOutcome:id=>delayedAdmin.mutationOutcome(id)},
+      maximumDrainMs:1000,pollMs:25,stableSamples:2});
+    await assert.rejects(restoreCoordinator.rollback(closedAgain),/quiescence-restore-uncertain/u);
+    check('actual restore HTTP request is held before Caddy commit',!!releaseRestore&&report.delayedRestore.terminalStatus===null,true);
+    check('old overlay remains active while actual restore is pending',configDigest((await admin.snapshot()).config),closedAgain.overlayConfigSha256);
+    const unknown=await secondJournal.load(closedAgain.transitionId),unresolved=await restoreCoordinator.reconcile(unknown);
+    check('pending real restore is never reclassified as admission closed',unresolved.phase,'needs-reconciliation');
+    await assert.rejects(restoreCoordinator.drain(unresolved),/quiescence-reconcile-required/u);
+    await assert.rejects(restoreCoordinator.drain(closedAgain),/quiescence-journal-stale/u);
+    check('zero real upstream counters cannot bypass unresolved restore',(await admin.upstreams()).filter(value=>upstreams.includes(value.address)).every(value=>value.num_requests===0),true);
+    releaseRestore();releaseRestore=null;
+    const mutation=unresolved.mutations.at(-1);let terminal=null;const terminalDeadline=Date.now()+2000;
+    while(!terminal&&Date.now()<terminalDeadline){terminal=await delayedAdmin.mutationOutcome(mutation.mutationId);if(!terminal)await pause(20);}
+    check('same exact delayed HTTP operation has a terminal success',terminal?.outcome,'succeeded');
+    report.delayedRestore.terminalReceipt=terminal;
+    const reconciledRestore=await restoreCoordinator.reconcile(await secondJournal.load(closedAgain.transitionId));
+    report.delayedRestore.finalState=reconciledRestore;
+    check('late restore reconciles only to restored',reconciledRestore.phase,'restored');
+    check('late restore returns exact original bytes',digest(await readFile(filename)),digest(original));
+    check('late restore returns exact original active config',configDigest((await admin.snapshot()).config),configDigest(snapshot.config));
+    check('no quiescent receipt occurs in pending restore transition',reconciledRestore.events.some(event=>event.phase==='control-quiescent'),false);
+    check('specific provider route resumes only after completed restore',await get(`http://127.0.0.1:${providerPort}/v1/chat/completions`),{status:200,text:'provider'});
     report.passed=true;
   }catch(error){report.errorCode=error.code??error.message;report.errorMessage=error.message;}
   finally{
     held?.end('fixture cleanup');
+    releaseRestore?.();
     if(child&&child.exitCode===null){const exited=once(child,'exit');child.kill();await Promise.race([exited,pause(5000)]);}
     for(const server of servers){server.closeAllConnections();await new Promise(resolve=>server.close(resolve));}
     report.cleanup={ownedCaddyStopped:!!child&&(child.exitCode!==null||child.signalCode!==null),ownedPortsClosed:await Promise.all(ports.map(closed)),

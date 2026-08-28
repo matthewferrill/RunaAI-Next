@@ -8,23 +8,31 @@ const scopes=[{siteAddress:'http://127.0.0.1:45001',mode:'api'}],upstreams=['127
 const transitionId='a'.repeat(32);
 function fixture(options={}){
   let bytes=Buffer.from(original),config={source:original.toString()},version=0,now=0;
-  const records=[],calls={fileWrites:0,reloads:0};
+  const records=[],calls={fileWrites:0,reloads:0},outcomes=new Map(),mutations=[];
   const file={async read(){return Buffer.from(bytes);},async compareAndSwap(expected,next){
     assert.equal(digest(bytes),expected);calls.fileWrites++;bytes=Buffer.from(next);options.afterFile?.();}};
   const admin={async snapshot(){return {config:structuredClone(config),etag:'"v'+version+'"'};},async adapt(raw){return {source:raw.toString()};},
     async upstreams(){return options.counters?.()??upstreams.map(address=>({address,num_requests:0}));},
-    async replace({config:next,etag}){calls.reloads++;assert.equal(etag,'"v'+version+'"');
+    async mutationOutcome(id){return structuredClone(outcomes.get(id)??null);},
+    async replace({config:next,etag,mutation}){calls.reloads++;mutations.push(structuredClone(mutation));assert.equal(etag,'"v'+version+'"');
       if(options.beforeReload)await options.beforeReload();if(options.failBefore)throw Error('lost before');
-      config=structuredClone(next);version++;if(options.failAfter)throw Error('lost after');}};
-  const coordinator=new CaddyQuiescenceCoordinator({admin,file,journal:{async save(state){records.push(state);}},
-    clock:()=>now,pause:async ms=>{now+=ms;},maximumDrainMs:10,pollMs:2,stableSamples:2});
-  return {coordinator,records,calls,file,admin,options,read:()=>bytes,config:()=>config,
+      config=structuredClone(next);version++;
+      const receipt={schemaVersion:'runaai-caddy-mutation-result/v1',...mutation,outcome:'succeeded',completedAt:new Date(now).toISOString()};
+      outcomes.set(mutation.mutationId,receipt);if(options.failAfter)throw Error('lost after');return receipt;}};
+  const journal={async load(){return structuredClone(records.at(-1)??null);},async save(state,{expectedRevision}){
+    assert.equal((records.at(-1)?.revision??0),expectedRevision,'quiescence-journal-stale');records.push(structuredClone(state));}};
+  const constructor={admin,file,journal,
+    clock:()=>now,pause:async ms=>{now+=ms;},maximumDrainMs:10,pollMs:2,stableSamples:2};
+  const coordinator=new CaddyQuiescenceCoordinator(constructor);
+  return {coordinator,records,calls,file,admin,options,constructor,mutations,outcomes,read:()=>bytes,config:()=>config,
     setFile(value){bytes=Buffer.from(value);},setConfig(value){config=structuredClone(value);version++;},advance(ms){now+=ms;},
     async prepare(){return coordinator.prepare({transitionId,expectedFileSha256:digest(original),expectedConfigSha256:configDigest({source:original.toString()}),scopes,upstreams});}};
 }
 test('overlay retains original bytes and unrelated block; input scopes are not mutated',()=>{
   const before=structuredClone(scopes),overlay=buildAdmissionOverlay({originalBytes:original,scopes,transitionId}).toString();
-  assert.deepEqual(scopes,before);assert.ok(overlay.endsWith(original.toString().slice(original.toString().indexOf('  reverse_proxy'))));
+  assert.deepEqual(scopes,before);assert.ok(overlay.endsWith(original.toString().slice(original.toString().indexOf('http://127.0.0.1:45002'))));
+  assert.match(overlay,/route \{\n    respond @runa_m1_maintenance_[a-f0-9]+ "Runa maintenance [a-f0-9]+" 503\n    handle \{/u);
+  assert.ok(overlay.includes('reverse_proxy 127.0.0.1:46001\n'));
   assert.match(overlay,/path \/api\/\* \/health\/\*/u);assert.equal((overlay.match(/Runa maintenance /gu)??[]).length,1);
 });
 for(const [name,change] of [
@@ -82,22 +90,23 @@ test('file change after CAS is retained and the old overlay is not sent to runti
   await assert.rejects(f.coordinator.closeAdmission(state),/quiescence-file-drift/u);
   assert.equal(f.read().toString(),'foreign');assert.equal(f.calls.reloads,0);assert.equal(f.records.at(-1).phase,'needs-reconciliation');
 });
-test('lost acknowledgement after actual reload reconciles without a second mutation',async()=>{
-  const f=fixture({failAfter:true}),closed=await f.coordinator.closeAdmission(await f.prepare());
-  assert.equal(closed.events.at(-1).acknowledgementLost,true);const resumed=await f.coordinator.reconcile(closed);
+test('lost acknowledgement after actual reload requires its exact retained terminal receipt',async()=>{
+  const f=fixture({failAfter:true});await assert.rejects(f.coordinator.closeAdmission(await f.prepare()),/uncertain/u);
+  const resumed=await f.coordinator.reconcile(f.records.at(-1));
   assert.equal(resumed.phase,'admission-closed');assert.equal(f.calls.reloads,1);
 });
-test('lost reload before observation stays unknown until actual successor is visible',async()=>{
+test('lost reload stays unknown when only its successor snapshot becomes visible',async()=>{
   const f=fixture({failBefore:true}),prepared=await f.prepare();await assert.rejects(f.coordinator.closeAdmission(prepared),/uncertain/u);
   const unknown=f.records.at(-1);assert.equal((await f.coordinator.reconcile(unknown)).phase,'needs-reconciliation');
   assert.equal(f.calls.reloads,1);f.setConfig(unknown.overlayConfig);
-  assert.equal((await f.coordinator.reconcile(unknown)).phase,'admission-closed');assert.equal(f.calls.reloads,1);
+  assert.equal((await f.coordinator.reconcile(f.records.at(-1))).phase,'needs-reconciliation');assert.equal(f.calls.reloads,1);
 });
 test('uncertain admission cannot be rolled back before read-back reconciliation',async()=>{
   const f=fixture({failBefore:true}),prepared=await f.prepare();await assert.rejects(f.coordinator.closeAdmission(prepared),/uncertain/u);
   const unknown=f.records.at(-1),before=structuredClone(f.calls);
   await assert.rejects(f.coordinator.rollback(unknown),/quiescence-reconcile-required/u);assert.deepEqual(f.calls,before);
   f.setConfig(unknown.overlayConfig);f.options.failBefore=false;
+  const mutation=f.mutations.at(-1);f.outcomes.set(mutation.mutationId,{schemaVersion:'runaai-caddy-mutation-result/v1',...mutation,outcome:'succeeded',completedAt:new Date(0).toISOString()});
   const reconciled=await f.coordinator.reconcile(unknown);await f.coordinator.rollback(reconciled);
   assert.deepEqual(f.read(),original);
 });
@@ -119,7 +128,7 @@ test('admin endpoint stays loopback with bounded requests and exact ETag',async(
   assert.throws(()=>new CaddyAdmin({baseUrl:'http://192.168.50.169:2019'}),/boundary/u);
   const calls=[],admin=new CaddyAdmin({baseUrl:'http://127.0.0.1:2019',fetchImpl:async(url,init)=>{
     calls.push({url,...init});return new Response('{}',{status:200,headers:{etag:'"config-1"'}});}});
-  await admin.snapshot();await admin.replace({config:{synthetic:true},etag:'"config-1"'});
+  await admin.snapshot();await admin.replace(adminMutation({synthetic:true},'"config-1"'));
   assert.equal(calls[1].headers['if-match'],'"config-1"');assert.equal(calls[1].redirect,'error');assert.ok(calls[1].signal);
   assert.equal(calls[1].headers.origin,'http://127.0.0.1:2019');
   await assert.rejects(admin.request('POST','/stop'),/quiescence-admin-route-denied/u);
@@ -130,5 +139,105 @@ test('admin rejects response caps and stale ETags without exposing bodies',async
   const capped=new CaddyAdmin({baseUrl:'http://127.0.0.1:2019',maximumBytes:1,fetchImpl:async()=>new Response('private value')});
   await assert.rejects(capped.snapshot(),/quiescence-admin-response-cap/u);
   const stale=new CaddyAdmin({baseUrl:'http://127.0.0.1:2019',fetchImpl:async()=>new Response('private value',{status:412})});
-  await assert.rejects(stale.replace({config:{},etag:'"old"'}),error=>error.code==='quiescence-admin-etag-drift'&&!error.message.includes('private'));
+  const receipt=await stale.replace(adminMutation({},'"old"'));assert.equal(receipt.outcome,'rejected');assert.ok(!JSON.stringify(receipt).includes('private'));
+});
+function adminMutation(config,etag,id='b'.repeat(32)){
+  return {config,etag,mutation:{mutationId:id,direction:'admission',fromConfigSha256:'0'.repeat(64),toConfigSha256:configDigest(config),expectedEtag:etag}};
+}
+
+for(const contents of [
+  'custom_plugin foo\n',
+  'respond "before"\n  tls internal\n',
+  'respond "before"\n  @later path /example\n',
+  'handle {\n    import unsafe.conf\n  }\n',
+])test('unsupported or interleaved site grammar rejects before effects: '+contents.trim(),()=>{
+  assert.throws(()=>buildAdmissionOverlay({originalBytes:Buffer.from('http://127.0.0.1:45001 {\n  '+contents+'}\n'),scopes,transitionId}),/quiescence-/u);
+});
+
+function terminal(mutation,overrides={}){
+  return {schemaVersion:'runaai-caddy-mutation-result/v1',...mutation,outcome:'succeeded',completedAt:new Date(0).toISOString(),...overrides};
+}
+test('delayed restore cannot become closed or quiescent from an old-overlay snapshot',async()=>{
+  const f=fixture(),closed=await f.coordinator.closeAdmission(await f.prepare());f.options.failBefore=true;
+  await assert.rejects(f.coordinator.rollback(closed),/quiescence-restore-uncertain/u);
+  const unknown=f.records.at(-1);assert.equal(unknown.mutations.at(-1).direction,'restore');
+  const reconciled=await f.coordinator.reconcile(unknown);assert.equal(reconciled.phase,'needs-reconciliation');
+  await assert.rejects(f.coordinator.drain(reconciled),/quiescence-reconcile-required/u);
+  await assert.rejects(f.coordinator.drain(closed),/quiescence-journal-stale/u);
+  await assert.rejects(f.coordinator.rollback(reconciled),/quiescence-reconcile-required/u);
+  assert.equal(f.calls.reloads,2);assert.ok(!f.records.some(state=>state.phase==='control-quiescent'));
+  // A later current snapshot still cannot prove that exact HTTP operation ended.
+  f.setConfig(unknown.originalConfig);
+  assert.equal((await f.coordinator.reconcile(f.records.at(-1))).phase,'needs-reconciliation');
+  const mutation=f.mutations.at(-1);f.outcomes.set(mutation.mutationId,terminal(mutation));
+  const restored=await f.coordinator.reconcile(f.records.at(-1));assert.equal(restored.phase,'restored');
+  assert.deepEqual(f.read(),original);assert.equal(f.calls.reloads,2);
+});
+
+for(const field of ['mutationId','direction','fromConfigSha256','toConfigSha256','expectedEtag']){
+  test('terminal result with different '+field+' cannot resolve the pending restore',async()=>{
+    const f=fixture(),closed=await f.coordinator.closeAdmission(await f.prepare());f.options.failBefore=true;
+    await assert.rejects(f.coordinator.rollback(closed),/uncertain/u);
+    const mutation=f.mutations.at(-1);f.outcomes.set(mutation.mutationId,terminal(mutation,{[field]:'different'}));
+    const resumed=await f.coordinator.reconcile(f.records.at(-1));assert.equal(resumed.phase,'needs-reconciliation');
+    assert.equal(f.calls.reloads,2);assert.ok(!f.records.some(state=>state.phase==='control-quiescent'));
+  });
+}
+test('restart without a retained terminal HTTP result remains unknown after commit',async()=>{
+  const f=fixture(),closed=await f.coordinator.closeAdmission(await f.prepare());f.options.failAfter=true;
+  await assert.rejects(f.coordinator.rollback(closed),/uncertain/u);f.outcomes.clear();
+  const restarted=new CaddyQuiescenceCoordinator(f.constructor);
+  const state=await restarted.reconcile(f.records.at(-1));assert.equal(state.phase,'needs-reconciliation');
+  await assert.rejects(restarted.drain(state),/reconcile-required/u);assert.equal(f.calls.reloads,2);
+});
+test('terminal receipt persisted before restart resolves to restored without another admin mutation',async()=>{
+  const f=fixture(),closed=await f.coordinator.closeAdmission(await f.prepare());
+  const originalCas=f.file.compareAndSwap;f.file.compareAndSwap=async()=>{throw Error('crash before file restore');};
+  await assert.rejects(f.coordinator.rollback(closed),/crash before file restore/u);
+  assert.equal(f.records.at(-1).mutations.at(-1).status,'succeeded');f.outcomes.clear();f.file.compareAndSwap=originalCas;
+  const restarted=new CaddyQuiescenceCoordinator(f.constructor),restored=await restarted.reconcile(f.records.at(-1));
+  assert.equal(restored.phase,'restored');assert.equal(f.calls.reloads,2);assert.deepEqual(f.read(),original);
+});
+test('unresolved restore held concurrently denies stale drain and no second restore dispatches',async()=>{
+  const f=fixture(),closed=await f.coordinator.closeAdmission(await f.prepare());let release;
+  f.options.beforeReload=()=>new Promise(resolve=>{release=resolve;});
+  const pending=f.coordinator.rollback(closed);
+  while(!release)await new Promise(resolve=>setImmediate(resolve));
+  await assert.rejects(f.coordinator.drain(closed),/quiescence-journal-stale/u);
+  await assert.rejects(f.coordinator.rollback(closed),/quiescence-journal-stale/u);
+  release();assert.equal((await pending).phase,'restored');assert.equal(f.calls.reloads,2);
+});
+test('failed mutation-intent persistence prevents admin dispatch',async()=>{
+  const f=fixture(),closed=await f.coordinator.closeAdmission(await f.prepare()),prior=f.constructor.journal.save;
+  f.constructor.journal.save=async(state,options)=>{if(state.mutations.at(-1)?.direction==='restore')throw Error('disk unavailable');return prior(state,options);};
+  await assert.rejects(f.coordinator.rollback(closed),/disk unavailable/u);assert.equal(f.calls.reloads,1);
+});
+test('old v1 state and same-revision forged status never inherit v2 authority',async()=>{
+  const f=fixture(),closed=await f.coordinator.closeAdmission(await f.prepare());
+  await assert.rejects(f.coordinator.drain({...closed,schemaVersion:'runaai-caddy-quiescence/v1'}),/state-invalid/u);
+  await assert.rejects(f.coordinator.drain({...closed,phase:'control-quiescent'}),/journal-stale/u);
+});
+test('a terminal rejected admission restores only the known original bytes without resending',async()=>{
+  const f=fixture();f.admin.replace=async({mutation})=>{f.calls.reloads++;return terminal(mutation,{outcome:'rejected'});};
+  await assert.rejects(f.coordinator.closeAdmission(await f.prepare()),/quiescence-admin-rejected/u);
+  const state=await f.coordinator.reconcile(f.records.at(-1));assert.equal(state.phase,'restored');
+  assert.deepEqual(f.read(),original);assert.equal(f.calls.reloads,1);
+});
+test('a terminal rejected restore can return to a freshly observed closed admission',async()=>{
+  const f=fixture(),closed=await f.coordinator.closeAdmission(await f.prepare());
+  f.admin.replace=async({mutation})=>{f.calls.reloads++;return terminal(mutation,{outcome:'rejected'});};
+  await assert.rejects(f.coordinator.rollback(closed),/quiescence-admin-rejected/u);
+  const state=await f.coordinator.reconcile(f.records.at(-1));assert.equal(state.phase,'admission-closed');
+  assert.equal((await f.coordinator.drain(state)).phase,'control-quiescent');assert.equal(f.calls.reloads,2);
+});
+test('synthetic late fetch completion yields only the exact bound terminal receipt',async()=>{
+  let release;
+  const admin=new CaddyAdmin({baseUrl:'http://127.0.0.1:2019',operationMs:1000,mutationWaitMs:10,
+    fetchImpl:async()=>new Promise(resolve=>{release=()=>resolve(new Response('{}'));})});
+  const input=adminMutation({},'"e"');await assert.rejects(admin.replace(input),/uncertain/u);
+  assert.equal(await admin.mutationOutcome(input.mutation.mutationId),null);
+  release();await new Promise(resolve=>setImmediate(resolve));
+  const receipt=await admin.mutationOutcome(input.mutation.mutationId);assert.equal(receipt.outcome,'succeeded');
+  assert.equal(receipt.mutationId,input.mutation.mutationId);assert.equal(receipt.toConfigSha256,configDigest({}));
+  await assert.rejects(admin.replace(input),/duplicate-or-cap/u);
 });

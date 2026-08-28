@@ -1,0 +1,22 @@
+export const MANIFEST = Object.freeze({
+  schemaVersion: "runa-m1-readiness-manifest/v1", diagnosticId: "20260828-readiness-r2", sourceCommit: "2fc9bc20fe3484a7df857298c4a85ff6bdffc970",
+  classification: "prospective-unscored-readiness-not-function-qualification", expectedHost: "RUNA-HOME", expectedNode: "v22.22.1",
+  api: "http://127.0.0.1:1234", contextLength: 32768, requestDeadlineMs: 30000, lateDiagnosticDeadlineMs: 120000,
+  loadDeadlineMs: 180000, armDeadlineMs: 1800000, maximumResponseBytes: 1048576, maximumOutputTokens: 512,
+  repetitions: 3, telemetryIntervalMs: 5000, maximumTelemetryGapMs: 30000,
+  contextLadderRows: [250, 750, 1400], contextOutputTokens: 128,
+  hardware: { gpuUuids: ["GPU-15ea3e34-292b-3333-5e43-e5b133f9a30c", "GPU-1f2f6459-b688-3466-5b49-a65c538be843"],
+    gpuPowerLimitWatts: 260, maximumStartTemperatureC: 50, temperatureCutoffC: 85, minimumFreeHostBytes: 8589934592 },
+  runtime: { name: "llama.cpp-win-x86_64-vulkan-avx2", version: "2.28.2" },
+  candidates: [
+    { id: "qwen36", key: "qwen3.6-27b-mtp", artifactPath: "C:\\lm-studio-models\\unsloth\\Qwen3.6-27B-MTP-GGUF\\Qwen3.6-27B-Q4_K_M.gguf",
+      bytes: 17106773120, sha256: "a7cbd3ecc0e3f9b333edee61ae66bc87ed713c5d49587a8355814722ed329e0f", architecture: "qwen35", quantization: "Q4_K_M",
+      templateSha256: "55d4931433fe502b794226ee7f4d206a6bdd436ac9f80eb7d8ebb4c639f9ea0c", mtp: true },
+    { id: "gemma", key: "gemma-4-26b-a4b-it-qat", artifactPath: "C:\\lm-studio-models\\google\\gemma-4-26B-A4B-it-qat-q4_0-gguf\\gemma-4-26B_q4_0-it.gguf",
+      bytes: 14439363584, sha256: "3eca3b8f6d7baf218a7dd6bba5fb59a56ee25fe2d567b6f5f589b4f697eca51d", architecture: "gemma4", quantization: "Q4_0",
+      templateSha256: "ae53464bf3be25802b3a5b37def7fd89667067d7577049b3b2d74c4d8de4c6d4", mtp: false },
+    { id: "coder", key: "qwen3-coder-30b-a3b-instruct", artifactPath: "C:\\lm-studio-models\\lmstudio-community\\Qwen3-Coder-30B-A3B-Instruct-GGUF\\Qwen3-Coder-30B-A3B-Instruct-Q6_K.gguf",
+      bytes: 25104724288, sha256: "72a9b20a19c70db56e1ccd01fb35b0f0842d67d28e7c3bdff762df860120b769", architecture: "qwen3moe", quantization: "Q6_K",
+      templateSha256: "672e747c77e990320152343b0a4951222e40de5645297905d89afba05586d827", mtp: false },
+  ],
+});

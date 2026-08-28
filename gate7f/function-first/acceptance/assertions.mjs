@@ -26,6 +26,18 @@ const phaseMatches = (record, phase) => phase === null || record?.phase === phas
 const reply = record => record?.response?.answer !== undefined ? record.response : record?.response?.result ?? record?.response;
 const answerText = record => typeof reply(record)?.answer === "string" ? reply(record).answer : null;
 const missing = Symbol("missing-evidence");
+function capturedAnswer(value) {
+  let text = typeof value === "string" ? value : typeof value?.answer === "string" ? value.answer
+    : typeof value?.text === "string" ? value.text : value?.choices?.length === 1 ? value.choices[0]?.message?.content : null;
+  if (typeof text !== "string") return null;
+  text = text.trim();
+  try {
+    const parsed = JSON.parse(text.replace(/^```(?:json)?\s*/iu, "").replace(/\s*```$/u, ""));
+    if (typeof parsed?.answer === "string" && Array.isArray(parsed.citations)) return parsed.answer.trim();
+    if (typeof parsed?.correctedAnswer === "string" && typeof parsed.accepted === "boolean") return parsed.correctedAnswer.trim();
+  } catch { /* Plain conversation text is intentionally not JSON. */ }
+  return text;
+}
 
 function getCase(value, controls = false) {
   const cases = controls ? CONTROL_CASES : MODEL_CASES;
@@ -281,8 +293,7 @@ function completionCheck(item, check, observation) {
     const calls = arr(observation.provider?.calls).filter(call => call.phase === record.phase);
     return typeof response.answer === "string" && response.answer.trim().length > 0 && response.ground !== "unavailable"
       && response.completion?.reason === "complete" && response.completion.timedOut === false && response.completion.outputLimited === false
-      && calls.length > 0 && calls.some(call => typeof call.response?.answer === "string" ? call.response.answer === response.answer
-        : typeof call.response?.text === "string" ? call.response.text === response.answer : typeof call.response === "string" && call.response === response.answer);
+      && calls.length > 0 && calls.some(call => capturedAnswer(call.response) === response.answer);
   });
   return result(check, valid ? "pass" : "fail", valid ? "complete" : "incomplete-or-unbound", "Completion requires nonempty actual model output linked to the delivered response.");
 }
@@ -291,6 +302,7 @@ function roleCheck(check, observation, options) {
   const calls = observation.provider?.calls;
   if (!Array.isArray(calls) || !Array.isArray(observation.provider?.unexpectedCalls) || !calls.length || typeof options.expectedModelId !== "string" || !options.expectedModelId.trim()) return inconclusive(check, "Capture actual provider calls and the exact sealed installed model ID.");
   const valid = calls.every(call => call.role === check.expected && call.modelId === options.expectedModelId
+    && (typeof call.response?.model !== "string" || call.response.model === options.expectedModelId)
     && own(call, "request") && own(call, "response") && typeof call.phase === "string"
     && Number.isFinite(Date.parse(call.startedAt)) && Number.isFinite(Date.parse(call.finishedAt)) && Date.parse(call.finishedAt) >= Date.parse(call.startedAt));
   return result(check, valid && arr(observation.provider.unexpectedCalls).length === 0 ? "pass" : "fail",
@@ -329,7 +341,15 @@ function citationCheck(item, check, observation) {
 }
 
 function boundEvidence(observation, source, kind, value) {
-  return arr(observation.evidence).some(entry => entry.source === source && entry.kind === kind && same(entry.data, value));
+  return arr(observation.evidence).some(entry => {
+    if (entry.source !== source || entry.kind !== kind) return false;
+    if (same(entry.data, value)) return true;
+    // ObservationLedger adds only its outer phase to non-receipt records. No
+    // other metadata or changed evidence content may be silently discarded.
+    if (!entry.data || !own(entry.data, "phase") || own(value, "phase")) return false;
+    const { phase, ...data } = entry.data;
+    return typeof phase === "string" && same(data, value);
+  });
 }
 
 function nativeProof(observation) {

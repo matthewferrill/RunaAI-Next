@@ -205,6 +205,15 @@ test("dependency fallbacks, stale provider replies and absent inference cannot b
   assert.equal(gradeCheck(check, observed, sealed).status, "fail");
 });
 
+test("raw OpenAI wire replies bind plain/evidence answers without trusting a requested model alone", () => {
+  const observed = freshNote(), record = observed.application.requests[0];
+  observed.provider.calls[0].response = { model: sealed.expectedModelId, choices: [{ message: {
+    content: JSON.stringify({ answer: record.response.answer, citations: [] }) } }] };
+  assert.equal(gradeCheck(checkFor(observed.caseId, "answer.completion"), observed, sealed).passed, true);
+  observed.provider.calls[0].response.model = "different-runtime-model";
+  assert.equal(gradeCheck(checkFor(observed.caseId, "provider.role"), observed, sealed).passed, false);
+});
+
 test("injected failure phase is excluded from complete-answer checks but exact retry ID/input still matters", () => {
   const observed = observation("chat-08-retry-incomplete");
   const retryInput = { message: "What is the opposite of clockwise?", contextRevision: 0 };

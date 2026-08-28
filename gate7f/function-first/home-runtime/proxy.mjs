@@ -8,12 +8,21 @@ export function rawHttpRequest(url,{method,headers,body,signal}){return new Prom
     headers:{get:name=>incoming.headers[name]??null},body:incoming}));
   outgoing.once('error',reject);outgoing.end(body);
 });}
+export async function readRequestBody(req,{signal,limit=RUNTIME_LIMITS.requestBytes}){
+  signal.throwIfAborted();
+  // AbortSignal alone does not interrupt IncomingMessage's async iterator. Destroy exactly this
+  // incomplete request on timeout/disconnect so a slow body cannot retain a pending reader.
+  const stop=()=>req.destroy(signal.reason);signal.addEventListener('abort',stop,{once:true});
+  try{const chunks=[];let size=0;for await(const chunk of req){signal.throwIfAborted();size+=chunk.length;
+      demand(size<=limit,'request-cap');chunks.push(chunk);}signal.throwIfAborted();return Buffer.concat(chunks);
+  }finally{signal.removeEventListener('abort',stop);}
+}
 export function createRuntimeProxy({controller,upstream='http://127.0.0.1:1234',allowedClients=['192.168.50.169'],fetchImpl=rawHttpRequest,event=()=>{}}){
   const base=new URL(upstream);demand(base.protocol==='http:'&&base.hostname==='127.0.0.1'&&!base.username&&!base.password
     &&base.pathname==='/'&&!base.search&&!base.hash,'upstream');
   const clients=new Set(allowedClients);demand(clients.size>0&&[...clients].every(v=>/^\d{1,3}(?:\.\d{1,3}){3}$/.test(v)),'clients');
   const server=createServer(async(req,res)=>{
-    let ticket=null;const abort=new AbortController();const closed=()=>{if(!res.writableEnded)abort.abort(error('client-disconnected'));};
+    let ticket=null,bodyTimeout=null;const abort=new AbortController();const closed=()=>{if(!res.writableEnded)abort.abort(error('client-disconnected'));};
     req.once('aborted',closed);res.once('close',closed);
     const timeout=setTimeout(()=>abort.abort(error('request-timeout')),RUNTIME_LIMITS.requestMs);
     const reject=(status,code)=>{if(res.headersSent||res.destroyed){res.destroy();return;}
@@ -28,9 +37,9 @@ export function createRuntimeProxy({controller,upstream='http://127.0.0.1:1234',
       demand(req.url&&!req.url.includes('?')&&!req.url.includes('#'),'endpoint-denied');
       if(req.method==='POST')demand(/^application\/json(?:\s*;\s*charset=utf-8)?$/i.test(req.headers['content-type']??''),'content-type');
       demand(!req.headers['content-encoding'],'content-encoding');
-      const chunks=[];let size=0;
-      for await(const chunk of req){size+=chunk.length;demand(size<=RUNTIME_LIMITS.requestBytes,'request-cap');chunks.push(chunk);}
-      const raw=Buffer.concat(chunks);validateRequest(controller.profile,req.url,req.method,raw);
+      bodyTimeout=setTimeout(()=>abort.abort(error('request-body-timeout')),RUNTIME_LIMITS.bodyMs);
+      const raw=await readRequestBody(req,{signal:abort.signal});clearTimeout(bodyTimeout);bodyTimeout=null;
+      validateRequest(controller.profile,req.url,req.method,raw);
       ticket=await controller.admit({signal:abort.signal});
       const response=await fetchImpl(new URL(req.url,base),{method:req.method,redirect:'error',
         headers:{...(req.headers['content-type']?{'content-type':req.headers['content-type']}:{}),...(req.headers.accept?{accept:req.headers.accept}:{})},
@@ -44,7 +53,7 @@ export function createRuntimeProxy({controller,upstream='http://127.0.0.1:1234',
       res.end(body);event({type:'forwarded',method:req.method,path:req.url,requestBytes:raw.length,responseBytes:body.length,status:response.status,generation:ticket.generation});
     }catch(e){abort.abort(e);const code=/^(runtime|lease)-[a-z0-9-]+$/.test(e?.code??'')?e.code:'runtime-request-unavailable';
       reject(code==='runtime-client-denied'?403:503,code);event({type:'denied',code});
-    }finally{clearTimeout(timeout);ticket?.release();req.removeListener('aborted',closed);res.removeListener('close',closed);}
+    }finally{clearTimeout(timeout);clearTimeout(bodyTimeout);ticket?.release();req.removeListener('aborted',closed);res.removeListener('close',closed);}
   });
   server.requestTimeout=RUNTIME_LIMITS.requestMs;server.headersTimeout=10000;server.maxHeadersCount=32;server.maxConnections=32;
   return server;

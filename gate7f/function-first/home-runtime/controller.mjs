@@ -87,6 +87,8 @@ export class QualifiedRuntimeController {
     demand(this.#requests.size===0,'drain-unconfirmed');
   }
   async #cleanup(){
+    // Cancellation or pin failure before the first native state change owns nothing to undo.
+    if(this.#engineIdentity===null&&!this.#powerChanged&&this.#owned.length===0&&this.#pendingKey===null)return;
     // A new/changed engine may reuse instance IDs. Never unload those as our old ownership.
     let observation=await this.#adapter.observe();
     demand(observation.engineIdentity===this.#engineIdentity,'cleanup-engine-changed');

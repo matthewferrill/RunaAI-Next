@@ -1,11 +1,12 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {createServer} from 'node:http';
+import {createServer,request as httpRequest} from 'node:http';
+import {connect} from 'node:net';
 import {once} from 'node:events';
 import {QualifiedRuntimeController} from './controller.mjs';
 import {createRuntimeProxy} from './proxy.mjs';
-import {validateProfile,loadRequest,verifyLoaded,validateRequest,NOMICS,LEASE_POLICY} from './contracts.mjs';
+import {validateProfile,loadRequest,verifyLoaded,validateRequest,NOMICS,LEASE_POLICY,RUNTIME_LIMITS} from './contracts.mjs';
 
 const profile=(id='gemma')=>({schemaVersion:'runaai-qualified-home-profile/v1',candidateId:id,
   appSourceCommit:'1'.repeat(40),runtimeSealSha256:'2'.repeat(64),qualificationGradesSha256:'3'.repeat(64)});
@@ -56,6 +57,13 @@ test('explicit owned startup, idle polling and stop preserve the exact two-model
   assert.equal((await f.controller.poll()).phase,'ready');assert.equal(f.values.loads.length,2,'poll never JIT reloads');
   const ticket=await f.controller.admit();assert.equal(f.controller.status.activeRequests,1);ticket.release();ticket.release();
   await f.controller.stop();assert.equal(f.controller.status.phase,'stopped');assert.equal(f.values.loaded.length,0);assert.equal(f.values.power,260);
+});
+test('cancelling startup before native state changes stops without loading or inventing cleanup ownership',async()=>{
+  const f=fixture();f.adapter.verifyPins=async(_profile,{signal})=>new Promise((resolve,reject)=>{
+    signal.addEventListener('abort',()=>reject(signal.reason),{once:true});});
+  const start=f.controller.start();const rejected=assert.rejects(start,/startup-cancelled/);
+  await f.controller.stop();await rejected;assert.equal(f.controller.status.phase,'stopped');
+  assert.equal(f.values.loads.length,0);assert.equal(f.values.unloads.length,0);assert.equal(f.values.power,260);
 });
 test('drain prevents admissions and waits for both active requests before unloading',async()=>{
   const f=fixture();await f.controller.start();const one=await f.controller.admit(),two=await f.controller.admit();
@@ -114,11 +122,18 @@ test('freshness, engine epoch and missing residency never trigger a blind reload
   }
 });
 test('request contract excludes override/JIT/native/MCP/unselected routes without changing accepted bytes',()=>{
-  const p=validateProfile(profile());const body={model:p.candidate.key,messages:[{role:'user',content:'hello'}],reasoning_effort:'none'};
+  const p=validateProfile(profile());const body={model:p.candidate.key,max_tokens:512,temperature:0,messages:[{role:'user',content:'hello'}],reasoning_effort:'none'};
   const good=Buffer.from(JSON.stringify(body));validateRequest(p,'/v1/chat/completions','POST',good);
-  for(const mutation of [b=>{b.ttl=3600;},b=>{b.model='foreign';},b=>{delete b.reasoning_effort;},b=>{b.stream=true;},b=>{b.integrations=[];}]){
+  for(const mutation of [b=>{b.ttl=3600;},b=>{b.model='foreign';},b=>{delete b.reasoning_effort;},b=>{b.stream=true;},b=>{b.integrations=[];},
+    b=>{delete b.max_tokens;},b=>{b.max_tokens=1537;},b=>{b.max_tokens=-1;},b=>{b.max_tokens=1.5;},b=>{b.max_tokens=null;},
+    b=>{b.temperature=1;},b=>{b.top_p=0.9;},b=>{b.tools=[];},b=>{b.max_completion_tokens=20000;},b=>{b.messages[0].tool_calls=[];}]){
     const bad=structuredClone(body);mutation(bad);assert.throws(()=>validateRequest(p,'/v1/chat/completions','POST',Buffer.from(JSON.stringify(bad))));}
   assert.throws(()=>validateRequest(p,'/api/v1/models/load','POST',good),/endpoint-denied/);
+  validateRequest(p,'/v1/chat/completions','POST',Buffer.from(JSON.stringify({...body,max_tokens:1536})));
+  const embedded={model:NOMICS.key,input:['search_document: synthetic']};
+  validateRequest(p,'/v1/embeddings','POST',Buffer.from(JSON.stringify(embedded)));
+  for(const b of [{...embedded,dimensions:123},{...embedded,input:['unprefixed']},{...embedded,input:['search_query: '+'x'.repeat(1600)]}])
+    assert.throws(()=>validateRequest(p,'/v1/embeddings','POST',Buffer.from(JSON.stringify(b))));
 });
 test('actual disposable HTTP proxy preserves request/reply bytes and upstream failures; no models executed',async()=>{
   const f=fixture();await f.controller.start();const seen=[];const response=Buffer.from('{\n "choices" : [{"message":{"content":"synthetic receipt"}}]\n}\n');
@@ -127,7 +142,7 @@ test('actual disposable HTTP proxy preserves request/reply bytes and upstream fa
   const upstreamUrl=await listen(upstream);const events=[];const proxy=createRuntimeProxy({controller:f.controller,upstream:upstreamUrl,allowedClients:['127.0.0.1'],event:e=>events.push(e)});
   const proxyUrl=await listen(proxy);
   try{
-    const body=Buffer.from('{"model":"gemma-4-26b-a4b-it-qat", "reasoning_effort":"none", "messages":[{"role":"user","content":"synthetic only"}]}\n');
+    const body=Buffer.from('{"model":"gemma-4-26b-a4b-it-qat", "max_tokens":512,"temperature":0,"reasoning_effort":"none", "messages":[{"role":"user","content":"synthetic only"}]}\n');
     const reply=await fetch(proxyUrl+'/v1/chat/completions',{method:'POST',headers:{'content-type':'application/json'},body});
     assert.equal(reply.status,200);assert.deepEqual(Buffer.from(await reply.arrayBuffer()),response);assert.deepEqual(seen,[body]);
     assert.equal(f.controller.status.activeRequests,0);assert.equal(events[0].type,'forwarded');assert.ok(!JSON.stringify(events).includes('synthetic'));
@@ -137,4 +152,34 @@ test('actual disposable HTTP proxy preserves request/reply bytes and upstream fa
     f.values.loaded[0].config.context_length=1;
     const unavailable=await fetch(proxyUrl+'/v1/chat/completions',{method:'POST',headers:{'content-type':'application/json'},body});assert.equal(unavailable.status,503);assert.equal(seen.length,2);
   }finally{await close(proxy);await close(upstream);}
+});
+
+test('qualified 60-second answer admission is not clipped by the outer proxy deadline (fake clock)',async t=>{
+  const f=fixture();await f.controller.start();let finish;const accepted=new Promise(resolve=>{finish=resolve;});let upstreamReply;
+  const upstream=createServer(async(req,res)=>{for await(const _ of req){}upstreamReply=res;finish();});
+  const proxy=createRuntimeProxy({controller:f.controller,upstream:await listen(upstream),allowedClients:['127.0.0.1']});
+  const url=await listen(proxy);t.mock.timers.enable({apis:['setTimeout']});
+  try{
+    const result=new Promise((resolve,reject)=>{const req=httpRequest(url+'/v1/chat/completions',{method:'POST',headers:{'content-type':'application/json'}},async res=>{
+      const chunks=[];for await(const chunk of res)chunks.push(chunk);resolve({status:res.statusCode,body:Buffer.concat(chunks).toString()});});
+      req.on('error',reject);req.end(JSON.stringify({model:f.controller.profile.candidate.key,max_tokens:512,temperature:0,reasoning_effort:'none',messages:[{role:'user',content:'synthetic'}]}));});
+    await accepted;t.mock.timers.tick(60000);await settle();assert.equal(f.controller.status.activeRequests,1);
+    assert.equal(RUNTIME_LIMITS.requestMs,65000);assert.ok(RUNTIME_LIMITS.drainMs>RUNTIME_LIMITS.requestMs);
+    upstreamReply.writeHead(200,{'content-type':'application/json'});upstreamReply.end('{"synthetic":true}');
+    assert.deepEqual(await result,{status:200,body:'{"synthetic":true}'});assert.equal(f.controller.status.activeRequests,0);
+  }finally{t.mock.timers.reset();await close(proxy);await close(upstream);await f.controller.stop();}
+});
+
+test('a real incomplete HTTP request body is destroyed on its bounded deadline, with no admission',async t=>{
+  const f=fixture();await f.controller.start();let calls=0;const events=[];
+  const proxy=createRuntimeProxy({controller:f.controller,allowedClients:['127.0.0.1'],fetchImpl:async()=>{calls++;throw Error('unexpected');},event:e=>events.push(e)});
+  const url=new URL(await listen(proxy));t.mock.timers.enable({apis:['setTimeout']});
+  const socket=connect({host:'127.0.0.1',port:Number(url.port)});socket.on('error',()=>{});
+  try{
+    await once(socket,'connect');const received=once(proxy,'request');
+    socket.write('POST /v1/chat/completions HTTP/1.1\r\nHost: localhost\r\nContent-Type: application/json\r\nContent-Length: 1000\r\n\r\n{');
+    await received;await settle();const ended=once(socket,'close');t.mock.timers.tick(RUNTIME_LIMITS.bodyMs);await ended;await settle();
+    assert.equal(calls,0);assert.equal(f.controller.status.activeRequests,0);assert.equal(events.length,1);
+    assert.equal(events[0].code,'runtime-request-body-timeout');
+  }finally{t.mock.timers.reset();socket.destroy();await close(proxy);await f.controller.stop();}
 });

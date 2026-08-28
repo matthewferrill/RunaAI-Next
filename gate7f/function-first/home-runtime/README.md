@@ -4,7 +4,7 @@ This directory is separate from the frozen M1 application/campaign. Read
 [the prospective criteria](HOME-RUNTIME-GUARD-PLAN.md) first.
 
 Implemented locally: exact-profile contracts, a single-primary-plus-Nomic lifecycle/admission
-controller, and a transparent bounded HTTP proxy factory. The factory does not listen until its
+controller, a pinned Home native adapter/read-only engine observer, and a transparent bounded HTTP proxy factory. The factory does not listen until its
 caller binds it. The controller cannot invoke a command, file, network request or native model operation
 without the supplied operator adapter. Tests supply explicit doubles and ephemeral local HTTP servers;
 no actual model inference or Home/Control mutation occurs.
@@ -35,9 +35,25 @@ implicit decompression, prompt suffix or replay is introduced. Client access by 
 not cryptographic authentication. A production package must prove its authenticated/private binding and
 close bypass paths before this factory is exposed beyond a disposable test.
 
-Run `node --test gate7f/function-first/home-runtime/runtime.test.mjs`.
+The outer request ceiling is65seconds, preserving the application's qualified60second answer and
+30second planner limits; graceful drain permits70seconds. An incomplete request body has its own10second
+deadline and is explicitly destroyed on abort. Only the actual qualified wire fields are accepted:
+temperature0, max_tokens1–1536, plain-text messages and the exact reasoning control. The application
+retains its tighter512/1536 per-role budgets. Nomic accepts at most64 prefixed1600-byte derived windows.
+Unknown overrides fail closed, never get removed or rewritten.
 
-Not yet implemented or proved: native adapter, independent crash watchdog/persistence, service
+`createPinnedNativeAdapter` is side-effect-free at construction. When invoked by a future qualified
+operator it requires the exact Home/Node identity, model/runtime/operator hashes, plain non-linked
+paths, zero-bypass loopback LM Studio binding, and engine PID/start-time/owner proof. Metadata is checked
+again on observations; owned model IDs are required for unload. The independent protected installation,
+exclusive lifecycle lock and crash supervisor remain necessary before this adapter may be activated.
+
+Run `node --test gate7f/function-first/home-runtime/runtime.test.mjs gate7f/function-first/home-runtime/native-adapter.test.mjs`.
+Local verification2026-08-28:22/22 pass. The60second test uses a controlled clock, not a long inference;
+the incomplete-body regression uses an actual disposable HTTP socket. Native file-link rejection uses
+actual NTFS hardlinks/junctions; the observer was parsed by Windows PowerShell. None is live Home proof.
+
+Not yet implemented or proved: independent crash watchdog/persistence, service
 installation, startup without Matthew login, post-campaign JIT/sensitive-log transition, authenticated
 deployment binding, long-idle native persistence, real fault/restart/rollback and production activation.
 Do not claim this core is ready to deploy. The existing finite campaign operator remains the sole live

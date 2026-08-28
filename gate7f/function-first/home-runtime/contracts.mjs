@@ -1,8 +1,10 @@
 import {MANIFEST} from '../readiness/manifest.mjs';
 import {NOMICS,LEASE_POLICY,primaryLoad,sha,residentList,checkHardware} from '../readiness/lease-contract.mjs';
 
-export const RUNTIME_LIMITS=Object.freeze({sampleMs:5000,maximumObservationAgeMs:5000,requestMs:30000,
-  requestBytes:2*1024*1024,responseBytes:4*1024*1024,drainMs:35000,abortDrainMs:5000,preparationMs:600000});
+// The application owns its qualified per-role deadline (answers <=60s, plans <=30s).
+// This outer transport ceiling must not shorten those deadlines, and cannot extend them.
+export const RUNTIME_LIMITS=Object.freeze({sampleMs:5000,maximumObservationAgeMs:5000,requestMs:65000,bodyMs:10000,
+  requestBytes:2*1024*1024,responseBytes:4*1024*1024,maximumOutputTokens:1536,drainMs:70000,abortDrainMs:5000,preparationMs:600000});
 export const error=code=>Object.assign(Error('runtime-'+code),{code:'runtime-'+code});
 export const demand=(ok,code)=>{if(!ok)throw error(code);};
 const HASH=/^[a-f0-9]{64}$/;
@@ -50,9 +52,20 @@ export function validateRequest(profile,pathname,method,raw){
   demand(body&&typeof body==='object'&&!Array.isArray(body),'body-invalid');
   for(const name of ['ttl','load_config','context_length','integrations','previous_response_id'])demand(!Object.hasOwn(body,name),'load-or-agent-override');
   if(pathname==='/v1/chat/completions'){
+    const allowed=new Set(['model','max_tokens','temperature','messages','reasoning_effort','stream']);
+    demand(Object.keys(body).every(name=>allowed.has(name)),'request-field');
     demand(body.model===profile.candidate.key&&Array.isArray(body.messages),'unselected-model');
+    demand(Number.isInteger(body.max_tokens)&&body.max_tokens>0&&body.max_tokens<=RUNTIME_LIMITS.maximumOutputTokens,'output-token-limit');
+    demand(body.temperature===0,'sampling-drift');
+    demand(body.messages.length>0&&body.messages.every(message=>message&&typeof message==='object'
+      &&Object.keys(message).sort().join()==='content,role'&&['system','user','assistant'].includes(message.role)
+      &&typeof message.content==='string'),'message-shape');
     demand(!Object.hasOwn(body,'stream')||body.stream===false,'stream-not-qualified');
     demand(profile.reasoningEffort===null?!Object.hasOwn(body,'reasoning_effort'):body.reasoning_effort===profile.reasoningEffort,'reasoning-drift');
-  }else demand(body.model===NOMICS.key,'unselected-model');
+  }else{
+    demand(Object.keys(body).sort().join()==='input,model','request-field');demand(body.model===NOMICS.key,'unselected-model');
+    demand(Array.isArray(body.input)&&body.input.length>0&&body.input.length<=64&&body.input.every(text=>typeof text==='string'
+      &&Buffer.byteLength(text,'utf8')<=1600&&/^search_(?:document|query): /.test(text)),'embedding-input');
+  }
 }
 export {NOMICS,LEASE_POLICY,sha,residentList};

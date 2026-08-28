@@ -22,7 +22,14 @@ M1-S2 is in progress under the existing standing permission. Its preregistered c
 `gate7f/function-first/M1-S2-INTEGRATION-PROGRESS-2026-08-28.md`. Durable encrypted task/source work,
 server-authoritative conversation context and the ordinary-user function surface are being integrated.
 Actual Control sandbox/project proof passed 6/6 with disposable resources and unchanged production.
-Model readiness, matched function acceptance, full customer UI/recovery and the human trial remain open.
+The three actual adapter readiness checks passed, and all 12 model-free controls passed in practice
+across their recorded implementation revisions. Those are not one qualified control suite: rerun all
+12 under the same final runtime seal before the fixed 360-attempt, three-model functional campaign.
+The campaign runner now retains exact archive/source/runtime pins, actual per-attempt hardware
+observations, browser checkpoints, all failures and unchanged denominators. Task reopen preserves
+only still-valid explicit approvals; Undo uses the original task's owned receipt. The separately
+executed task/orchestrator PostgreSQL regression suite passed 35/35. Source and private rows remain
+isolated. Production deployment and the real customer trial remain open; no model winner is presumed.
 Do not stop or request another approval at internal commits. Do not claim M1 or the broader roadmap is
 complete from these component results; preserve the historical M1-S1 result below.
 

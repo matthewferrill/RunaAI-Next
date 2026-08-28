@@ -1,0 +1,44 @@
+{
+  "schemaVersion": "runaai-m1-functional-readiness-reference/v1",
+  "createdBeforeScoredInference": true,
+  "qualification": false,
+  "scope": "Actual all-three adapter readiness and effective no-reasoning wire controls, with exact hardware/runtime exports. Not a substitute for functional qualification.",
+  "files": [
+    {
+      "path": "gate7f/function-first/readiness/evidence/20260828-smoke-gemma-r1/EXPORT.json",
+      "sha256": "9879f10c873d7f18c23be8cf2067a37c3b3064ced071d5f69de500c9e3c5a4b2"
+    },
+    {
+      "path": "gate7f/function-first/readiness/evidence/20260828-smoke-coder-r1/EXPORT.json",
+      "sha256": "81e965baad1ec8c07f53031fb02b538f0fd61f6cd3fda0892f22a7b6154bfb82"
+    },
+    {
+      "path": "gate7f/function-first/readiness/evidence/20260828-smoke-qwen36-r1/EXPORT.json",
+      "sha256": "e361a3b0d9e07f74d866e00a9c0107dc89cdf9aa59cf9345f4197cf10291d2f2"
+    },
+    {
+      "path": "gate7f/function-first/readiness/evidence/20260828-actual-adapter-gemma/EXPORT.json",
+      "sha256": "98c878650fb0d9c08437602217c9cdccf90adbbb27b3677360d8d8f253d9d0ce"
+    },
+    {
+      "path": "gate7f/function-first/readiness/evidence/20260828-actual-adapter-coder/EXPORT.json",
+      "sha256": "8c51eea82f319ec6d309e5f9f98718a04668bf9da6ba12b73406012edb8766a2"
+    },
+    {
+      "path": "gate7f/function-first/readiness/evidence/20260828-actual-adapter-qwen/EXPORT.json",
+      "sha256": "aa9c1aeac60b6bf4dc888fb777610374aa1286ed58a110d69349254be231c7cd"
+    }
+  ],
+  "modelRuntime": {
+    "path": "gate7f/evaluation/home/HOME-RUNTIME-2026-08-27.json",
+    "sha256": "0e57db1c2db05c338f6dbf755779d6a62fd6931d7e83f11e2a43991059ad9a4a"
+  },
+  "controls": {
+    "gemma4": "reasoning_effort none",
+    "qwen36": "reasoning_effort none",
+    "qwen3Coder": "reasoning_effort omitted"
+  },
+  "changedCompositionSinceSmoke": "The bounded-window Nomic adapter is new; qualify it prospectively through the functional cases.",
+  "productionRoutingChanged": false,
+  "protectedDataIncluded": false
+}

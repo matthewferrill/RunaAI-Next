@@ -1,0 +1,18 @@
+{
+  "schemaVersion": "runaai-tls-transport-proof/v1",
+  "observedAt": "2026-08-28T21:49:54.303Z",
+  "host": "RUNA-HOME",
+  "operatorSha256": "fefdfa29a3e3dd2a22f9faa6a239524751aa9f5f745677720af2eb7e15d753ad",
+  "scriptSha256": "fcc794780bd5856c7e1d89b43ed1137aac61cfa81d7aed91590d87436b07013e",
+  "remoteCommandChars": 3630,
+  "nestedCommandChars": 3677,
+  "maximumWrappedChars": 3933,
+  "inputSha256": "e0fa4c8b667b36b77b79c1f733d3759016c5fc5dce4d53623f77e65ef7bab008",
+  "rawResponseBase64": "eyJib2R5Ijoic3ludGhldGljLXB1YmxpYy10cmFuc2Zlci3PgFxuc2Vjb25kLWxpbmUiLCJob3N0IjoiUlVOQS1IT01FIiwic2NoZW1hVmVyc2lvbiI6InJ1bmFhaS10bHMtcmVhZC1vbmx5LXRyYW5zcG9ydC92MSIsInByaXZhdGVWYWx1ZXNJbmNsdWRlZCI6ZmFsc2UsInJlYWRPbmx5Ijp0cnVlfQ==",
+  "rawResponseSha256": "83e2d0352c2c42679c7bbe94301d97e617546bed57ad8caf93619858ed1984a3",
+  "passed": true,
+  "readOnly": true,
+  "modelCalled": false,
+  "enrollmentPerformed": false,
+  "privateValuesIncluded": false
+}

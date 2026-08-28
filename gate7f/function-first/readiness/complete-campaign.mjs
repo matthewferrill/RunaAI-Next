@@ -3,6 +3,7 @@ import {createHash} from 'node:crypto';
 import {execFileSync} from 'node:child_process';
 import path from 'node:path';
 import assert from 'node:assert/strict';
+import {tlsTransportRequest} from '../home-runtime/tls-enrollment-operator.mjs';
 const [leaseId,expectedSeal,reason,...extra]=process.argv.slice(2);
 assert.equal(extra.length,0);assert.match(leaseId,/^20260828-campaign-(?:gemma|coder|qwen36)-r[1-9][0-9]*$/);
 assert.match(expectedSeal,/^[a-f0-9]{64}$/);assert.ok(['completed','abort'].includes(reason));
@@ -14,12 +15,16 @@ const command=`$ErrorActionPreference='Stop';$ProgressPreference='SilentlyContin
   `if(-not(Test-Path -LiteralPath $root)){[void][IO.Directory]::CreateDirectory($root);$b=[Convert]::FromBase64String('${bytes.toString('base64')}');$s=[IO.File]::Open(($root+'\\Write-HomeCampaignCompletion.ps1'),[IO.FileMode]::CreateNew,[IO.FileAccess]::Write,[IO.FileShare]::None);try{$s.Write($b,0,$b.Length);$s.Flush($true)}finally{$s.Dispose()}};`+
   `$file=$root+'\\Write-HomeCampaignCompletion.ps1';if((Get-FileHash -LiteralPath $file -Algorithm SHA256).Hash.ToLowerInvariant()-cne'${writerSha256}'){throw 'completion-source-pin'};`+
   `& 'C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe' -NoProfile -NonInteractive -ExecutionPolicy Bypass -File $file -LeaseId '${leaseId}' -ExpectedSeal '${expectedSeal}' -Reason '${reason}';exit $LASTEXITCODE`;
-const encoded=Buffer.from(command,'utf16le').toString('base64');
+// Preserve the exact writer/marker; transport its source through the tested, hash-bound stdin
+// envelope so the nested Windows command never embeds the several-KB writer in EncodedCommand.
+const transport=tlsTransportRequest({host:'home',command,input:Buffer.alloc(0)});
+assert.ok(transport.maximumWrappedChars<6500);
 // One call only: uncertain publication is inspected, never retried automatically.
 const raw=execFileSync('ssh.exe',['-F','C:\\Users\\matth\\.ssh\\config','-o','ClearAllForwardings=yes','runa-control-wsl-codex',
-  `ssh -o ClearAllForwardings=yes runa-home-codex powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -EncodedCommand ${encoded}`],
-  {encoding:'buffer',timeout:30000,maxBuffer:16384,windowsHide:true});
+  transport.nested],
+  {input:transport.input,encoding:'buffer',timeout:30000,maxBuffer:16384,windowsHide:true});
 const result=JSON.parse(raw);assert.equal(result.published,true);assert.equal(result.leaseId,leaseId);assert.equal(result.sealSha256,expectedSeal);
 const local=path.resolve(import.meta.dirname,'../../../artifacts/m1-readiness',leaseId+'-completion-publication.json');
-writeFileSync(local,JSON.stringify({writerSha256,writerSource:bytes.toString('base64'),receiptRaw:raw.toString('base64'),receiptSha256:sha(raw)},null,2)+'\n',{flag:'wx'});
+writeFileSync(local,JSON.stringify({writerSha256,writerSource:bytes.toString('base64'),transportScriptSha256:transport.scriptSha256,
+  maximumWrappedChars:transport.maximumWrappedChars,receiptRaw:raw.toString('base64'),receiptSha256:sha(raw)},null,2)+'\n',{flag:'wx'});
 console.log(JSON.stringify({result,writerSha256,retained:local}));

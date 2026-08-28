@@ -65,7 +65,8 @@ export function validateRequest(profile,pathname,method,raw){
   }else if(pathname==='/v1/embeddings'){
     demand(Object.keys(body).sort().join()==='input,model','request-field');demand(body.model===NOMICS.key,'unselected-model');
     demand(Array.isArray(body.input)&&body.input.length>0&&body.input.length<=64&&body.input.every(text=>typeof text==='string'
-      &&Buffer.byteLength(text,'utf8')<=1600&&/^search_(?:document|query): /.test(text)),'embedding-input');
+      &&text.isWellFormed()&&Buffer.byteLength(text,'utf8')<=1600&&Buffer.byteLength(text.normalize('NFKD'),'utf8')<=1600
+      &&/^search_(?:document|query): /.test(text)),'embedding-input');
   }else{
     demand(Object.keys(body).sort().join()==='documents,query,top_n','request-field');
     demand(typeof body.query==='string'&&body.query.length>0&&body.query.length<=4000,'reranker-query');

@@ -68,8 +68,15 @@ permits releasing an unacknowledged grant. The broker is a pure control-plane mo
 Windows ACLs and the independent native supervisor are not implemented by this class. See
 [supervision criteria](SUPERVISOR-PLAN.md).
 
+`BrokerFileServer`/`BrokerFileClient` provide bounded, signed request/reply transport using the
+supervisor-created session directory. Each designated writer flushes a pending file before atomic
+publication; acknowledgments remove only exact ephemeral transfer names, never native grants or
+ownership evidence. A lost/tampered/oversized reply faults the client and is not replayed. Physical
+cross-process flow is tested with a disposable child process. Exclusive process ownership and Windows
+directory ACLs remain installer prerequisites; same-user tests do not prove cross-principal isolation.
+
 Run `node --test gate7f/function-first/home-runtime/*.test.mjs`.
-Local verification2026-08-28:30/30 pass. The60second test uses a controlled clock, not a long inference;
+Local verification2026-08-28:35/35 pass. The60second test uses a controlled clock, not a long inference;
 the incomplete-body regression uses an actual disposable HTTP socket. Native file-link rejection uses
 actual NTFS hardlinks/junctions; the observer was parsed by Windows PowerShell. None is live Home proof.
 The real local TLS regression creates disposable certificates using the installed Git OpenSSL and

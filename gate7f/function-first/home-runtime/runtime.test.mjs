@@ -132,7 +132,8 @@ test('request contract excludes override/JIT/native/MCP/unselected routes withou
   validateRequest(p,'/v1/chat/completions','POST',Buffer.from(JSON.stringify({...body,max_tokens:1536})));
   const embedded={model:NOMICS.key,input:['search_document: synthetic']};
   validateRequest(p,'/v1/embeddings','POST',Buffer.from(JSON.stringify(embedded)));
-  for(const b of [{...embedded,dimensions:123},{...embedded,input:['unprefixed']},{...embedded,input:['search_query: '+'x'.repeat(1600)]}])
+  for(const b of [{...embedded,dimensions:123},{...embedded,input:['unprefixed']},{...embedded,input:['search_query: '+'x'.repeat(1600)]},
+    {...embedded,input:['search_query: '+'각'.repeat(400)]}])
     assert.throws(()=>validateRequest(p,'/v1/embeddings','POST',Buffer.from(JSON.stringify(b))));
   const rerank={query:'synthetic',documents:['synthetic document'],top_n:1};
   validateRequest(p,'/rerank','POST',Buffer.from(JSON.stringify(rerank)));

@@ -17,7 +17,7 @@ $ownedRoot = 'C:\AI\RunaAI-Next-Candidate\staging\' + $name
 $artifactRoot = Join-Path $repo ('artifacts\runs\' + $name)
 New-Item -ItemType Directory -Path $artifactRoot | Out-Null
 $archive = Join-Path $artifactRoot 'source.tar'
-git -C $repo archive --format=tar --output=$archive $SourceCommit
+git -c core.autocrlf=false -C $repo archive --format=tar --output=$archive $SourceCommit
 if ($LASTEXITCODE -ne 0) { throw 'm1-stage-archive-failed' }
 $archiveSha = (Get-FileHash -LiteralPath $archive -Algorithm SHA256).Hash.ToLowerInvariant()
 $identityPath = Join-Path $artifactRoot 'SOURCE-IDENTITY.json'

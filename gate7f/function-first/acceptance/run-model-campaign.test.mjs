@@ -12,6 +12,13 @@ import { parseCampaignArguments, campaignPlan, qualifiedControlSuite, validateHo
 // These are deliberately model-free unit fixtures. They test the runner's
 // serialization, immutable evidence and fail-closed contracts, not acceptance.
 const hash = "a".repeat(64), hardwareHash = "d".repeat(64), runtimeHash = "e".repeat(64), sourceCommit = "b".repeat(40);
+
+test("Control staging exports source with checkout conversion disabled", async () => {
+  const source = await readFile(new URL("./Prepare-ControlFunctionalStage.ps1", import.meta.url), "utf8");
+  assert.match(source, /git -c core\.autocrlf=false -C \$repo archive --format=tar --output=\$archive \$SourceCommit/u);
+  assert.doesNotMatch(source, /\ngit -C \$repo archive/u);
+});
+
 const candidateId = "gemma4-26b-a4b";
 const now = Date.parse("2026-08-28T18:00:00.000Z");
 const stable = value => Array.isArray(value) ? value.map(stable) : value && typeof value === "object"

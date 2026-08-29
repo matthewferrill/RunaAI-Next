@@ -1,0 +1,57 @@
+{
+  "schemaVersion": "runaai-independent-shared-corrections-review/v1",
+  "reviewDate": "2026-08-28",
+  "evaluatorId": "codex-independent-model-role-review-20260828",
+  "reviewerIndependence": {
+    "freshIndependentAgent": true,
+    "plannerAuthor": false,
+    "modelAdapterAuthor": false
+  },
+  "baselineEvidenceChanged": false,
+  "baselineGradesChanged": false,
+  "qualificationClaimed": false,
+  "reviews": [
+    {
+      "name": "whole-plan current-receipt preflight",
+      "criteriaCommit": "f8a171479508a9cf56969ccea76b32ccd7abd78d",
+      "implementationCommit": "5a1f0c2472ae8a4dba5cfcc6e6caf4eb6ff57be4",
+      "disposition": "targeted-correction-required",
+      "effectSafety": "fail-closed",
+      "finding": "The planner receipt-supply filter checks proposal.arguments.path and proposal.arguments.suiteId but not proposal.restorePaths. A current receipt produced by project.restore under a wider grant can therefore be supplied to a later narrower planning attempt even when its affected paths are outside that grant. The fresh service resolveArguments preflight still rejects any resulting restore before plan retention, proposal creation, or dispatch.",
+      "remediation": "Include every proposal.restorePaths entry in the receipt-supply scope predicate and retain the fresh service preflight. Add a disposable-PostgreSQL regression that seeds apply then restore under a wider grant, rebinds a narrower grant, verifies that the restore-produced receipt is absent from planner input, and verifies no proposal or effect when that receipt is guessed.",
+      "otherReviewedBehavior": "Invented, foreign, corrupt, stale, out-of-path, out-of-suite, and future-invalidated references fail before effects; valid current restore retains exact approval and service validation; project drift stops plan retention. These deterministic fixtures do not prove model compliance."
+    },
+    {
+      "name": "native evidence JSON-schema wire contract",
+      "criteriaCommit": "063354417c3ca0be93100ef62231dd85acee9b06",
+      "implementationCommit": "801a8c3e6306417ff25446195e89c2ceade095f7",
+      "disposition": "no-blocking-finding-in-reviewed-scope",
+      "retainedEvidence": {
+        "actualMastraAndLocalHttp": true,
+        "actualModelsTested": false,
+        "applicationTests": "79/79",
+        "nativeRegression": "162/162",
+        "finalWireSha256": "2b83f61cb6579f824871608c26a0a20a5cbc9abad24e8168e1c4e8ac19066a55",
+        "finalTapSha256": "efe53e2a1b44b9ffd3e0277e27fa22f9670c5ed442c0c672f2dd72ef75133e87",
+        "nativeTapSha256": "e0e7910930239867d282d6ea0d1734a705b4db5d0b76333ca2fa4c09bc4cd530"
+      },
+      "reviewedBehavior": "One static exact schema is selected only for evidence-bearing answer generation; plain answers remain schema-free. The Home guard admits only the canonical wrapper, the application independently validates exact output shape and citation membership downstream, maxRetries zero reaches the generation settings boundary, and retained before, after, and final 429/500 probes each show exactly one HTTP request.",
+      "boundary": "Synthetic upstream responses establish installed Mastra/SDK transport, rejection, cancellation, and isolation only. Actual model grammar support and semantic quality require a fresh sealed three-model campaign."
+    },
+    {
+      "name": "shared request coverage and continuing constraints",
+      "criteriaCommit": "c09137cee54bbc9caf7fc06c275f5f048b266ae5",
+      "implementationCommit": "793ebc43757159a28551389fe7e669eca2a344c5",
+      "disposition": "no-blocking-finding-in-reviewed-scope",
+      "retainedEvidence": {
+        "actualSdkHttp": true,
+        "actualModelsTested": false,
+        "tests": "91/91",
+        "wireSha256": "6dac91199c38eec527378f1591a65f9954fde8eb742ebee2489c1d597084a68f",
+        "tapSha256": "4045f2f6cc87e305f00525d2905b35042004bf9de9a6b6b853a9f6fbae9bd59a"
+      },
+      "reviewedBehavior": "Four generic instructions are shared across three candidate profiles and ordinary chat, guarded local chat, selected workspace evidence, and review. Tests retain the current message, user history, source bytes, role and model selection, token and reasoning controls, exact evidence schema selection, one request, no tools, and policy denial before another model call.",
+      "boundary": "Wire presence is not instruction compliance or answer-quality evidence. The frozen baseline omissions remain failures or uncertainties; fresh matched qualification is required."
+    }
+  ]
+}

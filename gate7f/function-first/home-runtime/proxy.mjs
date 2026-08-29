@@ -37,7 +37,7 @@ export function createRuntimeProxy({controller,upstream='http://127.0.0.1:1234',
     req.once('aborted',closed);res.once('close',closed);
     const isReranker=['/rerank','/health'].includes(req.url);
     const timeout=setTimeout(()=>abort.abort(error('request-timeout')),isReranker?RUNTIME_LIMITS.rerankerMs:RUNTIME_LIMITS.requestMs);
-    const reject=(status,code,close=false)=>{if(res.headersSent||res.destroyed){res.destroy();return false;}
+    const reject=(status,code,close=false)=>{if(res.headersSent||res.destroyed)return false;
       const bytes=Buffer.from(JSON.stringify({schemaVersion:'runaai-home-runtime-error/v1',errorCode:code,privateValuesIncluded:false}));
       res.writeHead(status,{'content-type':'application/json','content-length':bytes.length,'cache-control':'no-store',...(close?{connection:'close'}:{})});
       res.end(bytes);return true;};

@@ -10,6 +10,7 @@ import {CASE_BUNDLE_SHA256} from './cases.mjs';
 import {QDRANT_PIN} from './runner-contract.mjs';
 import {captureBoundedStream,CONTROL_REGRESSION_FIXED,controlRegressionEnvironment,executeAllTests,parseControlRegressionArguments,parseTapSummary,
   runVerifiedControlRegression,validateControlRegressionManifest,verifyControlRegressionCleanup} from './control-exact-regression.mjs';
+import {ownerSafeEnvironment,runBoundedOwnerChild} from './control-exact-regression-owner.mjs';
 
 const hash=letter=>letter.repeat(64);
 const manifest=()=>({schemaVersion:'runaai-m1-control-regression-input/v1',runId:'1'.repeat(32),source:{commit:'2'.repeat(40),archiveSha256:hash('3'),
@@ -43,6 +44,11 @@ test('TAP summary requires one complete final summary and retains skips as a fai
   assert.deepEqual(parseTapSummary(tap()),{tests:2,suites:0,pass:2,fail:0,cancelled:0,skipped:0,todo:0});
   assert.equal(parseTapSummary(tap({tests:2,pass:1,skipped:1})).skipped,1);
   assert.throws(()=>parseTapSummary('# tests 1\n# pass 1\n'));assert.throws(()=>parseTapSummary(tap()+tap()));
+});
+
+test('owner supervisor environment retains only safe operating-system keys',()=>{
+  assert.deepEqual(ownerSafeEnvironment({SystemRoot:'C:\\Windows',TEMP:'C:\\Temp',NODE_OPTIONS:'--require foreign.js',providerSecret:'private'}),
+    {SystemRoot:'C:\\Windows',TEMP:'C:\\Temp'});
 });
 
 test('test environment exposes only owned endpoints and safe process keys, never inherited credentials or providers',()=>{
@@ -117,11 +123,32 @@ test('cleanup proof requires every owned directory absent and every recorded por
 
 test('owner PowerShell entry point parses in Windows PowerShell 5 and contains no arbitrary remote or service surface',()=>{
   const filename=path.join(import.meta.dirname,'Invoke-ControlExactRegression.ps1'),text=requireText(filename);
+  const supervisor=requireText(path.join(import.meta.dirname,'control-exact-regression-owner.mjs'));
   const command=`[void][scriptblock]::Create([IO.File]::ReadAllText('${filename.replaceAll("'","''")}'))`;
   const parsed=spawnSync('powershell.exe',['-NoProfile','-NonInteractive','-Command',command],{windowsHide:true,encoding:'utf8',timeout:10000});
-  assert.equal(parsed.status,0,parsed.stderr);assert.match(text,/RUNA-CONTROL\\Matthew/u);assert.match(text,/WaitForExit\(1020000\)/u);
-  assert.match(text,/EnvironmentVariables\.Clear\(\)/u);assert.doesNotMatch(text,/OPENAI|LMSTUDIO|RUNAAI_PROVIDER|M1_TASK_PG_URL/u);
-  assert.doesNotMatch(text,/\bssh\b|Invoke-Expression|Start-Service|Stop-Service|\/v1\/chat\/completions|--test-name-pattern/u);
+  assert.equal(parsed.status,0,parsed.stderr);assert.match(text,/RUNA-CONTROL\\Matthew/u);assert.match(text,/control-exact-regression-owner\.mjs/u);
+  assert.match(text,/GetEnvironmentVariables\('Process'\)/u);assert.match(text,/SetEnvironmentVariable/u);assert.match(text,/\$safeNames/u);
+  assert.match(text,/GetEnvironmentVariable\(\$name,'Process'\)/u);assert.doesNotMatch(text,/\$originalEnvironment\[\$name\]/u);
+  assert.doesNotMatch(text+supervisor,/OPENAI|LMSTUDIO|RUNAAI_PROVIDER|M1_TASK_PG_URL/u);
+  assert.doesNotMatch(text,/ReadToEndAsync|ReadToEnd\(|ProcessStartInfo|\.Kill\(/u);
+  assert.match(supervisor,/1_020_000/u);assert.match(supervisor,/taskkill\.exe/u);assert.match(supervisor,/stdio:\['ignore','pipe','pipe'\]/u);
+  assert.doesNotMatch(text+supervisor,/\bssh\b|Invoke-Expression|Start-Service|Stop-Service|\/v1\/chat\/completions|--test-name-pattern/u);
+});
+
+test('actual owner supervisor concurrently drains and fails closed on oversized stdout and stderr',async()=>{
+  const script=`for(let i=0;i<1024;i++){process.stdout.write('x'.repeat(1024));process.stderr.write('y'.repeat(1024))}setInterval(()=>{},1000)`;
+  const result=await runBoundedOwnerChild({file:process.execPath,args:['-e',script],cwd:process.cwd(),environment:ownerSafeEnvironment(),
+    maximumMs:10_000,maximumOutputBytes:65_536});
+  assert.equal(result.passed,false);assert.equal(result.errorCode,'m1-control-regression-owner-output-cap');
+  assert.equal(result.stdout.length,65_536);assert.equal(result.stderr.length,65_536);assert.equal(result.stopProof?.tree,true);
+});
+
+test('actual owner supervisor timeout stops its complete Windows child tree',async()=>{
+  const script=`const{spawn}=require('node:child_process');const c=spawn(process.execPath,['-e','setInterval(()=>{},1000)'],{stdio:'ignore'});console.log(c.pid);setInterval(()=>{},1000)`;
+  const result=await runBoundedOwnerChild({file:process.execPath,args:['-e',script],cwd:process.cwd(),environment:ownerSafeEnvironment(),maximumMs:1000});
+  assert.equal(result.passed,false);assert.equal(result.errorCode,'m1-control-regression-owner-timeout');assert.equal(result.stopProof?.tree,true);
+  const descendant=Number(result.stdout.trim());assert.ok(Number.isSafeInteger(descendant)&&descendant>0);
+  await new Promise(resolve=>setTimeout(resolve,200));assert.throws(()=>process.kill(descendant,0));
 });
 
 function requireText(filename){return spawnSync(process.execPath,['-e',`process.stdout.write(require('fs').readFileSync(${JSON.stringify(filename)},'utf8'))`],

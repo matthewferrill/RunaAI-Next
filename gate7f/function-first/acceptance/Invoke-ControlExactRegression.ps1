@@ -24,36 +24,21 @@ $node=Join-Path $fixedRelease 'runtime\node.exe'
 if(-not(Test-Path -LiteralPath $node -PathType Leaf)-or(Get-FileHash -LiteralPath $node -Algorithm SHA256).Hash.ToLowerInvariant()-cne$fixedNodeSha){throw'm1-control-regression-node-pin'}
 $core=Join-Path $root 'gate7f\function-first\acceptance\control-exact-regression.mjs'
 if(-not(Test-Path -LiteralPath $core -PathType Leaf)){throw'm1-control-regression-core'}
-$arguments=@($core,'--owned-root',$root,'--manifest',$manifest,'--manifest-sha256',$ExpectedManifestSha256)
+$supervisor=Join-Path $root 'gate7f\function-first\acceptance\control-exact-regression-owner.mjs'
+if(-not(Test-Path -LiteralPath $supervisor -PathType Leaf)){throw'm1-control-regression-owner-supervisor'}
+$arguments=@($supervisor,'--owned-root',$root,'--manifest',$manifest,'--manifest-sha256',$ExpectedManifestSha256)
 if($arguments.Where({$_-match'"'}).Count-ne0){throw'm1-control-regression-argument-character'}
-$start=[Diagnostics.ProcessStartInfo]::new()
-$start.FileName=$node
-$start.Arguments=($arguments|ForEach-Object{'"'+$_+'"'})-join' '
-$start.UseShellExecute=$false
-$start.CreateNoWindow=$true
-$start.RedirectStandardOutput=$true
-$start.RedirectStandardError=$true
-$safe=@{}
-foreach($name in @('SystemRoot','WINDIR','ComSpec','PATH','PATHEXT','PSModulePath','PROCESSOR_ARCHITECTURE','NUMBER_OF_PROCESSORS','TEMP','TMP')){
-  $value=[Environment]::GetEnvironmentVariable($name,'Process')
-  if($value){$safe[$name]=$value}
-}
-$start.EnvironmentVariables.Clear()
-foreach($item in $safe.GetEnumerator()){$start.EnvironmentVariables.Add($item.Key,$item.Value)}
-$child=[Diagnostics.Process]::new()
-$child.StartInfo=$start
+$originalEnvironment=[Environment]::GetEnvironmentVariables('Process')
+$safeNames=@('SystemRoot','WINDIR','ComSpec','PATH','PATHEXT','PSModulePath','PROCESSOR_ARCHITECTURE','NUMBER_OF_PROCESSORS','TEMP','TMP')
+$safeEnvironment=@{}
+foreach($name in $safeNames){$value=[Environment]::GetEnvironmentVariable($name,'Process');if($null-ne$value){$safeEnvironment[$name]=$value}}
 try{
-  if(-not$child.Start()){throw'm1-control-regression-start'}
-  $stdout=$child.StandardOutput.ReadToEndAsync()
-  $stderr=$child.StandardError.ReadToEndAsync()
-  if(-not$child.WaitForExit(1020000)){
-    $child.Kill()
-    if(-not$child.WaitForExit(5000)){throw'm1-control-regression-stop-unconfirmed'}
-    throw'm1-control-regression-owner-timeout'
-  }
-  $out=$stdout.GetAwaiter().GetResult()
-  $err=$stderr.GetAwaiter().GetResult()
-  if($out.Length-gt65536-or$err.Length-gt65536){throw'm1-control-regression-owner-output-cap'}
-  if($out){Write-Output $out.Trim()}
-  if($child.ExitCode-ne0){throw'm1-control-regression-run-failed'}
-}finally{$child.Dispose()}
+  foreach($name in @([Environment]::GetEnvironmentVariables('Process').Keys)){[Environment]::SetEnvironmentVariable([string]$name,$null,'Process')}
+  foreach($entry in $safeEnvironment.GetEnumerator()){[Environment]::SetEnvironmentVariable([string]$entry.Key,[string]$entry.Value,'Process')}
+  & $node @arguments
+  $childExitCode=$LASTEXITCODE
+}finally{
+  foreach($name in @([Environment]::GetEnvironmentVariables('Process').Keys)){[Environment]::SetEnvironmentVariable([string]$name,$null,'Process')}
+  foreach($entry in $originalEnvironment.GetEnumerator()){[Environment]::SetEnvironmentVariable([string]$entry.Key,[string]$entry.Value,'Process')}
+}
+if($childExitCode-ne0){throw'm1-control-regression-run-failed'}

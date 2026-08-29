@@ -29,6 +29,11 @@ test('rejects nonzero and insufficient counter evidence',()=>{const value=closur
   const short=closure();short.entries[1].samples.pop();assert.throws(()=>check(short));});
 test('rejects stale closure and stale member observation',()=>{assert.throws(()=>validateManagedCallerClosure(closure(),{transitionId,now:now+5001}));
   const value=closure();value.entries[3].observedAt='2026-08-28T23:59:00.000Z';assert.throws(()=>check(value));});
+test('rejects stale first and middle counter samples even when the latest sample is fresh',()=>{const value=closure();
+  value.entries[0].samples=[{observedAt:'2026-08-29T00:00:02.000Z',numRequests:0},{observedAt:'2026-08-29T00:00:03.000Z',numRequests:0},
+    {observedAt:'2026-08-29T00:00:04.500Z',numRequests:0}];
+  assert.throws(()=>validateManagedCallerClosure(value,{transitionId,now,maximumAgeMs:1000}),/observation-binding/u);
+});
 test('rejects pending effects and native connections',()=>{const pending=closure();pending.pendingEffect=id(9);assert.throws(()=>check(pending));
   const connected=closure();connected.entries[3].established=1;assert.throws(()=>check(connected));});
 test('rejects changed or unavailable reranker',()=>{const changed=closure();changed.entries[4].currentSha256=sha(34);assert.throws(()=>check(changed));

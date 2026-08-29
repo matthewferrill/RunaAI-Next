@@ -29,7 +29,8 @@ function reduce(state,event,binding){
       &&event.writerId===next.pendingWriter&&event.transitionId===binding.transitionId&&ID.test(event.operationId)
       &&HASH.test(event.requestSha256)&&event.descriptorSha256===binding.descriptorSha256
       &&event.packageSha256===binding.packageSha256&&time(event.deadline)&&next.pendingDispatch===null
-      &&!next.dispatches[event.operationId],'dispatch-intent');
+      &&!next.dispatches[event.operationId]
+      &&!Object.values(next.dispatches).some(dispatch=>dispatch.writerId===event.writerId),'dispatch-intent');
     next.pendingDispatch=event.operationId;next.dispatches[event.operationId]={status:'pending',writerId:event.writerId,
       requestSha256:event.requestSha256,descriptorSha256:event.descriptorSha256,packageSha256:event.packageSha256,deadline:event.deadline};
   }else if(event.type==='dispatch-result'){
@@ -51,7 +52,7 @@ function reduce(state,event,binding){
     need(exact(event,'type,effectId,transitionId,kind,inputSha256,recordedAt')&&ID.test(event.effectId)
       &&event.transitionId===binding.transitionId&&KINDS.includes(event.kind)&&HASH.test(event.inputSha256)&&time(event.recordedAt)
       &&next.pendingWriter===null&&next.pendingDispatch===null&&next.pendingEffect===null
-      &&!next.effects.some(effect=>effect.effectId===event.effectId),'effect-intent');
+      &&!next.effects.some(effect=>effect.effectId===event.effectId||effect.kind===event.kind),'effect-intent');
     next.pendingEffect=event.effectId;next.effects.push({effectId:event.effectId,kind:event.kind,inputSha256:event.inputSha256,status:'pending',recordedAt:event.recordedAt});
   }else if(event.type==='effect-result'){
     need(exact(event,'type,effectId,transitionId,kind,inputSha256,outcome,receiptSha256,recordedAt')

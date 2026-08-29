@@ -24,7 +24,8 @@ function closure(transitionId){const entry=(callerId,endpoint,intent=2,receipt=3
     {callerId:'legacy-reranker-8412',endpoint:'192.168.50.165:8412',authorityId:'legacy-reranker-observer-v1',intentId:id(30),terminalReceiptSha256:sha(31),
       observationSha256:sha(32),observedAt:'2026-08-29T00:00:04.500Z',available:true,expectedSha256:sha(33),currentSha256:sha(33)}],privateValuesIncluded:false};}
 async function fixture(){const root=await mkdtemp(path.join(tmpdir(),'m1-two-host-')),directory=path.join(root,'journal');await mkdir(directory);
-  const value=syntheticAssembly(),manifest=(await pack()).manifest,binding={schemaVersion:'runaai-owner-deployment-binding/v1',transitionId:value.descriptor.transitionId,
+  const original=syntheticAssembly(),descriptor=structuredClone(original.descriptor);descriptor.activationPermitted=true;descriptor.blockers=[];
+  const value={...original,descriptor,descriptorSha256:hash(descriptor)},manifest=(await pack()).manifest,binding={schemaVersion:'runaai-owner-deployment-binding/v1',transitionId:value.descriptor.transitionId,
     descriptorSha256:value.descriptorSha256,packageSha256:hash(manifest)},journal=new OwnerDeploymentJournal({directory,binding,assertOwnerPrivate:async()=>{}});
   const state={calls:[],app:'predecessor',sequence:100};
   const qualification={observe:async()=>({schemaVersion:'runaai-owner-qualification-receipt/v1',transitionId:value.descriptor.transitionId,descriptorSha256:value.descriptorSha256,
@@ -32,6 +33,8 @@ async function fixture(){const root=await mkdtemp(path.join(tmpdir(),'m1-two-hos
     observedAt:'2026-08-29T00:00:04.000Z',expiresAt:'2026-08-29T00:00:08.000Z',evidenceSha256:sha(40),privateValuesIncluded:false})};
   const homeReceipt=()=>({schemaVersion:'runaai-owner-home-readiness-receipt/v1',transitionId:value.descriptor.transitionId,descriptorSha256:value.descriptorSha256,
     installationSha256:value.descriptor.home.installationSha256,profileSha256:value.descriptor.home.profileSha256,observedAt:'2026-08-29T00:00:04.000Z',
+    taskIdentitySha256:sha(42),processIdentitySha256:sha(43),nativeObservationSha256:sha(44),mtlsEnrollmentId:value.descriptor.home.enrollmentId,
+    tlsOperatorDescriptorSha256:value.descriptor.home.tlsOperatorDescriptorSha256,
     expiresAt:'2026-08-29T00:00:08.000Z',evidenceSha256:sha(41),taskProcessConfirmed:true,nativeConfirmed:true,mtlsConfirmed:true,privateValuesIncluded:false});
   const managedCallers={close:async()=>{state.calls.push('closure.close');return closure(value.descriptor.transitionId);},
     assertFresh:async()=>{state.calls.push('closure.fresh');return closure(value.descriptor.transitionId);},
@@ -47,7 +50,11 @@ async function fixture(){const root=await mkdtemp(path.join(tmpdir(),'m1-two-hos
       configSha256:phase==='candidate-caddy'?sha(60):sha(61)}),publish:async({phase,plan})=>{state.calls.push('caddy.'+phase);return {schemaVersion:'runaai-owner-caddy-publication/v1',
       transitionId:value.descriptor.transitionId,phase,mutationId:id(++state.sequence),fromFileSha256:sha(62),toFileSha256:plan.fileSha256,fromConfigSha256:sha(63),
       toConfigSha256:plan.configSha256,expectedEtag:'"synthetic"',observedEtag:'"synthetic"',terminalReceiptSha256:sha(64),evidenceSha256:sha(65),
-      observedAt:'2026-08-29T00:00:05.000Z',pendingMutation:null,privateValuesIncluded:false};},restoreInitialClosed:async()=>{state.calls.push('caddy.restore');return {
+      observedAt:'2026-08-29T00:00:05.000Z',pendingMutation:null,privateValuesIncluded:false};},
+    confirmCandidateClosed:async({plan,forwardReceiptSha256})=>{state.calls.push('caddy.health');return {schemaVersion:'runaai-owner-caddy-health-observation/v1',
+      transitionId:value.descriptor.transitionId,phase:'candidate-caddy',forwardReceiptSha256,fileSha256:plan.fileSha256,configSha256:plan.configSha256,
+      observedEtag:'"synthetic"',observedAt:'2026-08-29T00:00:05.000Z',evidenceSha256:sha(66),healthAllowlistConfirmed:true,
+      pendingMutation:null,privateValuesIncluded:false};},restoreInitialClosed:async()=>{state.calls.push('caddy.restore');return {
       schemaVersion:'runaai-owner-caddy-restore/v1',transitionId:value.descriptor.transitionId,passed:true,currentFileSha256:value.descriptor.caddy.initialClosedSha256,pendingMutation:null};}};
   const application={observe:async({expected})=>{state.calls.push('app.observe.'+expected);const target=expected==='predecessor'?value.descriptor.predecessor:value.descriptor.application;
       return {schemaVersion:'runaai-control-application-observation/v1',releaseId:target.releaseId,commit:expected==='predecessor'?target.commit:target.sourceCommit,
@@ -63,8 +70,12 @@ async function fixture(){const root=await mkdtemp(path.join(tmpdir(),'m1-two-hos
       packageSha256:hash(manifest),status:'closed-deployment-complete',resultSha256:sha(83),recordedAt:'2026-08-29T00:00:05.000Z'});
     await journal.record({type:'writer-result',writerId,transitionId:value.descriptor.transitionId,outcome:'succeeded',recordedAt:'2026-08-29T00:00:05.000Z'});
     state.app='successor';return {status:'closed-deployment-complete'};}};
+  const activationAuthority={observe:async()=>({schemaVersion:'runaai-owner-activation-authority/v1',transitionId:value.descriptor.transitionId,
+    descriptorSha256:value.descriptorSha256,packageSha256:hash(manifest),sourceCommit:value.descriptor.application.sourceCommit,
+    runtimeSealSha256:value.descriptor.qualification.runtimeSealSha256,acceptanceGradesSha256:value.descriptor.qualification.acceptanceGradesSha256,
+    observedAt:'2026-08-29T00:00:04.000Z',expiresAt:'2026-08-29T00:00:08.000Z',evidenceSha256:sha(96),activationPermitted:true,privateValuesIncluded:false})};
   let next=90;const options={descriptor:value.descriptor,manifest,journal,qualification,managedCallers,home,control,application,closedAdapter,
-    allowSyntheticFixture:true,clock:()=>clockValue,randomId:()=>id(next++)};
+    activationAuthority,clock:()=>clockValue,randomId:()=>id(next++)};
   return {root,value,manifest,journal,state,options,coordinator:createTwoHostDeploymentCoordinator(options),async close(){await rm(root,{recursive:true,force:true});}};}
 
 test('one-effect continuation records exact closure home caddy app and final order',async()=>{const f=await fixture();try{
@@ -73,6 +84,8 @@ test('one-effect continuation records exact closure home caddy app and final ord
   assert.deepEqual(results.slice(0,5).map(value=>value.kind),['managed-closure','home-apply','candidate-caddy','application-observed','final-caddy']);
   assert.equal(results[5].productionPromoted,true);assert.ok(f.state.calls.indexOf('closure.close')<f.state.calls.indexOf('home.apply'));
   assert.ok(f.state.calls.indexOf('caddy.candidate-caddy')<f.state.calls.indexOf('app.deploy'));
+  assert.ok(f.state.calls.indexOf('caddy.candidate-caddy')<f.state.calls.indexOf('caddy.health'));
+  assert.ok(f.state.calls.indexOf('caddy.health')<f.state.calls.indexOf('app.deploy'));
   assert.ok(f.state.calls.indexOf('app.observe.successor')<f.state.calls.indexOf('caddy.final-caddy'));
 }finally{await f.close();}});
 
@@ -86,6 +99,8 @@ test('Next-only closure stays unknown and cannot retry or rollback',async()=>{co
 test('owner command return without fresh Home confirmation stays unknown before Caddy or app',async()=>{const f=await fixture();try{
   await f.coordinator.advance();f.options.home.confirm=async()=>({ready:true});const coordinator=createTwoHostDeploymentCoordinator(f.options),result=await coordinator.advance();
   assert.equal(result.status,'needs-reconciliation');assert.equal(f.state.calls.includes('caddy.candidate-caddy'),false);assert.equal(f.state.calls.includes('app.deploy'),false);
+  assert.equal((await coordinator.advance()).status,'needs-reconciliation');assert.equal((await coordinator.rollback()).status,'needs-reconciliation');
+  assert.equal(f.state.calls.filter(value=>value==='home.apply').length,1);
 }finally{await f.close();}});
 
 test('successor observation is mandatory before final publication',async()=>{const f=await fixture();try{
@@ -105,8 +120,35 @@ test('successor observation is mandatory before final publication',async()=>{con
 }finally{await f.close();}});
 
 test('diagnostic descriptor cannot construct a live coordinator without a future activation authority',async()=>{const f=await fixture();try{
-  const options={...f.options,allowSyntheticFixture:false,activationAuthority:{observe:async()=>({activationPermitted:true})}};
+  const descriptor=structuredClone(f.options.descriptor);descriptor.activationPermitted=false;descriptor.blockers=['diagnostic-not-qualified'];
+  const journal={binding:{...f.journal.binding,descriptorSha256:hash(descriptor)},load:f.journal.load.bind(f.journal),record:f.journal.record.bind(f.journal)};
+  const options={...f.options,descriptor,journal,activationAuthority:undefined,allowSyntheticFixture:true};
   assert.throws(()=>createTwoHostDeploymentCoordinator(options),/activation-blocked/u);
+}finally{await f.close();}});
+
+test('stale activation authority stops before journal or adapter work',async()=>{const f=await fixture();try{
+  const valid=f.options.activationAuthority.observe;f.options.activationAuthority={observe:async()=>({...await valid(),expiresAt:'2026-08-29T00:00:05.000Z'})};
+  await assert.rejects(()=>createTwoHostDeploymentCoordinator(f.options).advance(),/activation-authority/u);
+  assert.equal((await f.journal.load()).revision,0);assert.deepEqual(f.state.calls,[]);
+}finally{await f.close();}});
+
+test('candidate Caddy health is independently required and recovery never republishes or redeploys',async()=>{const f=await fixture();try{
+  await f.coordinator.advance();await f.coordinator.advance();await f.coordinator.advance();const valid=f.options.control.confirmCandidateClosed;
+  f.options.control.confirmCandidateClosed=async value=>({...await valid(value),healthAllowlistConfirmed:false});
+  let coordinator=createTwoHostDeploymentCoordinator(f.options),result=await coordinator.advance();assert.equal(result.status,'needs-reconciliation');
+  assert.equal(result.kind,'candidate-caddy-health');assert.equal(f.state.calls.includes('app.deploy'),false);
+  f.options.control.confirmCandidateClosed=valid;coordinator=createTwoHostDeploymentCoordinator(f.options);result=await coordinator.advance();
+  assert.equal(result.kind,'application-observed');assert.equal(f.state.calls.filter(value=>value==='caddy.candidate-caddy').length,1);
+  assert.equal(f.state.calls.filter(value=>value==='app.deploy').length,1);
+}finally{await f.close();}});
+
+test('candidate Caddy health failure permits only exact closed rollback before caller reopening',async()=>{const f=await fixture();try{
+  await f.coordinator.advance();await f.coordinator.advance();await f.coordinator.advance();const valid=f.options.control.confirmCandidateClosed;
+  f.options.control.confirmCandidateClosed=async value=>({...await valid(value),healthAllowlistConfirmed:false});
+  assert.equal((await createTwoHostDeploymentCoordinator(f.options).advance()).status,'needs-reconciliation');
+  const results=[];for(let index=0;index<4;index++)results.push(await createTwoHostDeploymentCoordinator(f.options).rollback());
+  assert.deepEqual(results.map(value=>value.kind??value.status),['caddy-restore','home-restore','caller-restore','restored']);
+  assert.equal(f.state.calls.includes('app.deploy'),false);
 }finally{await f.close();}});
 
 test('activation authority binds exact future descriptor package and qualification',async()=>{const f=await fixture();try{

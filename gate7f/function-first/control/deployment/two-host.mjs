@@ -36,6 +36,17 @@ function caddyReceipt(value,descriptor,plan,clock){
     &&observedNow-Date.parse(value.observedAt)>=0&&observedNow-Date.parse(value.observedAt)<=5000
     &&value.pendingMutation===null&&value.privateValuesIncluded===false,'caddy-receipt');return structuredClone(value);
 }
+function caddyHealth(value,descriptor,plan,forwardReceiptSha256,clock){
+  const observedNow=clock();
+  need(exact(value,'schemaVersion,transitionId,phase,forwardReceiptSha256,fileSha256,configSha256,observedEtag,observedAt,evidenceSha256,healthAllowlistConfirmed,pendingMutation,privateValuesIncluded')
+    &&value.schemaVersion==='runaai-owner-caddy-health-observation/v1'&&value.transitionId===descriptor.transitionId
+    &&value.phase==='candidate-caddy'&&value.forwardReceiptSha256===forwardReceiptSha256&&HASH.test(forwardReceiptSha256)
+    &&value.fileSha256===plan.fileSha256&&value.configSha256===plan.configSha256
+    &&typeof value.observedEtag==='string'&&value.observedEtag.length>0&&value.observedEtag.length<=256&&!/[\r\n]/u.test(value.observedEtag)
+    &&time(value.observedAt)&&observedNow-Date.parse(value.observedAt)>=0&&observedNow-Date.parse(value.observedAt)<=5000
+    &&HASH.test(value.evidenceSha256)&&value.healthAllowlistConfirmed===true&&value.pendingMutation===null
+    &&value.privateValuesIncluded===false,'caddy-health');return structuredClone(value);
+}
 function nativeResult(value,transitionId){
   need(value?.schemaVersion==='runaai-native-settings-transition/v1'&&value.transactionId===transitionId&&value.passed===true
     &&value.admissionOpened===false&&value.productionPromoted===false&&value.powerRestored===false,'home-apply');return structuredClone(value);
@@ -64,25 +75,26 @@ function activationReceipt(value,descriptor,manifest,clock){
  * journal and never loops over effects, retries unknown work or opens admission
  * from an observation alone. */
 export function createTwoHostDeploymentCoordinator({descriptor,manifest,journal,qualification,managedCallers,home,control,application,
-  closedAdapter,activationAuthority,allowSyntheticFixture=false,clock=Date.now,randomId=newId}){
+  closedAdapter,activationAuthority,clock=Date.now,randomId=newId}){
   need(descriptor?.schemaVersion==='runaai-m1-deployment-assembly/v1'&&manifest?.schemaVersion==='runaai-m1-supervised-companion/v1'
     &&journal?.binding?.transitionId===descriptor.transitionId&&journal.binding.descriptorSha256===hash(descriptor)
     &&journal.binding.packageSha256===hash(manifest)&&typeof journal.load==='function'&&typeof journal.record==='function'
     &&typeof qualification?.observe==='function'&&typeof managedCallers?.close==='function'&&typeof managedCallers?.assertFresh==='function'
     &&typeof managedCallers?.restore==='function'&&typeof home?.apply==='function'&&typeof home?.confirm==='function'&&typeof home?.restore==='function'
-    &&typeof control?.prepare==='function'&&typeof control?.publish==='function'&&typeof control?.restoreInitialClosed==='function'
+    &&typeof control?.prepare==='function'&&typeof control?.publish==='function'&&typeof control?.confirmCandidateClosed==='function'
+    &&typeof control?.restoreInitialClosed==='function'
     &&typeof application?.observe==='function'&&typeof application?.restore==='function'&&typeof closedAdapter?.execute==='function'
-    &&typeof allowSyntheticFixture==='boolean'&&typeof clock==='function'&&typeof randomId==='function','constructor');
-  if(allowSyntheticFixture)need(descriptor.activationPermitted===false,'synthetic-descriptor');
-  else need(descriptor.activationPermitted===true&&Array.isArray(descriptor.blockers)&&descriptor.blockers.length===0
+    &&typeof clock==='function'&&typeof randomId==='function','constructor');
+  need(descriptor.activationPermitted===true&&Array.isArray(descriptor.blockers)&&descriptor.blockers.length===0
     &&typeof activationAuthority?.observe==='function','activation-blocked');
   const transitionId=descriptor.transitionId;
   const effect=(state,kind)=>state.effects.find(item=>item.kind===kind);
+  const reconciliation=kind=>({status:'needs-reconciliation',kind,automaticRetryPermitted:false,
+    automaticRollbackPermitted:false,productionPromoted:false});
   function blocked(state){return state.pendingWriter!==null||state.pendingDispatch!==null||state.pendingEffect!==null
     ||state.effects.some(item=>item.status==='unknown');}
   async function qualified(){return validateOwnerQualificationReceipt(await qualification.observe(descriptor),descriptor,clock);}
-  async function authorized(){if(allowSyntheticFixture)return {synthetic:true};
-    return activationReceipt(await activationAuthority.observe({descriptor,manifest}),descriptor,manifest,clock);}
+  async function authorized(){return activationReceipt(await activationAuthority.observe({descriptor,manifest}),descriptor,manifest,clock);}
   async function perform(kind,input,action,validate){
     const effectId=randomId();need(ID.test(effectId),'effect-id');const inputSha256=hash(input);
     await journal.record({type:'effect-intent',effectId,transitionId,kind,inputSha256,recordedAt:nowIso(clock)});
@@ -98,6 +110,12 @@ export function createTwoHostDeploymentCoordinator({descriptor,manifest,journal,
   }
   async function freshClosure(state){const forwardEffect=effect(state,'managed-closure');need(forwardEffect?.status==='succeeded','closure-missing');
     return validateManagedCallerClosure(await managedCallers.assertFresh({transitionId,forwardReceiptSha256:forwardEffect.receiptSha256}),{transitionId,now:clock()});}
+  async function freshCandidateCaddy(state){const forwardEffect=effect(state,'candidate-caddy');need(forwardEffect?.status==='succeeded','candidate-caddy-missing');
+    const plan=caddyPlan(await control.prepare({phase:'candidate-caddy',descriptor}),descriptor,'candidate-caddy');
+    need(hash(plan)===forwardEffect.inputSha256,'candidate-caddy-plan-drift');
+    return caddyHealth(await control.confirmCandidateClosed({transitionId,descriptor,plan,forwardReceiptSha256:forwardEffect.receiptSha256}),
+      descriptor,plan,forwardEffect.receiptSha256,clock);
+  }
   return Object.freeze({
     async advance(){
       await authorized();await qualified();let state=await journal.load();
@@ -105,16 +123,18 @@ export function createTwoHostDeploymentCoordinator({descriptor,manifest,journal,
       for(const item of state.effects)if(!['succeeded'].includes(item.status))return {status:'blocked',code:'terminal-effect-not-successful',kind:item.kind,productionPromoted:false};
       if(!effect(state,'managed-closure'))return perform('managed-closure',{transitionId,descriptorSha256:hash(descriptor)},
         ()=>managedCallers.close({transitionId,descriptor}),value=>validateManagedCallerClosure(value,{transitionId,now:clock()}).receipt);
-      await freshClosure(state);
+      try{await freshClosure(state);}catch{return reconciliation('managed-closure-confirmation');}
       if(!effect(state,'home-apply'))return perform('home-apply',{transitionId,closureReceiptSha256:effect(state,'managed-closure').receiptSha256},
         async()=>{const result=nativeResult(await home.apply({transitionId,descriptor}),transitionId);
           validateOwnerHomeReceipt(await home.confirm({transitionId,descriptor,result}),descriptor,clock);return result;},value=>nativeResult(value,transitionId));
-      validateOwnerHomeReceipt(await home.confirm({transitionId,descriptor,receiptSha256:effect(state,'home-apply').receiptSha256}),descriptor,clock);
+      try{validateOwnerHomeReceipt(await home.confirm({transitionId,descriptor,receiptSha256:effect(state,'home-apply').receiptSha256}),descriptor,clock);}
+      catch{return reconciliation('home-confirmation');}
       if(!effect(state,'candidate-caddy')){
         const plan=caddyPlan(await control.prepare({phase:'candidate-caddy',descriptor}),descriptor,'candidate-caddy');
         return perform('candidate-caddy',plan,()=>control.publish({phase:'candidate-caddy',descriptor,plan}),value=>caddyReceipt(value,descriptor,plan,clock));
       }
       if(!state.applicationObservation){
+        try{await freshCandidateCaddy(state);}catch{return reconciliation('candidate-caddy-health');}
         try{
           const writers=Object.entries(state.writers).filter(([,value])=>value.status==='succeeded');
           if(!writers.length){
@@ -130,10 +150,10 @@ export function createTwoHostDeploymentCoordinator({descriptor,manifest,journal,
           await journal.record({type:'application-observed',transitionId,writerId,operationId,releaseId:observation.releaseId,commit:observation.commit,
             artifactDigest:observation.artifactDigest,observationSha256:observation.evidenceSha256,observedAt:observation.observedAt});
           return {status:'advanced',kind:'application-observed',operationId,observationSha256:observation.evidenceSha256,productionPromoted:false};
-        }catch{return {status:'needs-reconciliation',kind:'application-observed',automaticRetryPermitted:false,
-          automaticRollbackPermitted:false,productionPromoted:false};}
+        }catch{return reconciliation('application-observed');}
       }
       if(!effect(state,'final-caddy')){
+        try{await freshCandidateCaddy(state);}catch{return reconciliation('candidate-caddy-health');}
         const plan=caddyPlan(await control.prepare({phase:'final-caddy',descriptor}),descriptor,'final-caddy');
         return perform('final-caddy',plan,()=>control.publish({phase:'final-caddy',descriptor,plan}),value=>caddyReceipt(value,descriptor,plan,clock));
       }
@@ -177,4 +197,5 @@ export function createTwoHostDeploymentCoordinator({descriptor,manifest,journal,
 
 export const validateControlApplicationObservation=applicationObservation;
 export const validateOwnerCaddyPublication=caddyReceipt;
+export const validateOwnerCaddyHealthObservation=caddyHealth;
 export const validateOwnerActivationAuthority=activationReceipt;

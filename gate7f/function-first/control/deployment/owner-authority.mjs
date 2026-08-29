@@ -23,10 +23,13 @@ function qualificationReceipt(value,descriptor,clock){
 }
 function homeReceipt(value,descriptor,clock){
   const observedNow=clock();
-  need(exact(value,'schemaVersion,transitionId,descriptorSha256,installationSha256,profileSha256,observedAt,expiresAt,evidenceSha256,taskProcessConfirmed,nativeConfirmed,mtlsConfirmed,privateValuesIncluded')
+  need(exact(value,'schemaVersion,transitionId,descriptorSha256,installationSha256,profileSha256,taskIdentitySha256,processIdentitySha256,nativeObservationSha256,mtlsEnrollmentId,tlsOperatorDescriptorSha256,observedAt,expiresAt,evidenceSha256,taskProcessConfirmed,nativeConfirmed,mtlsConfirmed,privateValuesIncluded')
     &&value.schemaVersion==='runaai-owner-home-readiness-receipt/v1'&&value.transitionId===descriptor.transitionId
     &&value.descriptorSha256===hash(descriptor)&&value.installationSha256===descriptor.home.installationSha256
-    &&value.profileSha256===descriptor.home.profileSha256&&HASH.test(value.evidenceSha256)
+    &&value.profileSha256===descriptor.home.profileSha256&&HASH.test(value.taskIdentitySha256)
+    &&HASH.test(value.processIdentitySha256)&&HASH.test(value.nativeObservationSha256)
+    &&value.mtlsEnrollmentId===descriptor.home.enrollmentId
+    &&value.tlsOperatorDescriptorSha256===descriptor.home.tlsOperatorDescriptorSha256&&HASH.test(value.evidenceSha256)
     &&Number.isFinite(Date.parse(value.observedAt))&&Number.isFinite(Date.parse(value.expiresAt))
     &&observedNow>=Date.parse(value.observedAt)&&observedNow<Date.parse(value.expiresAt)&&Date.parse(value.expiresAt)-Date.parse(value.observedAt)<=5000
     &&value.taskProcessConfirmed===true&&value.nativeConfirmed===true&&value.mtlsConfirmed===true

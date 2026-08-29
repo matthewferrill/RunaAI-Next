@@ -6,7 +6,7 @@ import {tmpdir} from 'node:os';
 import {syntheticAssembly} from './deployment.fixtures.mjs';
 import {buildSupervisedCompanion} from './closed-adapter.mjs';
 import {OwnerDeploymentJournal} from './owner-journal.mjs';
-import {createOwnerDeploymentAuthority} from './owner-authority.mjs';
+import {createOwnerDeploymentAuthority,validateOwnerHomeReceipt} from './owner-authority.mjs';
 import {configDigest,digest} from '../quiescence/coordinator.mjs';
 import {APPLICATION,hash} from './assembly.mjs';
 
@@ -40,6 +40,8 @@ async function fixture(){const root=await mkdtemp(path.join(tmpdir(),'m1-owner-a
     evidenceSha256:sha(80),privateValuesIncluded:false})};
   const home={observe:async()=>({schemaVersion:'runaai-owner-home-readiness-receipt/v1',transitionId:value.descriptor.transitionId,
     descriptorSha256:value.descriptorSha256,installationSha256:value.descriptor.home.installationSha256,profileSha256:value.descriptor.home.profileSha256,
+    taskIdentitySha256:sha(82),processIdentitySha256:sha(83),nativeObservationSha256:sha(84),mtlsEnrollmentId:value.descriptor.home.enrollmentId,
+    tlsOperatorDescriptorSha256:value.descriptor.home.tlsOperatorDescriptorSha256,
     observedAt:'2026-08-29T00:00:01.000Z',expiresAt:'2026-08-29T00:00:05.000Z',evidenceSha256:sha(81),taskProcessConfirmed:true,
     nativeConfirmed:true,mtlsConfirmed:true,privateValuesIncluded:false})};
   const options={descriptor:value.descriptor,manifest:pack.manifest,journal,quiescenceJournal:{load:async()=>quiescence(value)},
@@ -84,3 +86,13 @@ test('stale or boolean qualification and Home claims never authorize',async()=>{
   const h=await fixture();try{h.options.home.observe=async()=>({...await h.options.qualification.observe(),schemaVersion:'runaai-owner-home-readiness-receipt/v1'});
     const authority=createOwnerDeploymentAuthority(h.options);await assert.rejects(authority.withExclusiveClosedPhase(h.value.descriptor,()=>authority.assertFreshHomeReady()),/home/u);
   }finally{await h.close();}});
+
+test('Home readiness requires exact task process native and mTLS bindings, not confirmation booleans',async()=>{const f=await fixture();try{
+  const valid=await f.options.home.observe();
+  for(const key of ['taskIdentitySha256','processIdentitySha256','nativeObservationSha256','mtlsEnrollmentId','tlsOperatorDescriptorSha256']){
+    const value=structuredClone(valid);delete value[key];assert.throws(()=>validateOwnerHomeReceipt(value,f.value.descriptor,()=>clockValue),/home/u,key);
+  }
+  assert.throws(()=>validateOwnerHomeReceipt({...valid,mtlsEnrollmentId:'foreign-enrollment'},f.value.descriptor,()=>clockValue),/home/u);
+  assert.throws(()=>validateOwnerHomeReceipt({schemaVersion:valid.schemaVersion,transitionId:valid.transitionId,
+    taskProcessConfirmed:true,nativeConfirmed:true,mtlsConfirmed:true},f.value.descriptor,()=>clockValue),/home/u);
+}finally{await f.close();}});

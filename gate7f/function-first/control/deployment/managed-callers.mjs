@@ -54,8 +54,8 @@ export function validateManagedCallerClosure(value,{transitionId,now=Date.now(),
     &&HASH.test(reranker.expectedSha256)&&reranker.currentSha256===reranker.expectedSha256,'reranker');
   const observed=Date.parse(value.observedAt);
   for(const entry of value.entries){
-    const latest=entry.samples?Date.parse(entry.samples.at(-1).observedAt):Date.parse(entry.observedAt);
-    need(latest<=observed&&observed-latest<=maximumAgeMs,'observation-binding');
+    const observations=entry.samples?entry.samples.map(sample=>Date.parse(sample.observedAt)):[Date.parse(entry.observedAt)];
+    need(observations.every(observation=>observation<=observed&&observed-observation<=maximumAgeMs),'observation-binding');
   }
   return Object.freeze({receipt:structuredClone(value),receiptSha256:hash(value)});
 }

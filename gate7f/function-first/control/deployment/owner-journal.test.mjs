@@ -42,6 +42,12 @@ test('foreign or stale dispatch bindings are denied',async()=>{const f=await fix
   await f.journal.record(dispatch());const result=dispatchResult();result.requestSha256=sha(99);await assert.rejects(()=>f.journal.record(result),/dispatch-result-binding/u);
 }finally{await rm(f.root,{recursive:true,force:true});}});
 
+test('one writer cannot publish a second dispatch after its first dispatch settles',async()=>{const f=await fixture();try{
+  await f.journal.record(writer());await f.journal.record(dispatch());await f.journal.record(dispatchResult());
+  await assert.rejects(()=>f.restart().record(dispatch(id(10),id(14))),/dispatch-intent/u);
+  const value=await f.restart().load();assert.equal(Object.keys(value.dispatches).length,1);assert.equal(value.pendingWriter,id(10));
+}finally{await rm(f.root,{recursive:true,force:true});}});
+
 test('create-only revision is the cross-process writer CAS',async()=>{const f=await fixture();try{
   const left=f.journal.record(writer(id(20))),right=f.restart().record(writer(id(21))),settled=await Promise.allSettled([left,right]);
   assert.equal(settled.filter(value=>value.status==='fulfilled').length,1);assert.equal(settled.filter(value=>value.status==='rejected').length,1);
@@ -55,6 +61,14 @@ test('generic effect is exact and unknown blocks every later writer or effect',a
   const value=await f.restart().load();assert.equal(value.pendingEffect,id(30));assert.equal(value.effects[0].status,'unknown');
   await assert.rejects(()=>f.journal.record(writer()));
   const next=structuredClone(intent);next.effectId=id(33);await assert.rejects(()=>f.journal.record(next));
+}finally{await rm(f.root,{recursive:true,force:true});}});
+
+test('one transition cannot record an ambiguous second effect of the same kind',async()=>{const f=await fixture();try{
+  const first={type:'effect-intent',effectId:id(40),transitionId:binding.transitionId,kind:'managed-closure',inputSha256:sha(41),recordedAt:at(1)};
+  await f.journal.record(first);await f.journal.record({type:'effect-result',effectId:first.effectId,transitionId:binding.transitionId,kind:first.kind,
+    inputSha256:first.inputSha256,outcome:'succeeded',receiptSha256:sha(42),recordedAt:at(2)});
+  await assert.rejects(()=>f.restart().record({...first,effectId:id(43),inputSha256:sha(44),recordedAt:at(3)}),/effect-intent/u);
+  assert.equal((await f.restart().load()).effects.length,1);
 }finally{await rm(f.root,{recursive:true,force:true});}});
 
 test('application observation requires the settled exact dispatch',async()=>{const f=await fixture();try{

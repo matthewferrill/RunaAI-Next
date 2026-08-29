@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { createServer } from "node:http";
 import { once } from "node:events";
 import { createHash } from "node:crypto";
-import { AcceptanceFaultController, createFaultActions, holdApplicationAcknowledgement } from "./fault-actions.mjs";
+import { AGENT05_POST_RECEIPT_HOLD_MS, AcceptanceFaultController, createFaultActions, holdApplicationAcknowledgement } from "./fault-actions.mjs";
 import { startApplicationFaultWorker } from "./fault-worker.mjs";
 import { MODEL_CASES } from "./cases.mjs";
 
@@ -40,11 +40,13 @@ test("provider fault truncates a real HTTP socket exactly once; no successful an
 
 test("fault arming rejects non-test identities and does not intercept another scope", async () => {
   const faults = new AcceptanceFaultController();
+  assert.equal(faults.nativeReceiptHoldMs, AGENT05_POST_RECEIPT_HOLD_MS);
   assert.throws(() => faults.armProviderResponseDrop({ participantId: "owner", projectId: "production" }), /synthetic-scope/u);
   faults.armProviderResponseDrop(scope);
   assert.equal(await faults.deliverProviderResponse({ item: { scope: { ...scope, projectId: "another-project" } } }), true);
   assert.equal(faults.providerFaultObserved(), false); faults.clear();
   assert.throws(() => new AcceptanceFaultController({ maximumHoldMs: 100000 }), /hold-budget/u);
+  assert.throws(() => new AcceptanceFaultController({ nativeReceiptHoldMs: AGENT05_POST_RECEIPT_HOLD_MS + 1 }), /native-hold-budget/u);
 });
 
 test("lost acknowledgement destroys the actual client socket after headers and preserves the exact retry body", async () => {
@@ -156,6 +158,62 @@ test("all five non-browser gap families have concrete action implementations", (
     assert.equal(typeof extension.actions[action.action], "function"); missingActions.delete(action.action);
   }
   assert.equal(missingActions.size, 0); extension.close();
+});
+
+test("Agent05 binds the authoritative cancellation time, releases once and introduces no later dispatch", async () => {
+  const observed = ledger(), calls = [], checkpoints = []; let releaseRun, releases = 0;
+  const pendingRun = new Promise(resolve => { releaseRun = resolve; });
+  const held = { requestId: "native-request", receiptId: "native-receipt", sourceSha256: "c".repeat(64),
+    runtimeStatus: "executed", heldAt: "2026-08-29T15:00:00.000Z", nativeCompletedBeforeHold: true };
+  const cancelled = { schemaVersion: "runa-m1-task/v1", status: "cancelled", taskId: "fixture-task",
+    participantId: scope.participantId, projectId: scope.projectId, updatedAt: "2026-08-29T15:00:01.125Z" };
+  const faults = { armProviderResponseDrop() {}, armNativeReceiptHold(value) { assert.deepEqual(value, scope); }, async waitNativeReceiptHeld() { return held; },
+    releaseNativeReceipt() { releases++; }, clear() {} };
+  const extension = createFaultActions({ async checkpoint(value) { checkpoints.push(value); } });
+  const client = { item: { id: "agent-05-cancel-drain", role: "agent" }, principalId: scope.participantId, projectId: scope.projectId,
+    task: { taskId: "fixture-task" }, grant: { grantId: "fixture-grant", revision: 1 }, id: () => "fixture-request",
+    ledger: observed, host: { faults }, async m1(operation) {
+      calls.push(operation); if (operation === "run.start") return pendingRun; if (operation === "task.cancel") return structuredClone(cancelled);
+      throw new Error("unexpected operation");
+    }, async recordState(value) { return value; } };
+  try {
+    await extension.actions["run.start"](client);
+    assert.deepEqual(await extension.actions["user.cancel-after-native-dispatch"](client), cancelled);
+    assert.equal(releases, 1); assert.deepEqual(calls, ["run.start", "task.cancel"]);
+    assert.equal(checkpoints.length, 1); assert.equal(checkpoints[0].stage, "in-flight");
+    assert.equal(checkpoints[0].cancellationAt, cancelled.updatedAt);
+    const records = observed.observation.evidence.filter(value => value.kind === "fault-cancel-after-native-dispatch");
+    assert.equal(records.length, 1); assert.equal(records[0].data.cancellationAt, cancelled.updatedAt);
+    assert.equal(records[0].data.held.receiptId, held.receiptId);
+    releaseRun({ status: "cancelled", receipts: [{ receiptId: held.receiptId }] });
+    assert.equal((await extension.actions["run.observe-drain"](client)).status, "cancelled");
+    assert.deepEqual(calls, ["run.start", "task.cancel"], "Checkpoint and drain must not dispatch another effect.");
+  } finally { releaseRun({ status: "cancelled" }); extension.close(); }
+});
+
+for (const scenario of ["checkpoint-failure", "invalid-cancel-result"]) test(`Agent05 always releases its held receipt after ${scenario}`, async () => {
+  const observed = ledger(), calls = []; let releases = 0, checkpointCalls = 0;
+  const held = { requestId: "native-request", receiptId: "native-receipt", sourceSha256: "c".repeat(64),
+    runtimeStatus: "executed", heldAt: "2026-08-29T15:10:00.000Z", nativeCompletedBeforeHold: true };
+  const faults = { armProviderResponseDrop() {}, armNativeReceiptHold() {}, async waitNativeReceiptHeld() { return held; }, releaseNativeReceipt() {
+    releases++; if (releases > 1) throw new Error("released twice");
+  }, clear() {} };
+  const extension = createFaultActions({ async checkpoint() { checkpointCalls++; throw new Error("synthetic-checkpoint-failure"); } });
+  const client = { item: { id: "agent-05-cancel-drain", role: "agent" }, principalId: scope.participantId, projectId: scope.projectId,
+    task: { taskId: "fixture-task" }, grant: { grantId: "fixture-grant", revision: 1 }, id: () => "fixture-request",
+    ledger: observed, host: { faults }, async m1(operation) {
+      calls.push(operation); if (operation === "run.start") return new Promise(() => {});
+      if (operation === "task.cancel") return { schemaVersion: "runa-m1-task/v1", status: scenario === "invalid-cancel-result" ? "active" : "cancelled",
+        taskId: "fixture-task", participantId: scope.participantId, projectId: scope.projectId, updatedAt: "2026-08-29T15:10:01.000Z" };
+      throw new Error("unexpected operation");
+    } };
+  try {
+    await extension.actions["run.start"](client);
+    await assert.rejects(extension.actions["user.cancel-after-native-dispatch"](client),
+      scenario === "invalid-cancel-result" ? /m1-cancel-result-invalid/u : /synthetic-checkpoint-failure/u);
+    assert.equal(releases, 1); assert.equal(checkpointCalls, scenario === "checkpoint-failure" ? 1 : 0);
+    assert.deepEqual(calls, ["run.start", "task.cancel"]);
+  } finally { extension.close(); }
 });
 
 test("fault drain waits for the real pending HTTP call after close releases its fixture hold", async () => {

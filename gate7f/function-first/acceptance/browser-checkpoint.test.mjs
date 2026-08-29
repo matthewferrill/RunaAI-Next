@@ -4,7 +4,7 @@ import { mkdtemp, readFile, writeFile, rm, symlink, mkdir } from "node:fs/promis
 import { readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
-import { createBrowserCheckpoint } from "./browser-checkpoint.mjs";
+import { AGENT05_BOUNDED_DRAIN_NOTICE, AGENT05_IN_FLIGHT_OBSERVATION_MS, createBrowserCheckpoint } from "./browser-checkpoint.mjs";
 import { CONTROL_CASES, MODEL_CASES } from "./cases.mjs";
 import { newObservation, ObservationLedger } from "./runner-contract.mjs";
 
@@ -29,12 +29,44 @@ function cancelClient() {
     } } };
   return client;
 }
-function preparationAck(request) {
+function preparationAck(request, observedAt = new Date().toISOString()) {
   return { schemaVersion: "runaai-m1-browser-checkpoint-ack/v1", checkpointId: request.checkpointId,
     caseId: request.caseId, runtimeSealSha256: request.runtimeSealSha256, preparedScope: request.scope, checks: [],
     evidence: [{ id: "unit-preparation", source: "browser", kind: "browser-preparation", data: {
-      scope: request.scope, url: request.baseUrl + "/", observedAt: new Date().toISOString(),
+      scope: request.scope, url: request.baseUrl + "/", observedAt,
       projectName: request.projectName, taskObjective: request.taskObjective, note: "UNIT fixture, not customer proof" } }] };
+}
+
+function cancellation(client, cancellationAt = new Date().toISOString()) {
+  const held = { requestId: "unit-native-request", receiptId: "unit-native-receipt", sourceSha256: "c".repeat(64),
+    runtimeStatus: "executed", heldAt: cancellationAt, nativeCompletedBeforeHold: true };
+  const receipt = { requestId: held.requestId, receiptId: held.receiptId, sourceSha256: held.sourceSha256,
+    participantId: client.principalId, projectId: client.projectId };
+  const result = { schemaVersion: "runa-m1-task/v1", status: "cancelled", taskId: client.task.taskId,
+    participantId: client.principalId, projectId: client.projectId, updatedAt: cancellationAt };
+  client.ledger.observation.native.receipts.push(receipt);
+  client.ledger.evidence("host-runtime", "fault-native-result-held", held);
+  client.ledger.evidence("postgresql", "fault-cancel-after-native-dispatch", { taskId: client.task.taskId, result, held, cancellationAt });
+  return { cancellationAt, held, result };
+}
+
+function inFlightAck(request, overrides = {}) {
+  const { data: dataOverrides = {}, ...topLevelOverrides } = overrides;
+  const descriptor = request.checks[0], evidenceId = "unit-inflight";
+  const data = { checkId: descriptor.checkId, actual: false, claimedImmediateKill: false,
+    scope: request.scope, url: request.baseUrl + "/", observedAt: new Date().toISOString(),
+    projectName: request.projectName, projectId: request.projectId, taskId: request.taskId,
+    experience: request.experience, taskStatus: "cancelled", cancellationAt: request.cancellationAt,
+    notice: AGENT05_BOUNDED_DRAIN_NOTICE, boundedDrain: { noNewSteps: true,
+      alreadyDispatchedMayFinish: true, awaitingReconciliation: true, resultWillBeRetained: true },
+    ...dataOverrides };
+  return { schemaVersion: "runaai-m1-browser-checkpoint-ack/v1", checkpointId: request.checkpointId,
+    caseId: request.caseId, runtimeSealSha256: request.runtimeSealSha256,
+    preparedScope: request.scope, preparationCheckpointId: request.preparationCheckpointId,
+    cancellationAt: request.cancellationAt,
+    evidence: [{ id: evidenceId, source: "browser", kind: descriptor.kind, data }],
+    checks: [{ checkId: descriptor.checkId, kind: descriptor.kind, actual: false,
+      evidenceRefs: [{ id: evidenceId, pointer: "/actual" }] }], ...topLevelOverrides };
 }
 
 function controlFixture() {
@@ -66,23 +98,18 @@ test("cancel browser prep is ungraded and actual in-flight checkpoint reuses the
     writers.push((async () => {
       const request = JSON.parse(await readFile(value.requestPath, "utf8")); requests.push(request);
       if (request.preparationOnly) await writeFile(request.ackPath, JSON.stringify(preparationAck(request)));
-      else {
-        const descriptor = request.checks[0];
-        await writeFile(request.ackPath, JSON.stringify({ schemaVersion: "runaai-m1-browser-checkpoint-ack/v1", checkpointId: request.checkpointId,
-          caseId: request.caseId, runtimeSealSha256: request.runtimeSealSha256,
-          evidence: [{ id: "unit-inflight", source: "browser", kind: descriptor.kind,
-            data: { checkId: descriptor.checkId, actual: false, note: "UNIT real-check fixture only" } }],
-          checks: [{ checkId: descriptor.checkId, kind: descriptor.kind, actual: false, evidenceRefs: [{ id: "unit-inflight", pointer: "/actual" }] }] }));
-      }
+      else await writeFile(request.ackPath, JSON.stringify(inFlightAck(request)));
     })());
   } });
   const ticket = await checkpoint({ client, phase: "1:run.start", stage: "before-native-dispatch" });
   assert.equal(ticket.preparationOnly, true); assert.equal(client.ledger.observation.checks.length, 0);
   assert.equal(client.ledger.observation.browserExercised, false); assert.equal(requests[0].checks.length, 0);
-  await checkpoint({ client, phase: "2:user.cancel-after-native-dispatch", stage: "in-flight" });
+  const cancelled = cancellation(client);
+  await checkpoint({ client, phase: "2:user.cancel-after-native-dispatch", stage: "in-flight", cancellationAt: cancelled.cancellationAt });
   await Promise.all(writers);
   assert.equal(client.bootstrapCalls, 1); assert.equal(requests[1].bootstrap, null);
   assert.equal(requests[1].reusePreparedBrowser, true); assert.equal(requests[1].preparationCheckpointId, ticket.checkpointId);
+  assert.equal(requests[1].cancellationAt, cancelled.cancellationAt); assert.deepEqual(requests[1].scope, ticket.scope);
   assert.equal(client.ledger.observation.checks.length, 1); assert.equal(client.ledger.observation.browserExercised, true);
 });
 test("in-flight cancel cannot bootstrap late or borrow another task/session preparation", async t => {
@@ -94,10 +121,98 @@ test("in-flight cancel cannot bootstrap late or borrow another task/session prep
   } });
   await assert.rejects(checkpoint({ client, stage: "in-flight" }), /preparation-required/u); assert.equal(client.bootstrapCalls, 0);
   await checkpoint({ client, stage: "before-native-dispatch", phase: "before" }); await Promise.all(writers);
+  cancellation(client);
   client.task.taskId = "other-task";
   await assert.rejects(checkpoint({ client, stage: "in-flight" }), /preparation-required/u);
   client.task.taskId = "fixture-task"; client.session.sessionId = "c".repeat(64);
   await assert.rejects(checkpoint({ client, stage: "in-flight" }), /preparation-required/u); assert.equal(client.bootstrapCalls, 1);
+});
+
+for (const acknowledgementMs of [10000, 15000, 20000]) test(`post-cancel browser evidence at ${acknowledgementMs / 1000}s uses the authoritative timestamp and passes`, async t => {
+  const directory = await mkdtemp(path.join(tmpdir(), "m1-browser-inflight-late-valid-"));
+  t.after(() => rm(directory, { recursive: true, force: true }));
+  const client = cancelClient(), start = Date.parse("2026-08-29T14:00:00.000Z"); let clock = start, inFlightRequest;
+  const checkpoint = createBrowserCheckpoint({ directory, maximumWaitMs: 30000, now: () => clock,
+    pause: async ms => { clock += ms; }, async readAck(ackPath) {
+      const request = JSON.parse(await readFile(path.join(path.dirname(ackPath), "request.json"), "utf8"));
+      if (request.preparationOnly) return JSON.stringify(preparationAck(request, new Date(clock).toISOString()));
+      inFlightRequest = request;
+      if (clock - start < acknowledgementMs) throw Object.assign(new Error("not published yet"), { code: "ENOENT" });
+      return JSON.stringify(inFlightAck(request, { data: { observedAt: new Date(clock).toISOString() } }));
+    } });
+  const prepared = await checkpoint({ client, phase: "1:run.start", stage: "before-native-dispatch" });
+  const cancelled = cancellation(client, new Date(start).toISOString());
+  await checkpoint({ client, phase: "2:user.cancel-after-native-dispatch", stage: "in-flight", cancellationAt: cancelled.cancellationAt });
+  assert.equal(clock - start, acknowledgementMs); assert.equal(Date.parse(inFlightRequest.expiresAt) - start, AGENT05_IN_FLIGHT_OBSERVATION_MS);
+  assert.equal(inFlightRequest.cancellationAt, cancelled.result.updatedAt);
+  assert.deepEqual(inFlightRequest.scope, prepared.scope); assert.equal(inFlightRequest.preparationCheckpointId, prepared.checkpointId);
+  assert.equal(client.ledger.observation.checks[0].actual, false); assert.equal(client.ledger.observation.browserExercised, true);
+});
+
+test("post-cancel browser evidence beyond twenty seconds expires without grading the DOM", async t => {
+  const directory = await mkdtemp(path.join(tmpdir(), "m1-browser-inflight-expired-"));
+  t.after(() => rm(directory, { recursive: true, force: true }));
+  const client = cancelClient(), start = Date.parse("2026-08-29T14:30:00.000Z"); let clock = start;
+  const checkpoint = createBrowserCheckpoint({ directory, maximumWaitMs: 30000, now: () => clock,
+    pause: async ms => { clock += ms; }, async readAck(ackPath) {
+      const request = JSON.parse(await readFile(path.join(path.dirname(ackPath), "request.json"), "utf8"));
+      if (request.preparationOnly) return JSON.stringify(preparationAck(request, new Date(clock).toISOString()));
+      if (clock - start <= AGENT05_IN_FLIGHT_OBSERVATION_MS) throw Object.assign(new Error("not published yet"), { code: "ENOENT" });
+      return JSON.stringify(inFlightAck(request, { data: { observedAt: new Date(clock).toISOString() } }));
+    } });
+  await checkpoint({ client, phase: "1:run.start", stage: "before-native-dispatch" });
+  const cancelled = cancellation(client, new Date(start).toISOString()), evidenceBefore = client.ledger.observation.evidence.length;
+  await assert.rejects(checkpoint({ client, phase: "2:user.cancel-after-native-dispatch", stage: "in-flight",
+    cancellationAt: cancelled.cancellationAt }), /m1-browser-checkpoint-unobserved/u);
+  assert.equal(clock - start, AGENT05_IN_FLIGHT_OBSERVATION_MS);
+  assert.deepEqual([client.ledger.observation.evidence.length, client.ledger.observation.checks.length,
+    client.ledger.observation.browserExercised], [evidenceBefore, 0, false]);
+});
+
+for (const [label, mutate] of [
+  ["pre-cancel observation", (ack, request) => { ack.evidence[0].data.observedAt = new Date(Date.parse(request.cancellationAt) - 1).toISOString(); }],
+  ["different prepared scope", ack => { ack.preparedScope = { ...ack.preparedScope, projectId: "wrong-project" }; }],
+  ["different session", ack => { ack.evidence[0].data.scope = { ...ack.evidence[0].data.scope, sessionSha256: "d".repeat(64) }; }],
+  ["different task", ack => { ack.evidence[0].data.taskId = "wrong-task"; }],
+  ["different project", ack => { ack.evidence[0].data.projectId = "wrong-project"; }],
+  ["different experience", ack => { ack.evidence[0].data.experience = "chat"; }],
+  ["non-authoritative cancellation", ack => { ack.cancellationAt = "2026-08-29T00:00:00.000Z"; }],
+]) test(`in-flight browser rejects ${label} without ledger mutation`, async t => {
+  const directory = await mkdtemp(path.join(tmpdir(), "m1-browser-inflight-binding-"));
+  t.after(() => rm(directory, { recursive: true, force: true }));
+  const client = cancelClient(); let inFlight = false;
+  const checkpoint = createBrowserCheckpoint({ directory, maximumWaitMs: 1000, async readAck(ackPath) {
+    const request = JSON.parse(await readFile(path.join(path.dirname(ackPath), "request.json"), "utf8"));
+    if (request.preparationOnly) return JSON.stringify(preparationAck(request));
+    inFlight = true; const ack = inFlightAck(request); mutate(ack, request); return JSON.stringify(ack);
+  } });
+  await checkpoint({ client, phase: "1:run.start", stage: "before-native-dispatch" });
+  const cancelled = cancellation(client), evidenceBefore = client.ledger.observation.evidence.length;
+  await assert.rejects(checkpoint({ client, phase: "2:user.cancel-after-native-dispatch", stage: "in-flight",
+    cancellationAt: cancelled.cancellationAt }), /m1-browser-in-flight-(binding|dom)-invalid/u);
+  assert.equal(inFlight, true); assert.deepEqual([client.ledger.observation.evidence.length,
+    client.ledger.observation.checks.length, client.ledger.observation.browserExercised], [evidenceBefore, 0, false]);
+});
+
+for (const [label, data] of [
+  ["generic false value", { notice: "cancelled" }],
+  ["immediate-kill claim", { claimedImmediateKill: true }],
+  ["active task state", { taskStatus: "active" }],
+  ["missing bounded drain", { boundedDrain: { noNewSteps: true } }],
+]) test(`in-flight browser requires actual bounded-drain DOM truth: ${label}`, async t => {
+  const directory = await mkdtemp(path.join(tmpdir(), "m1-browser-inflight-dom-"));
+  t.after(() => rm(directory, { recursive: true, force: true }));
+  const client = cancelClient();
+  const checkpoint = createBrowserCheckpoint({ directory, maximumWaitMs: 1000, async readAck(ackPath) {
+    const request = JSON.parse(await readFile(path.join(path.dirname(ackPath), "request.json"), "utf8"));
+    return JSON.stringify(request.preparationOnly ? preparationAck(request) : inFlightAck(request, { data }));
+  } });
+  await checkpoint({ client, phase: "1:run.start", stage: "before-native-dispatch" });
+  const cancelled = cancellation(client), evidenceBefore = client.ledger.observation.evidence.length;
+  await assert.rejects(checkpoint({ client, phase: "2:user.cancel-after-native-dispatch", stage: "in-flight",
+    cancellationAt: cancelled.cancellationAt }), /m1-browser-in-flight-dom-invalid/u);
+  assert.deepEqual([client.ledger.observation.evidence.length, client.ledger.observation.checks.length,
+    client.ledger.observation.browserExercised], [evidenceBefore, 0, false]);
 });
 test("preparation refuses graded checks and does not turn a readiness ack into a pass", async t => {
   const directory = await mkdtemp(path.join(tmpdir(), "m1-browser-prep-denied-"));

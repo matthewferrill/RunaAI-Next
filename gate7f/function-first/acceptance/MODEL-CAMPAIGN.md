@@ -72,8 +72,12 @@ No frozen check or graded browser flag is credited by preparation.
 The later `in-flight` request has `bootstrap:null`, `reusePreparedBrowser:true` and
 the preparation checkpoint ID. Refresh/observe that already-open task directly;
 do not start another login/navigation sequence. This acknowledgement remains
-graded and has at most 10 seconds inside the unchanged 15-second native-delivery
-hold. Stale or different-session/task preparation fails closed. Other browser
+graded and has at most 20 seconds inside the 25-second post-receipt native-delivery
+hold. It binds the authoritative cancelled task's `updatedAt`, exact prepared
+principal/project/task/experience/session scope and a post-cancellation actual DOM
+observation of the bounded-drain notice. A generic false value, pre-cancel view,
+stale or different-session/task preparation fails closed. The native receipt is
+always released when that bounded checkpoint ends. Other browser
 cases observe stable pending/revoked/unknown/restored states with the ordinary
 five-minute bridge bound and do not need a pre-dispatch rendezvous.
 

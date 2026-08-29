@@ -15,6 +15,7 @@ const deferred = () => {
   return { promise, resolve, reject };
 };
 const scoped = (expected, actual) => expected.participantId === actual.participantId && expected.projectId === actual.projectId;
+export const AGENT05_POST_RECEIPT_HOLD_MS = 25_000;
 async function bounded(promise, timeoutMs, code) {
   let timer;
   try { return await Promise.race([promise, new Promise((_, reject) => { timer = setTimeout(() => reject(fail(code)), timeoutMs); })]); }
@@ -30,9 +31,11 @@ function gate(scope, holdMs) {
  * The native hook runs only AFTER the real executor has produced its receipt;
  * it delays delivery, not dispatch or execution, and changes none of its caps. */
 export class AcceptanceFaultController {
-  constructor({ getLedger = () => null, qdrant = null, maximumHoldMs = 15000 } = {}) {
+  constructor({ getLedger = () => null, qdrant = null, maximumHoldMs = 15000,
+    nativeReceiptHoldMs = AGENT05_POST_RECEIPT_HOLD_MS } = {}) {
     if (!Number.isInteger(maximumHoldMs) || maximumHoldMs < 100 || maximumHoldMs > 15000) throw fail("m1-fault-hold-budget-invalid");
-    this.getLedger = getLedger; this.qdrant = qdrant; this.maximumHoldMs = maximumHoldMs;
+    if (!Number.isInteger(nativeReceiptHoldMs) || nativeReceiptHoldMs < 100 || nativeReceiptHoldMs > AGENT05_POST_RECEIPT_HOLD_MS) throw fail("m1-native-hold-budget-invalid");
+    this.getLedger = getLedger; this.qdrant = qdrant; this.maximumHoldMs = maximumHoldMs; this.nativeReceiptHoldMs = nativeReceiptHoldMs;
     this.providerDrop = null; this.nativeHold = null; this.materializationHold = null;
     this.taskHooks = Object.freeze({
       afterMaterialize: value => this.afterMaterialize(value),
@@ -65,7 +68,7 @@ export class AcceptanceFaultController {
   providerFaultObserved() { return this.providerDrop?.used === true && this.providerDrop?.observed?.actualSocketDestroyed === true; }
   armNativeReceiptHold(scope) {
     if (this.nativeHold) throw fail("m1-native-fault-already-armed");
-    this.nativeHold = gate(scope, this.maximumHoldMs);
+    this.nativeHold = { ...gate(scope, this.nativeReceiptHoldMs), released: false };
   }
   async afterNativeReceipt({ request, receipt }) {
     const state = this.nativeHold;
@@ -85,6 +88,8 @@ export class AcceptanceFaultController {
   }
   releaseNativeReceipt() {
     if (!this.nativeHold?.observed) throw fail("m1-native-result-not-held");
+    if (this.nativeHold.released) throw fail("m1-native-result-already-released");
+    this.nativeHold.released = true;
     this.nativeHold.release.resolve();
   }
   armMaterializationHold(scope) {
@@ -208,9 +213,9 @@ export function createFaultActions({ checkpoint = null } = {}) {
   };
   const contextSnapshot = client => client.host.continuity.prepareAnswerContext({ participantId: client.principalId,
     projectId: client.projectId, threadId: client.threadId, experience: client.experience });
-  const inspectCheckpoint = async (client, stage) => {
+  const inspectCheckpoint = async (client, stage, bindings = {}) => {
     const observe = checkpoint ?? client.checkpoint ?? client.host.checkpoint;
-    if (typeof observe === "function") return observe({ client, phase: client.ledger.phase, stage });
+    if (typeof observe === "function") return observe({ client, phase: client.ledger.phase, stage, ...bindings });
     client.ledger.evidence("application", "fault-browser-checkpoint-unavailable", { stage, browserObserved: false });
   };
   const actions = {
@@ -299,12 +304,19 @@ export function createFaultActions({ checkpoint = null } = {}) {
     },
     "user.cancel-after-native-dispatch": async client => {
       if (!state(client).held) throw fail("m1-native-dispatch-not-observed");
-      const result = await client.m1("task.cancel", { taskId: client.task.taskId });
-      client.ledger.evidence("postgresql", "fault-cancel-after-native-dispatch", { taskId: client.task.taskId,
-        result, held: state(client).held, cancellationAt: new Date().toISOString() });
-      try { await inspectCheckpoint(client, "in-flight"); }
-      finally { controller(client).releaseNativeReceipt(); }
-      return result;
+      try {
+        const result = await client.m1("task.cancel", { taskId: client.task.taskId });
+        const cancelledAt = typeof result?.updatedAt === "string" ? Date.parse(result.updatedAt) : NaN;
+        if (result?.schemaVersion !== "runa-m1-task/v1" || result.status !== "cancelled" || result.taskId !== client.task.taskId
+            || result.participantId !== client.principalId || result.projectId !== client.projectId || !Number.isFinite(cancelledAt)) {
+          throw fail("m1-cancel-result-invalid");
+        }
+        const cancellationAt = result.updatedAt;
+        client.ledger.evidence("postgresql", "fault-cancel-after-native-dispatch", { taskId: client.task.taskId,
+          result, held: state(client).held, cancellationAt });
+        await inspectCheckpoint(client, "in-flight", { cancellationAt });
+        return result;
+      } finally { controller(client).releaseNativeReceipt(); }
     },
     "run.observe-drain": async client => {
       if (!state(client).pendingRun) throw fail("m1-cancel-run-not-pending");

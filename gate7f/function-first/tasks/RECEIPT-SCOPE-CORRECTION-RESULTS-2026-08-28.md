@@ -8,7 +8,7 @@ The complete task regression passed 70/70 with zero failures, skips, or cancella
 
 Retained evidence:
 
-- `evidence/20260828-receipt-scope-r1/tests.tap`: SHA-256 `f58675645ebcc4598a098a1d92cff53171fb99d5ead387b3d7b107f3aeda04a3`;
-- `evidence/20260828-receipt-scope-r1/result.json`: SHA-256 `6976b17acd08052c82b28c0e1940bce72029f3305731142688c32a1f6eb2cd87`.
+- `evidence/20260828-receipt-scope-r1/tests.tap`: SHA-256 `da0f7d9902ed4df90182e015cf0d88101872d18737b6bc9e4aa08b1b1339be31`;
+- `evidence/20260828-receipt-scope-r1/result.json`: SHA-256 `021484f92801ebe304d185975ce39f140ec47fef189eee685dbcae850d1600a7`.
 
 This closes the bounded independent-review finding only. It does not change baseline model grades, qualify a model, activate a route, or complete M1.

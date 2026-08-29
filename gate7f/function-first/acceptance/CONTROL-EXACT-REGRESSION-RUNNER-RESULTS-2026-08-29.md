@@ -18,10 +18,13 @@ node --test gate7f/function-first/acceptance/control-exact-regression.test.mjs
 ```
 
 Result before the real-host correction: 11 tests passed, 0 failed, 0 cancelled,
-0 skipped and 0 todo. The hardened supervisor and resource failure path add four focused regressions:
-safe-only inherited environment, concurrent dual-stream overflow and complete
-descendant-tree stop, plus partial-start port retention. The corrected focused
-result is 15 passed with zero fail, cancel, skip or todo.
+0 skipped and 0 todo. The hardened supervisor, resource failure path and final
+authority corrections bring the current focused result to 19 passed with zero
+fail, cancel, skip or todo. The added coverage includes safe-only inherited
+environment, concurrent dual-stream overflow and complete descendant-tree stop,
+partial-start port retention, external dispatcher pinning before parsing,
+nonblocking base64 bootstrap transport, complete dependency verification before
+repository import, an invoked eval transport and actionable finite-terminal data.
 
 The tests cover strict prospective manifest/pin validation; refusal of override
 surfaces; exact unfiltered serial Node arguments; environment allowlisting;
@@ -209,8 +212,38 @@ exited successfully on the final prospective worktree, and roadmap verification
 passed 15/15 while retaining all 17 capability families. Local success does not
 replace the required fresh immutable Control run.
 
-The next execution must create a fresh exact stage and prospective manifest for
-the final selected source, then run the fixed PowerShell entry point on Control.
-Only that execution can prove the pinned Control PostgreSQL/Qdrant/QuickJS/MXC
-envelope and the complete repository test set. Its pass must retain the five
-create-only evidence files and independently confirm owned resource cleanup.
+The next fresh stage, `m1-task-native-d55ee8c867054a0eb9ca443d6f74f2bd`,
+used source `7d7c0aab359fc082c8f6a70647ca3f8e12e6ebe7` and prospective run
+`710fc2825ead46d58dfd9d7856222dac`. The Node child was absent after both
+deadlines, but the dedicated PowerShell host again remained resident and no
+evidence directory or disposable service had been created. The exact
+`RUNA-CONTROL\Matthew` PowerShell process had no descendant, was reverified by
+PID, owner and command, and was stopped. No model or protected data was accessed
+and production was unchanged. This stage is disqualified and must not be reused.
+
+That result disproves the remaining assumption that polling `HasExited` avoids
+the Control PowerShell host defect. The replacement no longer executes the
+stage dispatcher directly. A reviewed Omen builder creates an encoded preloader
+bound to an external dispatcher SHA-256; Control hashes the exact dispatcher
+bytes before parsing those same bytes. The dispatcher purges its ambient
+PowerShell environment using .NET APIs, validates fixed pins, carries the
+externally pinned bootstrap as a base64 argument and closes stdin without
+writing. It exits immediately without a child-lifetime wait.
+
+An embedded built-in-only Node watchdog retains the watchdog/bootstrap PIDs and
+bounds source and dependency hashing plus the regression at 1,080,000
+milliseconds. The bootstrap checks identity, manifest, every extracted source
+byte, the complete 30,036-file release artifact, the exact dependency junction
+and pinned Node before importing repository code. The inner supervisor retains
+the core PID and has a finite post-stop/pipe-drain ceiling. Unconfirmed cleanup
+therefore returns actionable process identity rather than waiting forever or
+claiming a pass. Direct `-File` and direct Node invocation are unsupported.
+
+The current focused launcher suite passed 19/19, the invoked `-e` sentinel proved
+that bootstrap main actually executes, and independent re-review found no
+remaining blocker to one fresh synthetic Control qualification. The complete
+local Windows suite exited zero with 1,679 passing and 77 expected host-specific
+skips; roadmap verification passed 15/15. The next execution must use a fresh
+commit, archive, exact stage and prospective manifest through the encoded
+preloader. Only its five create-only evidence files, zero-skip result and exact
+cleanup proof can qualify the Control PostgreSQL/Qdrant/QuickJS/MXC envelope.

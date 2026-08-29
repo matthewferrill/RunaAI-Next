@@ -1,7 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {spawnSync} from 'node:child_process';
+import {createHash} from 'node:crypto';
 import {mkdtemp,mkdir,readFile,rm,stat,writeFile} from 'node:fs/promises';
+import {createRequire} from 'node:module';
 import net from 'node:net';
 import {tmpdir} from 'node:os';
 import path from 'node:path';
@@ -11,6 +13,9 @@ import {QDRANT_PIN} from './runner-contract.mjs';
 import {captureBoundedStream,CONTROL_REGRESSION_FIXED,controlRegressionEnvironment,executeAllTests,parseControlRegressionArguments,parseTapSummary,
   runVerifiedControlRegression,validateControlRegressionManifest,verifyControlRegressionCleanup} from './control-exact-regression.mjs';
 import {ownerSafeEnvironment,runBoundedOwnerChild} from './control-exact-regression-owner.mjs';
+import {parseOwnerEntryArguments,purgeToOwnerEntryEnvironment} from './control-exact-regression-entry.mjs';
+import {buildInvocation,parseInvocationArguments} from './build-control-exact-regression-invocation.mjs';
+const {parse:parseBootstrap,verifyArchive:verifyBootstrapArchive,verifyRelease:verifyBootstrapRelease}=createRequire(import.meta.url)('./control-exact-regression-bootstrap.cjs');
 
 const hash=letter=>letter.repeat(64);
 const manifest=()=>({schemaVersion:'runaai-m1-control-regression-input/v1',runId:'1'.repeat(32),source:{commit:'2'.repeat(40),archiveSha256:hash('3'),
@@ -133,27 +138,65 @@ test('cleanup proof requires every owned directory absent and every recorded por
   const after=await verifyControlRegressionCleanup(f.root,{postgres:port});assert.equal(after.passed,true);
 }finally{if(server.listening)await new Promise(resolve=>server.close(resolve));await f.close();}});
 
-test('owner PowerShell entry point parses in Windows PowerShell 5 and contains no arbitrary remote or service surface',()=>{
-  const filename=path.join(import.meta.dirname,'Invoke-ControlExactRegression.ps1'),text=requireText(filename);
+test('externally pinned dispatcher uses argument transport, closes stdin and exits without a child-lifetime wait',()=>{
+  const filename=path.join(import.meta.dirname,'Invoke-ControlExactRegression.ps1'),dispatcher=requireText(filename);
+  const entry=requireText(path.join(import.meta.dirname,'control-exact-regression-entry.mjs'));
   const supervisor=requireText(path.join(import.meta.dirname,'control-exact-regression-owner.mjs'));
   const command=`[void][scriptblock]::Create([IO.File]::ReadAllText('${filename.replaceAll("'","''")}'))`;
   const parsed=spawnSync('powershell.exe',['-NoProfile','-NonInteractive','-Command',command],{windowsHide:true,encoding:'utf8',timeout:10000});
-  assert.equal(parsed.status,0,parsed.stderr);assert.match(text,/RUNA-CONTROL\\Matthew/u);assert.match(text,/control-exact-regression-owner\.mjs/u);
-  assert.match(text,/EnvironmentVariables\.Clear\(\)/u);assert.match(text,/\$safeNames/u);
-  assert.match(text,/GetEnvironmentVariable\(\$name,'Process'\)/u);assert.doesNotMatch(text,/SetEnvironmentVariable|\$originalEnvironment/u);
-  assert.match(text,/\$terminalCode=125/u);assert.match(text,/\$terminalCode=\$child\.ExitCode/u);
-  assert.match(text,/finally\{\s*\[Environment\]::Exit\(\$terminalCode\)\s*\}/u);
-  assert.match(text,/function Stop-ExactTree/u);assert.match(text,/\.HasExited/u);assert.match(text,/ElapsedMilliseconds-lt1050000/u);
-  assert.match(text,/ElapsedMilliseconds-lt10000/u);assert.match(text,/System32\\taskkill\.exe/u);assert.doesNotMatch(text,/Start-Process/u);
-  assert.doesNotMatch(text,/throw'm1-control-regression-run-failed'|if\(\$childExitCode-ne0\)\{exit/u);
-  assert.match(text,/System\.Diagnostics\.ProcessStartInfo/u);
-  assert.match(text,/RedirectStandardInput=\$false/u);assert.match(text,/RedirectStandardOutput=\$false/u);assert.match(text,/RedirectStandardError=\$false/u);
-  assert.doesNotMatch(text,/& \$node @arguments/u);
-  assert.doesNotMatch(text+supervisor,/OPENAI|LMSTUDIO|RUNAAI_PROVIDER|M1_TASK_PG_URL/u);
-  assert.doesNotMatch(text,/ReadToEndAsync|ReadToEnd\(|\.WaitForExit\(|\$child\.Kill\(/u);
+  assert.equal(parsed.status,0,parsed.stderr);assert.match(dispatcher,/control-exact-regression-bootstrap\.cjs/u);assert.match(dispatcher,/EnvironmentVariables\.Clear\(\)/u);
+  assert.match(dispatcher,/Convert\]::ToBase64String/u);assert.match(dispatcher,/process\.argv\[1\]/u);assert.match(dispatcher,/RedirectStandardInput=\$true/u);assert.match(dispatcher,/StandardInput\.Close\(\)/u);assert.match(dispatcher,/\[Environment\]::Exit\(\$terminal\)/u);
+  assert.doesNotMatch(dispatcher,/Start-Process|\.HasExited|ReadToEnd|StandardInput\.BaseStream\.Write/u);assert.match(dispatcher,/WaitForExit\(10000\)/u);
+  assert.match(dispatcher,/GetEnvironmentVariables\('Process'\)/u);assert.doesNotMatch(dispatcher,/\bGet-FileHash\b|\bTest-Path\b|\bConvertTo-Json\b|\bJoin-Path\b|\bNew-Object\b/u);
+  assert.match(dispatcher,/maximumMs=1080000/u);assert.match(dispatcher,/m1-control-bootstrap-watchdog-timeout/u);assert.match(dispatcher,/spawnSync\(taskkill/u);assert.match(dispatcher,/timeout:10000/u);
+  const watchdog=/\$watchdogSource=@'\r?\n([\s\S]*?)\r?\n'@/u.exec(dispatcher)?.[1],bootstrap=requireText(path.join(import.meta.dirname,'control-exact-regression-bootstrap.cjs'));
+  assert.ok(watchdog);const estimatedCommand=160+Buffer.byteLength(watchdog,'utf8')*4/3+Buffer.byteLength(bootstrap,'utf8')*4/3+1024;
+  assert.ok(estimatedCommand<24576,`Node command length ${estimatedCommand} lost the 25% Windows margin`);
+  const target={FOREIGN_SECRET:'no',SystemRoot:'wrong'};const safe=purgeToOwnerEntryEnvironment({SystemRoot:'C:\\foreign',TEMP:'C:\\foreign',FOREIGN_SECRET:'no'},target);
+  assert.equal(target.FOREIGN_SECRET,undefined);assert.equal(target.SystemRoot,'C:\\Windows');assert.equal(safe.TEMP,undefined);assert.equal(safe.ComSpec,'C:\\Windows\\System32\\cmd.exe');
+  assert.throws(()=>parseOwnerEntryArguments(['--owned-root','C:\\bad root','--manifest','x','--manifest-sha256',hash('a')]),/entry-arguments/u);
+  assert.match(entry,/purgeToOwnerEntryEnvironment\(\);validateOwnerEntry\(parsed\);/u);assert.match(entry,/await import\('\.\/control-exact-regression-owner\.mjs'\)/u);
+  assert.ok(entry.indexOf('purgeToOwnerEntryEnvironment();')<entry.indexOf("await import('./control-exact-regression-owner.mjs')"));
+  assert.match(entry,/FIXED_NODE_SHA256/u);assert.match(entry,/whoami\.exe/u);assert.match(entry,/realpathSync\(executable\)/u);
+  assert.doesNotMatch(entry+supervisor,/OPENAI|LMSTUDIO|RUNAAI_PROVIDER|M1_TASK_PG_URL/u);
   assert.match(supervisor,/1_020_000/u);assert.match(supervisor,/taskkill\.exe/u);assert.match(supervisor,/stdio:\['ignore','pipe','pipe'\]/u);
-  assert.doesNotMatch(text+supervisor,/\bssh\b|Invoke-Expression|Start-Service|Stop-Service|\/v1\/chat\/completions|--test-name-pattern/u);
+  assert.doesNotMatch(entry+supervisor,/\bssh\b|Invoke-Expression|Start-Service|Stop-Service|\/v1\/chat\/completions|--test-name-pattern/u);
 });
+
+function bootstrapTar(entries){const chunks=[];for(const[name,content,type='0']of entries){const bytes=Buffer.from(content),header=Buffer.alloc(512);
+  header.write(name);header.write('0000644\0',100);header.write(bytes.length.toString(8).padStart(11,'0')+'\0',124);header[156]=type.charCodeAt(0);
+  chunks.push(header,bytes,Buffer.alloc((512-bytes.length%512)%512));}return Buffer.concat([...chunks,Buffer.alloc(1024)]);}
+const actualSha=value=>createHash('sha256').update(value).digest('hex');
+test('argument bootstrap is actually invoked and verifies every extracted source byte before importing repository code',async()=>{const f=await fixture();try{
+  const archive=bootstrapTar([['file.mjs','export const value=1;\n']]),archivePath=path.join(f.root,'source.tar');
+  await writeFile(archivePath,archive);await writeFile(path.join(f.root,'file.mjs'),'export const value=1;\n');
+  assert.equal(verifyBootstrapArchive(f.root,archivePath,actualSha(archive)),1);
+  await writeFile(path.join(f.root,'file.mjs'),'export const value=2;\n');assert.throws(()=>verifyBootstrapArchive(f.root,archivePath,actualSha(archive)),/source-drift/u);
+  const source=requireText(path.join(import.meta.dirname,'control-exact-regression-bootstrap.cjs'));
+  assert.ok(source.indexOf('verifyArchive(root,archivePath')<source.indexOf('await import(pathToFileURL(entry).href)'));
+  assert.ok(source.indexOf('verifyRelease(fixedRelease,fixedArtifact)')<source.indexOf('await import(pathToFileURL(entry).href)'));
+  assert.throws(()=>parseBootstrap(['--owned-root','C:\\safe&bad']),/bootstrap-arguments/u);
+  const loader="globalThis.__RUNA_CONTROL_BOOTSTRAP__=true;eval(Buffer.from(process.argv[1],'base64').toString('utf8'))",invoked=spawnSync(process.execPath,['-e',loader,Buffer.from(source).toString('base64')],{encoding:'utf8',windowsHide:true,timeout:10000});
+  assert.equal(invoked.status,1);assert.match(invoked.stdout,/m1-control-bootstrap-arguments/u);
+}finally{await f.close();}});
+
+test('bootstrap verifies the complete dependency artifact and rejects drift before repository import',async()=>{const f=await fixture();try{
+  await mkdir(path.join(f.root,'node_modules'));const one=Buffer.from('one\n'),two=Buffer.from('two\n');await writeFile(path.join(f.root,'runtime.bin'),one);await writeFile(path.join(f.root,'node_modules','package.json'),two);
+  const entries=[{path:'node_modules/package.json',size:two.length,sha256:actualSha(two)},{path:'runtime.bin',size:one.length,sha256:actualSha(one)}];
+  const canonical=value=>{if(Array.isArray(value))return value.map(canonical);if(value&&typeof value==='object'){const out={};for(const key of Object.keys(value).sort())out[key]=canonical(value[key]);return out;}return value;};
+  const base={schemaVersion:'runa2-gate6b-artifact/v1',entries},artifactDigest=actualSha(JSON.stringify(canonical(base)));
+  await writeFile(path.join(f.root,'artifact-files.json'),JSON.stringify({...base,artifactDigest}));assert.equal(verifyBootstrapRelease(f.root,artifactDigest).fileCount,2);
+  await writeFile(path.join(f.root,'runtime.bin'),'changed\n');assert.throws(()=>verifyBootstrapRelease(f.root,artifactDigest),/artifact-drift/u);
+}finally{await f.close();}});
+
+test('trusted invocation preloader hashes dispatcher bytes before parsing the same bytes',async()=>{const f=await fixture();try{
+  const dispatcher=Buffer.from("[Console]::Out.WriteLine('verified')\n"),dispatcherPath=path.join(f.root,'dispatcher.ps1');await writeFile(dispatcherPath,dispatcher);
+  const raw=['--owned-root','C:\\AI\\RunaAI-Next-Candidate\\staging\\m1-task-native-'+('a'.repeat(32)),'--manifest-sha256',hash('1'),'--dispatcher-sha256',actualSha(dispatcher),
+    '--bootstrap-sha256',hash('2'),'--identity-sha256',hash('3'),'--archive-sha256',hash('4'),'--source-commit','5'.repeat(40)];
+  const result=buildInvocation(parseInvocationArguments(raw),{dispatcherPath}),source=Buffer.from(result.encodedCommand,'base64').toString('utf16le');
+  assert.ok(source.indexOf('ComputeHash($bytes)')<source.indexOf('[ScriptBlock]::Create($body)'));assert.match(source,/UTF8Encoding\]::new\(\$false,\$true\)/u);assert.doesNotMatch(source,/New-Object|Get-FileHash|Test-Path|ConvertTo-Json/u);
+  await writeFile(dispatcherPath,'changed');assert.throws(()=>buildInvocation(parseInvocationArguments(raw),{dispatcherPath}),/dispatcher-pin/u);
+}finally{await f.close();}});
 
 test('actual owner supervisor concurrently drains and fails closed on oversized stdout and stderr',async()=>{
   const script=`for(let i=0;i<1024;i++){process.stdout.write('x'.repeat(1024));process.stderr.write('y'.repeat(1024))}setInterval(()=>{},1000)`;
@@ -170,6 +213,18 @@ test('actual owner supervisor timeout stops its complete Windows child tree',asy
   const descendant=Number(result.stdout.trim());assert.ok(Number.isSafeInteger(descendant)&&descendant>0);
   await new Promise(resolve=>setTimeout(resolve,200));assert.throws(()=>process.kill(descendant,0));
 });
+
+test('owner supervisor has a finite terminal when tree stop and pipe close are unconfirmed',async()=>{
+  const script=`const{spawn}=require('node:child_process');const c=spawn(process.execPath,['-e','setInterval(()=>{},1000)'],{stdio:['ignore','inherit','inherit']});console.log(c.pid);setInterval(()=>{},1000)`;
+  const started=Date.now(),result=await runBoundedOwnerChild({file:process.execPath,args:['-e',script],cwd:process.cwd(),environment:ownerSafeEnvironment(),maximumMs:200,postStopMs:300,
+    stopTree:()=>{throw Error('synthetic-unconfirmed-stop');},fallbackKill:()=>{throw Error('synthetic-unconfirmed-fallback');}});
+  assert.equal(result.passed,false);assert.equal(result.errorCode,'m1-control-regression-owner-terminal-unconfirmed');assert.ok(Date.now()-started<3000);
+  assert.ok(result.childProcessId>0);assert.equal(result.stopAttempted,true);assert.equal(result.postStopExceeded,true);assert.equal(result.stopProof,null);
+  const descendant=Number(result.stdout.trim());assert.ok(Number.isSafeInteger(descendant)&&descendant>0);stopWindowsTreeForTest(descendant);
+});
+
+function stopWindowsTreeForTest(processId){const executable=path.join(process.env.SystemRoot??'C:\\Windows','System32','taskkill.exe');
+  const stopped=spawnSync(executable,['/PID',String(processId),'/T','/F'],{windowsHide:true,encoding:'utf8',timeout:10000});assert.equal(stopped.status,0,stopped.stderr);}
 
 function requireText(filename){return spawnSync(process.execPath,['-e',`process.stdout.write(require('fs').readFileSync(${JSON.stringify(filename)},'utf8'))`],
   {encoding:'utf8',windowsHide:true,timeout:10000}).stdout;}

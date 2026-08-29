@@ -59,20 +59,53 @@ SHA-256 is computed after the file is closed. The stage must retain the exact
 `source.tar`, `SOURCE-IDENTITY.json`, package lock, Qdrant binary and dependency
 junction created by the preparation workflow.
 
-From an already-authorized `RUNA-CONTROL\Matthew` noninteractive owner shell,
-the only supported invocation is:
+The stage copy of the dispatcher is never executed directly. From the reviewed
+Omen checkout, the operator first supplies all external pins, including the
+SHA-256 of the dispatcher itself, to the built-in-only invocation builder:
 
-```powershell
-powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File .\gate7f\function-first\acceptance\Invoke-ControlExactRegression.ps1 `
-  -OwnedRoot C:\AI\RunaAI-Next-Candidate\staging\m1-task-native-<32hex> `
-  -ManifestPath C:\AI\RunaAI-Next-Candidate\staging\m1-task-native-<32hex>\CONTROL-REGRESSION-INPUT.json `
-  -ExpectedManifestSha256 <64hex>
+```text
+node gate7f/function-first/acceptance/build-control-exact-regression-invocation.mjs
+  --owned-root <exact-stage> --manifest-sha256 <64hex>
+  --dispatcher-sha256 <64hex> --bootstrap-sha256 <64hex>
+  --identity-sha256 <64hex> --archive-sha256 <64hex>
+  --source-commit <40hex>
 ```
 
-The entry point passes no inherited provider credentials or product endpoints.
+The builder refuses unless its local dispatcher bytes match the external pin.
+Its encoded preloader is sent to fixed
+`C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe`; on Control it reads
+the stage dispatcher once, hashes those exact bytes before parsing the same
+bytes as a script block, and then supplies the fixed arguments. Direct `-File`
+invocation is unsupported and cannot produce authoritative evidence.
+
+The verified dispatcher purges its own process environment to fixed Windows
+values using only .NET APIs before it resolves any external command. It validates
+the fixed owner, root, pinned Node executable and every input hash. It reads the
+externally pinned bootstrap bytes once and carries them as base64 in the direct
+Node argument vector. The first pinned Node is a built-in-only watchdog whose
+source is inside the externally pinned dispatcher. It spawns the bootstrap,
+retains both exact PIDs and enforces a 1,080,000-millisecond outer ceiling over
+all pre-import hashing and the bounded regression. At that ceiling it invokes
+fixed `taskkill.exe /PID <bootstrap> /T /F` with its own 10-second bound and
+records whether tree stop was confirmed. The dispatcher closes redirected stdin
+without writing and exits immediately while the watchdog retains the owner
+terminal. This removes both the PowerShell child-lifetime wait and an unbounded
+anonymous-pipe write.
+
+The bootstrap has only Node built-ins; before importing repository code it verifies the source identity,
+manifest, every extracted source file, the complete installed dependency
+artifact, the exact `node_modules` junction and the released Node executable.
+The entry then validates the fixed Node path/version/hash, exact root/manifest
+and fixed `C:\Windows\System32\whoami.exe` owner before dynamically importing the
+bounded supervisor. No provider credential or product endpoint is inherited.
 The fixed child command is the pinned Node executable with
 `--test --test-concurrency=1 --test-reporter=tap`; there is no test-selection,
 retry or skip surface.
+
+If the bounded supervisor cannot confirm stop or pipe closure, its failure
+record retains the exact core child PID, whether stop was attempted, any stop
+proof and whether the finite post-stop ceiling expired. Such an outcome cannot
+pass or be retried blindly; the retained identifiers are used for reconciliation.
 
 Evidence is retained under
 `acceptance-evidence/control-regression-<runId>/`. A valid pass requires all of

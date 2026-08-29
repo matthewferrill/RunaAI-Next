@@ -138,7 +138,7 @@ test('cleanup proof requires every owned directory absent and every recorded por
   const after=await verifyControlRegressionCleanup(f.root,{postgres:port});assert.equal(after.passed,true);
 }finally{if(server.listening)await new Promise(resolve=>server.close(resolve));await f.close();}});
 
-test('externally pinned dispatcher uses argument transport, closes stdin and exits without a child-lifetime wait',()=>{
+test('externally pinned dispatcher uses argument transport and one finite owner-session wait',()=>{
   const filename=path.join(import.meta.dirname,'Invoke-ControlExactRegression.ps1'),dispatcher=requireText(filename);
   const entry=requireText(path.join(import.meta.dirname,'control-exact-regression-entry.mjs'));
   const supervisor=requireText(path.join(import.meta.dirname,'control-exact-regression-owner.mjs'));
@@ -146,7 +146,7 @@ test('externally pinned dispatcher uses argument transport, closes stdin and exi
   const parsed=spawnSync('powershell.exe',['-NoProfile','-NonInteractive','-Command',command],{windowsHide:true,encoding:'utf8',timeout:10000});
   assert.equal(parsed.status,0,parsed.stderr);assert.match(dispatcher,/control-exact-regression-bootstrap\.cjs/u);assert.match(dispatcher,/EnvironmentVariables\.Clear\(\)/u);
   assert.match(dispatcher,/Convert\]::ToBase64String/u);assert.match(dispatcher,/process\.argv\[1\]/u);assert.match(dispatcher,/RedirectStandardInput=\$true/u);assert.match(dispatcher,/StandardInput\.Close\(\)/u);assert.match(dispatcher,/\[Environment\]::Exit\(\$terminal\)/u);
-  assert.doesNotMatch(dispatcher,/Start-Process|\.HasExited|ReadToEnd|StandardInput\.BaseStream\.Write/u);assert.match(dispatcher,/WaitForExit\(10000\)/u);
+  assert.doesNotMatch(dispatcher,/Start-Process|\.HasExited|ReadToEnd|StandardInput\.BaseStream\.Write|WaitForExit\(\)/u);assert.match(dispatcher,/WaitForExit\(1095000\)/u);assert.match(dispatcher,/\$terminal=\$child\.ExitCode/u);assert.match(dispatcher,/WaitForExit\(10000\)/u);
   assert.match(dispatcher,/GetEnvironmentVariables\('Process'\)/u);assert.doesNotMatch(dispatcher,/\bGet-FileHash\b|\bTest-Path\b|\bConvertTo-Json\b|\bJoin-Path\b|\bNew-Object\b/u);
   assert.match(dispatcher,/maximumMs=1080000/u);assert.match(dispatcher,/m1-control-bootstrap-watchdog-timeout/u);assert.match(dispatcher,/spawnSync\(taskkill/u);assert.match(dispatcher,/timeout:10000/u);
   assert.match(dispatcher,/CONTROL-BOOTSTRAP-WATCHDOG\.jsonl/u);assert.match(dispatcher,/CONTROL-BOOTSTRAP-STDOUT\.txt/u);assert.match(dispatcher,/CONTROL-BOOTSTRAP-STDERR\.txt/u);assert.match(dispatcher,/openSync\([^\n]+,'wx'\)/u);

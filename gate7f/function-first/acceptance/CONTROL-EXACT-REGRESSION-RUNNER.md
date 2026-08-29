@@ -92,11 +92,14 @@ receipt and bounded 131,072-byte stdout/stderr records at the stage root. A
 predispatch intent is fsynced before spawn and the exact child PID is fsynced
 before any best-effort owner output. Capture, journal or stream failure attempts
 the exact tree stop; even an unconfirmed stop destroys and unreferences inherited
-pipes so the watchdog still has a finite nonzero terminal. These records retain pre-import errors even if the owner SSH
-connection closes; a filename collision fails rather than overwriting evidence.
-The dispatcher closes redirected stdin
-without writing and exits immediately while the watchdog retains the owner
-terminal. This removes both the PowerShell child-lifetime wait and an unbounded
+pipes so the watchdog still has a finite nonzero terminal. A filename collision
+fails rather than overwriting evidence. Windows OpenSSH owns its session children
+as one kill-on-close job, so the owner connection is deliberately retained until
+the exact watchdog terminates. The dispatcher closes redirected stdin without
+writing, waits once with a 1,095,000-millisecond ceiling, and returns the
+watchdog's exact exit code. Connection loss stops the whole job; an intent/started
+journal without a terminal record is therefore an immutable failed attempt, not
+authority to resume. This uses no parameterless wait, polling loop or unbounded
 anonymous-pipe write.
 
 The bootstrap has only Node built-ins; before importing repository code it verifies the source identity,

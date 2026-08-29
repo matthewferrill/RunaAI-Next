@@ -228,7 +228,8 @@ bound to an external dispatcher SHA-256; Control hashes the exact dispatcher
 bytes before parsing those same bytes. The dispatcher purges its ambient
 PowerShell environment using .NET APIs, validates fixed pins, carries the
 externally pinned bootstrap as a base64 argument and closes stdin without
-writing. It exits immediately without a child-lifetime wait.
+writing. The final form retains the owner session with one finite wait for the
+exact watchdog and returns that watchdog's exit code.
 
 An embedded built-in-only Node watchdog retains the watchdog/bootstrap PIDs and
 bounds source and dependency hashing plus the regression at 1,080,000
@@ -262,5 +263,20 @@ owner connection had already closed, the bootstrap's error text was not retained
 the stage is disqualified and is not reused. The correction makes the outer
 watchdog create and fsync a predispatch JSONL intent before child start, append
 the exact child PID before best-effort owner output, and retain bounded
-stdout/stderr files, so every future pre-import terminal survives connection loss. This is a
-diagnostic correction, not a reclassification of the failed run.
+stdout/stderr files. This is a diagnostic correction, not a reclassification of
+the failed run.
+
+The next immutable exercise used stage
+`m1-task-native-681d4731486846d18303db9ea2a96f49`, source
+`6dc91a2b2a6ffb3d85ce343f056b6b07b5de3e25` and prospective run
+`84347e187a4e4984815d5265de171ddf`. Its fsynced intent and exact watchdog/child
+PIDs were retained, but both processes were absent after the SSH owner session
+closed; the journal had no terminal record and the bounded output and evidence
+files were empty. No disposable service, model, protected-data read or production
+change occurred. This proves Windows OpenSSH places the session tree in a
+kill-on-close job: a nominally detached child cannot outlive the connection.
+The stage is disqualified and is not reused. The corrected dispatcher therefore
+keeps the owner connection open with one 1,095,000-millisecond wait, bounded
+slightly beyond the watchdog's own ceiling. Connection loss now remains a safe
+whole-tree stop and an explicitly failed attempt; it is not treated as a
+recoverable terminal.

@@ -78,7 +78,8 @@ if(!settled)timer=setTimeout(()=>stop('m1-control-bootstrap-watchdog-timeout'),m
     $child.StandardInput.Close()
     $escapedRoot=$root.Replace('\','\\').Replace('"','\"')
     [Console]::Out.Write('{"schemaVersion":"runaai-m1-control-regression-dispatch/v1","processId":'+[string]$child.Id+',"root":"'+$escapedRoot+'","manifestSha256":"'+$ExpectedManifestSha256+'","bootstrapSha256":"'+$ExpectedBootstrapSha256+'","sourceCommit":"'+$ExpectedSourceCommit+'","modelsInvoked":false,"protectedDataRead":false,"productionChanged":false}' + "`n")
-    $terminal=0
+    if(-not$child.WaitForExit(1095000)){throw'm1-control-dispatch-watchdog-timeout'}
+    $terminal=$child.ExitCode
   }catch{
     if($started){
       $killStart=[Diagnostics.ProcessStartInfo]::new();$killStart.FileName='C:\Windows\System32\taskkill.exe';$killStart.Arguments="/PID $($child.Id) /T /F"

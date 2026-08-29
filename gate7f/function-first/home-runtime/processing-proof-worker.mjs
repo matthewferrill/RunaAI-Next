@@ -7,7 +7,8 @@ demand(hostname().toUpperCase()==='RUNA-HOME'&&process.version==='v22.22.1','hos
 demand(root===config.homeRoot&&path.dirname(outputRoot)===path.dirname(root)&&path.basename(outputRoot)==='results'
   &&config.schemaVersion==='runaai-native-processing-proof/v1'
   &&/^20260829-native-processing-nomic-r[1-9][0-9]*$/.test(config.proofId)
-  &&root.endsWith(config.proofId.replaceAll('-',''))&&JSON.stringify(config.policy)===JSON.stringify(PROOF_POLICY),'config');
+  &&path.basename(path.dirname(root))==='RunaAI-Next-ProcessingProof-'+config.proofId.replaceAll('-','')
+  &&JSON.stringify(config.policy)===JSON.stringify(PROOF_POLICY),'config');
 for(const[name,pin]of Object.entries(seal.files)){const file=path.join(root,name);demand(!lstatSync(file).isSymbolicLink()&&sha(readFileSync(file))===pin,'source-drift');}
 const fixture=validateRequestFixture(JSON.parse(readFileSync(path.join(root,'request.json'),'utf8')));
 const output=(name,value)=>writeFileSync(path.join(outputRoot,name),JSON.stringify(value,null,2)+'\n',{flag:'wx'});

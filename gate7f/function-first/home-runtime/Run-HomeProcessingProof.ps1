@@ -2,8 +2,8 @@ param()
 Set-StrictMode -Version Latest
 $ErrorActionPreference='Stop';$ProgressPreference='SilentlyContinue'
 if($env:COMPUTERNAME-cne'RUNA-HOME'){throw 'processing-proof-supervisor-host'}
-$root=$PSScriptRoot;$config=Get-Content -LiteralPath ($root+'\config.json') -Raw|ConvertFrom-Json;$output=[string]$config.outputRoot
-if($root-cne$config.homeRoot-or$config.proofId-notmatch'^20260829-native-processing-nomic-r[1-9][0-9]*$'-or-not$root.EndsWith($config.proofId.Replace('-',''))-or$config.policy.proofDeadlineMs-ne900000){throw 'processing-proof-supervisor-config'}
+$root=$PSScriptRoot;$config=Get-Content -LiteralPath ($root+'\config.json') -Raw|ConvertFrom-Json;$output=[string]$config.outputRoot;$base=[IO.Path]::GetDirectoryName($root)
+if($root-cne$config.homeRoot-or$config.proofId-notmatch'^20260829-native-processing-nomic-r[1-9][0-9]*$'-or$base-cne('C:\ProgramData\RunaAI-Next-ProcessingProof-'+$config.proofId.Replace('-',''))-or$config.policy.proofDeadlineMs-ne900000){throw 'processing-proof-supervisor-config'}
 $seal=Get-Content -LiteralPath ($root+'\seal.json') -Raw|ConvertFrom-Json;$sealHash=(Get-FileHash -LiteralPath ($root+'\seal.json') -Algorithm SHA256).Hash.ToLowerInvariant()
 foreach($file in $seal.files.PSObject.Properties){if($file.Name-notmatch'^[a-zA-Z0-9-]+\.(mjs|json|ps1)$'-or(Get-FileHash -LiteralPath ($root+'\'+$file.Name) -Algorithm SHA256).Hash.ToLowerInvariant()-cne$file.Value){throw 'processing-proof-supervisor-source'}}
 function Evidence([string]$name,$value){$bytes=[Text.UTF8Encoding]::new($false).GetBytes(($value|ConvertTo-Json -Depth 20)+"`n");$stream=[IO.File]::Open(($output+'\'+$name),'CreateNew','Write','None');try{$stream.Write($bytes,0,$bytes.Length);$stream.Flush($true)}finally{$stream.Dispose()}}

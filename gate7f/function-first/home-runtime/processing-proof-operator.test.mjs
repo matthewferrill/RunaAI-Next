@@ -15,7 +15,7 @@ test('prospective package freezes the prior synthetic request and exact separate
     assert.equal(config.proofId,'20260829-native-processing-nomic-r2');assert.notEqual(config.mainTask,config.samplerTask);assert.match(config.homeRoot,/^C:\\ProgramData\\RunaAI-Next-ProcessingProof-/);
   }finally{rmSync(value.root,{recursive:true,force:true});}});
 test('operator modes remain exact-task, owner-sampler and non-production scoped',()=>{
-  const value=fixture();try{for(const mode of ['Stage','Dispatch','Ready','Proof','Status','Complete','Abort','ReleaseAbort','Export','Cleanup','Final']){
+  const value=fixture();try{for(const mode of ['Stage','Dispatch','Ready','Proof','Status','Complete','Abort','ReleaseAbort','RetirePreflightFailure','Export','Cleanup','Final']){
       const request=processingProofRequest(value.target,value.expected,mode),script=Buffer.from(request.input.toString().split('\n')[0],'base64').toString();
       execFileSync('powershell.exe',['-NoProfile','-NonInteractive','-Command',`$errors=$null;$tokens=$null;[void][Management.Automation.Language.Parser]::ParseInput([Console]::In.ReadToEnd(),[ref]$tokens,[ref]$errors);if($errors.Count){$errors|ForEach-Object{[Console]::Error.WriteLine($_.Message)};exit 1}`],{input:script});
       assert.match(request.nested,/runa-home-codex/);assert.doesNotMatch(script,/Remove-Item|Stop-Service/i);

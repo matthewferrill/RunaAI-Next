@@ -108,8 +108,9 @@ test('actual SDK deadline cancels a stalled structured request without another d
   }finally{await close(server);}
 });
 
-test('Home guard rejects arbitrary or weakened format declarations before admission',async()=>{
-  const selected=profile('gemma'),controller={profile:selected,async admit(){throw Error('must not admit');}},upstream=createServer((_q,r)=>r.end('{}'));
+test('Home guard counts ingress but rejects arbitrary or weakened format declarations before upstream',async()=>{
+  let admitted=0,released=0;const selected=profile('gemma'),controller={profile:selected,async admit(){admitted++;return {generation:'fixture',
+    signal:new AbortController().signal,release(){released++;}};}},upstream=createServer((_q,r)=>r.end('{}'));
   const endpoint=await listen(upstream),proxy=createRuntimeProxy({controller,upstream:endpoint,rerankerUpstream:endpoint,allowedClients:['127.0.0.1']});
   const url=await listen(proxy);let native=0;upstream.on('request',()=>native++);
   const variations=[null,{type:'json_object'}, {...EVIDENCE_RESPONSE_FORMAT,extra:'ignore'},
@@ -122,6 +123,6 @@ test('Home guard rejects arbitrary or weakened format declarations before admiss
     assert.throws(()=>validateRequest(selected,'/v1/chat/completions','POST',Buffer.from(JSON.stringify(body))),/response-format-not-qualified/);
     const res=await fetch(url+'/v1/chat/completions',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body)});
     assert.equal(res.status,503);assert.equal((await res.json()).errorCode,'runtime-response-format-not-qualified');}
-    assert.equal(native,0);
+    assert.equal(native,0);assert.equal(admitted,variations.length);assert.equal(released,variations.length);
   }finally{await close(proxy);await close(upstream);}
 });

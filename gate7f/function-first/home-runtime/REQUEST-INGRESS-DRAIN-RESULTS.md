@@ -11,7 +11,9 @@ model, credential, production configuration or live service was changed.
 - The selected proxy now obtains its existing privileged admission ticket
   after client/header checks but before awaiting the body. Its body reader is
   bound to both client/deadline cancellation and lifecycle ticket revocation.
-  Validation still precedes upstream dispatch.
+  Validation still precedes upstream dispatch. Malformed complete bodies retain
+  that counted ticket through denial, make zero upstream calls and release it in
+  the same `finally` boundary.
 - The legacy adapter now issues a single-use ingress lease before its server
   awaits a body. The durable close count includes that lease, so close cannot
   publish zero samples while an incomplete accepted body remains.

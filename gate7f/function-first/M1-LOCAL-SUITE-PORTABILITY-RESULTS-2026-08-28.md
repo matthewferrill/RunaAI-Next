@@ -13,4 +13,6 @@ Verification:
 - canonical TLS proxy SHA-256 remains `1c063e289ad2f1fc5be25c32fc7b39796d0a415943a868f0de5ae977ed0ef7f9`;
 - controller, manifest, and lease-contract working bytes were rematerialized exactly from their canonical Git objects; no source semantics changed.
 
+The default repository test script now caps file-level concurrency at four. The previous unbounded host default could start enough simultaneous PowerShell, Caddy, PostgreSQL, and native helper fixtures that an owned watchdog process did not reach its durable started record within 30 seconds. With concurrency four, the complete repository suite passed with zero failures; the product watchdog deadlines and assertions were unchanged. The final immutable Control qualification still runs serially as its existing criteria require.
+
 The complete local suite is rerun separately after integration; this focused result does not substitute for that terminal result or for the full Control regression.

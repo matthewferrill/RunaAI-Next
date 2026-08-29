@@ -6,14 +6,15 @@ const sealBytes=readFileSync(path.join(root,'seal.json')),seal=JSON.parse(sealBy
 demand(hostname().toUpperCase()==='RUNA-HOME'&&process.version==='v22.22.1','host-runtime');
 demand(root===config.homeRoot&&path.dirname(outputRoot)===path.dirname(root)&&path.basename(outputRoot)==='results'
   &&config.schemaVersion==='runaai-native-processing-proof/v1'
-  &&config.proofId==='20260829-native-processing-nomic-r1'&&JSON.stringify(config.policy)===JSON.stringify(PROOF_POLICY),'config');
+  &&/^20260829-native-processing-nomic-r[1-9][0-9]*$/.test(config.proofId)
+  &&root.endsWith(config.proofId.replaceAll('-',''))&&JSON.stringify(config.policy)===JSON.stringify(PROOF_POLICY),'config');
 for(const[name,pin]of Object.entries(seal.files)){const file=path.join(root,name);demand(!lstatSync(file).isSymbolicLink()&&sha(readFileSync(file))===pin,'source-drift');}
 const fixture=validateRequestFixture(JSON.parse(readFileSync(path.join(root,'request.json'),'utf8')));
 const output=(name,value)=>writeFileSync(path.join(outputRoot,name),JSON.stringify(value,null,2)+'\n',{flag:'wx'});
 writeFileSync(path.join(outputRoot,'events.jsonl'),'',{flag:'wx'});
 const event=(type,value={})=>appendFileSync(path.join(outputRoot,'events.jsonl'),JSON.stringify({type,time:new Date().toISOString(),...value})+'\n');
 const owned=[],controller=new AbortController();let pendingKey=null,phase='baseline',expectedPower=260,lastSample=Date.now(),sampling=false;
-let cleanupVerified=false,powerRestored=false,failure=null,completion=null,instanceId=null;
+let cleanupVerified=false,powerRestored=false,failure=null,completion=null,instanceId=null,inferenceCalled=false;
 async function api(endpoint,body,timeoutMs=10000,signal=controller.signal){
   demand(['/api/v1/models','/api/v1/models/load','/api/v1/models/unload'].includes(endpoint),'lifecycle-endpoint');
   const response=await fetch('http://127.0.0.1:1234'+endpoint,{method:body?'POST':'GET',redirect:'error',
@@ -76,10 +77,14 @@ try{
   phase='ready';clearTimeout(preparation);await sample();output('ready.json',{schemaVersion:'runaai-native-processing-proof-ready/v1',proofId:config.proofId,
     sealSha256,modelId:NOMIC.key,instanceId,artifactSha256:NOMIC.sha256,readyAt:new Date().toISOString(),
     expiresAt:new Date(Date.now()+PROOF_POLICY.proofDeadlineMs).toISOString(),goPath:path.join(outputRoot,'go.json'),completionPath:path.join(outputRoot,'complete.json')});
-  const deadline=Date.now()+PROOF_POLICY.proofDeadlineMs;while(!existsSync(path.join(outputRoot,'go.json'))){demand(Date.now()<deadline,'go-timeout');await pause();}
+  const deadline=Date.now()+PROOF_POLICY.proofDeadlineMs;while(!existsSync(path.join(outputRoot,'go.json'))){
+    if(existsSync(path.join(outputRoot,'complete.json'))){const early=JSON.parse(readFileSync(path.join(outputRoot,'complete.json'),'utf8'));
+      demand(early?.schemaVersion==='runaai-native-processing-proof-completion/v1'&&early.proofId===config.proofId
+        &&early.sealSha256===sealSha256&&early.reason==='abort','early-completion');throw Error('processing-proof-aborted-before-go');}
+    demand(Date.now()<deadline,'go-timeout');await pause();}
   const go=JSON.parse(readFileSync(path.join(outputRoot,'go.json'),'utf8'));demand(go?.schemaVersion==='runaai-native-processing-proof-go/v1'
     &&go.proofId===config.proofId&&go.sealSha256===sealSha256&&Number.isFinite(Date.parse(go.startedAt)),'go');
-  phase='requests';await runRequests();phase='await-completion';while(!existsSync(path.join(outputRoot,'complete.json'))){demand(Date.now()<deadline,'completion-timeout');await pause();}
+  phase='requests';inferenceCalled=true;await runRequests();phase='await-completion';while(!existsSync(path.join(outputRoot,'complete.json'))){demand(Date.now()<deadline,'completion-timeout');await pause();}
   const value=JSON.parse(readFileSync(path.join(outputRoot,'complete.json'),'utf8'));demand(value?.schemaVersion==='runaai-native-processing-proof-completion/v1'
     &&value.proofId===config.proofId&&value.sealSha256===sealSha256&&['completed','abort'].includes(value.reason),'completion');completion=value.reason;
 }catch(error){failure=/^processing-proof-[a-z0-9-]+$/.test(error.message)?error.message:'processing-proof-worker-failed';event('failure',{code:failure,errorClass:error.name});}
@@ -93,6 +98,6 @@ finally{
   }catch(error){event('cleanup-failure',{code:error.message});}
   output('lease-result.json',{schemaVersion:'runaai-native-processing-proof-lease-result/v1',proofId:config.proofId,sealSha256,
     endedAt:new Date().toISOString(),failure,completion,cleanupVerified,powerRestored,owned,ambiguousLoad:pendingKey,
-    productionRoutingChanged:false,settingsChanged:false,protectedDataIncluded:false,inferenceCalledByOperator:true});
+    productionRoutingChanged:false,settingsChanged:false,protectedDataIncluded:false,inferenceCalledByOperator:inferenceCalled});
   if(failure||!cleanupVerified||!powerRestored)process.exitCode=1;
 }

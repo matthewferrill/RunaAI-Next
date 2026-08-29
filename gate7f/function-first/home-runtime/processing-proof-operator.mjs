@@ -4,7 +4,7 @@ const HASH=/^[a-f0-9]{64}$/,ps=value=>value.replaceAll("'","''");
 function loadPackage(directory,expected){demand(path.isAbsolute(directory)&&HASH.test(expected),'operator-args');const raw=readFileSync(path.join(directory,'seal.json'));
   demand(sha(raw)===expected,'operator-seal');const seal=JSON.parse(raw),config=JSON.parse(readFileSync(path.join(directory,'config.json')));
   demand(seal.schemaVersion==='runaai-native-processing-proof-seal/v1'&&seal.proofId===config.proofId
-    &&config.schemaVersion==='runaai-native-processing-proof/v1'&&config.proofId==='20260829-native-processing-nomic-r1'
+    &&config.schemaVersion==='runaai-native-processing-proof/v1'&&/^20260829-native-processing-nomic-r[1-9][0-9]*$/.test(config.proofId)
     &&JSON.stringify(config.policy)===JSON.stringify(PROOF_POLICY)&&config.model.key===NOMIC.key,'operator-config');
   for(const[name,pin]of Object.entries(seal.files))demand(sha(readFileSync(path.join(directory,name)))===pin,'operator-source');
   validateRequestFixture(JSON.parse(readFileSync(path.join(directory,'request.json'))));return {seal,config};}

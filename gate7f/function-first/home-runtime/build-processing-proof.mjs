@@ -1,8 +1,9 @@
 import {execFileSync} from 'node:child_process';import {existsSync,mkdirSync,readFileSync,writeFileSync} from 'node:fs';import path from 'node:path';
 import {NOMIC,PROOF_POLICY,demand,sha} from './processing-proof-contract.mjs';
-const proofId='20260829-native-processing-nomic-r1',here=import.meta.dirname,repository=path.resolve(here,'../../..');
-const target=path.resolve(process.argv[2]??''),preflightPath=path.resolve(process.argv[3]??'');
-demand(process.argv.length===4&&path.isAbsolute(target)&&!existsSync(target)&&existsSync(preflightPath),'build-arguments');
+const here=import.meta.dirname,repository=path.resolve(here,'../../..');
+const target=path.resolve(process.argv[2]??''),preflightPath=path.resolve(process.argv[3]??''),proofId=process.argv[4]??'';
+demand(process.argv.length===5&&path.isAbsolute(target)&&!existsSync(target)&&existsSync(preflightPath)
+  &&/^20260829-native-processing-nomic-r[1-9][0-9]*$/.test(proofId),'build-arguments');
 const preflight=JSON.parse(readFileSync(preflightPath,'utf8'));demand(preflight.schemaVersion==='runaai-native-processing-proof-preflight/v1'
   &&preflight.residentCount===0&&preflight.node?.version==='v22.22.1','build-preflight');
 const evidenceCommit='35e01bf557881ad4ff10f739c59e55c041ffcdaa',evidencePath='gate7f/function-first/readiness/evidence/20260828-actual-adapter-gemma/0017.json';
@@ -23,4 +24,3 @@ files['seal.json']=Buffer.from(JSON.stringify(seal,null,2)+'\n');mkdirSync(targe
 for(const[name,raw]of Object.entries(files))writeFileSync(path.join(target,name),raw,{flag:'wx'});
 writeFileSync(path.join(target,'transfer.json'),JSON.stringify(Object.fromEntries(Object.entries(files).map(([name,raw])=>[name,raw.toString('base64')]))),{flag:'wx'});
 process.stdout.write(JSON.stringify({target,sealSha256:sha(files['seal.json']),config,seal})+'\n');
-

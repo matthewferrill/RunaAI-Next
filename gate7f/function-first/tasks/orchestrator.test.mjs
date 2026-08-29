@@ -55,7 +55,8 @@ class Adapter {
 }
 
 async function fixture({ planner, profile = "safe-autopilot", hooks = {}, budgets = {}, cipher = null, authorizeContext = null,
-  files = { "index.js": "exports.add=(a,b)=>a-b;" }, objective = "Fix and test the addition function." } = {}) {
+  files = { "index.js": "exports.add=(a,b)=>a-b;" }, allowedPaths = ["index.js"],
+  objective = "Fix and test the addition function." } = {}) {
   const pool = new pg.Pool({ connectionString: process.env.M1_TASK_PG_URL });
   const schema = `m1_orch_${randomBytes(6).toString("hex")}`;
   const store = new PostgresTaskStore({ pool, schema, cipher, allowPlaintextForSynthetic: !cipher }); await store.initialize();
@@ -64,7 +65,7 @@ async function fixture({ planner, profile = "safe-autopilot", hooks = {}, budget
     ...(authorizeContext ? { authorizeContext } : { allowSyntheticAuthority: true }) });
   await service.registerProject(context, { environmentId: "orch-environment", files });
   const task = await service.createTask(context, { requestId: "task-create", objective });
-  const grant = await service.createGrant(context, { taskId: task.taskId, profile, allowedPaths: ["index.js"],
+  const grant = await service.createGrant(context, { taskId: task.taskId, profile, allowedPaths,
     allowedSuites: ["addition"], expiresAt: new Date(Date.now() + 600_000).toISOString() });
   const saver = new PostgresSaver(pool, undefined, { schema: `${schema}_cp` }); await saver.setup();
   const workflow = createM1TaskWorkflow({ service, checkpointer: saver });
@@ -298,6 +299,49 @@ integration("explicit new-session grant continuation invalidates old approvals a
   } finally { await f.close(); }
 });
 
+integration("replacement planner never receives a restore receipt whose affected paths exceed its narrowed grant", async () => {
+  let plans = 0, restoreReceiptId;
+  const planner = { async plan({ snapshot, receipts }) {
+    plans++;
+    if (plans === 1) return planFor(snapshot, true);
+    assert.equal(receipts.some(receipt => receipt.receiptId === restoreReceiptId), false);
+    return { summary: "Untrusted guess of an omitted restore receipt.", steps: [
+      { capabilityId: "project.inspect", arguments: { path: "index.js" } },
+      { capabilityId: "project.restore", arguments: { receiptId: restoreReceiptId } },
+    ] };
+  } };
+  const f = await fixture({ profile: "ask-every-time", planner, allowedPaths: ["index.js", "hidden.js"],
+    files: { "index.js": "exports.add=(a,b)=>a-b;", "hidden.js": "exports.hidden='before';" } });
+  try {
+    const first = await f.start();
+    assert.equal(first.run.status, "waiting-approval");
+    const changed = await seedOwnedEdit(f, { path: "hidden.js", content: "exports.hidden='after';", requestId: "hidden-edit" });
+    let restore = await f.service.propose(context, { taskId: f.task.taskId, grantId: f.grant.grantId,
+      grantRevision: f.grant.revision, requestId: "hidden-restore", capabilityId: "project.restore",
+      arguments: { receiptId: changed.receiptId } });
+    assert(restore.restorePaths.includes("hidden.js"));
+    await f.service.approve(context, { proposalId: restore.proposalId, proposalDigest: restore.proposalDigest });
+    restore = (await f.service.execute(context, { proposalId: restore.proposalId })).proposal;
+    restoreReceiptId = (await f.service.proposalState(context, restore.proposalId)).receipt.receiptId;
+    assert.equal(restore.status, "completed");
+
+    const before = await f.service.status(context, { taskId: f.task.taskId });
+    const edits = f.adapter.edits, originalPlans = first.run.plans.length;
+    const nextContext = { ...context, sessionId: "narrow-replacement-session" };
+    const replacement = await f.service.createGrant(nextContext, { taskId: f.task.taskId, profile: "safe-autopilot",
+      allowedPaths: ["index.js"], allowedSuites: ["addition"], expiresAt: new Date(Date.now() + 600_000).toISOString() });
+    const result = await f.orchestrator.resume(nextContext, { runId: first.run.runId,
+      grantId: replacement.grantId, grantRevision: replacement.revision });
+    assert.equal(result.run.status, "failed");
+    assert.equal(result.run.errorCode, "m1-plan-restore-reference-invalid");
+    assert.equal(result.run.plans.length, originalPlans);
+    assert.equal(result.proposals.length, before.proposals.length);
+    assert.equal(result.receipts.length, before.receipts.length);
+    assert.equal(f.adapter.edits, edits);
+    assert.equal(plans, 2);
+  } finally { await f.close(); }
+});
+
 integration("an unknown old test outcome blocks replacement-grant continuation", async () => {
   const f = await fixture({ hooks: { afterTests: () => { throw new Error("lost-test"); } } });
   try {
@@ -477,11 +521,12 @@ for (const role of ["code", "agent"]) for (const mode of ["preview-only", "appro
   });
 }
 
-async function seedOwnedEdit(f, { content = "exports.add=(a,b)=>a+b;", requestId = "seed-edit", task = f.task, grant = f.grant } = {}) {
+async function seedOwnedEdit(f, { path = "index.js", content = "exports.add=(a,b)=>a+b;", requestId = "seed-edit", task = f.task, grant = f.grant } = {}) {
   const project = await f.service.currentProject(context);
+  const current = project.reference.files.find(file => file.path === path);
   const proposal = await f.service.propose(context, { taskId: task.taskId, grantId: grant.grantId,
     grantRevision: grant.revision, requestId, capabilityId: "project.apply-change",
-    arguments: { path: "index.js", content, expectedSha256: project.reference.files[0].sha256 } });
+    arguments: { path, content, expectedSha256: current.sha256 } });
   if (proposal.status === "pending-approval") await f.service.approve(context,
     { proposalId: proposal.proposalId, proposalDigest: proposal.proposalDigest });
   return (await f.service.execute(context, { proposalId: proposal.proposalId })).receipt;

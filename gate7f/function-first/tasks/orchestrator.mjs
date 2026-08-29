@@ -225,7 +225,9 @@ export class M1TaskOrchestrator {
       reference: taskState.project.reference });
     const permittedStep = step => (!step.arguments?.path || grant.allowedPaths.includes(step.arguments.path))
       && (!step.arguments?.suiteId || grant.allowedSuites.includes(step.arguments.suiteId));
-    const permittedProposalIds = new Set(taskState.proposals.filter(permittedStep).map(proposal => proposal.proposalId));
+    const permittedProposal = proposal => permittedStep(proposal)
+      && (!proposal.restorePaths || proposal.restorePaths.every(file => grant.allowedPaths.includes(file)));
+    const permittedProposalIds = new Set(taskState.proposals.filter(permittedProposal).map(proposal => proposal.proposalId));
     const permittedReceipts = taskState.receipts.filter(receipt => permittedProposalIds.has(receipt.proposalId));
     const plannerSnapshot = { workspaceSha256: snapshot.workspaceSha256, projectRevision: taskState.project.revision,
       files: snapshot.files.filter(file => grant.allowedPaths.includes(file.path)),

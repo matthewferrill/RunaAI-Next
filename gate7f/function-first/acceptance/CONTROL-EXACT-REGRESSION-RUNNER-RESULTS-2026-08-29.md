@@ -137,6 +137,25 @@ nested `finally`, an ordinary child result retains its exact exit code, and the
 outermost `finally` calls `[Environment]::Exit` on every path. No exception can
 skip child disposal or fall back into normal host teardown.
 
+The next immutable stage confirmed the dedicated host could remain inside
+`.WaitForExit()` after its Node child was no longer present. That API is now
+removed. The wrapper polls the actual child handle's `HasExited` state at
+100-millisecond intervals, retains the exact child code as soon as the OS marks
+it terminal, and enforces a 1,050,000-millisecond outer ceiling. If that ceiling
+is reached it stops only the recorded child tree with fixed `taskkill /PID <id>
+/T /F` arguments and exits `124`; its nested `finally` repeats the exact-tree
+stop if an exception occurred while the child was still live, then disposes the
+handle without allowing cleanup exceptions to bypass the outer terminal exit.
+
+Independent timeout-path review then caught that the first ceiling handler used
+`Start-Process -Wait`, reintroducing the rejected wait mechanism only on that
+rare path. `Stop-ExactTree` now starts fixed `taskkill.exe` through another
+nonredirected `.NET ProcessStartInfo`, polls its handle for at most 10 seconds,
+and accepts only exact exit `0`. It kills only that recorded stopper process if
+the stopper itself exceeds the bound. Both the ceiling and nested-cleanup paths
+use this helper; an unconfirmed tree stop returns wrapper failure `125` rather
+than claiming timeout cleanup succeeded.
+
 The next execution must create a fresh exact stage and prospective manifest for
 the final selected source, then run the fixed PowerShell entry point on Control.
 Only that execution can prove the pinned Control PostgreSQL/Qdrant/QuickJS/MXC

@@ -47,15 +47,16 @@ test('TAP summary requires one complete final summary and retains skips as a fai
 });
 
 test('owner supervisor environment retains only safe operating-system keys',()=>{
-  assert.deepEqual(ownerSafeEnvironment({SystemRoot:'C:\\Windows',TEMP:'C:\\Temp',NODE_OPTIONS:'--require foreign.js',providerSecret:'private'}),
-    {SystemRoot:'C:\\Windows',TEMP:'C:\\Temp'});
+  assert.deepEqual(ownerSafeEnvironment({SystemRoot:'C:\\Windows',SystemDrive:'Z:',OS:'foreign',TEMP:'C:\\Temp',NODE_OPTIONS:'--require foreign.js',providerSecret:'private'}),
+    {SystemRoot:'C:\\Windows',SystemDrive:'C:',OS:'Windows_NT',TEMP:'C:\\Temp'});
 });
 
 test('test environment exposes only owned endpoints and safe process keys, never inherited credentials or providers',()=>{
   const root='C:\\AI\\RunaAI-Next-Candidate\\staging\\m1-task-native-'+('a'.repeat(32)),owned=resources(root);
-  const env=controlRegressionEnvironment({SystemRoot:'C:\\Windows',PATH:'safe',OPENAI_API_KEY:'secret',HOME:'private',M1_TASK_PG_URL:'production',
+  const env=controlRegressionEnvironment({SystemRoot:'C:\\Windows',SystemDrive:'Z:',OS:'foreign',PATH:'safe',OPENAI_API_KEY:'secret',HOME:'private',M1_TASK_PG_URL:'production',
     RUNAAI_PROVIDER_URL:'http://production'},owned,root);
-  assert.equal(env.SystemRoot,'C:\\Windows');assert.equal(env.M1_TASK_PG_URL,'postgresql://m1_synthetic@127.0.0.1:41001/postgres');
+  assert.equal(env.SystemRoot,'C:\\Windows');assert.equal(env.SystemDrive,'C:');assert.equal(env.OS,'Windows_NT');
+  assert.equal(env.M1_TASK_PG_URL,'postgresql://m1_synthetic@127.0.0.1:41001/postgres');
   assert.equal(env.M1_QDRANT_BINARY,path.join(root,'tools/qdrant/bin/qdrant.exe'));assert.equal(env.TEMP,owned.dataDirectory);
   for(const key of ['OPENAI_API_KEY','HOME','RUNAAI_PROVIDER_URL'])assert.equal(Object.hasOwn(env,key),false);
 });

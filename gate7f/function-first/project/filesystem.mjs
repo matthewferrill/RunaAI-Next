@@ -15,6 +15,49 @@ export function validateBaseDirectory(value) {
   return value;
 }
 
+function exact(value, keys) {
+  return value && typeof value === "object" && !Array.isArray(value)
+    && Object.keys(value).sort().join(",") === [...keys].sort().join(",");
+}
+
+export function parseFilesystemTerminal({ stdout, stderrBytes, code, operation }) {
+  if (!Number.isSafeInteger(stderrBytes) || stderrBytes < 0 || stderrBytes > 16_000
+      || !["create", "read", "observe"].includes(operation)) throw failure("project-filesystem-output-invalid");
+  let result;
+  try { result = JSON.parse(String(stdout).trim()); }
+  catch { throw failure("project-filesystem-output-invalid"); }
+  if (code !== 0) {
+    if (exact(result, ["status", "errorCode"]) && result.status === "error"
+        && /^project-[a-z-]+$/.test(result.errorCode)) throw failure(result.errorCode);
+    throw failure("project-filesystem-operation-failed");
+  }
+  // Windows PowerShell can emit bounded CLIXML progress records on stderr while
+  // returning an exact successful JSON result and exit code zero. Stderr is a
+  // capped diagnostic channel, never an authority channel.
+  if (result.status === "absent") {
+    if (operation !== "observe" || !exact(result, ["status"])) throw failure("project-filesystem-output-invalid");
+    return { status: "absent" };
+  }
+  if (result.status !== "present" || !exact(result, ["status", "created", "files"])
+      || typeof result.created !== "boolean" || !Array.isArray(result.files)
+      || result.files.length < 1 || result.files.length > 4) throw failure("project-filesystem-output-invalid");
+  const names = new Set();
+  const files = result.files.map(file => {
+    if (!exact(file, ["path", "base64"]) || typeof file.path !== "string" || typeof file.base64 !== "string"
+        || !/^[a-z][a-z0-9_-]{0,47}\.js$/.test(file.path) || names.has(file.path.toLowerCase())) {
+      throw failure("project-filesystem-output-invalid");
+    }
+    names.add(file.path.toLowerCase());
+    const bytes = Buffer.from(file.base64, "base64");
+    if (bytes.length > 4_000 || bytes.toString("base64") !== file.base64) throw failure("project-filesystem-output-invalid");
+    let content;
+    try { content = new TextDecoder("utf-8", { fatal: true }).decode(bytes); }
+    catch { throw failure("project-filesystem-output-invalid"); }
+    return { path: file.path, content };
+  });
+  return { status: "present", created: result.created, files };
+}
+
 export async function revisionFilesystem({ operation, baseDirectory, environmentDirectory, revisionId, files }) {
   validateBaseDirectory(baseDirectory);
   const input = JSON.stringify({ operation, baseDirectory, environmentDirectory, revisionId,
@@ -36,18 +79,7 @@ export async function revisionFilesystem({ operation, baseDirectory, environment
     child.stderr.on("data", chunk => { stderrBytes += chunk.length; if (stderrBytes > 16_000) child.kill(); });
     child.on("close", code => {
       try {
-        const result = JSON.parse(stdout.trim());
-        if (result.status === "error" || code !== 0 || stderrBytes) throw failure(
-          /^project-[a-z-]+$/.test(result.errorCode ?? "") ? result.errorCode : "project-filesystem-operation-failed");
-        if (result.status === "absent" && operation === "observe") return finish(null, { status: "absent" });
-        if (result.status !== "present" || !Array.isArray(result.files)) throw failure("project-filesystem-output-invalid");
-        const decoded = result.files.map(file => {
-          if (typeof file.path !== "string" || typeof file.base64 !== "string") throw failure("project-filesystem-output-invalid");
-          const bytes = Buffer.from(file.base64, "base64");
-          if (bytes.toString("base64") !== file.base64) throw failure("project-filesystem-output-invalid");
-          return { path: file.path, content: new TextDecoder("utf-8", { fatal: true }).decode(bytes) };
-        });
-        finish(null, { status: "present", created: result.created === true, files: decoded });
+        finish(null, parseFilesystemTerminal({ stdout, stderrBytes, code, operation }));
       } catch (error) { finish(error?.code ? error : failure("project-filesystem-output-invalid")); }
     });
     child.stdin.end(input);

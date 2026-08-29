@@ -8,7 +8,9 @@ const safeKeys=Object.freeze(['SystemRoot','WINDIR','ComSpec','PATH','PATHEXT','
 const coded=code=>Object.assign(new Error(code),{code});
 
 export function ownerSafeEnvironment(source=process.env){
-  const output={};for(const key of safeKeys)if(source[key])output[key]=source[key];return Object.freeze(output);
+  const output={};for(const key of safeKeys)if(source[key])output[key]=source[key];
+  if(process.platform==='win32'){output.SystemDrive='C:';output.OS='Windows_NT';}
+  return Object.freeze(output);
 }
 
 export function stopWindowsProcessTree(processId,{run=spawnSync,systemRoot=process.env.SystemRoot??'C:\\Windows'}={}){

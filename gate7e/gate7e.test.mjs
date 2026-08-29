@@ -388,7 +388,7 @@ test("MXC runs the pinned child or exposes the exact host-preparation blocker an
     const directDaclBlocker = /Failed to apply DACL ACEs|DACL fallback requires write-DAC permission/.test(diagnostics);
     const drivePreparationBlocker = receipt.exitCode === 0xC0000142
       && (support.isolationWarnings ?? []).some(warning => warning.includes("prepare-system-drive"));
-    const ancestorTraversalBlocker = /^sandbox-start-ancestor-[1-6]-denied$/.test(receipt.errorCode)
+    const ancestorTraversalBlocker = /^sandbox-start-ancestor-(?:[1-6]|path)-denied$/.test(receipt.errorCode)
       && /(?:EPERM|EACCES).*lstat/i.test(diagnostics);
     assert.equal(directDaclBlocker || drivePreparationBlocker || ancestorTraversalBlocker, true);
     assert.equal(receipt.output.combinedBytes, 0);

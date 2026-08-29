@@ -45,7 +45,8 @@ else {fs.writeFileSync(side,JSON.stringify({pid:process.pid,argv:process.argv.sl
     async launch(){launched=await launchWatchdog(options);return launched;},
     async close(){if(launched&&isRunning(launched.child.pid)){launched.child.kill();await launched.completion;}
       for(const file of [side,grand])try{const value=JSON.parse(await readFile(file));if(isRunning(value.pid)){process.kill(value.pid);await stopConfirmed(value.pid);}}catch(error){if(!['ENOENT','ESRCH'].includes(error.code))throw error;}
-      assert.ok(path.resolve(base).startsWith(path.resolve(tmpdir())+path.sep));await rm(base,{recursive:true,force:true});}
+      assert.ok(path.resolve(base).startsWith(path.resolve(tmpdir())+path.sep));
+      await rm(base,{recursive:true,force:true,maxRetries:10,retryDelay:100});}
   };
 }
 

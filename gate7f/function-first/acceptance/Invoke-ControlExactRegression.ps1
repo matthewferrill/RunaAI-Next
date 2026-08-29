@@ -69,6 +69,8 @@ $startInfo.RedirectStandardOutput=$false
 $startInfo.RedirectStandardError=$false
 $startInfo.EnvironmentVariables.Clear()
 foreach($name in $safeNames){$value=[Environment]::GetEnvironmentVariable($name,'Process');if($null-ne$value){$startInfo.EnvironmentVariables[$name]=$value}}
+$startInfo.EnvironmentVariables['SystemDrive']='C:'
+$startInfo.EnvironmentVariables['OS']='Windows_NT'
 $child=New-Object System.Diagnostics.Process
 $child.StartInfo=$startInfo
 $childStarted=$false

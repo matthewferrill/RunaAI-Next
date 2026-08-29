@@ -1,6 +1,7 @@
 param()
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
+$ProgressPreference = 'SilentlyContinue'
 # This fixed helper never evaluates supplied code. It only operates on bounded immutable artifacts.
 # All ancestors are held open without FILE_SHARE_DELETE; source files also deny FILE_SHARE_WRITE.
 Add-Type -TypeDefinition @'

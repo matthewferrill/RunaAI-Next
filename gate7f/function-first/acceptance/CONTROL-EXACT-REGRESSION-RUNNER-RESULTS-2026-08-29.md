@@ -156,6 +156,59 @@ the stopper itself exceeds the bound. Both the ceiling and nested-cleanup paths
 use this helper; an unconfirmed tree stop returns wrapper failure `125` rather
 than claiming timeout cleanup succeeded.
 
+## Complete diagnostic run and prospective shared corrections
+
+The fresh diagnostic stage
+`m1-task-native-3820e9d9c0a4458bb7538a6eea1cbf0f` on source
+`5063f98e08c95c15ab846d9203e9ec81ef9d9e60` completed the entire zero-skip
+suite instead of stalling. Prospective run `7f79edb805414b69bde8ccac5c8aa118`
+retained 1,740 tests: 1,721 passed, 19 failed and none skipped. Cleanup passed:
+the owned PostgreSQL and Qdrant processes were stopped, their owned runtime/data
+were removed, and production remained unchanged. The retained TAP log is the
+authority for its complete SHA-256. This failed run is diagnostic evidence, not
+qualification.
+
+The 19 failures resolved into six shared causes rather than model behavior:
+
+1. an existing typed MXC ancestor-path denial was omitted from one unit-test
+   allowlist even though the mandatory resource preflight passed;
+2. the sanitized Windows child environment omitted the fixed `OS` value;
+3. one watchdog fixture cleanup needed a bounded retry for transient Windows
+   `EBUSY` after its stop proof;
+4. processing-proof packaging consulted `.git` inside an extracted archive;
+5. `File.Replace` added only `SE_DACL_AUTO_INHERITED` to the post-replacement
+   target descriptor; and
+6. the project filesystem adapter treated benign PowerShell first-use CLIXML on
+   stderr as a protocol failure despite exact stdout and exit status.
+
+The prospective corrections replace each ambient assumption with an explicit
+contract. Windows constants are derived exactly without inheriting provider or
+credential variables; the typed MXC denial remains constrained by its existing
+zero-output diagnostics; cleanup retry is bounded; the processing proof uses a
+hash-pinned repository-root `SOURCE-IDENTITY.json` and a frozen archived request
+without Git; the project child accepts only exact bounded terminal JSON plus an
+exact exit/status combination while keeping capped stderr non-authoritative.
+
+The ACL correction is deliberately narrower than a normalized-SDDL comparison.
+It records an exact descriptor fingerprint, a replacement-equivalence
+fingerprint and the original flags. It requests the SACL with `Get-Acl -Audit`,
+binds exact owner, group, DACL and SACL bytes/order, and permits only a
+post-`ReplaceFile` `0x0400` addition. Preapply, unstarted and owned-preimage
+checks remain exact; flag removal or any other descriptor difference fails
+closed. Intent and receipts advance to v3, and duplicate, legacy, missing,
+unknown or mistyped authority fields are rejected before use. A read-only Control
+probe confirmed the owner identity is an administrator and can request audit
+security data; the final zero-skip run must still prove the actual transactions.
+
+Independent review found no remaining blocker in the prospective diff. The
+focused shared-correction suite passes on Omen; twelve real SACL transaction
+cases are intentionally skipped there because its current token cannot read
+audit security data, while the implementation itself fails closed. Those cases
+must run with zero skips under the Control owner token. The complete local suite
+exited successfully on the final prospective worktree, and roadmap verification
+passed 15/15 while retaining all 17 capability families. Local success does not
+replace the required fresh immutable Control run.
+
 The next execution must create a fresh exact stage and prospective manifest for
 the final selected source, then run the fixed PowerShell entry point on Control.
 Only that execution can prove the pinned Control PostgreSQL/Qdrant/QuickJS/MXC

@@ -7,6 +7,7 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import { getQuickJS } from "quickjs-emscripten";
 import { DisposableJavascriptProjectAdapter } from "./adapter.mjs";
+import { parseFilesystemTerminal } from "./filesystem.mjs";
 import { bindingDigest, digest, normalizeFiles, stableJson } from "./contracts.mjs";
 import { buildTestBundle, compareTestReceipt } from "./test-harness.mjs";
 
@@ -18,6 +19,24 @@ const addition = { suiteId: "addition", cases: [
   { testId: "negative", exportName: "add", args: [-5, 3], expected: -2 },
 ] };
 const suiteMap = { addition };
+
+test("filesystem child protocol accepts bounded diagnostics but no ambiguous terminal", () => {
+  const present = JSON.stringify({ status: "present", created: true,
+    files: [{ path: "main.js", base64: Buffer.from(add).toString("base64") }] });
+  assert.deepEqual(parseFilesystemTerminal({ stdout: present, stderrBytes: 512, code: 0, operation: "create" }),
+    { status: "present", created: true, files: initialFiles });
+  assert.deepEqual(parseFilesystemTerminal({ stdout: '{"status":"absent"}', stderrBytes: 0, code: 0, operation: "observe" }),
+    { status: "absent" });
+  for (const input of [
+    { stdout: present, stderrBytes: 0, code: 1, operation: "create" },
+    { stdout: present, stderrBytes: 16_001, code: 0, operation: "create" },
+    { stdout: '{"status":"error","errorCode":"project-base-invalid"}', stderrBytes: 0, code: 0, operation: "create" },
+    { stdout: '{"status":"present","created":true,"files":[],"extra":true}', stderrBytes: 0, code: 0, operation: "create" },
+    { stdout: '{"status":"absent"}', stderrBytes: 0, code: 0, operation: "read" },
+  ]) assert.throws(() => parseFilesystemTerminal(input), /project-/);
+  assert.throws(() => parseFilesystemTerminal({ stdout: '{"status":"error","errorCode":"project-base-invalid"}',
+    stderrBytes: 1, code: 1, operation: "create" }), /project-base-invalid/);
+});
 
 // Real QuickJS language semantics, deliberately NOT MXC/isolation qualification.
 // This test double stamps synthetic transport receipts solely to exercise host validation.

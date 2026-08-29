@@ -141,6 +141,8 @@ test('owner PowerShell entry point parses in Windows PowerShell 5 and contains n
   assert.match(text,/GetEnvironmentVariables\('Process'\)/u);assert.match(text,/SetEnvironmentVariable/u);assert.match(text,/\$safeNames/u);
   assert.match(text,/GetEnvironmentVariable\(\$name,'Process'\)/u);assert.doesNotMatch(text,/\$originalEnvironment\[\$name\]/u);
   assert.match(text,/exit \$childExitCode/u);assert.doesNotMatch(text,/throw'm1-control-regression-run-failed'/u);
+  assert.match(text,/Start-Process -FilePath \$node -ArgumentList \$arguments -Wait -PassThru -NoNewWindow/u);
+  assert.doesNotMatch(text,/& \$node @arguments/u);
   assert.doesNotMatch(text+supervisor,/OPENAI|LMSTUDIO|RUNAAI_PROVIDER|M1_TASK_PG_URL/u);
   assert.doesNotMatch(text,/ReadToEndAsync|ReadToEnd\(|ProcessStartInfo|\.Kill\(/u);
   assert.match(supervisor,/1_020_000/u);assert.match(supervisor,/taskkill\.exe/u);assert.match(supervisor,/stdio:\['ignore','pipe','pipe'\]/u);

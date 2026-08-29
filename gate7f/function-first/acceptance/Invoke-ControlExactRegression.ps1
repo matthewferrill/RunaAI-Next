@@ -35,8 +35,8 @@ foreach($name in $safeNames){$value=[Environment]::GetEnvironmentVariable($name,
 try{
   foreach($name in @([Environment]::GetEnvironmentVariables('Process').Keys)){[Environment]::SetEnvironmentVariable([string]$name,$null,'Process')}
   foreach($entry in $safeEnvironment.GetEnumerator()){[Environment]::SetEnvironmentVariable([string]$entry.Key,[string]$entry.Value,'Process')}
-  & $node @arguments
-  $childExitCode=$LASTEXITCODE
+  $child=Start-Process -FilePath $node -ArgumentList $arguments -Wait -PassThru -NoNewWindow
+  $childExitCode=$child.ExitCode
 }finally{
   foreach($name in @([Environment]::GetEnvironmentVariables('Process').Keys)){[Environment]::SetEnvironmentVariable([string]$name,$null,'Process')}
   foreach($entry in $originalEnvironment.GetEnumerator()){[Environment]::SetEnvironmentVariable([string]$entry.Key,[string]$entry.Value,'Process')}

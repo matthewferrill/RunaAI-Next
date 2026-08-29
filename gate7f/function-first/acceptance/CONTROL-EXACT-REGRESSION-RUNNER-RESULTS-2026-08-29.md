@@ -95,6 +95,17 @@ cleanup state without hanging or inventing absent ports.
 Selected ports are recorded before PostgreSQL initialization or Qdrant start,
 so a later partial-start failure also probes every possibly bound port.
 
+A third fresh stage on source `a6561dbda46c7b90b4adbc8fe18290b57f9ddf01`
+proved that direct PowerShell call-operator invocation could still leave the
+PowerShell host resident after its Node child had exited. No Node child,
+evidence directory or disposable service remained; the exact wrapper identity
+was rechecked and stopped, and the stage was disqualified. The entry point now
+uses `Start-Process -Wait -PassThru -NoNewWindow` without redirection. This
+retains inherited output while moving the child wait out of PowerShell's
+pipeline invocation layer; Node remains the bounded stream supervisor. A direct
+Control probe completed normally and retained the deliberately selected child
+exit code `7`, with no model, protected-data or production access.
+
 The next execution must create a fresh exact stage and prospective manifest for
 the final selected source, then run the fixed PowerShell entry point on Control.
 Only that execution can prove the pinned Control PostgreSQL/Qdrant/QuickJS/MXC

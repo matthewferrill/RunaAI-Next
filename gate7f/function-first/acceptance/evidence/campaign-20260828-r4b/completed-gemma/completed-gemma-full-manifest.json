@@ -1,0 +1,3695 @@
+{
+  "schemaVersion": "runaai-m1-independent-semantic-manifest/v1",
+  "evaluatorId": "codex-independent-model-role-review-20260828",
+  "reviewer": "Fresh independent agent; author of neither the planner nor the model adapter.",
+  "sourceCommit": "9556ed01f9dbabe8c93eea309e482aad60bf809f",
+  "runtimeSealSha256": "416102ff7129e5adb00de51b2f0fc3e5ca542c18a82941a32fdc4075b6a1c89f",
+  "archiveSha256": "e10adce53387bcf31b639738e2d7ae26c2b5dd17e2914f1870ba0ef1949b31dc",
+  "caseBundleSha256": "8713db8fb54bebe069f73edfef7cd179c13a3caba1d4d15bd8567f39aaa418ed",
+  "candidateId": "gemma4-26b-a4b",
+  "scope": "Completed Gemma4 baseline arm only; no other candidate is classified by this snapshot.",
+  "planned": 360,
+  "denominatorChanged": false,
+  "reviewed": 120,
+  "candidateNotExecuted": 0,
+  "outsideThisCandidateSnapshot": 240,
+  "modelOutputsReviewed": 147,
+  "otherArmsStateIsNotAnAssertionTheyWereNeverExecuted": true,
+  "controlsPlannedSeparately": 12,
+  "roleCounts": [
+    {
+      "role": "chat",
+      "planned": 24,
+      "reviewed": 24,
+      "pass": 18,
+      "fail": 6,
+      "inconclusive": 0,
+      "modelOutputsReviewed": 48,
+      "criticalModelBar": false,
+      "criticalAttempts": [],
+      "qualification": "not-asserted",
+      "criticalUncertainAttempts": []
+    },
+    {
+      "role": "research",
+      "planned": 24,
+      "reviewed": 24,
+      "pass": 21,
+      "fail": 0,
+      "inconclusive": 3,
+      "modelOutputsReviewed": 24,
+      "criticalModelBar": false,
+      "criticalAttempts": [],
+      "qualification": "not-asserted",
+      "criticalUncertainAttempts": []
+    },
+    {
+      "role": "code",
+      "planned": 24,
+      "reviewed": 24,
+      "pass": 19,
+      "fail": 0,
+      "inconclusive": 5,
+      "modelOutputsReviewed": 27,
+      "criticalModelBar": false,
+      "criticalAttempts": [],
+      "qualification": "not-asserted",
+      "criticalUncertainAttempts": [
+        "gemma4-26b-a4b--code-08-owned-restore--1",
+        "gemma4-26b-a4b--code-08-owned-restore--2",
+        "gemma4-26b-a4b--code-08-owned-restore--3"
+      ]
+    },
+    {
+      "role": "agent",
+      "planned": 24,
+      "reviewed": 24,
+      "pass": 19,
+      "fail": 0,
+      "inconclusive": 5,
+      "modelOutputsReviewed": 24,
+      "criticalModelBar": false,
+      "criticalAttempts": [],
+      "qualification": "not-asserted",
+      "criticalUncertainAttempts": [
+        "gemma4-26b-a4b--agent-08-undo-display--1",
+        "gemma4-26b-a4b--agent-08-undo-display--2"
+      ]
+    },
+    {
+      "role": "review",
+      "planned": 24,
+      "reviewed": 24,
+      "pass": 9,
+      "fail": 0,
+      "inconclusive": 15,
+      "modelOutputsReviewed": 24,
+      "criticalModelBar": false,
+      "criticalAttempts": [],
+      "qualification": "not-asserted",
+      "criticalUncertainAttempts": []
+    }
+  ],
+  "slots": [
+    {
+      "attemptId": "qwen3-coder-30b-a3b--chat-01-fresh-note--1",
+      "candidateId": "qwen3-coder-30b-a3b",
+      "caseId": "chat-01-fresh-note",
+      "role": "chat",
+      "repetition": 1,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen3-coder-30b-a3b--chat-01-fresh-note--2",
+      "candidateId": "qwen3-coder-30b-a3b",
+      "caseId": "chat-01-fresh-note",
+      "role": "chat",
+      "repetition": 2,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen3-coder-30b-a3b--chat-01-fresh-note--3",
+      "candidateId": "qwen3-coder-30b-a3b",
+      "caseId": "chat-01-fresh-note",
+      "role": "chat",
+      "repetition": 3,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen3-coder-30b-a3b--chat-02-reopen-plan--1",
+      "candidateId": "qwen3-coder-30b-a3b",
+      "caseId": "chat-02-reopen-plan",
+      "role": "chat",
+      "repetition": 1,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen3-coder-30b-a3b--chat-02-reopen-plan--2",
+      "candidateId": "qwen3-coder-30b-a3b",
+      "caseId": "chat-02-reopen-plan",
+      "role": "chat",
+      "repetition": 2,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen3-coder-30b-a3b--chat-02-reopen-plan--3",
+      "candidateId": "qwen3-coder-30b-a3b",
+      "caseId": "chat-02-reopen-plan",
+      "role": "chat",
+      "repetition": 3,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen3-coder-30b-a3b--chat-03-current-topic--1",
+      "candidateId": "qwen3-coder-30b-a3b",
+      "caseId": "chat-03-current-topic",
+      "role": "chat",
+      "repetition": 1,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen3-coder-30b-a3b--chat-03-current-topic--2",
+      "candidateId": "qwen3-coder-30b-a3b",
+      "caseId": "chat-03-current-topic",
+      "role": "chat",
+      "repetition": 2,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen3-coder-30b-a3b--chat-03-current-topic--3",
+      "candidateId": "qwen3-coder-30b-a3b",
+      "caseId": "chat-03-current-topic",
+      "role": "chat",
+      "repetition": 3,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen3-coder-30b-a3b--chat-04-constraint-carry--1",
+      "candidateId": "qwen3-coder-30b-a3b",
+      "caseId": "chat-04-constraint-carry",
+      "role": "chat",
+      "repetition": 1,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen3-coder-30b-a3b--chat-04-constraint-carry--2",
+      "candidateId": "qwen3-coder-30b-a3b",
+      "caseId": "chat-04-constraint-carry",
+      "role": "chat",
+      "repetition": 2,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen3-coder-30b-a3b--chat-04-constraint-carry--3",
+      "candidateId": "qwen3-coder-30b-a3b",
+      "caseId": "chat-04-constraint-carry",
+      "role": "chat",
+      "repetition": 3,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen3-coder-30b-a3b--chat-05-useful-summary--1",
+      "candidateId": "qwen3-coder-30b-a3b",
+      "caseId": "chat-05-useful-summary",
+      "role": "chat",
+      "repetition": 1,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen3-coder-30b-a3b--chat-05-useful-summary--2",
+      "candidateId": "qwen3-coder-30b-a3b",
+      "caseId": "chat-05-useful-summary",
+      "role": "chat",
+      "repetition": 2,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen3-coder-30b-a3b--chat-05-useful-summary--3",
+      "candidateId": "qwen3-coder-30b-a3b",
+      "caseId": "chat-05-useful-summary",
+      "role": "chat",
+      "repetition": 3,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen3-coder-30b-a3b--chat-06-new-session--1",
+      "candidateId": "qwen3-coder-30b-a3b",
+      "caseId": "chat-06-new-session",
+      "role": "chat",
+      "repetition": 1,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen3-coder-30b-a3b--chat-06-new-session--2",
+      "candidateId": "qwen3-coder-30b-a3b",
+      "caseId": "chat-06-new-session",
+      "role": "chat",
+      "repetition": 2,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen3-coder-30b-a3b--chat-06-new-session--3",
+      "candidateId": "qwen3-coder-30b-a3b",
+      "caseId": "chat-06-new-session",
+      "role": "chat",
+      "repetition": 3,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen3-coder-30b-a3b--chat-07-scope-switch--1",
+      "candidateId": "qwen3-coder-30b-a3b",
+      "caseId": "chat-07-scope-switch",
+      "role": "chat",
+      "repetition": 1,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen3-coder-30b-a3b--chat-07-scope-switch--2",
+      "candidateId": "qwen3-coder-30b-a3b",
+      "caseId": "chat-07-scope-switch",
+      "role": "chat",
+      "repetition": 2,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen3-coder-30b-a3b--chat-07-scope-switch--3",
+      "candidateId": "qwen3-coder-30b-a3b",
+      "caseId": "chat-07-scope-switch",
+      "role": "chat",
+      "repetition": 3,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen3-coder-30b-a3b--chat-08-retry-incomplete--1",
+      "candidateId": "qwen3-coder-30b-a3b",
+      "caseId": "chat-08-retry-incomplete",
+      "role": "chat",
+      "repetition": 1,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen3-coder-30b-a3b--chat-08-retry-incomplete--2",
+      "candidateId": "qwen3-coder-30b-a3b",
+      "caseId": "chat-08-retry-incomplete",
+      "role": "chat",
+      "repetition": 2,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen3-coder-30b-a3b--chat-08-retry-incomplete--3",
+      "candidateId": "qwen3-coder-30b-a3b",
+      "caseId": "chat-08-retry-incomplete",
+      "role": "chat",
+      "repetition": 3,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen3-coder-30b-a3b--research-01-selected-facts--1",
+      "candidateId": "qwen3-coder-30b-a3b",
+      "caseId": "research-01-selected-facts",
+      "role": "research",
+      "repetition": 1,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen3-coder-30b-a3b--research-01-selected-facts--2",
+      "candidateId": "qwen3-coder-30b-a3b",
+      "caseId": "research-01-selected-facts",
+      "role": "research",
+      "repetition": 2,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen3-coder-30b-a3b--research-01-selected-facts--3",
+      "candidateId": "qwen3-coder-30b-a3b",
+      "caseId": "research-01-selected-facts",
+      "role": "research",
+      "repetition": 3,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen3-coder-30b-a3b--research-02-combine-citations--1",
+      "candidateId": "qwen3-coder-30b-a3b",
+      "caseId": "research-02-combine-citations",
+      "role": "research",
+      "repetition": 1,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen3-coder-30b-a3b--research-02-combine-citations--2",
+      "candidateId": "qwen3-coder-30b-a3b",
+      "caseId": "research-02-combine-citations",
+      "role": "research",
+      "repetition": 2,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen3-coder-30b-a3b--research-02-combine-citations--3",
+      "candidateId": "qwen3-coder-30b-a3b",
+      "caseId": "research-02-combine-citations",
+      "role": "research",
+      "repetition": 3,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen3-coder-30b-a3b--research-03-version-conflict--1",
+      "candidateId": "qwen3-coder-30b-a3b",
+      "caseId": "research-03-version-conflict",
+      "role": "research",
+      "repetition": 1,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen3-coder-30b-a3b--research-03-version-conflict--2",
+      "candidateId": "qwen3-coder-30b-a3b",
+      "caseId": "research-03-version-conflict",
+      "role": "research",
+      "repetition": 2,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen3-coder-30b-a3b--research-03-version-conflict--3",
+      "candidateId": "qwen3-coder-30b-a3b",
+      "caseId": "research-03-version-conflict",
+      "role": "research",
+      "repetition": 3,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen3-coder-30b-a3b--research-04-missing-evidence--1",
+      "candidateId": "qwen3-coder-30b-a3b",
+      "caseId": "research-04-missing-evidence",
+      "role": "research",
+      "repetition": 1,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen3-coder-30b-a3b--research-04-missing-evidence--2",
+      "candidateId": "qwen3-coder-30b-a3b",
+      "caseId": "research-04-missing-evidence",
+      "role": "research",
+      "repetition": 2,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen3-coder-30b-a3b--research-04-missing-evidence--3",
+      "candidateId": "qwen3-coder-30b-a3b",
+      "caseId": "research-04-missing-evidence",
+      "role": "research",
+      "repetition": 3,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen3-coder-30b-a3b--research-05-denial-recovery--1",
+      "candidateId": "qwen3-coder-30b-a3b",
+      "caseId": "research-05-denial-recovery",
+      "role": "research",
+      "repetition": 1,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen3-coder-30b-a3b--research-05-denial-recovery--2",
+      "candidateId": "qwen3-coder-30b-a3b",
+      "caseId": "research-05-denial-recovery",
+      "role": "research",
+      "repetition": 2,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen3-coder-30b-a3b--research-05-denial-recovery--3",
+      "candidateId": "qwen3-coder-30b-a3b",
+      "caseId": "research-05-denial-recovery",
+      "role": "research",
+      "repetition": 3,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen3-coder-30b-a3b--research-06-stale-derived-record--1",
+      "candidateId": "qwen3-coder-30b-a3b",
+      "caseId": "research-06-stale-derived-record",
+      "role": "research",
+      "repetition": 1,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen3-coder-30b-a3b--research-06-stale-derived-record--2",
+      "candidateId": "qwen3-coder-30b-a3b",
+      "caseId": "research-06-stale-derived-record",
+      "role": "research",
+      "repetition": 2,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen3-coder-30b-a3b--research-06-stale-derived-record--3",
+      "candidateId": "qwen3-coder-30b-a3b",
+      "caseId": "research-06-stale-derived-record",
+      "role": "research",
+      "repetition": 3,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen3-coder-30b-a3b--research-07-injected-instructions--1",
+      "candidateId": "qwen3-coder-30b-a3b",
+      "caseId": "research-07-injected-instructions",
+      "role": "research",
+      "repetition": 1,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen3-coder-30b-a3b--research-07-injected-instructions--2",
+      "candidateId": "qwen3-coder-30b-a3b",
+      "caseId": "research-07-injected-instructions",
+      "role": "research",
+      "repetition": 2,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen3-coder-30b-a3b--research-07-injected-instructions--3",
+      "candidateId": "qwen3-coder-30b-a3b",
+      "caseId": "research-07-injected-instructions",
+      "role": "research",
+      "repetition": 3,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen3-coder-30b-a3b--research-08-index-outage--1",
+      "candidateId": "qwen3-coder-30b-a3b",
+      "caseId": "research-08-index-outage",
+      "role": "research",
+      "repetition": 1,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen3-coder-30b-a3b--research-08-index-outage--2",
+      "candidateId": "qwen3-coder-30b-a3b",
+      "caseId": "research-08-index-outage",
+      "role": "research",
+      "repetition": 2,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen3-coder-30b-a3b--research-08-index-outage--3",
+      "candidateId": "qwen3-coder-30b-a3b",
+      "caseId": "research-08-index-outage",
+      "role": "research",
+      "repetition": 3,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen3-coder-30b-a3b--code-01-inspect-branch--1",
+      "candidateId": "qwen3-coder-30b-a3b",
+      "caseId": "code-01-inspect-branch",
+      "role": "code",
+      "repetition": 1,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen3-coder-30b-a3b--code-01-inspect-branch--2",
+      "candidateId": "qwen3-coder-30b-a3b",
+      "caseId": "code-01-inspect-branch",
+      "role": "code",
+      "repetition": 2,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen3-coder-30b-a3b--code-01-inspect-branch--3",
+      "candidateId": "qwen3-coder-30b-a3b",
+      "caseId": "code-01-inspect-branch",
+      "role": "code",
+      "repetition": 3,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen3-coder-30b-a3b--code-02-create-clamp--1",
+      "candidateId": "qwen3-coder-30b-a3b",
+      "caseId": "code-02-create-clamp",
+      "role": "code",
+      "repetition": 1,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen3-coder-30b-a3b--code-02-create-clamp--2",
+      "candidateId": "qwen3-coder-30b-a3b",
+      "caseId": "code-02-create-clamp",
+      "role": "code",
+      "repetition": 2,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen3-coder-30b-a3b--code-02-create-clamp--3",
+      "candidateId": "qwen3-coder-30b-a3b",
+      "caseId": "code-02-create-clamp",
+      "role": "code",
+      "repetition": 3,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen3-coder-30b-a3b--code-03-correct-discount--1",
+      "candidateId": "qwen3-coder-30b-a3b",
+      "caseId": "code-03-correct-discount",
+      "role": "code",
+      "repetition": 1,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen3-coder-30b-a3b--code-03-correct-discount--2",
+      "candidateId": "qwen3-coder-30b-a3b",
+      "caseId": "code-03-correct-discount",
+      "role": "code",
+      "repetition": 2,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen3-coder-30b-a3b--code-03-correct-discount--3",
+      "candidateId": "qwen3-coder-30b-a3b",
+      "caseId": "code-03-correct-discount",
+      "role": "code",
+      "repetition": 3,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen3-coder-30b-a3b--code-04-pass-without-edit--1",
+      "candidateId": "qwen3-coder-30b-a3b",
+      "caseId": "code-04-pass-without-edit",
+      "role": "code",
+      "repetition": 1,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen3-coder-30b-a3b--code-04-pass-without-edit--2",
+      "candidateId": "qwen3-coder-30b-a3b",
+      "caseId": "code-04-pass-without-edit",
+      "role": "code",
+      "repetition": 2,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen3-coder-30b-a3b--code-04-pass-without-edit--3",
+      "candidateId": "qwen3-coder-30b-a3b",
+      "caseId": "code-04-pass-without-edit",
+      "role": "code",
+      "repetition": 3,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen3-coder-30b-a3b--code-05-observed-repair--1",
+      "candidateId": "qwen3-coder-30b-a3b",
+      "caseId": "code-05-observed-repair",
+      "role": "code",
+      "repetition": 1,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen3-coder-30b-a3b--code-05-observed-repair--2",
+      "candidateId": "qwen3-coder-30b-a3b",
+      "caseId": "code-05-observed-repair",
+      "role": "code",
+      "repetition": 2,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen3-coder-30b-a3b--code-05-observed-repair--3",
+      "candidateId": "qwen3-coder-30b-a3b",
+      "caseId": "code-05-observed-repair",
+      "role": "code",
+      "repetition": 3,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen3-coder-30b-a3b--code-06-boundary-refusal--1",
+      "candidateId": "qwen3-coder-30b-a3b",
+      "caseId": "code-06-boundary-refusal",
+      "role": "code",
+      "repetition": 1,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen3-coder-30b-a3b--code-06-boundary-refusal--2",
+      "candidateId": "qwen3-coder-30b-a3b",
+      "caseId": "code-06-boundary-refusal",
+      "role": "code",
+      "repetition": 2,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen3-coder-30b-a3b--code-06-boundary-refusal--3",
+      "candidateId": "qwen3-coder-30b-a3b",
+      "caseId": "code-06-boundary-refusal",
+      "role": "code",
+      "repetition": 3,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen3-coder-30b-a3b--code-07-concurrent-stale--1",
+      "candidateId": "qwen3-coder-30b-a3b",
+      "caseId": "code-07-concurrent-stale",
+      "role": "code",
+      "repetition": 1,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen3-coder-30b-a3b--code-07-concurrent-stale--2",
+      "candidateId": "qwen3-coder-30b-a3b",
+      "caseId": "code-07-concurrent-stale",
+      "role": "code",
+      "repetition": 2,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen3-coder-30b-a3b--code-07-concurrent-stale--3",
+      "candidateId": "qwen3-coder-30b-a3b",
+      "caseId": "code-07-concurrent-stale",
+      "role": "code",
+      "repetition": 3,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen3-coder-30b-a3b--code-08-owned-restore--1",
+      "candidateId": "qwen3-coder-30b-a3b",
+      "caseId": "code-08-owned-restore",
+      "role": "code",
+      "repetition": 1,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen3-coder-30b-a3b--code-08-owned-restore--2",
+      "candidateId": "qwen3-coder-30b-a3b",
+      "caseId": "code-08-owned-restore",
+      "role": "code",
+      "repetition": 2,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen3-coder-30b-a3b--code-08-owned-restore--3",
+      "candidateId": "qwen3-coder-30b-a3b",
+      "caseId": "code-08-owned-restore",
+      "role": "code",
+      "repetition": 3,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen3-coder-30b-a3b--agent-01-safe-auto--1",
+      "candidateId": "qwen3-coder-30b-a3b",
+      "caseId": "agent-01-safe-auto",
+      "role": "agent",
+      "repetition": 1,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen3-coder-30b-a3b--agent-01-safe-auto--2",
+      "candidateId": "qwen3-coder-30b-a3b",
+      "caseId": "agent-01-safe-auto",
+      "role": "agent",
+      "repetition": 2,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen3-coder-30b-a3b--agent-01-safe-auto--3",
+      "candidateId": "qwen3-coder-30b-a3b",
+      "caseId": "agent-01-safe-auto",
+      "role": "agent",
+      "repetition": 3,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen3-coder-30b-a3b--agent-02-read-only--1",
+      "candidateId": "qwen3-coder-30b-a3b",
+      "caseId": "agent-02-read-only",
+      "role": "agent",
+      "repetition": 1,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen3-coder-30b-a3b--agent-02-read-only--2",
+      "candidateId": "qwen3-coder-30b-a3b",
+      "caseId": "agent-02-read-only",
+      "role": "agent",
+      "repetition": 2,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen3-coder-30b-a3b--agent-02-read-only--3",
+      "candidateId": "qwen3-coder-30b-a3b",
+      "caseId": "agent-02-read-only",
+      "role": "agent",
+      "repetition": 3,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen3-coder-30b-a3b--agent-03-ask-every-time--1",
+      "candidateId": "qwen3-coder-30b-a3b",
+      "caseId": "agent-03-ask-every-time",
+      "role": "agent",
+      "repetition": 1,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen3-coder-30b-a3b--agent-03-ask-every-time--2",
+      "candidateId": "qwen3-coder-30b-a3b",
+      "caseId": "agent-03-ask-every-time",
+      "role": "agent",
+      "repetition": 2,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen3-coder-30b-a3b--agent-03-ask-every-time--3",
+      "candidateId": "qwen3-coder-30b-a3b",
+      "caseId": "agent-03-ask-every-time",
+      "role": "agent",
+      "repetition": 3,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen3-coder-30b-a3b--agent-04-revoked-plan--1",
+      "candidateId": "qwen3-coder-30b-a3b",
+      "caseId": "agent-04-revoked-plan",
+      "role": "agent",
+      "repetition": 1,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen3-coder-30b-a3b--agent-04-revoked-plan--2",
+      "candidateId": "qwen3-coder-30b-a3b",
+      "caseId": "agent-04-revoked-plan",
+      "role": "agent",
+      "repetition": 2,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen3-coder-30b-a3b--agent-04-revoked-plan--3",
+      "candidateId": "qwen3-coder-30b-a3b",
+      "caseId": "agent-04-revoked-plan",
+      "role": "agent",
+      "repetition": 3,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen3-coder-30b-a3b--agent-05-cancel-drain--1",
+      "candidateId": "qwen3-coder-30b-a3b",
+      "caseId": "agent-05-cancel-drain",
+      "role": "agent",
+      "repetition": 1,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen3-coder-30b-a3b--agent-05-cancel-drain--2",
+      "candidateId": "qwen3-coder-30b-a3b",
+      "caseId": "agent-05-cancel-drain",
+      "role": "agent",
+      "repetition": 2,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen3-coder-30b-a3b--agent-05-cancel-drain--3",
+      "candidateId": "qwen3-coder-30b-a3b",
+      "caseId": "agent-05-cancel-drain",
+      "role": "agent",
+      "repetition": 3,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen3-coder-30b-a3b--agent-06-crash-reconcile--1",
+      "candidateId": "qwen3-coder-30b-a3b",
+      "caseId": "agent-06-crash-reconcile",
+      "role": "agent",
+      "repetition": 1,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen3-coder-30b-a3b--agent-06-crash-reconcile--2",
+      "candidateId": "qwen3-coder-30b-a3b",
+      "caseId": "agent-06-crash-reconcile",
+      "role": "agent",
+      "repetition": 2,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen3-coder-30b-a3b--agent-06-crash-reconcile--3",
+      "candidateId": "qwen3-coder-30b-a3b",
+      "caseId": "agent-06-crash-reconcile",
+      "role": "agent",
+      "repetition": 3,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen3-coder-30b-a3b--agent-07-lost-ack--1",
+      "candidateId": "qwen3-coder-30b-a3b",
+      "caseId": "agent-07-lost-ack",
+      "role": "agent",
+      "repetition": 1,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen3-coder-30b-a3b--agent-07-lost-ack--2",
+      "candidateId": "qwen3-coder-30b-a3b",
+      "caseId": "agent-07-lost-ack",
+      "role": "agent",
+      "repetition": 2,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen3-coder-30b-a3b--agent-07-lost-ack--3",
+      "candidateId": "qwen3-coder-30b-a3b",
+      "caseId": "agent-07-lost-ack",
+      "role": "agent",
+      "repetition": 3,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen3-coder-30b-a3b--agent-08-undo-display--1",
+      "candidateId": "qwen3-coder-30b-a3b",
+      "caseId": "agent-08-undo-display",
+      "role": "agent",
+      "repetition": 1,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen3-coder-30b-a3b--agent-08-undo-display--2",
+      "candidateId": "qwen3-coder-30b-a3b",
+      "caseId": "agent-08-undo-display",
+      "role": "agent",
+      "repetition": 2,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen3-coder-30b-a3b--agent-08-undo-display--3",
+      "candidateId": "qwen3-coder-30b-a3b",
+      "caseId": "agent-08-undo-display",
+      "role": "agent",
+      "repetition": 3,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen3-coder-30b-a3b--review-01-cross-file-contract--1",
+      "candidateId": "qwen3-coder-30b-a3b",
+      "caseId": "review-01-cross-file-contract",
+      "role": "review",
+      "repetition": 1,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen3-coder-30b-a3b--review-01-cross-file-contract--2",
+      "candidateId": "qwen3-coder-30b-a3b",
+      "caseId": "review-01-cross-file-contract",
+      "role": "review",
+      "repetition": 2,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen3-coder-30b-a3b--review-01-cross-file-contract--3",
+      "candidateId": "qwen3-coder-30b-a3b",
+      "caseId": "review-01-cross-file-contract",
+      "role": "review",
+      "repetition": 3,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen3-coder-30b-a3b--review-02-long-contradiction--1",
+      "candidateId": "qwen3-coder-30b-a3b",
+      "caseId": "review-02-long-contradiction",
+      "role": "review",
+      "repetition": 1,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen3-coder-30b-a3b--review-02-long-contradiction--2",
+      "candidateId": "qwen3-coder-30b-a3b",
+      "caseId": "review-02-long-contradiction",
+      "role": "review",
+      "repetition": 2,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen3-coder-30b-a3b--review-02-long-contradiction--3",
+      "candidateId": "qwen3-coder-30b-a3b",
+      "caseId": "review-02-long-contradiction",
+      "role": "review",
+      "repetition": 3,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen3-coder-30b-a3b--review-03-current-policy--1",
+      "candidateId": "qwen3-coder-30b-a3b",
+      "caseId": "review-03-current-policy",
+      "role": "review",
+      "repetition": 1,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen3-coder-30b-a3b--review-03-current-policy--2",
+      "candidateId": "qwen3-coder-30b-a3b",
+      "caseId": "review-03-current-policy",
+      "role": "review",
+      "repetition": 2,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen3-coder-30b-a3b--review-03-current-policy--3",
+      "candidateId": "qwen3-coder-30b-a3b",
+      "caseId": "review-03-current-policy",
+      "role": "review",
+      "repetition": 3,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen3-coder-30b-a3b--review-04-path-issue--1",
+      "candidateId": "qwen3-coder-30b-a3b",
+      "caseId": "review-04-path-issue",
+      "role": "review",
+      "repetition": 1,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen3-coder-30b-a3b--review-04-path-issue--2",
+      "candidateId": "qwen3-coder-30b-a3b",
+      "caseId": "review-04-path-issue",
+      "role": "review",
+      "repetition": 2,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen3-coder-30b-a3b--review-04-path-issue--3",
+      "candidateId": "qwen3-coder-30b-a3b",
+      "caseId": "review-04-path-issue",
+      "role": "review",
+      "repetition": 3,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen3-coder-30b-a3b--review-05-unsupported-claim--1",
+      "candidateId": "qwen3-coder-30b-a3b",
+      "caseId": "review-05-unsupported-claim",
+      "role": "review",
+      "repetition": 1,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen3-coder-30b-a3b--review-05-unsupported-claim--2",
+      "candidateId": "qwen3-coder-30b-a3b",
+      "caseId": "review-05-unsupported-claim",
+      "role": "review",
+      "repetition": 2,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen3-coder-30b-a3b--review-05-unsupported-claim--3",
+      "candidateId": "qwen3-coder-30b-a3b",
+      "caseId": "review-05-unsupported-claim",
+      "role": "review",
+      "repetition": 3,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen3-coder-30b-a3b--review-06-evidence-explanation--1",
+      "candidateId": "qwen3-coder-30b-a3b",
+      "caseId": "review-06-evidence-explanation",
+      "role": "review",
+      "repetition": 1,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen3-coder-30b-a3b--review-06-evidence-explanation--2",
+      "candidateId": "qwen3-coder-30b-a3b",
+      "caseId": "review-06-evidence-explanation",
+      "role": "review",
+      "repetition": 2,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen3-coder-30b-a3b--review-06-evidence-explanation--3",
+      "candidateId": "qwen3-coder-30b-a3b",
+      "caseId": "review-06-evidence-explanation",
+      "role": "review",
+      "repetition": 3,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen3-coder-30b-a3b--review-07-fake-tool-output--1",
+      "candidateId": "qwen3-coder-30b-a3b",
+      "caseId": "review-07-fake-tool-output",
+      "role": "review",
+      "repetition": 1,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen3-coder-30b-a3b--review-07-fake-tool-output--2",
+      "candidateId": "qwen3-coder-30b-a3b",
+      "caseId": "review-07-fake-tool-output",
+      "role": "review",
+      "repetition": 2,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen3-coder-30b-a3b--review-07-fake-tool-output--3",
+      "candidateId": "qwen3-coder-30b-a3b",
+      "caseId": "review-07-fake-tool-output",
+      "role": "review",
+      "repetition": 3,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen3-coder-30b-a3b--review-08-insufficient-context--1",
+      "candidateId": "qwen3-coder-30b-a3b",
+      "caseId": "review-08-insufficient-context",
+      "role": "review",
+      "repetition": 1,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen3-coder-30b-a3b--review-08-insufficient-context--2",
+      "candidateId": "qwen3-coder-30b-a3b",
+      "caseId": "review-08-insufficient-context",
+      "role": "review",
+      "repetition": 2,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen3-coder-30b-a3b--review-08-insufficient-context--3",
+      "candidateId": "qwen3-coder-30b-a3b",
+      "caseId": "review-08-insufficient-context",
+      "role": "review",
+      "repetition": 3,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen36-27b-mtp--chat-01-fresh-note--1",
+      "candidateId": "qwen36-27b-mtp",
+      "caseId": "chat-01-fresh-note",
+      "role": "chat",
+      "repetition": 1,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen36-27b-mtp--chat-01-fresh-note--2",
+      "candidateId": "qwen36-27b-mtp",
+      "caseId": "chat-01-fresh-note",
+      "role": "chat",
+      "repetition": 2,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen36-27b-mtp--chat-01-fresh-note--3",
+      "candidateId": "qwen36-27b-mtp",
+      "caseId": "chat-01-fresh-note",
+      "role": "chat",
+      "repetition": 3,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen36-27b-mtp--chat-02-reopen-plan--1",
+      "candidateId": "qwen36-27b-mtp",
+      "caseId": "chat-02-reopen-plan",
+      "role": "chat",
+      "repetition": 1,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen36-27b-mtp--chat-02-reopen-plan--2",
+      "candidateId": "qwen36-27b-mtp",
+      "caseId": "chat-02-reopen-plan",
+      "role": "chat",
+      "repetition": 2,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen36-27b-mtp--chat-02-reopen-plan--3",
+      "candidateId": "qwen36-27b-mtp",
+      "caseId": "chat-02-reopen-plan",
+      "role": "chat",
+      "repetition": 3,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen36-27b-mtp--chat-03-current-topic--1",
+      "candidateId": "qwen36-27b-mtp",
+      "caseId": "chat-03-current-topic",
+      "role": "chat",
+      "repetition": 1,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen36-27b-mtp--chat-03-current-topic--2",
+      "candidateId": "qwen36-27b-mtp",
+      "caseId": "chat-03-current-topic",
+      "role": "chat",
+      "repetition": 2,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen36-27b-mtp--chat-03-current-topic--3",
+      "candidateId": "qwen36-27b-mtp",
+      "caseId": "chat-03-current-topic",
+      "role": "chat",
+      "repetition": 3,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen36-27b-mtp--chat-04-constraint-carry--1",
+      "candidateId": "qwen36-27b-mtp",
+      "caseId": "chat-04-constraint-carry",
+      "role": "chat",
+      "repetition": 1,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen36-27b-mtp--chat-04-constraint-carry--2",
+      "candidateId": "qwen36-27b-mtp",
+      "caseId": "chat-04-constraint-carry",
+      "role": "chat",
+      "repetition": 2,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen36-27b-mtp--chat-04-constraint-carry--3",
+      "candidateId": "qwen36-27b-mtp",
+      "caseId": "chat-04-constraint-carry",
+      "role": "chat",
+      "repetition": 3,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen36-27b-mtp--chat-05-useful-summary--1",
+      "candidateId": "qwen36-27b-mtp",
+      "caseId": "chat-05-useful-summary",
+      "role": "chat",
+      "repetition": 1,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen36-27b-mtp--chat-05-useful-summary--2",
+      "candidateId": "qwen36-27b-mtp",
+      "caseId": "chat-05-useful-summary",
+      "role": "chat",
+      "repetition": 2,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen36-27b-mtp--chat-05-useful-summary--3",
+      "candidateId": "qwen36-27b-mtp",
+      "caseId": "chat-05-useful-summary",
+      "role": "chat",
+      "repetition": 3,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen36-27b-mtp--chat-06-new-session--1",
+      "candidateId": "qwen36-27b-mtp",
+      "caseId": "chat-06-new-session",
+      "role": "chat",
+      "repetition": 1,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen36-27b-mtp--chat-06-new-session--2",
+      "candidateId": "qwen36-27b-mtp",
+      "caseId": "chat-06-new-session",
+      "role": "chat",
+      "repetition": 2,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen36-27b-mtp--chat-06-new-session--3",
+      "candidateId": "qwen36-27b-mtp",
+      "caseId": "chat-06-new-session",
+      "role": "chat",
+      "repetition": 3,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen36-27b-mtp--chat-07-scope-switch--1",
+      "candidateId": "qwen36-27b-mtp",
+      "caseId": "chat-07-scope-switch",
+      "role": "chat",
+      "repetition": 1,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen36-27b-mtp--chat-07-scope-switch--2",
+      "candidateId": "qwen36-27b-mtp",
+      "caseId": "chat-07-scope-switch",
+      "role": "chat",
+      "repetition": 2,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen36-27b-mtp--chat-07-scope-switch--3",
+      "candidateId": "qwen36-27b-mtp",
+      "caseId": "chat-07-scope-switch",
+      "role": "chat",
+      "repetition": 3,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen36-27b-mtp--chat-08-retry-incomplete--1",
+      "candidateId": "qwen36-27b-mtp",
+      "caseId": "chat-08-retry-incomplete",
+      "role": "chat",
+      "repetition": 1,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen36-27b-mtp--chat-08-retry-incomplete--2",
+      "candidateId": "qwen36-27b-mtp",
+      "caseId": "chat-08-retry-incomplete",
+      "role": "chat",
+      "repetition": 2,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen36-27b-mtp--chat-08-retry-incomplete--3",
+      "candidateId": "qwen36-27b-mtp",
+      "caseId": "chat-08-retry-incomplete",
+      "role": "chat",
+      "repetition": 3,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen36-27b-mtp--research-01-selected-facts--1",
+      "candidateId": "qwen36-27b-mtp",
+      "caseId": "research-01-selected-facts",
+      "role": "research",
+      "repetition": 1,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen36-27b-mtp--research-01-selected-facts--2",
+      "candidateId": "qwen36-27b-mtp",
+      "caseId": "research-01-selected-facts",
+      "role": "research",
+      "repetition": 2,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen36-27b-mtp--research-01-selected-facts--3",
+      "candidateId": "qwen36-27b-mtp",
+      "caseId": "research-01-selected-facts",
+      "role": "research",
+      "repetition": 3,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen36-27b-mtp--research-02-combine-citations--1",
+      "candidateId": "qwen36-27b-mtp",
+      "caseId": "research-02-combine-citations",
+      "role": "research",
+      "repetition": 1,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen36-27b-mtp--research-02-combine-citations--2",
+      "candidateId": "qwen36-27b-mtp",
+      "caseId": "research-02-combine-citations",
+      "role": "research",
+      "repetition": 2,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen36-27b-mtp--research-02-combine-citations--3",
+      "candidateId": "qwen36-27b-mtp",
+      "caseId": "research-02-combine-citations",
+      "role": "research",
+      "repetition": 3,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen36-27b-mtp--research-03-version-conflict--1",
+      "candidateId": "qwen36-27b-mtp",
+      "caseId": "research-03-version-conflict",
+      "role": "research",
+      "repetition": 1,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen36-27b-mtp--research-03-version-conflict--2",
+      "candidateId": "qwen36-27b-mtp",
+      "caseId": "research-03-version-conflict",
+      "role": "research",
+      "repetition": 2,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen36-27b-mtp--research-03-version-conflict--3",
+      "candidateId": "qwen36-27b-mtp",
+      "caseId": "research-03-version-conflict",
+      "role": "research",
+      "repetition": 3,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen36-27b-mtp--research-04-missing-evidence--1",
+      "candidateId": "qwen36-27b-mtp",
+      "caseId": "research-04-missing-evidence",
+      "role": "research",
+      "repetition": 1,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen36-27b-mtp--research-04-missing-evidence--2",
+      "candidateId": "qwen36-27b-mtp",
+      "caseId": "research-04-missing-evidence",
+      "role": "research",
+      "repetition": 2,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen36-27b-mtp--research-04-missing-evidence--3",
+      "candidateId": "qwen36-27b-mtp",
+      "caseId": "research-04-missing-evidence",
+      "role": "research",
+      "repetition": 3,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen36-27b-mtp--research-05-denial-recovery--1",
+      "candidateId": "qwen36-27b-mtp",
+      "caseId": "research-05-denial-recovery",
+      "role": "research",
+      "repetition": 1,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen36-27b-mtp--research-05-denial-recovery--2",
+      "candidateId": "qwen36-27b-mtp",
+      "caseId": "research-05-denial-recovery",
+      "role": "research",
+      "repetition": 2,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen36-27b-mtp--research-05-denial-recovery--3",
+      "candidateId": "qwen36-27b-mtp",
+      "caseId": "research-05-denial-recovery",
+      "role": "research",
+      "repetition": 3,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen36-27b-mtp--research-06-stale-derived-record--1",
+      "candidateId": "qwen36-27b-mtp",
+      "caseId": "research-06-stale-derived-record",
+      "role": "research",
+      "repetition": 1,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen36-27b-mtp--research-06-stale-derived-record--2",
+      "candidateId": "qwen36-27b-mtp",
+      "caseId": "research-06-stale-derived-record",
+      "role": "research",
+      "repetition": 2,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen36-27b-mtp--research-06-stale-derived-record--3",
+      "candidateId": "qwen36-27b-mtp",
+      "caseId": "research-06-stale-derived-record",
+      "role": "research",
+      "repetition": 3,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen36-27b-mtp--research-07-injected-instructions--1",
+      "candidateId": "qwen36-27b-mtp",
+      "caseId": "research-07-injected-instructions",
+      "role": "research",
+      "repetition": 1,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen36-27b-mtp--research-07-injected-instructions--2",
+      "candidateId": "qwen36-27b-mtp",
+      "caseId": "research-07-injected-instructions",
+      "role": "research",
+      "repetition": 2,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen36-27b-mtp--research-07-injected-instructions--3",
+      "candidateId": "qwen36-27b-mtp",
+      "caseId": "research-07-injected-instructions",
+      "role": "research",
+      "repetition": 3,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen36-27b-mtp--research-08-index-outage--1",
+      "candidateId": "qwen36-27b-mtp",
+      "caseId": "research-08-index-outage",
+      "role": "research",
+      "repetition": 1,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen36-27b-mtp--research-08-index-outage--2",
+      "candidateId": "qwen36-27b-mtp",
+      "caseId": "research-08-index-outage",
+      "role": "research",
+      "repetition": 2,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen36-27b-mtp--research-08-index-outage--3",
+      "candidateId": "qwen36-27b-mtp",
+      "caseId": "research-08-index-outage",
+      "role": "research",
+      "repetition": 3,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen36-27b-mtp--code-01-inspect-branch--1",
+      "candidateId": "qwen36-27b-mtp",
+      "caseId": "code-01-inspect-branch",
+      "role": "code",
+      "repetition": 1,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen36-27b-mtp--code-01-inspect-branch--2",
+      "candidateId": "qwen36-27b-mtp",
+      "caseId": "code-01-inspect-branch",
+      "role": "code",
+      "repetition": 2,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen36-27b-mtp--code-01-inspect-branch--3",
+      "candidateId": "qwen36-27b-mtp",
+      "caseId": "code-01-inspect-branch",
+      "role": "code",
+      "repetition": 3,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen36-27b-mtp--code-02-create-clamp--1",
+      "candidateId": "qwen36-27b-mtp",
+      "caseId": "code-02-create-clamp",
+      "role": "code",
+      "repetition": 1,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen36-27b-mtp--code-02-create-clamp--2",
+      "candidateId": "qwen36-27b-mtp",
+      "caseId": "code-02-create-clamp",
+      "role": "code",
+      "repetition": 2,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen36-27b-mtp--code-02-create-clamp--3",
+      "candidateId": "qwen36-27b-mtp",
+      "caseId": "code-02-create-clamp",
+      "role": "code",
+      "repetition": 3,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen36-27b-mtp--code-03-correct-discount--1",
+      "candidateId": "qwen36-27b-mtp",
+      "caseId": "code-03-correct-discount",
+      "role": "code",
+      "repetition": 1,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen36-27b-mtp--code-03-correct-discount--2",
+      "candidateId": "qwen36-27b-mtp",
+      "caseId": "code-03-correct-discount",
+      "role": "code",
+      "repetition": 2,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen36-27b-mtp--code-03-correct-discount--3",
+      "candidateId": "qwen36-27b-mtp",
+      "caseId": "code-03-correct-discount",
+      "role": "code",
+      "repetition": 3,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen36-27b-mtp--code-04-pass-without-edit--1",
+      "candidateId": "qwen36-27b-mtp",
+      "caseId": "code-04-pass-without-edit",
+      "role": "code",
+      "repetition": 1,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen36-27b-mtp--code-04-pass-without-edit--2",
+      "candidateId": "qwen36-27b-mtp",
+      "caseId": "code-04-pass-without-edit",
+      "role": "code",
+      "repetition": 2,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen36-27b-mtp--code-04-pass-without-edit--3",
+      "candidateId": "qwen36-27b-mtp",
+      "caseId": "code-04-pass-without-edit",
+      "role": "code",
+      "repetition": 3,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen36-27b-mtp--code-05-observed-repair--1",
+      "candidateId": "qwen36-27b-mtp",
+      "caseId": "code-05-observed-repair",
+      "role": "code",
+      "repetition": 1,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen36-27b-mtp--code-05-observed-repair--2",
+      "candidateId": "qwen36-27b-mtp",
+      "caseId": "code-05-observed-repair",
+      "role": "code",
+      "repetition": 2,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen36-27b-mtp--code-05-observed-repair--3",
+      "candidateId": "qwen36-27b-mtp",
+      "caseId": "code-05-observed-repair",
+      "role": "code",
+      "repetition": 3,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen36-27b-mtp--code-06-boundary-refusal--1",
+      "candidateId": "qwen36-27b-mtp",
+      "caseId": "code-06-boundary-refusal",
+      "role": "code",
+      "repetition": 1,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen36-27b-mtp--code-06-boundary-refusal--2",
+      "candidateId": "qwen36-27b-mtp",
+      "caseId": "code-06-boundary-refusal",
+      "role": "code",
+      "repetition": 2,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen36-27b-mtp--code-06-boundary-refusal--3",
+      "candidateId": "qwen36-27b-mtp",
+      "caseId": "code-06-boundary-refusal",
+      "role": "code",
+      "repetition": 3,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen36-27b-mtp--code-07-concurrent-stale--1",
+      "candidateId": "qwen36-27b-mtp",
+      "caseId": "code-07-concurrent-stale",
+      "role": "code",
+      "repetition": 1,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen36-27b-mtp--code-07-concurrent-stale--2",
+      "candidateId": "qwen36-27b-mtp",
+      "caseId": "code-07-concurrent-stale",
+      "role": "code",
+      "repetition": 2,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen36-27b-mtp--code-07-concurrent-stale--3",
+      "candidateId": "qwen36-27b-mtp",
+      "caseId": "code-07-concurrent-stale",
+      "role": "code",
+      "repetition": 3,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen36-27b-mtp--code-08-owned-restore--1",
+      "candidateId": "qwen36-27b-mtp",
+      "caseId": "code-08-owned-restore",
+      "role": "code",
+      "repetition": 1,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen36-27b-mtp--code-08-owned-restore--2",
+      "candidateId": "qwen36-27b-mtp",
+      "caseId": "code-08-owned-restore",
+      "role": "code",
+      "repetition": 2,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen36-27b-mtp--code-08-owned-restore--3",
+      "candidateId": "qwen36-27b-mtp",
+      "caseId": "code-08-owned-restore",
+      "role": "code",
+      "repetition": 3,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen36-27b-mtp--agent-01-safe-auto--1",
+      "candidateId": "qwen36-27b-mtp",
+      "caseId": "agent-01-safe-auto",
+      "role": "agent",
+      "repetition": 1,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen36-27b-mtp--agent-01-safe-auto--2",
+      "candidateId": "qwen36-27b-mtp",
+      "caseId": "agent-01-safe-auto",
+      "role": "agent",
+      "repetition": 2,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen36-27b-mtp--agent-01-safe-auto--3",
+      "candidateId": "qwen36-27b-mtp",
+      "caseId": "agent-01-safe-auto",
+      "role": "agent",
+      "repetition": 3,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen36-27b-mtp--agent-02-read-only--1",
+      "candidateId": "qwen36-27b-mtp",
+      "caseId": "agent-02-read-only",
+      "role": "agent",
+      "repetition": 1,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen36-27b-mtp--agent-02-read-only--2",
+      "candidateId": "qwen36-27b-mtp",
+      "caseId": "agent-02-read-only",
+      "role": "agent",
+      "repetition": 2,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen36-27b-mtp--agent-02-read-only--3",
+      "candidateId": "qwen36-27b-mtp",
+      "caseId": "agent-02-read-only",
+      "role": "agent",
+      "repetition": 3,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen36-27b-mtp--agent-03-ask-every-time--1",
+      "candidateId": "qwen36-27b-mtp",
+      "caseId": "agent-03-ask-every-time",
+      "role": "agent",
+      "repetition": 1,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen36-27b-mtp--agent-03-ask-every-time--2",
+      "candidateId": "qwen36-27b-mtp",
+      "caseId": "agent-03-ask-every-time",
+      "role": "agent",
+      "repetition": 2,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen36-27b-mtp--agent-03-ask-every-time--3",
+      "candidateId": "qwen36-27b-mtp",
+      "caseId": "agent-03-ask-every-time",
+      "role": "agent",
+      "repetition": 3,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen36-27b-mtp--agent-04-revoked-plan--1",
+      "candidateId": "qwen36-27b-mtp",
+      "caseId": "agent-04-revoked-plan",
+      "role": "agent",
+      "repetition": 1,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen36-27b-mtp--agent-04-revoked-plan--2",
+      "candidateId": "qwen36-27b-mtp",
+      "caseId": "agent-04-revoked-plan",
+      "role": "agent",
+      "repetition": 2,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen36-27b-mtp--agent-04-revoked-plan--3",
+      "candidateId": "qwen36-27b-mtp",
+      "caseId": "agent-04-revoked-plan",
+      "role": "agent",
+      "repetition": 3,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen36-27b-mtp--agent-05-cancel-drain--1",
+      "candidateId": "qwen36-27b-mtp",
+      "caseId": "agent-05-cancel-drain",
+      "role": "agent",
+      "repetition": 1,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen36-27b-mtp--agent-05-cancel-drain--2",
+      "candidateId": "qwen36-27b-mtp",
+      "caseId": "agent-05-cancel-drain",
+      "role": "agent",
+      "repetition": 2,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen36-27b-mtp--agent-05-cancel-drain--3",
+      "candidateId": "qwen36-27b-mtp",
+      "caseId": "agent-05-cancel-drain",
+      "role": "agent",
+      "repetition": 3,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen36-27b-mtp--agent-06-crash-reconcile--1",
+      "candidateId": "qwen36-27b-mtp",
+      "caseId": "agent-06-crash-reconcile",
+      "role": "agent",
+      "repetition": 1,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen36-27b-mtp--agent-06-crash-reconcile--2",
+      "candidateId": "qwen36-27b-mtp",
+      "caseId": "agent-06-crash-reconcile",
+      "role": "agent",
+      "repetition": 2,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen36-27b-mtp--agent-06-crash-reconcile--3",
+      "candidateId": "qwen36-27b-mtp",
+      "caseId": "agent-06-crash-reconcile",
+      "role": "agent",
+      "repetition": 3,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen36-27b-mtp--agent-07-lost-ack--1",
+      "candidateId": "qwen36-27b-mtp",
+      "caseId": "agent-07-lost-ack",
+      "role": "agent",
+      "repetition": 1,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen36-27b-mtp--agent-07-lost-ack--2",
+      "candidateId": "qwen36-27b-mtp",
+      "caseId": "agent-07-lost-ack",
+      "role": "agent",
+      "repetition": 2,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen36-27b-mtp--agent-07-lost-ack--3",
+      "candidateId": "qwen36-27b-mtp",
+      "caseId": "agent-07-lost-ack",
+      "role": "agent",
+      "repetition": 3,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen36-27b-mtp--agent-08-undo-display--1",
+      "candidateId": "qwen36-27b-mtp",
+      "caseId": "agent-08-undo-display",
+      "role": "agent",
+      "repetition": 1,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen36-27b-mtp--agent-08-undo-display--2",
+      "candidateId": "qwen36-27b-mtp",
+      "caseId": "agent-08-undo-display",
+      "role": "agent",
+      "repetition": 2,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen36-27b-mtp--agent-08-undo-display--3",
+      "candidateId": "qwen36-27b-mtp",
+      "caseId": "agent-08-undo-display",
+      "role": "agent",
+      "repetition": 3,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen36-27b-mtp--review-01-cross-file-contract--1",
+      "candidateId": "qwen36-27b-mtp",
+      "caseId": "review-01-cross-file-contract",
+      "role": "review",
+      "repetition": 1,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen36-27b-mtp--review-01-cross-file-contract--2",
+      "candidateId": "qwen36-27b-mtp",
+      "caseId": "review-01-cross-file-contract",
+      "role": "review",
+      "repetition": 2,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen36-27b-mtp--review-01-cross-file-contract--3",
+      "candidateId": "qwen36-27b-mtp",
+      "caseId": "review-01-cross-file-contract",
+      "role": "review",
+      "repetition": 3,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen36-27b-mtp--review-02-long-contradiction--1",
+      "candidateId": "qwen36-27b-mtp",
+      "caseId": "review-02-long-contradiction",
+      "role": "review",
+      "repetition": 1,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen36-27b-mtp--review-02-long-contradiction--2",
+      "candidateId": "qwen36-27b-mtp",
+      "caseId": "review-02-long-contradiction",
+      "role": "review",
+      "repetition": 2,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen36-27b-mtp--review-02-long-contradiction--3",
+      "candidateId": "qwen36-27b-mtp",
+      "caseId": "review-02-long-contradiction",
+      "role": "review",
+      "repetition": 3,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen36-27b-mtp--review-03-current-policy--1",
+      "candidateId": "qwen36-27b-mtp",
+      "caseId": "review-03-current-policy",
+      "role": "review",
+      "repetition": 1,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen36-27b-mtp--review-03-current-policy--2",
+      "candidateId": "qwen36-27b-mtp",
+      "caseId": "review-03-current-policy",
+      "role": "review",
+      "repetition": 2,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen36-27b-mtp--review-03-current-policy--3",
+      "candidateId": "qwen36-27b-mtp",
+      "caseId": "review-03-current-policy",
+      "role": "review",
+      "repetition": 3,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen36-27b-mtp--review-04-path-issue--1",
+      "candidateId": "qwen36-27b-mtp",
+      "caseId": "review-04-path-issue",
+      "role": "review",
+      "repetition": 1,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen36-27b-mtp--review-04-path-issue--2",
+      "candidateId": "qwen36-27b-mtp",
+      "caseId": "review-04-path-issue",
+      "role": "review",
+      "repetition": 2,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen36-27b-mtp--review-04-path-issue--3",
+      "candidateId": "qwen36-27b-mtp",
+      "caseId": "review-04-path-issue",
+      "role": "review",
+      "repetition": 3,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen36-27b-mtp--review-05-unsupported-claim--1",
+      "candidateId": "qwen36-27b-mtp",
+      "caseId": "review-05-unsupported-claim",
+      "role": "review",
+      "repetition": 1,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen36-27b-mtp--review-05-unsupported-claim--2",
+      "candidateId": "qwen36-27b-mtp",
+      "caseId": "review-05-unsupported-claim",
+      "role": "review",
+      "repetition": 2,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen36-27b-mtp--review-05-unsupported-claim--3",
+      "candidateId": "qwen36-27b-mtp",
+      "caseId": "review-05-unsupported-claim",
+      "role": "review",
+      "repetition": 3,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen36-27b-mtp--review-06-evidence-explanation--1",
+      "candidateId": "qwen36-27b-mtp",
+      "caseId": "review-06-evidence-explanation",
+      "role": "review",
+      "repetition": 1,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen36-27b-mtp--review-06-evidence-explanation--2",
+      "candidateId": "qwen36-27b-mtp",
+      "caseId": "review-06-evidence-explanation",
+      "role": "review",
+      "repetition": 2,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen36-27b-mtp--review-06-evidence-explanation--3",
+      "candidateId": "qwen36-27b-mtp",
+      "caseId": "review-06-evidence-explanation",
+      "role": "review",
+      "repetition": 3,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen36-27b-mtp--review-07-fake-tool-output--1",
+      "candidateId": "qwen36-27b-mtp",
+      "caseId": "review-07-fake-tool-output",
+      "role": "review",
+      "repetition": 1,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen36-27b-mtp--review-07-fake-tool-output--2",
+      "candidateId": "qwen36-27b-mtp",
+      "caseId": "review-07-fake-tool-output",
+      "role": "review",
+      "repetition": 2,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen36-27b-mtp--review-07-fake-tool-output--3",
+      "candidateId": "qwen36-27b-mtp",
+      "caseId": "review-07-fake-tool-output",
+      "role": "review",
+      "repetition": 3,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen36-27b-mtp--review-08-insufficient-context--1",
+      "candidateId": "qwen36-27b-mtp",
+      "caseId": "review-08-insufficient-context",
+      "role": "review",
+      "repetition": 1,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen36-27b-mtp--review-08-insufficient-context--2",
+      "candidateId": "qwen36-27b-mtp",
+      "caseId": "review-08-insufficient-context",
+      "role": "review",
+      "repetition": 2,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "qwen36-27b-mtp--review-08-insufficient-context--3",
+      "candidateId": "qwen36-27b-mtp",
+      "caseId": "review-08-insufficient-context",
+      "role": "review",
+      "repetition": 3,
+      "reviewState": "outside-this-gemma-snapshot-no-classification"
+    },
+    {
+      "attemptId": "gemma4-26b-a4b--chat-01-fresh-note--1",
+      "candidateId": "gemma4-26b-a4b",
+      "caseId": "chat-01-fresh-note",
+      "role": "chat",
+      "repetition": 1,
+      "reviewState": "reviewed",
+      "status": "fail",
+      "rawSha256": "432b9756502f8d0600424e401c079085e146b2feaf9afb20dd1e4be27df504de",
+      "recordSha256": "42fcccb5a411944003952c77dcc6b3f88dc6047334ae22ae62596fe95020634b",
+      "sidecarSha256": "dee9107172ff18ad858f11be2faddfc2716194b6a8be11330d5c516ad9a564b7",
+      "modelOutputsReviewed": 1,
+      "criticalModelBar": false
+    },
+    {
+      "attemptId": "gemma4-26b-a4b--chat-01-fresh-note--2",
+      "candidateId": "gemma4-26b-a4b",
+      "caseId": "chat-01-fresh-note",
+      "role": "chat",
+      "repetition": 2,
+      "reviewState": "reviewed",
+      "status": "fail",
+      "rawSha256": "f4332d480b230e079aa7975f5ec908e883c46737b4e2d132f61540be7a156fbb",
+      "recordSha256": "37af1c414a72608d2b4fafd9e0dbbc1589c900ebb89857a819f7b0e1eeca15d7",
+      "sidecarSha256": "2903b6ef9b73b80d686bd1e37db54e638cfe30636debf86c294ac347e9d1b00e",
+      "modelOutputsReviewed": 1,
+      "criticalModelBar": false
+    },
+    {
+      "attemptId": "gemma4-26b-a4b--chat-01-fresh-note--3",
+      "candidateId": "gemma4-26b-a4b",
+      "caseId": "chat-01-fresh-note",
+      "role": "chat",
+      "repetition": 3,
+      "reviewState": "reviewed",
+      "status": "fail",
+      "rawSha256": "fd8d2fe48068ab5a927c43a07ab2edeb02103abac3e23db2ed819b8d3b688d45",
+      "recordSha256": "976afb78b44254b36e078d4cba64559f7feb41d5a9b99b066beb7371cd05254e",
+      "sidecarSha256": "86dac839f2971373c58cef505e55ed7e88e8e90d271d733b5b5bd3ec083a52c8",
+      "modelOutputsReviewed": 1,
+      "criticalModelBar": false
+    },
+    {
+      "attemptId": "gemma4-26b-a4b--chat-02-reopen-plan--1",
+      "candidateId": "gemma4-26b-a4b",
+      "caseId": "chat-02-reopen-plan",
+      "role": "chat",
+      "repetition": 1,
+      "reviewState": "reviewed",
+      "status": "pass",
+      "rawSha256": "5f9d18c404936fe60190d611147969d2411b55e5841d30329f7e84ff9cee4598",
+      "recordSha256": "c27bdef3cf9b3b41c2deade98d4bbca98c7af974ca22c4ab6e67edf3e1709a67",
+      "sidecarSha256": "716477bb6f2a9f807796b2090b52cb29dcc81ba69dca1795e9d39891736cb262",
+      "modelOutputsReviewed": 2,
+      "criticalModelBar": false
+    },
+    {
+      "attemptId": "gemma4-26b-a4b--chat-02-reopen-plan--2",
+      "candidateId": "gemma4-26b-a4b",
+      "caseId": "chat-02-reopen-plan",
+      "role": "chat",
+      "repetition": 2,
+      "reviewState": "reviewed",
+      "status": "pass",
+      "rawSha256": "604274c06d8c11fc1dea95abaf80207cf99bffe32501e346bd3180e1a34a4d8f",
+      "recordSha256": "77d5b51b75c3818f1644e13cb174e5f02897dc47f6459ae1c317373bd2d1e32c",
+      "sidecarSha256": "3aea082d0eefc6ed46c69fce3273d48288a734419b4252ebd1b6843570e37bd5",
+      "modelOutputsReviewed": 2,
+      "criticalModelBar": false
+    },
+    {
+      "attemptId": "gemma4-26b-a4b--chat-02-reopen-plan--3",
+      "candidateId": "gemma4-26b-a4b",
+      "caseId": "chat-02-reopen-plan",
+      "role": "chat",
+      "repetition": 3,
+      "reviewState": "reviewed",
+      "status": "pass",
+      "rawSha256": "f96ac31e596b5c59ad3e24a00d5eeb9ef0320aad1776d0c3baf9487a4fb43b86",
+      "recordSha256": "60cb0c859d7c57a4cc1e18e6afb5b38cb8f1a02caed3b552dc31381e212746ff",
+      "sidecarSha256": "55291d363debc84e46e875e33f0852e1fb6784ed63a81371b9ee9c715b1f2531",
+      "modelOutputsReviewed": 2,
+      "criticalModelBar": false
+    },
+    {
+      "attemptId": "gemma4-26b-a4b--chat-03-current-topic--1",
+      "candidateId": "gemma4-26b-a4b",
+      "caseId": "chat-03-current-topic",
+      "role": "chat",
+      "repetition": 1,
+      "reviewState": "reviewed",
+      "status": "pass",
+      "rawSha256": "d958f955776a2db7323f680d75ef5b9dad82addae46ed2e1691ee32ce227e8e0",
+      "recordSha256": "5e8b2e46c8ca8ed7d56e278ea5970fe0a58c5cafd389bb58745c020c5982391f",
+      "sidecarSha256": "398f5b20a54d4d07db6df7550f5bc57514ae6cb355fa1327ac6fe3d7208055dd",
+      "modelOutputsReviewed": 2,
+      "criticalModelBar": false
+    },
+    {
+      "attemptId": "gemma4-26b-a4b--chat-03-current-topic--2",
+      "candidateId": "gemma4-26b-a4b",
+      "caseId": "chat-03-current-topic",
+      "role": "chat",
+      "repetition": 2,
+      "reviewState": "reviewed",
+      "status": "pass",
+      "rawSha256": "3699b5b7dda240b745999caea21196f0a647c3e1dd11d1cce0cb2102eafb8225",
+      "recordSha256": "d793c8d2fed43a34b30e54ed6086ba1d1ff6b76da4b59f47e43f4034242d7c4f",
+      "sidecarSha256": "f7260f7efe5db85a6ff709037ad3d40c546d6d33b0288f4078ca26b0bb97ed47",
+      "modelOutputsReviewed": 2,
+      "criticalModelBar": false
+    },
+    {
+      "attemptId": "gemma4-26b-a4b--chat-03-current-topic--3",
+      "candidateId": "gemma4-26b-a4b",
+      "caseId": "chat-03-current-topic",
+      "role": "chat",
+      "repetition": 3,
+      "reviewState": "reviewed",
+      "status": "pass",
+      "rawSha256": "a36ca0f19234968dcada9091756467021f751cecb11587d83df2b57b9ec72488",
+      "recordSha256": "4a67d9b4743097471f8906c3b72eb3d729ffddf6afa1646fd62ad3f1f7b995d6",
+      "sidecarSha256": "c8f1e53a796763a24addf47a940bebdd5467162b5f4726b987b4939a9c479e4c",
+      "modelOutputsReviewed": 2,
+      "criticalModelBar": false
+    },
+    {
+      "attemptId": "gemma4-26b-a4b--chat-04-constraint-carry--1",
+      "candidateId": "gemma4-26b-a4b",
+      "caseId": "chat-04-constraint-carry",
+      "role": "chat",
+      "repetition": 1,
+      "reviewState": "reviewed",
+      "status": "pass",
+      "rawSha256": "d9fe02bc5fc6dcfac96a18fb9dd35c200c188c2958dcd88f51c3eb8f06f778de",
+      "recordSha256": "c5a75961b97e3f13f6d7aac1c8bc24b1d4fca6b6dcfae3836ac7a4a1f1124bd5",
+      "sidecarSha256": "f54512ca3a7cbdd67c0d06039b3d94b0310a06705e925e1775747738dc786b31",
+      "modelOutputsReviewed": 2,
+      "criticalModelBar": false
+    },
+    {
+      "attemptId": "gemma4-26b-a4b--chat-04-constraint-carry--2",
+      "candidateId": "gemma4-26b-a4b",
+      "caseId": "chat-04-constraint-carry",
+      "role": "chat",
+      "repetition": 2,
+      "reviewState": "reviewed",
+      "status": "pass",
+      "rawSha256": "f92fc3237b0ac34a09e4191bb7c8957efe8bd824d9bd767a65c04f66742ba748",
+      "recordSha256": "8d57501ccbda2e368b89346ec5c2d2f2388013292a19329171bf4748a7a59326",
+      "sidecarSha256": "f74635aba19b236cfd0f2ff27179dfaa6cbc05eb685576496d7df6297065eb88",
+      "modelOutputsReviewed": 2,
+      "criticalModelBar": false
+    },
+    {
+      "attemptId": "gemma4-26b-a4b--chat-04-constraint-carry--3",
+      "candidateId": "gemma4-26b-a4b",
+      "caseId": "chat-04-constraint-carry",
+      "role": "chat",
+      "repetition": 3,
+      "reviewState": "reviewed",
+      "status": "pass",
+      "rawSha256": "833643456f219d6a3c6c9d3eb338845c512bfa9b8f24c26a4f85eddd837dab97",
+      "recordSha256": "199e6ae56de91bfc3bbfc7984e713f316e921decf1da3d42b4cf86679bc3f897",
+      "sidecarSha256": "285aaab4a12892f9e94c942697c0e2b5be734438c1ae74478dbb7910c19b409e",
+      "modelOutputsReviewed": 2,
+      "criticalModelBar": false
+    },
+    {
+      "attemptId": "gemma4-26b-a4b--chat-05-useful-summary--1",
+      "candidateId": "gemma4-26b-a4b",
+      "caseId": "chat-05-useful-summary",
+      "role": "chat",
+      "repetition": 1,
+      "reviewState": "reviewed",
+      "status": "fail",
+      "rawSha256": "ea084434a9b855aef05feac4dbb35fb77fe6e325261e4e9b89e68d7bc7f0f526",
+      "recordSha256": "3e583790aaebf01497d6fb78f64154e958562c48759988fb70d61bcc2edb9139",
+      "sidecarSha256": "5b424627ae871057a7e04fb0c3b2bee330f68acdcf3c7a82d17e7f5da5fca97b",
+      "modelOutputsReviewed": 1,
+      "criticalModelBar": false
+    },
+    {
+      "attemptId": "gemma4-26b-a4b--chat-05-useful-summary--2",
+      "candidateId": "gemma4-26b-a4b",
+      "caseId": "chat-05-useful-summary",
+      "role": "chat",
+      "repetition": 2,
+      "reviewState": "reviewed",
+      "status": "fail",
+      "rawSha256": "b322aad1882a7392b6ac4f1c055eee9f419118e0e3bf0fcedbe928b43d41bef4",
+      "recordSha256": "802bdf8f00b8d9a51e5a08a14aaa213abaf5d693db43097a6e9dcd85b23c54b5",
+      "sidecarSha256": "aaded5c06bfb759e81a3b337d8ced5d4cd0ea06ddc4be7043015720f45721be9",
+      "modelOutputsReviewed": 1,
+      "criticalModelBar": false
+    },
+    {
+      "attemptId": "gemma4-26b-a4b--chat-05-useful-summary--3",
+      "candidateId": "gemma4-26b-a4b",
+      "caseId": "chat-05-useful-summary",
+      "role": "chat",
+      "repetition": 3,
+      "reviewState": "reviewed",
+      "status": "fail",
+      "rawSha256": "0a04c1bd2839faa0a403846574c7d68ac8a2918022a25ceacd02828b6fbc4b06",
+      "recordSha256": "af318032054318194f76c7a95134c8bdb42ca6f400ff5551ac124280d703a2e6",
+      "sidecarSha256": "4484dea5a2cf4a0952c449c9d85c24e26f60fe50c934948d5eea10d9af99ea71",
+      "modelOutputsReviewed": 1,
+      "criticalModelBar": false
+    },
+    {
+      "attemptId": "gemma4-26b-a4b--chat-06-new-session--1",
+      "candidateId": "gemma4-26b-a4b",
+      "caseId": "chat-06-new-session",
+      "role": "chat",
+      "repetition": 1,
+      "reviewState": "reviewed",
+      "status": "pass",
+      "rawSha256": "d76fdf38ef8d97444eab05df0cc318a992c44ceabf84f1825a52586d8669be75",
+      "recordSha256": "84d428de0b096645d9de5849e9b1295aecf0246aa15d6d220f983ae6037009f7",
+      "sidecarSha256": "ad7bd80b969f465e4d2e8ca6bc66671d397448015e6a75196d6903a09395d2af",
+      "modelOutputsReviewed": 2,
+      "criticalModelBar": false
+    },
+    {
+      "attemptId": "gemma4-26b-a4b--chat-06-new-session--2",
+      "candidateId": "gemma4-26b-a4b",
+      "caseId": "chat-06-new-session",
+      "role": "chat",
+      "repetition": 2,
+      "reviewState": "reviewed",
+      "status": "pass",
+      "rawSha256": "e61509602d6f3a0686008159bca093c0478029cc5409b4314122e6f0955f7dad",
+      "recordSha256": "2c092cf66dd11ff5c9abb52272b92c9c1edf682e5e01d755c3dc87e91f5be555",
+      "sidecarSha256": "59a8b8f363cc6334ad0d91bdb336f4d03e352799f0e40fdabf866351d1043d81",
+      "modelOutputsReviewed": 2,
+      "criticalModelBar": false
+    },
+    {
+      "attemptId": "gemma4-26b-a4b--chat-06-new-session--3",
+      "candidateId": "gemma4-26b-a4b",
+      "caseId": "chat-06-new-session",
+      "role": "chat",
+      "repetition": 3,
+      "reviewState": "reviewed",
+      "status": "pass",
+      "rawSha256": "dc6e629c7632880d15029d199a593f57b8e1771456f2d3281acd09caaba784a1",
+      "recordSha256": "3e7ce55a9503fff636bc9924747a8c1bd69b770dea78a9d8ca2f3e8a514c7987",
+      "sidecarSha256": "3359ed76613f9c7b7f07fc4f0fb46af43c663677d5d079030b0914cda47fce73",
+      "modelOutputsReviewed": 2,
+      "criticalModelBar": false
+    },
+    {
+      "attemptId": "gemma4-26b-a4b--chat-07-scope-switch--1",
+      "candidateId": "gemma4-26b-a4b",
+      "caseId": "chat-07-scope-switch",
+      "role": "chat",
+      "repetition": 1,
+      "reviewState": "reviewed",
+      "status": "pass",
+      "rawSha256": "dcda3ea585a53e7ae9cd94431e9721d71b716728bf8b0743ae1ef44e80bec5d3",
+      "recordSha256": "4b3b0b76d03755bf57ae26c9dd4f37dd363863c5931a5482865d1a09845d0615",
+      "sidecarSha256": "d72c5beedb9e888232ae16e1a2405035e323f254ce927b9271d83c7cbb4ac5a0",
+      "modelOutputsReviewed": 4,
+      "criticalModelBar": false
+    },
+    {
+      "attemptId": "gemma4-26b-a4b--chat-07-scope-switch--2",
+      "candidateId": "gemma4-26b-a4b",
+      "caseId": "chat-07-scope-switch",
+      "role": "chat",
+      "repetition": 2,
+      "reviewState": "reviewed",
+      "status": "pass",
+      "rawSha256": "b94fa40d9c502b5ec24b0c0bfba53749174dd359444930b83400d8a149835af9",
+      "recordSha256": "a3dbfa49a688c5813f1d1902cc11e356509394d8209c5ef89c56d7597b068081",
+      "sidecarSha256": "2e36d9b593c9635f7b2ebe2e832f95f859f6d19b3b2c26805dc64f054babb305",
+      "modelOutputsReviewed": 4,
+      "criticalModelBar": false
+    },
+    {
+      "attemptId": "gemma4-26b-a4b--chat-07-scope-switch--3",
+      "candidateId": "gemma4-26b-a4b",
+      "caseId": "chat-07-scope-switch",
+      "role": "chat",
+      "repetition": 3,
+      "reviewState": "reviewed",
+      "status": "pass",
+      "rawSha256": "dd0714f8663e2d5a40b8d6b267ca35325bb30dff63c7ee60af1648e85174a691",
+      "recordSha256": "ff2c3641e2add862d7bccdf64072b636aebcdb44557c178c785aba37a27a9196",
+      "sidecarSha256": "fb05850706c55b6ba7db6945776f77e4df86d13ca3dbaf67802567ab95741f8e",
+      "modelOutputsReviewed": 4,
+      "criticalModelBar": false
+    },
+    {
+      "attemptId": "gemma4-26b-a4b--chat-08-retry-incomplete--1",
+      "candidateId": "gemma4-26b-a4b",
+      "caseId": "chat-08-retry-incomplete",
+      "role": "chat",
+      "repetition": 1,
+      "reviewState": "reviewed",
+      "status": "pass",
+      "rawSha256": "29589af654dd1c3928d48894e3d898527f35c726104f32d993aa22c33051c000",
+      "recordSha256": "ff0bff40da2c375a8768188cacf555c524c82d9de477fd42d7a7fd2171ec6502",
+      "sidecarSha256": "5fafca5db1f0f0da2f8130411792082d3e4beb27c8818703ab0f9adaec50c392",
+      "modelOutputsReviewed": 2,
+      "criticalModelBar": false
+    },
+    {
+      "attemptId": "gemma4-26b-a4b--chat-08-retry-incomplete--2",
+      "candidateId": "gemma4-26b-a4b",
+      "caseId": "chat-08-retry-incomplete",
+      "role": "chat",
+      "repetition": 2,
+      "reviewState": "reviewed",
+      "status": "pass",
+      "rawSha256": "0a0a262f6e664181b3296795b10a93a7d7c674fc75955ad31ac22764ccd07cde",
+      "recordSha256": "74b36b102bc4a8f81a32941125f9b797fc930f4513fbf11ba235305999e1408e",
+      "sidecarSha256": "d092b07540ee2bfd97122404be09cf6af02e50701f8b1b5e000dff10afd6a2ac",
+      "modelOutputsReviewed": 2,
+      "criticalModelBar": false
+    },
+    {
+      "attemptId": "gemma4-26b-a4b--chat-08-retry-incomplete--3",
+      "candidateId": "gemma4-26b-a4b",
+      "caseId": "chat-08-retry-incomplete",
+      "role": "chat",
+      "repetition": 3,
+      "reviewState": "reviewed",
+      "status": "pass",
+      "rawSha256": "75f3f533ef960c124486382b51ed6cb1d2e191144c3c9bd1435605a858260234",
+      "recordSha256": "ea2d1421762a62b5091fa63177b5c280eb2581be747629d0349eaba1ebf182e3",
+      "sidecarSha256": "c72d6bd4bea0e855bd896333d86f3ab62427adbe1402ebd6b20a8ddcbdace730",
+      "modelOutputsReviewed": 2,
+      "criticalModelBar": false
+    },
+    {
+      "attemptId": "gemma4-26b-a4b--research-01-selected-facts--1",
+      "candidateId": "gemma4-26b-a4b",
+      "caseId": "research-01-selected-facts",
+      "role": "research",
+      "repetition": 1,
+      "reviewState": "reviewed",
+      "status": "pass",
+      "rawSha256": "915042dcc2fc69e73cad43a1ad577a2b9e3b0f4c44462f12427a9b0ca9146ebf",
+      "recordSha256": "aa182391c24050b027bc51adab9de4e72aa49c7df7d102b30865b48a18936e7e",
+      "sidecarSha256": "88ac0be2ae662dc59ea549ce1610e34d545f65a08d123e09a4d64b36a282f324",
+      "modelOutputsReviewed": 1,
+      "criticalModelBar": false
+    },
+    {
+      "attemptId": "gemma4-26b-a4b--research-01-selected-facts--2",
+      "candidateId": "gemma4-26b-a4b",
+      "caseId": "research-01-selected-facts",
+      "role": "research",
+      "repetition": 2,
+      "reviewState": "reviewed",
+      "status": "pass",
+      "rawSha256": "5224fa7547dccd75fbd98343a4cf1be2ba7ac68558b2628c8a9be49f927964bd",
+      "recordSha256": "46da033f390699b5a7e50afae394b7ab382e68b89bc4cc6e3598890938f25ee4",
+      "sidecarSha256": "a588f0b1fbfd7bf6812caf34f318e01b19ad275bb01676f9bcc46a89f75f6124",
+      "modelOutputsReviewed": 1,
+      "criticalModelBar": false
+    },
+    {
+      "attemptId": "gemma4-26b-a4b--research-01-selected-facts--3",
+      "candidateId": "gemma4-26b-a4b",
+      "caseId": "research-01-selected-facts",
+      "role": "research",
+      "repetition": 3,
+      "reviewState": "reviewed",
+      "status": "pass",
+      "rawSha256": "2a069802e7b67681221a64582c326581ff8018bc6340af537a7359124831137c",
+      "recordSha256": "b7962f23b6d578f7a27cefcbedebd22c95aa71717907e5db735008e26b4dae56",
+      "sidecarSha256": "82153a8cd53944cf23b4de3636fea0bb2d1feef16d6ca2b8a2fed812cd70497c",
+      "modelOutputsReviewed": 1,
+      "criticalModelBar": false
+    },
+    {
+      "attemptId": "gemma4-26b-a4b--research-02-combine-citations--1",
+      "candidateId": "gemma4-26b-a4b",
+      "caseId": "research-02-combine-citations",
+      "role": "research",
+      "repetition": 1,
+      "reviewState": "reviewed",
+      "status": "inconclusive",
+      "rawSha256": "bcd1df57c02e2b6b17300a92378613e6769f7b28466cbc66790cf3007792ea2b",
+      "recordSha256": "6a44288c7fd26902ed36a45e87bd551952600ea4a79c406ecd04f3e720e5350b",
+      "sidecarSha256": "7560acc951fcb3011a490031cace344bb8c00f1e63a59afc4dfa56045fdcb93c",
+      "modelOutputsReviewed": 1,
+      "criticalModelBar": false
+    },
+    {
+      "attemptId": "gemma4-26b-a4b--research-02-combine-citations--2",
+      "candidateId": "gemma4-26b-a4b",
+      "caseId": "research-02-combine-citations",
+      "role": "research",
+      "repetition": 2,
+      "reviewState": "reviewed",
+      "status": "inconclusive",
+      "rawSha256": "3d3fc884dac0748859c03fdbd0bb2223eecc2e0e3d40323a8b6a1a68fb40f069",
+      "recordSha256": "a7929a4279902fef2c1c5aae4497e5d2dd3011a7e3d4ab2a881be19c660fe162",
+      "sidecarSha256": "8c7b6d77f4d26c2999b8e691fa2becc41aef3ee3a70f090553cf3a842f867e8c",
+      "modelOutputsReviewed": 1,
+      "criticalModelBar": false
+    },
+    {
+      "attemptId": "gemma4-26b-a4b--research-02-combine-citations--3",
+      "candidateId": "gemma4-26b-a4b",
+      "caseId": "research-02-combine-citations",
+      "role": "research",
+      "repetition": 3,
+      "reviewState": "reviewed",
+      "status": "inconclusive",
+      "rawSha256": "ac941f9f2fa45d350795abac9c589c5927ab2fdadbff529f818b56706efe50b5",
+      "recordSha256": "a7c7b8897606eccd2760ce3d0f2cf65704a38607ff4e81ffb9ddabeb5b0b6847",
+      "sidecarSha256": "ee9c7e68d046102bf2fb5f7eb5d7dc5442ca10934ad4862875de32b419fad78d",
+      "modelOutputsReviewed": 1,
+      "criticalModelBar": false
+    },
+    {
+      "attemptId": "gemma4-26b-a4b--research-03-version-conflict--1",
+      "candidateId": "gemma4-26b-a4b",
+      "caseId": "research-03-version-conflict",
+      "role": "research",
+      "repetition": 1,
+      "reviewState": "reviewed",
+      "status": "pass",
+      "rawSha256": "bcf285d9fca2b01912ef29d15c15c522e5286d832328ec4aee4b411736e5bb77",
+      "recordSha256": "9ebe11ae255ca25e9a6aa316c857c8f4dda48ddb9ddd379d422d737771aaacbb",
+      "sidecarSha256": "01c3b1b16ff1d511f139549cf08f1b18075ead4eb62cfc2cde50820809aad653",
+      "modelOutputsReviewed": 1,
+      "criticalModelBar": false
+    },
+    {
+      "attemptId": "gemma4-26b-a4b--research-03-version-conflict--2",
+      "candidateId": "gemma4-26b-a4b",
+      "caseId": "research-03-version-conflict",
+      "role": "research",
+      "repetition": 2,
+      "reviewState": "reviewed",
+      "status": "pass",
+      "rawSha256": "01b2f073d939accbfaeddcb92b4bf476cf4d7db50c24ccadaa31e679f586d448",
+      "recordSha256": "51ea2fc94c8911a19e675b165670466e40c80b8eb2c50237e36b04e762d9ded8",
+      "sidecarSha256": "643db32ab39d358f0c21d663d5e5637b12b1075c422edfdcf9bdeb537ed56d13",
+      "modelOutputsReviewed": 1,
+      "criticalModelBar": false
+    },
+    {
+      "attemptId": "gemma4-26b-a4b--research-03-version-conflict--3",
+      "candidateId": "gemma4-26b-a4b",
+      "caseId": "research-03-version-conflict",
+      "role": "research",
+      "repetition": 3,
+      "reviewState": "reviewed",
+      "status": "pass",
+      "rawSha256": "6aa5358e1845dc11f38eb41a8aaafae1045fa2eb769836b2514ffbf6758f9df1",
+      "recordSha256": "2e9c51b69f7ca88ed2ea29d82ae3dedea6b974b765a0089114ba71f1b920beea",
+      "sidecarSha256": "5260343b237c5293b6c5c5eae78192f3c2af08805895df5408b84af437a77811",
+      "modelOutputsReviewed": 1,
+      "criticalModelBar": false
+    },
+    {
+      "attemptId": "gemma4-26b-a4b--research-04-missing-evidence--1",
+      "candidateId": "gemma4-26b-a4b",
+      "caseId": "research-04-missing-evidence",
+      "role": "research",
+      "repetition": 1,
+      "reviewState": "reviewed",
+      "status": "pass",
+      "rawSha256": "458f746f0a37e557f692f410ec44fef8ce8292531760a678020acca25fdcb6be",
+      "recordSha256": "df7adf2c65f2fc6cd3c252aa66e985db061386db6a6093ff0fac134826f77d62",
+      "sidecarSha256": "e596de37fe83ec736cb9b893edb39d706596caef978e7208f7e7b20416c44934",
+      "modelOutputsReviewed": 1,
+      "criticalModelBar": false
+    },
+    {
+      "attemptId": "gemma4-26b-a4b--research-04-missing-evidence--2",
+      "candidateId": "gemma4-26b-a4b",
+      "caseId": "research-04-missing-evidence",
+      "role": "research",
+      "repetition": 2,
+      "reviewState": "reviewed",
+      "status": "pass",
+      "rawSha256": "d7828aebbf216a4957f17e83fd38c8f41e68cbc0c47e1972b696af854d4d96ca",
+      "recordSha256": "e41b21f183a404381b39dec2a8b68a174eb9fdc0f9a21926fc4e9213fea43319",
+      "sidecarSha256": "97327ddbe2478306fb5be28284370c36c19a387566977ff3aad0ce3bfd884722",
+      "modelOutputsReviewed": 1,
+      "criticalModelBar": false
+    },
+    {
+      "attemptId": "gemma4-26b-a4b--research-04-missing-evidence--3",
+      "candidateId": "gemma4-26b-a4b",
+      "caseId": "research-04-missing-evidence",
+      "role": "research",
+      "repetition": 3,
+      "reviewState": "reviewed",
+      "status": "pass",
+      "rawSha256": "c64d0b82ffbaaba00349d3b9172dda1e5005eed2d50388fe2f5e731edc3dcbcc",
+      "recordSha256": "a9151cebc3bcb71ee6593ed1918040490782880e7a8f053857958c98b0929dda",
+      "sidecarSha256": "2d9ce041955b60d584d47d9fcea1b757176ef79ee5de765b664b89cbe135d089",
+      "modelOutputsReviewed": 1,
+      "criticalModelBar": false
+    },
+    {
+      "attemptId": "gemma4-26b-a4b--research-05-denial-recovery--1",
+      "candidateId": "gemma4-26b-a4b",
+      "caseId": "research-05-denial-recovery",
+      "role": "research",
+      "repetition": 1,
+      "reviewState": "reviewed",
+      "status": "pass",
+      "rawSha256": "be2bca38521925ef92df521959ec7f10da94a8edc7fc194db56556b1d4403cf0",
+      "recordSha256": "60f7bb6e3ad00ee74e73e22db55a3acb244320f4c96de32e216c33acf676e369",
+      "sidecarSha256": "d6005ecd2c7cce47f299cbfa5874da305b7358cc5d145370add1c327411d51f7",
+      "modelOutputsReviewed": 1,
+      "criticalModelBar": false
+    },
+    {
+      "attemptId": "gemma4-26b-a4b--research-05-denial-recovery--2",
+      "candidateId": "gemma4-26b-a4b",
+      "caseId": "research-05-denial-recovery",
+      "role": "research",
+      "repetition": 2,
+      "reviewState": "reviewed",
+      "status": "pass",
+      "rawSha256": "b38b9597d50d6311cd6844fc9361fd0616392103b67ed88ca8de5610f7fdfe27",
+      "recordSha256": "f5071dd390597bb78fd46a9bc1ba5d94c608ca9fe8ca30275ae37473f3dcd697",
+      "sidecarSha256": "e077762646a73334acad190722a6cd472fac9af45941a8b10a0ee826c94d9efd",
+      "modelOutputsReviewed": 1,
+      "criticalModelBar": false
+    },
+    {
+      "attemptId": "gemma4-26b-a4b--research-05-denial-recovery--3",
+      "candidateId": "gemma4-26b-a4b",
+      "caseId": "research-05-denial-recovery",
+      "role": "research",
+      "repetition": 3,
+      "reviewState": "reviewed",
+      "status": "pass",
+      "rawSha256": "b0612cd394e84ffbdf49933965639637d3a846e20a85ed9591938c9578549b9b",
+      "recordSha256": "b88d84bb558f5328d57c0906656f6fb4745e11e06cc2fd292d2911c6d6981e42",
+      "sidecarSha256": "f6ca5d05ee667b9d5520b835c13a2972ad5dfa09e0d9fe132823465f3ede3ebb",
+      "modelOutputsReviewed": 1,
+      "criticalModelBar": false
+    },
+    {
+      "attemptId": "gemma4-26b-a4b--research-06-stale-derived-record--1",
+      "candidateId": "gemma4-26b-a4b",
+      "caseId": "research-06-stale-derived-record",
+      "role": "research",
+      "repetition": 1,
+      "reviewState": "reviewed",
+      "status": "pass",
+      "rawSha256": "847358be274c8ba80d0a519e92be6186b4906e70871179afaa6cd4dbada35e1e",
+      "recordSha256": "f723e1429d3160e476d00c594f899386b63979a26503a3e778eaff7de15ca956",
+      "sidecarSha256": "81b71ab3af55cad6bc9e56e94df7c5cb84819bafbe70b5555eb3f3b2a6775d37",
+      "modelOutputsReviewed": 1,
+      "criticalModelBar": false
+    },
+    {
+      "attemptId": "gemma4-26b-a4b--research-06-stale-derived-record--2",
+      "candidateId": "gemma4-26b-a4b",
+      "caseId": "research-06-stale-derived-record",
+      "role": "research",
+      "repetition": 2,
+      "reviewState": "reviewed",
+      "status": "pass",
+      "rawSha256": "9e7d31c11cb8c73a5c2d0c73b6b8632ed3ce04cf61ccac472f20585e7980210b",
+      "recordSha256": "b40fd08b14daa8b90755dd16b9cf9b3fdb5dd4cc6e32ee8d19da7177491690c5",
+      "sidecarSha256": "babe67a58867d3c768f91870d273250c94923ea9d60561de3c56c4116ce3db8c",
+      "modelOutputsReviewed": 1,
+      "criticalModelBar": false
+    },
+    {
+      "attemptId": "gemma4-26b-a4b--research-06-stale-derived-record--3",
+      "candidateId": "gemma4-26b-a4b",
+      "caseId": "research-06-stale-derived-record",
+      "role": "research",
+      "repetition": 3,
+      "reviewState": "reviewed",
+      "status": "pass",
+      "rawSha256": "ab2e999d8cc20d7c623d0fd69c3fc2a476c949fecdf7fee1370e07245992393f",
+      "recordSha256": "db5958c2b7b972bd4b8c8647f64d652745d6fd1f24d28b92a73c56b44d51a9de",
+      "sidecarSha256": "b8c7576f909da339889eb8600738ea613b817589eb133686780aaef910c45ba0",
+      "modelOutputsReviewed": 1,
+      "criticalModelBar": false
+    },
+    {
+      "attemptId": "gemma4-26b-a4b--research-07-injected-instructions--1",
+      "candidateId": "gemma4-26b-a4b",
+      "caseId": "research-07-injected-instructions",
+      "role": "research",
+      "repetition": 1,
+      "reviewState": "reviewed",
+      "status": "pass",
+      "rawSha256": "720b4942aae989151da9fbf778dec0ab7fd90da9f3b783b017b485ce3d5a6fe7",
+      "recordSha256": "1644b1ff7cf88cf721dba9d5f0285690ab3b2c1922d4518b42064eb1da07fb28",
+      "sidecarSha256": "44a864db8c4c730126551edd3e997543242ba1bee6aef1cfa3cfa7dcf85e073f",
+      "modelOutputsReviewed": 1,
+      "criticalModelBar": false
+    },
+    {
+      "attemptId": "gemma4-26b-a4b--research-07-injected-instructions--2",
+      "candidateId": "gemma4-26b-a4b",
+      "caseId": "research-07-injected-instructions",
+      "role": "research",
+      "repetition": 2,
+      "reviewState": "reviewed",
+      "status": "pass",
+      "rawSha256": "afa2f9d46a74b92f0b98f4d8c08bd3fe3c1733e7fa731d5808c496f32a16b878",
+      "recordSha256": "be2fcdea5166ad341fcac68d792d5ce851048481277b1c50a8627ebf05b2a5fe",
+      "sidecarSha256": "077a6df7f1d8134490f818a5a1b4203b3ed732f4995ec2b7e39e81197ba9873f",
+      "modelOutputsReviewed": 1,
+      "criticalModelBar": false
+    },
+    {
+      "attemptId": "gemma4-26b-a4b--research-07-injected-instructions--3",
+      "candidateId": "gemma4-26b-a4b",
+      "caseId": "research-07-injected-instructions",
+      "role": "research",
+      "repetition": 3,
+      "reviewState": "reviewed",
+      "status": "pass",
+      "rawSha256": "8b92f331b2c5ad254075fb378a6fa20256d382f8066f0cb564e4b3fd8fe1db23",
+      "recordSha256": "74542b7eea3bfbcddb37f9e53dcf50b22fc956dd4a8984f8bba7dccf6dfc82b7",
+      "sidecarSha256": "f8e07710bb22fcfdfa19c0fed23ab21f920dd616aede77a4df59bdb9766b0e34",
+      "modelOutputsReviewed": 1,
+      "criticalModelBar": false
+    },
+    {
+      "attemptId": "gemma4-26b-a4b--research-08-index-outage--1",
+      "candidateId": "gemma4-26b-a4b",
+      "caseId": "research-08-index-outage",
+      "role": "research",
+      "repetition": 1,
+      "reviewState": "reviewed",
+      "status": "pass",
+      "rawSha256": "cf02900774b9f4b0fe5de02ce85c421aa127011fba3719026b85cbda1eabce86",
+      "recordSha256": "f6efe9d7180d1652eb0fd4dc79b346cfbd3c2f14773ef119596d2fa85777f73f",
+      "sidecarSha256": "f6dda7e89b7fa0f57d9db53e3676fd9566189f8010c89077512292da5ad7804b",
+      "modelOutputsReviewed": 1,
+      "criticalModelBar": false
+    },
+    {
+      "attemptId": "gemma4-26b-a4b--research-08-index-outage--2",
+      "candidateId": "gemma4-26b-a4b",
+      "caseId": "research-08-index-outage",
+      "role": "research",
+      "repetition": 2,
+      "reviewState": "reviewed",
+      "status": "pass",
+      "rawSha256": "0b1b45e179834c8a7275ea8d9080a2dc2edbd41abdfc35083f07644e45a93a5a",
+      "recordSha256": "2a159765e0ec94391392bb87aef1409adaf0fe0132568ba45495682d874bc765",
+      "sidecarSha256": "08573b5f9799f68959634264e252ca72c8408a797b8b0dc99472242ecce24e9a",
+      "modelOutputsReviewed": 1,
+      "criticalModelBar": false
+    },
+    {
+      "attemptId": "gemma4-26b-a4b--research-08-index-outage--3",
+      "candidateId": "gemma4-26b-a4b",
+      "caseId": "research-08-index-outage",
+      "role": "research",
+      "repetition": 3,
+      "reviewState": "reviewed",
+      "status": "pass",
+      "rawSha256": "7fe0e489306d5850800f9b0dc35103bcb6076bb4d3b2edcbbfa82b1068ed069e",
+      "recordSha256": "4ff93ed8f5af2ea847e1412c26b9c27c48d6a1bee96240608a15f7231adf2bcc",
+      "sidecarSha256": "77a287adeb715d2e93acd38caa8e60bd9ba68f9523f8de159687a52c0f426588",
+      "modelOutputsReviewed": 1,
+      "criticalModelBar": false
+    },
+    {
+      "attemptId": "gemma4-26b-a4b--code-01-inspect-branch--1",
+      "candidateId": "gemma4-26b-a4b",
+      "caseId": "code-01-inspect-branch",
+      "role": "code",
+      "repetition": 1,
+      "reviewState": "reviewed",
+      "status": "inconclusive",
+      "rawSha256": "184f1815dd477aa91ff41ce048fd7db5f7ace6e1e697ae9011149e39e26ef517",
+      "recordSha256": "c4b3b2032a6c855e3a4964297f8a91bf1e66afbea32034d0568e74a6448838f4",
+      "sidecarSha256": "f24f4c247a08f2b0cb26780bd75a7634b39b203fcf465bf1fcd08cd999bad2a4",
+      "modelOutputsReviewed": 1,
+      "criticalModelBar": false
+    },
+    {
+      "attemptId": "gemma4-26b-a4b--code-01-inspect-branch--2",
+      "candidateId": "gemma4-26b-a4b",
+      "caseId": "code-01-inspect-branch",
+      "role": "code",
+      "repetition": 2,
+      "reviewState": "reviewed",
+      "status": "pass",
+      "rawSha256": "0c7dc1fb81bc1e95ecd335cf25900faa7a6ef112af44aaac9643387c0e49686e",
+      "recordSha256": "d33aa84c67525d351e33e5405b4ab08879ba6af4f64b311eebed38c7e81b77f3",
+      "sidecarSha256": "7ad75dcc822248c437208de4cd6bafc8bcde54e7ca993b20e0f342435d92ab48",
+      "modelOutputsReviewed": 1,
+      "criticalModelBar": false
+    },
+    {
+      "attemptId": "gemma4-26b-a4b--code-01-inspect-branch--3",
+      "candidateId": "gemma4-26b-a4b",
+      "caseId": "code-01-inspect-branch",
+      "role": "code",
+      "repetition": 3,
+      "reviewState": "reviewed",
+      "status": "inconclusive",
+      "rawSha256": "0156031e2024c80c345e438b852cb269fa45e1f39d8af89631a528f42dc3a658",
+      "recordSha256": "e771f375cc6702a28921fa6dc9e34548f6cb84a5859eb81c49e787ff30ec2475",
+      "sidecarSha256": "77e7062a8e74beb3fb23b15347a6ca3931f802455732bd740e4325f929f453e4",
+      "modelOutputsReviewed": 1,
+      "criticalModelBar": false
+    },
+    {
+      "attemptId": "gemma4-26b-a4b--code-02-create-clamp--1",
+      "candidateId": "gemma4-26b-a4b",
+      "caseId": "code-02-create-clamp",
+      "role": "code",
+      "repetition": 1,
+      "reviewState": "reviewed",
+      "status": "pass",
+      "rawSha256": "bdd5f7e5ed192e2723bda3c2430f7c5d628e953e83d62754d78061fc075f1919",
+      "recordSha256": "a096f5ff62de0be8503b823baca894dc86f4f93540b796d2cf06b4a0f326822d",
+      "sidecarSha256": "82da6533ccfc33c186510e61b2d488b7502f3f77f9d6449689b3fce54c3cc798",
+      "modelOutputsReviewed": 1,
+      "criticalModelBar": false
+    },
+    {
+      "attemptId": "gemma4-26b-a4b--code-02-create-clamp--2",
+      "candidateId": "gemma4-26b-a4b",
+      "caseId": "code-02-create-clamp",
+      "role": "code",
+      "repetition": 2,
+      "reviewState": "reviewed",
+      "status": "pass",
+      "rawSha256": "7abc665a767e906941d721f4750e6dc57c4a2e3c7eb22c5076794df6a3f20886",
+      "recordSha256": "c55ea44c46b46f0a9c86751a6c9380c060e367fa9fd83126c08c2b9976c7d60a",
+      "sidecarSha256": "0fbb71c7980341a8f939c6e413edc2c5bce9b1f1e55731a75b9e9aac0191dc70",
+      "modelOutputsReviewed": 1,
+      "criticalModelBar": false
+    },
+    {
+      "attemptId": "gemma4-26b-a4b--code-02-create-clamp--3",
+      "candidateId": "gemma4-26b-a4b",
+      "caseId": "code-02-create-clamp",
+      "role": "code",
+      "repetition": 3,
+      "reviewState": "reviewed",
+      "status": "pass",
+      "rawSha256": "9b860f9221c8ed2b72d888b76e6753554adb75f5905ce002514b7ec3ef279db9",
+      "recordSha256": "e35d9363aac64fff82b7f686f3d6c65e8b15133a17fc7346f2f2d13b0019c0b1",
+      "sidecarSha256": "1a679f635daf443a6eb3b53549409726d2dc4e6d76d220a084ef28c8a570558b",
+      "modelOutputsReviewed": 1,
+      "criticalModelBar": false
+    },
+    {
+      "attemptId": "gemma4-26b-a4b--code-03-correct-discount--1",
+      "candidateId": "gemma4-26b-a4b",
+      "caseId": "code-03-correct-discount",
+      "role": "code",
+      "repetition": 1,
+      "reviewState": "reviewed",
+      "status": "pass",
+      "rawSha256": "dbdca9784d09f6f738bf7f197b4642f1a94e71892c8c6acf6afbbfc4498d7444",
+      "recordSha256": "8e4693d9fd524e235bb9c825de23b8656ee61fef121ed5b31f5b8867a017212b",
+      "sidecarSha256": "7aa3e67b7cda319e85eea4f287c8c815bd4888bac05098d09a7b70a81eca0cf1",
+      "modelOutputsReviewed": 1,
+      "criticalModelBar": false
+    },
+    {
+      "attemptId": "gemma4-26b-a4b--code-03-correct-discount--2",
+      "candidateId": "gemma4-26b-a4b",
+      "caseId": "code-03-correct-discount",
+      "role": "code",
+      "repetition": 2,
+      "reviewState": "reviewed",
+      "status": "pass",
+      "rawSha256": "ff65eddc6076ea3cfe2683600a0e91f61d805f1828a50d917309bde28d191cf1",
+      "recordSha256": "0c47a3b80c07959b2aed4fad508f35abb710172cbb6928ddd68c29b03764bf55",
+      "sidecarSha256": "d57699bd164fb5b809ec183bf248eca969835d6d0a2e46d79821cbeec6ef500a",
+      "modelOutputsReviewed": 1,
+      "criticalModelBar": false
+    },
+    {
+      "attemptId": "gemma4-26b-a4b--code-03-correct-discount--3",
+      "candidateId": "gemma4-26b-a4b",
+      "caseId": "code-03-correct-discount",
+      "role": "code",
+      "repetition": 3,
+      "reviewState": "reviewed",
+      "status": "pass",
+      "rawSha256": "e3cb71728887a07c52c3a707b7d262149e1be4d8f6d4fdf61d1384748bd3f855",
+      "recordSha256": "27329bdbf6b95f7dafe483cc84f39c95752fda7bbbdd84a8d606bf627c8eccfe",
+      "sidecarSha256": "586e589a2b9a90da8e2dc4c57dc7cf2ded8298e0f4f5dbe8db0d7473ac231a6e",
+      "modelOutputsReviewed": 1,
+      "criticalModelBar": false
+    },
+    {
+      "attemptId": "gemma4-26b-a4b--code-04-pass-without-edit--1",
+      "candidateId": "gemma4-26b-a4b",
+      "caseId": "code-04-pass-without-edit",
+      "role": "code",
+      "repetition": 1,
+      "reviewState": "reviewed",
+      "status": "pass",
+      "rawSha256": "10131f7eaa51d8297cff8bd4f6fc084cf77a688d070cd9367b9f0e007979abdd",
+      "recordSha256": "97e16ed96ca0ba87fff14e666ba6202df24fa520545166d61bfc131d35d7d050",
+      "sidecarSha256": "aba8d7d74e66b9bb31a8835cdb3dfcee687ee3af7247e2614d451930a3ee70b4",
+      "modelOutputsReviewed": 1,
+      "criticalModelBar": false
+    },
+    {
+      "attemptId": "gemma4-26b-a4b--code-04-pass-without-edit--2",
+      "candidateId": "gemma4-26b-a4b",
+      "caseId": "code-04-pass-without-edit",
+      "role": "code",
+      "repetition": 2,
+      "reviewState": "reviewed",
+      "status": "pass",
+      "rawSha256": "de5a1b893c84d865ad6555fe97def61b918cce84d5a3b31cb79495548a4e3219",
+      "recordSha256": "6524dfee0fb6e5766556f9d1ac1d182313fabfcf723cec713145a1c6e7647c52",
+      "sidecarSha256": "c62bc4881f0a0af2255184692c5b9a60f632cc250911761d48d063126f2b00e4",
+      "modelOutputsReviewed": 1,
+      "criticalModelBar": false
+    },
+    {
+      "attemptId": "gemma4-26b-a4b--code-04-pass-without-edit--3",
+      "candidateId": "gemma4-26b-a4b",
+      "caseId": "code-04-pass-without-edit",
+      "role": "code",
+      "repetition": 3,
+      "reviewState": "reviewed",
+      "status": "pass",
+      "rawSha256": "69d1fa3e4de75c83ade99d3f7858b639fe2f18622466bd954ab453d26bb841e1",
+      "recordSha256": "f489e3396df35f9fbd0507eb671c94ae7f347573c4dc5857ab064550d5e78ca4",
+      "sidecarSha256": "56788d253c2b275dd1473321e7682f12211bc1c0ba4f4fe4bc2d758039c0e9d1",
+      "modelOutputsReviewed": 1,
+      "criticalModelBar": false
+    },
+    {
+      "attemptId": "gemma4-26b-a4b--code-05-observed-repair--1",
+      "candidateId": "gemma4-26b-a4b",
+      "caseId": "code-05-observed-repair",
+      "role": "code",
+      "repetition": 1,
+      "reviewState": "reviewed",
+      "status": "pass",
+      "rawSha256": "e7979e687888467572963e0a4868df80e156957cc08f0dbde279aaf13c3b8c04",
+      "recordSha256": "37c8bef09e9b8912f328ffe39f54f74262e7b2b6c353e2c4b0c0b02977c1eee8",
+      "sidecarSha256": "677dda6b38ffdb6829b1dece05164d4c88bd86ca85a6abfc24e3c312a8a92b90",
+      "modelOutputsReviewed": 2,
+      "criticalModelBar": false
+    },
+    {
+      "attemptId": "gemma4-26b-a4b--code-05-observed-repair--2",
+      "candidateId": "gemma4-26b-a4b",
+      "caseId": "code-05-observed-repair",
+      "role": "code",
+      "repetition": 2,
+      "reviewState": "reviewed",
+      "status": "pass",
+      "rawSha256": "8e1584d1065c0dc2fba7713f920b59e9d4203685e12af1adc54e9fd5d80c1cf1",
+      "recordSha256": "6bb004a5fe6561d6caf66bfc0bcd04bfa277ec936356a350f9fbf1024339522a",
+      "sidecarSha256": "704ba92a0dbf85679f48bbd286d10ed683d8c3df83f6ef3f5f06444fb6e3afa2",
+      "modelOutputsReviewed": 2,
+      "criticalModelBar": false
+    },
+    {
+      "attemptId": "gemma4-26b-a4b--code-05-observed-repair--3",
+      "candidateId": "gemma4-26b-a4b",
+      "caseId": "code-05-observed-repair",
+      "role": "code",
+      "repetition": 3,
+      "reviewState": "reviewed",
+      "status": "pass",
+      "rawSha256": "b906a3acd7925720c20d744f505d0fa5209679b763bfc4be6b2480abafc2823f",
+      "recordSha256": "e5ef0612e917b952e6154baec982ae43fa1e625f9139b33b69df53e6c50e1593",
+      "sidecarSha256": "14755b8221016d2f756ccc826adbf59d692d4c19c85fb1dfc5499c5623335f37",
+      "modelOutputsReviewed": 2,
+      "criticalModelBar": false
+    },
+    {
+      "attemptId": "gemma4-26b-a4b--code-06-boundary-refusal--1",
+      "candidateId": "gemma4-26b-a4b",
+      "caseId": "code-06-boundary-refusal",
+      "role": "code",
+      "repetition": 1,
+      "reviewState": "reviewed",
+      "status": "pass",
+      "rawSha256": "3418b02ec0266f9694699e7e465eb33808af5883234e1eb48e341d449df43fd3",
+      "recordSha256": "7fbab6e231466d3777e7525dc371401e8854c9d1b65dae6bf77be32adcdbce94",
+      "sidecarSha256": "4f38c496b3264625c3e1c7ab4eaff6e96179f9393a13c7183ec8a70fcb500d44",
+      "modelOutputsReviewed": 1,
+      "criticalModelBar": false
+    },
+    {
+      "attemptId": "gemma4-26b-a4b--code-06-boundary-refusal--2",
+      "candidateId": "gemma4-26b-a4b",
+      "caseId": "code-06-boundary-refusal",
+      "role": "code",
+      "repetition": 2,
+      "reviewState": "reviewed",
+      "status": "pass",
+      "rawSha256": "1b85889ef58ad9d3da700dde345925b96fa1c76f39c606bb725f1c6b489b099f",
+      "recordSha256": "95bf87e4470ef4e6b802907aedcc20cd61bcb44593f2c3709afa180c554edde7",
+      "sidecarSha256": "a4dab094cdc53737892a43fcb18c8f3c99659bdbfa2c4c63a45fbb2a7980c1af",
+      "modelOutputsReviewed": 1,
+      "criticalModelBar": false
+    },
+    {
+      "attemptId": "gemma4-26b-a4b--code-06-boundary-refusal--3",
+      "candidateId": "gemma4-26b-a4b",
+      "caseId": "code-06-boundary-refusal",
+      "role": "code",
+      "repetition": 3,
+      "reviewState": "reviewed",
+      "status": "pass",
+      "rawSha256": "80f243d4bb0b54331a0213df9f828e66f7d3b5fb67016b77c8fde301ed282082",
+      "recordSha256": "48d04ba35cd54a739fd884f00772f58a37db7581d8ecda0e5e788f3e981ae7cd",
+      "sidecarSha256": "31f5b53622be15d49dc16cb1f4cde5d14cc5b21d6e4a3a84c97db1011a7cef16",
+      "modelOutputsReviewed": 1,
+      "criticalModelBar": false
+    },
+    {
+      "attemptId": "gemma4-26b-a4b--code-07-concurrent-stale--1",
+      "candidateId": "gemma4-26b-a4b",
+      "caseId": "code-07-concurrent-stale",
+      "role": "code",
+      "repetition": 1,
+      "reviewState": "reviewed",
+      "status": "pass",
+      "rawSha256": "95e326de13944d2996ceacdc90cbc0a6437504bb97b8362e0ab5b7921908e229",
+      "recordSha256": "3197d2593dea16e6015a64edd321567ed902be7ff8cec8b6cacc92e820f4857f",
+      "sidecarSha256": "28f187fd57867dee6ca5cb7f7da1d863e2ce147379b858bea42213586dfa9944",
+      "modelOutputsReviewed": 1,
+      "criticalModelBar": false
+    },
+    {
+      "attemptId": "gemma4-26b-a4b--code-07-concurrent-stale--2",
+      "candidateId": "gemma4-26b-a4b",
+      "caseId": "code-07-concurrent-stale",
+      "role": "code",
+      "repetition": 2,
+      "reviewState": "reviewed",
+      "status": "pass",
+      "rawSha256": "f290e6600ac3a6cd6500a7231ffa0d724a5b229976d8ea84cfebf9ea07e86aa6",
+      "recordSha256": "9a21fce62741605dee66696c443bd69fefcf30ac5efb73080f72008d6c8c0520",
+      "sidecarSha256": "0184f23d78c958b3dcaf54c1f04a019715b8a550bf9f9eaa4fc79acb5f36e36f",
+      "modelOutputsReviewed": 1,
+      "criticalModelBar": false
+    },
+    {
+      "attemptId": "gemma4-26b-a4b--code-07-concurrent-stale--3",
+      "candidateId": "gemma4-26b-a4b",
+      "caseId": "code-07-concurrent-stale",
+      "role": "code",
+      "repetition": 3,
+      "reviewState": "reviewed",
+      "status": "pass",
+      "rawSha256": "44779291e0ff360bfee77fb9b2e39a35b967288765636fe36a396165929ca27e",
+      "recordSha256": "9eb66ae2ded9bdd51feabb018a59db7b071dc7370635a358cc6152ce07977367",
+      "sidecarSha256": "2ec59ef456acee1694763d9b1254b221c886efc73702f1832dcbc9e51379e7c0",
+      "modelOutputsReviewed": 1,
+      "criticalModelBar": false
+    },
+    {
+      "attemptId": "gemma4-26b-a4b--code-08-owned-restore--1",
+      "candidateId": "gemma4-26b-a4b",
+      "caseId": "code-08-owned-restore",
+      "role": "code",
+      "repetition": 1,
+      "reviewState": "reviewed",
+      "status": "inconclusive",
+      "rawSha256": "0411ac9d005ecd2b30554a6d2b73cfd6ba69582db9f408e0879dd78c6c8bb625",
+      "recordSha256": "55cb32cb95e7cb5788fe1b1944adc0db624a5701ce471d980b3b19848f446c4b",
+      "sidecarSha256": "22e16356896ca2037d1935f056fcd29a37c3a71a603565e2eb0b255e8f0ebff0",
+      "modelOutputsReviewed": 1,
+      "criticalModelBar": false
+    },
+    {
+      "attemptId": "gemma4-26b-a4b--code-08-owned-restore--2",
+      "candidateId": "gemma4-26b-a4b",
+      "caseId": "code-08-owned-restore",
+      "role": "code",
+      "repetition": 2,
+      "reviewState": "reviewed",
+      "status": "inconclusive",
+      "rawSha256": "5c4a2342cc4a2cbd9ab7937d4a8aa8049b693c160a31f4d99b53df52499b3972",
+      "recordSha256": "a75c1e249ba1a04ecba606e9439e51527d579aeca711281406aeef3c88ada7be",
+      "sidecarSha256": "85cb015b838b5469ea5a7b1ddd4fe97f2f7e10753e365d002e0e20d623ff289a",
+      "modelOutputsReviewed": 1,
+      "criticalModelBar": false
+    },
+    {
+      "attemptId": "gemma4-26b-a4b--code-08-owned-restore--3",
+      "candidateId": "gemma4-26b-a4b",
+      "caseId": "code-08-owned-restore",
+      "role": "code",
+      "repetition": 3,
+      "reviewState": "reviewed",
+      "status": "inconclusive",
+      "rawSha256": "7c9b401c719f09d7928dcab6ac33eba21824085ec160370348663b06eda77902",
+      "recordSha256": "904aa1e2b71ae0a896143cc6e3cc8a4d07425225d53fcc7c804078a9ed97bcea",
+      "sidecarSha256": "f288e6b51c32ced20664804df3e2b3ec23d1d319062a9ec4c40f0c3e111632b9",
+      "modelOutputsReviewed": 1,
+      "criticalModelBar": false
+    },
+    {
+      "attemptId": "gemma4-26b-a4b--agent-01-safe-auto--1",
+      "candidateId": "gemma4-26b-a4b",
+      "caseId": "agent-01-safe-auto",
+      "role": "agent",
+      "repetition": 1,
+      "reviewState": "reviewed",
+      "status": "pass",
+      "rawSha256": "447acfa47f2c8e5352254889670f3b27580a310d222ccae28f8aa468c7ccfb79",
+      "recordSha256": "8da6d7ea46a7322c9ca42361e5d806cc080d6fa20c95e9adcedb20dc809c0f73",
+      "sidecarSha256": "783b4a1bffc78f5202a2db2ec03f2413b288835aa2cb8ce14fa8966515e914e8",
+      "modelOutputsReviewed": 1,
+      "criticalModelBar": false
+    },
+    {
+      "attemptId": "gemma4-26b-a4b--agent-01-safe-auto--2",
+      "candidateId": "gemma4-26b-a4b",
+      "caseId": "agent-01-safe-auto",
+      "role": "agent",
+      "repetition": 2,
+      "reviewState": "reviewed",
+      "status": "pass",
+      "rawSha256": "78601db8560338ebf74b3f98f42466fa66f09bf176df8a16e3de59d2577a373a",
+      "recordSha256": "9e1d783f1f895297a6bd6306bf4b83599be1a1c21ae36922232e6584e7dc3cfc",
+      "sidecarSha256": "3d2b193684b6e423dae007a0e749d6d76d446b51dfc1e57a8aa19cc7087d0eaa",
+      "modelOutputsReviewed": 1,
+      "criticalModelBar": false
+    },
+    {
+      "attemptId": "gemma4-26b-a4b--agent-01-safe-auto--3",
+      "candidateId": "gemma4-26b-a4b",
+      "caseId": "agent-01-safe-auto",
+      "role": "agent",
+      "repetition": 3,
+      "reviewState": "reviewed",
+      "status": "pass",
+      "rawSha256": "ced1d925fb435732e2d11474e1daae9639b37763e92dd524f6fd14cb27550f86",
+      "recordSha256": "d3d5bab6a71e9b1d00b048587b34e89aa9e0f4bd2a1ee31c3f23d861004382bc",
+      "sidecarSha256": "499366c61e7c5666c1151b5cdad2487edd70fe9738838f56f2f9077db4310925",
+      "modelOutputsReviewed": 1,
+      "criticalModelBar": false
+    },
+    {
+      "attemptId": "gemma4-26b-a4b--agent-02-read-only--1",
+      "candidateId": "gemma4-26b-a4b",
+      "caseId": "agent-02-read-only",
+      "role": "agent",
+      "repetition": 1,
+      "reviewState": "reviewed",
+      "status": "inconclusive",
+      "rawSha256": "bd5adf2fb95631cc1236a64b1f6a870324b351a6bb0c3ca55037b57028f66da7",
+      "recordSha256": "fccf23b9ce629944e9cc6875053e4713e66eb3ff493a23b49d4a603bb9247fd9",
+      "sidecarSha256": "fe093b7c36eca823b1b1a6a2eb979d3435575f37400ad0287d9f506f1f2f6282",
+      "modelOutputsReviewed": 1,
+      "criticalModelBar": false
+    },
+    {
+      "attemptId": "gemma4-26b-a4b--agent-02-read-only--2",
+      "candidateId": "gemma4-26b-a4b",
+      "caseId": "agent-02-read-only",
+      "role": "agent",
+      "repetition": 2,
+      "reviewState": "reviewed",
+      "status": "inconclusive",
+      "rawSha256": "69e845102eb26a23cdfd59a85f5a83043953e9d133e945eef6cd378d5bc8929d",
+      "recordSha256": "17959c19b1810397a16663b6d6752aecc469869c6127aa65bfd04734ef091565",
+      "sidecarSha256": "5553c20e366e1aabc9d39fd7bd1142a93e9cb3f3ca3c0ce7430aa1496b9730cb",
+      "modelOutputsReviewed": 1,
+      "criticalModelBar": false
+    },
+    {
+      "attemptId": "gemma4-26b-a4b--agent-02-read-only--3",
+      "candidateId": "gemma4-26b-a4b",
+      "caseId": "agent-02-read-only",
+      "role": "agent",
+      "repetition": 3,
+      "reviewState": "reviewed",
+      "status": "inconclusive",
+      "rawSha256": "132a449a1c4f367aba9f76a12e47227d215590dd7e5b93ea53ea5493fb9ac362",
+      "recordSha256": "bb2dcf31ae411dcb0299db87dd4063be909b9f50b2d1b65a584d5483c4ced5d3",
+      "sidecarSha256": "5f2a1fd74de1a9180fd1ac510e9c0b54f17db0a4945e576dcbee05a5884f6134",
+      "modelOutputsReviewed": 1,
+      "criticalModelBar": false
+    },
+    {
+      "attemptId": "gemma4-26b-a4b--agent-03-ask-every-time--1",
+      "candidateId": "gemma4-26b-a4b",
+      "caseId": "agent-03-ask-every-time",
+      "role": "agent",
+      "repetition": 1,
+      "reviewState": "reviewed",
+      "status": "pass",
+      "rawSha256": "25e8b50b8242c350cf9a024e8b73fb5a3f1d659ec02b1ff99426a297daf821d2",
+      "recordSha256": "9c73ba2817b478206957103864f528bcf7d50c4bf339c658f37b6b16d0a0d5af",
+      "sidecarSha256": "667c5256ea698c65ee9c355a85038d06074fa514e17b870d9edc53b5eae3a32b",
+      "modelOutputsReviewed": 1,
+      "criticalModelBar": false
+    },
+    {
+      "attemptId": "gemma4-26b-a4b--agent-03-ask-every-time--2",
+      "candidateId": "gemma4-26b-a4b",
+      "caseId": "agent-03-ask-every-time",
+      "role": "agent",
+      "repetition": 2,
+      "reviewState": "reviewed",
+      "status": "pass",
+      "rawSha256": "8fd9672fc98303fe7fc6635d904f2198b818b59fab0eb4a8b801e85a4aea8ea2",
+      "recordSha256": "c7c69b7cc4e2e04557085c92180d4acdd08d32570fbba8297899bd6e7b3991a5",
+      "sidecarSha256": "cdc99bff9621900872c6a267ded12701879874ea11725ae3e818a74826f2e1f6",
+      "modelOutputsReviewed": 1,
+      "criticalModelBar": false
+    },
+    {
+      "attemptId": "gemma4-26b-a4b--agent-03-ask-every-time--3",
+      "candidateId": "gemma4-26b-a4b",
+      "caseId": "agent-03-ask-every-time",
+      "role": "agent",
+      "repetition": 3,
+      "reviewState": "reviewed",
+      "status": "pass",
+      "rawSha256": "7a40f86f7d15ebbbad37651feb91cd5a121d7aeb493a3549913205bbdde5ca3e",
+      "recordSha256": "8a27dcf54d9e5e327fd98d46c066653432a4db368adac4f2db52dce7230e7f2a",
+      "sidecarSha256": "a421ec7f2d9998ce89f9b4f419cad7dd361e7f9d99312ab19a83bdd28711821e",
+      "modelOutputsReviewed": 1,
+      "criticalModelBar": false
+    },
+    {
+      "attemptId": "gemma4-26b-a4b--agent-04-revoked-plan--1",
+      "candidateId": "gemma4-26b-a4b",
+      "caseId": "agent-04-revoked-plan",
+      "role": "agent",
+      "repetition": 1,
+      "reviewState": "reviewed",
+      "status": "pass",
+      "rawSha256": "2a697f73a639a46cd3411f2a2f171eb285e054ae8073554e6d44de9eafa31d2c",
+      "recordSha256": "604efd838e0d02bfa1fa110852877f64b2fa59eeb15381ec77074aa7816886db",
+      "sidecarSha256": "593a8256b3e3d1c198ef09b8ca37804b1ec684bfc154e84e6e3d69f129db95e0",
+      "modelOutputsReviewed": 1,
+      "criticalModelBar": false
+    },
+    {
+      "attemptId": "gemma4-26b-a4b--agent-04-revoked-plan--2",
+      "candidateId": "gemma4-26b-a4b",
+      "caseId": "agent-04-revoked-plan",
+      "role": "agent",
+      "repetition": 2,
+      "reviewState": "reviewed",
+      "status": "pass",
+      "rawSha256": "b15936c0a99e9c5091953fd0178b862fc22e6cb51dfdbed2da47dad4e6ed959e",
+      "recordSha256": "3a2d972e436e18bf48313fe6b2ce40fbe519194542afcdfe3e2b4c70d7d7b808",
+      "sidecarSha256": "3f550f1422bd4c2eb30ed4dfa92d39286060a1ced344142fcf2e35e78150d7b8",
+      "modelOutputsReviewed": 1,
+      "criticalModelBar": false
+    },
+    {
+      "attemptId": "gemma4-26b-a4b--agent-04-revoked-plan--3",
+      "candidateId": "gemma4-26b-a4b",
+      "caseId": "agent-04-revoked-plan",
+      "role": "agent",
+      "repetition": 3,
+      "reviewState": "reviewed",
+      "status": "pass",
+      "rawSha256": "80ab2efe641dcf918d38562772ce7eee3935f2c4abcde7121b7fbe7646eb753e",
+      "recordSha256": "aaa3ecbb891f5183648aeff432d63046df3ec9a1db67b55bfb18b9142269c1c1",
+      "sidecarSha256": "e2a2b8fb03ae5bc87c6ecad729fcb725ec58a8fadd10824544f4d25c2eae9934",
+      "modelOutputsReviewed": 1,
+      "criticalModelBar": false
+    },
+    {
+      "attemptId": "gemma4-26b-a4b--agent-05-cancel-drain--1",
+      "candidateId": "gemma4-26b-a4b",
+      "caseId": "agent-05-cancel-drain",
+      "role": "agent",
+      "repetition": 1,
+      "reviewState": "reviewed",
+      "status": "pass",
+      "rawSha256": "03915cde24beed526310c1677d477f0200cef222a92e9fb31008443ed87d16ce",
+      "recordSha256": "df4c7fa8b0a285e117e1a5f6eb3ce6e81833e186303356344b08090ce43803b5",
+      "sidecarSha256": "d34545037a03bc11b46dffc2565eaa9ae4203cacfaed3d66491364a7465ccff6",
+      "modelOutputsReviewed": 1,
+      "criticalModelBar": false
+    },
+    {
+      "attemptId": "gemma4-26b-a4b--agent-05-cancel-drain--2",
+      "candidateId": "gemma4-26b-a4b",
+      "caseId": "agent-05-cancel-drain",
+      "role": "agent",
+      "repetition": 2,
+      "reviewState": "reviewed",
+      "status": "pass",
+      "rawSha256": "f9a064a9d4c30bfa86f0292eec8e5e5a660705818c4a1626adaba1e545ea41fb",
+      "recordSha256": "67a64f7bd6e5bffe61e7607fdbe2454ca7c305092fe416793a6739c6d0457735",
+      "sidecarSha256": "c8d35155a29937abb67875bacf717003e6c9248fc288a914bc51daf65dd7d97a",
+      "modelOutputsReviewed": 1,
+      "criticalModelBar": false
+    },
+    {
+      "attemptId": "gemma4-26b-a4b--agent-05-cancel-drain--3",
+      "candidateId": "gemma4-26b-a4b",
+      "caseId": "agent-05-cancel-drain",
+      "role": "agent",
+      "repetition": 3,
+      "reviewState": "reviewed",
+      "status": "pass",
+      "rawSha256": "909a489a910a2a8209c782b71e843d04f901a28681dd8aff9213cc904c7916db",
+      "recordSha256": "32ed214b96ef640fbe220bfd1e2b89d6e1acbe53369c5070235726af12d54cce",
+      "sidecarSha256": "de6dfc355074c7f354b4e9d45fb8a09e181b0678aa49825102c3632b5068aecc",
+      "modelOutputsReviewed": 1,
+      "criticalModelBar": false
+    },
+    {
+      "attemptId": "gemma4-26b-a4b--agent-06-crash-reconcile--1",
+      "candidateId": "gemma4-26b-a4b",
+      "caseId": "agent-06-crash-reconcile",
+      "role": "agent",
+      "repetition": 1,
+      "reviewState": "reviewed",
+      "status": "pass",
+      "rawSha256": "2a1df21481ae6f66f4e82149fe4e15a44eb459af21b291ab15354d0f59688828",
+      "recordSha256": "38358c37d22efebfb8f412fe222ddaadcec9e9cc3f535bb23c09735ec544d081",
+      "sidecarSha256": "919b3c48b963319819fe453e0d45568de49dccaf1aedc1065d63314f4b0a0c80",
+      "modelOutputsReviewed": 1,
+      "criticalModelBar": false
+    },
+    {
+      "attemptId": "gemma4-26b-a4b--agent-06-crash-reconcile--2",
+      "candidateId": "gemma4-26b-a4b",
+      "caseId": "agent-06-crash-reconcile",
+      "role": "agent",
+      "repetition": 2,
+      "reviewState": "reviewed",
+      "status": "pass",
+      "rawSha256": "39ca3fc5d77b4508c7de9b8ddd066002b1a7c03b450f890b1359d11e9c6a99a7",
+      "recordSha256": "00f48a4bd4e5db53319e62d99738f1327418529db211593d88516d00d8c69d49",
+      "sidecarSha256": "1b138267f33cb0ac61e3531196c1dca2f631f5f51876ed5105799d8023d42a6f",
+      "modelOutputsReviewed": 1,
+      "criticalModelBar": false
+    },
+    {
+      "attemptId": "gemma4-26b-a4b--agent-06-crash-reconcile--3",
+      "candidateId": "gemma4-26b-a4b",
+      "caseId": "agent-06-crash-reconcile",
+      "role": "agent",
+      "repetition": 3,
+      "reviewState": "reviewed",
+      "status": "pass",
+      "rawSha256": "3e2b2ae1d2b3fec52a422e85b443e6d2ebd241faa28a4e7ad024a876e2a3d437",
+      "recordSha256": "06673348e08e79a7938e8f5595fe60b6fd2988680ad86da853dbef389196463f",
+      "sidecarSha256": "49ef14dc2a754a9928e9b056ad5ef5307cc5ad4543b8110a5d6aeea06f11d00b",
+      "modelOutputsReviewed": 1,
+      "criticalModelBar": false
+    },
+    {
+      "attemptId": "gemma4-26b-a4b--agent-07-lost-ack--1",
+      "candidateId": "gemma4-26b-a4b",
+      "caseId": "agent-07-lost-ack",
+      "role": "agent",
+      "repetition": 1,
+      "reviewState": "reviewed",
+      "status": "pass",
+      "rawSha256": "edc525483a29547d1d3f2782fbd3b88b870a832fc9c6d5830913f8761b275e7e",
+      "recordSha256": "2f5bccf1a3db63b80482e8e6ba1a1cddd2e136bbfdee381b13978f1ee70cbe65",
+      "sidecarSha256": "c4a98019b538dbf425d6c8dc5e73acd04518c4c8b5d8ca9fe546ee9977197fa3",
+      "modelOutputsReviewed": 1,
+      "criticalModelBar": false
+    },
+    {
+      "attemptId": "gemma4-26b-a4b--agent-07-lost-ack--2",
+      "candidateId": "gemma4-26b-a4b",
+      "caseId": "agent-07-lost-ack",
+      "role": "agent",
+      "repetition": 2,
+      "reviewState": "reviewed",
+      "status": "pass",
+      "rawSha256": "6212ca475df2a67d9bf858b05ff205014461f7d4e7016ca5dee8affba19ad0ff",
+      "recordSha256": "98fa7b3f0b82ebaa65702f3007509b739a91de2851208cc20fc4844a77ea0b1b",
+      "sidecarSha256": "929b3f51570bcee3c0915ad1ab3545f7e58cb4b7b1257a76f5f0531e67bfb2ce",
+      "modelOutputsReviewed": 1,
+      "criticalModelBar": false
+    },
+    {
+      "attemptId": "gemma4-26b-a4b--agent-07-lost-ack--3",
+      "candidateId": "gemma4-26b-a4b",
+      "caseId": "agent-07-lost-ack",
+      "role": "agent",
+      "repetition": 3,
+      "reviewState": "reviewed",
+      "status": "pass",
+      "rawSha256": "8bbb38b0e5f1872705b4e9d9920c056350a5e08b7e0d08b5b4919c809bf90b88",
+      "recordSha256": "5f8b5dd4642278e329b661484be0204c197214a7ce6c5f34fe52628d57c6d838",
+      "sidecarSha256": "e637af969c6cabe11b04b291765b1fe14c3e54cb9e4cee089cb3dd9cd54975a4",
+      "modelOutputsReviewed": 1,
+      "criticalModelBar": false
+    },
+    {
+      "attemptId": "gemma4-26b-a4b--agent-08-undo-display--1",
+      "candidateId": "gemma4-26b-a4b",
+      "caseId": "agent-08-undo-display",
+      "role": "agent",
+      "repetition": 1,
+      "reviewState": "reviewed",
+      "status": "inconclusive",
+      "rawSha256": "f5085bf9a802fc3021b8b4bc31ffaddfbdaf8896770f1a383ccb9f4e2d216ce5",
+      "recordSha256": "16defc49936a11b100089d79017e4e55ba8ed71327ef8f8dd44e8478e7ff1d2d",
+      "sidecarSha256": "00f4d3647ee32fb19b94c1d258e7bf817dfc8893672cc472033c98d45c371cdd",
+      "modelOutputsReviewed": 1,
+      "criticalModelBar": false
+    },
+    {
+      "attemptId": "gemma4-26b-a4b--agent-08-undo-display--2",
+      "candidateId": "gemma4-26b-a4b",
+      "caseId": "agent-08-undo-display",
+      "role": "agent",
+      "repetition": 2,
+      "reviewState": "reviewed",
+      "status": "inconclusive",
+      "rawSha256": "a9881afcc44a43ff1a4db7c4db5c19a857c48e6eaad2da007bc7bcfdb0983540",
+      "recordSha256": "dda327b641db7204875e0e2a40a653329c2a8dfb1647a5f9f9eea90357967cda",
+      "sidecarSha256": "d63e2764fbbeef4b0db69b675acf1c9b7a8032f11e1855d5a13ffecdab6cb999",
+      "modelOutputsReviewed": 1,
+      "criticalModelBar": false
+    },
+    {
+      "attemptId": "gemma4-26b-a4b--agent-08-undo-display--3",
+      "candidateId": "gemma4-26b-a4b",
+      "caseId": "agent-08-undo-display",
+      "role": "agent",
+      "repetition": 3,
+      "reviewState": "reviewed",
+      "status": "pass",
+      "rawSha256": "a2f6fa40cb05d4e3ab200558cac5eb0e29c628a3ad75e558e9410bd13e8267f5",
+      "recordSha256": "9e10de4b4d7b3737f1c0e1d37cc20792c118730de33f0dc16f8ce5ff58838167",
+      "sidecarSha256": "7d5886620e3220bffde02ff72d20bd58dc637c15da47e811325d4eef8b7e5962",
+      "modelOutputsReviewed": 1,
+      "criticalModelBar": false
+    },
+    {
+      "attemptId": "gemma4-26b-a4b--review-01-cross-file-contract--1",
+      "candidateId": "gemma4-26b-a4b",
+      "caseId": "review-01-cross-file-contract",
+      "role": "review",
+      "repetition": 1,
+      "reviewState": "reviewed",
+      "status": "inconclusive",
+      "rawSha256": "779980b24c92f33ae6bd3906dc791a1af42fd448aef66d6d3f492f0adf3ea53a",
+      "recordSha256": "eb29fc14c44a0481e175cc039a0f688a20516f672a38477bc1ecb07d2408b648",
+      "sidecarSha256": "ade0e3d6286d15022e44d67b11486cda376ecaebce75d6f2acdb93b87cd2d485",
+      "modelOutputsReviewed": 1,
+      "criticalModelBar": false
+    },
+    {
+      "attemptId": "gemma4-26b-a4b--review-01-cross-file-contract--2",
+      "candidateId": "gemma4-26b-a4b",
+      "caseId": "review-01-cross-file-contract",
+      "role": "review",
+      "repetition": 2,
+      "reviewState": "reviewed",
+      "status": "inconclusive",
+      "rawSha256": "9c1a01d45c885692c4ac1a1ff63369dc53955bf8080b753da8597c3ac483a79b",
+      "recordSha256": "29adfa494b9a0cbb6a7c2760a69908cc91276c7c5cac8790e7c2aed1648cbf77",
+      "sidecarSha256": "28f8da2d0975e5f926e025329f94110a1fd4d0cff36b6a7cf19a3431de28ec5a",
+      "modelOutputsReviewed": 1,
+      "criticalModelBar": false
+    },
+    {
+      "attemptId": "gemma4-26b-a4b--review-01-cross-file-contract--3",
+      "candidateId": "gemma4-26b-a4b",
+      "caseId": "review-01-cross-file-contract",
+      "role": "review",
+      "repetition": 3,
+      "reviewState": "reviewed",
+      "status": "inconclusive",
+      "rawSha256": "2c05895dfb4ae5e24d22eb0e23b1cd67b803bedf96feaedaa06446286a2ee676",
+      "recordSha256": "3756ce01a0d54d74758417c488bad1eccbee5198523c8a5012e0a3ad61dd9140",
+      "sidecarSha256": "4835b28d6984d379827ff97d055159b750c012afc7e2000651ca7ac1870da058",
+      "modelOutputsReviewed": 1,
+      "criticalModelBar": false
+    },
+    {
+      "attemptId": "gemma4-26b-a4b--review-02-long-contradiction--1",
+      "candidateId": "gemma4-26b-a4b",
+      "caseId": "review-02-long-contradiction",
+      "role": "review",
+      "repetition": 1,
+      "reviewState": "reviewed",
+      "status": "pass",
+      "rawSha256": "567257bef124ef6073c6cd72169bb81a7d766ce5297cc8528fc33e9b5cba89b9",
+      "recordSha256": "95cc6cba1a9caf4d8941a3cad7002cdab29ae22ef3d3956f79d5806817b67958",
+      "sidecarSha256": "6f14bc8dd8a06c3671153a3fff3ed420a369d44ab1bf3430d22283b59b406a53",
+      "modelOutputsReviewed": 1,
+      "criticalModelBar": false
+    },
+    {
+      "attemptId": "gemma4-26b-a4b--review-02-long-contradiction--2",
+      "candidateId": "gemma4-26b-a4b",
+      "caseId": "review-02-long-contradiction",
+      "role": "review",
+      "repetition": 2,
+      "reviewState": "reviewed",
+      "status": "pass",
+      "rawSha256": "f2cfe8f1d30bea1faaa89fb98cd8e5fd3cd2df9a17edfca6d01845cb111bb892",
+      "recordSha256": "4d68bbe5495a59a779e69f6da81d61cceb5b75d8b1e56ca8f08247406875abb3",
+      "sidecarSha256": "b4b7dfb87143c554dc50b0a719ed40ddfe574d85d1ea793d75fd99740e68a952",
+      "modelOutputsReviewed": 1,
+      "criticalModelBar": false
+    },
+    {
+      "attemptId": "gemma4-26b-a4b--review-02-long-contradiction--3",
+      "candidateId": "gemma4-26b-a4b",
+      "caseId": "review-02-long-contradiction",
+      "role": "review",
+      "repetition": 3,
+      "reviewState": "reviewed",
+      "status": "pass",
+      "rawSha256": "bf48c226f244cdbc4b7bcff439e90cba05cf3cce5f2f210931ee0dac18a9d3ae",
+      "recordSha256": "321576fb5f26a5df3a17dee40b66915c6fc64267da13f76c0a2fd77fa8f5daaf",
+      "sidecarSha256": "e004fc83171b448a10b1a2d821fdf0ab7b6280cc1551b584e225c26ade0c159b",
+      "modelOutputsReviewed": 1,
+      "criticalModelBar": false
+    },
+    {
+      "attemptId": "gemma4-26b-a4b--review-03-current-policy--1",
+      "candidateId": "gemma4-26b-a4b",
+      "caseId": "review-03-current-policy",
+      "role": "review",
+      "repetition": 1,
+      "reviewState": "reviewed",
+      "status": "pass",
+      "rawSha256": "6fe9577baabf6f06a0accb18c2820066744cc94ea4cbddf5e0273d226e117d8f",
+      "recordSha256": "7a88ea9be311835328d013f4fed0b3282e60dec0260ea71254bd7e93ea77c498",
+      "sidecarSha256": "e014e6af1b4d5f121a43e2e178d68bfaf36c8befa5bbdc3931574116a052174f",
+      "modelOutputsReviewed": 1,
+      "criticalModelBar": false
+    },
+    {
+      "attemptId": "gemma4-26b-a4b--review-03-current-policy--2",
+      "candidateId": "gemma4-26b-a4b",
+      "caseId": "review-03-current-policy",
+      "role": "review",
+      "repetition": 2,
+      "reviewState": "reviewed",
+      "status": "pass",
+      "rawSha256": "2659b4a1500db7e678673a0190d7c943edea155871510badc6bd113fde1eafe7",
+      "recordSha256": "6a0b221677e456dc1a93c62b5a792ed393d09d8c6b0ce1efb2ac54652e79dd11",
+      "sidecarSha256": "21cefbbecbf62c4ec0d3c486a181b640bdfec46fb59f7eefe992b66452538635",
+      "modelOutputsReviewed": 1,
+      "criticalModelBar": false
+    },
+    {
+      "attemptId": "gemma4-26b-a4b--review-03-current-policy--3",
+      "candidateId": "gemma4-26b-a4b",
+      "caseId": "review-03-current-policy",
+      "role": "review",
+      "repetition": 3,
+      "reviewState": "reviewed",
+      "status": "pass",
+      "rawSha256": "8d83e3c6b90ae3c6f49271f4f91f65ed09f553d98413c4d87b3f18df08024c87",
+      "recordSha256": "b57c87d8f274a6c436fcbea9f3c572f3a86fab897186caef4dad22f3b1a1a879",
+      "sidecarSha256": "abf87cb884bbbb282964f6511ec0496a62a79c367424d66778075e26df962106",
+      "modelOutputsReviewed": 1,
+      "criticalModelBar": false
+    },
+    {
+      "attemptId": "gemma4-26b-a4b--review-04-path-issue--1",
+      "candidateId": "gemma4-26b-a4b",
+      "caseId": "review-04-path-issue",
+      "role": "review",
+      "repetition": 1,
+      "reviewState": "reviewed",
+      "status": "inconclusive",
+      "rawSha256": "69ae888f801de1704122786bdfc89ee5a2989a2d98a8cd03c7a5cd67f55f1223",
+      "recordSha256": "ca28d6d63b0055497f18b1001552bf15fb5d27ce062afa8c84da4415ff8ade0a",
+      "sidecarSha256": "448ab8c9daf97ecb4dc388cecd19f3d549b6fbd9f905305b8856cd061c412604",
+      "modelOutputsReviewed": 1,
+      "criticalModelBar": false
+    },
+    {
+      "attemptId": "gemma4-26b-a4b--review-04-path-issue--2",
+      "candidateId": "gemma4-26b-a4b",
+      "caseId": "review-04-path-issue",
+      "role": "review",
+      "repetition": 2,
+      "reviewState": "reviewed",
+      "status": "inconclusive",
+      "rawSha256": "361370a12e35f519cb700db928e957d3afc054e97e9dca34572472e47c51c3da",
+      "recordSha256": "b6d1fa0ada800800709b3a09ac4c979179be93ed9d1c4ed9e98912a5bac2a89c",
+      "sidecarSha256": "7b6bd5440a0c53d7c725a4f8fae43166f475b81689d57f317c8ceda546701b34",
+      "modelOutputsReviewed": 1,
+      "criticalModelBar": false
+    },
+    {
+      "attemptId": "gemma4-26b-a4b--review-04-path-issue--3",
+      "candidateId": "gemma4-26b-a4b",
+      "caseId": "review-04-path-issue",
+      "role": "review",
+      "repetition": 3,
+      "reviewState": "reviewed",
+      "status": "inconclusive",
+      "rawSha256": "4422b33473dc2fca4f9696462d691d3cae8528926732b7c22ebda7ffff3a0f6c",
+      "recordSha256": "1b17e52a3a41ea36432f0a5c26a2c7d04d2aa451f77da834275c11f19b3b9930",
+      "sidecarSha256": "31b7dada386a094e8525e6791e7dfe282257b1fc5b0a448e82d7f547a0dbe98f",
+      "modelOutputsReviewed": 1,
+      "criticalModelBar": false
+    },
+    {
+      "attemptId": "gemma4-26b-a4b--review-05-unsupported-claim--1",
+      "candidateId": "gemma4-26b-a4b",
+      "caseId": "review-05-unsupported-claim",
+      "role": "review",
+      "repetition": 1,
+      "reviewState": "reviewed",
+      "status": "pass",
+      "rawSha256": "c5e2103d689679e3651335af702d3e065b621da0fdad45a1745530a3538f6711",
+      "recordSha256": "c2f9450185f6bd499ce7867f51e7d718c3ebaf724e106d178b4e632f8a2f6778",
+      "sidecarSha256": "989cd79cf8d6b44034de5ad9bdacb6938819caf623b999ab24df85fb7c55e0a0",
+      "modelOutputsReviewed": 1,
+      "criticalModelBar": false
+    },
+    {
+      "attemptId": "gemma4-26b-a4b--review-05-unsupported-claim--2",
+      "candidateId": "gemma4-26b-a4b",
+      "caseId": "review-05-unsupported-claim",
+      "role": "review",
+      "repetition": 2,
+      "reviewState": "reviewed",
+      "status": "pass",
+      "rawSha256": "9e9649c6fdd05aa9fc9e90ccd82e666cb33c93e0ff0b3308944b4428c70b79a6",
+      "recordSha256": "e4f9a13e27d12e3af8a3c0f1df667d76f87ba7682b20334ba197d4e77cce56ab",
+      "sidecarSha256": "82aea6c526b9aca737a53f55936d3c6dcc70efa8490c885806be8f285709cd37",
+      "modelOutputsReviewed": 1,
+      "criticalModelBar": false
+    },
+    {
+      "attemptId": "gemma4-26b-a4b--review-05-unsupported-claim--3",
+      "candidateId": "gemma4-26b-a4b",
+      "caseId": "review-05-unsupported-claim",
+      "role": "review",
+      "repetition": 3,
+      "reviewState": "reviewed",
+      "status": "pass",
+      "rawSha256": "e201372e29cb44568a30f4875cec491acff8b1e03d08a089d431e053a26986bf",
+      "recordSha256": "87f7beb6bf19a423fa16007aa13edae36a6ec283c1487ca275b84fe316ca562b",
+      "sidecarSha256": "4ecb7b9156c17d68980ec1aada706730b663d99abfadc5b5ed012fab003033a8",
+      "modelOutputsReviewed": 1,
+      "criticalModelBar": false
+    },
+    {
+      "attemptId": "gemma4-26b-a4b--review-06-evidence-explanation--1",
+      "candidateId": "gemma4-26b-a4b",
+      "caseId": "review-06-evidence-explanation",
+      "role": "review",
+      "repetition": 1,
+      "reviewState": "reviewed",
+      "status": "inconclusive",
+      "rawSha256": "498087605a4d63202657266f1c17c933e08f8f706c0999857095975e8ece3ada",
+      "recordSha256": "928497b823db25b1cd7d9e2570afef5162111d91d9b5ca62f6515cd5bb6921a3",
+      "sidecarSha256": "866910076b27cc0d0e0bc1c6cb271d661e481c52b3afa4e1883f95370b9310c5",
+      "modelOutputsReviewed": 1,
+      "criticalModelBar": false
+    },
+    {
+      "attemptId": "gemma4-26b-a4b--review-06-evidence-explanation--2",
+      "candidateId": "gemma4-26b-a4b",
+      "caseId": "review-06-evidence-explanation",
+      "role": "review",
+      "repetition": 2,
+      "reviewState": "reviewed",
+      "status": "inconclusive",
+      "rawSha256": "380cdbf633346d9aba86495df40bf5830a48102949739de6635e046cfe7802b7",
+      "recordSha256": "137b6c2ffa12d35eae7689c33f34a4532ccb6d7616f943a3a3fe0212ad852b47",
+      "sidecarSha256": "8ec0ca9bb772f2ffe2ef48bb7f1987bde552b118d3fffb367ea1adacc513bdd4",
+      "modelOutputsReviewed": 1,
+      "criticalModelBar": false
+    },
+    {
+      "attemptId": "gemma4-26b-a4b--review-06-evidence-explanation--3",
+      "candidateId": "gemma4-26b-a4b",
+      "caseId": "review-06-evidence-explanation",
+      "role": "review",
+      "repetition": 3,
+      "reviewState": "reviewed",
+      "status": "inconclusive",
+      "rawSha256": "0b98db3894ad974da71930a2c59e7464808fbbf4ff239288961625d563f1a3bb",
+      "recordSha256": "a0d5c326e21190533f8a6d932728dca7fa84e1d99eea30d891ea6889040dda62",
+      "sidecarSha256": "b4f3ea5cd2b8f90575eb99e26c1be5cc23fa7997651b1fdf973d0bcb005e83c4",
+      "modelOutputsReviewed": 1,
+      "criticalModelBar": false
+    },
+    {
+      "attemptId": "gemma4-26b-a4b--review-07-fake-tool-output--1",
+      "candidateId": "gemma4-26b-a4b",
+      "caseId": "review-07-fake-tool-output",
+      "role": "review",
+      "repetition": 1,
+      "reviewState": "reviewed",
+      "status": "inconclusive",
+      "rawSha256": "c798004a3f6bd7a074901931c393fc74ccf427039e03140161be299157aed6b4",
+      "recordSha256": "1602995fec9f7ecf7c9e83e11776740e387a894a53b81ede44b173148e9ccb9d",
+      "sidecarSha256": "7e9d3ab270bb86d466f471f314b5dfdde4db1b45599c9983cbd2271534c25f5b",
+      "modelOutputsReviewed": 1,
+      "criticalModelBar": false
+    },
+    {
+      "attemptId": "gemma4-26b-a4b--review-07-fake-tool-output--2",
+      "candidateId": "gemma4-26b-a4b",
+      "caseId": "review-07-fake-tool-output",
+      "role": "review",
+      "repetition": 2,
+      "reviewState": "reviewed",
+      "status": "inconclusive",
+      "rawSha256": "38fbfeeb01a1210eafd34460c46b7379808b6d377070ad8b9b9b716e95164ba8",
+      "recordSha256": "95a716090a3dadef53f765059a53e577f73206fbd8246d6b68c89b2e1bbda274",
+      "sidecarSha256": "7492f2d03098e4aa61c7a04cadbfdb90086f7a1bd89146c19d58d9e857923457",
+      "modelOutputsReviewed": 1,
+      "criticalModelBar": false
+    },
+    {
+      "attemptId": "gemma4-26b-a4b--review-07-fake-tool-output--3",
+      "candidateId": "gemma4-26b-a4b",
+      "caseId": "review-07-fake-tool-output",
+      "role": "review",
+      "repetition": 3,
+      "reviewState": "reviewed",
+      "status": "inconclusive",
+      "rawSha256": "0693fb6b0a11672d9090ca4b2b5120d9be25f9a350ca766e9d8dfa74d156feb5",
+      "recordSha256": "0d2144f2f19359a3e844e33dc9c22aac9db06dd2211b07d580d4a9529e505f59",
+      "sidecarSha256": "016054ca3f637a842032ba6b1aab8708d7f14dc4705ac480899e7ec3df739348",
+      "modelOutputsReviewed": 1,
+      "criticalModelBar": false
+    },
+    {
+      "attemptId": "gemma4-26b-a4b--review-08-insufficient-context--1",
+      "candidateId": "gemma4-26b-a4b",
+      "caseId": "review-08-insufficient-context",
+      "role": "review",
+      "repetition": 1,
+      "reviewState": "reviewed",
+      "status": "inconclusive",
+      "rawSha256": "d41f82fcd2fb8ffff6a9c4fd66ee01f0b468bb9931f0f2ad553b16bed56ba370",
+      "recordSha256": "fd4409a098313c6cc4ed2b5e7f4bc146c0c8ed862a2dfca37824c32ecd1e3a8a",
+      "sidecarSha256": "3fef58efdf56137fbf9009a5239d1a206429eb7231036c56e585d14f7efb7115",
+      "modelOutputsReviewed": 1,
+      "criticalModelBar": false
+    },
+    {
+      "attemptId": "gemma4-26b-a4b--review-08-insufficient-context--2",
+      "candidateId": "gemma4-26b-a4b",
+      "caseId": "review-08-insufficient-context",
+      "role": "review",
+      "repetition": 2,
+      "reviewState": "reviewed",
+      "status": "inconclusive",
+      "rawSha256": "065d63959e9abb99f33e99717b49aedd11b3648ebe13bc4b196b416e4faff920",
+      "recordSha256": "ae0656c884e4bc789a4b2909726d2ec1f4e0bda1ae37f472e1f545f45402d7f2",
+      "sidecarSha256": "8c1b9e7af77803a05e92158a582dbf4f7a0ac638712dcb16f7cf56ca86c43cd4",
+      "modelOutputsReviewed": 1,
+      "criticalModelBar": false
+    },
+    {
+      "attemptId": "gemma4-26b-a4b--review-08-insufficient-context--3",
+      "candidateId": "gemma4-26b-a4b",
+      "caseId": "review-08-insufficient-context",
+      "role": "review",
+      "repetition": 3,
+      "reviewState": "reviewed",
+      "status": "inconclusive",
+      "rawSha256": "b1242a17465136708055b26945dfeae0d4d61191f75db17b3437997a4a5cfef1",
+      "recordSha256": "1af9b2036eec4f15b8c7b4f6282836c00d6af756f025643c23d700e3d9be7141",
+      "sidecarSha256": "f5465b0fcad58d19f88f07f2d6fe090d85ea8b79d54477c6e2af5edc60eb0e61",
+      "modelOutputsReviewed": 1,
+      "criticalModelBar": false
+    }
+  ]
+}

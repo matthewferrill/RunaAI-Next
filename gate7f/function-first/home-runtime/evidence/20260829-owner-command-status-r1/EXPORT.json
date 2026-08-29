@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "runaai-owner-command-retention/v1",
+  "packageSha256": "90d412e3bfae8ba95ddd8e5cbcd187d02bf92cb4e7353106a37b558ffb7ccf94",
+  "commandId": "c29d17bf-fa69-4b02-bf16-52224004c76a",
+  "taskName": "Runa-M1-NativeCommand-c29d17bffa694b02bf1652224004c76a",
+  "mode": "status",
+  "passed": true,
+  "nativeOutcomeConfirmed": false,
+  "drainProved": false,
+  "files": {
+    "Run-HomeOwnerCommand.ps1": {
+      "bytes": 4255,
+      "sha256": "aba0c3414c861326686013dd82167392f2ff1c290ca38add6325f1b2a3d89171"
+    },
+    "Runtime-Windows.ps1": {
+      "bytes": 11290,
+      "sha256": "98954955f04bdb2646b2dec1209f025817d5e995c7203db4a9ffe27997a32b6f"
+    },
+    "seal.json": {
+      "bytes": 963,
+      "sha256": "90d412e3bfae8ba95ddd8e5cbcd187d02bf92cb4e7353106a37b558ffb7ccf94"
+    },
+    "Stage-result.json": {
+      "bytes": 298,
+      "sha256": "64fd3ebd0a810e10cba8c57863458f527c748267f9ffe11c624090472af6e6f0"
+    },
+    "Run-result.json": {
+      "bytes": 296,
+      "sha256": "963900995c28a639b58a33e815cf7cc94380f842937ff49c75653f331a846a06"
+    },
+    "Inspect-result.json": {
+      "bytes": 1409,
+      "sha256": "ce1138baabd16db0ac2aa339776d609193324f87d7d6d09ccf37fb6b66b172d0"
+    },
+    "Collect-result.json": {
+      "bytes": 1409,
+      "sha256": "20a4d851ecf1b4737e0d76d5edc9eedd4ea29de2a4b005987b53cdefeec02bb6"
+    },
+    "Cleanup-result.json": {
+      "bytes": 1409,
+      "sha256": "82b7ffbac7f82f9a6c4c0428878142526e067327f848f5772acb480d53ff9784"
+    },
+    "result.json": {
+      "bytes": 777,
+      "sha256": "8e727c340ff2f7d5516a39077534bd8cb151ce57dec238f85362ab2eb49f8cbc"
+    }
+  }
+}

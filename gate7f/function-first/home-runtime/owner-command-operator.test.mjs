@@ -8,13 +8,14 @@ function fixture(t,mode='status',bind=null){const base=mkdtempSync(path.join(tmp
 test('package loading repeats exact deterministic bytes and rejects another seal',t=>{const f=fixture(t),loaded=loadOwnerCommandPackage(f.dir,f.prepared.packageSha256);
  assert.equal(loaded.packageSha256,f.prepared.packageSha256);assert.throws(()=>loadOwnerCommandPackage(f.dir,'b'.repeat(64)));});
 test('all operator modes stay under the nested transport ceiling and parse in actual PowerShell 5',t=>{const f=fixture(t);
- for(const mode of ['Stage','Run','Inspect','Collect','Cleanup']){const request=ownerCommandRequest(f.dir,f.prepared.packageSha256,mode);
+ for(const mode of ['Stage','Run','Inspect','Collect','Cleanup']){const request=ownerCommandRequest(f.dir,f.prepared.packageSha256,mode,mode==='Cleanup'?'b'.repeat(64):null);
   assert.ok(request.maximumWrappedChars<=6500);const source=Buffer.from(request.input.toString().split('\n')[0],'base64').toString('utf8');
   assert.equal(source.includes('server stop'),false);assert.equal(source.includes('server start'),false);
   const parser="$s=[Console]::In.ReadToEnd();$t=$null;$e=$null;[void][Management.Automation.Language.Parser]::ParseInput($s,[ref]$t,[ref]$e);if($e.Count){$e|ForEach-Object{$_.Message+' at '+$_.Extent.Text};exit 1};'parsed'";
   try{assert.equal(execFileSync('powershell.exe',['-NoProfile','-Command',parser],{input:source,encoding:'utf8',timeout:10000}).trim(),'parsed');}
   catch(error){assert.fail(mode+': '+String(error.stdout)+' '+String(error.stderr));}
  }});
-test('operator source allows only its exact task and preserves files after retirement',t=>{const f=fixture(t),source=Buffer.from(ownerCommandRequest(f.dir,f.prepared.packageSha256,'Cleanup').input.toString().split('\n')[0],'base64').toString();
+test('operator source allows only its exact task and preserves files after retirement',t=>{const f=fixture(t),source=Buffer.from(ownerCommandRequest(f.dir,f.prepared.packageSha256,'Cleanup','b'.repeat(64)).input.toString().split('\n')[0],'base64').toString();
  assert.match(source,/Unregister-ScheduledTask -TaskName \$task/);assert.doesNotMatch(source,/Remove-Item|Stop-Process|taskkill|Credential|Password/);
- assert.match(source,/executionStopped-ne\$true/);assert.match(source,/workerAlive/);});
+ assert.match(source,/executionStopped-ne\$true/);assert.match(source,/workerAlive/);assert.match(source,/owner-command-result-drift/);
+ assert.throws(()=>ownerCommandRequest(f.dir,f.prepared.packageSha256,'Cleanup'));});

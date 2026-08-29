@@ -1,0 +1,20 @@
+{
+  "schemaVersion": "runaai-owner-command-package/v1",
+  "commandId": "c29d17bf-fa69-4b02-bf16-52224004c76a",
+  "mode": "status",
+  "bind": null,
+  "root": "C:\\ProgramData\\RunaAI-Next-NativeCommand-c29d17bffa694b02bf1652224004c76a",
+  "taskName": "Runa-M1-NativeCommand-c29d17bffa694b02bf1652224004c76a",
+  "engine": {
+    "pid": 14568,
+    "startedAt": "2026-08-23T14:19:15.3385098Z",
+    "executable": "C:\\Users\\Matthew\\AppData\\Local\\Programs\\LM Studio\\LM Studio.exe"
+  },
+  "engineSha256": "428c46865482aef24712eb5bcbbc7b966e0d8173a946b0b2f307672e4c1529c1",
+  "cliSha256": "976d4389f97b2cf95b38a4eb673855d8a846f2db21a20eb4fe5e79f7179722f5",
+  "descriptorSha256": "0aeff4b66f35f258f6ec60fc661add55e4e2d38fbc1791278ab0c0c4713ec8c3",
+  "sourceFiles": {
+    "Run-HomeOwnerCommand.ps1": "aba0c3414c861326686013dd82167392f2ff1c290ca38add6325f1b2a3d89171",
+    "Runtime-Windows.ps1": "98954955f04bdb2646b2dec1209f025817d5e995c7203db4a9ffe27997a32b6f"
+  }
+}

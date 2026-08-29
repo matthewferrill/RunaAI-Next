@@ -60,3 +60,17 @@ these criteria or unit tests alone.
 
 These are finite operator mechanics and integration checks. They do not alter model quality thresholds,
 upgrade the runtime, add model co-residency, bypass product approvals or expand ordinary-user authority.
+
+## Status-only implementation checkpoint
+
+Implementation commit `169f3a8` routes the real controller through a mandatory owner executor and removes
+its direct lifecycle CLI child. Fixed-command package, worker and operator tests passed34/34 with the
+parent-owned durable journal tests. A later cleanup hardening binds exact collected-result bytes before
+task retirement. The worker's terminal receipt always reports `nativeOutcomeConfirmed:false`; only the
+controller's subsequent fresh listener/descriptor postcondition can append the journal confirmation.
+
+The same new executor ran only `ps --json` on Home at00:08:56–57Z on2026-08-29. It used the real Matthew
+identity, returned the exact empty status hash, changed no settings/models/listeners/routes and copied no
+credential. The worker stopped, task result was0 and the exact task was unregistered after its raw result
+hash was rechecked. See `evidence/20260829-owner-command-status-r1`. This satisfies acceptance item4's
+identity path only; lifecycle, positive-busy, caller-drain, legacy preservation and rollback remain open.

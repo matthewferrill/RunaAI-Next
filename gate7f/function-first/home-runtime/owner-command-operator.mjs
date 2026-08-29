@@ -1,8 +1,9 @@
-import {execFileSync} from 'node:child_process';import {writeFileSync} from 'node:fs';import path from 'node:path';import {fileURLToPath} from 'node:url';
+import {execFileSync} from 'node:child_process';import {readFileSync,writeFileSync} from 'node:fs';import path from 'node:path';import {fileURLToPath} from 'node:url';
 import {loadOwnerCommandPackage,validateOwnerCommandResult} from './owner-command.mjs';import {tlsTransportRequest} from './tls-enrollment-operator.mjs';import {demand,sha} from './tls-primitives.mjs';
 const ps=s=>s.replaceAll("'","''");
-export function ownerCommandRequest(directory,expected,mode){
+export function ownerCommandRequest(directory,expected,mode,resultPin=null){
   demand(['Stage','Run','Inspect','Collect','Cleanup'].includes(mode),'owner-command-operator-mode');
+  demand(mode==='Cleanup'?/^[a-f0-9]{64}$/.test(resultPin):resultPin===null,'owner-command-cleanup-pin');
   const prepared=loadOwnerCommandPackage(directory,expected),m=prepared.manifest,root=ps(m.root),task=ps(m.taskName);
   const args=`-NoProfile -NonInteractive -WindowStyle Hidden -ExecutionPolicy Bypass -File "${root}\\code\\Run-HomeOwnerCommand.ps1" -ExpectedSeal ${expected}`;
   const packet=mode==='Stage'?Buffer.from(JSON.stringify(Object.fromEntries(Object.entries(prepared.files).map(([name,raw])=>[name,raw.toString('base64')])))):undefined;
@@ -20,15 +21,19 @@ export function ownerCommandRequest(directory,expected,mode){
     `$a=New-ScheduledTaskAction -Execute 'C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe' -Argument '${ps(args)}';$p=New-ScheduledTaskPrincipal -UserId 'RUNA-HOME\\Matthew' -LogonType Interactive -RunLevel Limited;$s=New-ScheduledTaskSettingsSet -ExecutionTimeLimit (New-TimeSpan -Minutes 1) -MultipleInstances IgnoreNew -Hidden;$null=Register-ScheduledTask -TaskName $task -Action $a -Principal $p -Settings $s;${taskCheck}`+
     "$b=[Text.UTF8Encoding]::new($false).GetBytes((@{packageSha256=$expected;taskName=$task;time=[DateTime]::UtcNow.ToString('o')}|ConvertTo-Json -Compress));$f=[IO.File]::Open($root+'\\task-start-intent.json','CreateNew','Write','None');try{$f.Write($b,0,$b.Length);$f.Flush($true)}finally{$f.Dispose()};Start-ScheduledTask -TaskName $task;";
   if(['Inspect','Collect','Cleanup'].includes(mode))command+=taskCheck+"$info=Get-ScheduledTaskInfo -TaskName $task;$resultFile=$root+'\\results\\result.json';$result=$null;$bytes=$null;if(Test-Path -LiteralPath $resultFile){Plain $resultFile;$bytes=[IO.File]::ReadAllBytes($resultFile);if($bytes.Length-gt8192){throw 'owner-command-result-cap'};$result=[Text.UTF8Encoding]::new($false,$true).GetString($bytes)|ConvertFrom-Json};$workerFile=$root+'\\results\\worker.json';$worker=$null;$workerAlive=$false;if(Test-Path -LiteralPath $workerFile){Plain $workerFile;$worker=[IO.File]::ReadAllText($workerFile)|ConvertFrom-Json;$process=Get-Process -Id ([int]$worker.pid) -ErrorAction SilentlyContinue;if($null-ne$process){try{$workerAlive=$process.StartTime.ToUniversalTime().ToString('o')-ceq$worker.startedAt-and$process.Path-ceq$worker.executable}finally{$process.Dispose()}}};";
-  if(mode==='Cleanup')command+="if($t.State-eq'Running'-or$null-eq$result-or$result.packageSha256-cne$expected-or$result.executionStopped-ne$true-or$workerAlive){throw 'owner-command-unsettled'};$exit=if($result.passed-eq$true){0}else{1};if($info.LastTaskResult-ne$exit){throw 'owner-command-terminal'};Unregister-ScheduledTask -TaskName $task -Confirm:$false;if(Get-ScheduledTask -TaskName $task -ErrorAction SilentlyContinue){throw 'owner-command-task-remains'};";
+  if(mode==='Cleanup')command+=`if((Get-FileHash -LiteralPath $resultFile -Algorithm SHA256).Hash.ToLowerInvariant()-cne'${resultPin}'){throw 'owner-command-result-drift'};`+"if($t.State-eq'Running'-or$null-eq$result-or$result.schemaVersion-cne'runaai-owner-command-result/v1'-or$result.packageSha256-cne$expected-or$result.commandId-cne'"+m.commandId+"'-or$result.mode-cne'"+m.mode+"'-or$result.executionStopped-ne$true-or$result.nativeOutcomeConfirmed-ne$false-or$result.credentialsCopied-ne$false-or$result.credentialReadByWrapper-ne$false-or$result.privateValuesIncluded-ne$false-or$workerAlive){throw 'owner-command-unsettled'};$exit=if($result.passed-eq$true){0}else{1};if($info.LastTaskResult-ne$exit){throw 'owner-command-terminal'};Unregister-ScheduledTask -TaskName $task -Confirm:$false;if(Get-ScheduledTask -TaskName $task -ErrorAction SilentlyContinue){throw 'owner-command-task-remains'};";
   command+=`@{schemaVersion='runaai-owner-command-operator/v1';mode='${mode}';packageSha256=$expected;taskName=$task;`+
     (['Inspect','Collect','Cleanup'].includes(mode)?"state=[string]$t.State;lastTaskResult=$info.LastTaskResult;workerAlive=$workerAlive;resultBase64=if($null-ne$bytes){[Convert]::ToBase64String($bytes)}else{$null};":"")+
     "privateValuesIncluded=$false;inferenceCalled=$false;settingsChanged=$false}|ConvertTo-Json -Compress";
   return tlsTransportRequest({host:'home',command,input:packet});
 }
-export function runOwnerCommand(directory,expected,mode){const request=ownerCommandRequest(directory,expected,mode);
+export function runOwnerCommand(directory,expected,mode){const prepared=loadOwnerCommandPackage(directory,expected);let resultPin=null;
+  if(mode==='Cleanup'){const collected=JSON.parse(readFileSync(path.join(directory,'Collect-result.json'))),bytes=Buffer.from(collected.resultBase64,'base64');
+    validateOwnerCommandResult(bytes,prepared);resultPin=sha(bytes);}
+  const request=ownerCommandRequest(directory,expected,mode,resultPin);
   const raw=execFileSync('ssh.exe',['-F','C:\\Users\\matth\\.ssh\\config','-o','ClearAllForwardings=yes','runa-control-wsl-codex',request.nested],{input:request.input,windowsHide:true,timeout:30000,maxBuffer:16384});
   const value=JSON.parse(raw);demand(value.schemaVersion==='runaai-owner-command-operator/v1'&&value.mode===mode&&value.packageSha256===expected,'owner-command-operator-result');
+  if(value.resultBase64!==undefined&&value.resultBase64!==null)validateOwnerCommandResult(Buffer.from(value.resultBase64,'base64'),prepared);
   const output=path.join(directory,mode+'-result.json');writeFileSync(output,raw,{flag:'wx'});return {output,sha256:sha(raw),...value};}
 if(process.argv[1]&&path.resolve(process.argv[1])===fileURLToPath(import.meta.url)){
   const [mode,directory,pin,...extra]=process.argv.slice(2);demand(extra.length===0,'owner-command-operator-arguments');

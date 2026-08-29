@@ -237,7 +237,9 @@ test('trusted invocation preloader hashes dispatcher bytes before parsing the sa
   const raw=['--owned-root','C:\\AI\\RunaAI-Next-Candidate\\staging\\m1-task-native-'+('a'.repeat(32)),'--manifest-sha256',hash('1'),'--dispatcher-sha256',actualSha(dispatcher),
     '--bootstrap-sha256',hash('2'),'--identity-sha256',hash('3'),'--archive-sha256',hash('4'),'--source-commit','5'.repeat(40)];
   const result=buildInvocation(parseInvocationArguments(raw),{dispatcherPath}),source=Buffer.from(result.encodedCommand,'base64').toString('utf16le');
-  assert.ok(source.indexOf('ComputeHash($bytes)')<source.indexOf('[ScriptBlock]::Create($body)'));assert.match(source,/UTF8Encoding\]::new\(\$false,\$true\)/u);assert.doesNotMatch(source,/New-Object|Get-FileHash|Test-Path|ConvertTo-Json/u);
+  assert.ok(source.indexOf('ComputeHash($bytes)')<source.indexOf('[ScriptBlock]::Create($body)'));assert.match(source,/UTF8Encoding\]::new\(\$false,\$true\)/u);
+  assert.match(source,/\{throw 'm1-control-preloader-dispatcher-pin'\}/u);assert.doesNotMatch(source,/throw'm1-control-preloader/u);
+  assert.doesNotMatch(source,/New-Object|Get-FileHash|Test-Path|ConvertTo-Json/u);
   await writeFile(dispatcherPath,'changed');assert.throws(()=>buildInvocation(parseInvocationArguments(raw),{dispatcherPath}),/dispatcher-pin/u);
 }finally{await f.close();}});
 

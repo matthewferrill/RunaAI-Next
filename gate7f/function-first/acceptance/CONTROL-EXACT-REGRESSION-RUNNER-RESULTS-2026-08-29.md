@@ -106,6 +106,17 @@ pipeline invocation layer; Node remains the bounded stream supervisor. A direct
 Control probe completed normally and retained the deliberately selected child
 exit code `7`, with no model, protected-data or production access.
 
+A fourth fresh stage on source `70bab549ebb54b67c4112b96ce25d8ffc79746cb`
+showed the same post-child residency with `Start-Process`, disproving the
+pipeline-wait explanation. The exact wrapper was again verified and stopped,
+with no Node child, evidence directory or disposable service remaining. The
+factor common to both stalled variants was temporary mutation of the parent
+PowerShell process environment. The entry point now leaves its own environment
+untouched and instead supplies an explicit safe-only environment on a
+nonredirected `.NET ProcessStartInfo` child. A direct Control probe of that
+pattern completed and retained a deliberate child exit code `7`. This is still
+prospective until a new immutable stage executes the full runner.
+
 The next execution must create a fresh exact stage and prospective manifest for
 the final selected source, then run the fixed PowerShell entry point on Control.
 Only that execution can prove the pinned Control PostgreSQL/Qdrant/QuickJS/MXC

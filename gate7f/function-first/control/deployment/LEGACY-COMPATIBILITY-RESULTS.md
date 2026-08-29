@@ -1,7 +1,9 @@
 # Legacy compatibility adapter results
 
-Date: 2026-08-29  
-Criteria: `LEGACY-COMPATIBILITY-CRITERIA.md`  
+Date: 2026-08-29
+
+Criteria: `LEGACY-COMPATIBILITY-CRITERIA.md`
+
 Criteria commit: `2cff9245f133d621dc5f60a5240d795199b3bbe8`
 
 ## Outcome

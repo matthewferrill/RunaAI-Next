@@ -326,6 +326,7 @@ integration("replacement planner never receives a restore receipt whose affected
     assert.equal(restore.status, "completed");
 
     const before = await f.service.status(context, { taskId: f.task.taskId });
+    const intents = (await f.store.transaction(context, tx => tx.list("intent", f.task.taskId))).length;
     const edits = f.adapter.edits, originalPlans = first.run.plans.length;
     const nextContext = { ...context, sessionId: "narrow-replacement-session" };
     const replacement = await f.service.createGrant(nextContext, { taskId: f.task.taskId, profile: "safe-autopilot",
@@ -337,6 +338,7 @@ integration("replacement planner never receives a restore receipt whose affected
     assert.equal(result.run.plans.length, originalPlans);
     assert.equal(result.proposals.length, before.proposals.length);
     assert.equal(result.receipts.length, before.receipts.length);
+    assert.equal((await f.store.transaction(nextContext, tx => tx.list("intent", f.task.taskId))).length, intents);
     assert.equal(f.adapter.edits, edits);
     assert.equal(plans, 2);
   } finally { await f.close(); }

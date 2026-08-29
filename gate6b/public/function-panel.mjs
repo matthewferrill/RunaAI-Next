@@ -20,6 +20,12 @@ export function restoredWorkspaceNotice(result) {
 }
 export function taskPresentation(result) {
   if (result?.task?.status !== "cancelled") {
+    const unsettled = (result?.pendingReconciliation ?? []).length > 0
+      || (result?.proposals ?? []).some(proposal => ["dispatching", "unknown"].includes(proposal.status));
+    if (unsettled) return {
+      status: "unknown",
+      notice: "Outcome unknown. Reconcile the recorded action before any successor work; refreshing or continuing must not repeat it."
+    };
     const status = result?.run?.status ?? result?.task?.status ?? "unknown";
     const code = result?.run?.errorCode;
     const notice = status === "failed" && code === "m1-stale-project"
@@ -181,7 +187,16 @@ export async function initializeFunctionPanel({ root = document, request, getCon
     for (const run of runs) button(`${run.objective} — ${run.status}`, () => openTask(token, run.taskId, run.runId, true), catalog);
     const runTasks = new Set(runs.map(run => run.taskId));
     for (const task of tasks.filter(task => !runTasks.has(task.taskId))) {
-      button(`${task.objective} — ${task.status}`, () => openTask(token, task.taskId, null, true), catalog);
+      let displayStatus = task.status;
+      try {
+        const detail = await call("task.status", { taskId: task.taskId }, token);
+        if (!alive(token)) return;
+        displayStatus = taskPresentation(detail).status;
+      } catch {
+        // A list entry remains useful when its detail is temporarily unavailable.
+        // It must never infer success or authorize work from that failure.
+      }
+      button(`${task.objective} — ${displayStatus}`, () => openTask(token, task.taskId, null, true), catalog);
     }
     if (!catalog.childElementCount) catalog.append(element(root, "p", "No saved tasks in this project.", "navigation-empty"));
   }

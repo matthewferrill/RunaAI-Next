@@ -60,6 +60,18 @@ test("durable cancellation wins over stale run status on reload and explains uns
     { status: "waiting-approval", notice: null });
 });
 
+test("an uncertain durable effect overrides an active task label and blocks successor inference", () => {
+  for (const result of [
+    { task: { status: "active" }, proposals: [{ status: "unknown" }], pendingReconciliation: [] },
+    { task: { status: "active" }, proposals: [], pendingReconciliation: [{ proposalId: "uncertain" }] }
+  ]) {
+    const shown = taskPresentation(result);
+    assert.equal(shown.status, "unknown");
+    assert.match(shown.notice, /Reconcile/);
+    assert.match(shown.notice, /must not repeat/);
+  }
+});
+
 test("reopened stale and revoked runs explain the actual durable stop without implying success", () => {
   const stale = taskPresentation({ task: { status: "active" }, run: { status: "failed", errorCode: "m1-stale-project" } });
   assert.equal(stale.status, "failed");

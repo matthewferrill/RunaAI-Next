@@ -43,7 +43,9 @@ async function panelPage(t, overrides = {}) {
     if (payload.operation === "task.list") return { tasks: [task(), task("b")] };
     if (payload.operation === "run.list") return { runs: [run(), run("b")] };
     if (payload.operation === "task.status") return { task: task(suffix), project: { revision: 2 }, grants: [{ grantId: 'grant-new', revision: 4, status: 'active' }],
-      proposals: [proposal(suffix)], receipts: [], currentReceiptIds: [], pendingReconciliation: [] };
+      proposals: [proposal(suffix)], receipts: [], currentReceiptIds: [], pendingReconciliation: [],
+      approvableProposalIds: calls.some(call => call.operation === "run.resume" && call.input?.runId === `run-${suffix}`)
+        ? [proposal(suffix).proposalId] : [] };
     if (payload.operation === "run.status" || payload.operation === "run.resume") return { run: run(suffix), task: task(suffix),
       proposals: [proposal(suffix)], receipts: [], pendingReconciliation: [] };
     if (payload.operation === "grant.create") return { grantId: "grant-new", revision: 4 };
@@ -105,6 +107,21 @@ test("actual DOM: saved runs reopen read-only; explicit profile replaces grant b
       request: async (path, body) => (await fetch(path, { method: 'POST', body: JSON.stringify(body) })).json() }); });
   await open(page); assert.equal(await page.locator("#m1-profile").inputValue(), "");
 });
+test("actual DOM: a saved standalone task exposes unknown outcome before it is opened", async t => {
+  const { page, calls } = await panelPage(t, { handle: async payload => {
+    if (payload.operation === "run.list") return { runs: [] };
+    if (payload.operation === "task.list") return { tasks: [task()] };
+    if (payload.operation === "task.status") return { task: task(), project: { revision: 1 }, grants: [], receipts: [],
+      proposals: [{ ...proposal(), status: "unknown" }], pendingReconciliation: [{ proposalId: "proposal-a" }], currentReceiptIds: [] };
+  } });
+  const entry = page.getByRole("button", { name: "Repair exercise a — unknown", exact: true });
+  await entry.waitFor();
+  assert.equal(calls.filter(call => call.operation === "task.status").length, 1);
+  await entry.click();
+  await page.locator("#m1-task h3").waitFor();
+  assert.match(await page.locator("#m1-task").textContent(), /Outcome unknown/);
+  assert.match(await page.locator("#m1-task").textContent(), /Reconcile the recorded action/);
+});
 test("actual DOM: navigating to another task during approval cannot resume the new or previous run", async t => {
   let release, started; const waiting = new Promise(resolve => { started = resolve; });
   const { page, calls } = await panelPage(t, { handle: async payload => {
@@ -144,11 +161,11 @@ test("actual DOM: revocation targets the exact grant and requires a fresh profil
   assert.equal(await page.getByRole('button', { name: 'Approve this exact action', exact: true }).count(), 0);
 });
 test("actual DOM: a standalone saved undo task can rebind and preview again without inheriting its old approval", async t => {
-  const { page, calls } = await panelPage(t, { handle: async payload => {
+  const { page, calls } = await panelPage(t, { handle: async (payload, recordedCalls) => {
     if (payload.operation === 'run.list') return { runs: [] };
     if (payload.operation === 'task.status') return { task: task(), project: { revision: 2 },
       grants: [{ grantId: 'grant-new', revision: 4, status: 'active' }], proposals: [{ ...proposal(), capabilityId: 'project.restore', arguments: { receiptId: 'receipt-a' } }],
-      receipts: [], pendingReconciliation: [] };
+      receipts: [], pendingReconciliation: [], approvableProposalIds: recordedCalls.some(call => call.operation === 'proposal.create') ? ['proposal-a'] : [] };
   } });
   await page.getByRole('button', { name: 'Repair exercise a — active', exact: true }).click();
   await page.locator('#m1-task h3').waitFor();

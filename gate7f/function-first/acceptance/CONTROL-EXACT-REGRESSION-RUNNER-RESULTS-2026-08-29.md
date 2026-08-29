@@ -239,11 +239,28 @@ the core PID and has a finite post-stop/pipe-drain ceiling. Unconfirmed cleanup
 therefore returns actionable process identity rather than waiting forever or
 claiming a pass. Direct `-File` and direct Node invocation are unsupported.
 
-The current focused launcher suite passed 19/19, the invoked `-e` sentinel proved
+The current focused launcher suite passed 20/20, including an actual forced
+second-journal-write failure that stopped its child and terminated promptly. The invoked `-e` sentinel proved
 that bootstrap main actually executes, and independent re-review found no
 remaining blocker to one fresh synthetic Control qualification. The complete
-local Windows suite exited zero with 1,679 passing and 77 expected host-specific
-skips; roadmap verification passed 15/15. The next execution must use a fresh
+local Windows suite exited zero with 1,680 passing and 77 expected host-specific
+skips; roadmap verification passed 15/15. The suite also proved that its Windows
+file-observation helper retries transient `EBUSY`/`EPERM` sharing windows instead
+of misclassifying a complete fsynced watchdog record as a product failure. The next execution must use a fresh
 commit, archive, exact stage and prospective manifest through the encoded
 preloader. Only its five create-only evidence files, zero-skip result and exact
 cleanup proof can qualify the Control PostgreSQL/Qdrant/QuickJS/MXC envelope.
+
+The first encoded-preloader exercise used fresh stage
+`m1-task-native-02b4f51d1d3042e28649df1f6e5b1989`, source
+`705e7d7f89cb93bf9d7017e11e469baf23ea9985` and prospective run
+`f4e10ca61d3845d688eadea40edecac5`. The dispatcher and outer-watchdog receipts
+were observed, then both exact processes ended before the core created evidence.
+Independent stage observation confirmed that no disposable directory, service,
+model, protected-data read or production change remained. Because the inherited
+owner connection had already closed, the bootstrap's error text was not retained;
+the stage is disqualified and is not reused. The correction makes the outer
+watchdog create and fsync a predispatch JSONL intent before child start, append
+the exact child PID before best-effort owner output, and retain bounded
+stdout/stderr files, so every future pre-import terminal survives connection loss. This is a
+diagnostic correction, not a reclassification of the failed run.

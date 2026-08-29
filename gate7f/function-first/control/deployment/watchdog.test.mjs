@@ -12,7 +12,7 @@ const wrapperFile=path.join(root,'Invoke-ClosedCompanionWatchdog.ps1'),helperFil
 const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
 const ps=value=>value.replaceAll("'","''");
 const privateHook=async()=>{}; // Wrapper itself verifies real ACL/owner on every record.
-async function waitFor(file,ms=10000){const until=Date.now()+ms;while(Date.now()<until){try{return await readFile(file,'utf8');}catch(error){if(error.code!=='ENOENT')throw error;}await sleep(20);}throw Error('test-observation-timeout');}
+async function waitFor(file,ms=10000){const until=Date.now()+ms;while(Date.now()<until){try{return await readFile(file,'utf8');}catch(error){if(!['ENOENT','EBUSY','EPERM'].includes(error.code))throw error;}await sleep(20);}throw Error('test-observation-timeout');}
 function isRunning(pid){try{process.kill(pid,0);return true;}catch{return false;}}
 async function stopConfirmed(pid){for(let n=0;n<100;n++){if(!isRunning(pid))return true;await sleep(20);}return false;}
 async function fixture(mode,{maximumMs=7000,maximumBytes=262144}={}){

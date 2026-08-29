@@ -149,6 +149,10 @@ test('externally pinned dispatcher uses argument transport, closes stdin and exi
   assert.doesNotMatch(dispatcher,/Start-Process|\.HasExited|ReadToEnd|StandardInput\.BaseStream\.Write/u);assert.match(dispatcher,/WaitForExit\(10000\)/u);
   assert.match(dispatcher,/GetEnvironmentVariables\('Process'\)/u);assert.doesNotMatch(dispatcher,/\bGet-FileHash\b|\bTest-Path\b|\bConvertTo-Json\b|\bJoin-Path\b|\bNew-Object\b/u);
   assert.match(dispatcher,/maximumMs=1080000/u);assert.match(dispatcher,/m1-control-bootstrap-watchdog-timeout/u);assert.match(dispatcher,/spawnSync\(taskkill/u);assert.match(dispatcher,/timeout:10000/u);
+  assert.match(dispatcher,/CONTROL-BOOTSTRAP-WATCHDOG\.jsonl/u);assert.match(dispatcher,/CONTROL-BOOTSTRAP-STDOUT\.txt/u);assert.match(dispatcher,/CONTROL-BOOTSTRAP-STDERR\.txt/u);assert.match(dispatcher,/openSync\([^\n]+,'wx'\)/u);
+  assert.ok(dispatcher.indexOf('watchdog-intent/v1')<dispatcher.indexOf("child=spawn(process.execPath"));const initialIndex=dispatcher.indexOf('const initial=');assert.ok(dispatcher.indexOf('if(!write(initial))',initialIndex)<dispatcher.indexOf('process.stdout.write',initialIndex));
+  assert.match(dispatcher,/child\.stdout\.destroy\(\)/u);assert.match(dispatcher,/child\.stderr\.destroy\(\)/u);assert.match(dispatcher,/child\.unref\(\)/u);assert.match(dispatcher,/process\.stdout\.on\('error'/u);assert.match(dispatcher,/stream\.on\('error'/u);
+  assert.match(dispatcher,/if\(!settled\)timer=setTimeout/u);
   const watchdog=/\$watchdogSource=@'\r?\n([\s\S]*?)\r?\n'@/u.exec(dispatcher)?.[1],bootstrap=requireText(path.join(import.meta.dirname,'control-exact-regression-bootstrap.cjs'));
   assert.ok(watchdog);const estimatedCommand=160+Buffer.byteLength(watchdog,'utf8')*4/3+Buffer.byteLength(bootstrap,'utf8')*4/3+1024;
   assert.ok(estimatedCommand<24576,`Node command length ${estimatedCommand} lost the 25% Windows margin`);
@@ -162,6 +166,16 @@ test('externally pinned dispatcher uses argument transport, closes stdin and exi
   assert.match(supervisor,/1_020_000/u);assert.match(supervisor,/taskkill\.exe/u);assert.match(supervisor,/stdio:\['ignore','pipe','pipe'\]/u);
   assert.doesNotMatch(entry+supervisor,/\bssh\b|Invoke-Expression|Start-Service|Stop-Service|\/v1\/chat\/completions|--test-name-pattern/u);
 });
+
+test('outer watchdog stops its child and terminates promptly when the started journal append fails',async()=>{const f=await fixture();try{
+  const dispatcher=requireText(path.join(import.meta.dirname,'Invoke-ControlExactRegression.ps1')),match=/\$watchdogSource=@'\r?\n([\s\S]*?)\r?\n'@/u.exec(dispatcher);assert.ok(match);
+  let watchdog=match[1].replace('maximumMs=1080000','maximumMs=1000').replace("||!/^C:\\\\AI\\\\RunaAI-Next-Candidate\\\\staging\\\\m1-task-native-[a-f0-9]{32}$/.test(root)",'||false');
+  assert.match(watchdog,/\|\|false/u);watchdog=watchdog.replace('const write=value=>{try{','let syntheticWrites=0;const write=value=>{try{if(++syntheticWrites===2)throw Error(\'synthetic-write\');');
+  const loader="globalThis.__RUNA_CONTROL_BOOTSTRAP__=true;eval(Buffer.from(process.argv[1],'base64').toString('utf8'))",bootstrap="setInterval(()=>{},1000)";
+  const result=spawnSync(process.execPath,['-e',loader,Buffer.from(watchdog).toString('base64'),Buffer.from(bootstrap).toString('base64'),'--owned-root',f.root],{encoding:'utf8',windowsHide:true,timeout:5000,env:process.env});
+  assert.ok([124,125].includes(result.status),result.stderr);const receipt=result.stdout.split(/\r?\n/u).filter(Boolean).map(line=>JSON.parse(line)).find(item=>item.schemaVersion==='runaai-m1-control-bootstrap-watchdog/v1');
+  assert.ok(receipt?.childProcessId>0);assert.throws(()=>process.kill(receipt.childProcessId,0));
+}finally{await f.close();}});
 
 function bootstrapTar(entries){const chunks=[];for(const[name,content,type='0']of entries){const bytes=Buffer.from(content),header=Buffer.alloc(512);
   header.write(name);header.write('0000644\0',100);header.write(bytes.length.toString(8).padStart(11,'0')+'\0',124);header[156]=type.charCodeAt(0);

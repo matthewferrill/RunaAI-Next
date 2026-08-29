@@ -39,16 +39,30 @@ try{
   $loader="globalThis.__RUNA_CONTROL_BOOTSTRAP__=true;eval(Buffer.from(process.argv[1],'base64').toString('utf8'))"
   $watchdogSource=@'
 const{spawn,spawnSync}=require('node:child_process');
+const{createHash}=require('node:crypto');
+const fs=require('node:fs');
 const path=require('node:path');
-const maximumMs=1080000,bootstrap=process.argv[2],args=process.argv.slice(3),root=args[1];
+const maximumMs=1080000,maximumBytes=131072,bootstrap=process.argv[2],args=process.argv.slice(3),root=args[1];
 if(!/^[A-Za-z0-9+/]+={0,2}$/.test(bootstrap)||args[0]!=='--owned-root'||!/^C:\\AI\\RunaAI-Next-Candidate\\staging\\m1-task-native-[a-f0-9]{32}$/.test(root)){process.stdout.write('{"errorCode":"m1-control-bootstrap-watchdog-input","productionChanged":false}\n');process.exit(125);}
 const loader="globalThis.__RUNA_CONTROL_BOOTSTRAP__=true;eval(Buffer.from(process.argv[1],'base64').toString('utf8'))";
-const child=spawn(process.execPath,['-e',loader,bootstrap,...args],{cwd:root,env:process.env,stdio:['ignore','inherit','inherit'],windowsHide:true});
-process.stdout.write(JSON.stringify({schemaVersion:'runaai-m1-control-bootstrap-watchdog/v1',watchdogProcessId:process.pid,childProcessId:child.pid,maximumMs,productionChanged:false})+'\n');
-let settled=false;const finish=code=>{if(settled)return;settled=true;clearTimeout(timer);process.exitCode=Number.isInteger(code)?code:1;};
-child.once('error',()=>finish(125));child.once('exit',code=>finish(code));
-const timer=setTimeout(()=>{if(settled)return;const taskkill=path.join(process.env.SystemRoot,'System32','taskkill.exe'),stopped=spawnSync(taskkill,['/PID',String(child.pid),'/T','/F'],{windowsHide:true,encoding:'utf8',timeout:10000,maxBuffer:1048576});
-  const confirmed=!stopped.error&&stopped.status===0;process.stdout.write(JSON.stringify({schemaVersion:'runaai-m1-control-bootstrap-watchdog-terminal/v1',errorCode:confirmed?'m1-control-bootstrap-watchdog-timeout':'m1-control-bootstrap-watchdog-stop-unconfirmed',watchdogProcessId:process.pid,childProcessId:child.pid,stopConfirmed:confirmed,productionChanged:false})+'\n');finish(confirmed?124:125);},maximumMs);
+const journal=fs.openSync(path.join(root,'CONTROL-BOOTSTRAP-WATCHDOG.jsonl'),'wx'),stdout=fs.openSync(path.join(root,'CONTROL-BOOTSTRAP-STDOUT.txt'),'wx'),stderr=fs.openSync(path.join(root,'CONTROL-BOOTSTRAP-STDERR.txt'),'wx');
+let settled=false,timer=null,stdoutBytes=0,stderrBytes=0;
+const write=value=>{try{fs.writeSync(journal,JSON.stringify(value)+'\n');fs.fsyncSync(journal);return true;}catch{return false;}};
+const close=()=>{for(const handle of[journal,stdout,stderr]){try{fs.fsyncSync(handle);}catch{}try{fs.closeSync(handle);}catch{}}};
+const authoritySha256=createHash('sha256').update(JSON.stringify([bootstrap,...args])).digest('hex');
+if(!write({schemaVersion:'runaai-m1-control-bootstrap-watchdog-intent/v1',watchdogProcessId:process.pid,childProcessId:null,authoritySha256,productionChanged:false})){close();process.exit(125);}
+let child;try{child=spawn(process.execPath,['-e',loader,bootstrap,...args],{cwd:root,env:process.env,stdio:['ignore','pipe','pipe'],windowsHide:true});}
+catch{write({schemaVersion:'runaai-m1-control-bootstrap-watchdog-terminal/v1',errorCode:'m1-control-bootstrap-watchdog-start',watchdogProcessId:process.pid,childProcessId:null,stopConfirmed:false,productionChanged:false});close();process.exit(125);}
+const finish=(code,errorCode=null,stopConfirmed=null)=>{if(settled)return;settled=true;if(timer)clearTimeout(timer);write({schemaVersion:'runaai-m1-control-bootstrap-watchdog-terminal/v1',errorCode,watchdogProcessId:process.pid,childProcessId:child.pid,stopConfirmed,stdoutBytes,stderrBytes,productionChanged:false});close();
+  try{child.stdout.destroy();}catch{}try{child.stderr.destroy();}catch{}try{child.unref();}catch{}process.exitCode=Number.isInteger(code)?code:1;};
+const stop=errorCode=>{if(settled)return;const taskkill=path.join(process.env.SystemRoot,'System32','taskkill.exe'),stopped=spawnSync(taskkill,['/PID',String(child.pid),'/T','/F'],{windowsHide:true,encoding:'utf8',timeout:10000,maxBuffer:1048576});
+  const confirmed=!stopped.error&&stopped.status===0;finish(confirmed?124:125,confirmed?errorCode:'m1-control-bootstrap-watchdog-stop-unconfirmed',confirmed);};
+const initial={schemaVersion:'runaai-m1-control-bootstrap-watchdog/v1',watchdogProcessId:process.pid,childProcessId:child.pid,maximumMs,productionChanged:false};if(!write(initial))stop('m1-control-bootstrap-watchdog-evidence-failed');
+process.stdout.on('error',()=>{});try{process.stdout.write(JSON.stringify(initial)+'\n');}catch{}
+for(const[name,stream,handle]of[['stdout',child.stdout,stdout],['stderr',child.stderr,stderr]]){stream.on('error',()=>stop('m1-control-bootstrap-watchdog-evidence-failed'));stream.on('data',chunk=>{if(settled)return;const bytes=Buffer.from(chunk);if(name==='stdout')stdoutBytes+=bytes.length;else stderrBytes+=bytes.length;
+  const total=name==='stdout'?stdoutBytes:stderrBytes,retained=Math.max(0,maximumBytes-(total-bytes.length));try{if(retained)fs.writeSync(handle,bytes.subarray(0,retained));}catch{return stop('m1-control-bootstrap-watchdog-evidence-failed');}if(total>maximumBytes)stop('m1-control-bootstrap-watchdog-output-cap');});}
+child.once('error',()=>stop('m1-control-bootstrap-watchdog-start'));child.once('close',code=>finish(code,code===0?null:'m1-control-bootstrap-child-failed',null));
+if(!settled)timer=setTimeout(()=>stop('m1-control-bootstrap-watchdog-timeout'),maximumMs);
 '@
   $watchdogBase64=[Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes($watchdogSource));if($watchdogBase64-cnotmatch'^[A-Za-z0-9+/]+={0,2}$'){throw'm1-control-dispatch-watchdog-encoding'}
   $authorityArguments=@($watchdogBase64,$bootstrapBase64,'--owned-root',$root,'--manifest',$manifest,'--manifest-sha256',$ExpectedManifestSha256,'--source-identity-sha256',$ExpectedIdentitySha256,'--source-archive-sha256',$ExpectedArchiveSha256,'--source-commit',$ExpectedSourceCommit)

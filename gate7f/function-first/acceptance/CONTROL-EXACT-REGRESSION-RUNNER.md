@@ -87,7 +87,14 @@ source is inside the externally pinned dispatcher. It spawns the bootstrap,
 retains both exact PIDs and enforces a 1,080,000-millisecond outer ceiling over
 all pre-import hashing and the bounded regression. At that ceiling it invokes
 fixed `taskkill.exe /PID <bootstrap> /T /F` with its own 10-second bound and
-records whether tree stop was confirmed. The dispatcher closes redirected stdin
+records whether tree stop was confirmed. It also creates, with `wx`, one JSONL
+receipt and bounded 131,072-byte stdout/stderr records at the stage root. A
+predispatch intent is fsynced before spawn and the exact child PID is fsynced
+before any best-effort owner output. Capture, journal or stream failure attempts
+the exact tree stop; even an unconfirmed stop destroys and unreferences inherited
+pipes so the watchdog still has a finite nonzero terminal. These records retain pre-import errors even if the owner SSH
+connection closes; a filename collision fails rather than overwriting evidence.
+The dispatcher closes redirected stdin
 without writing and exits immediately while the watchdog retains the owner
 terminal. This removes both the PowerShell child-lifetime wait and an unbounded
 anonymous-pipe write.

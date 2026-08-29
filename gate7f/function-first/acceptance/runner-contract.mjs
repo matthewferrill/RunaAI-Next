@@ -5,6 +5,10 @@ import { ACCEPTANCE_POLICY, CASE_BUNDLE_SHA256, MODEL_CASES, CONTROL_CASES } fro
 
 export const fail = code => Object.assign(new Error(code), { code });
 export const sha256 = value => createHash("sha256").update(value).digest("hex");
+const stableJson = value => JSON.stringify(Array.isArray(value) ? value.map(stableJsonValue) : stableJsonValue(value));
+const stableJsonValue = value => value && typeof value === "object" && !Array.isArray(value)
+  ? Object.fromEntries(Object.keys(value).sort().map(key => [key, stableJsonValue(value[key])]))
+  : Array.isArray(value) ? value.map(stableJsonValue) : value;
 export const OWNED_STAGE_PARENT = "C:\\AI\\RunaAI-Next-Candidate\\staging";
 export const QDRANT_PIN = Object.freeze({ version: "1.19.0", bytes: 84184576,
   sha256: "369c562eae3d89333a13abfdb522fa209e3f587c1217a1059d817e80814ea9d4" });
@@ -17,8 +21,7 @@ export function assertOwnedStage(value) {
 
 const hex = z.string().regex(/^[a-f0-9]{64}$/);
 const model = z.object({ modelId: z.string().min(1).max(200), artifactSha256: hex, artifactBytes: z.number().int().positive() }).strict();
-export const RuntimeSealSchema = z.object({
-  schemaVersion: z.literal("runaai-m1-functional-runtime-seal/v1"),
+const runtimeSealFields = {
   sourceCommit: z.string().regex(/^[a-f0-9]{40}$/), caseBundleSha256: z.literal(CASE_BUNDLE_SHA256),
   runtime: z.object({ nodeSha256: hex, sourceArchiveSha256: hex, packageLockSha256: hex,
     qdrantSha256: z.literal(QDRANT_PIN.sha256), modelRuntimeSha256: hex, modelRuntimeVersion: z.string().min(1) }).strict(),
@@ -37,13 +40,27 @@ export const RuntimeSealSchema = z.object({
     effectiveReasoningEvidenceSha256: hex, telemetryPolicySha256: hex }).strict(),
   suites: z.record(z.string(), hex), evaluatorId: z.string().min(1).max(160),
   maximumBatchMs: z.number().int().min(1000).max(3600000), productionRoutingChanged: z.literal(false),
+};
+const RuntimeSealV1Schema = z.object({ schemaVersion: z.literal("runaai-m1-functional-runtime-seal/v1"), ...runtimeSealFields }).strict();
+const RuntimeSealV2Schema = z.object({ schemaVersion: z.literal("runaai-m1-functional-runtime-seal/v2"), ...runtimeSealFields,
+  qualificationCriteria: z.object({ schemaVersion: z.literal("runaai-m1-common-qualification-criteria/v1"),
+    entries: z.array(z.object({ id: z.enum(["lease-publication-margin", "agent05-browser-checkpoint", "determinate-function-qualification"]),
+      sha256: hex, normalizedSha256: hex }).strict()).length(3), combinedSha256: hex }).strict(),
 }).strict();
+export const RuntimeSealSchema = z.union([RuntimeSealV1Schema, RuntimeSealV2Schema]);
 
 export function validateRuntimeSeal(value, { sourceCommit, candidateId } = {}) {
   const seal = RuntimeSealSchema.parse(value);
   if (new Set(seal.candidates.map(item => item.candidateId)).size !== 3
       || (sourceCommit && seal.sourceCommit !== sourceCommit)
       || (candidateId && !seal.candidates.some(item => item.candidateId === candidateId))) throw fail("m1-acceptance-seal-mismatch");
+  if (seal.schemaVersion === "runaai-m1-functional-runtime-seal/v2") {
+    const ids = seal.qualificationCriteria.entries.map(item => item.id);
+    if (new Set(ids).size !== 3 || ids.join() !== "agent05-browser-checkpoint,determinate-function-qualification,lease-publication-margin"
+        || sha256(stableJson(seal.qualificationCriteria.entries)) !== seal.qualificationCriteria.combinedSha256) {
+      throw fail("m1-acceptance-criteria-authority-invalid");
+    }
+  }
   for (const endpoint of [seal.embedding.baseUrl, seal.reranker.baseUrl]) {
     const url = new URL(endpoint);
     if (url.protocol !== "http:" || !["127.0.0.1", "192.168.50.165", "192.168.50.169"].includes(url.hostname)

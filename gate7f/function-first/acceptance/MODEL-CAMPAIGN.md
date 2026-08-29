@@ -108,3 +108,16 @@ restored power and cleanup. A hardware completion signal is never a pass claim.
 Local verification: `node --test gate7f/function-first/acceptance/run-model-campaign.test.mjs`.
 These are runner-contract unit tests with synthetic observations, not live model,
 Control database/native, browser, or functional qualification evidence.
+
+## R6 lifecycle v2
+
+V1/R5 plans and results above retain their original behavior. A v2 READY receipt
+creates a side-by-side v2 batch plan. Launch requires at least 63 of the exact
+70 READY minutes remaining. The runner refuses a new attempt when four minutes
+remain, interrupts bounded in-flight work at the three-minute boundary, retains
+all started evidence and unexecuted denominator slots, and preserves one minute
+for result settlement plus two minutes for Home completion publication. The
+maximum application batch remains 60 minutes and role/request budgets are
+unchanged. R6 requires a fresh prospective runtime seal that binds the lease,
+Agent05 browser, and determinate-function criteria; an R4b/R5 seal or v1 hardware
+plan cannot be relabeled.

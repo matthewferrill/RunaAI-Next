@@ -8,7 +8,7 @@ param(
 )
 Set-StrictMode -Version Latest
 $ErrorActionPreference='Stop'
-if($LeaseId-notmatch'^20260828-campaign-(gemma|coder|qwen36)-r[1-9][0-9]*$'-or
+if($LeaseId-notmatch'^202608(28|29)-campaign-(gemma|coder|qwen36)-r[1-9][0-9]*$'-or
   $ExpectedSeal-notmatch'^[a-f0-9]{64}$'-or$ExpectedControlSourceCommit-notmatch'^[a-f0-9]{40}$'){
   throw 'm1-mirror-pin-invalid'
 }

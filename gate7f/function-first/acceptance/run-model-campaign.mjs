@@ -13,6 +13,7 @@ import { FunctionalHttpJourney } from "./http-journey.mjs";
 import { AcceptanceFaultController, createFaultActions } from "./fault-actions.mjs";
 import { startApplicationFaultWorker } from "./fault-worker.mjs";
 import { createBrowserCheckpoint } from "./browser-checkpoint.mjs";
+import { CAMPAIGN_V2_POLICY, campaignV2Windows, validateCampaignV2Policy } from "../readiness/lease-v2-contract.mjs";
 
 const HEX = /^[a-f0-9]{64}$/u;
 const stable = value => Array.isArray(value) ? value.map(stable) : value && typeof value === "object"
@@ -54,14 +55,34 @@ export function campaignPlan({ seal, runtimeSealSha256, candidateId, controlsSha
     caseId: item.id, role: item.role, repetition: index + 1, candidateId,
     attemptId: `${candidateId}--${item.id}--${index + 1}`,
   }))).flat();
-  return { schemaVersion: "runaai-m1-candidate-batch-plan/v1", createdAt: new Date(now).toISOString(),
+  const v2 = ready.schemaVersion === "runa-m1-campaign-lease-ready/v2";
+  const windows = v2 ? campaignV2Windows({ readyAt: ready.readyAt, now }) : null;
+  if (v2 && Date.parse(ready.expiresAt) !== windows.expiresAt) throw fail("m1-campaign-home-lease-invalid");
+  if (v2 && windows.expiresAt - now < CAMPAIGN_V2_POLICY.minimumLaunchRemainingMs) throw fail("m1-campaign-launch-window-insufficient");
+  return { schemaVersion: v2 ? "runaai-m1-candidate-batch-plan/v2" : "runaai-m1-candidate-batch-plan/v1", createdAt: new Date(now).toISOString(),
     sourceCommit: seal.sourceCommit, caseBundleSha256: CASE_BUNDLE_SHA256, runtimeSealSha256, controlsSha256,
     readySha256, hardwarePlanSha256, homeLeaseId: ready.leaseId, homeLeaseSealSha256: ready.sealSha256,
     candidateId, modelId: seal.candidates.find(value => value.candidateId === candidateId).modelId,
     roster: ACCEPTANCE_POLICY.roster.map(value => value.candidateId), plannedCampaignAttempts: 360,
     plannedCandidateAttempts: 120, attempts, maximumBatchMs: Math.min(3600000, seal.maximumBatchMs),
+    ...(v2 ? { lifecycleVersion: "v2", latestLaunchAt: new Date(windows.latestLaunchAt).toISOString(),
+      dispatchStopAt: new Date(windows.dispatchStopAt).toISOString(), applicationHardStopAt: new Date(windows.applicationHardStopAt).toISOString(),
+      publicationMarginMs: CAMPAIGN_V2_POLICY.publicationMarginMs, runnerFinalizationMs: CAMPAIGN_V2_POLICY.runnerFinalizationMs,
+      completionPublicationMs: CAMPAIGN_V2_POLICY.completionPublicationMs } : {}),
     independentSemanticReviewRequired: true, humanTrialRequired: true,
     modelLifecycleOwnedExternally: true, productionChanged: false, protectedDataRead: false };
+}
+
+export function campaignExecutionWindow(plan,ready,{now=Date.now()}={}){
+  const v2=plan.lifecycleVersion==='v2',hardStopAt=v2?Date.parse(plan.applicationHardStopAt):Date.parse(ready.expiresAt);
+  const maximumMs=Math.min(plan.maximumBatchMs,hardStopAt-now);
+  if(maximumMs<1000)throw fail("m1-campaign-home-lease-expired");
+  return Object.freeze({v2,hardStopAt,maximumMs});
+}
+
+export function assertCampaignAttemptWindow(plan,{now=Date.now()}={}){
+  if(plan.lifecycleVersion==='v2'&&now>=Date.parse(plan.dispatchStopAt))throw fail("m1-campaign-publication-margin");
+  return true;
 }
 
 export function qualifiedControlSuite(report, { sourceCommit, runtimeSealSha256 }) {
@@ -85,13 +106,16 @@ export function qualifiedControlSuite(report, { sourceCommit, runtimeSealSha256 
 export function validateHomeReady(ready, hardwarePlan, { seal, candidateId, hardwarePlanSha256, now = Date.now() }) {
   const candidate = seal.candidates.find(value => value.candidateId === candidateId);
   const hardware = hardwarePlan?.candidates?.find(value => value.candidateId === candidateId);
-  if (hardwarePlan?.schemaVersion !== "runa-m1-campaign-hardware-plan/v1" || hardwarePlan.createdBeforeLoads !== true
+  const v2 = ready?.schemaVersion === "runa-m1-campaign-lease-ready/v2";
+  const supported = v2 || ready?.schemaVersion === "runa-m1-campaign-lease-ready/v1";
+  if (v2) { try { validateCampaignV2Policy(hardwarePlan?.policy); } catch { throw fail("m1-campaign-home-lease-invalid"); } }
+  if (!supported || hardwarePlan?.schemaVersion !== (v2 ? "runa-m1-campaign-hardware-plan/v2" : "runa-m1-campaign-hardware-plan/v1") || hardwarePlan.createdBeforeLoads !== true
       || hardwarePlan.maximumConcurrentPrimaries !== 1 || hardwarePlan.productionRoutingChanged !== false
       || !candidate || !hardware || hardware.artifact?.key !== candidate.modelId || hardware.artifact.sha256 !== candidate.artifactSha256
       || hardware.artifact.bytes !== candidate.artifactBytes || hardwarePlan.auxiliary?.artifact?.sha256 !== seal.embedding.artifactSha256
       || seal.residency.telemetryPolicySha256 !== hardwarePlanSha256
       || !hardwarePlan.runtimeFiles?.some(value => value.sha256 === seal.runtime.modelRuntimeSha256)
-      || ready?.schemaVersion !== "runa-m1-campaign-lease-ready/v1" || !HEX.test(ready.sealSha256 ?? "")
+      || !HEX.test(ready.sealSha256 ?? "")
       || typeof ready.leaseId !== "string" || ready.leaseId.length > 160 || !ready.leaseId.includes("-campaign-")
       || ready.campaignHardwarePlanSha256 !== hardwarePlanSha256 || ready.candidateId !== hardware.id
       || ready.modelId !== candidate.modelId || ready.primaryArtifactSha256 !== candidate.artifactSha256
@@ -99,8 +123,10 @@ export function validateHomeReady(ready, hardwarePlan, { seal, candidateId, hard
       || ![ready.primaryInstanceId, ready.embeddingInstanceId].every(value => typeof value === "string" && value.length > 0 && value.length < 201)
       || ready.primaryInstanceId === ready.embeddingInstanceId || ready.reasoningEffort !== hardware.requestReasoningEffort
       || Object.values(candidate.requestControls).some(value => value.reasoningEffort !== ready.reasoningEffort)
-      || !within(ready.readyAt, now, 3600000) || !Number.isFinite(Date.parse(ready.expiresAt)) || Date.parse(ready.expiresAt) <= now
-      || Date.parse(ready.expiresAt) - Date.parse(ready.readyAt) > 3600000) throw fail("m1-campaign-home-lease-invalid");
+      || !within(ready.readyAt, now, v2 ? CAMPAIGN_V2_POLICY.readyLeaseMs : 3600000)
+      || !Number.isFinite(Date.parse(ready.expiresAt)) || Date.parse(ready.expiresAt) <= now
+      || (v2 ? Date.parse(ready.expiresAt) - Date.parse(ready.readyAt) !== CAMPAIGN_V2_POLICY.readyLeaseMs
+        : Date.parse(ready.expiresAt) - Date.parse(ready.readyAt) > 3600000)) throw fail("m1-campaign-home-lease-invalid");
   return ready;
 }
 
@@ -307,7 +333,7 @@ export async function executeCandidateAttempts({ plan, writer, runAttempt, befor
     }
     if (signal.aborted) { stopCode = safeCode(abortError(signal)); break; }
   }
-  return { schemaVersion: "runaai-m1-candidate-batch-result/v1", candidateId: plan.candidateId,
+  return { schemaVersion: plan.lifecycleVersion === "v2" ? "runaai-m1-candidate-batch-result/v2" : "runaai-m1-candidate-batch-result/v1", candidateId: plan.candidateId,
     sourceCommit: plan.sourceCommit, runtimeSealSha256: plan.runtimeSealSha256, caseBundleSha256: CASE_BUNDLE_SHA256,
     plannedCampaignAttempts: 360, plannedCandidateAttempts: 120, recordedAttempts: records.length, attempts: records,
     notExecuted: remaining(), stopCode, denominatorChanged: false, productQualificationPassed: false,
@@ -326,8 +352,7 @@ export async function runModelCampaign(args, { checkpoint = null, getLeaseObserv
   for (const [name, value] of Object.entries(inputs.inputs)) await writer.write(`${name}.json`, value.bytes);
   await writer.write("archive-proof.json", inputs.archiveProof);
   const controller = new AbortController(), { signal } = controller;
-  const maximumMs = Math.min(plan.maximumBatchMs, Date.parse(ready.expiresAt) - Date.now());
-  if (maximumMs < 1000) throw fail("m1-campaign-home-lease-expired");
+  const {v2,maximumMs}=campaignExecutionWindow(plan,ready);
   let resources, testbed, worker, ledger = null, registryDigest = null, monitoring = false, cleanupPromise = Promise.resolve(), faults, result;
   const closedResources = new Set();
   const readLease = getLeaseObservation ?? (async () => { await regularFile(inputs.homeStatus, 2 * 1024 * 1024); return JSON.parse(await readFile(inputs.homeStatus, "utf8")); });
@@ -352,7 +377,7 @@ export async function runModelCampaign(args, { checkpoint = null, getLeaseObserv
     }
     if (failures.length) throw fail("m1-campaign-owned-cleanup-failed");
   });
-  const timer = setTimeout(() => stop("m1-campaign-deadline"), maximumMs);
+  const timer = setTimeout(() => stop(v2 ? "m1-campaign-publication-hard-stop" : "m1-campaign-deadline"), maximumMs);
   const monitor = setInterval(() => {
     if (monitoring || signal.aborted) return; monitoring = true;
     checkLease().catch(error => stop(safeCode(error))).finally(() => { monitoring = false; });
@@ -371,7 +396,8 @@ export async function runModelCampaign(args, { checkpoint = null, getLeaseObserv
     const observe = async value => { if (signal.aborted) throw abortError(signal);
       const result = needsBrowserCheckpoint(value) ? await bridge(value) : undefined;
       if (signal.aborted) throw abortError(signal); return result; };
-    result = await executeCandidateAttempts({ plan, writer, signal, announce, beforeAttempt: checkLease,
+    const beforeAttempt=async slot=>{assertCampaignAttemptWindow(plan);return checkLease(false,slot);};
+    result = await executeCandidateAttempts({ plan, writer, signal, announce, beforeAttempt,
       runAttempt: async slot => {
         ledger = new ObservationLedger(newObservation(MODEL_CASES.find(value => value.id === slot.caseId), { ...slot, runtimeSealSha256: plan.runtimeSealSha256 }));
         ledger.observation.sourceCommit = plan.sourceCommit;
@@ -422,7 +448,7 @@ export async function runModelCampaign(args, { checkpoint = null, getLeaseObserv
         return { observation: ledger.observation, grade, unresolved: reduction.unresolved };
       } });
   } catch (error) {
-    result = { schemaVersion: "runaai-m1-candidate-batch-error/v1", sourceCommit: plan.sourceCommit,
+    result = { schemaVersion: v2 ? "runaai-m1-candidate-batch-error/v2" : "runaai-m1-candidate-batch-error/v1", sourceCommit: plan.sourceCommit,
       runtimeSealSha256: plan.runtimeSealSha256, candidateId: plan.candidateId, errorCode: safeCode(error),
       plannedCampaignAttempts: 360, plannedCandidateAttempts: 120, productQualificationPassed: false,
       preserveAllStartedMarkersAndExports: true, productionChanged: false, protectedDataRead: false };

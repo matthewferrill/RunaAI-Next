@@ -43,3 +43,12 @@ The completed short smokes prove this lifecycle at short duration, not sustained
 Failures during the longer campaign remain failures in the fixed denominator; do not raise cutoffs
 or replace a failed result with a retry. The new campaign profile cannot be selected by changing only
 an old smoke ID, schema or duration: profile validation requires the exact frozen policy.
+
+## R6 lifecycle v2
+
+The text above records the v1/R5 60/70/74-minute operator and is not rewritten.
+Prospective R6 uses `campaign-hardware-plan/v2`: 10 minutes preparation, 70 minutes
+READY, 2 minutes owned cleanup, an 82-minute worker ceiling, and 4 minutes
+independent recovery for an 86-minute supervisor/task ceiling. The application
+batch remains 60 minutes. See `R6-CAMPAIGN-LIFECYCLE.md` for the exact launch and
+publication cutoffs. A fresh v2 plan and R6 runtime seal are mandatory.

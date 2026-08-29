@@ -29,3 +29,13 @@ do not claim publication occurred or retry the same command. Before a new explic
 the independently tested short hash-bound stdin bootstrap, cap the wrapped command below6500characters,
 and keep the writer bytes, four-field marker, ownership checks and no-overwrite semantics identical.
 Prove the Home UTF8 transport read-only first. Neither the source/model campaign nor lease is resealed.
+
+## R6 lifecycle v2
+
+The historical v1 publisher and receipts above remain unchanged. The prospective
+v2 writer publishes only `runa-m1-campaign-completion/v2`, binds a v2 READY receipt
+whose expiry is exactly 70 minutes after its captured READY time, and refuses a
+marker at or after expiry. R6 reserves the final three READY minutes: one minute
+for application-result settlement and two minutes for this atomic publication.
+The marker remains four-field, create-only, flushed and same-volume published;
+late or uncertain publication is retained as failure and is never replayed.

@@ -73,6 +73,7 @@ export async function createOwnedControlResources({ root: suppliedRoot, maximumM
     if (!preflight.ready) throw fail("m1-native-preflight-unavailable");
     const pgPort = await freePort(), qPort = await freePort(), qGrpcPort = await freePort();
     if (new Set([pgPort, qPort, qGrpcPort]).size !== 3) throw fail("m1-owned-port-race");
+    report.ports = { postgres: pgPort, qdrantHttp: qPort, qdrantGrpc: qGrpcPort };
     run(path.join(pgBin, "initdb.exe"), ["-D", pgData, "-U", "m1_synthetic", "--auth-local=trust", "--auth-host=trust", "--encoding=UTF8", "--no-locale"]);
     run(path.join(pgBin, "pg_ctl.exe"), ["-D", pgData, "-l", path.join(root, "disposable-postgres.log"), "-o", `-p ${pgPort} -h 127.0.0.1`, "start", "-w"], { stdio: "ignore" }); postgresRunning = true;
     qdrant = spawn(qdrantExecutable, ["--disable-telemetry"], { cwd: qRoot, windowsHide: true, stdio: ["ignore", "pipe", "pipe"],
@@ -94,7 +95,6 @@ export async function createOwnedControlResources({ root: suppliedRoot, maximumM
     report.qdrantReady = ready; report.qdrantLogs = logs.join("");
     if (!ready) throw fail("m1-owned-qdrant-unavailable");
     pool = new pg.Pool({ connectionString: `postgresql://m1_synthetic@127.0.0.1:${pgPort}/postgres`, connectionTimeoutMillis: 2000, max: 12 });
-    report.ports = { postgres: pgPort, qdrantHttp: qPort, qdrantGrpc: qGrpcPort };
     return { root, executor, pool, qdrantEndpoint: endpoint, dataDirectory, report, close,
       workerResources: { root, postgresPort: pgPort, dataDirectory,
         native: { runtimeRoot, runnerPath: path.join(runtimeRoot, "quickjs-child.mjs"), nodeExecutable, temporaryRoot: transient } } };

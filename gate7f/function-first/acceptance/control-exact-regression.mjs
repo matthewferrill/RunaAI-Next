@@ -171,20 +171,21 @@ export async function runVerifiedControlRegression({verified,createResources=cre
     dependencyArtifactDigest:verified.dependencyProof.artifactDigest,dependencyFiles:verified.dependencyProof.fileCount,nodeSha256:manifest.dependencies.nodeSha256,
     qdrantSha256:manifest.qdrant.sha256,postgresSha256:verified.postgres,quickjsVersion:verified.versions.quickjs,mxcVersion:verified.versions.mxc,
     modelsInvoked:false,protectedDataRead:false,productionChanged:false};
-  const inputReceipt=await writeExclusive(path.join(outputDirectory,'input-proof.json'),inputProof);let resources=null,testOutcome=null,errorCode=null,closeReceipt=null;
+  const inputReceipt=await writeExclusive(path.join(outputDirectory,'input-proof.json'),inputProof);let resources=null,resourceFailureReport=null,testOutcome=null,errorCode=null,closeReceipt=null;
   try{
     resources=await createResources({root,maximumMs:manifest.execution.maximumMs});
     demand(resources.report?.nativePreflight?.ready===true,'native-preflight');
     const environment=controlRegressionEnvironment(process.env,resources,root);
     testOutcome=await executeTests({root,nodeExecutable:verified.nodeExecutable,environment,outputDirectory,maximumMs:manifest.execution.maximumMs});
     if(!testOutcome.passed)errorCode=testOutcome.failureCode??'m1-control-regression-tests-failed';
-  }catch(error){errorCode=error.code??'m1-control-regression-run-failed';}
+  }catch(error){resourceFailureReport=error.resourceReport??null;errorCode=error.code??'m1-control-regression-run-failed';}
   try{closeReceipt=await resources?.close()??null;}catch(error){errorCode??=error.code??'m1-control-regression-cleanup-failed';}
-  const ports=resources?.report?.ports??{};let cleanup;
-  try{cleanup=await probeCleanup(root,{postgres:ports.postgres,qdrantHttp:ports.qdrantHttp,qdrantGrpc:ports.qdrantGrpc});}
+  const ports=resources?.report?.ports??resourceFailureReport?.ports??{},cleanupPorts=Object.fromEntries(
+    [['postgres',ports.postgres],['qdrantHttp',ports.qdrantHttp],['qdrantGrpc',ports.qdrantGrpc]].filter(([,port])=>Number.isInteger(port)));let cleanup;
+  try{cleanup=await probeCleanup(root,cleanupPorts);}
   catch(error){errorCode??=error.code??'m1-control-regression-cleanup-probe-failed';cleanup={schemaVersion:'runaai-m1-control-regression-cleanup/v1',
     errorCode:error.code??'cleanup-probe-failed',sourceAndEvidenceRetained:true,productionChanged:false,protectedDataRead:false,modelsInvoked:false,passed:false};}
-  const cleanupRecord={...cleanup,resourceCloseReceipt:closeReceipt,resourceReport:resources?.report??null};
+  const cleanupRecord={...cleanup,resourceCloseReceipt:closeReceipt,resourceReport:resources?.report??resourceFailureReport};
   const cleanupReceipt=await writeExclusive(path.join(outputDirectory,'cleanup.json'),cleanupRecord);
   const tapPath=path.join(outputDirectory,'tests.tap'),stderrPath=path.join(outputDirectory,'tests.stderr.txt');
   const logs={tap:await retainedFile(tapPath),stderr:await retainedFile(stderrPath)};

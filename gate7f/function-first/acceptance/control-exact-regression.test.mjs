@@ -78,15 +78,26 @@ test('verified regression writes create-only complete success and cleanup eviden
   await assert.rejects(runVerifiedControlRegression({verified:verified(f.root),createResources:async()=>resources(f.root),probeCleanup:async()=>clean()}));
 }finally{await f.close();}});
 
-test('skips, resource failure and cleanup uncertainty are retained but never passed',async()=>{for(const mode of ['skip','resource','cleanup']){const f=await fixture();try{
-  const result=await runVerifiedControlRegression({verified:verified(f.root),createResources:async()=>{if(mode==='resource')throw Object.assign(Error('no'),{code:'resource-failed'});return resources(f.root);},
+test('skips, partial resource failure and cleanup uncertainty are retained but never passed',async()=>{for(const mode of ['skip','resource','cleanup']){const f=await fixture();try{
+  const failurePorts={postgres:41011,qdrantHttp:41012,qdrantGrpc:41013};
+  const failureReport={nativePreflight:{ready:true},ports:failurePorts,productionChanged:false},observedPorts=[];
+  const result=await runVerifiedControlRegression({verified:verified(f.root),createResources:async()=>{if(mode==='resource')throw Object.assign(Error('no'),{code:'resource-failed',resourceReport:failureReport});return resources(f.root);},
     executeTests:async input=>{const text=tap({tests:2,pass:1,skipped:1});await writeFile(path.join(input.outputDirectory,'tests.tap'),text,{flag:'wx'});
       await writeFile(path.join(input.outputDirectory,'tests.stderr.txt'),'retained',{flag:'wx'});return {exitCode:0,signal:null,deadlineExpired:false,captureError:null,
         counts:parseTapSummary(text),passed:false,command:['node.exe',...CONTROL_REGRESSION_FIXED.testArguments]};},
-    probeCleanup:async()=>mode==='cleanup'?{...clean(),passed:false}:clean()});
+    probeCleanup:async(_root,ports)=>{observedPorts.push(ports);return mode==='cleanup'?{...clean(),passed:false}:clean();}});
   assert.equal(result.passed,false);assert.equal(result.modelsInvoked,false);assert.equal(result.productionChanged,false);assert.ok(await readFile(path.join(f.root,result.evidenceDirectory,'cleanup.json')));
   assert.ok(await readFile(path.join(f.root,result.evidenceDirectory,'result.json')));
+  if(mode==='resource'){const retained=JSON.parse(await readFile(path.join(f.root,result.evidenceDirectory,'cleanup.json'),'utf8'));
+    assert.deepEqual(retained.resourceReport,failureReport);assert.deepEqual(observedPorts,[failurePorts]);}
 }finally{await f.close();}}});
+
+test('owned resources record all selected ports before any PostgreSQL or Qdrant start can fail',()=>{
+  const source=requireText(path.join(import.meta.dirname,'owned-control-resources.mjs'));
+  const assigned=source.indexOf('report.ports = { postgres: pgPort, qdrantHttp: qPort, qdrantGrpc: qGrpcPort }');
+  assert.ok(assigned>source.indexOf('new Set([pgPort, qPort, qGrpcPort])'));
+  assert.ok(assigned<source.indexOf('pgBin, "initdb.exe"'));assert.ok(assigned<source.indexOf('qdrant = spawn'));
+});
 
 test('actual Node test child runs the complete discovered root serially and zero skips is mandatory',async()=>{for(const skipped of [false,true]){const f=await fixture();try{
   const output=path.join(f.root,'output');await mkdir(output);await writeFile(path.join(f.root,'one.test.mjs'),
@@ -129,6 +140,7 @@ test('owner PowerShell entry point parses in Windows PowerShell 5 and contains n
   assert.equal(parsed.status,0,parsed.stderr);assert.match(text,/RUNA-CONTROL\\Matthew/u);assert.match(text,/control-exact-regression-owner\.mjs/u);
   assert.match(text,/GetEnvironmentVariables\('Process'\)/u);assert.match(text,/SetEnvironmentVariable/u);assert.match(text,/\$safeNames/u);
   assert.match(text,/GetEnvironmentVariable\(\$name,'Process'\)/u);assert.doesNotMatch(text,/\$originalEnvironment\[\$name\]/u);
+  assert.match(text,/exit \$childExitCode/u);assert.doesNotMatch(text,/throw'm1-control-regression-run-failed'/u);
   assert.doesNotMatch(text+supervisor,/OPENAI|LMSTUDIO|RUNAAI_PROVIDER|M1_TASK_PG_URL/u);
   assert.doesNotMatch(text,/ReadToEndAsync|ReadToEnd\(|ProcessStartInfo|\.Kill\(/u);
   assert.match(supervisor,/1_020_000/u);assert.match(supervisor,/taskkill\.exe/u);assert.match(supervisor,/stdio:\['ignore','pipe','pipe'\]/u);

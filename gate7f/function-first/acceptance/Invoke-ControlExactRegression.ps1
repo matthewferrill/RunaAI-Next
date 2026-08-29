@@ -41,4 +41,4 @@ try{
   foreach($name in @([Environment]::GetEnvironmentVariables('Process').Keys)){[Environment]::SetEnvironmentVariable([string]$name,$null,'Process')}
   foreach($entry in $originalEnvironment.GetEnumerator()){[Environment]::SetEnvironmentVariable([string]$entry.Key,[string]$entry.Value,'Process')}
 }
-if($childExitCode-ne0){throw'm1-control-regression-run-failed'}
+if($childExitCode-ne0){exit $childExitCode}

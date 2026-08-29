@@ -18,10 +18,10 @@ node --test gate7f/function-first/acceptance/control-exact-regression.test.mjs
 ```
 
 Result before the real-host correction: 11 tests passed, 0 failed, 0 cancelled,
-0 skipped and 0 todo. The hardened supervisor adds three focused regressions:
+0 skipped and 0 todo. The hardened supervisor and resource failure path add four focused regressions:
 safe-only inherited environment, concurrent dual-stream overflow and complete
-descendant-tree stop. The corrected focused result is 14 passed with zero fail,
-cancel, skip or todo.
+descendant-tree stop, plus partial-start port retention. The corrected focused
+result is 15 passed with zero fail, cancel, skip or todo.
 
 The tests cover strict prospective manifest/pin validation; refusal of override
 surfaces; exact unfiltered serial Node arguments; environment allowlisting;
@@ -36,11 +36,11 @@ test fixture inherited Node's recursive-test marker. The timer is now cleared
 on every outcome, while the production allowlisted environment already excludes
 that marker. The corrected focused suite is the result recorded above.
 
-The combined new-runner and established acceptance-runner suites passed 32/32
+The combined new-runner and established acceptance-runner suites passed 33/33
 with zero skips. `npm run verify:roadmap` also passed all 15 roadmap checks, and
 `git diff --check` reported no whitespace error.
 
-The complete corrected local Windows suite then passed 1,681 of 1,746 tests with
+The complete corrected local Windows suite then passed 1,682 of 1,747 tests with
 zero failures, cancellations or todo and 65 expected absent-host integration
 skips. Those skips are not accepted as qualification; the exact Control runner
 requires the same source to execute with zero skips.
@@ -65,6 +65,16 @@ installed-release files in12.103 seconds, so release hashing was not the delay.
 The precise original noncompletion cause remains unproven and is not recorded as
 an RCA.
 
+A second fresh-stage attempt on corrected source `396937fc4af8ce8b2a1ea3f607cb8fca8d295665`
+showed the actual post-child condition. The core failed closed with
+`m1-native-preflight-unavailable` before tests; the PowerShell wrapper then
+noncompleted while translating that already-safe nonzero exit into a new thrown
+error. Direct bounded-supervisor execution retained the failed result. A later
+disposable preflight on the disqualified stage passed and cleaned itself, so the
+first native failure is treated as transient, not silently reclassified as a
+pass. The old result lacked the preflight receipt because the runner discarded
+`error.resourceReport` when resource creation failed.
+
 The hardened correction removes redirected child-process handling from Windows
 PowerShell. A fixed Node supervisor concurrently drains both streams with a
 65,536-byte cap, enforces the1,020-second whole-run deadline, and uses the exact
@@ -76,6 +86,14 @@ fixed supervisor and restores its own environment afterward. Actual subprocess r
 stream overflow to stop without deadlock and a timed-out child plus descendant
 to be absent afterward. A new source archive, stage and prospective run are
 required for the real qualification.
+
+The wrapper now propagates the supervisor's nonzero exit directly after restoring
+its environment instead of throwing a second error. The core also retains a
+resource-creation failure report and probes only ports that were actually
+allocated, so a future preflight failure records its safe receipt and truthful
+cleanup state without hanging or inventing absent ports.
+Selected ports are recorded before PostgreSQL initialization or Qdrant start,
+so a later partial-start failure also probes every possibly bound port.
 
 The next execution must create a fresh exact stage and prospective manifest for
 the final selected source, then run the fixed PowerShell entry point on Control.

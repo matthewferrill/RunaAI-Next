@@ -1,0 +1,36 @@
+{
+  "schemaVersion": "runaai-m1-task-regression/v1",
+  "recordedAt": "2026-08-29T00:46:36.330Z",
+  "counts": {
+    "tests": 70,
+    "pass": 70,
+    "fail": 0,
+    "skipped": 0,
+    "cancelled": 0
+  },
+  "passed": true,
+  "exitCode": 0,
+  "sourceUnchanged": true,
+  "sourceSha256": {
+    "gate7f/function-first/planner.mjs": "75bb2d3defb53af1bce57cda419e06e438116ebe6637095c4f31d77afff4e322",
+    "gate7f/function-first/planner-progress.mjs": "fba8a79a6b5ba6da08e681d380e0530bdeee00262108d412f76d2fec48ace8c9",
+    "gate7f/function-first/tasks/orchestrator.mjs": "c75cf58d6892214e31cc116ea0d4f3c518d30a4d27b70a87d0b2c0d480a38767",
+    "gate7f/function-first/tasks/service.mjs": "42abb73bb2ebf6c3f89f41bb4b38bc67547f70346c4c5a530372484e94059a60",
+    "gate7f/function-first/tasks/contracts.test.mjs": "959a6dc2647902645eccad22256c1e6f2d99ca80b70d572c1e425343612e1a18",
+    "gate7f/function-first/tasks/postgres.test.mjs": "c10303ec7a4c81fd0d55874c0d2bc485984a6752c9dbd414a7d097d10463ef45",
+    "gate7f/function-first/tasks/orchestrator.test.mjs": "fcd81731a0deaa99d81a3d789276049d5e7b99e56b96af01e9683b684f5de557",
+    "gate7f/function-first/tasks/pending-authority.test.mjs": "a65e9a8e2efdcb9e1712ab0990319d1a4d644108a028c5d9ceb5b67f5bdc1041"
+  },
+  "stdoutSha256": "0077d596049aa8517525da3ff0b20045d3adef52b30b49939fbec24fa651ca45",
+  "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "cleanup": {
+    "stopped": true,
+    "ownedSyntheticDataRemoved": true,
+    "productionChanged": false
+  },
+  "realPostgres": true,
+  "model": "deterministic-fixture",
+  "executor": "deterministic-fixture-not-native-execution",
+  "evidenceDirectory": "D:\\AI\\CodexHome\\visualizations\\2026\\08\\20\\01a02109-d801-7c71-a69e-511f1ddd5278\\runaai-next-gate7e\\artifacts\\exact-task-1738aff-git\\artifacts\\runs\\m1-task-regression-eEG4DZ",
+  "productionChanged": false
+}

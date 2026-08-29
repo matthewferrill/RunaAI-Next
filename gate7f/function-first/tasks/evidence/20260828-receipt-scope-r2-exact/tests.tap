@@ -1,0 +1,430 @@
+TAP version 13
+# Subtest: context is an exact server-derived identity tuple, not a verified flag
+ok 1 - context is an exact server-derived identity tuple, not a verified flag
+  ---
+  duration_ms: 3.6063
+  type: 'test'
+  ...
+# Subtest: proposal rejects an authority field, unknown executor, forged reference and unbounded path
+ok 2 - proposal rejects an authority field, unknown executor, forged reference and unbounded path
+  ---
+  duration_ms: 3.5459
+  type: 'test'
+  ...
+# Subtest: new capability sets cannot inherit an old grant
+ok 3 - new capability sets cannot inherit an old grant
+  ---
+  duration_ms: 1.2974
+  type: 'test'
+  ...
+# Subtest: all initial profile decisions are application-owned
+ok 4 - all initial profile decisions are application-owned
+  ---
+  duration_ms: 0.1418
+  type: 'test'
+  ...
+# Subtest: path, suite and owned-restore limits are enforced independently
+ok 5 - path, suite and owned-restore limits are enforced independently
+  ---
+  duration_ms: 0.2392
+  type: 'test'
+  ...
+# Subtest: proposal/receipt digests ignore delivery state, never exact work or output
+ok 6 - proposal/receipt digests ignore delivery state, never exact work or output
+  ---
+  duration_ms: 0.4347
+  type: 'test'
+  ...
+# Subtest: conversational safe-auto plans, edits, observes actual service receipt, and completes without approval bypass
+ok 7 - conversational safe-auto plans, edits, observes actual service receipt, and completes without approval bypass
+  ---
+  duration_ms: 567.8234
+  type: 'test'
+  ...
+# Subtest: ask-profile pauses each effect and survives orchestrator replacement after exact approval
+ok 8 - ask-profile pauses each effect and survives orchestrator replacement after exact approval
+  ---
+  duration_ms: 548.835
+  type: 'test'
+  ...
+# Subtest: durable run preserves the planner role across restart and rejects role substitution
+ok 9 - durable run preserves the planner role across restart and rejects role substitution
+  ---
+  duration_ms: 253.7027
+  type: 'test'
+  ...
+# Subtest: a stale pending edit is durably stopped on resume without approval
+ok 10 - a stale pending edit is durably stopped on resume without approval
+  ---
+  duration_ms: 359.1674
+  type: 'test'
+  ...
+# Subtest: a stale pending edit is durably stopped on approval then resume
+ok 11 - a stale pending edit is durably stopped on approval then resume
+  ---
+  duration_ms: 352.4833
+  type: 'test'
+  ...
+# Subtest: revoked pending authority fails on resume instead of waiting for an impossible approval
+ok 12 - revoked pending authority fails on resume instead of waiting for an impossible approval
+  ---
+  duration_ms: 269.0607
+  type: 'test'
+  ...
+# Subtest: one bounded repair is based on a real failed test receipt and fresh immutable snapshot
+ok 13 - one bounded repair is based on a real failed test receipt and fresh immutable snapshot
+  ---
+  duration_ms: 558.8643
+  type: 'test'
+  ...
+# Subtest: repeated failed tests stop at the repair budget instead of forming an unbounded agent loop
+ok 14 - repeated failed tests stop at the repair budget instead of forming an unbounded agent loop
+  ---
+  duration_ms: 563.9107
+  type: 'test'
+  ...
+# Subtest: planner output cannot add approval, runtime paths, shell execution or a fake completed receipt
+ok 15 - planner output cannot add approval, runtime paths, shell execution or a fake completed receipt
+  ---
+  duration_ms: 857.7616
+  type: 'test'
+  ...
+# Subtest: read-only denies an effect even when a planner disregards the supplied allowed capability list
+ok 16 - read-only denies an effect even when a planner disregards the supplied allowed capability list
+  ---
+  duration_ms: 220.988
+  type: 'test'
+  ...
+# Subtest: revocation before resumed approval blocks effects; a different participant cannot inspect a run
+ok 17 - revocation before resumed approval blocks effects; a different participant cannot inspect a run
+  ---
+  duration_ms: 261.7354
+  type: 'test'
+  ...
+# Subtest: uncertain test result pauses durable orchestration and does not repeat the process
+ok 18 - uncertain test result pauses durable orchestration and does not repeat the process
+  ---
+  duration_ms: 472.3017
+  type: 'test'
+  ...
+# Subtest: planner deadline aborts advisory work and authorizes no effect
+ok 19 - planner deadline aborts advisory work and authorizes no effect
+  ---
+  duration_ms: 204.5112
+  type: 'test'
+  ...
+# Subtest: encrypted plans survive listing/reload without plaintext source or summary in raw runs
+ok 20 - encrypted plans survive listing/reload without plaintext source or summary in raw runs
+  ---
+  duration_ms: 423.8561
+  type: 'test'
+  ...
+# Subtest: explicit new-session grant continuation invalidates old approvals and plans fresh
+ok 21 - explicit new-session grant continuation invalidates old approvals and plans fresh
+  ---
+  duration_ms: 457.8712
+  type: 'test'
+  ...
+# Subtest: replacement planner never receives a restore receipt whose affected paths exceed its narrowed grant
+ok 22 - replacement planner never receives a restore receipt whose affected paths exceed its narrowed grant
+  ---
+  duration_ms: 303.0195
+  type: 'test'
+  ...
+# Subtest: an unknown old test outcome blocks replacement-grant continuation
+ok 23 - an unknown old test outcome blocks replacement-grant continuation
+  ---
+  duration_ms: 397.2501
+  type: 'test'
+  ...
+# Subtest: logout between conversational steps prevents every following effect
+ok 24 - logout between conversational steps prevents every following effect
+  ---
+  duration_ms: 356.4369
+  type: 'test'
+  ...
+# Subtest: planner receives only grant-selected file contents and no opaque full reference
+ok 25 - planner receives only grant-selected file contents and no opaque full reference
+  ---
+  duration_ms: 336.0883
+  type: 'test'
+  ...
+# Subtest: actual planner receives durable failed-test progress before the sole permitted repair
+ok 26 - actual planner receives durable failed-test progress before the sole permitted repair
+  ---
+  duration_ms: 512.2498
+  type: 'test'
+  ...
+# Subtest: actual planner cannot gain a third attempt by disregarding the repair progress
+ok 27 - actual planner cannot gain a third attempt by disregarding the repair progress
+  ---
+  duration_ms: 381.8975
+  type: 'test'
+  ...
+# Subtest: code planner protocol keeps preview-only separate from actual effect authority
+ok 28 - code planner protocol keeps preview-only separate from actual effect authority
+  ---
+  duration_ms: 429.9171
+  type: 'test'
+  ...
+# Subtest: code planner protocol keeps approval-sequence separate from actual effect authority
+ok 29 - code planner protocol keeps approval-sequence separate from actual effect authority
+  ---
+  duration_ms: 511.2951
+  type: 'test'
+  ...
+# Subtest: code planner protocol keeps read-only separate from actual effect authority
+ok 30 - code planner protocol keeps read-only separate from actual effect authority
+  ---
+  duration_ms: 353.8385
+  type: 'test'
+  ...
+# Subtest: code planner protocol keeps explain-only separate from actual effect authority
+ok 31 - code planner protocol keeps explain-only separate from actual effect authority
+  ---
+  duration_ms: 370.0968
+  type: 'test'
+  ...
+# Subtest: agent planner protocol keeps preview-only separate from actual effect authority
+ok 32 - agent planner protocol keeps preview-only separate from actual effect authority
+  ---
+  duration_ms: 335.3331
+  type: 'test'
+  ...
+# Subtest: agent planner protocol keeps approval-sequence separate from actual effect authority
+ok 33 - agent planner protocol keeps approval-sequence separate from actual effect authority
+  ---
+  duration_ms: 509.2349
+  type: 'test'
+  ...
+# Subtest: agent planner protocol keeps read-only separate from actual effect authority
+ok 34 - agent planner protocol keeps read-only separate from actual effect authority
+  ---
+  duration_ms: 327.1448
+  type: 'test'
+  ...
+# Subtest: agent planner protocol keeps explain-only separate from actual effect authority
+ok 35 - agent planner protocol keeps explain-only separate from actual effect authority
+  ---
+  duration_ms: 336.508
+  type: 'test'
+  ...
+# Subtest: whole-plan preflight rejects invented references before any new action
+ok 36 - whole-plan preflight rejects invented references before any new action
+  ---
+  duration_ms: 210.2694
+  type: 'test'
+  ...
+# Subtest: whole-plan preflight rejects foreign references before any new action
+ok 37 - whole-plan preflight rejects foreign references before any new action
+  ---
+  duration_ms: 234.5851
+  type: 'test'
+  ...
+# Subtest: whole-plan preflight rejects stale references before any new action
+ok 38 - whole-plan preflight rejects stale references before any new action
+  ---
+  duration_ms: 266.2442
+  type: 'test'
+  ...
+# Subtest: whole-plan preflight rejects future-invalidated references before any new action
+ok 39 - whole-plan preflight rejects future-invalidated references before any new action
+  ---
+  duration_ms: 309.7336
+  type: 'test'
+  ...
+# Subtest: whole-plan preflight rejects out-of-path references before any new action
+ok 40 - whole-plan preflight rejects out-of-path references before any new action
+  ---
+  duration_ms: 216.4883
+  type: 'test'
+  ...
+# Subtest: whole-plan preflight rejects out-of-suite references before any new action
+ok 41 - whole-plan preflight rejects out-of-suite references before any new action
+  ---
+  duration_ms: 221.6303
+  type: 'test'
+  ...
+# Subtest: valid supplied current restore still requires exact approval and restores only its owned revision
+ok 42 - valid supplied current restore still requires exact approval and restores only its owned revision
+  ---
+  duration_ms: 419.8416
+  type: 'test'
+  ...
+# Subtest: a project change during planning rejects the stale whole plan before dispatch
+ok 43 - a project change during planning rejects the stale whole plan before dispatch
+  ---
+  duration_ms: 223.9681
+  type: 'test'
+  ...
+# Subtest: corrupt prior receipt cannot become a valid restore plan or create an effect
+ok 44 - corrupt prior receipt cannot become a valid restore plan or create an effect
+  ---
+  duration_ms: 172.3882
+  type: 'test'
+  ...
+# Subtest: stale pending authority is durably invalidated before returning the rejection
+ok 45 - stale pending authority is durably invalidated before returning the rejection
+  ---
+  duration_ms: 6.2209
+  type: 'test'
+  ...
+# Subtest: approval commits a stale rejection without creating an approval
+ok 46 - approval commits a stale rejection without creating an approval
+  ---
+  duration_ms: 0.9346
+  type: 'test'
+  ...
+# Subtest: revoked and expired undispatched grants retain their precise denial
+ok 47 - revoked and expired undispatched grants retain their precise denial
+  ---
+  duration_ms: 1.5255
+  type: 'test'
+  ...
+# Subtest: wrong sessions, malformed digests, unavailable authority and storage errors cannot invalidate a proposal
+ok 48 - wrong sessions, malformed digests, unavailable authority and storage errors cannot invalidate a proposal
+  ---
+  duration_ms: 1.9864
+  type: 'test'
+  ...
+# Subtest: existing intents and terminal outcomes never become a never-dispatched denial
+ok 49 - existing intents and terminal outcomes never become a never-dispatched denial
+  ---
+  duration_ms: 1.1731
+  type: 'test'
+  ...
+# Subtest: valid pending authority stays pending and still requires its exact approval
+ok 50 - valid pending authority stays pending and still requires its exact approval
+  ---
+  duration_ms: 0.8498
+  type: 'test'
+  ...
+# Subtest: real PG: safe-auto publication atomically advances pointer, receipt and outbox once
+ok 51 - real PG: safe-auto publication atomically advances pointer, receipt and outbox once
+  ---
+  duration_ms: 209.6182
+  type: 'test'
+  ...
+# Subtest: real PG: scoped idempotency rejects changed requests and foreign identities
+ok 52 - real PG: scoped idempotency rejects changed requests and foreign identities
+  ---
+  duration_ms: 131.4605
+  type: 'test'
+  ...
+# Subtest: real PG: ask profile requires exact application approval; read-only cannot execute
+ok 53 - real PG: ask profile requires exact application approval; read-only cannot execute
+  ---
+  duration_ms: 186.5601
+  type: 'test'
+  ...
+# Subtest: real PG: same-session reload retains exact pending approval; a new login, expiry and revocation do not
+ok 54 - real PG: same-session reload retains exact pending approval; a new login, expiry and revocation do not
+  ---
+  duration_ms: 132.1333
+  type: 'test'
+  ...
+# Subtest: real PG: stale project proposals and cancelled tasks are not offered for approval
+ok 55 - real PG: stale project proposals and cancelled tasks are not offered for approval
+  ---
+  duration_ms: 211.7514
+  type: 'test'
+  ...
+# Subtest: real PG: effect-time revocation, expiry and stale project state fail closed
+ok 56 - real PG: effect-time revocation, expiry and stale project state fail closed
+  ---
+  duration_ms: 224.4284
+  type: 'test'
+  ...
+# Subtest: real PG: revoke after intent but before dispatch does not materialize
+ok 57 - real PG: revoke after intent but before dispatch does not materialize
+  ---
+  duration_ms: 175.4609
+  type: 'test'
+  ...
+# Subtest: real PG: two concurrent dispatchers do not execute the same proposal twice
+ok 58 - real PG: two concurrent dispatchers do not execute the same proposal twice
+  ---
+  duration_ms: 177.8242
+  type: 'test'
+  ...
+# Subtest: real PG: failed publication commit leaves pointer unchanged, then reconciles without repeating staging
+ok 59 - real PG: failed publication commit leaves pointer unchanged, then reconciles without repeating staging
+  ---
+  duration_ms: 191.8548
+  type: 'test'
+  ...
+# Subtest: real PG: lost acknowledgement replays durable receipt even after cancellation
+ok 60 - real PG: lost acknowledgement replays durable receipt even after cancellation
+  ---
+  duration_ms: 178.6129
+  type: 'test'
+  ...
+# Subtest: real PG: unknown test outcome is not inferred or blindly rerun
+ok 61 - real PG: unknown test outcome is not inferred or blindly rerun
+  ---
+  duration_ms: 171.058
+  type: 'test'
+  ...
+# Subtest: real PG: cancellation drains an already-started bounded test and preserves its actual result
+ok 62 - real PG: cancellation drains an already-started bounded test and preserves its actual result
+  ---
+  duration_ms: 174.2866
+  type: 'test'
+  ...
+# Subtest: real PG: cancel after staging preserves the original pointer and never publishes
+ok 63 - real PG: cancel after staging preserves the original pointer and never publishes
+  ---
+  duration_ms: 164.8798
+  type: 'test'
+  ...
+# Subtest: real PG: restore is scoped to an exact owned forward receipt and preserves versions
+ok 64 - real PG: restore is scoped to an exact owned forward receipt and preserves versions
+  ---
+  duration_ms: 194.9386
+  type: 'test'
+  ...
+# Subtest: real PG/LangGraph: a fresh process resumes an actual checkpoint without invoking the executor
+ok 65 - real PG/LangGraph: a fresh process resumes an actual checkpoint without invoking the executor
+  ---
+  duration_ms: 1302.4001
+  type: 'test'
+  ...
+# Subtest: encrypted PG roundtrip and fresh-process checkpoint resume do not retain source canaries in raw rows
+ok 66 - encrypted PG roundtrip and fresh-process checkpoint resume do not retain source canaries in raw rows
+  ---
+  duration_ms: 1298.0963
+  type: 'test'
+  ...
+# Subtest: encrypted records reject same-kind record swaps and foreign-project envelope substitution
+ok 67 - encrypted records reject same-kind record swaps and foreign-project envelope substitution
+  ---
+  duration_ms: 105.2479
+  type: 'test'
+  ...
+# Subtest: session logout after intent and before dispatch prevents the executor
+ok 68 - session logout after intent and before dispatch prevents the executor
+  ---
+  duration_ms: 144.0229
+  type: 'test'
+  ...
+# Subtest: session logout after staging prevents logical revision publication
+ok 69 - session logout after staging prevents logical revision publication
+  ---
+  duration_ms: 168.0459
+  type: 'test'
+  ...
+# Subtest: task listing is owner/project scoped and bounded to twenty
+ok 70 - task listing is owner/project scoped and bounded to twenty
+  ---
+  duration_ms: 207.7145
+  type: 'test'
+  ...
+1..70
+# tests 70
+# suites 0
+# pass 70
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 15719.3575

@@ -1,0 +1,17 @@
+{
+  "schemaVersion": "runaai-m1-receipt-scope-exact-seal/v1",
+  "sourceCommit": "1738aff9451724f65ae4159ef178ede2cb9d8deb",
+  "archiveSha256": "28c1590d71987772c1b9be63217940895be168053a1fc5ba0fd68697485d664a",
+  "testsTapSha256": "0077d596049aa8517525da3ff0b20045d3adef52b30b49939fbec24fa651ca45",
+  "resultSha256": "756eccf2aa877b69730e27cf31d77d8a738828a5d64c4a3bdc06f88314d08f9b",
+  "sourcePinsMatchGitObjects": true,
+  "tests": 70,
+  "pass": 70,
+  "fail": 0,
+  "skipped": 0,
+  "cancelled": 0,
+  "disposablePostgres": true,
+  "cleanupConfirmed": true,
+  "productionChanged": false,
+  "privateValuesIncluded": false
+}

@@ -54,7 +54,30 @@ fixture unit suite passed11/11, and the separate proxy/runtime/TLS suite29/29.
 Re-run the real matrix with the documented CLI and exact pinned source tree;
 drift fails before import, not through normalization or fallback.
 
-Next: finite outer deployment watchdog and concrete closed-companion adapter;
-native-wide/local caller closure, actual Home installation/observer, corrected
-application qualification and customer trial still remain. All17 roadmap
-families stay open as recorded; this proof does not close M1.
+## R4 exact evidence-output schema extension
+
+The fresh canonical-source R4 run extends the same actual Caddy, mTLS, proxy,
+controller and loopback-backend matrix to **40/40 pass**. The four prospective
+cases send the exact static evidence response format through Caddy. The exact
+strict schema was admitted once and returned the expected byte-exact response;
+strict=false, additionalProperties=true and an arbitrary command schema were
+each rejected before controller admission or upstream contact. This is
+transport/guard evidence, not real-model structured-output qualification.
+
+R4 proof: `evidence/20260828-wire-r4-schema/proof.json`, SHA256
+`d1effdf2aaba7055017aa9105c61e9badb45cf96e14c0e99e64a87797b1ae767`.
+It ran from canonical source commit
+`3cb9b1a9e3aaeca7cd20e69d86b1f06c09a75d09` with Node22.22.0 SHA
+`bae898add4643fcf890a83ad8ae56e20dce7e781cab161a53991ceba70c99ffb`,
+Caddy SHA `5cb9ab71e5756ce72840b8234177a2f40c8b4ab47a806b8e841e2b784e9df62b`
+and OpenSSL SHA
+`063e62dcc027fc5dbb1343de631f02a9291f8b1df0b4e37012e49a03d525aad4`.
+Cleanup again stopped all owned Caddy processes, closed all six ports, left no
+active controller request or synthetic instance and removed the private TLS
+fixture. R1-R3 remain unchanged and independently attributable.
+
+Next: the finite outer deployment watchdog and concrete closed-companion adapter
+have separate canonical-source proof below. Native-wide/local caller closure,
+actual Home installation/observer, real-model schema qualification and customer
+trial still remain. All17 roadmap families stay open as recorded; this proof
+does not close M1.

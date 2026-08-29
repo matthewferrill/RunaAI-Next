@@ -1,0 +1,45 @@
+{
+  "name": "invalid chunk syntax",
+  "passed": true,
+  "error": null,
+  "errorMessage": null,
+  "result": {
+    "status": 502,
+    "response": "HTTP/1.1 502 Bad Gateway\r\nServer: Caddy\r\nDate: Sat, 29 Aug 2026 00:00:55 GMT\r\nContent-Length: 0\r\nConnection: close\r\n\r\n",
+    "error": null,
+    "elapsedMs": 4,
+    "requestWire": "GET /v1/models HTTP/1.1\r\nHost: 127.0.0.1:60227\r\nConnection: close\r\nTransfer-Encoding: chunked\r\n\r\nQ\r\nx\r\n0\r\n\r\n",
+    "tcpHalfClose": false,
+    "termination": "server-end",
+    "serverTerminated": true
+  },
+  "requestFrame": null,
+  "before": {
+    "admitAttempts": 5,
+    "admitted": 5,
+    "released": 5,
+    "active": 0,
+    "polls": 0,
+    "primary": 4,
+    "bge": 1,
+    "redirects": 0
+  },
+  "after": {
+    "admitAttempts": 5,
+    "admitted": 5,
+    "released": 5,
+    "active": 0,
+    "polls": 0,
+    "primary": 4,
+    "bge": 1,
+    "redirects": 0
+  },
+  "nativeRequests": [],
+  "proxyEvents": [
+    {
+      "type": "denied",
+      "code": "runtime-request-unavailable",
+      "at": 1787961655290
+    }
+  ]
+}

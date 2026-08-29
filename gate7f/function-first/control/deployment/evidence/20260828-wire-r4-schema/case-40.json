@@ -1,0 +1,45 @@
+{
+  "name": "arbitrary evidence schema denied before admission",
+  "passed": true,
+  "error": null,
+  "errorMessage": null,
+  "result": {
+    "status": 503,
+    "body": "{\"schemaVersion\":\"runaai-home-runtime-error/v1\",\"errorCode\":\"runtime-response-format-not-qualified\",\"privateValuesIncluded\":false}",
+    "elapsedMs": 3
+  },
+  "requestFrame": {
+    "method": "POST",
+    "route": "/v1/chat/completions",
+    "body": "{\"model\":\"gemma-4-26b-a4b-it-qat\",\"max_tokens\":512,\"temperature\":0,\"reasoning_effort\":\"none\",\"messages\":[{\"role\":\"user\",\"content\":\"Return the fixed synthetic transport fixture response.\"}],\"response_format\":{\"type\":\"json_schema\",\"json_schema\":{\"schema\":{\"type\":\"object\",\"properties\":{\"command\":{\"type\":\"string\"}},\"required\":[\"command\"]},\"strict\":true,\"name\":\"response\"}}}",
+    "bodySha256": "4096fa5b5b615b6e2999907619f79da89a7501899cc4f81d65c078d19cf851e0"
+  },
+  "before": {
+    "admitAttempts": 11,
+    "admitted": 11,
+    "released": 11,
+    "active": 0,
+    "polls": 0,
+    "primary": 7,
+    "bge": 4,
+    "redirects": 0
+  },
+  "after": {
+    "admitAttempts": 11,
+    "admitted": 11,
+    "released": 11,
+    "active": 0,
+    "polls": 0,
+    "primary": 7,
+    "bge": 4,
+    "redirects": 0
+  },
+  "nativeRequests": [],
+  "proxyEvents": [
+    {
+      "type": "denied",
+      "code": "runtime-response-format-not-qualified",
+      "at": 1787961818146
+    }
+  ]
+}

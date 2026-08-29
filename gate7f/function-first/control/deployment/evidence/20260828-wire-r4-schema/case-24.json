@@ -1,0 +1,39 @@
+{
+  "name": "slow incomplete chunk ends under actual body deadline",
+  "passed": true,
+  "error": null,
+  "errorMessage": null,
+  "result": {
+    "status": 408,
+    "response": "HTTP/1.1 408 Request Timeout\r\nCache-Control: no-store\r\nContent-Length: 121\r\nContent-Type: application/json\r\nDate: Sat, 29 Aug 2026 00:01:05 GMT\r\nVia: 1.1 Caddy\r\nConnection: close\r\n\r\n{\"schemaVersion\":\"runaai-home-runtime-error/v1\",\"errorCode\":\"runtime-request-body-timeout\",\"privateValuesIncluded\":false}",
+    "error": null,
+    "elapsedMs": 10019,
+    "requestWire": "GET /v1/models HTTP/1.1\r\nHost: 127.0.0.1:60227\r\nConnection: close\r\nTransfer-Encoding: chunked\r\n\r\n1\r\n",
+    "tcpHalfClose": false,
+    "termination": "server-end",
+    "serverTerminated": true
+  },
+  "requestFrame": null,
+  "before": {
+    "admitAttempts": 5,
+    "admitted": 5,
+    "released": 5,
+    "active": 0,
+    "polls": 0,
+    "primary": 4,
+    "bge": 1,
+    "redirects": 0
+  },
+  "after": {
+    "admitAttempts": 5,
+    "admitted": 5,
+    "released": 5,
+    "active": 0,
+    "polls": 0,
+    "primary": 4,
+    "bge": 1,
+    "redirects": 0
+  },
+  "nativeRequests": [],
+  "proxyEvents": []
+}

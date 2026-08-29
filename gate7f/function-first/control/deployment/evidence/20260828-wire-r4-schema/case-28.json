@@ -1,0 +1,58 @@
+{
+  "name": "actual 15 second BGE timeout releases admission",
+  "passed": true,
+  "error": null,
+  "errorMessage": null,
+  "result": {
+    "status": 503,
+    "body": "{\"schemaVersion\":\"runaai-home-runtime-error/v1\",\"errorCode\":\"runtime-request-unavailable\",\"privateValuesIncluded\":false}",
+    "elapsedMs": 15011
+  },
+  "requestFrame": null,
+  "before": {
+    "admitAttempts": 7,
+    "admitted": 7,
+    "released": 7,
+    "active": 0,
+    "polls": 0,
+    "primary": 4,
+    "bge": 3,
+    "redirects": 0
+  },
+  "after": {
+    "admitAttempts": 8,
+    "admitted": 8,
+    "released": 8,
+    "active": 0,
+    "polls": 0,
+    "primary": 4,
+    "bge": 4,
+    "redirects": 0
+  },
+  "nativeRequests": [
+    {
+      "kind": "bge",
+      "path": "/health",
+      "method": "GET",
+      "bodyBytes": 0,
+      "bodySha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "headers": {
+        "host": "127.0.0.1:60225",
+        "connection": "keep-alive"
+      },
+      "at": 1787961665331
+    }
+  ],
+  "proxyEvents": [
+    {
+      "type": "denied",
+      "code": "runtime-request-body-timeout",
+      "at": 1787961665418
+    },
+    {
+      "type": "denied",
+      "code": "runtime-request-unavailable",
+      "at": 1787961680339
+    }
+  ]
+}

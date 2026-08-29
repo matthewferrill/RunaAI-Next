@@ -1,0 +1,595 @@
+TAP version 13
+# Subtest: pure provider projection preserves every non-provider byte and exact TLS paths/timeouts
+ok 1 - pure provider projection preserves every non-provider byte and exact TLS paths/timeouts
+  ---
+  duration_ms: 4.3676
+  type: 'test'
+  ...
+# Subtest: closed candidate adds exact GET readiness/framing prefilter before provider maintenance
+ok 2 - closed candidate adds exact GET readiness/framing prefilter before provider maintenance
+  ---
+  duration_ms: 0.7777
+  type: 'test'
+  ...
+# Subtest: raw CRLF predecessor bytes remain CRLF outside the replaced provider block
+ok 3 - raw CRLF predecessor bytes remain CRLF outside the replaced provider block
+  ---
+  duration_ms: 0.6829
+  type: 'test'
+  ...
+# Subtest: Caddy binding is reconstructed from the exact original, not self-consistent supplied hashes
+ok 4 - Caddy binding is reconstructed from the exact original, not self-consistent supplied hashes
+  ---
+  duration_ms: 2.1472
+  type: 'test'
+  ...
+# Subtest: unknown provider/TLS preimage or unsafe enrollment is denied v=>v.originalBytes=Buffer.from(caddyfile.replace('http://192.168.50.165:1234','http://other:1234'))
+ok 5 - unknown provider/TLS preimage or unsafe enrollment is denied v=>v.originalBytes=Buffer.from(caddyfile.replace('http://192.168.50.165:1234','http://other:1234'))
+  ---
+  duration_ms: 0.2435
+  type: 'test'
+  ...
+# Subtest: unknown provider/TLS preimage or unsafe enrollment is denied v=>v.originalBytes=Buffer.concat([v.originalBytes,Buffer.from('http://127.0.0.1:9770 {}\\n')])
+ok 6 - unknown provider/TLS preimage or unsafe enrollment is denied v=>v.originalBytes=Buffer.concat([v.originalBytes,Buffer.from('http://127.0.0.1:9770 {}\\n')])
+  ---
+  duration_ms: 0.194
+  type: 'test'
+  ...
+# Subtest: unknown provider/TLS preimage or unsafe enrollment is denied v=>v.enrollment.enrollmentId='..\\\\secrets'
+ok 7 - unknown provider/TLS preimage or unsafe enrollment is denied v=>v.enrollment.enrollmentId='..\\\\secrets'
+  ---
+  duration_ms: 0.1953
+  type: 'test'
+  ...
+# Subtest: unknown provider/TLS preimage or unsafe enrollment is denied v=>v.enrollment.serverName='other'
+ok 8 - unknown provider/TLS preimage or unsafe enrollment is denied v=>v.enrollment.serverName='other'
+  ---
+  duration_ms: 0.1788
+  type: 'test'
+  ...
+# Subtest: unknown provider/TLS preimage or unsafe enrollment is denied v=>v.enrollment.clientExpiresAt='2000-01-01'
+ok 9 - unknown provider/TLS preimage or unsafe enrollment is denied v=>v.enrollment.clientExpiresAt='2000-01-01'
+  ---
+  duration_ms: 0.3336
+  type: 'test'
+  ...
+# Subtest: unknown provider/TLS preimage or unsafe enrollment is denied v=>v.enrollment.privateMaterialIncluded=true
+ok 10 - unknown provider/TLS preimage or unsafe enrollment is denied v=>v.enrollment.privateMaterialIncluded=true
+  ---
+  duration_ms: 0.3967
+  type: 'test'
+  ...
+# Subtest: unknown provider/TLS preimage or unsafe enrollment is denied v=>v.enrollment.key='secret'
+ok 11 - unknown provider/TLS preimage or unsafe enrollment is denied v=>v.enrollment.key='secret'
+  ---
+  duration_ms: 0.1876
+  type: 'test'
+  ...
+# Subtest: configuration projection changes only enumerated M1 data and does not imply qualification
+ok 12 - configuration projection changes only enumerated M1 data and does not imply qualification
+  ---
+  duration_ms: 26.4304
+  type: 'test'
+  ...
+# Subtest: mixed primary, bypass route or deadline widening is denied v=>v.provider.models.code='qwen3-coder-30b-a3b-instruct'
+ok 13 - mixed primary, bypass route or deadline widening is denied v=>v.provider.models.code='qwen3-coder-30b-a3b-instruct'
+  ---
+  duration_ms: 17.9754
+  type: 'test'
+  ...
+# Subtest: mixed primary, bypass route or deadline widening is denied v=>v.provider.baseUrl='http://127.0.0.1:1234/v1'
+ok 14 - mixed primary, bypass route or deadline widening is denied v=>v.provider.baseUrl='http://127.0.0.1:1234/v1'
+  ---
+  duration_ms: 16.1619
+  type: 'test'
+  ...
+# Subtest: mixed primary, bypass route or deadline widening is denied v=>v.functionFirst.reranker.baseUrl='http://192.168.50.165:8412'
+ok 15 - mixed primary, bypass route or deadline widening is denied v=>v.functionFirst.reranker.baseUrl='http://192.168.50.165:8412'
+  ---
+  duration_ms: 15.4101
+  type: 'test'
+  ...
+# Subtest: mixed primary, bypass route or deadline widening is denied v=>v.functionFirst.qdrant.endpoint='http://127.0.0.1:9773'
+ok 16 - mixed primary, bypass route or deadline widening is denied v=>v.functionFirst.qdrant.endpoint='http://127.0.0.1:9773'
+  ---
+  duration_ms: 16.056
+  type: 'test'
+  ...
+# Subtest: mixed primary, bypass route or deadline widening is denied v=>v.functionFirst.embedding.baseUrl='http://192.168.50.165:1234/v1'
+ok 17 - mixed primary, bypass route or deadline widening is denied v=>v.functionFirst.embedding.baseUrl='http://192.168.50.165:1234/v1'
+  ---
+  duration_ms: 16.3664
+  type: 'test'
+  ...
+# Subtest: mixed primary, bypass route or deadline widening is denied v=>v.prior.limits.totalDeadlineMs=120000
+ok 18 - mixed primary, bypass route or deadline widening is denied v=>v.prior.limits.totalDeadlineMs=120000
+  ---
+  duration_ms: 17.3193
+  type: 'test'
+  ...
+# Subtest: synthetic verifier fixture cannot qualify the frozen real runtime seal
+ok 19 - synthetic verifier fixture cannot qualify the frozen real runtime seal
+  ---
+  duration_ms: 28.9119
+  type: 'test'
+  ...
+# Subtest: pinned Caddy offline adaptation accepts mTLS and literal closed-candidate routing
+ok 20 - pinned Caddy offline adaptation accepts mTLS and literal closed-candidate routing
+  ---
+  duration_ms: 484.1678
+  type: 'test'
+  ...
+# Subtest: actual child intent, PID/start identity and terminal are durable and exactly linked
+ok 21 - actual child intent, PID/start identity and terminal are durable and exactly linked
+  ---
+  duration_ms: 2099.6621
+  type: 'test'
+  ...
+# {"coordinatorProcessId":37044,"exitCode":0,"processId":33740,"records":3,"stopped":true,"errorCode":null,"firstUnknown":false,"restartErrorCode":null,"restartUnknown":false,"sideEffect":"effect\\n","rawRecords":[{"schemaVersion":"runaai-m1-deployment-child-intent/v1","stage":"intent","transitionId":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","childId":"aed285acfb174f1fbeb6de714203f2a3","operation":"qualification","executableSha256":"bae898add4643fcf890a83ad8ae56e20dce7e781cab161a53991ceba70c99ffb","argumentsSha256":"a8b81e9a7420e6950c8b9a6b2f9c06768ff87d4736fd6e12680a0101c3407eab","maximumMs":5000,"preparedAt":"2026-08-29T00:04:04.4338403Z","privateValuesIncluded":false},{"schemaVersion":"runaai-m1-deployment-child-started/v1","stage":"started","intentSha256":"7c374226e3f62aeb42e5a0a48f443d3dc3c0fb636bca09054e71b2a3267b0467","childId":"aed285acfb174f1fbeb6de714203f2a3","transitionId":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","operation":"qualification","executableSha256":"bae898add4643fcf890a83ad8ae56e20dce7e781cab161a53991ceba70c99ffb","argumentsSha256":"a8b81e9a7420e6950c8b9a6b2f9c06768ff87d4736fd6e12680a0101c3407eab","maximumMs":5000,"processId":33740,"processStartedAt":"2026-08-29T00:04:04.4990284Z","observedAt":"2026-08-29T00:04:04.5271570Z","privateValuesIncluded":false},{"schemaVersion":"runaai-m1-deployment-child/v1","stage":"terminal","transitionId":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","childId":"aed285acfb174f1fbeb6de714203f2a3","operation":"qualification","executableSha256":"bae898add4643fcf890a83ad8ae56e20dce7e781cab161a53991ceba70c99ffb","maximumMs":5000,"argumentsSha256":"a8b81e9a7420e6950c8b9a6b2f9c06768ff87d4736fd6e12680a0101c3407eab","intentSha256":"7c374226e3f62aeb42e5a0a48f443d3dc3c0fb636bca09054e71b2a3267b0467","startedRecordSha256":"4c18c61d46e4408be5909d111896a763798d476991194d542ff141a05c1d0daa","started":true,"processId":33740,"processStartedAt":"2026-08-29T00:04:04.4990284Z","startedAt":"2026-08-29T00:04:04.4854051Z","finishedAt":"2026-08-29T00:04:04.5669472Z","stopConfirmed":true,"timedOut":false,"outputLimited":false,"outputComplete":true,"exitCode":0,"stdoutBytes":0,"stderrBytes":0,"outcome":"terminal","privateValuesIncluded":false}]}
+# Subtest: actual child side effect followed by start-observer throw remains unknown; exact child stops and restart cannot replay
+ok 22 - actual child side effect followed by start-observer throw remains unknown; exact child stops and restart cannot replay
+  ---
+  duration_ms: 3842.4882
+  type: 'test'
+  ...
+# {"coordinatorProcessId":12748,"exitCode":-1,"processId":26144,"records":1,"stopped":true,"errorCode":"m1-deploy-child-outcome-unknown","firstUnknown":true,"restartCoordinatorProcessId":2992,"restartUnknown":true,"restartErrorCode":"m1-deploy-reconciliation-required","sideEffect":"effect\\n","rawRecords":[{"schemaVersion":"runaai-m1-deployment-child-intent/v1","stage":"intent","transitionId":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","childId":"c0166f537d37454183e66420ae264a99","operation":"qualification","executableSha256":"bae898add4643fcf890a83ad8ae56e20dce7e781cab161a53991ceba70c99ffb","argumentsSha256":"82bcd4b26ef3f71bb64bb5e08b9278bb42995e6f25941c33888211fbb35e38a1","maximumMs":5000,"preparedAt":"2026-08-29T00:04:06.5472574Z","privateValuesIncluded":false}]}
+# Subtest: actual completed child with lost terminal record retains unknown despite successful effect; restart cannot replay
+ok 23 - actual completed child with lost terminal record retains unknown despite successful effect; restart cannot replay
+  ---
+  duration_ms: 3831.5344
+  type: 'test'
+  ...
+# {"coordinatorProcessId":37652,"exitCode":-1,"processId":31132,"records":2,"stopped":true,"errorCode":"m1-deploy-child-receipt-unretained","firstUnknown":true,"restartCoordinatorProcessId":37332,"restartUnknown":true,"restartErrorCode":"m1-deploy-reconciliation-required","sideEffect":"effect\\n","rawRecords":[{"schemaVersion":"runaai-m1-deployment-child-intent/v1","stage":"intent","transitionId":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","childId":"babb45c153fc43319a63dd1604d0c751","operation":"qualification","executableSha256":"bae898add4643fcf890a83ad8ae56e20dce7e781cab161a53991ceba70c99ffb","argumentsSha256":"a24010aa3e62581204ca6a1f08cd125f1946bd384ed5747dc6f50af4f11172d9","maximumMs":5000,"preparedAt":"2026-08-29T00:04:10.3978469Z","privateValuesIncluded":false},{"schemaVersion":"runaai-m1-deployment-child-started/v1","stage":"started","intentSha256":"3b8733d336116ba80b5b3c529b8d3624bf73e27dc993365b6840c94595edd18e","childId":"babb45c153fc43319a63dd1604d0c751","transitionId":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","operation":"qualification","executableSha256":"bae898add4643fcf890a83ad8ae56e20dce7e781cab161a53991ceba70c99ffb","argumentsSha256":"a24010aa3e62581204ca6a1f08cd125f1946bd384ed5747dc6f50af4f11172d9","maximumMs":5000,"processId":31132,"processStartedAt":"2026-08-29T00:04:10.4529225Z","observedAt":"2026-08-29T00:04:10.4663744Z","privateValuesIncluded":false}]}
+# Subtest: a successful terminal from a different child cannot resolve the retained exact intent after restart
+ok 24 - a successful terminal from a different child cannot resolve the retained exact intent after restart
+  ---
+  duration_ms: 3876.0729
+  type: 'test'
+  ...
+# {"coordinatorProcessId":9876,"exitCode":0,"processId":16404,"records":3,"stopped":true,"errorCode":null,"firstUnknown":false,"restartCoordinatorProcessId":36796,"restartUnknown":true,"restartErrorCode":"m1-deploy-reconciliation-required","sideEffect":"effect\\n","rawRecords":[{"schemaVersion":"runaai-m1-deployment-child-intent/v1","stage":"intent","transitionId":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","childId":"0cc16dfbd3f247a6b751a6eed1dc4ccd","operation":"qualification","executableSha256":"bae898add4643fcf890a83ad8ae56e20dce7e781cab161a53991ceba70c99ffb","argumentsSha256":"4953c2eeb7c96cae7510674fca75e5a67c87f78ea78d125c19b3d9f3dbe88770","maximumMs":5000,"preparedAt":"2026-08-29T00:04:14.1647501Z","privateValuesIncluded":false},{"schemaVersion":"runaai-m1-deployment-child-started/v1","stage":"started","intentSha256":"1a6a7c40c2084c61ab276cfc3291e121c5e88ff582d1d9063ae864e8f5cebb9c","childId":"0cc16dfbd3f247a6b751a6eed1dc4ccd","transitionId":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","operation":"qualification","executableSha256":"bae898add4643fcf890a83ad8ae56e20dce7e781cab161a53991ceba70c99ffb","argumentsSha256":"4953c2eeb7c96cae7510674fca75e5a67c87f78ea78d125c19b3d9f3dbe88770","maximumMs":5000,"processId":16404,"processStartedAt":"2026-08-29T00:04:14.2198560Z","observedAt":"2026-08-29T00:04:14.2279374Z","privateValuesIncluded":false},{"schemaVersion":"runaai-m1-deployment-child/v1","stage":"terminal","transitionId":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","childId":"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb","operation":"qualification","executableSha256":"bae898add4643fcf890a83ad8ae56e20dce7e781cab161a53991ceba70c99ffb","maximumMs":5000,"argumentsSha256":"4953c2eeb7c96cae7510674fca75e5a67c87f78ea78d125c19b3d9f3dbe88770","intentSha256":"1a6a7c40c2084c61ab276cfc3291e121c5e88ff582d1d9063ae864e8f5cebb9c","startedRecordSha256":"495a34dc0d554431c78993d0bea900c005cc18e60e21e666e4416b4af71c3a7b","started":true,"processId":16404,"processStartedAt":"2026-08-29T00:04:14.2198560Z","startedAt":"2026-08-29T00:04:14.2148919Z","finishedAt":"2026-08-29T00:04:14.2833427Z","stopConfirmed":true,"timedOut":false,"outputLimited":false,"outputComplete":true,"exitCode":0,"stdoutBytes":0,"stderrBytes":0,"outcome":"terminal","privateValuesIncluded":false}]}
+# Subtest: seven-file assembly preserves frozen app and binds host/runtime limits separately
+ok 25 - seven-file assembly preserves frozen app and binds host/runtime limits separately
+  ---
+  duration_ms: 12.0162
+  type: 'test'
+  ...
+# Subtest: concrete adapter requires trusted withExclusiveClosedPhase and never accepts a JSON-ready substitute
+ok 26 - concrete adapter requires trusted withExclusiveClosedPhase and never accepts a JSON-ready substitute
+  ---
+  duration_ms: 182.1713
+  type: 'test'
+  ...
+# Subtest: concrete adapter requires trusted assertOwnerPrivate and never accepts a JSON-ready substitute
+ok 27 - concrete adapter requires trusted assertOwnerPrivate and never accepts a JSON-ready substitute
+  ---
+  duration_ms: 151.4191
+  type: 'test'
+  ...
+# Subtest: concrete adapter requires trusted verifyQualification and never accepts a JSON-ready substitute
+ok 28 - concrete adapter requires trusted verifyQualification and never accepts a JSON-ready substitute
+  ---
+  duration_ms: 146.0563
+  type: 'test'
+  ...
+# Subtest: concrete adapter requires trusted assertFreshHomeReady and never accepts a JSON-ready substitute
+ok 29 - concrete adapter requires trusted assertFreshHomeReady and never accepts a JSON-ready substitute
+  ---
+  duration_ms: 136.8836
+  type: 'test'
+  ...
+# Subtest: concrete adapter requires trusted assertCurrentClosedPhase and never accepts a JSON-ready substitute
+ok 30 - concrete adapter requires trusted assertCurrentClosedPhase and never accepts a JSON-ready substitute
+  ---
+  duration_ms: 134.8881
+  type: 'test'
+  ...
+# Subtest: concrete adapter requires trusted recordDispatchIntent and never accepts a JSON-ready substitute
+ok 31 - concrete adapter requires trusted recordDispatchIntent and never accepts a JSON-ready substitute
+  ---
+  duration_ms: 137.5346
+  type: 'test'
+  ...
+# Subtest: concrete adapter requires trusted recordDispatchResult and never accepts a JSON-ready substitute
+ok 32 - concrete adapter requires trusted recordDispatchResult and never accepts a JSON-ready substitute
+  ---
+  duration_ms: 134.8361
+  type: 'test'
+  ...
+# Subtest: pre-dispatch qualification denial leaves no execution intent or process
+ok 33 - pre-dispatch qualification denial leaves no execution intent or process
+  ---
+  duration_ms: 136.0811
+  type: 'test'
+  ...
+# Subtest: pre-dispatch home denial leaves no execution intent or process
+ok 34 - pre-dispatch home denial leaves no execution intent or process
+  ---
+  duration_ms: 134.2108
+  type: 'test'
+  ...
+# Subtest: pre-dispatch held denial leaves no execution intent or process
+ok 35 - pre-dispatch held denial leaves no execution intent or process
+  ---
+  duration_ms: 137.285
+  type: 'test'
+  ...
+# Subtest: pre-dispatch package denial leaves no execution intent or process
+ok 36 - pre-dispatch package denial leaves no execution intent or process
+  ---
+  duration_ms: 149.0546
+  type: 'test'
+  ...
+# Subtest: durable outer intent then second home check failure stays pending without launch
+ok 37 - durable outer intent then second home check failure stays pending without launch
+  ---
+  duration_ms: 257.4365
+  type: 'test'
+  ...
+# Subtest: durable outer intent then second held check failure stays pending without launch
+ok 38 - durable outer intent then second held check failure stays pending without launch
+  ---
+  duration_ms: 278.0556
+  type: 'test'
+  ...
+# Subtest: actual generated companion is supervised but rejects synthetic host context before any production reads
+ok 39 - actual generated companion is supervised but rejects synthetic host context before any production reads
+  ---
+  duration_ms: 4215.4883
+  type: 'test'
+  ...
+# {"kind":"actual-fixed-companion-context-denial","result":{"schemaVersion":"runaai-m1-closed-adapter-result/v1","status":"needs-reconciliation","transitionId":"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb","operationId":"ec65817f440e4dd3a284511097619386","requestSha256":"0a541bb677b513e905513a43640d9a9da1f73b04f42c39309dc078a83666583b","descriptorSha256":"6ad799485ccd24e8579826974ceab4dc73de550ea0f0475c7464600588d2dbd2","packageSha256":"f5352d1d7bcc6240b90d99546c2617364ef512296e94ba7db56f117f0b066c9a","terminalRetained":true,"admissionOpened":false,"productionPromoted":false,"automaticRollbackPermitted":false,"automaticReplayPermitted":false},"outerResult":{"ProcessId":34772,"ExitCode":1,"StdoutBytes":0,"StderrBytes":462,"ActiveProcesses":0,"CreatedSuspended":true,"AtomicJobAssigned":true,"Resumed":true,"StopConfirmed":true,"TimedOut":false,"OutputLimited":false,"OutputComplete":true,"ProcessStartedAt":"2026-08-29T00:04:22.9774504Z","StartedAt":"2026-08-29T00:04:22.9745130Z","FinishedAt":"2026-08-29T00:04:23.3078707Z","Stdout":""},"productionEffects":false}
+# Subtest: exact typed result accepts only its new operation and current closed phase, not model-like success text
+ok 40 - exact typed result accepts only its new operation and current closed phase, not model-like success text
+  ---
+  duration_ms: 293.8646
+  type: 'test'
+  ...
+# Subtest: twelve actual files cross-bind synthetic command records; old completed records cannot certify a fresh execution
+ok 41 - twelve actual files cross-bind synthetic command records; old completed records cannot certify a fresh execution
+  ---
+  duration_ms: 129.0355
+  type: 'test'
+  ...
+# Subtest: frozen deployer is retained and companion is a separate four-file package
+ok 42 - frozen deployer is retained and companion is a separate four-file package
+  ---
+  duration_ms: 5.3369
+  type: 'test'
+  ...
+# Subtest: one-byte source drift and newline rewriting are denied, never silently normalized
+ok 43 - one-byte source drift and newline rewriting are denied, never silently normalized
+  ---
+  duration_ms: 5.5762
+  type: 'test'
+  ...
+# Subtest: companion retains ordinary identity/readiness and removes all Caddy publication/rollback
+ok 44 - companion retains ordinary identity/readiness and removes all Caddy publication/rollback
+  ---
+  duration_ms: 2.3325
+  type: 'test'
+  ...
+# Subtest: bounded wrappers preserve exact argument arrays and packaged node, not PATH node
+ok 45 - bounded wrappers preserve exact argument arrays and packaged node, not PATH node
+  ---
+  duration_ms: 1.9249
+  type: 'test'
+  ...
+# Subtest: generated complete PowerShell script parses without executing its operational statements
+ok 46 - generated complete PowerShell script parses without executing its operational statements
+  ---
+  duration_ms: 722.7959
+  type: 'test'
+  ...
+# Subtest: actual isolated bounded child retains complete stdout and an observed exit
+ok 47 - actual isolated bounded child retains complete stdout and an observed exit
+  ---
+  duration_ms: 958.9751
+  type: 'test'
+  ...
+# Subtest: actual isolated hanging child is stopped within deadline and not reported successful
+ok 48 - actual isolated hanging child is stopped within deadline and not reported successful
+  ---
+  duration_ms: 1093.1369
+  type: 'test'
+  ...
+# Subtest: actual isolated output flood is bounded and never returned as complete output
+ok 49 - actual isolated output flood is bounded and never returned as complete output
+  ---
+  duration_ms: 975.4552
+  type: 'test'
+  ...
+# Subtest: private child receipt path is create-only and unknown forbids blind retry/rollback
+ok 50 - private child receipt path is create-only and unknown forbids blind retry/rollback
+  ---
+  duration_ms: 2.2793
+  type: 'test'
+  ...
+# Subtest: synthetic packaging plan binds exact source and all supplied bytes without claiming qualification/activation
+ok 51 - synthetic packaging plan binds exact source and all supplied bytes without claiming qualification/activation
+  ---
+  duration_ms: 52.8327
+  type: 'test'
+  ...
+# Subtest: packaging rejects changed identity
+ok 52 - packaging rejects changed identity
+  ---
+  duration_ms: 35.0484
+  type: 'test'
+  ...
+# Subtest: packaging rejects wrong app source
+ok 53 - packaging rejects wrong app source
+  ---
+  duration_ms: 25.1895
+  type: 'test'
+  ...
+# Subtest: packaging rejects wrong frozen seal
+ok 54 - packaging rejects wrong frozen seal
+  ---
+  duration_ms: 22.2335
+  type: 'test'
+  ...
+# Subtest: packaging rejects mixed Home profile
+ok 55 - packaging rejects mixed Home profile
+  ---
+  duration_ms: 24.593
+  type: 'test'
+  ...
+# Subtest: packaging rejects wrong grades
+ok 56 - packaging rejects wrong grades
+  ---
+  duration_ms: 21.4943
+  type: 'test'
+  ...
+# Subtest: packaging rejects wrong candidate route bytes
+ok 57 - packaging rejects wrong candidate route bytes
+  ---
+  duration_ms: 24.553
+  type: 'test'
+  ...
+# Subtest: packaging rejects unknown TLS file
+ok 58 - packaging rejects unknown TLS file
+  ---
+  duration_ms: 19.7512
+  type: 'test'
+  ...
+# Subtest: packaging rejects path-injected companion
+ok 59 - packaging rejects path-injected companion
+  ---
+  duration_ms: 24.8423
+  type: 'test'
+  ...
+# Subtest: packaging rejects altered helper byte
+ok 60 - packaging rejects altered helper byte
+  ---
+  duration_ms: 28.1759
+  type: 'test'
+  ...
+# Subtest: packaging rejects manifest stale role selection
+ok 61 - packaging rejects manifest stale role selection
+  ---
+  duration_ms: 22.8016
+  type: 'test'
+  ...
+# Subtest: packaging rejects wrong launcher
+ok 62 - packaging rejects wrong launcher
+  ---
+  duration_ms: 19.9381
+  type: 'test'
+  ...
+# Subtest: later closed-phase argv is exact data only and keeps final config separate from held candidate-closed Caddy
+ok 63 - later closed-phase argv is exact data only and keeps final config separate from held candidate-closed Caddy
+  ---
+  duration_ms: 22.1793
+  type: 'test'
+  ...
+# Subtest: closed/drained Control transaction stops at real missing Home adapter, with exact safe rollback available
+ok 64 - closed/drained Control transaction stops at real missing Home adapter, with exact safe rollback available
+  ---
+  duration_ms: 65.2336
+  type: 'test'
+  ...
+# Subtest: unknown admission blocks retry and rollback even when snapshot appears closed
+ok 65 - unknown admission blocks retry and rollback even when snapshot appears closed
+  ---
+  duration_ms: 38.5756
+  type: 'test'
+  ...
+# Subtest: pending restore remains unknown until exact same request terminates; never becomes quiescent again
+ok 66 - pending restore remains unknown until exact same request terminates; never becomes quiescent again
+  ---
+  duration_ms: 33.2644
+  type: 'test'
+  ...
+# Subtest: outer state and inner quiescence revision must both be current before any decision
+ok 67 - outer state and inner quiescence revision must both be current before any decision
+  ---
+  duration_ms: 29.1562
+  type: 'test'
+  ...
+# Subtest: stale zero counters are not transferable native authority
+ok 68 - stale zero counters are not transferable native authority
+  ---
+  duration_ms: 29.5853
+  type: 'test'
+  ...
+# Subtest: cached Home boolean and listener marker cannot activate an unimplemented path
+ok 69 - cached Home boolean and listener marker cannot activate an unimplemented path
+  ---
+  duration_ms: 27.1095
+  type: 'test'
+  ...
+# Subtest: effect identity/terminal history cannot be rewritten while retaining apparent valid snapshots
+ok 70 - effect identity/terminal history cannot be rewritten while retaining apparent valid snapshots
+  ---
+  duration_ms: 30.1544
+  type: 'test'
+  ...
+# Subtest: claims that app/Home already changed cannot use the pre-native rollback contract to reopen old routes
+ok 71 - claims that app/Home already changed cannot use the pre-native rollback contract to reopen old routes
+  ---
+  duration_ms: 21.7096
+  type: 'test'
+  ...
+# Subtest: atomic job starts suspended, records identity, inherits only stdin EOF, returns exact complete output
+ok 72 - atomic job starts suspended, records identity, inherits only stdin EOF, returns exact complete output
+  ---
+  duration_ms: 4046.0422
+  type: 'test'
+  ...
+# {"schemaVersion":"runaai-m1-watchdog-observation/v1","operationId":"06dd50c327074d3cad8127a8d460e3f4","transitionId":"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb","requestSha256":"9b871134f69d20552bd7a56ff5a3e4c673e0186ba05ea7258b61b7e34b127451","descriptorSha256":"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc","packageSha256":"9b851e9a763e2ff0b5338c3e9d681f2ccd4dde3d7fbc25dbbefe3fde52360106","automaticReplayPermitted":false,"automaticRollbackPermitted":false,"admissionOpened":false,"status":"terminal","terminalRetained":true,"records":{"intent.json":{"schemaVersion":"runaai-m1-watchdog-intent/v1","operationId":"06dd50c327074d3cad8127a8d460e3f4","transitionId":"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb","requestSha256":"9b871134f69d20552bd7a56ff5a3e4c673e0186ba05ea7258b61b7e34b127451","descriptorSha256":"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc","packageSha256":"9b851e9a763e2ff0b5338c3e9d681f2ccd4dde3d7fbc25dbbefe3fde52360106","executableSha256":"bae898add4643fcf890a83ad8ae56e20dce7e781cab161a53991ceba70c99ffb","argumentsSha256":"6a49fb6579678e1af18c1c87aa872ba6d8a5949a26865c749171535ae0142a77","deadline":"2026-08-29T00:04:38.972Z","recordedAt":"2026-08-29T00:04:34.1917513Z","privateValuesIncluded":false},"supervisor.json":{"schemaVersion":"runaai-m1-watchdog-supervisor/v1","operationId":"06dd50c327074d3cad8127a8d460e3f4","intentSha256":"0cdeb60a2a935ed566937e8aa8edc2b1a9928dbd2ae32c48dcf1b89738ab8f41","hostSha256":"b774254b032e6fc4d31ca2a9a046760db1cdd4b5abe987d267e8bc6f0ff9db7a","hostProcessId":16512,"hostProcessStartedAt":"2026-08-29T00:04:32.2552504Z","processId":1292,"processStartedAt":"2026-08-29T00:04:32.4139535Z","recordedAt":"2026-08-29T00:04:34.2288748Z"},"started.json":{"schemaVersion":"runaai-m1-watchdog-started/v1","operationId":"06dd50c327074d3cad8127a8d460e3f4","intentSha256":"0cdeb60a2a935ed566937e8aa8edc2b1a9928dbd2ae32c48dcf1b89738ab8f41","supervisorSha256":"79b48836b68b05ec0fb6000cfce3089926df63643cf251cff240fdcbff149bb8","processId":11508,"processStartedAt":"2026-08-29T00:04:34.2536573Z","createdSuspended":true,"atomicJobAssigned":true,"recordedAt":"2026-08-29T00:04:34.2684854Z"},"terminal.json":{"schemaVersion":"runaai-m1-watchdog-terminal/v1","operationId":"06dd50c327074d3cad8127a8d460e3f4","intentSha256":"0cdeb60a2a935ed566937e8aa8edc2b1a9928dbd2ae32c48dcf1b89738ab8f41","supervisorSha256":"79b48836b68b05ec0fb6000cfce3089926df63643cf251cff240fdcbff149bb8","startedSha256":"dcf72a2560c3ad4d8bf57925c5f6157e4bcc112958bf0f659dc9e2c625b4e311","outcome":"terminal","result":{"ProcessId":11508,"ExitCode":0,"StdoutBytes":32,"StderrBytes":0,"ActiveProcesses":0,"CreatedSuspended":true,"AtomicJobAssigned":true,"Resumed":true,"StopConfirmed":true,"TimedOut":false,"OutputLimited":false,"OutputComplete":true,"ProcessStartedAt":"2026-08-29T00:04:34.2536573Z","StartedAt":"2026-08-29T00:04:34.2467264Z","FinishedAt":"2026-08-29T00:04:34.3476763Z","Stdout":"{\\"complete\\":true,\\"stdin\\":\\"eof\\"}\\n"},"recordedAt":"2026-08-29T00:04:34.3516916Z","admissionOpened":false,"automaticReplayPermitted":false,"automaticRollbackPermitted":false},"host.json":{"schemaVersion":"runaai-m1-watchdog-host/v1","operationId":"06dd50c327074d3cad8127a8d460e3f4","requestSha256":"9b871134f69d20552bd7a56ff5a3e4c673e0186ba05ea7258b61b7e34b127451","processId":16512,"executableSha256":"bae898add4643fcf890a83ad8ae56e20dce7e781cab161a53991ceba70c99ffb","hostSha256":"2e7923acf94eeb36b1e641b2b28369cc2c1ce9c3e1c2d43b81963361d48d6baf","wrapperSha256":"5d60a21470273743a9b5b1789d080255e90b678379ac0187a7f6b59a373fcc1a","helperSha256":"76ea1aaeeb4b5b8e8979eac15f4344a9563a450b709637c839c08d882c95f017","powershellSha256":"7600ffe12da441fe89d035b13801e8e91d064bc544a27b19a5cf49f6ab8b18f5","recordedAt":"2026-08-29T00:04:32.408Z"}},"result":{"ProcessId":11508,"ExitCode":0,"StdoutBytes":32,"StderrBytes":0,"ActiveProcesses":0,"CreatedSuspended":true,"AtomicJobAssigned":true,"Resumed":true,"StopConfirmed":true,"TimedOut":false,"OutputLimited":false,"OutputComplete":true,"ProcessStartedAt":"2026-08-29T00:04:34.2536573Z","StartedAt":"2026-08-29T00:04:34.2467264Z","FinishedAt":"2026-08-29T00:04:34.3476763Z","Stdout":"{\\"complete\\":true,\\"stdin\\":\\"eof\\"}\\n"}}
+# Subtest: finite deadline stops actual companion/grandchild, not an unrelated sentinel; replay forbidden
+ok 73 - finite deadline stops actual companion/grandchild, not an unrelated sentinel; replay forbidden
+  ---
+  duration_ms: 5707.1665
+  type: 'test'
+  ...
+# {"schemaVersion":"runaai-m1-watchdog-observation/v1","operationId":"9d2cafd2ad1747a18147b0a3e7497b98","transitionId":"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb","requestSha256":"45154374b9225b390082258048a2d0bfe8cd97309e97100ce47444e20ca4e673","descriptorSha256":"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc","packageSha256":"169685f9ad9ee28ded93c628078b75233138a0255ebaec5d6f8beea3c5d60351","automaticReplayPermitted":false,"automaticRollbackPermitted":false,"admissionOpened":false,"status":"needs-reconciliation","terminalRetained":true,"records":{"intent.json":{"schemaVersion":"runaai-m1-watchdog-intent/v1","operationId":"9d2cafd2ad1747a18147b0a3e7497b98","transitionId":"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb","requestSha256":"45154374b9225b390082258048a2d0bfe8cd97309e97100ce47444e20ca4e673","descriptorSha256":"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc","packageSha256":"169685f9ad9ee28ded93c628078b75233138a0255ebaec5d6f8beea3c5d60351","executableSha256":"bae898add4643fcf890a83ad8ae56e20dce7e781cab161a53991ceba70c99ffb","argumentsSha256":"9e505d3899a428c9401eff2b3790a6267b7a0676c34dc3cebcb551d6aafe0326","deadline":"2026-08-29T00:04:40.032Z","recordedAt":"2026-08-29T00:04:38.2136598Z","privateValuesIncluded":false},"supervisor.json":{"schemaVersion":"runaai-m1-watchdog-supervisor/v1","operationId":"9d2cafd2ad1747a18147b0a3e7497b98","intentSha256":"23d3b155e015f31ea06d98aa537213725007d354f885705b8f6f081873e1ffba","hostSha256":"1111e3e523ea70f8fed67f3d040e7a3c7113f7227dfe4f7d1fe451c813dbcfaa","hostProcessId":4556,"hostProcessStartedAt":"2026-08-29T00:04:36.3151093Z","processId":37256,"processStartedAt":"2026-08-29T00:04:36.4652825Z","recordedAt":"2026-08-29T00:04:38.2498907Z"},"started.json":{"schemaVersion":"runaai-m1-watchdog-started/v1","operationId":"9d2cafd2ad1747a18147b0a3e7497b98","intentSha256":"23d3b155e015f31ea06d98aa537213725007d354f885705b8f6f081873e1ffba","supervisorSha256":"a246ca307a17f6a448b907cc1199cd7b6fbdf2774855082ba403c2b5278af03e","processId":13544,"processStartedAt":"2026-08-29T00:04:38.2822295Z","createdSuspended":true,"atomicJobAssigned":true,"recordedAt":"2026-08-29T00:04:38.2985868Z"},"terminal.json":{"schemaVersion":"runaai-m1-watchdog-terminal/v1","operationId":"9d2cafd2ad1747a18147b0a3e7497b98","intentSha256":"23d3b155e015f31ea06d98aa537213725007d354f885705b8f6f081873e1ffba","supervisorSha256":"a246ca307a17f6a448b907cc1199cd7b6fbdf2774855082ba403c2b5278af03e","startedSha256":"d7b455264d1608324f56242b9d26c59b5c5dadbef49f46d6bacc1ce5f5f16170","outcome":"unknown","result":{"ProcessId":13544,"ExitCode":124,"StdoutBytes":0,"StderrBytes":0,"ActiveProcesses":0,"CreatedSuspended":true,"AtomicJobAssigned":true,"Resumed":true,"StopConfirmed":true,"TimedOut":true,"OutputLimited":false,"OutputComplete":true,"ProcessStartedAt":"2026-08-29T00:04:38.2822295Z","StartedAt":"2026-08-29T00:04:38.2666002Z","FinishedAt":"2026-08-29T00:04:40.0432394Z","Stdout":""},"recordedAt":"2026-08-29T00:04:40.0464017Z","admissionOpened":false,"automaticReplayPermitted":false,"automaticRollbackPermitted":false},"host.json":{"schemaVersion":"runaai-m1-watchdog-host/v1","operationId":"9d2cafd2ad1747a18147b0a3e7497b98","requestSha256":"45154374b9225b390082258048a2d0bfe8cd97309e97100ce47444e20ca4e673","processId":4556,"executableSha256":"bae898add4643fcf890a83ad8ae56e20dce7e781cab161a53991ceba70c99ffb","hostSha256":"2e7923acf94eeb36b1e641b2b28369cc2c1ce9c3e1c2d43b81963361d48d6baf","wrapperSha256":"5d60a21470273743a9b5b1789d080255e90b678379ac0187a7f6b59a373fcc1a","helperSha256":"76ea1aaeeb4b5b8e8979eac15f4344a9563a450b709637c839c08d882c95f017","powershellSha256":"7600ffe12da441fe89d035b13801e8e91d064bc544a27b19a5cf49f6ab8b18f5","recordedAt":"2026-08-29T00:04:36.459Z"}},"result":{"ProcessId":13544,"ExitCode":124,"StdoutBytes":0,"StderrBytes":0,"ActiveProcesses":0,"CreatedSuspended":true,"AtomicJobAssigned":true,"Resumed":true,"StopConfirmed":true,"TimedOut":true,"OutputLimited":false,"OutputComplete":true,"ProcessStartedAt":"2026-08-29T00:04:38.2822295Z","StartedAt":"2026-08-29T00:04:38.2666002Z","FinishedAt":"2026-08-29T00:04:40.0432394Z","Stdout":""}}
+# Subtest: actual stdout cap stays unknown, bounded and stopped
+ok 74 - actual stdout cap stays unknown, bounded and stopped
+  ---
+  duration_ms: 4003.5569
+  type: 'test'
+  ...
+# {"schemaVersion":"runaai-m1-watchdog-observation/v1","operationId":"afb5357237924f6788eca9eab406bbc6","transitionId":"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb","requestSha256":"cf5b73a9ee971426f2d99531d2eeaa262e20acb589e581723f6cbfbe03536379","descriptorSha256":"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc","packageSha256":"2ab791b18365dd879530a326cf3db19786ca8481cfe133b2ecbd14cf209fad52","automaticReplayPermitted":false,"automaticRollbackPermitted":false,"admissionOpened":false,"status":"needs-reconciliation","terminalRetained":true,"records":{"intent.json":{"schemaVersion":"runaai-m1-watchdog-intent/v1","operationId":"afb5357237924f6788eca9eab406bbc6","transitionId":"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb","requestSha256":"cf5b73a9ee971426f2d99531d2eeaa262e20acb589e581723f6cbfbe03536379","descriptorSha256":"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc","packageSha256":"2ab791b18365dd879530a326cf3db19786ca8481cfe133b2ecbd14cf209fad52","executableSha256":"bae898add4643fcf890a83ad8ae56e20dce7e781cab161a53991ceba70c99ffb","argumentsSha256":"b89820e6dfd438101a57a855b74d018511e599d0bf560280effcdc897b2d2d97","deadline":"2026-08-29T00:04:48.709Z","recordedAt":"2026-08-29T00:04:43.9094820Z","privateValuesIncluded":false},"supervisor.json":{"schemaVersion":"runaai-m1-watchdog-supervisor/v1","operationId":"afb5357237924f6788eca9eab406bbc6","intentSha256":"560ae0c9a375af27b4ce8bce90b527a5f008dbed802b9f91db215bda491bcab4","hostSha256":"ccd1ad30741c4a6bbc366053acdc16cf546c77b5631dbc76400337fc2c203891","hostProcessId":10864,"hostProcessStartedAt":"2026-08-29T00:04:42.0007375Z","processId":17956,"processStartedAt":"2026-08-29T00:04:42.1558993Z","recordedAt":"2026-08-29T00:04:43.9452667Z"},"started.json":{"schemaVersion":"runaai-m1-watchdog-started/v1","operationId":"afb5357237924f6788eca9eab406bbc6","intentSha256":"560ae0c9a375af27b4ce8bce90b527a5f008dbed802b9f91db215bda491bcab4","supervisorSha256":"a206f91c0fbcae5a38816126111aff70768934beae83f6b0357385f519316a69","processId":22868,"processStartedAt":"2026-08-29T00:04:43.9687954Z","createdSuspended":true,"atomicJobAssigned":true,"recordedAt":"2026-08-29T00:04:43.9838508Z"},"terminal.json":{"schemaVersion":"runaai-m1-watchdog-terminal/v1","operationId":"afb5357237924f6788eca9eab406bbc6","intentSha256":"560ae0c9a375af27b4ce8bce90b527a5f008dbed802b9f91db215bda491bcab4","supervisorSha256":"a206f91c0fbcae5a38816126111aff70768934beae83f6b0357385f519316a69","startedSha256":"9795fe34ba3e73255503bba25489712352331c6ecd92e6492fc8d966a440b478","outcome":"unknown","result":{"ProcessId":22868,"ExitCode":124,"StdoutBytes":4096,"StderrBytes":0,"ActiveProcesses":0,"CreatedSuspended":true,"AtomicJobAssigned":true,"Resumed":true,"StopConfirmed":true,"TimedOut":false,"OutputLimited":true,"OutputComplete":true,"ProcessStartedAt":"2026-08-29T00:04:43.9687954Z","StartedAt":"2026-08-29T00:04:43.9618060Z","FinishedAt":"2026-08-29T00:04:44.0660645Z","Stdout":""},"recordedAt":"2026-08-29T00:04:44.0690657Z","admissionOpened":false,"automaticReplayPermitted":false,"automaticRollbackPermitted":false},"host.json":{"schemaVersion":"runaai-m1-watchdog-host/v1","operationId":"afb5357237924f6788eca9eab406bbc6","requestSha256":"cf5b73a9ee971426f2d99531d2eeaa262e20acb589e581723f6cbfbe03536379","processId":10864,"executableSha256":"bae898add4643fcf890a83ad8ae56e20dce7e781cab161a53991ceba70c99ffb","hostSha256":"2e7923acf94eeb36b1e641b2b28369cc2c1ce9c3e1c2d43b81963361d48d6baf","wrapperSha256":"5d60a21470273743a9b5b1789d080255e90b678379ac0187a7f6b59a373fcc1a","helperSha256":"76ea1aaeeb4b5b8e8979eac15f4344a9563a450b709637c839c08d882c95f017","powershellSha256":"7600ffe12da441fe89d035b13801e8e91d064bc544a27b19a5cf49f6ab8b18f5","recordedAt":"2026-08-29T00:04:42.150Z"}},"result":{"ProcessId":22868,"ExitCode":124,"StdoutBytes":4096,"StderrBytes":0,"ActiveProcesses":0,"CreatedSuspended":true,"AtomicJobAssigned":true,"Resumed":true,"StopConfirmed":true,"TimedOut":false,"OutputLimited":true,"OutputComplete":true,"ProcessStartedAt":"2026-08-29T00:04:43.9687954Z","StartedAt":"2026-08-29T00:04:43.9618060Z","FinishedAt":"2026-08-29T00:04:44.0660645Z","Stdout":""}}
+# Subtest: actual stderr cap stays unknown, bounded and stopped
+ok 75 - actual stderr cap stays unknown, bounded and stopped
+  ---
+  duration_ms: 4051.2097
+  type: 'test'
+  ...
+# {"schemaVersion":"runaai-m1-watchdog-observation/v1","operationId":"3656d26382c34f2d899c850d12dc73b7","transitionId":"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb","requestSha256":"0a6b917cd4db35f64be4c77d33bc76b47e37dd5670c93c5b05e85ce83ba30b72","descriptorSha256":"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc","packageSha256":"956eabd6d6bc1c3b92d973a3fb994998f8f499dc4319eb962dee9ca31e2ff498","automaticReplayPermitted":false,"automaticRollbackPermitted":false,"admissionOpened":false,"status":"needs-reconciliation","terminalRetained":true,"records":{"intent.json":{"schemaVersion":"runaai-m1-watchdog-intent/v1","operationId":"3656d26382c34f2d899c850d12dc73b7","transitionId":"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb","requestSha256":"0a6b917cd4db35f64be4c77d33bc76b47e37dd5670c93c5b05e85ce83ba30b72","descriptorSha256":"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc","packageSha256":"956eabd6d6bc1c3b92d973a3fb994998f8f499dc4319eb962dee9ca31e2ff498","executableSha256":"bae898add4643fcf890a83ad8ae56e20dce7e781cab161a53991ceba70c99ffb","argumentsSha256":"b4dc070f4adf7eb8eb96021501c34f48bbe1686cef61968b27928208c5c84827","deadline":"2026-08-29T00:04:52.752Z","recordedAt":"2026-08-29T00:04:47.9441798Z","privateValuesIncluded":false},"supervisor.json":{"schemaVersion":"runaai-m1-watchdog-supervisor/v1","operationId":"3656d26382c34f2d899c850d12dc73b7","intentSha256":"f9a4521f7d2be60829dc4063fd459cca9b285dea290fdb3097a440e92cafe49b","hostSha256":"3cbc26be1e7242b9b74f9e356f7d76c04c012af8e31f4cead5779f10dfef3e3e","hostProcessId":12324,"hostProcessStartedAt":"2026-08-29T00:04:46.0437889Z","processId":27424,"processStartedAt":"2026-08-29T00:04:46.2052078Z","recordedAt":"2026-08-29T00:04:47.9801332Z"},"started.json":{"schemaVersion":"runaai-m1-watchdog-started/v1","operationId":"3656d26382c34f2d899c850d12dc73b7","intentSha256":"f9a4521f7d2be60829dc4063fd459cca9b285dea290fdb3097a440e92cafe49b","supervisorSha256":"1d30a58217cab238143674141367a8f428a70cd7102e29df918adce03413d208","processId":17992,"processStartedAt":"2026-08-29T00:04:48.0031389Z","createdSuspended":true,"atomicJobAssigned":true,"recordedAt":"2026-08-29T00:04:48.0172331Z"},"terminal.json":{"schemaVersion":"runaai-m1-watchdog-terminal/v1","operationId":"3656d26382c34f2d899c850d12dc73b7","intentSha256":"f9a4521f7d2be60829dc4063fd459cca9b285dea290fdb3097a440e92cafe49b","supervisorSha256":"1d30a58217cab238143674141367a8f428a70cd7102e29df918adce03413d208","startedSha256":"84378a0bdde45c523090902fc5cd00f6f67b3ce657f89c7ef4bd130e09d3beda","outcome":"unknown","result":{"ProcessId":17992,"ExitCode":124,"StdoutBytes":0,"StderrBytes":4096,"ActiveProcesses":0,"CreatedSuspended":true,"AtomicJobAssigned":true,"Resumed":true,"StopConfirmed":true,"TimedOut":false,"OutputLimited":true,"OutputComplete":true,"ProcessStartedAt":"2026-08-29T00:04:48.0031389Z","StartedAt":"2026-08-29T00:04:47.9965810Z","FinishedAt":"2026-08-29T00:04:48.1171153Z","Stdout":""},"recordedAt":"2026-08-29T00:04:48.1204028Z","admissionOpened":false,"automaticReplayPermitted":false,"automaticRollbackPermitted":false},"host.json":{"schemaVersion":"runaai-m1-watchdog-host/v1","operationId":"3656d26382c34f2d899c850d12dc73b7","requestSha256":"0a6b917cd4db35f64be4c77d33bc76b47e37dd5670c93c5b05e85ce83ba30b72","processId":12324,"executableSha256":"bae898add4643fcf890a83ad8ae56e20dce7e781cab161a53991ceba70c99ffb","hostSha256":"2e7923acf94eeb36b1e641b2b28369cc2c1ce9c3e1c2d43b81963361d48d6baf","wrapperSha256":"5d60a21470273743a9b5b1789d080255e90b678379ac0187a7f6b59a373fcc1a","helperSha256":"76ea1aaeeb4b5b8e8979eac15f4344a9563a450b709637c839c08d882c95f017","powershellSha256":"7600ffe12da441fe89d035b13801e8e91d064bc544a27b19a5cf49f6ab8b18f5","recordedAt":"2026-08-29T00:04:46.198Z"}},"result":{"ProcessId":17992,"ExitCode":124,"StdoutBytes":0,"StderrBytes":4096,"ActiveProcesses":0,"CreatedSuspended":true,"AtomicJobAssigned":true,"Resumed":true,"StopConfirmed":true,"TimedOut":false,"OutputLimited":true,"OutputComplete":true,"ProcessStartedAt":"2026-08-29T00:04:48.0031389Z","StartedAt":"2026-08-29T00:04:47.9965810Z","FinishedAt":"2026-08-29T00:04:48.1171153Z","Stdout":""}}
+# Subtest: actual watchdog crash closes its noninherited job and stops descendants, leaving no fabricated terminal
+ok 76 - actual watchdog crash closes its noninherited job and stops descendants, leaving no fabricated terminal
+  ---
+  duration_ms: 4039.2375
+  type: 'test'
+  ...
+# {"schemaVersion":"runaai-m1-watchdog-observation/v1","operationId":"46f09e5e68684e4da0062f39c1d21f10","transitionId":"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb","requestSha256":"3a1e1f1d73cfefcebf4a62b0424a4c33dc4acceaec7b34936f81720303847928","descriptorSha256":"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc","packageSha256":"8c0139b92fbe834a26e4d5cee698a66bba34d61891373ba9ab4f6123209ecc48","automaticReplayPermitted":false,"automaticRollbackPermitted":false,"admissionOpened":false,"status":"needs-reconciliation","terminalRetained":false,"records":{"intent.json":{"schemaVersion":"runaai-m1-watchdog-intent/v1","operationId":"46f09e5e68684e4da0062f39c1d21f10","transitionId":"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb","requestSha256":"3a1e1f1d73cfefcebf4a62b0424a4c33dc4acceaec7b34936f81720303847928","descriptorSha256":"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc","packageSha256":"8c0139b92fbe834a26e4d5cee698a66bba34d61891373ba9ab4f6123209ecc48","executableSha256":"bae898add4643fcf890a83ad8ae56e20dce7e781cab161a53991ceba70c99ffb","argumentsSha256":"e59acc88bcb5645c8490d2c9e34de7701565a6779751bd6b1d29affd263316db","deadline":"2026-08-29T00:04:56.760Z","recordedAt":"2026-08-29T00:04:51.9526725Z","privateValuesIncluded":false},"supervisor.json":{"schemaVersion":"runaai-m1-watchdog-supervisor/v1","operationId":"46f09e5e68684e4da0062f39c1d21f10","intentSha256":"2ca1f10a818bef6ebd4066c907476d29c9233aed49e794d4d2f04b9fa08cea49","hostSha256":"a2b6c182bdfca02b9c88281cc0384f9df3075b6f70bf4e8b063f9409a3040977","hostProcessId":17520,"hostProcessStartedAt":"2026-08-29T00:04:50.0526554Z","processId":18552,"processStartedAt":"2026-08-29T00:04:50.2058208Z","recordedAt":"2026-08-29T00:04:51.9930059Z"},"started.json":{"schemaVersion":"runaai-m1-watchdog-started/v1","operationId":"46f09e5e68684e4da0062f39c1d21f10","intentSha256":"2ca1f10a818bef6ebd4066c907476d29c9233aed49e794d4d2f04b9fa08cea49","supervisorSha256":"6cc6943064b2508c59d53cce31ccaeff2174eea2098234b2ce40c2e4012b1c4d","processId":33028,"processStartedAt":"2026-08-29T00:04:52.0200243Z","createdSuspended":true,"atomicJobAssigned":true,"recordedAt":"2026-08-29T00:04:52.0363136Z"},"host.json":{"schemaVersion":"runaai-m1-watchdog-host/v1","operationId":"46f09e5e68684e4da0062f39c1d21f10","requestSha256":"3a1e1f1d73cfefcebf4a62b0424a4c33dc4acceaec7b34936f81720303847928","processId":17520,"executableSha256":"bae898add4643fcf890a83ad8ae56e20dce7e781cab161a53991ceba70c99ffb","hostSha256":"2e7923acf94eeb36b1e641b2b28369cc2c1ce9c3e1c2d43b81963361d48d6baf","wrapperSha256":"5d60a21470273743a9b5b1789d080255e90b678379ac0187a7f6b59a373fcc1a","helperSha256":"76ea1aaeeb4b5b8e8979eac15f4344a9563a450b709637c839c08d882c95f017","powershellSha256":"7600ffe12da441fe89d035b13801e8e91d064bc544a27b19a5cf49f6ab8b18f5","recordedAt":"2026-08-29T00:04:50.200Z"}}}
+# Subtest: actual effect followed by lost terminal cannot be accepted by fresh observer
+ok 77 - actual effect followed by lost terminal cannot be accepted by fresh observer
+  ---
+  duration_ms: 4446.5319
+  type: 'test'
+  ...
+# {"schemaVersion":"runaai-m1-watchdog-observation/v1","operationId":"76c7dd0f53ad4b79b4945adacd7bc07c","transitionId":"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb","requestSha256":"5d7d4164d671c3744b562daeb243bf12eef533294ab070981f86b588fefbf673","descriptorSha256":"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc","packageSha256":"44bfecdde10a2ebf0b781123275ca66bec1ac2dc994e7aee8c903ff3b19a933a","automaticReplayPermitted":false,"automaticRollbackPermitted":false,"admissionOpened":false,"status":"needs-reconciliation","terminalRetained":false,"records":{"intent.json":{"schemaVersion":"runaai-m1-watchdog-intent/v1","operationId":"76c7dd0f53ad4b79b4945adacd7bc07c","transitionId":"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb","requestSha256":"5d7d4164d671c3744b562daeb243bf12eef533294ab070981f86b588fefbf673","descriptorSha256":"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc","packageSha256":"44bfecdde10a2ebf0b781123275ca66bec1ac2dc994e7aee8c903ff3b19a933a","executableSha256":"bae898add4643fcf890a83ad8ae56e20dce7e781cab161a53991ceba70c99ffb","argumentsSha256":"ba6c3b8406031b6b44ec4f1e4c6b5a0422621defe7432243f9fabd93ca114640","deadline":"2026-08-29T00:05:00.829Z","recordedAt":"2026-08-29T00:04:56.3054198Z","privateValuesIncluded":false},"supervisor.json":{"schemaVersion":"runaai-m1-watchdog-supervisor/v1","operationId":"76c7dd0f53ad4b79b4945adacd7bc07c","intentSha256":"3ef8d3e955212d724ced404ff85efb88e374cdf808a7c20d3cac258d27937ede","hostSha256":"67551ade2eb4bccba071013d487d20005872393b0bc01f788c4f671dfd8d0a46","hostProcessId":14296,"hostProcessStartedAt":"2026-08-29T00:04:54.1395807Z","processId":20944,"processStartedAt":"2026-08-29T00:04:54.2948446Z","recordedAt":"2026-08-29T00:04:56.3482655Z"},"started.json":{"schemaVersion":"runaai-m1-watchdog-started/v1","operationId":"76c7dd0f53ad4b79b4945adacd7bc07c","intentSha256":"3ef8d3e955212d724ced404ff85efb88e374cdf808a7c20d3cac258d27937ede","supervisorSha256":"7e86fe1b15b0969563af16fe3c792182fb980862d527843cdd1e1953126fdf21","processId":28372,"processStartedAt":"2026-08-29T00:04:56.3780578Z","createdSuspended":true,"atomicJobAssigned":true,"recordedAt":"2026-08-29T00:04:56.3922640Z"},"failure.json":{"schemaVersion":"runaai-m1-watchdog-failure/v1","requestSha256":"5d7d4164d671c3744b562daeb243bf12eef533294ab070981f86b588fefbf673","stage":"terminal","errorCode":"m1-supervisor-unconfirmed","recordedAt":"2026-08-29T00:04:56.4888048Z","outcome":"unknown","privateValuesIncluded":false},"host.json":{"schemaVersion":"runaai-m1-watchdog-host/v1","operationId":"76c7dd0f53ad4b79b4945adacd7bc07c","requestSha256":"5d7d4164d671c3744b562daeb243bf12eef533294ab070981f86b588fefbf673","processId":14296,"executableSha256":"bae898add4643fcf890a83ad8ae56e20dce7e781cab161a53991ceba70c99ffb","hostSha256":"2e7923acf94eeb36b1e641b2b28369cc2c1ce9c3e1c2d43b81963361d48d6baf","wrapperSha256":"5d60a21470273743a9b5b1789d080255e90b678379ac0187a7f6b59a373fcc1a","helperSha256":"76ea1aaeeb4b5b8e8979eac15f4344a9563a450b709637c839c08d882c95f017","powershellSha256":"7600ffe12da441fe89d035b13801e8e91d064bc544a27b19a5cf49f6ab8b18f5","recordedAt":"2026-08-29T00:04:54.289Z"}}}
+# Subtest: foreign terminal, package drift, malformed request and hardlink fail closed
+ok 78 - foreign terminal, package drift, malformed request and hardlink fail closed
+  ---
+  duration_ms: 4104.5634
+  type: 'test'
+  ...
+# Subtest: argument hash is unambiguous with quotes, unicode, empty and escaped separators
+ok 79 - argument hash is unambiguous with quotes, unicode, empty and escaped separators
+  ---
+  duration_ms: 0.4684
+  type: 'test'
+  ...
+# Subtest: launching controller really exits; independent watchdog retains deadline and stops its tree
+ok 80 - launching controller really exits; independent watchdog retains deadline and stops its tree
+  ---
+  duration_ms: 6673.4926
+  type: 'test'
+  ...
+# {"schemaVersion":"runaai-m1-watchdog-observation/v1","operationId":"a20ede4e8ec34118b6727b8e746958c4","transitionId":"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb","requestSha256":"766669b55a8d6fcbb85f7747ecd254be8b7df2458bb612b2eeb37421af42f1cf","descriptorSha256":"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc","packageSha256":"0ba0a28b873916ad83ad463ff17f03ad06dc02acf943b8cc188b74e5a9b35f64","automaticReplayPermitted":false,"automaticRollbackPermitted":false,"admissionOpened":false,"status":"needs-reconciliation","terminalRetained":false,"records":{"intent.json":{"schemaVersion":"runaai-m1-watchdog-intent/v1","operationId":"a20ede4e8ec34118b6727b8e746958c4","transitionId":"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb","requestSha256":"766669b55a8d6fcbb85f7747ecd254be8b7df2458bb612b2eeb37421af42f1cf","descriptorSha256":"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc","packageSha256":"0ba0a28b873916ad83ad463ff17f03ad06dc02acf943b8cc188b74e5a9b35f64","executableSha256":"bae898add4643fcf890a83ad8ae56e20dce7e781cab161a53991ceba70c99ffb","argumentsSha256":"ec8427802a799948bfbc27e54512313ec698a46d2cb907546e9a8cea0ec5f40e","deadline":"2026-08-29T00:05:07.331Z","recordedAt":"2026-08-29T00:05:05.6120720Z","privateValuesIncluded":false},"supervisor.json":{"schemaVersion":"runaai-m1-watchdog-supervisor/v1","operationId":"a20ede4e8ec34118b6727b8e746958c4","intentSha256":"67989692dfb332f3dc4b4222512d90152e14b055f42c93e52f7c04dd086c85e0","hostSha256":"d2fc76fe4d838edc27644dcb042cb12e9f1703a860d35c3a3a1b5b5a9eba82b5","hostProcessId":37252,"hostProcessStartedAt":"2026-08-29T00:05:02.6890066Z","processId":12828,"processStartedAt":"2026-08-29T00:05:02.8510171Z","recordedAt":"2026-08-29T00:05:05.6773739Z"},"started.json":{"schemaVersion":"runaai-m1-watchdog-started/v1","operationId":"a20ede4e8ec34118b6727b8e746958c4","intentSha256":"67989692dfb332f3dc4b4222512d90152e14b055f42c93e52f7c04dd086c85e0","supervisorSha256":"2c4aae16a9bd2fd59c068efc062475a1af9fc7376cbd193d882d3fb8578bed33","processId":37088,"processStartedAt":"2026-08-29T00:05:05.7425826Z","createdSuspended":true,"atomicJobAssigned":true,"recordedAt":"2026-08-29T00:05:05.7650463Z"},"host.json":{"schemaVersion":"runaai-m1-watchdog-host/v1","operationId":"a20ede4e8ec34118b6727b8e746958c4","requestSha256":"766669b55a8d6fcbb85f7747ecd254be8b7df2458bb612b2eeb37421af42f1cf","processId":37252,"executableSha256":"bae898add4643fcf890a83ad8ae56e20dce7e781cab161a53991ceba70c99ffb","hostSha256":"2e7923acf94eeb36b1e641b2b28369cc2c1ce9c3e1c2d43b81963361d48d6baf","wrapperSha256":"5d60a21470273743a9b5b1789d080255e90b678379ac0187a7f6b59a373fcc1a","helperSha256":"76ea1aaeeb4b5b8e8979eac15f4344a9563a450b709637c839c08d882c95f017","powershellSha256":"7600ffe12da441fe89d035b13801e8e91d064bc544a27b19a5cf49f6ab8b18f5","recordedAt":"2026-08-29T00:05:02.844Z"}}}
+# {"controllerPid":30364,"controllerStopped":true,"actual":{"schemaVersion":"runaai-m1-watchdog-observation/v1","operationId":"a20ede4e8ec34118b6727b8e746958c4","transitionId":"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb","requestSha256":"766669b55a8d6fcbb85f7747ecd254be8b7df2458bb612b2eeb37421af42f1cf","descriptorSha256":"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc","packageSha256":"0ba0a28b873916ad83ad463ff17f03ad06dc02acf943b8cc188b74e5a9b35f64","automaticReplayPermitted":false,"automaticRollbackPermitted":false,"admissionOpened":false,"status":"needs-reconciliation","terminalRetained":true,"records":{"intent.json":{"schemaVersion":"runaai-m1-watchdog-intent/v1","operationId":"a20ede4e8ec34118b6727b8e746958c4","transitionId":"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb","requestSha256":"766669b55a8d6fcbb85f7747ecd254be8b7df2458bb612b2eeb37421af42f1cf","descriptorSha256":"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc","packageSha256":"0ba0a28b873916ad83ad463ff17f03ad06dc02acf943b8cc188b74e5a9b35f64","executableSha256":"bae898add4643fcf890a83ad8ae56e20dce7e781cab161a53991ceba70c99ffb","argumentsSha256":"ec8427802a799948bfbc27e54512313ec698a46d2cb907546e9a8cea0ec5f40e","deadline":"2026-08-29T00:05:07.331Z","recordedAt":"2026-08-29T00:05:05.6120720Z","privateValuesIncluded":false},"supervisor.json":{"schemaVersion":"runaai-m1-watchdog-supervisor/v1","operationId":"a20ede4e8ec34118b6727b8e746958c4","intentSha256":"67989692dfb332f3dc4b4222512d90152e14b055f42c93e52f7c04dd086c85e0","hostSha256":"d2fc76fe4d838edc27644dcb042cb12e9f1703a860d35c3a3a1b5b5a9eba82b5","hostProcessId":37252,"hostProcessStartedAt":"2026-08-29T00:05:02.6890066Z","processId":12828,"processStartedAt":"2026-08-29T00:05:02.8510171Z","recordedAt":"2026-08-29T00:05:05.6773739Z"},"started.json":{"schemaVersion":"runaai-m1-watchdog-started/v1","operationId":"a20ede4e8ec34118b6727b8e746958c4","intentSha256":"67989692dfb332f3dc4b4222512d90152e14b055f42c93e52f7c04dd086c85e0","supervisorSha256":"2c4aae16a9bd2fd59c068efc062475a1af9fc7376cbd193d882d3fb8578bed33","processId":37088,"processStartedAt":"2026-08-29T00:05:05.7425826Z","createdSuspended":true,"atomicJobAssigned":true,"recordedAt":"2026-08-29T00:05:05.7650463Z"},"terminal.json":{"schemaVersion":"runaai-m1-watchdog-terminal/v1","operationId":"a20ede4e8ec34118b6727b8e746958c4","intentSha256":"67989692dfb332f3dc4b4222512d90152e14b055f42c93e52f7c04dd086c85e0","supervisorSha256":"2c4aae16a9bd2fd59c068efc062475a1af9fc7376cbd193d882d3fb8578bed33","startedSha256":"92b097118bd0d044c074dca6309198fe9abb59671680e36e29c1dcf72d1cc94c","outcome":"unknown","result":{"ProcessId":37088,"ExitCode":124,"StdoutBytes":0,"StderrBytes":0,"ActiveProcesses":0,"CreatedSuspended":true,"AtomicJobAssigned":true,"Resumed":true,"StopConfirmed":true,"TimedOut":true,"OutputLimited":false,"OutputComplete":true,"ProcessStartedAt":"2026-08-29T00:05:05.7425826Z","StartedAt":"2026-08-29T00:05:05.7337227Z","FinishedAt":"2026-08-29T00:05:07.3612872Z","Stdout":""},"recordedAt":"2026-08-29T00:05:07.3659764Z","admissionOpened":false,"automaticReplayPermitted":false,"automaticRollbackPermitted":false},"host.json":{"schemaVersion":"runaai-m1-watchdog-host/v1","operationId":"a20ede4e8ec34118b6727b8e746958c4","requestSha256":"766669b55a8d6fcbb85f7747ecd254be8b7df2458bb612b2eeb37421af42f1cf","processId":37252,"executableSha256":"bae898add4643fcf890a83ad8ae56e20dce7e781cab161a53991ceba70c99ffb","hostSha256":"2e7923acf94eeb36b1e641b2b28369cc2c1ce9c3e1c2d43b81963361d48d6baf","wrapperSha256":"5d60a21470273743a9b5b1789d080255e90b678379ac0187a7f6b59a373fcc1a","helperSha256":"76ea1aaeeb4b5b8e8979eac15f4344a9563a450b709637c839c08d882c95f017","powershellSha256":"7600ffe12da441fe89d035b13801e8e91d064bc544a27b19a5cf49f6ab8b18f5","recordedAt":"2026-08-29T00:05:02.844Z"}},"result":{"ProcessId":37088,"ExitCode":124,"StdoutBytes":0,"StderrBytes":0,"ActiveProcesses":0,"CreatedSuspended":true,"AtomicJobAssigned":true,"Resumed":true,"StopConfirmed":true,"TimedOut":true,"OutputLimited":false,"OutputComplete":true,"ProcessStartedAt":"2026-08-29T00:05:05.7425826Z","StartedAt":"2026-08-29T00:05:05.7337227Z","FinishedAt":"2026-08-29T00:05:07.3612872Z","Stdout":""}}}
+# Subtest: actual suspended-start observer throw never executes companion
+ok 81 - actual suspended-start observer throw never executes companion
+  ---
+  duration_ms: 3292.8481
+  type: 'test'
+  ...
+# {"mode":"throw","elapsedMs":1168,"actual":{"ProcessId":31532,"ExitCode":-1,"StdoutBytes":0,"StderrBytes":0,"ActiveProcesses":-1,"CreatedSuspended":true,"AtomicJobAssigned":true,"Resumed":false,"StopConfirmed":false,"TimedOut":false,"OutputLimited":false,"OutputComplete":false,"ProcessStartedAt":"2026-08-29T00:05:10.6306670Z","StartedAt":"2026-08-29T00:05:10.6219911Z","FinishedAt":null,"Stdout":""},"stopped":true,"effectObserved":false}
+# Subtest: actual suspended-start observer stall never executes companion
+ok 82 - actual suspended-start observer stall never executes companion
+  ---
+  duration_ms: 11277.6741
+  type: 'test'
+  ...
+# {"mode":"stall","elapsedMs":9199,"actual":{"ProcessId":20516,"ExitCode":-1,"StdoutBytes":0,"StderrBytes":0,"ActiveProcesses":-1,"CreatedSuspended":true,"AtomicJobAssigned":true,"Resumed":false,"StopConfirmed":false,"TimedOut":false,"OutputLimited":false,"OutputComplete":false,"ProcessStartedAt":"2026-08-29T00:05:13.7910247Z","StartedAt":"2026-08-29T00:05:13.7830769Z","FinishedAt":null,"Stdout":""},"stopped":true,"effectObserved":false}
+# Subtest: wire projection retains exact closed/final routing without sticky input/write deadlines
+ok 83 - wire projection retains exact closed/final routing without sticky input/write deadlines
+  ---
+  duration_ms: 333.2027
+  type: 'test'
+  ...
+# Subtest: wire helper refuses unsafe fixture substitution value=>value.frontPort=9770
+ok 84 - wire helper refuses unsafe fixture substitution value=>value.frontPort=9770
+  ---
+  duration_ms: 50.7994
+  type: 'test'
+  ...
+# Subtest: wire helper refuses unsafe fixture substitution value=>value.tlsPort=1234
+ok 85 - wire helper refuses unsafe fixture substitution value=>value.tlsPort=1234
+  ---
+  duration_ms: 46.7205
+  type: 'test'
+  ...
+# Subtest: wire helper refuses unsafe fixture substitution value=>value.tlsPort='192.168.50.165:9776'
+ok 86 - wire helper refuses unsafe fixture substitution value=>value.tlsPort='192.168.50.165:9776'
+  ---
+  duration_ms: 49.1721
+  type: 'test'
+  ...
+# Subtest: wire helper refuses unsafe fixture substitution value=>value.client='../real-key'
+ok 87 - wire helper refuses unsafe fixture substitution value=>value.client='../real-key'
+  ---
+  duration_ms: 43.6958
+  type: 'test'
+  ...
+# Subtest: wire helper refuses unsafe fixture substitution value=>value.issuer='../real-ca'
+ok 88 - wire helper refuses unsafe fixture substitution value=>value.issuer='../real-ca'
+  ---
+  duration_ms: 47.3606
+  type: 'test'
+  ...
+# Subtest: wire helper refuses unsafe fixture substitution value=>value.serverName='other.example'
+ok 89 - wire helper refuses unsafe fixture substitution value=>value.serverName='other.example'
+  ---
+  duration_ms: 51.7775
+  type: 'test'
+  ...
+# Subtest: wire helper refuses unsafe fixture substitution value=>value.phase='unverified'
+ok 90 - wire helper refuses unsafe fixture substitution value=>value.phase='unverified'
+  ---
+  duration_ms: 43.3768
+  type: 'test'
+  ...
+# Subtest: raw ordinary HTTP fixture does not TCP-half-close before its server response
+ok 91 - raw ordinary HTTP fixture does not TCP-half-close before its server response
+  ---
+  duration_ms: 70.1888
+  type: 'test'
+  ...
+# Subtest: raw client guard remains an explicit failure, not server timeout evidence
+ok 92 - raw client guard remains an explicit failure, not server timeout evidence
+  ---
+  duration_ms: 92.6416
+  type: 'test'
+  ...
+# Subtest: raw response-free server closure is distinct from the fixture client guard
+ok 93 - raw response-free server closure is distinct from the fixture client guard
+  ---
+  duration_ms: 3.1468
+  type: 'test'
+  ...
+# Subtest: new wire source includes exact shared schema and all current proxy pins
+ok 94 - new wire source includes exact shared schema and all current proxy pins
+  ---
+  duration_ms: 5.3517
+  type: 'test'
+  ...
+# Subtest: four prospective schema frames retain one valid contract and three independently denied changes
+ok 95 - four prospective schema frames retain one valid contract and three independently denied changes
+  ---
+  duration_ms: 2.0647
+  type: 'test'
+  ...
+1..95
+# tests 95
+# suites 0
+# pass 95
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 81560.1208

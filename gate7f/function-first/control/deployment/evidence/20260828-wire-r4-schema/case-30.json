@@ -1,0 +1,60 @@
+{
+  "name": "valid sixty second completion remains byte exact under input-only deadline",
+  "passed": true,
+  "error": null,
+  "errorMessage": null,
+  "result": {
+    "status": 200,
+    "body": " {\"id\":\"synthetic-sixty-second\",\"choices\":[{\"message\":{\"role\":\"assistant\",\"content\":\"Complete unchanged response after sixty seconds.\"}}]}\n",
+    "elapsedMs": 60017
+  },
+  "requestFrame": null,
+  "before": {
+    "admitAttempts": 9,
+    "admitted": 9,
+    "released": 9,
+    "active": 0,
+    "polls": 0,
+    "primary": 5,
+    "bge": 4,
+    "redirects": 0
+  },
+  "after": {
+    "admitAttempts": 10,
+    "admitted": 10,
+    "released": 10,
+    "active": 0,
+    "polls": 0,
+    "primary": 6,
+    "bge": 4,
+    "redirects": 0
+  },
+  "nativeRequests": [
+    {
+      "kind": "primary",
+      "path": "/v1/chat/completions",
+      "method": "POST",
+      "bodyBytes": 189,
+      "bodySha256": "de8193a9c0f0554b8a714c2fc46e04b3bd45646c3290971f645e4557d5469917",
+      "headers": {
+        "content-type": "application/json",
+        "host": "127.0.0.1:60224",
+        "connection": "keep-alive",
+        "content-length": "189"
+      },
+      "at": 1787961745665
+    }
+  ],
+  "proxyEvents": [
+    {
+      "type": "forwarded",
+      "method": "POST",
+      "path": "/v1/chat/completions",
+      "requestBytes": 189,
+      "responseBytes": 139,
+      "status": 200,
+      "generation": "290f8bd7-5a35-4b2f-8031-717859503dbb",
+      "at": 1787961805673
+    }
+  ]
+}

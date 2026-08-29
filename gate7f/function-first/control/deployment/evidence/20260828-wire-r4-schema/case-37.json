@@ -1,0 +1,65 @@
+{
+  "name": "exact static evidence schema passes once byte exact",
+  "passed": true,
+  "error": null,
+  "errorMessage": null,
+  "result": {
+    "status": 200,
+    "body": "{\"id\":\"synthetic-evidence-wire\",\"choices\":[{\"message\":{\"role\":\"assistant\",\"content\":\"{\\\"answer\\\":\\\"The synthetic lantern is amber.\\\",\\\"citations\\\":[{\\\"sourceId\\\":\\\"synthetic-lantern\\\",\\\"sectionId\\\":\\\"color\\\"}]}\"}}]}\n",
+    "elapsedMs": 12
+  },
+  "requestFrame": {
+    "method": "POST",
+    "route": "/v1/chat/completions",
+    "body": "{\"model\":\"gemma-4-26b-a4b-it-qat\",\"max_tokens\":512,\"temperature\":0,\"reasoning_effort\":\"none\",\"messages\":[{\"role\":\"user\",\"content\":\"Return the fixed synthetic transport fixture response.\"}],\"response_format\":{\"type\":\"json_schema\",\"json_schema\":{\"schema\":{\"$schema\":\"http://json-schema.org/draft-07/schema#\",\"type\":\"object\",\"additionalProperties\":false,\"properties\":{\"answer\":{\"type\":\"string\"},\"citations\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"additionalProperties\":false,\"properties\":{\"sourceId\":{\"type\":\"string\"},\"sectionId\":{\"type\":\"string\"}},\"required\":[\"sourceId\",\"sectionId\"]}}},\"required\":[\"answer\",\"citations\"]},\"strict\":true,\"name\":\"response\"}}}",
+    "bodySha256": "b48c1515f270b860b5223061fbea52fff2b99e9ad7bb07aa0e305f3c16601848"
+  },
+  "before": {
+    "admitAttempts": 10,
+    "admitted": 10,
+    "released": 10,
+    "active": 0,
+    "polls": 0,
+    "primary": 6,
+    "bge": 4,
+    "redirects": 0
+  },
+  "after": {
+    "admitAttempts": 11,
+    "admitted": 11,
+    "released": 11,
+    "active": 0,
+    "polls": 0,
+    "primary": 7,
+    "bge": 4,
+    "redirects": 0
+  },
+  "nativeRequests": [
+    {
+      "kind": "primary",
+      "path": "/v1/chat/completions",
+      "method": "POST",
+      "bodyBytes": 656,
+      "bodySha256": "b48c1515f270b860b5223061fbea52fff2b99e9ad7bb07aa0e305f3c16601848",
+      "headers": {
+        "content-type": "application/json",
+        "host": "127.0.0.1:60224",
+        "connection": "keep-alive",
+        "content-length": "656"
+      },
+      "at": 1787961818135
+    }
+  ],
+  "proxyEvents": [
+    {
+      "type": "forwarded",
+      "method": "POST",
+      "path": "/v1/chat/completions",
+      "requestBytes": 656,
+      "responseBytes": 216,
+      "status": 200,
+      "generation": "290f8bd7-5a35-4b2f-8031-717859503dbb",
+      "at": 1787961818137
+    }
+  ]
+}

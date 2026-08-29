@@ -1,0 +1,45 @@
+{
+  "name": "weakened evidence additional properties denied before admission",
+  "passed": true,
+  "error": null,
+  "errorMessage": null,
+  "result": {
+    "status": 503,
+    "body": "{\"schemaVersion\":\"runaai-home-runtime-error/v1\",\"errorCode\":\"runtime-response-format-not-qualified\",\"privateValuesIncluded\":false}",
+    "elapsedMs": 2
+  },
+  "requestFrame": {
+    "method": "POST",
+    "route": "/v1/chat/completions",
+    "body": "{\"model\":\"gemma-4-26b-a4b-it-qat\",\"max_tokens\":512,\"temperature\":0,\"reasoning_effort\":\"none\",\"messages\":[{\"role\":\"user\",\"content\":\"Return the fixed synthetic transport fixture response.\"}],\"response_format\":{\"type\":\"json_schema\",\"json_schema\":{\"schema\":{\"$schema\":\"http://json-schema.org/draft-07/schema#\",\"type\":\"object\",\"additionalProperties\":true,\"properties\":{\"answer\":{\"type\":\"string\"},\"citations\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"additionalProperties\":false,\"properties\":{\"sourceId\":{\"type\":\"string\"},\"sectionId\":{\"type\":\"string\"}},\"required\":[\"sourceId\",\"sectionId\"]}}},\"required\":[\"answer\",\"citations\"]},\"strict\":true,\"name\":\"response\"}}}",
+    "bodySha256": "92c45ccf689eda40145ec0cd6d4beb886bde6f48825b888adebe3e89c1ad4749"
+  },
+  "before": {
+    "admitAttempts": 11,
+    "admitted": 11,
+    "released": 11,
+    "active": 0,
+    "polls": 0,
+    "primary": 7,
+    "bge": 4,
+    "redirects": 0
+  },
+  "after": {
+    "admitAttempts": 11,
+    "admitted": 11,
+    "released": 11,
+    "active": 0,
+    "polls": 0,
+    "primary": 7,
+    "bge": 4,
+    "redirects": 0
+  },
+  "nativeRequests": [],
+  "proxyEvents": [
+    {
+      "type": "denied",
+      "code": "runtime-response-format-not-qualified",
+      "at": 1787961818143
+    }
+  ]
+}

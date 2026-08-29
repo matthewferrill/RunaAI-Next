@@ -67,3 +67,21 @@ admission. The frozen9556 app is diagnostic only; these results do not promote i
 The adapter cross-checks child argv hashes but does not independently reconstruct
 the four private command arguments. Those commands are defined by the exact
 pinned companion. This trust boundary is explicit in the code and README.
+
+## Canonical-source rerun
+
+After the newline-drift audit, the exact existing Git object bytes were marked
+byte-preserved and the complete supervisor/deployment suite was rerun from
+commit `3cb9b1a9e3aaeca7cd20e69d86b1f06c09a75d09`. It passed **95/95**, zero
+failed, cancelled or skipped. The count is two higher than R1 because the
+prospective source-byte and evidence-schema checks are included; no old result
+was edited or regraded.
+
+Canonical proof: `evidence/20260828-supervisor-r2-canonical/proof.json`, SHA256
+`a1a7ae82a57b76c055b0add63d3777b589b37d95610afe8f7401c11feae111e7`.
+Complete TAP SHA256:
+`3aa102fff79d2716b1289f8e203a9f317b2bb0972e6cfd611601132792b5022d`.
+The proof binds the exact24 deployment source files; its companion R4 wire proof
+binds the remaining eight Home/runtime/evidence files. All32 selected files
+matched the canonical Git bytes, this checkout and a fresh Git archive without
+normalization or alternate accepted hashes. See `SOURCE-BYTE-EXPORT-RESULTS.md`.

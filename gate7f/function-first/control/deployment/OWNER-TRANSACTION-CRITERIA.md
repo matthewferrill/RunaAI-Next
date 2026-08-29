@@ -43,6 +43,13 @@ Home command, load a model, read a protected value or activate a service.
    receipts with source/runtime/profile/installation/task/process/native/mTLS
    bindings. A boolean `ready`, listener marker, cached receipt, source mismatch
    or expired receipt is not authority.
+6. The outer coordinator additionally requires a fresh, versioned activation-
+   authority receipt bound to the exact descriptor and companion package. The
+   receipt must name the qualified source, runtime seal and grades and state
+   `activationPermitted:true`. The current diagnostic descriptor states
+   `activationPermitted:false`; therefore it cannot be executed by the outer
+   coordinator even when constructor adapters are present. Synthetic tests use
+   an explicit test-only bypass and never call a host.
 
 ## Managed caller closure
 

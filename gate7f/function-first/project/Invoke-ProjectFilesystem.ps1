@@ -27,13 +27,14 @@ public sealed class RunaProjectHandles : IDisposable {
   readonly List<IDisposable> held = new List<IDisposable>();
   readonly Dictionary<string,FileStream> written = new Dictionary<string,FileStream>(StringComparer.OrdinalIgnoreCase);
   readonly HashSet<string> directories = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+  static string Native(string path) { return path.StartsWith(@"\\?\",StringComparison.Ordinal) ? path : @"\\?\"+path; }
   public void DirectoryLock(string path, bool create) {
     path = Path.GetFullPath(path);
     if (directories.Contains(path)) return;
     string parent = Path.GetDirectoryName(path.TrimEnd('\\'));
     if (!String.IsNullOrEmpty(parent) && !String.Equals(parent,path,StringComparison.OrdinalIgnoreCase)) DirectoryLock(parent,false);
-    if (create && !CreateDirectory(path,IntPtr.Zero) && Marshal.GetLastWin32Error()!=183) throw new IOException("project-directory-create-failed");
-    SafeFileHandle h = CreateFile(path,0x80,3,IntPtr.Zero,3,0x02200000,IntPtr.Zero);
+    if (create && !CreateDirectory(Native(path),IntPtr.Zero) && Marshal.GetLastWin32Error()!=183) throw new IOException("project-directory-create-failed");
+    SafeFileHandle h = CreateFile(Native(path),0x80,3,IntPtr.Zero,3,0x02200000,IntPtr.Zero);
     if(h.IsInvalid) { h.Dispose(); throw new IOException("project-directory-lock-failed"); }
     held.Add(h);
     Info info;
@@ -41,13 +42,13 @@ public sealed class RunaProjectHandles : IDisposable {
     directories.Add(path);
   }
   public bool NewRevision(string path) {
-    bool created = CreateDirectory(path,IntPtr.Zero);
+    bool created = CreateDirectory(Native(path),IntPtr.Zero);
     if(!created && Marshal.GetLastWin32Error()!=183) throw new IOException("project-revision-create-failed");
     DirectoryLock(path,false);
     return created;
   }
   FileStream Open(string path, bool create) {
-    SafeFileHandle h = CreateFile(path, create ? 0xC0000000u : 0x80000000u, 1, IntPtr.Zero, create ? 1u : 3u, 0x00200000, IntPtr.Zero);
+    SafeFileHandle h = CreateFile(Native(path), create ? 0xC0000000u : 0x80000000u, 1, IntPtr.Zero, create ? 1u : 3u, 0x00200000, IntPtr.Zero);
     if(h.IsInvalid) { h.Dispose(); throw new IOException("project-file-lock-failed"); }
     Info info;
     if(!GetFileInformationByHandle(h,out info) || (info.Attributes & 0x410)!=0 || info.Links!=1 || info.SizeHigh!=0 || info.SizeLow>4000) {
@@ -87,10 +88,12 @@ try {
   $environment = [IO.Path]::Combine($base, [string]$request.environmentDirectory)
   $held.DirectoryLock($environment, ($request.operation -eq 'create'))
   $revision = [IO.Path]::Combine($environment, [string]$request.revisionId)
+  $environmentIo = '\\?\' + $environment
+  $revisionIo = '\\?\' + $revision
   $created = $false
-  if ($request.operation -eq 'observe' -and -not [IO.Directory]::Exists($revision)) {
+  if ($request.operation -eq 'observe' -and -not [IO.Directory]::Exists($revisionIo)) {
     # A file/reparse point at this exact name is not absence.
-    if ([IO.File]::Exists($revision) -or [IO.Directory]::GetFileSystemEntries($environment, [string]$request.revisionId).Length -ne 0) { throw 'project-revision-invalid' }
+    if ([IO.File]::Exists($revisionIo) -or [IO.Directory]::GetFileSystemEntries($environmentIo, [string]$request.revisionId).Length -ne 0) { throw 'project-revision-invalid' }
     @{status='absent'} | ConvertTo-Json -Compress
     exit 0
   }
@@ -108,7 +111,7 @@ try {
       $held.WriteNew([IO.Path]::Combine($revision,[string]$file.path), $bytes)
     }
   }
-  $entries = @([IO.Directory]::GetFileSystemEntries($revision))
+  $entries = @([IO.Directory]::GetFileSystemEntries($revisionIo))
   if ($entries.Count -ne $names.Count) { throw 'project-revision-file-set-invalid' }
   foreach ($entry in $entries) { if (-not $names.Contains([IO.Path]::GetFileName($entry))) { throw 'project-revision-file-set-invalid' } }
   $files = @()

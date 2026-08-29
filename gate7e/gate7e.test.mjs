@@ -366,8 +366,9 @@ test("MXC runs the pinned child or exposes the exact host-preparation blocker an
     t.skip("Microsoft ProcessContainer is not available on this host.");
     return;
   }
-  const temporaryRoot = await mkdtemp(join(tmpdir(), "runa2-gate7e-"));
-  assert.equal(resolve(temporaryRoot).startsWith(resolve(tmpdir())), true);
+  const temporaryParent = process.env.M1_EXECUTOR_TEMP_ROOT ?? tmpdir();
+  const temporaryRoot = await mkdtemp(join(temporaryParent, "runa2-gate7e-"));
+  assert.equal(resolve(temporaryRoot).startsWith(resolve(temporaryParent)), true);
   t.after(async () => rm(temporaryRoot, { recursive: true, force: true }));
   await mkdir(join(temporaryRoot, "gate7e"), { recursive: true });
   await mkdir(join(temporaryRoot, "runtime"), { recursive: true });
@@ -386,7 +387,7 @@ test("MXC runs the pinned child or exposes the exact host-preparation blocker an
     } };
   const executor = new MxcJavascriptExecutor({ runtimeRoot: temporaryRoot,
     runnerPath: join(temporaryRoot, "gate7e", "quickjs-child.mjs"),
-    nodeExecutable: join(temporaryRoot, "runtime", "node.exe"), sdk: diagnosticSdk });
+    nodeExecutable: join(temporaryRoot, "runtime", "node.exe"), temporaryRoot, sdk: diagnosticSdk });
   const receipt = await executor.execute(request({ requestId: "mxc-disposable-smoke",
     source: "console.log(115 + 25)" }));
   if (receipt.status === "executed") {

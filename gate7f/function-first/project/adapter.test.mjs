@@ -38,6 +38,20 @@ test("filesystem child protocol accepts bounded diagnostics but no ambiguous ter
     stderrBytes: 1, code: 1, operation: "create" }), /project-base-invalid/);
 });
 
+test("extended native paths keep bounded revisions above legacy MAX_PATH usable", async t => {
+  const directory = await mkdtemp(path.join(tmpdir(), "runa-m1-long-path-"));
+  t.after(async () => rm(directory, { recursive: true, force: true, maxRetries: 3 }));
+  const targetBaseLength = 126;
+  const paddingLength = targetBaseLength - directory.length - 1;
+  assert.ok(paddingLength > 0 && paddingLength < 180);
+  const baseDirectory = path.join(directory, "x".repeat(paddingLength));
+  const adapter = new DisposableJavascriptProjectAdapter({ baseDirectory, executor: { execute: quickJsReceipt }, suites: suiteMap });
+  const reference = await adapter.createEnvironment({ ...binding, files: initialFiles });
+  const revisionFile = path.join(baseDirectory, `e-${bindingDigest(binding)}`, reference.revisionId, "main.js");
+  assert.ok(revisionFile.length > 259);
+  assert.equal((await adapter.inspectRevision({ binding, reference })).files[0].content, add);
+});
+
 // Real QuickJS language semantics, deliberately NOT MXC/isolation qualification.
 // This test double stamps synthetic transport receipts solely to exercise host validation.
 async function quickJsReceipt(request) {

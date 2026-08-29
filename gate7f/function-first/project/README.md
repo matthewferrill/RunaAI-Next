@@ -36,7 +36,10 @@ this adapter performs no deletion or overwrite. A same-effect retry verifies byt
   write nor delete sharing. New files use native exclusive creation; handles remain held while writing,
   flushing, reading and validating the complete snapshot. Final file type/link/length checks are repeated.
   This closes check/open/ancestor-substitution windows; `lstat`/`realpath` alone would not do so.
-- Use a short dedicated application-owned base with existing parents. The application account/ACL is
+- Use a bounded dedicated application-owned base with existing parents. The validated ordinary drive
+  path remains the authority; the helper adds the Windows extended-path prefix internally only after
+  validation so fixed environment/revision IDs cannot cross the legacy 260-character ceiling. UNC,
+  caller-supplied extended prefixes and all other alternate path forms remain rejected. The application account/ACL is
   still trusted: this is not a defense against an administrator injecting into the application itself.
   Native locks prevent concurrent rename/write during the operation; subsequent tampering is detected
   by exact reference hashes. The helper is short-lived, capped, hidden, has no model execution, and emits
@@ -100,6 +103,7 @@ QuickJS unit transport receipts are explicitly synthetic; they do **not** qualif
 customer workflow. Root integration must additionally pass actual MXC, PostgreSQL crash/CAS/grant,
 LangGraph restart, authenticated UI and three-model tests before any customer-ready claim.
 
-Local Omen validation on 2026-08-28: 13/13 passed, including the real native handle denial probe.
+Local Omen validation on 2026-08-29 includes a real revision file beyond legacy `MAX_PATH`, plus the
+real native handle denial probe.
 Only synthetic temporary fixture directories were created and removed. No service, Home/Control
 activity, model load, production routing, protected record or Gate 7E source change was made.

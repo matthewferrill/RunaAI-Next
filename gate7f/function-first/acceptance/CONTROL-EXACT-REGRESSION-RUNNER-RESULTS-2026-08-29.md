@@ -325,3 +325,35 @@ local Windows suite exited zero; its JUnit record contains 1,754 testcase
 elements, zero failures, zero errors and 77 expected absent-Control integration
 skips. Roadmap verification remained 15/15. Those local skips are not accepted
 as qualification and remain the reason for the fresh zero-skip Control run.
+
+Fresh stage `m1-task-native-b12a2395726043fb9cfd9e2021c4e779`, source
+`e541e16e29df80dc33579521ec6020758f0e7e1f` and prospective run
+`b2d2c0dd6cd74438a781b7d8349e07f0` proved the environment correction: the
+native MXC preflight executed successfully on its first attempt, PostgreSQL and
+Qdrant started as owned loopback resources, and all source/dependency pins
+verified. The complete suite retained 1,751 tests: 1,742 passed, 9 failed and
+none skipped. Exact cleanup removed every owned writable directory and closed
+all three selected ports. No model, protected data or production route was
+used. This failed run is retained diagnostic evidence and is not qualification.
+
+The nine failures reduce to two path-layout causes. The standalone MXC smoke
+created its own source transport below the generic test temp root instead of
+the already prepared `M1_EXECUTOR_TEMP_ROOT`. It now uses the prepared owned
+root for both fixture and source transport. The other eight failures shared a
+260-character revision directory and 268-character source path. The PowerShell
+filesystem helper accepted a bounded base but passed the derived path to legacy
+Win32/.NET forms. It now adds `\\?\` internally only after the ordinary drive
+path, fixed environment/revision IDs and flat filename have passed their
+existing validation. Caller-supplied extended/UNC paths remain rejected. A
+focused real-Windows test now materializes and re-reads a revision beyond
+legacy `MAX_PATH`; the combined MXC, project and runner focus exits zero. These
+corrections remain prospective until a new immutable Control run passes all
+tests with zero skip.
+
+After those corrections, the complete local Windows suite exited zero. Its
+JUnit record contains 1,755 testcase elements, zero failures, zero errors and
+77 expected absent-Control integration skips; its SHA-256 is
+`0e212b3080da8f1ae27428c185ab6fe71dd1b0e5f146eaab025050fdf1cee27f`.
+Roadmap verification remained 15/15. An independent security review found no
+blocker in either correction. Local success remains non-qualifying until the
+fresh immutable Control run exercises every integration without skips.

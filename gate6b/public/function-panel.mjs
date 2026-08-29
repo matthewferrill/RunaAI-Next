@@ -184,7 +184,11 @@ export async function initializeFunctionPanel({ root = document, request, getCon
     if (!alive(token)) return;
     catalog.replaceChildren();
     const runs = runList.runs ?? [], tasks = taskList.tasks ?? [];
-    for (const run of runs) button(`${run.objective} — ${run.status}`, () => openTask(token, run.taskId, run.runId, true), catalog);
+    // The outer shell can change experience/project scope before its awaited panel
+    // refresh clears this catalog. Bind the click to the current scope so the
+    // server can deny a stale visible entry explicitly instead of an old ticket
+    // making the control silently inert.
+    for (const run of runs) button(`${run.objective} — ${run.status}`, () => openTask(ticket(), run.taskId, run.runId, true), catalog);
     const runTasks = new Set(runs.map(run => run.taskId));
     for (const task of tasks.filter(task => !runTasks.has(task.taskId))) {
       let displayStatus = task.status;
@@ -196,7 +200,7 @@ export async function initializeFunctionPanel({ root = document, request, getCon
         // A list entry remains useful when its detail is temporarily unavailable.
         // It must never infer success or authorize work from that failure.
       }
-      button(`${task.objective} — ${displayStatus}`, () => openTask(token, task.taskId, null, true), catalog);
+      button(`${task.objective} — ${displayStatus}`, () => openTask(ticket(), task.taskId, null, true), catalog);
     }
     if (!catalog.childElementCount) catalog.append(element(root, "p", "No saved tasks in this project.", "navigation-empty"));
   }

@@ -147,6 +147,24 @@ test("actual DOM: late project preparation does not change a newly selected scop
   assert.equal(await page.locator("#m1-mode").inputValue(), "conversation");
   assert.doesNotMatch(await page.locator('[role="status"]').textContent(), /exercise ready/);
 });
+test("actual DOM: a visible saved task uses the current scope while the outer shell awaits panel refresh", async t => {
+  const { page, calls } = await panelPage(t, { handle: async payload => {
+    if (payload.operation === "task.status" && payload.projectId === "synthetic-beta") {
+      throw Object.assign(new Error("current scope correctly denied the old task"), { code: "m1-task-project-scope" });
+    }
+  } });
+  const entry = page.getByRole("button", { name: "Repair exercise a — waiting-approval", exact: true });
+  await entry.waitFor();
+  const before = calls.length;
+  await page.evaluate(() => { window.syntheticContext = { experience: "code", projectId: "synthetic-beta" }; });
+  await entry.click();
+  await page.getByText("Task could not be loaded. No actions were started.", { exact: true }).waitFor();
+  const after = calls.slice(before);
+  const reads = after.filter(call => call.operation === "task.status");
+  assert.equal(reads.length, 1);
+  assert.equal(reads[0].experience, "code"); assert.equal(reads[0].projectId, "synthetic-beta");
+  assert.equal(after.some(call => ["grant.create", "run.resume", "proposal.create", "proposal.approve", "proposal.execute"].includes(call.operation)), false);
+});
 test("actual DOM: revocation targets the exact grant and requires a fresh profile before continuing", async t => {
   let revoked = false;
   const { page, calls } = await panelPage(t, { handle: async payload => {

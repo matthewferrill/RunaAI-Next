@@ -1,0 +1,14 @@
+{
+  "schemaVersion": "runaai-independent-two-host-closure-seal/v1",
+  "sourceCommit": "4d4401d60e33ad18eeea710ceddd039c486784db",
+  "evaluatorId": "codex-independent-model-role-review-20260828",
+  "files": {
+    "tests.tap": "b71e1de9825545daa4f0a1110e1defd718472911ff28ea8019f21f3a068f0d19",
+    "tests.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "result.json": "e5959e50df836229e55626b8371616b240c12bd391646dfeecbc53969f42d0e4",
+    "review.json": "c95e5ab8482778f7ced9479ba031b29b96c54dd0f243f26d683c066cb73ebe01",
+    "REVIEW.md": "d329e3ed90975ef671d0185431daa9c7c17cab10941f97c055480203e0bb43e1"
+  },
+  "passed": true,
+  "privateValuesIncluded": false
+}

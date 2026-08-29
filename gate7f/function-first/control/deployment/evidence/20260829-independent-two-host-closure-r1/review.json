@@ -1,0 +1,53 @@
+{
+  "schemaVersion": "runaai-independent-two-host-closure-review/v1",
+  "evaluatorId": "codex-independent-model-role-review-20260828",
+  "sourceCommit": "4d4401d60e33ad18eeea710ceddd039c486784db",
+  "disposition": "closed",
+  "findings": [
+    {
+      "id": "TH-01",
+      "status": "closed",
+      "summary": "The exported coordinator no longer accepts a synthetic-fixture activation bypass; every construction requires a current exact activation-authority receipt."
+    },
+    {
+      "id": "TH-02",
+      "status": "closed",
+      "summary": "Managed-caller closure freshness now covers every required counter sample, not only the latest sample."
+    },
+    {
+      "id": "TH-03",
+      "status": "closed",
+      "summary": "A fresh exact candidate-Caddy health allowlist observation, bound to the publication receipt and reconstructed plan, is required before application deployment and final publication."
+    },
+    {
+      "id": "TH-04",
+      "status": "closed",
+      "summary": "Home readiness requires exact task, process, native observation, enrollment, and TLS operator descriptor bindings in addition to explicit confirmations."
+    },
+    {
+      "id": "TH-05",
+      "status": "closed",
+      "summary": "The append-only journal rejects a second dispatch for one writer and a second effect of one kind, including after restart."
+    }
+  ],
+  "verification": {
+    "result": "result.json",
+    "tap": "tests.tap",
+    "stderr": "tests.stderr.txt",
+    "counts": {
+      "tests": 136,
+      "suites": 0,
+      "pass": 136,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0
+    },
+    "passed": true
+  },
+  "limitations": [
+    "This is source, journal, fixture, and isolated child-process evidence; it is not live two-host activation evidence.",
+    "No production route, Home runtime, Control service, model, or customer path was changed or exercised.",
+    "Future activation still requires the fresh outer activation receipt and the live receipts required by the frozen criteria."
+  ]
+}

@@ -1,0 +1,137 @@
+{
+  "schemaVersion": "runaai-independent-two-host-closure-result/v1",
+  "evaluatorId": "codex-independent-model-role-review-20260828",
+  "reviewerRole": "fresh independent reviewer; author of neither the original owner-transaction criteria nor the original two-host implementation",
+  "sourceCommit": "4d4401d60e33ad18eeea710ceddd039c486784db",
+  "reviewedCriteriaCommits": [
+    "88ebe41",
+    "394c011"
+  ],
+  "reviewedImplementationCommit": "8052d32",
+  "reviewBranchBase": "477060497ab486cf4c9d79833a9bd9f2910c82b6",
+  "command": [
+    "C:\\Program Files\\nodejs\\node.exe",
+    "--test",
+    "--test-concurrency=1",
+    "gate7f/function-first/control/deployment/assembly.test.mjs",
+    "gate7f/function-first/control/deployment/child-intent.test.mjs",
+    "gate7f/function-first/control/deployment/closed-adapter.test.mjs",
+    "gate7f/function-first/control/deployment/companion.test.mjs",
+    "gate7f/function-first/control/deployment/descriptor.test.mjs",
+    "gate7f/function-first/control/deployment/managed-callers.test.mjs",
+    "gate7f/function-first/control/deployment/owner-authority.test.mjs",
+    "gate7f/function-first/control/deployment/owner-journal.test.mjs",
+    "gate7f/function-first/control/deployment/transaction.test.mjs",
+    "gate7f/function-first/control/deployment/two-host.test.mjs",
+    "gate7f/function-first/control/deployment/watchdog.test.mjs",
+    "gate7f/function-first/control/deployment/wire-fixture.test.mjs"
+  ],
+  "startedAt": "2026-08-29T01:16:26.484Z",
+  "finishedAt": "2026-08-29T01:17:54.908Z",
+  "exitCode": 0,
+  "testFileCount": 12,
+  "counts": {
+    "tests": 136,
+    "suites": 0,
+    "pass": 136,
+    "fail": 0,
+    "cancelled": 0,
+    "skipped": 0,
+    "todo": 0
+  },
+  "passed": true,
+  "sourcePins": [
+    {
+      "path": "gate7f/function-first/control/deployment/OWNER-TRANSACTION-CRITERIA.md",
+      "sha256": "8b79c3eca741f21b1d09fed033084b51045980f2457949e9f22a22e873a8a922",
+      "bytes": 6931,
+      "gitObjectSha256": "8b79c3eca741f21b1d09fed033084b51045980f2457949e9f22a22e873a8a922",
+      "workingTreeMatchesGit": true
+    },
+    {
+      "path": "gate7f/function-first/control/deployment/closed-adapter.mjs",
+      "sha256": "7ebad816fc25aafbc30d47fafdf891f40186db5cb7df2470b4be843ecd3417e6",
+      "bytes": 16190,
+      "gitObjectSha256": "7ebad816fc25aafbc30d47fafdf891f40186db5cb7df2470b4be843ecd3417e6",
+      "workingTreeMatchesGit": true
+    },
+    {
+      "path": "gate7f/function-first/control/deployment/managed-callers.mjs",
+      "sha256": "ba13c41ba249392140e7ccdd94d7a3a517d7273e705086976e12b514e8d4988f",
+      "bytes": 6044,
+      "gitObjectSha256": "ba13c41ba249392140e7ccdd94d7a3a517d7273e705086976e12b514e8d4988f",
+      "workingTreeMatchesGit": true
+    },
+    {
+      "path": "gate7f/function-first/control/deployment/managed-callers.test.mjs",
+      "sha256": "23eaf2657e8cea50fdd4e9646b32d6ac0a2b4d9e114bea73a48e0efdd2ec0318",
+      "bytes": 5307,
+      "gitObjectSha256": "23eaf2657e8cea50fdd4e9646b32d6ac0a2b4d9e114bea73a48e0efdd2ec0318",
+      "workingTreeMatchesGit": true
+    },
+    {
+      "path": "gate7f/function-first/control/deployment/owner-authority.mjs",
+      "sha256": "755b01ac21ef1507cca1190a94330ca8f71cc68f36b899bd571ec768c4f85eeb",
+      "bytes": 8458,
+      "gitObjectSha256": "755b01ac21ef1507cca1190a94330ca8f71cc68f36b899bd571ec768c4f85eeb",
+      "workingTreeMatchesGit": true
+    },
+    {
+      "path": "gate7f/function-first/control/deployment/owner-authority.test.mjs",
+      "sha256": "0ebf1f073cdbbb83d42c86dda8953f1b37aa299d676f2d93c55a32b9f97b64b3",
+      "bytes": 10588,
+      "gitObjectSha256": "0ebf1f073cdbbb83d42c86dda8953f1b37aa299d676f2d93c55a32b9f97b64b3",
+      "workingTreeMatchesGit": true
+    },
+    {
+      "path": "gate7f/function-first/control/deployment/owner-journal.mjs",
+      "sha256": "6045c0514fb16b67ea64dd0adff8a122b53f2f0c59c16d4ee96d609711b7a587",
+      "bytes": 10488,
+      "gitObjectSha256": "6045c0514fb16b67ea64dd0adff8a122b53f2f0c59c16d4ee96d609711b7a587",
+      "workingTreeMatchesGit": true
+    },
+    {
+      "path": "gate7f/function-first/control/deployment/owner-journal.test.mjs",
+      "sha256": "7925a1a2d975ecda1f61465f0ffc2331c08cef7e2550d6cb0933d5cf4047697b",
+      "bytes": 8369,
+      "gitObjectSha256": "7925a1a2d975ecda1f61465f0ffc2331c08cef7e2550d6cb0933d5cf4047697b",
+      "workingTreeMatchesGit": true
+    },
+    {
+      "path": "gate7f/function-first/control/deployment/two-host.mjs",
+      "sha256": "7a53bc042ef03cade8cb0c586294c0722e1bd26e849b310447093315d1f60686",
+      "bytes": 17911,
+      "gitObjectSha256": "7a53bc042ef03cade8cb0c586294c0722e1bd26e849b310447093315d1f60686",
+      "workingTreeMatchesGit": true
+    },
+    {
+      "path": "gate7f/function-first/control/deployment/two-host.test.mjs",
+      "sha256": "0adafebc2b362a36399e53a682bd82dc33de08a0b26d9e4b6be082fa5b9e4d1c",
+      "bytes": 20198,
+      "gitObjectSha256": "0adafebc2b362a36399e53a682bd82dc33de08a0b26d9e4b6be082fa5b9e4d1c",
+      "workingTreeMatchesGit": true
+    },
+    {
+      "path": "gate7f/function-first/control/deployment/run-independent-two-host-closure-proof.mjs",
+      "sha256": "5aec9d9634671fe85982d927dc0c6fd11080abe9a5ea47f584e662a37ac35983",
+      "bytes": 7750,
+      "gitObjectSha256": "5aec9d9634671fe85982d927dc0c6fd11080abe9a5ea47f584e662a37ac35983",
+      "workingTreeMatchesGit": true
+    },
+    {
+      "path": "gate7f/function-first/control/deployment/evidence/20260829-independent-two-host-closure-r1/.gitattributes",
+      "sha256": "705fd4d6451a31d36b3df7de96f83f30ac976c9b4a6d1e51671d8e2f33e2d0da",
+      "bytes": 8,
+      "gitObjectSha256": "705fd4d6451a31d36b3df7de96f83f30ac976c9b4a6d1e51671d8e2f33e2d0da",
+      "workingTreeMatchesGit": true
+    }
+  ],
+  "scope": {
+    "liveActivationAttempted": false,
+    "liveRouteMutationAttempted": false,
+    "homeOrControlLifecycleMutationAttempted": false,
+    "syntheticFixturesOnlyForTransactionEffects": true,
+    "qualificationClaimed": false,
+    "productionPromotionClaimed": false
+  }
+}

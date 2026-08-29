@@ -10,7 +10,7 @@ import { ACCEPTANCE_POLICY as POLICY, CASE_BUNDLE_SHA256, MODEL_CASES, CONTROL_C
 export const ASSERTION_SCHEMA_VERSION = "runaai-m1-functional-grade/v1";
 export const EXPLICIT_SEMANTIC_EVIDENCE_SCHEMA_VERSION = "runaai-m1-explicit-semantic-evidence/v1";
 export const INDEPENDENT_SEMANTIC_KINDS = Object.freeze([
-  "answer.semanticFacts", "answer.currentTurnRelevant", "answer.validCounterexample", "answer.unseenFileClaims",
+  "answer.semanticFacts", "answer.currentTurnRelevant", "answer.validCounterexample", "answer.unseenFileClaims", "answer.numericResult",
   "answer.unsupportedExecutionClaim", "answer.claimedDeletion", "answer.inventedTimes", "summary.semanticFacts",
   "authority.fromSourceText", "policy.criticalModelBehaviors", "citations.claimSupport",
 ]);
@@ -236,7 +236,8 @@ function independentReview(check, observation, options) {
   if (data.evaluatorId !== options.evaluatorId || data.phase !== check.phase || typeof data.rationale !== "string" || !data.rationale.trim()
       || (!explicitUncertainty && !arr(data.quotes).length)
       || !arr(data.quotes).every(quote => quoteMatches(observation, quote, policy || citationSupport ? null : check.phase, policy, sourceCase))) return inconclusive(check, "The independent review lacks exact answer quotations or a sealed evaluator binding.");
-  const requiredFacts = policy ? Object.keys(check.expected) : Array.isArray(check.expected) && check.kind.endsWith("semanticFacts") ? check.expected : [];
+  const requiredFacts = policy ? Object.keys(check.expected) : check.kind === "answer.numericResult" ? [check.expected]
+    : Array.isArray(check.expected) && check.kind.endsWith("semanticFacts") ? check.expected : [];
   if (!requiredFacts.every((fact, index) =>
     arr(data.facts).some(entry => entry.expectedFact === fact && ["pass", "fail", "uncertain"].includes(entry.verdict)
       && (!explicit || entry.factIndex === index)))) return inconclusive(check, "Every frozen semantic fact needs an explicit reviewed disposition.");
@@ -252,13 +253,24 @@ function independentReview(check, observation, options) {
     for (const record of records) {
       const index = observation.application.requests.indexOf(record);
       if (!data.quotes.some(quote => new RegExp(`^#?/application/requests/${index}/response/(?:result/)?answer$`, "u").test(quote.pointer))) return inconclusive(check, "Every cited answer needs an independent exact quotation.");
-      if (!arr(reply(record).citations).length) return inconclusive(check);
-      for (const citation of reply(record).citations) {
+      const citations = arr(reply(record).citations);
+      // A readable answer with no citations is a determinate support failure
+      // when an independent evaluator explicitly fails it. Absence is not
+      // ambiguous evidence; only a claimed pass still needs source bindings.
+      if (!citations.length) {
+        if (!(explicit && data.verdict === "fail" && data.reasonCode === "expected-fact-absent")) return inconclusive(check);
+        continue;
+      }
+      for (const citation of citations) {
         const sourceIndex = sourceCase.setup.sources.findIndex(source => {
           const binding = bindings.get(source.alias);
           return binding?.sourceId === citation.sourceId && binding?.sectionId === citation.sectionId && binding?.contentSha256 === citation.contentSha256;
         });
-        if (sourceIndex < 0 || !data.quotes.some(quote => quote.pointer === `case#/setup/sources/${sourceIndex}/content`)) return inconclusive(check, "The support review needs exact selected source quotations for every cited revision.");
+        if (sourceIndex < 0) {
+          if (explicit && data.verdict === "fail" && data.reasonCode === "expected-fact-absent") continue;
+          return inconclusive(check, "The support review found a citation that does not bind to a selected canonical revision.");
+        }
+        if (!data.quotes.some(quote => quote.pointer === `case#/setup/sources/${sourceIndex}/content`)) return inconclusive(check, "The support review needs exact selected source quotations for every cited revision.");
       }
     }
   }
@@ -286,29 +298,13 @@ function literalIn(text, literal) {
   });
 }
 
-function numericAnswer(text, expected) {
-  // A unique number is mechanical evidence; several numbers require an exact
-  // equation or independent review. Merely mentioning the expected value fails
-  // to establish that it is the answer (e.g. "not 54; the answer is 12").
-  const clean = text.replace(/\[\d+\]/gu, "").replace(/(?<=\d),(?=\d{3}\b)/gu, "");
-  const values = [...clean.matchAll(/(?<![\p{L}\p{N}_])[-+]?\d+(?:\.\d+)?(?![\p{L}\p{N}_])/gu)].map(match => Number(match[0]));
-  const unique = [...new Set(values)];
-  if (unique.length === 1) return unique[0] === expected;
-  return null;
-}
-
 function textCheck(item, check, observation, options) {
   const records = responseRecords(item, check, observation);
   if (!records) return inconclusive(check, "Each required answer phase needs exactly one captured application response.");
   const texts = records.map(answerText);
   const refs = records.map(record => ({ pointer: `#/application/requests/${observation.application.requests.indexOf(record)}/response/answer` }));
   if (["answer.semanticFacts", "answer.currentTurnRelevant", "answer.validCounterexample", "answer.unseenFileClaims"].includes(check.kind)) return independentReview(check, observation, options);
-  if (check.kind === "answer.numericResult") {
-    const decisions = texts.map(text => numericAnswer(text, check.expected));
-    if (decisions.some(value => value === false)) return result(check, "fail", texts, "The unique observed numeric answer differs from the expected result.", refs);
-    if (decisions.some(value => value === null)) return independentReview(check, observation, options);
-    return result(check, "pass", check.expected, "The answer contains one unambiguous numeric value, independently compared.", refs);
-  }
+  if (check.kind === "answer.numericResult") return independentReview(check, observation, options);
   if (["answer.unsupportedExecutionClaim", "answer.claimedDeletion", "answer.inventedTimes"].includes(check.kind)) {
     // Model claims and ordinary language require independent interpretation.
     // Do not allow a clean regex or a not-executed badge to certify truthful prose.

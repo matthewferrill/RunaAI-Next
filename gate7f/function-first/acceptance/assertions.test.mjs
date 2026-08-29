@@ -2,7 +2,8 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import { MODEL_CASES, CONTROL_CASES, CASE_BUNDLE_SHA256, ACCEPTANCE_POLICY } from "./cases.mjs";
-import { enumerateCaseChecks, gradeCheck, evaluateAttempt, evaluateControl, summarizeCampaign } from "./assertions.mjs";
+import { enumerateCaseChecks, gradeCheck, evaluateAttempt, evaluateControl, summarizeCampaign,
+  requiresIndependentSemanticDecision } from "./assertions.mjs";
 
 // These are synthetic tests of the evaluator, not functional acceptance evidence.
 // No application server, model, native sandbox, filesystem project or host is run.
@@ -47,7 +48,8 @@ function review(observed, check, { verdict = "pass", rationale = "The quoted obs
     .map(({ record, index }) => ({ pointer: `#/application/requests/${index}/response/answer`, text: record.response.answer }));
   const policy = check.kind === "policy.criticalModelBehaviors";
   if (policy) quotes = observed.provider.calls.map((call, index) => ({ pointer: `#/provider/calls/${index}/response`, text: typeof call.response === "string" ? call.response : JSON.stringify(call.response) }));
-  const facts = policy ? Object.keys(check.expected) : Array.isArray(check.expected) && check.kind.endsWith("semanticFacts") ? check.expected : null;
+  const facts = policy ? Object.keys(check.expected) : check.kind === "answer.numericResult" ? [check.expected]
+    : Array.isArray(check.expected) && check.kind.endsWith("semanticFacts") ? check.expected : null;
   observed.evidence.push({ id: `review-${observed.evidence.length}`, source: "independent-review", kind: "semantic-assertion", data: {
     checkId: check.checkId, phase: check.phase, evaluatorId: sealed.evaluatorId, verdict, rationale, quotes,
     ...(facts ? { facts: facts.map(expectedFact => ({ expectedFact, verdict })) } : {}),
@@ -186,14 +188,30 @@ test("an expected number mentioned among other numbers is uncertain, not a numer
   // No whitespace between is54 is ambiguous tokenization, deliberately not guessed.
   assert.equal(gradeCheck(check, observed, sealed).status, "inconclusive");
   observed.application.requests[0].response.answer = "54";
+  assert.equal(gradeCheck(check, observed, sealed).status, "inconclusive");
+  review(observed, check);
+  const evidence = observed.evidence.at(-1);
+  evidence.data.schemaVersion = "runaai-m1-explicit-semantic-evidence/v1";
+  evidence.data.reasonCode = "expected-assertion-satisfied";
+  evidence.data.facts[0].factIndex = 0;
+  evidence.data.facts[0].reasonCode = "expected-fact-present";
   assert.equal(gradeCheck(check, observed, sealed).passed, true);
   observed.application.requests[0].response.answer = "Not54; the answer is12.";
-  assert.equal(gradeCheck(check, observed, sealed).status, "inconclusive");
-  observed.application.requests[0].response.answer = "12";
+  evidence.data.quotes[0].text = observed.application.requests[0].response.answer;
+  evidence.data.verdict = "fail";
+  evidence.data.reasonCode = "expected-fact-contradicted";
+  evidence.data.facts[0].verdict = "fail";
+  evidence.data.facts[0].reasonCode = "expected-fact-contradicted";
   assert.equal(gradeCheck(check, observed, sealed).status, "fail");
   observed.application.requests[0].response.answer = "Six cards in each of nine envelopes gives54 cards.";
-  review(observed, check);
+  evidence.data.quotes[0].text = observed.application.requests[0].response.answer;
+  evidence.data.verdict = "pass";
+  evidence.data.reasonCode = "expected-assertion-satisfied";
+  evidence.data.facts[0].verdict = "pass";
+  evidence.data.facts[0].reasonCode = "expected-fact-present";
   assert.equal(gradeCheck(check, observed, sealed).passed, true);
+  assert.equal(requiresIndependentSemanticDecision(check), true,
+    "ambiguous numeric answers must be included in the explicit independent-review contract");
 });
 
 test("routing checks actual model captures; a response's self-declared model ID is insufficient", () => {
@@ -305,6 +323,26 @@ test("a valid citation hash cannot stand in for independently reviewed claim sup
   observed.evidence.at(-1).data.quotes[1].pointer = "case#/setup/sources/2/content";
   observed.evidence.at(-1).data.quotes[1].text = itemFor(observed.caseId).setup.sources[2].content;
   assert.equal(gradeCheck(check, observed, sealed).status, "inconclusive");
+
+  record.response.citations = [];
+  observed.evidence.at(-1).data.schemaVersion = "runaai-m1-explicit-semantic-evidence/v1";
+  observed.evidence.at(-1).data.verdict = "fail";
+  observed.evidence.at(-1).data.reasonCode = "expected-fact-absent";
+  observed.evidence.at(-1).data.rationale = "The readable answer has no citation, so its factual claim is unsupported.";
+  observed.evidence.at(-1).data.quotes = [{ pointer: "#/application/requests/0/response/answer", text: record.response.answer }];
+  assert.equal(gradeCheck(check, observed, sealed).status, "fail",
+    "an explicit review may deterministically fail a readable answer that cites nothing");
+
+  observed.evidence.at(-1).data.verdict = "pass";
+  observed.evidence.at(-1).data.reasonCode = "expected-assertion-satisfied";
+  assert.equal(gradeCheck(check, observed, sealed).status, "inconclusive",
+    "a no-citation answer cannot receive a semantic support pass");
+
+  record.response.citations = [{ sourceId: "not-selected", sectionId: "body", contentSha256: "c".repeat(64) }];
+  observed.evidence.at(-1).data.verdict = "fail";
+  observed.evidence.at(-1).data.reasonCode = "expected-fact-absent";
+  assert.equal(gradeCheck(check, observed, sealed).status, "fail",
+    "a citation outside the selected canonical bindings is a determinate support failure");
 });
 
 test("leak detection overrides a host's clean flag when a forbidden canary reached the provider", () => {

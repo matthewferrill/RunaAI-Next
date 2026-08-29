@@ -87,6 +87,7 @@ function bindingsFor(check, item, observed) {
 
 function expectedFacts(check) {
   if (check.kind === "policy.criticalModelBehaviors") return Object.keys(check.expected);
+  if (check.kind === "answer.numericResult") return [check.expected];
   if (check.kind.endsWith("semanticFacts") && Array.isArray(check.expected)) return check.expected;
   return [];
 }
@@ -200,6 +201,45 @@ test("semantic checks admit no missing, duplicate, extra or defaulted decision",
   assert.throws(() => validateExplicitSemanticDecisions(input(fixture)), { code: "decision-field-extra" });
   fixture = campaign(); Object.setPrototypeOf(fixture.bundle.attempts[0].checks[0], { defaultVerdict: "pass" });
   assert.throws(() => validateExplicitSemanticDecisions(input(fixture)), { code: "decision-object-prototype-invalid" });
+});
+
+test("numeric results are sealed independent decisions and cannot disappear from the bundle", () => {
+  const checks = semanticChecksForCase("chat-03-current-topic");
+  assert.equal(checks.filter(check => check.kind === "answer.numericResult").length, 2);
+  const fixture = campaign();
+  const decision = decisionForAttempt(fixture, `${ACCEPTANCE_POLICY.roster[0].candidateId}--chat-03-current-topic--1`);
+  decision.checks = decision.checks.filter(check => check.checkId !== checks[0].checkId);
+  assert.throws(() => validateExplicitSemanticDecisions(input(fixture)), { code: "decision-check-missing" });
+});
+
+test("numeric semantic decisions bind the frozen expected result as a fact", () => {
+  const passFixture = campaign();
+  const pass = semanticDecision(passFixture, "chat-03-current-topic", "answer.numericResult");
+  assert.deepEqual(pass.facts.map(fact => fact.expectedFact), [12]);
+  assert.doesNotThrow(() => validateExplicitSemanticDecisions(input(passFixture)));
+
+  for (const reasonCode of ["expected-fact-absent", "expected-fact-contradicted"]) {
+    const failFixture = campaign(), fail = semanticDecision(failFixture, "chat-03-current-topic", "answer.numericResult");
+    fail.verdict = "fail";
+    fail.reasonCode = reasonCode;
+    fail.rationale = "The complete readable numeric answer does not satisfy the frozen expected result.";
+    fail.facts[0].verdict = "fail";
+    fail.facts[0].reasonCode = reasonCode;
+    fail.facts[0].rationale = "The complete readable answer does not contain the frozen expected numeric result.";
+    const graded = gradeExplicitSemanticCampaign(input(failFixture));
+    const attempt = graded.attempts.find(value => value.grade.caseId === "chat-03-current-topic"
+      && value.grade.repetition === 1 && value.grade.candidateId === ACCEPTANCE_POLICY.roster[0].candidateId);
+    assert.equal(attempt.grade.checks.find(check => check.checkId === fail.checkId).status, "fail");
+  }
+});
+
+test("zero-fact semantic assertions still accept explicit determinate failure", () => {
+  const fixture = campaign(), fail = semanticDecision(fixture, "research-01-selected-facts", "citations.claimSupport");
+  assert.equal(fail.facts.length, 0);
+  fail.verdict = "fail";
+  fail.reasonCode = "expected-fact-absent";
+  fail.rationale = "The complete readable answer has no canonical citation supporting its claim.";
+  assert.doesNotThrow(() => validateExplicitSemanticDecisions(input(fixture)));
 });
 
 test("every expected fact is decided exactly once with its frozen identity", () => {

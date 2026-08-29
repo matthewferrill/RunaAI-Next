@@ -357,3 +357,33 @@ JUnit record contains 1,755 testcase elements, zero failures, zero errors and
 Roadmap verification remained 15/15. An independent security review found no
 blocker in either correction. Local success remains non-qualifying until the
 fresh immutable Control run exercises every integration without skips.
+
+## Passing fresh Control qualification
+
+Fresh stage `m1-task-native-ea79ae212dc5408db37fea2d0023f32b` tested
+source commit `cae3a7719229cfddfdbefd1ecda6a95aba941dfc`, source archive
+`04c225a6ca89518d714ddb974b3a5fc3d5f264f1cdf032c0ceb4e905ee798592`
+and manifest `ad57e0839645e0ab8de8ff9079886bebe6eb9a96265ee7933a2e7daf5424ae2d`.
+Run `d0fede0f5c394ca48e39a4701ec244ac` passed all 1,752 tests, with 1,752
+passes, zero failures, zero cancellations, zero skips and zero TODO results.
+Native MXC executed its first preflight attempt; the disposable PostgreSQL and
+Qdrant resources ran on owned loopback ports. The run invoked no model, read no
+protected data and changed no production route.
+
+Cleanup also passed: all six owned writable directories were absent, all three
+owned ports were closed, PostgreSQL and Qdrant were stopped, and the synthetic
+source and evidence were retained. The five retrieved evidence files are:
+
+- `result.json`: 2,385 bytes,
+  `b4219dace541d60fa8431d4ff95a299797da8c625f9b19af90fba5f5e5aa2879`
+- `cleanup.json`: 7,685 bytes,
+  `ef98848788cbfec866b8b52adf249bf9cb2f7c7ede0cadb9cac658c415348798`
+- `input-proof.json`: 1,258 bytes,
+  `ddbdfe92343028eec0553486b50a192052003e4e189e578a600e348b26c9662e`
+- `tests.tap`: 433,935 bytes,
+  `30eebfebefbcbb423f59089be108f47deda8b0fb6836c666a87c3fa51641e7ba`
+- `tests.stderr.txt`: zero bytes,
+  `e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855`
+
+This closes the corrected stack's model-free Control regression checkpoint. It
+does not qualify any large model, production caller or customer experience.

@@ -25,6 +25,22 @@ async function freePort() {
   return new Promise((resolve, reject) => { const server = net.createServer(); server.once("error", reject);
     server.listen(0, "127.0.0.1", () => { const port = server.address().port; server.close(error => error ? reject(error) : resolve(port)); }); });
 }
+export function shouldRetryNativePreflight(preflight, attempt) {
+  const receipt = preflight?.receipt;
+  const observation = preflight?.startupObservation;
+  return attempt === 0 && preflight?.ready === false
+    && receipt?.status === "unavailable" && receipt?.errorCode === "sandbox-start-failed"
+    && receipt?.exitCode === 1 && receipt?.systemStamped === true
+    && receipt?.output?.stdout === "" && receipt?.output?.stderr === ""
+    && receipt?.output?.combinedBytes === 0 && receipt?.output?.partialDelivered === false
+    && Array.isArray(receipt?.effects) && receipt.effects.length === 0
+    && observation?.schemaVersion === "runa2-sandbox-startup-observation/v1"
+    && observation?.processStarted === true && observation?.exitCode === 1
+    && observation?.rawStdoutBytes === 0 && observation?.rawStderrBytes === 0
+    && observation?.resultMarkerCount === 0
+    && observation?.classifiedErrorCode === "sandbox-start-failed"
+    && observation?.privateValuesIncluded === false;
+}
 async function removeOwned(root, name) {
   const target = path.resolve(root, name);
   if (path.dirname(target) !== root || !["disposable-postgres", "runtime", "sandbox-runtime", "transient", "q", "data"].includes(name)) throw fail("m1-owned-cleanup-invalid");
@@ -69,7 +85,15 @@ export async function createOwnedControlResources({ root: suppliedRoot, maximumM
       path.join(root, "gate7f/function-first/tasks/Stage-OwnedNativeAccess.ps1"), "-OwnedRoot", root]).trim());
     report.nodeSha256 = await fileSha256(nodeExecutable);
     const executor = new MxcJavascriptExecutor({ runtimeRoot, runnerPath: path.join(runtimeRoot, "quickjs-child.mjs"), nodeExecutable, temporaryRoot: transient });
-    const preflight = await executor.preflight(); report.nativePreflight = preflight;
+    const nativePreflightAttempts = [];
+    let preflight;
+    for (let attempt = 0; attempt < 2; attempt += 1) {
+      preflight = await executor.preflight(); nativePreflightAttempts.push(preflight);
+      if (preflight.ready || !shouldRetryNativePreflight(preflight, attempt)) break;
+      await pause(100);
+    }
+    report.nativePreflightAttempts = nativePreflightAttempts;
+    report.nativePreflight = preflight;
     if (!preflight.ready) throw fail("m1-native-preflight-unavailable");
     const pgPort = await freePort(), qPort = await freePort(), qGrpcPort = await freePort();
     if (new Set([pgPort, qPort, qGrpcPort]).size !== 3) throw fail("m1-owned-port-race");

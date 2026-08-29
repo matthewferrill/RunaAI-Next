@@ -15,6 +15,7 @@ import {captureBoundedStream,CONTROL_REGRESSION_FIXED,controlRegressionEnvironme
 import {ownerSafeEnvironment,runBoundedOwnerChild} from './control-exact-regression-owner.mjs';
 import {parseOwnerEntryArguments,purgeToOwnerEntryEnvironment} from './control-exact-regression-entry.mjs';
 import {buildInvocation,parseInvocationArguments} from './build-control-exact-regression-invocation.mjs';
+import {shouldRetryNativePreflight} from './owned-control-resources.mjs';
 const {parse:parseBootstrap,verifyArchive:verifyBootstrapArchive,verifyRelease:verifyBootstrapRelease}=createRequire(import.meta.url)('./control-exact-regression-bootstrap.cjs');
 
 const hash=letter=>letter.repeat(64);
@@ -103,6 +104,26 @@ test('owned resources record all selected ports before any PostgreSQL or Qdrant 
   const assigned=source.indexOf('report.ports = { postgres: pgPort, qdrantHttp: qPort, qdrantGrpc: qGrpcPort }');
   assert.ok(assigned>source.indexOf('new Set([pgPort, qPort, qGrpcPort])'));
   assert.ok(assigned<source.indexOf('pgBin, "initdb.exe"'));assert.ok(assigned<source.indexOf('qdrant = spawn'));
+});
+
+test('native preflight retries once only for an empty system-stamped start failure',()=>{
+  const receipt={status:'unavailable',errorCode:'sandbox-start-failed',exitCode:1,systemStamped:true,
+    output:{stdout:'',stderr:'',combinedBytes:0,partialDelivered:false},effects:[]};
+  const startupObservation={schemaVersion:'runa2-sandbox-startup-observation/v1',processStarted:true,exitCode:1,
+    rawStdoutBytes:0,rawStderrBytes:0,resultMarkerCount:0,classifiedErrorCode:'sandbox-start-failed',privateValuesIncluded:false};
+  assert.equal(shouldRetryNativePreflight({ready:false,receipt,startupObservation},0),true);
+  assert.equal(shouldRetryNativePreflight({ready:false,receipt,startupObservation},1),false);
+  const changes=[value=>{value.ready=true;},value=>{value.receipt.status='failed';},value=>{value.receipt.errorCode='sandbox-timeout';},
+    value=>{value.receipt.exitCode=0;},value=>{value.receipt.systemStamped=false;},value=>{value.receipt.output.stdout='partial';},
+    value=>{value.receipt.output.stderr='diagnostic';},value=>{value.receipt.output.combinedBytes=1;},
+    value=>{value.receipt.output.partialDelivered=true;},value=>{value.receipt.effects=[{type:'unexpected'}];},
+    value=>{value.startupObservation=null;},value=>{value.startupObservation.processStarted=false;},
+    value=>{value.startupObservation.exitCode=0;},value=>{value.startupObservation.rawStdoutBytes=1;},
+    value=>{value.startupObservation.rawStderrBytes=1;},value=>{value.startupObservation.resultMarkerCount=1;},
+    value=>{value.startupObservation.classifiedErrorCode='sandbox-start-filesystem-lstat-denied';},
+    value=>{value.startupObservation.privateValuesIncluded=true;}];
+  for(const change of changes){const value={ready:false,receipt:structuredClone(receipt),startupObservation:structuredClone(startupObservation)};
+    change(value);assert.equal(shouldRetryNativePreflight(value,0),false);}
 });
 
 test('actual Node test child runs the complete discovered root serially and zero skips is mandatory',async()=>{for(const skipped of [false,true]){const f=await fixture();try{

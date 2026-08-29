@@ -56,7 +56,13 @@ directory, one copied Node, one compact QuickJS runtime, one transient executor
 root and a new evidence directory. It uses the existing reviewed target-only
 access preparation, MXC `processcontainer`/AppContainer executor and 1,200 ms
 JavaScript / 2,000 ms process ceilings. It requires a successful native
-preflight before tests.
+preflight before tests. Exactly one second attempt is permitted only when the
+first system-stamped receipt is `unavailable` / `sandbox-start-failed`, exits
+`1`, has empty non-partial public output and records no effects, and its internal
+startup observation independently records a started process, exit `1`, zero raw
+stdout/stderr bytes and zero result markers. The observation retains counts and
+classification only, never text. Both receipts are retained. Access denial,
+timeout, executed failure, output or any second failure stops the run.
 
 The sole test command is the pinned released Node with:
 
@@ -81,8 +87,8 @@ The result binds all input/runtime hashes, command, counts and evidence hashes.
 
 Success requires an ordinary zero exit, a parseable final TAP summary, at least
 one test, `pass == tests`, and exactly zero failures, cancellations, skips and
-todos. Missing or conflicting summaries, truncated output, timeout, resource
-preflight failure or cleanup uncertainty fail the run.
+todos. Missing or conflicting summaries, truncated output, timeout, terminal
+resource-preflight failure or cleanup uncertainty fail the run.
 
 Cleanup stops only the owned PostgreSQL and Qdrant processes and removes only
 the known owned database/runtime/transient directories. A separate final probe

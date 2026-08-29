@@ -108,6 +108,14 @@ artifact, the exact `node_modules` junction and the released Node executable.
 The entry then validates the fixed Node path/version/hash, exact root/manifest
 and fixed `C:\Windows\System32\whoami.exe` owner before dynamically importing the
 bounded supervisor. No provider credential or product endpoint is inherited.
+The native MXC preflight may make one fully retained second attempt only when
+the first system-stamped receipt is the exit-`1` `sandbox-start-failed`
+condition observed on Control and a separate internal observation records that
+the process started but emitted zero raw stdout/stderr bytes and no result
+marker. Only byte counts and classification are retained, never raw diagnostic
+text. No access denial, timeout, partial output, executed failure or second
+failure is retried. Tests never start unless an actual preflight receipt
+executes the expected sandbox program.
 The fixed child command is the pinned Node executable with
 `--test --test-concurrency=1 --test-reporter=tap`; there is no test-selection,
 retry or skip surface.

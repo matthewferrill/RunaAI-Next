@@ -244,7 +244,7 @@ The current focused launcher suite passed 20/20, including an actual forced
 second-journal-write failure that stopped its child and terminated promptly. The invoked `-e` sentinel proved
 that bootstrap main actually executes, and independent re-review found no
 remaining blocker to one fresh synthetic Control qualification. The complete
-local Windows suite exited zero with 1,680 passing and 77 expected host-specific
+local Windows suite exited zero with 1,681 passing and 77 expected host-specific
 skips; roadmap verification passed 15/15. The suite also proved that its Windows
 file-observation helper retries transient `EBUSY`/`EPERM` sharing windows instead
 of misclassifying a complete fsynced watchdog record as a product failure. The next execution must use a fresh
@@ -280,3 +280,27 @@ keeps the owner connection open with one 1,095,000-millisecond wait, bounded
 slightly beyond the watchdog's own ceiling. Connection loss now remains a safe
 whole-tree stop and an explicitly failed attempt; it is not treated as a
 recoverable terminal.
+
+The first retained-session exercise used fresh stage
+`m1-task-native-c11c0bd6b8fd49bcbdb88e793b557efc`, source
+`04906e2988a5972e862f78be900c13c01b7568da` and prospective run
+`d1fbeffbc19b47f49bd5bde724008577`. It verified all 2,231 archived source files
+and all 30,036 released dependency files, entered the resource envelope, then
+failed closed before tests with `m1-native-preflight-unavailable`. The retained
+system-stamped receipt was the exit-`1` `sandbox-start-failed` condition with
+empty public output. Cleanup removed every owned directory and
+confirmed no services, models, protected-data read or production change. A
+subsequent established disposable Control preflight on the disqualified stage
+immediately executed both the startup program and arithmetic through
+`appcontainer-dacl`, then cleaned itself. The separate environment diagnostic
+also distinguished profile-ancestor and unsupported-environment variants from
+this owned-envelope event.
+
+The correction does not turn that failed attempt into a pass. Resource startup
+may issue one second preflight only when that exact receipt is accompanied by an
+internal observation proving the child started and produced zero raw stdout,
+zero raw stderr and no result marker. The observation retains counts and
+classification, not raw text; both preflight records are retained. Access
+denial, timeout, partial output, executed failure, any other code or a second failure stops the run. This is the
+ordinary harmless-envelope retry already permitted for user code, not a test
+retry, selective rerun or success override.

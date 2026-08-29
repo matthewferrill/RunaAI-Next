@@ -179,6 +179,14 @@ test("missing typed evidence and parent output overflow fail closed without part
   assert.equal(unavailable.status, "unavailable");
   assert.equal(unavailable.errorCode, "sandbox-start-failed");
   assert.equal(unavailable.output.combinedBytes, 0);
+  const observed = await new MxcJavascriptExecutor({ sdk: fakeSdk({
+    stdout: "model says this ran\n", stderr: "private diagnostic", exitCode: 1,
+  }, {}) }).preflight();
+  assert.equal(observed.startupObservation.rawStdoutBytes, Buffer.byteLength("model says this ran\n"));
+  assert.equal(observed.startupObservation.rawStderrBytes, Buffer.byteLength("private diagnostic"));
+  assert.equal(observed.startupObservation.resultMarkerCount, 0);
+  assert.equal(observed.startupObservation.privateValuesIncluded, false);
+  assert.equal(JSON.stringify(observed.startupObservation).includes("private diagnostic"), false);
 
   const lstatDenied = await new MxcJavascriptExecutor({ sdk: fakeSdk({
     stdout: "", stderr: "Error: EPERM: operation not permitted, lstat 'Z:\\\\private-path'", exitCode: 1,

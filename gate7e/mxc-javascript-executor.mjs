@@ -149,6 +149,10 @@ export class MxcJavascriptExecutor {
   }
 
   async execute(rawRequest) {
+    return (await this.executeObserved(rawRequest)).receipt;
+  }
+
+  async executeObserved(rawRequest) {
     const request = parseCodeExecutionRequest(rawRequest);
     const sourceSha256 = sha256(request.source);
     const startedAt = this.now();
@@ -161,6 +165,7 @@ export class MxcJavascriptExecutor {
     let hostVersion = process.version;
     let sourceTransport = null;
     let cleanupFailed = false;
+    let startupObservation = null;
     try {
       support = supportFor(this.sdk);
       sourceTransport = await this.sourceTransport({ source: request.source, sourceSha256,
@@ -228,9 +233,17 @@ export class MxcJavascriptExecutor {
         errorCode = "sandbox-timeout";
       } else {
         if (outcome.exitCode !== 0 && !String(outcome.stdout).includes(RESULT_MARKER)) {
-          throw coded(startupError(outcome.stderr, { runtimeRoot: this.runtimeRoot,
+          const classifiedErrorCode = startupError(outcome.stderr, { runtimeRoot: this.runtimeRoot,
             nodeExecutable: this.nodeExecutable, sourcePath: sourceTransport.sourcePath,
-            temporaryRoot: this.temporaryRoot }), "The sandbox process did not start successfully.");
+            temporaryRoot: this.temporaryRoot });
+          startupObservation = Object.freeze({ schemaVersion: "runa2-sandbox-startup-observation/v1",
+            processStarted: true, exitCode: outcome.exitCode,
+            rawStdoutBytes: Buffer.byteLength(outcome.stdout, "utf8"),
+            rawStderrBytes: Buffer.byteLength(outcome.stderr, "utf8"),
+            resultMarkerCount: String(outcome.stdout).split(/\r?\n/)
+              .filter(line => line.startsWith(RESULT_MARKER)).length,
+            classifiedErrorCode, privateValuesIncluded: false });
+          throw coded(classifiedErrorCode, "The sandbox process did not start successfully.");
         }
         const result = childResult(outcome.stdout);
         hostVersion = result.hostVersion;
@@ -268,7 +281,7 @@ export class MxcJavascriptExecutor {
       stderr = "";
     }
     const durationMs = Math.max(0, Math.round(this.now() - startedAt));
-    return parseCodeExecutionReceipt({
+    const receipt = parseCodeExecutionReceipt({
       schemaVersion: "runa2-code-execution-receipt/v1",
       receiptId: `exec-${sha256(`${request.participant.principalId}\0${request.project.projectId}\0${request.thread.threadId}\0${request.requestId}\0${sourceSha256}\0${status}`).slice(0, 40)}`,
       requestId: request.requestId,
@@ -296,10 +309,11 @@ export class MxcJavascriptExecutor {
       systemStamped: true,
       effects: [],
     });
+    return Object.freeze({ receipt, startupObservation });
   }
 
   async preflight() {
-    const receipt = await this.execute({
+    const observed = await this.executeObserved({
       schemaVersion: "runa2-code-execution-request/v1",
       requestId: `sandbox-preflight-${randomUUID()}`,
       participant: { principalId: "runa2-system-preflight", verified: true },
@@ -310,8 +324,10 @@ export class MxcJavascriptExecutor {
       source: "console.log('runa2-sandbox-ready')",
       origin: { type: "system-startup-preflight" },
     });
+    const receipt = observed.receipt;
     return Object.freeze({ ready: receipt.status === "executed"
-      && receipt.output.stdout === "runa2-sandbox-ready\n", receipt });
+      && receipt.output.stdout === "runa2-sandbox-ready\n", receipt,
+      startupObservation: observed.startupObservation });
   }
 }
 

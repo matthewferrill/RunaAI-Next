@@ -81,6 +81,16 @@ always released when that bounded checkpoint ends. Other browser
 cases observe stable pending/revoked/unknown/restored states with the ordinary
 five-minute bridge bound and do not need a pre-dispatch rendezvous.
 
+For the in-flight checkpoint, click **Refresh task status** in the already-open
+browser before acknowledging. The DOM must show `Task: cancelled`, the exact
+bounded-drain notice, `claimedImmediateKill:false`, and all four true drain facts:
+no new steps, an already-dispatched step may finish, reconciliation may still be
+pending, and its result will be retained. Only the tracked
+`operator-browser-ack-helper.mjs`, invoked through the tracked owner wrapper, may
+serialize this acknowledgement. Operator-supplied details cannot replace scope,
+checkpoint, cancellation, check or result bindings. A hand-authored or generic
+acknowledgement is invalid even when its Boolean happens to match the expected value.
+
 `--mode inventory` performs no inference and reports driver coverage only.
 Scored output includes deterministic grades plus unresolved checks. Independent
 semantic review (including critical model-behavior inspection) and the customer

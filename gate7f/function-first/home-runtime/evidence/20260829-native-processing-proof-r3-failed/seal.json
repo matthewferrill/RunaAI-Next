@@ -1,0 +1,17 @@
+{
+  "schemaVersion": "runaai-native-processing-proof-seal/v1",
+  "proofId": "20260829-native-processing-nomic-r3",
+  "createdAt": "2026-08-29T00:54:20.276Z",
+  "sourceCommit": "bb0fc7f2f0c80a86c40d9c650d523263813b2a19",
+  "createdBeforeLoad": true,
+  "files": {
+    "processing-proof-worker.mjs": "7af945972ca51d9066c3d8ef1245ab960cfeec41c7c18efcf1686aadee4b2557",
+    "processing-proof-contract.mjs": "e4a8724c515e559f35ce061134afc701e09dfe3cc525cacda03c15c42ededda3",
+    "Run-HomeProcessingProof.ps1": "7543eaad0e369e10e5498e7c176c98253a2815ed3046258782c05b0383c8a3a8",
+    "Run-HomeProcessingSampler.ps1": "7d715bf6da9bc9dfb3ff425c2901d985335865fb952528c33b6e639bac54e813",
+    "Runtime-Windows.ps1": "98954955f04bdb2646b2dec1209f025817d5e995c7203db4a9ffe27997a32b6f",
+    "request.json": "5a5297cc9a525777fd551c6ba28ba6cac4b8635a4762b6368e6a4dbb59de9b13",
+    "runtime.json": "5b13307cd32f48b8d2cd61b563322d02b2f68bbf6d3401b87358ccf0c6735d51",
+    "config.json": "48e593f570c2a117713e8d6cd1c167a0bbee8778b7c4d29deeada9ebe38d2af7"
+  }
+}

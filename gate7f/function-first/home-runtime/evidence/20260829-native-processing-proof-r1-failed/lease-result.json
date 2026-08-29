@@ -1,0 +1,22 @@
+{
+  "schemaVersion": "runaai-native-processing-proof-lease-result/v1",
+  "proofId": "20260829-native-processing-nomic-r1",
+  "sealSha256": "d827372fe6e5cc1f6f7ee31ec020aff6a4fc81531e18b37dc003005ef1243e4f",
+  "endedAt": "2026-08-29T00:43:26.443Z",
+  "failure": "processing-proof-go",
+  "completion": null,
+  "cleanupVerified": true,
+  "powerRestored": true,
+  "owned": [
+    {
+      "key": "text-embedding-nomic-embed-text-v1.5",
+      "id": "text-embedding-nomic-embed-text-v1.5",
+      "fingerprint": "66f5db3ab6ec2819b698b24780d7511d0d343f5d0d911dfd5c74640a1b3233db"
+    }
+  ],
+  "ambiguousLoad": null,
+  "productionRoutingChanged": false,
+  "settingsChanged": false,
+  "protectedDataIncluded": false,
+  "inferenceCalledByOperator": true
+}

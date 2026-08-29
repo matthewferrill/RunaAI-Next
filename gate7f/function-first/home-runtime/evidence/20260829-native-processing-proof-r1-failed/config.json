@@ -1,0 +1,72 @@
+{
+  "schemaVersion": "runaai-native-processing-proof/v1",
+  "proofId": "20260829-native-processing-nomic-r1",
+  "homeRoot": "C:\\ProgramData\\RunaAI-Next-ProcessingProof-20260829nativeprocessingnomicr1\\code",
+  "outputRoot": "C:\\ProgramData\\RunaAI-Next-ProcessingProof-20260829nativeprocessingnomicr1\\results",
+  "mainTask": "Runa-M1-ProcessingProof-20260829-native-processing-nomic-r1",
+  "samplerTask": "Runa-M1-ProcessingSampler-20260829-native-processing-nomic-r1",
+  "policy": {
+    "schemaVersion": "runaai-native-processing-proof-policy/v1",
+    "requestCount": 96,
+    "requestDeadlineMs": 30000,
+    "responseCapBytes": 131072,
+    "sampleIntervalMs": 100,
+    "sampleDeadlineMs": 45000,
+    "preparationDeadlineMs": 600000,
+    "proofDeadlineMs": 900000,
+    "sampleMs": 5000,
+    "maximumGapMs": 30000,
+    "minimumFreeHostBytes": 8589934592,
+    "minimumFreeGpuMiB": 1024,
+    "maximumStartTemperatureC": 45,
+    "cutoffC": 85,
+    "powerWatts": 160,
+    "originalPowerWatts": 260,
+    "gpuUuids": [
+      "GPU-15ea3e34-292b-3333-5e43-e5b133f9a30c",
+      "GPU-1f2f6459-b688-3466-5b49-a65c538be843"
+    ]
+  },
+  "model": {
+    "key": "text-embedding-nomic-embed-text-v1.5",
+    "bytes": 84106624,
+    "sha256": "d4e388894e09cf3816e8b0896d81d265b55e7a9fff9ab03fe8bf4ef5e11295ac",
+    "context": 2048,
+    "dimension": 768,
+    "artifactPath": "C:\\Users\\Matthew\\AppData\\Local\\Programs\\LM Studio\\resources\\app\\.webpack\\bin\\bundled-models\\nomic-ai\\nomic-embed-text-v1.5-GGUF\\nomic-embed-text-v1.5.Q4_K_M.gguf"
+  },
+  "preflight": {
+    "cliSha256": "976d4389f97b2cf95b38a4eb673855d8a846f2db21a20eb4fe5e79f7179722f5",
+    "residentCount": 0,
+    "privateValuesIncluded": false,
+    "node": {
+      "path": "C:\\Program Files\\nodejs\\node.exe",
+      "sha256": "923a41f268ab49ede2e3363fbdd9e790609e385c6f3ca880b4ee9a56a8133e5a",
+      "version": "v22.22.1"
+    },
+    "engine": {
+      "pid": 14568,
+      "startedAt": "2026-08-23T14:19:15.3385098Z",
+      "executable": "C:\\Users\\Matthew\\AppData\\Local\\Programs\\LM Studio\\LM Studio.exe"
+    },
+    "engineSha256": "428c46865482aef24712eb5bcbbc7b966e0d8173a946b0b2f307672e4c1529c1",
+    "host": "RUNA-HOME",
+    "descriptorSha256": "0aeff4b66f35f258f6ec60fc661add55e4e2d38fbc1791278ab0c0c4713ec8c3",
+    "readOnly": true,
+    "observedAt": "2026-08-29T00:33:59.0022896Z",
+    "schemaVersion": "runaai-native-processing-proof-preflight/v1",
+    "gpus": [
+      "0, Quadro RTX 6000, GPU-15ea3e34-292b-3333-5e43-e5b133f9a30c, 23040, 1687, 41, 260.00",
+      "1, Quadro RTX 6000, GPU-1f2f6459-b688-3466-5b49-a65c538be843, 23040, 0, 36, 260.00"
+    ]
+  },
+  "frozenRequest": {
+    "commit": "35e01bf557881ad4ff10f739c59e55c041ffcdaa",
+    "path": "gate7f/function-first/readiness/evidence/20260828-actual-adapter-gemma/0017.json",
+    "sha256": "5a5297cc9a525777fd551c6ba28ba6cac4b8635a4762b6368e6a4dbb59de9b13"
+  },
+  "createdBeforeLoad": true,
+  "syntheticOnly": true,
+  "productionRoutingChanged": false,
+  "settingsChanged": false
+}

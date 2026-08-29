@@ -45,7 +45,8 @@ export function runProcessingProof(directory,expected,mode,outputFile=null){cons
   const raw=execFileSync('ssh.exe',['-F','C:\\Users\\matth\\.ssh\\config','-o','ClearAllForwardings=yes','runa-control-wsl-codex',request.nested],
     {input:request.input,windowsHide:true,timeout:mode==='Proof'?30000:45000,maxBuffer:12*1024*1024});
   if(mode==='Export'){demand(outputFile&&path.isAbsolute(outputFile)&&!existsSync(outputFile),'operator-export-output');writeFileSync(outputFile,raw,{flag:'wx'});return {output:outputFile,sha256:sha(raw)};}
-  const value=JSON.parse(raw);if(mode==='Ready'){const ready=JSON.parse(Buffer.from(value.readyBase64,'base64'));
+  const value=JSON.parse(raw);if(mode==='Final'&&outputFile){demand(path.isAbsolute(outputFile)&&!existsSync(outputFile),'operator-final-output');writeFileSync(outputFile,raw,{flag:'wx'});value.output=outputFile;}
+  if(mode==='Ready'){const ready=JSON.parse(Buffer.from(value.readyBase64,'base64'));
     demand(ready.schemaVersion==='runaai-native-processing-proof-ready/v1'&&ready.proofId===value.proofId
       &&ready.sealSha256===expected&&ready.instanceId===value.instanceId&&ready.expiresAt===value.expiresAt,'operator-ready-bytes');}
   return {sha256:sha(raw),...value};

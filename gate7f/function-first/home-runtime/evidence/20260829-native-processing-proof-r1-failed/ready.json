@@ -1,0 +1,12 @@
+{
+  "schemaVersion": "runaai-native-processing-proof-ready/v1",
+  "proofId": "20260829-native-processing-nomic-r1",
+  "sealSha256": "d827372fe6e5cc1f6f7ee31ec020aff6a4fc81531e18b37dc003005ef1243e4f",
+  "modelId": "text-embedding-nomic-embed-text-v1.5",
+  "instanceId": "text-embedding-nomic-embed-text-v1.5",
+  "artifactSha256": "d4e388894e09cf3816e8b0896d81d265b55e7a9fff9ab03fe8bf4ef5e11295ac",
+  "readyAt": "2026-08-29T00:35:11.919Z",
+  "expiresAt": "2026-08-29T00:50:11.919Z",
+  "goPath": "C:\\ProgramData\\RunaAI-Next-ProcessingProof-20260829nativeprocessingnomicr1\\results\\go.json",
+  "completionPath": "C:\\ProgramData\\RunaAI-Next-ProcessingProof-20260829nativeprocessingnomicr1\\results\\complete.json"
+}

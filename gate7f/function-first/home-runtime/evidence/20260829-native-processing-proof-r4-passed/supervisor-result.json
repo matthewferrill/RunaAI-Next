@@ -1,0 +1,11 @@
+{
+    "failure":  null,
+    "endedAt":  "2026-08-29T01:01:28.8012150Z",
+    "workerExitCode":  0,
+    "protectedDataIncluded":  false,
+    "sealSha256":  "0a94f7a61c6f3cefd1a38b6ee7b824bd36e3ca880fa026ac2cbb4ed66a448971",
+    "recovered":  false,
+    "zeroResidencyAndPowerRestored":  true,
+    "schemaVersion":  "runaai-native-processing-proof-supervisor-result/v1",
+    "proofId":  "20260829-native-processing-nomic-r4"
+}

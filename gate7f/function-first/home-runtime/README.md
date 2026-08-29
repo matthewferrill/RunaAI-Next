@@ -129,3 +129,9 @@ post-campaign JIT/sensitive-log transition, authenticated deployment binding, lo
 persistence, real fault/restart/rollback and production activation.
 Do not claim this core is ready to deploy. The existing finite campaign operator remains the sole live
 Home lifecycle authority until explicitly handed over after cleanup.
+
+The separate [native positive-processing proof](NATIVE-PROCESSING-PROOF-RESULTS-2026-08-29.md) passed
+on immutable attempt R4: the owner-context CLI observed `computingEmbedding` and a maximum queue of187,
+all96 frozen synthetic Nomic requests settled successfully, and final cleanup proved zero residency,
+no owned tasks and both GPUs restored to260W. This supplies positive busy/queue evidence only; it does
+not change the deployment limitations above or establish native-wide caller closure.

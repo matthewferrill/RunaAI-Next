@@ -73,7 +73,7 @@ const review={schemaVersion:'runaai-independent-two-host-closure-review/v1',eval
     'No production route, Home runtime, Control service, model, or customer path was changed or exercised.',
     'Future activation still requires the fresh outer activation receipt and the live receipts required by the frozen criteria.']};
 const markdown=`# Independent two-host owner-transaction closure review\n\n`+
-`Evaluator: \`${review.evaluatorId}\`  \nSource commit: \`${sourceCommit}\`  \nDisposition: **${review.disposition}**\n\n`+
+`Evaluator: \`${review.evaluatorId}\`\n\nSource commit: \`${sourceCommit}\`\n\nDisposition: **${review.disposition}**\n\n`+
 `I reviewed the frozen owner-transaction criteria and the implementation lineage at \`8052d32\` as a fresh independent reviewer, author of neither the original criteria nor the original two-host adapter. Five blocking gaps were found and prospectively corrected:\n\n`+
 findings.map(item=>`- **${item.id} — ${item.status}:** ${item.summary}`).join('\n')+`\n\n`+
 `The exact committed source passed all ${counts.tests} deployment tests serially (${counts.pass} pass, ${counts.fail} fail, ${counts.skipped} skipped). Restart, unknown-effect, rollback-order, activation-authority, receipt-binding, stale-observation, and negative synthetic-boundary cases are retained in the TAP evidence.\n\n`+

@@ -1,7 +1,9 @@
 # Independent two-host owner-transaction closure review
 
-Evaluator: `codex-independent-model-role-review-20260828`  
-Source commit: `4d4401d60e33ad18eeea710ceddd039c486784db`  
+Evaluator: `codex-independent-model-role-review-20260828`
+
+Source commit: `4d4401d60e33ad18eeea710ceddd039c486784db`
+
 Disposition: **closed**
 
 I reviewed the frozen owner-transaction criteria and the implementation lineage at `8052d32` as a fresh independent reviewer, author of neither the original criteria nor the original two-host adapter. Five blocking gaps were found and prospectively corrected:

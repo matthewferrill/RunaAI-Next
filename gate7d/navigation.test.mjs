@@ -221,6 +221,8 @@ test("the authenticated shell contains identity, separate Chat and Code controls
   assert.match(script, /\/api\/selected\/navigation\/query/);
   assert.match(script, /\/api\/selected\/chat\/read/);
   assert.match(script, /\/api\/selected\/projects/);
+  assert.match(script, /async function startNew[\s\S]*?setNavigationDisabled\(true\);[\s\S]*?await functionPanel\?\.refresh\(\);[\s\S]*?finally[\s\S]*?setNavigationDisabled\(false\);/);
+  assert.match(script, /async function selectExperience[\s\S]*?await refreshNavigation\(experience\);[\s\S]*?setNavigationDisabled\(true\);[\s\S]*?await functionPanel\?\.refresh\(\);[\s\S]*?finally[\s\S]*?setNavigationDisabled\(false\);/);
   assert.doesNotMatch(script, /innerHTML|localStorage|sessionStorage/);
   assert.match(styles, /\.experience-tabs/);
   assert.match(styles, /\.session-avatar/);

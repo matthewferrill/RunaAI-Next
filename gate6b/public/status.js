@@ -190,7 +190,7 @@ async function refreshNavigation(experience = activeExperience) {
   }
 }
 
-function startNew(projectId = "runa:personal", selectedProjectName = null) {
+async function startNew(projectId = "runa:personal", selectedProjectName = null) {
   const state = activeState();
   state.threadId = `web-${activeExperience}-${crypto.randomUUID()}`;
   state.projectId = projectId;
@@ -201,26 +201,43 @@ function startNew(projectId = "runa:personal", selectedProjectName = null) {
   resetTranscript();
   renderNavigation();
   text("chat-status", selectedProjectName ? `New chat in ${selectedProjectName}` : "Ready");
-  void functionPanel?.refresh();
-  message.focus();
+  setNavigationDisabled(true);
+  send.disabled = true;
+  try { await functionPanel?.refresh(); }
+  finally {
+    setNavigationDisabled(false);
+    send.disabled = false;
+    message.focus();
+  }
 }
 
 async function selectExperience(experience) {
   if (!experiences.includes(experience) || experience === activeExperience) return;
-  activeExperience = experience;
-  projectForm.hidden = true;
-  projectName.value = "";
-  updateExperiencePresentation();
-  const state = activeState();
-  resetTranscript();
-  for (const turn of state.history) appendMessage(turn.role, turn.content, {
-    codeDraft: activeExperience === "code" && turn.role === "assistant", state, evidence: turn.evidence,
-  });
-  renderNavigation();
-  await refreshNavigation(experience);
-  await functionPanel?.refresh();
-  text("chat-status", state.projectName ? `Ready in ${state.projectName}` : "Ready");
-  message.focus();
+  setNavigationDisabled(true);
+  send.disabled = true;
+  try {
+    activeExperience = experience;
+    projectForm.hidden = true;
+    projectName.value = "";
+    updateExperiencePresentation();
+    const state = activeState();
+    resetTranscript();
+    for (const turn of state.history) appendMessage(turn.role, turn.content, {
+      codeDraft: activeExperience === "code" && turn.role === "assistant", state, evidence: turn.evidence,
+    });
+    renderNavigation();
+    setNavigationDisabled(true);
+    await refreshNavigation(experience);
+    // refreshNavigation replaces the project buttons; keep the new controls
+    // disabled until the function panel has caught up to the same experience.
+    setNavigationDisabled(true);
+    await functionPanel?.refresh();
+    text("chat-status", state.projectName ? `Ready in ${state.projectName}` : "Ready");
+  } finally {
+    setNavigationDisabled(false);
+    send.disabled = false;
+    message.focus();
+  }
 }
 
 async function loadChat(chatId) {

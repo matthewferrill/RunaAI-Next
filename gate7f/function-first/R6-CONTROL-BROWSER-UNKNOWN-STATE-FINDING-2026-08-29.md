@@ -104,3 +104,36 @@ Prospective correction verification after adding the direct race regression:
 - Gate 6B suite: 32 passed, 0 failed.
 - Roadmap retrieval/validation: 15 passed, 0 failed; all 17 capability families
   remain visible and M1-S2 remains the current first milestone.
+
+## Third actual-browser sequencing finding
+
+The next exact source `35615fb97daa9dca96f37edc9974030348404659` was
+sealed as
+`62a5f98e04f1abb25dc46ea2c8b12f57d5fef9d1592b391c0638bed241885afb`.
+Its fresh Control stage passed all 12 model-free controls; the retained evidence
+file is `r6c-controls-1788020249853.json`, 2,443,526 bytes, SHA-256
+`669ebdb44c84e71b1fd5c1b709c6cc48bfd52a55e9c6410d81b87634fb89b7f3`.
+The actual browser saw the corrected `unknown` catalog label. It also established
+that selecting the task immediately after changing to Code and choosing its
+project could still leave the detail surface empty.
+
+The click-time scope ticket was necessary but not sufficient. The outer Code
+transition exposes newly fetched project buttons before its awaited function-panel
+refresh. Selecting a project in that window starts a second panel refresh; the
+older transition can then refresh again and erase the task opening. The corrective
+boundary is therefore at navigation: project and record controls, plus message
+submission, remain disabled until the experience transition and its panel refresh
+are both settled. Project selection likewise awaits its panel refresh before
+re-enabling navigation. This changes no server authority and starts no action.
+
+Because this correction changes the source, the third seal and controls are retained
+as superseded pre-model evidence. No Home lease was created and no model was loaded
+under that seal. The next run again requires a fresh archive, seal and Control stage.
+
+Prospective sequencing verification:
+
+- Gate 7D navigation/session suite: 8 passed, 0 failed.
+- Intercepted actual-DOM function-panel suite: 10 passed, 0 failed.
+- Gate 6B suite: 32 passed, 0 failed.
+- Gate 7F foundation suite: 28 passed, 0 failed.
+- Roadmap retrieval/validation: 15 passed, 0 failed.

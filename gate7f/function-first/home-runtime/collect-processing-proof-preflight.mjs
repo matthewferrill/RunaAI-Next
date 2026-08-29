@@ -8,7 +8,7 @@ $engines=@(Get-Process 'LM Studio' -ErrorAction Stop|Where-Object{$_.Path-ceq$en
 try{$inventory=Invoke-RestMethod -Uri 'http://127.0.0.1:1234/api/v1/models' -TimeoutSec 10;$resident=@($inventory.models|ForEach-Object{$_.loaded_instances}|Where-Object{$null-ne$_});
 if($resident.Count-ne0){throw 'processing-proof-preflight-residency'};$gpus=@(& nvidia-smi.exe --query-gpu=index,name,uuid,memory.total,memory.used,temperature.gpu,power.limit --format=csv,noheader,nounits);if($LASTEXITCODE-ne0-or$gpus.Count-ne2){throw 'processing-proof-preflight-gpu'};
 $value=@{schemaVersion='runaai-native-processing-proof-preflight/v1';observedAt=[DateTime]::UtcNow.ToString('o');host=$env:COMPUTERNAME;engine=@{pid=$engine.Id;startedAt=$engine.StartTime.ToUniversalTime().ToString('o');executable=$engine.Path};engineSha256=(Get-FileHash -LiteralPath $enginePath -Algorithm SHA256).Hash.ToLowerInvariant();cliSha256=(Get-FileHash -LiteralPath $cli -Algorithm SHA256).Hash.ToLowerInvariant();descriptorSha256=(Get-FileHash -LiteralPath $descriptor -Algorithm SHA256).Hash.ToLowerInvariant();node=@{path=$node;version=(& $node --version);sha256=(Get-FileHash -LiteralPath $node -Algorithm SHA256).Hash.ToLowerInvariant()};residentCount=$resident.Count;gpus=$gpus;readOnly=$true;privateValuesIncluded=$false};$value|ConvertTo-Json -Depth 10 -Compress}finally{$engine.Dispose()}`;
-const request=tlsTransportRequest({host:'home',command});const raw=execFileSync('ssh.exe',['-F','C:\\Users\\matth\\.ssh\\config','-o','ClearAllForwardings=yes','runa-control-wsl-codex',request.nested],{windowsHide:true,timeout:30000,maxBuffer:65536});
+const request=tlsTransportRequest({host:'home',command});const raw=execFileSync('ssh.exe',['-F','C:\\Users\\matth\\.ssh\\config','-o','ClearAllForwardings=yes','runa-control-wsl-codex',request.nested],{input:request.input,windowsHide:true,timeout:30000,maxBuffer:65536});
 let value;try{value=JSON.parse(raw);}catch{demand(false,'processing-proof-preflight-json');}
 demand(value?.schemaVersion==='runaai-native-processing-proof-preflight/v1'&&value.host==='RUNA-HOME'&&value.residentCount===0
   &&value.readOnly===true&&value.privateValuesIncluded===false&&value.node?.version==='v22.22.1'
@@ -17,4 +17,3 @@ demand(value?.schemaVersion==='runaai-native-processing-proof-preflight/v1'&&val
   &&Number.isSafeInteger(value.engine.pid)&&value.engine.pid>0&&Number.isFinite(Date.parse(value.engine.startedAt))
   &&Array.isArray(value.gpus)&&value.gpus.length===2,'processing-proof-preflight-value');
 writeFileSync(output,raw,{flag:'wx'});process.stdout.write(JSON.stringify({output,sha256:sha(raw),...value})+'\n');
-

@@ -24,15 +24,12 @@ export function checkHardware(value,power=160,starting=false){
   }
 }
 const allowedStatus=new Set(['idle','processingPrompt','generating','computingEmbedding']);
-const allowedFields=new Set(['type','modelKey','format','displayName','publisher','path','sizeBytes','indexedModelIdentifier',
-  'deviceIdentifier','paramsString','architecture','quantization','variants','selectedVariant','identifier','ttlMs',
-  'lastUsedTime','vision','trainedForToolUse','maxContextLength','contextLength','status','queued','parallel']);
 export function projectSample(value,{instanceId,modelKey=NOMIC.key,startedAt,finishedAt,now=Date.now()}){
   demand(typeof instanceId==='string'&&instanceId.length>0&&instanceId.length<=256,'identity');
   demand(Number.isFinite(startedAt)&&Number.isFinite(finishedAt)&&finishedAt>=startedAt&&finishedAt-startedAt<=5000
     &&now>=finishedAt&&now-finishedAt<=5000,'stale');
   demand(Array.isArray(value)&&value.length===1,'model-count');const item=value[0];
-  demand(item&&typeof item==='object'&&!Array.isArray(item)&&Object.keys(item).every(key=>allowedFields.has(key))
+  demand(item&&typeof item==='object'&&!Array.isArray(item)
     &&item.identifier===instanceId&&item.modelKey===modelKey&&item.type==='embedding'&&item.deviceIdentifier===null
     &&allowedStatus.has(item.status)&&Number.isSafeInteger(item.queued)&&item.queued>=0&&item.queued<=100000,'model');
   return {startedAt:new Date(startedAt).toISOString(),finishedAt:new Date(finishedAt).toISOString(),

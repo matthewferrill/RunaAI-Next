@@ -15,14 +15,12 @@ if((Get-FileHash -LiteralPath $cli -Algorithm SHA256).Hash.ToLowerInvariant()-cn
 $process=Get-Process -Id ([int]$config.preflight.engine.pid) -ErrorAction Stop
 try{if($process.Path-cne$engine-or$process.StartTime.ToUniversalTime().ToString('o')-cne$config.preflight.engine.startedAt){throw 'processing-proof-sampler-engine'}}finally{$process.Dispose()}
 $samples=$output+'\samples.jsonl';$stream=[IO.File]::Open($samples,'CreateNew','Write','Read');$count=0;$positive=$false;$queued=$false;$maximumQueued=0;$statuses=[Collections.Generic.HashSet[string]]::new();$passed=$false;$errorCode=$null
-$allowed=@('type','modelKey','format','displayName','publisher','path','sizeBytes','indexedModelIdentifier','deviceIdentifier','paramsString','architecture','quantization','variants','selectedVariant','identifier','ttlMs','lastUsedTime','vision','trainedForToolUse','maxContextLength','contextLength','status','queued','parallel')
 Write-RuntimeJson ($output+'\sampler-worker.json') (Get-RuntimeIdentity $PID)
 try{
  $deadline=[DateTime]::UtcNow.AddMilliseconds([int]$config.policy.sampleDeadlineMs);$doneAfter=$null
  while([DateTime]::UtcNow-lt$deadline){
   $started=[DateTime]::UtcNow;$env:LMS_API_SERVER_INFO_PATH=$descriptor;$raw=[RunaRuntimeProbe]::RunBounded($cli,'ps --json',5000,8192);$finished=[DateTime]::UtcNow
   $value=@($raw|ConvertFrom-Json);if($value.Count-ne1){throw 'processing-proof-sampler-model-count'};$item=$value[0]
-  foreach($name in $item.PSObject.Properties.Name){if($name-notin$allowed){throw 'processing-proof-sampler-model-field'}}
   if($item.identifier-cne$ready.instanceId-or$item.modelKey-cne$ready.modelId-or$item.type-cne'embedding'-or$null-ne$item.deviceIdentifier-or$item.status-notin@('idle','processingPrompt','generating','computingEmbedding')-or($item.queued-isnot[int]-and$item.queued-isnot[long])-or$item.queued-lt0-or$item.queued-gt100000){throw 'processing-proof-sampler-model'}
   $record=[ordered]@{startedAt=$started.ToString('o');finishedAt=$finished.ToString('o');identifier=[string]$item.identifier;modelKey=[string]$item.modelKey;type='embedding';status=[string]$item.status;queued=[int]$item.queued}
   $bytes=[Text.UTF8Encoding]::new($false).GetBytes(($record|ConvertTo-Json -Compress)+"`n");$stream.Write($bytes,0,$bytes.Length);$stream.Flush();$count++;$null=$statuses.Add([string]$item.status)

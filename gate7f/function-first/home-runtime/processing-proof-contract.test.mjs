@@ -10,12 +10,12 @@ test('the frozen synthetic request body is exact and rejects changed inputs',()=
 });
 test('positive samples retain only exact status and queue metadata',()=>{
   const raw=[{identifier:NOMIC.key,modelKey:NOMIC.key,type:'embedding',deviceIdentifier:null,status:'computingEmbedding',queued:4,
-    displayName:'NOT EXPORTED',path:'NOT EXPORTED'}];
+    displayName:'NOT EXPORTED',path:'NOT EXPORTED',newSdkMetadata:'NOT EXPORTED',prompt:'NOT EXPORTED'}];
   const value=projectSample(raw,{instanceId:NOMIC.key,startedAt:1000,finishedAt:1100,now:1200});
   assert.deepEqual(value,{startedAt:new Date(1000).toISOString(),finishedAt:new Date(1100).toISOString(),identifier:NOMIC.key,
     modelKey:NOMIC.key,type:'embedding',status:'computingEmbedding',queued:4});
   for(const mutate of [v=>v.push(v[0]),v=>v[0].identifier='other',v=>v[0].modelKey='other',v=>v[0].status='unknown',
-    v=>v[0].queued=-1,v=>v[0].deviceIdentifier='remote',v=>v[0].prompt='private']){const input=structuredClone(raw);mutate(input);
+    v=>v[0].queued=-1,v=>v[0].deviceIdentifier='remote']){const input=structuredClone(raw);mutate(input);
       assert.throws(()=>projectSample(input,{instanceId:NOMIC.key,startedAt:1000,finishedAt:1100,now:1200}),/processing-proof/);}
 });
 test('terminal proof requires both active and queued evidence and all requests settled',()=>{

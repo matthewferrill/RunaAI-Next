@@ -8,7 +8,7 @@ if((Get-FileHash -LiteralPath ($root+'\seal.json') -Algorithm SHA256).Hash.ToLow
 foreach($file in $seal.files.PSObject.Properties){if((Get-FileHash -LiteralPath ($root+'\'+$file.Name) -Algorithm SHA256).Hash.ToLowerInvariant()-cne$file.Value){throw 'processing-proof-sampler-source'} }
 $ready=Get-Content -LiteralPath ($output+'\ready.json') -Raw|ConvertFrom-Json
 if($ready.sealSha256-cne$ExpectedSeal-or$ready.proofId-cne$config.proofId-or$ready.modelId-cne'text-embedding-nomic-embed-text-v1.5'){throw 'processing-proof-sampler-ready'}
-$cli='C:\Users\Matthew\.lmstudio\bin\lms.exe';$engine='C:\Users\Matthew\AppData\Local\Programs\LM Studio\LM Studio.exe';$descriptor='C:\Users\Matthew\.lmstudio\.internal\http-server-port';
+$cli='C:\Users\Matthew\.lmstudio\bin\lms.exe';$engine='C:\Users\Matthew\AppData\Local\Programs\LM Studio\LM Studio.exe';$descriptor='C:\Users\Matthew\.lmstudio\.internal\http-server.json';
 if((Get-FileHash -LiteralPath $cli -Algorithm SHA256).Hash.ToLowerInvariant()-cne$config.preflight.cliSha256-or(Get-FileHash -LiteralPath $engine -Algorithm SHA256).Hash.ToLowerInvariant()-cne$config.preflight.engineSha256-or(Get-FileHash -LiteralPath $descriptor -Algorithm SHA256).Hash.ToLowerInvariant()-cne$config.preflight.descriptorSha256){throw 'processing-proof-sampler-runtime'}
 $process=Get-Process -Id ([int]$config.preflight.engine.pid) -ErrorAction Stop
 try{if($process.Path-cne$engine-or$process.StartTime.ToUniversalTime().ToString('o')-cne$config.preflight.engine.startedAt){throw 'processing-proof-sampler-engine'}}finally{$process.Dispose()}

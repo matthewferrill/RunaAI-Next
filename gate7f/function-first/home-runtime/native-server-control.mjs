@@ -3,9 +3,9 @@ import {createHash,randomUUID} from 'node:crypto';
 import {spawn} from 'node:child_process';
 import {hostname} from 'node:os';
 import {fileURLToPath} from 'node:url';
-import {demand,sha,residentList} from './contracts.mjs';
+import {demand,residentList} from './contracts.mjs';
 import {assertPlainPath} from './native-adapter.mjs';
-import {privateChildJson,privateChildText} from './private-child-result.mjs';
+import {privateChildJson} from './private-child-result.mjs';
 export const NATIVE_SERVER_PATHS=Object.freeze({cli:'C:\\Users\\Matthew\\.lmstudio\\bin\\lms.exe',
   descriptor:'C:\\Users\\Matthew\\.lmstudio\\.internal\\http-server.json',
   settings:'C:\\Users\\Matthew\\.lmstudio\\.internal\\http-server-config.json',
@@ -61,10 +61,11 @@ export function createNativeCommandGate({assertMutationSettled}){
  * assertQuiescent must verify its independent native lock and the live Control/caller drain; a stale
  * JSON claim is not supplied by this class and is never treated as application-drain evidence.
  * No HOME/USERPROFILE override, daemon command, credential read/copy, model loading or broad kill. */
-export function createNativeServerController({codePins,assertQuiescent,assertMutationSettled,record}){
+export function createNativeServerController({codePins,assertQuiescent,assertMutationSettled,record,executeOwnerCommand}){
   demand(codePins&&Object.keys(codePins).sort().join()==='Observe-NativeServer.ps1,Runtime-Windows.ps1,Settings-FileTransaction.ps1'
     &&Object.values(codePins).every(pin=>/^[a-f0-9]{64}$/.test(pin))
-    &&typeof assertQuiescent==='function'&&typeof assertMutationSettled==='function'&&typeof record==='function','native-server-controller');
+    &&typeof assertQuiescent==='function'&&typeof assertMutationSettled==='function'&&typeof record==='function'
+    &&typeof executeOwnerCommand==='function','native-server-controller');
   let verified=false;const commandGate=createNativeCommandGate({assertMutationSettled});
   function requireHome(){demand(process.platform==='win32'&&hostname().toUpperCase()==='RUNA-HOME'&&process.version==='v22.22.1','native-server-host');}
   async function observe(){
@@ -97,14 +98,10 @@ export function createNativeServerController({codePins,assertQuiescent,assertMut
       await record({type:'native-server-command-intent',commandId,mode,bind:bind??null,engine:before.engine,descriptorSha256:before.descriptorSha256,time:Date.now()});
       let result=null,failure=null;
       markDispatched();
-      try{const child=spawn(NATIVE_SERVER_PATHS.cli,args,{windowsHide:true,stdio:['pipe','pipe','pipe'],
-        // Installed exact CLI source proves this branch uses only tryFindLocalAPIServer; missing
-        // selected API fails, rather than launching llmster or trying an unbound default instance.
-        env:{...process.env,LMS_API_SERVER_INFO_PATH:NATIVE_SERVER_PATHS.descriptor}});
-        const pending=privateChildText(child);child.stdin.end();result=await pending;}
+      try{result=await executeOwnerCommand({commandId,mode,bind:bind??null,baseline:before,args});}
       catch(error){failure={code:'runtime-native-server-child-unconfirmed',executionStopped:error?.executionStopped===true};}
-      await record({type:'native-server-command-returned',commandId,mode,failure,stdoutSha256:result?sha(result.stdout):null,
-        stderrSha256:result?sha(result.stderr):null,time:Date.now()});
+      await record({type:'native-server-command-returned',commandId,mode,failure,stdoutSha256:result?.stdoutSha256??null,
+        stderrSha256:result?.stderrSha256??null,time:Date.now()});
       // Never infer successful mutation from exit status or retry a timed-out command.
       const after=validateNativeServerObservation(await observe(),{expectedEngine:baseline.engine,expectedDescriptorSha256:baseline.descriptorSha256});
       const expected=mode==='stop'?after.http.addresses.length===0:

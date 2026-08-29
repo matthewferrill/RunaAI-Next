@@ -26,7 +26,7 @@ test('native observations reject stale, wrong process and descriptor drift befor
 test('native controller construction is inert and requires independent quiescence/retention callbacks',async()=>{
   assert.throws(()=>createNativeServerController({observerSha256:'a'.repeat(64)}));let calls=0;
   const codePins=Object.fromEntries(['Observe-NativeServer.ps1','Runtime-Windows.ps1','Settings-FileTransaction.ps1'].map(name=>[name,'a'.repeat(64)]));
-  const controller=createNativeServerController({codePins,assertMutationSettled:()=>{calls++;},assertQuiescent:()=>{calls++;},record:()=>{calls++;}});
+  const controller=createNativeServerController({codePins,assertMutationSettled:()=>{calls++;},assertQuiescent:()=>{calls++;},record:()=>{calls++;},executeOwnerCommand:()=>{calls++;}});
   assert.equal(calls,0);
   if(hostname().toUpperCase()!=='RUNA-HOME')await assert.rejects(()=>controller.verify(),/native-server-host/);
   assert.equal(calls,0);

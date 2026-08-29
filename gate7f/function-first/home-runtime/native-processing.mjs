@@ -51,7 +51,8 @@ export function createNativeProcessingObserver({codePins,assertOwnership}){
   const pins=Object.freeze({...codePins});let verified=false;
   const controller=createNativeServerController({codePins:Object.fromEntries(observerSources.map(name=>[name,pins[name]])),
     assertMutationSettled:async()=>{demand(false,'native-processing-no-lifecycle');},
-    assertQuiescent:async()=>{demand(false,'native-processing-no-lifecycle');},record:async()=>{demand(false,'native-processing-no-lifecycle');}});
+    assertQuiescent:async()=>{demand(false,'native-processing-no-lifecycle');},record:async()=>{demand(false,'native-processing-no-lifecycle');},
+    executeOwnerCommand:async()=>{demand(false,'native-processing-no-lifecycle');}});
   const checkSources=()=>{for(const name of ownSources){const file=new URL('./'+name,import.meta.url);
     // URL paths are converted by the filesystem API only after the shared native path check.
     assertPlainPath(fileURLToPath(file));demand(sha(readFileSync(file))===pins[name],'native-processing-source-drift');}};

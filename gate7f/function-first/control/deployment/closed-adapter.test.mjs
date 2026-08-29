@@ -18,13 +18,13 @@ async function fixture(){
   await mkdir(packageDirectory);await mkdir(journalDirectory);
   const value=syntheticAssembly(),pack=buildSupervisedCompanion(await sources());
   for(const file of pack.files){const destination=path.join(packageDirectory,file.path);await mkdir(path.dirname(destination),{recursive:true});await writeFile(destination,file.bytes,{flag:'wx'});}
-  const held={transitionId:value.descriptor.transitionId,fileSha256:value.descriptor.caddy.candidateClosedSha256,etag:'"synthetic-closed"',pendingMutation:false};
+  const held={transitionId:value.descriptor.transitionId,fileSha256:value.descriptor.caddy.candidateClosedSha256,etag:'"synthetic-closed"',pendingMutation:false,activeDispatch:null};
   // Explicit synthetic authority fixtures, not Home readiness or qualification.
   const state={intents:[],results:[],homeChecks:0,heldChecks:0,pending:false};
   const authority={
     async withExclusiveClosedPhase(_descriptor,run){if(state.pending)throw Error('synthetic-unresolved-dispatch');return run();},
     async assertOwnerPrivate(){},async verifyQualification(){},async assertFreshHomeReady(){state.homeChecks++;},
-    async assertCurrentClosedPhase(){state.heldChecks++;return {...held};},
+    async assertCurrentClosedPhase(_descriptor,expectedDispatch=null){state.heldChecks++;return {...held,activeDispatch:expectedDispatch};},
     async recordDispatchIntent(record){state.intents.push(record);state.pending=true;},
     async recordDispatchResult(record){state.results.push(record);},
   };
@@ -52,7 +52,7 @@ for(const phase of ['qualification','home','held','package'])test('pre-dispatch 
   const f=await fixture();try{
     if(phase==='qualification')f.authority.verifyQualification=async()=>{throw Error('synthetic-unqualified');};
     if(phase==='home')f.authority.assertFreshHomeReady=async()=>{throw Error('synthetic-home-not-ready');};
-    if(phase==='held')f.authority.assertCurrentClosedPhase=async()=>({...f.held,pendingMutation:true});
+    if(phase==='held')f.authority.assertCurrentClosedPhase=async(_descriptor,expectedDispatch=null)=>({...f.held,pendingMutation:true,activeDispatch:expectedDispatch});
     if(phase==='package')await writeFile(path.join(f.options.packageDirectory,'watchdog','Watchdog-Host.mjs'),'drift');
     await assert.rejects(createClosedCompanionAdapter(f.options).execute());
     assert.equal(f.state.intents.length,0);assert.deepEqual(await readdir(f.options.journalDirectory),[]);
@@ -62,7 +62,7 @@ for(const phase of ['qualification','home','held','package'])test('pre-dispatch 
 for(const phase of ['home','held'])test('durable outer intent then second '+phase+' check failure stays pending without launch',async()=>{
   const f=await fixture();try{
     if(phase==='home')f.authority.assertFreshHomeReady=async()=>{if(++f.state.homeChecks===2)throw Error('synthetic-home-became-unready');};
-    else f.authority.assertCurrentClosedPhase=async()=>({...f.held,etag:++f.state.heldChecks===2?'"changed"':f.held.etag});
+    else f.authority.assertCurrentClosedPhase=async(_descriptor,expectedDispatch=null)=>({...f.held,etag:++f.state.heldChecks===2?'"changed"':f.held.etag,activeDispatch:expectedDispatch});
     const adapter=createClosedCompanionAdapter(f.options),result=await adapter.execute();
     assert.equal(result.status,'needs-reconciliation');assert.equal(f.state.intents.length,1);assert.equal(f.state.pending,true);
     assert.equal(result.automaticReplayPermitted,false);assert.equal(result.automaticRollbackPermitted,false);

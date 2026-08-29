@@ -115,11 +115,13 @@ export function createClosedCompanionAdapter({descriptor,expectedDescriptorSha25
   need(authority&&methods.every(name=>typeof authority[name]==='function'),'authority-adapter-required');
   const frozen=structuredClone(descriptor),pins=structuredClone(manifest.files);
   const hooks=Object.fromEntries(methods.map(name=>[name,authority[name].bind(authority)]));
-  async function heldPhase(){const held=await hooks.assertCurrentClosedPhase(frozen);
-    need(exact(held,'transitionId,fileSha256,etag,pendingMutation')&&held.transitionId===frozen.transitionId
+  async function heldPhase(expectedDispatch=null){const held=await hooks.assertCurrentClosedPhase(frozen,expectedDispatch);
+    need(exact(held,'transitionId,fileSha256,etag,pendingMutation,activeDispatch')&&held.transitionId===frozen.transitionId
       &&held.fileSha256===frozen.caddy.candidateClosedSha256&&held.pendingMutation===false&&typeof held.etag==='string'
-      &&held.etag.length>0&&held.etag.length<=256&&!/[\r\n]/u.test(held.etag),'closed-phase');return held;
+      &&held.etag.length>0&&held.etag.length<=256&&!/[\r\n]/u.test(held.etag)
+      &&(expectedDispatch===null?held.activeDispatch===null:same(held.activeDispatch,expectedDispatch)),'closed-phase');return held;
   }
+  const sameCaddy=(left,right)=>['transitionId','fileSha256','etag','pendingMutation'].every(key=>left[key]===right[key]);
   return Object.freeze({
     async execute(){
       return hooks.withExclusiveClosedPhase(frozen,async()=>{
@@ -139,9 +141,11 @@ export function createClosedCompanionAdapter({descriptor,expectedDescriptorSha25
         // may acquire a released OS writer, but must not ignore this pending ID.
         await hooks.recordDispatchIntent({transitionId:frozen.transitionId,operationId:prepared.request.operationId,requestSha256:prepared.requestSha256,
           descriptorSha256:expectedDescriptorSha256,packageSha256:expectedPackageSha256,deadline:prepared.request.deadline});
+        const currentDispatch={operationId:prepared.request.operationId,requestSha256:prepared.requestSha256,
+          descriptorSha256:expectedDescriptorSha256,packageSha256:expectedPackageSha256};
         let observation;
         try{
-          await hooks.assertFreshHomeReady(frozen);need(same(await heldPhase(),held),'closed-phase-changed');
+          await hooks.assertFreshHomeReady(frozen);need(sameCaddy(await heldPhase(currentDispatch),held),'closed-phase-changed');
           const run=await launchWatchdog({prepared,wrapperFile:path.join(packageDirectory,...WRAPPER.split('/')),wrapperSha256:pins[WRAPPER],
             helperFile:path.join(packageDirectory,...HELPER.split('/')),helperSha256:pins[HELPER],
             hostFile:path.join(packageDirectory,...HOST.split('/')),hostSha256:pins[HOST],powershellSha256,assertOwnerPrivate:hooks.assertOwnerPrivate});
@@ -150,7 +154,7 @@ export function createClosedCompanionAdapter({descriptor,expectedDescriptorSha25
           const value=validateClosedResult({observation,descriptor:frozen,held,prepared});
           await verifyClosedChildRecords({directory:path.win32.join(ROOT,'secrets','m1-deployment-'+frozen.transitionId),transitionId:frozen.transitionId,
             receipts:value.childReceipts,notBefore:observation.result.ProcessStartedAt,notAfter:observation.result.FinishedAt,assertOwnerPrivate:hooks.assertOwnerPrivate});
-          await hooks.assertFreshHomeReady(frozen);need(same(await heldPhase(),held),'closed-phase-changed');
+          await hooks.assertFreshHomeReady(frozen);need(sameCaddy(await heldPhase(currentDispatch),held),'closed-phase-changed');
           const result={schemaVersion:'runaai-m1-closed-adapter-result/v1',status:'closed-deployment-complete',transitionId:frozen.transitionId,
             operationId:prepared.request.operationId,requestSha256:prepared.requestSha256,descriptorSha256:expectedDescriptorSha256,
             packageSha256:expectedPackageSha256,releaseId:value.releaseId,admissionOpened:false,productionPromoted:false,

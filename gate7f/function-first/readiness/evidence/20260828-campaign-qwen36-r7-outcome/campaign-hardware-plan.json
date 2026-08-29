@@ -1,0 +1,172 @@
+{
+  "schemaVersion": "runa-m1-campaign-hardware-plan/v1",
+  "createdAt": "2026-08-29T10:38:05.293Z",
+  "createdBeforeLoads": true,
+  "sourceCommit": "7ba6bf21131a522ceba991c9ddf2daadca776494",
+  "host": "RUNA-HOME",
+  "node": "v22.22.1",
+  "classification": "prospective-hardware-only-not-functional-qualification",
+  "policy": {
+    "readyLeaseMs": 3600000,
+    "preparationMs": 600000,
+    "loadMs": 180000,
+    "sampleMs": 5000,
+    "maximumGapMs": 30000,
+    "minimumFreeHostBytes": 8589934592,
+    "minimumFreeGpuMiB": 1024,
+    "maximumStartTemperatureC": 45,
+    "cutoffC": 85,
+    "powerWatts": 160,
+    "originalPowerWatts": 260,
+    "gpuUuids": [
+      "GPU-15ea3e34-292b-3333-5e43-e5b133f9a30c",
+      "GPU-1f2f6459-b688-3466-5b49-a65c538be843"
+    ],
+    "workerDeadlineMs": 4200000,
+    "supervisorDeadlineMs": 4440000,
+    "taskDeadlineMs": 4440000
+  },
+  "sourceFiles": {
+    "home-smoke-lease.mjs": "4f2ec0c04ef74d2363a007d9b8231ed025b595bf9bccdfe03af4f00db838ea90",
+    "lease-contract.mjs": "0fe24a0ee7bb7258bb76264bf57a69f602b6fdd9658d9012739cc45c24ed8269",
+    "Run-HomeSmokeLease.ps1": "1ee8e4a52184a07cd611d768331226cdca846df3e7af1d698c720af244ca2adb",
+    "gguf-metadata.mjs": "58092cf7f6ee4c61b64bb5d2b8ef58739b8fe0ad52b9b2c00483914596873299"
+  },
+  "operatorFiles": {
+    "Invoke-HomeSmokeLease.ps1": "4dd111761c2ccd72ab3d501d780f77326edef8db8456b5ff6351b004ef3418bb",
+    "build-campaign-hardware.mjs": "130f3592f419e321cd9e7fdad92240a5e111bc78553d46d8cc50f947befe2ae7",
+    "build-smoke-lease.mjs": "888070a4cfa529384bd5463c43c83efe6a5c0a80dfe2e7b44c6b5d9eb7c80ebb"
+  },
+  "runtimeFiles": [
+    {
+      "path": "C:\\Users\\Matthew\\AppData\\Local\\Programs\\LM Studio\\resources\\app\\.webpack\\main\\index.js",
+      "sha256": "6cbb7ba8dfeefee1ce523a88e0f9d64687cdad59564ee5e7fbff6bb95d00f22f"
+    },
+    {
+      "path": "C:\\Users\\Matthew\\.lmstudio\\extensions\\backends\\llama.cpp-win-x86_64-vulkan-avx2-2.28.2\\llama-server-impl.dll",
+      "sha256": "4d54ebfb12797403104095a4c551feecee93520bf6326e76d2ac163615816ee3"
+    },
+    {
+      "path": "C:\\Users\\Matthew\\.lmstudio\\extensions\\backends\\llama.cpp-win-x86_64-vulkan-avx2-2.28.2\\llm_engine.dll",
+      "sha256": "67b78025b78c5d36a4de23d16e1c405c9634585c93c446eaefe7acd7d49bdc37"
+    },
+    {
+      "path": "C:\\Users\\Matthew\\.lmstudio\\extensions\\backends\\llama.cpp-win-x86_64-vulkan-avx2-2.28.2\\llama.dll",
+      "sha256": "d16ff1ecbc6bb29a0e2e9136ceb111477df69a82df19d2bfad8fa6dc8f0bff64"
+    },
+    {
+      "path": "C:\\Users\\Matthew\\.lmstudio\\extensions\\backends\\llama.cpp-win-x86_64-vulkan-avx2-2.28.2\\ggml-vulkan.dll",
+      "sha256": "1f84a7113734e5de76636a2b38609796219bd2e2c4ef3ee75b0f39f0f3e6eb7a"
+    },
+    {
+      "path": "C:\\Users\\Matthew\\.lmstudio\\extensions\\backends\\llama.cpp-win-x86_64-vulkan-avx2-2.28.2\\backend-manifest.json",
+      "sha256": "220daa1d7061d0b4ef179ff421c116f255330a5aa072f6187b099a4f598d11f8"
+    }
+  ],
+  "auxiliary": {
+    "artifact": {
+      "key": "text-embedding-nomic-embed-text-v1.5",
+      "bytes": 84106624,
+      "sha256": "d4e388894e09cf3816e8b0896d81d265b55e7a9fff9ab03fe8bf4ef5e11295ac",
+      "context": 2048,
+      "artifactPath": "C:\\Users\\Matthew\\AppData\\Local\\Programs\\LM Studio\\resources\\app\\.webpack\\bin\\bundled-models\\nomic-ai\\nomic-embed-text-v1.5-GGUF\\nomic-embed-text-v1.5.Q4_K_M.gguf"
+    },
+    "loadRequest": {
+      "model": "text-embedding-nomic-embed-text-v1.5",
+      "context_length": 2048,
+      "echo_load_config": true
+    }
+  },
+  "candidates": [
+    {
+      "id": "qwen36",
+      "candidateId": "qwen36-27b-mtp",
+      "artifact": {
+        "id": "qwen36",
+        "key": "qwen3.6-27b-mtp",
+        "artifactPath": "C:\\lm-studio-models\\unsloth\\Qwen3.6-27B-MTP-GGUF\\Qwen3.6-27B-Q4_K_M.gguf",
+        "bytes": 17106773120,
+        "sha256": "a7cbd3ecc0e3f9b333edee61ae66bc87ed713c5d49587a8355814722ed329e0f",
+        "architecture": "qwen35",
+        "quantization": "Q4_K_M",
+        "templateSha256": "55d4931433fe502b794226ee7f4d206a6bdd436ac9f80eb7d8ebb4c639f9ea0c",
+        "mtp": true
+      },
+      "loadRequest": {
+        "model": "qwen3.6-27b-mtp",
+        "context_length": 32768,
+        "flash_attention": true,
+        "offload_kv_cache_to_gpu": true,
+        "echo_load_config": true,
+        "speculative_draft_mtp": true,
+        "speculative_draft_simple": false,
+        "speculative_draft_model": "",
+        "speculative_draft_max_tokens": 2,
+        "speculative_draft_min_tokens": 0,
+        "speculative_draft_min_continue_probability": 0.75
+      },
+      "requestReasoningEffort": "none"
+    },
+    {
+      "id": "gemma",
+      "candidateId": "gemma4-26b-a4b",
+      "artifact": {
+        "id": "gemma",
+        "key": "gemma-4-26b-a4b-it-qat",
+        "artifactPath": "C:\\lm-studio-models\\google\\gemma-4-26B-A4B-it-qat-q4_0-gguf\\gemma-4-26B_q4_0-it.gguf",
+        "bytes": 14439363584,
+        "sha256": "3eca3b8f6d7baf218a7dd6bba5fb59a56ee25fe2d567b6f5f589b4f697eca51d",
+        "architecture": "gemma4",
+        "quantization": "Q4_0",
+        "templateSha256": "ae53464bf3be25802b3a5b37def7fd89667067d7577049b3b2d74c4d8de4c6d4",
+        "mtp": false
+      },
+      "loadRequest": {
+        "model": "gemma-4-26b-a4b-it-qat",
+        "context_length": 32768,
+        "flash_attention": true,
+        "offload_kv_cache_to_gpu": true,
+        "echo_load_config": true,
+        "speculative_draft_mtp": false,
+        "speculative_draft_simple": false,
+        "speculative_draft_model": ""
+      },
+      "requestReasoningEffort": "none"
+    },
+    {
+      "id": "coder",
+      "candidateId": "qwen3-coder-30b-a3b",
+      "artifact": {
+        "id": "coder",
+        "key": "qwen3-coder-30b-a3b-instruct",
+        "artifactPath": "C:\\lm-studio-models\\lmstudio-community\\Qwen3-Coder-30B-A3B-Instruct-GGUF\\Qwen3-Coder-30B-A3B-Instruct-Q6_K.gguf",
+        "bytes": 25104724288,
+        "sha256": "72a9b20a19c70db56e1ccd01fb35b0f0842d67d28e7c3bdff762df860120b769",
+        "architecture": "qwen3moe",
+        "quantization": "Q6_K",
+        "templateSha256": "672e747c77e990320152343b0a4951222e40de5645297905d89afba05586d827",
+        "mtp": false
+      },
+      "loadRequest": {
+        "model": "qwen3-coder-30b-a3b-instruct",
+        "context_length": 32768,
+        "flash_attention": true,
+        "offload_kv_cache_to_gpu": true,
+        "echo_load_config": true,
+        "speculative_draft_mtp": false,
+        "speculative_draft_simple": false,
+        "speculative_draft_model": ""
+      },
+      "requestReasoningEffort": null
+    }
+  ],
+  "inferenceOwnership": "root-functional-driver-and-browser-only",
+  "leaseOwnership": "roadmap_review",
+  "maximumConcurrentPrimaries": 1,
+  "existingReranker": {
+    "url": "http://192.168.50.165:8412",
+    "changed": false
+  },
+  "productionRoutingChanged": false,
+  "protectedDataIncluded": false
+}

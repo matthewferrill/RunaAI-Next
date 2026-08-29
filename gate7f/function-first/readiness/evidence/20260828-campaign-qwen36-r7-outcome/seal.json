@@ -1,0 +1,16 @@
+{
+  "schemaVersion": "runa-m1-campaign-lease-seal/v1",
+  "createdAt": "2026-08-29T10:39:20.885Z",
+  "sourceCommit": "7ba6bf21131a522ceba991c9ddf2daadca776494",
+  "leaseId": "20260828-campaign-qwen36-r7",
+  "createdBeforeModelLoads": true,
+  "files": {
+    "home-smoke-lease.mjs": "4f2ec0c04ef74d2363a007d9b8231ed025b595bf9bccdfe03af4f00db838ea90",
+    "lease-contract.mjs": "0fe24a0ee7bb7258bb76264bf57a69f602b6fdd9658d9012739cc45c24ed8269",
+    "Run-HomeSmokeLease.ps1": "1ee8e4a52184a07cd611d768331226cdca846df3e7af1d698c720af244ca2adb",
+    "gguf-metadata.mjs": "58092cf7f6ee4c61b64bb5d2b8ef58739b8fe0ad52b9b2c00483914596873299",
+    "campaign-hardware-plan.json": "f77cc5494e363772a281c06801e1a27d5aa7724ad1086574b7accc7740e59706",
+    "runtime.json": "0e57db1c2db05c338f6dbf755779d6a62fd6931d7e83f11e2a43991059ad9a4a",
+    "lease-config.json": "3e4db01db61bc3c7d3a97ba56607030ef636db6bafb1aa40c40bfa29d6a76b09"
+  }
+}

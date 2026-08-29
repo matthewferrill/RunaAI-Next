@@ -1,7 +1,9 @@
 import {readFileSync,writeFileSync,mkdirSync,existsSync} from 'node:fs';
 import path from 'node:path';
 import assert from 'node:assert/strict';
-import {sha,validCompletion} from './lease-contract.mjs';
+import {sha} from './lease-contract.mjs';
+import {retainedCompletionMarker} from './retained-completion-marker.mjs';
+
 // New local retention path for an actual worker failure whose exact-owned cleanup succeeded.
 // Do not turn a failed lease into a clean abort or alter the old retention runner/evidence.
 const [leaseId,expectedSeal]=process.argv.slice(2);
@@ -17,7 +19,7 @@ for(const [name,digest]of Object.entries(seal.files))assert.equal(sha(files[name
 assert.equal(result.completion,null);assert.match(result.failure,/^lease-[a-z0-9-]+$/);
 assert.equal(result.cleanupVerified,true);assert.equal(result.powerRestored,true);
 assert.equal(supervisor.zeroResidencyAndPowerRestored,true);assert.equal(supervisor.exitCode,1);assert.equal(supervisor.failure,null);
-const marker=validCompletion(JSON.parse(files['complete.json']),expectedSeal,leaseId);
+const marker=retainedCompletionMarker(files,expectedSeal,leaseId);
 const finalBytes=readFileSync(path.join(artifacts,`${leaseId}-final.json`)),final=JSON.parse(finalBytes);
 assert.equal(final.models.flatMap(model=>model.loadedInstances).length,0);assert.equal(final.ownedTaskRegistrations.length,0);
 assert.ok(final.gpus.every(gpu=>gpu.split(',')[2].trim()==='260.00'));

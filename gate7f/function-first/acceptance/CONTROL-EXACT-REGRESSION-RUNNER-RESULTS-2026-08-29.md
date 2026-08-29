@@ -304,3 +304,24 @@ classification, not raw text; both preflight records are retained. Access
 denial, timeout, partial output, executed failure, any other code or a second failure stops the run. This is the
 ordinary harmless-envelope retry already permitted for user code, not a test
 retry, selective rerun or success override.
+
+A stricter follow-up run on fresh stage
+`m1-task-native-67bc23c4a03842c18b8448166ede2b68` correctly refused that retry. Its
+internal observation recorded 2,806 raw stderr bytes, so the attempt failed
+closed and cleaned every owned resource. A separate disqualified diagnostic
+stage then reproduced the exact startup failure under the sealed environment.
+Changing only `TEMP`/`TMP` did not help; adding only `LOCALAPPDATA` made the
+native preflight pass with zero diagnostic bytes. The same pass was obtained
+when `LOCALAPPDATA` pointed at the disposable stage transient directory, so the
+real owner profile is neither required nor exposed. The root cause is therefore
+the omitted Windows location required by MXC's permission bootstrap, not a
+sandbox workload, model, protected store or production service. The supervisor
+now injects only that owned path. This is prospective until a new immutable
+zero-skip Control run passes; neither prior failed stage is reclassified or
+reused.
+
+The corrected producer/runner focus passed 39/39 with zero skip. The complete
+local Windows suite exited zero; its JUnit record contains 1,754 testcase
+elements, zero failures, zero errors and 77 expected absent-Control integration
+skips. Roadmap verification remained 15/15. Those local skips are not accepted
+as qualification and remain the reason for the fresh zero-skip Control run.

@@ -73,6 +73,9 @@ The sole test command is the pinned released Node with:
 No filename, pattern, shard, retry, watch or skip argument is accepted. The
 child receives a fixed allowlisted environment containing only required Windows
 process variables and the newly owned PostgreSQL, Qdrant and executor paths.
+`LOCALAPPDATA` is fixed to the stage-owned transient directory rather than
+inherited from the owner's profile; it exists only for MXC's Windows permission
+bootstrap and is removed during exact cleanup.
 Provider/model endpoints, credentials and inherited product configuration are
 not forwarded. Stdout and stderr have finite byte ceilings, and the process is
 terminated at the prospective whole-run deadline.

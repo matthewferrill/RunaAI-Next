@@ -108,6 +108,12 @@ artifact, the exact `node_modules` junction and the released Node executable.
 The entry then validates the fixed Node path/version/hash, exact root/manifest
 and fixed `C:\Windows\System32\whoami.exe` owner before dynamically importing the
 bounded supervisor. No provider credential or product endpoint is inherited.
+The supervisor supplies `LOCALAPPDATA` only as the newly owned stage
+`transient` directory. Control diagnostics proved MXC's Windows permission
+bootstrap requires that variable, while an absent value fails before sandbox
+code starts and the disposable owned path succeeds without exposing the
+owner's real profile. The directory is created before preflight and removed by
+the exact cleanup boundary.
 The native MXC preflight may make one fully retained second attempt only when
 the first system-stamped receipt is the exit-`1` `sandbox-start-failed`
 condition observed on Control and a separate internal observation records that

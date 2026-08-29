@@ -73,7 +73,7 @@ export function controlRegressionEnvironment(source,resources,root){
     if(typeof source[key]==='string'&&source[key])safe[key]=source[key];
   if(process.platform==='win32'){safe.SystemDrive='C:';safe.OS='Windows_NT';}
   const native=resources.workerResources.native,postgresPort=resources.workerResources.postgresPort;
-  return Object.freeze({...safe,TEMP:resources.dataDirectory,TMP:resources.dataDirectory,CI:'1',NO_COLOR:'1',
+  return Object.freeze({...safe,TEMP:resources.dataDirectory,TMP:resources.dataDirectory,LOCALAPPDATA:native.temporaryRoot,CI:'1',NO_COLOR:'1',
     M1_TASK_PG_URL:`postgresql://m1_synthetic@127.0.0.1:${postgresPort}/postgres`,
     M1_QDRANT_BINARY:path.join(root,'tools/qdrant/bin/qdrant.exe'),M1_EXECUTOR_RUNTIME_ROOT:native.runtimeRoot,
     M1_EXECUTOR_RUNNER_PATH:native.runnerPath,M1_EXECUTOR_NODE_PATH:native.nodeExecutable,M1_EXECUTOR_TEMP_ROOT:native.temporaryRoot});

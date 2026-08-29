@@ -12,7 +12,7 @@ import {CASE_BUNDLE_SHA256} from './cases.mjs';
 import {QDRANT_PIN} from './runner-contract.mjs';
 import {captureBoundedStream,CONTROL_REGRESSION_FIXED,controlRegressionEnvironment,executeAllTests,parseControlRegressionArguments,parseTapSummary,
   runVerifiedControlRegression,validateControlRegressionManifest,verifyControlRegressionCleanup} from './control-exact-regression.mjs';
-import {ownerSafeEnvironment,runBoundedOwnerChild} from './control-exact-regression-owner.mjs';
+import {ownerSafeEnvironment,ownerSafeEnvironmentForRoot,runBoundedOwnerChild} from './control-exact-regression-owner.mjs';
 import {parseOwnerEntryArguments,purgeToOwnerEntryEnvironment} from './control-exact-regression-entry.mjs';
 import {buildInvocation,parseInvocationArguments} from './build-control-exact-regression-invocation.mjs';
 import {shouldRetryNativePreflight} from './owned-control-resources.mjs';
@@ -55,15 +55,21 @@ test('TAP summary requires one complete final summary and retains skips as a fai
 test('owner supervisor environment retains only safe operating-system keys',()=>{
   assert.deepEqual(ownerSafeEnvironment({SystemRoot:'C:\\Windows',SystemDrive:'Z:',OS:'foreign',TEMP:'C:\\Temp',NODE_OPTIONS:'--require foreign.js',providerSecret:'private'}),
     {SystemRoot:'C:\\Windows',SystemDrive:'C:',OS:'Windows_NT',TEMP:'C:\\Temp'});
+  const root='C:\\AI\\RunaAI-Next-Candidate\\staging\\m1-task-native-'+('a'.repeat(32));
+  assert.deepEqual(ownerSafeEnvironmentForRoot(root,{SystemRoot:'C:\\Windows',LOCALAPPDATA:'C:\\Users\\Matthew\\AppData\\Local',
+    USERPROFILE:'C:\\Users\\Matthew',providerSecret:'private'}),
+  {SystemRoot:'C:\\Windows',SystemDrive:'C:',OS:'Windows_NT',LOCALAPPDATA:path.join(root,'transient')});
 });
 
 test('test environment exposes only owned endpoints and safe process keys, never inherited credentials or providers',()=>{
   const root='C:\\AI\\RunaAI-Next-Candidate\\staging\\m1-task-native-'+('a'.repeat(32)),owned=resources(root);
-  const env=controlRegressionEnvironment({SystemRoot:'C:\\Windows',SystemDrive:'Z:',OS:'foreign',PATH:'safe',OPENAI_API_KEY:'secret',HOME:'private',M1_TASK_PG_URL:'production',
+  const env=controlRegressionEnvironment({SystemRoot:'C:\\Windows',SystemDrive:'Z:',OS:'foreign',PATH:'safe',LOCALAPPDATA:'C:\\Users\\Matthew\\AppData\\Local',
+    OPENAI_API_KEY:'secret',HOME:'private',M1_TASK_PG_URL:'production',
     RUNAAI_PROVIDER_URL:'http://production'},owned,root);
   assert.equal(env.SystemRoot,'C:\\Windows');assert.equal(env.SystemDrive,'C:');assert.equal(env.OS,'Windows_NT');
   assert.equal(env.M1_TASK_PG_URL,'postgresql://m1_synthetic@127.0.0.1:41001/postgres');
   assert.equal(env.M1_QDRANT_BINARY,path.join(root,'tools/qdrant/bin/qdrant.exe'));assert.equal(env.TEMP,owned.dataDirectory);
+  assert.equal(env.LOCALAPPDATA,owned.workerResources.native.temporaryRoot);
   for(const key of ['OPENAI_API_KEY','HOME','RUNAAI_PROVIDER_URL'])assert.equal(Object.hasOwn(env,key),false);
 });
 
@@ -185,6 +191,8 @@ test('externally pinned dispatcher uses argument transport and one finite owner-
   assert.match(entry,/FIXED_NODE_SHA256/u);assert.match(entry,/whoami\.exe/u);assert.match(entry,/realpathSync\(executable\)/u);
   assert.doesNotMatch(entry+supervisor,/OPENAI|LMSTUDIO|RUNAAI_PROVIDER|M1_TASK_PG_URL/u);
   assert.match(supervisor,/1_020_000/u);assert.match(supervisor,/taskkill\.exe/u);assert.match(supervisor,/stdio:\['ignore','pipe','pipe'\]/u);
+  assert.match(supervisor,/LOCALAPPDATA:path\.join\(path\.resolve\(root\),'transient'\)/u);
+  assert.doesNotMatch(supervisor,/Users\\\\Matthew|process\.env\.LOCALAPPDATA/u);
   assert.doesNotMatch(entry+supervisor,/\bssh\b|Invoke-Expression|Start-Service|Stop-Service|\/v1\/chat\/completions|--test-name-pattern/u);
 });
 

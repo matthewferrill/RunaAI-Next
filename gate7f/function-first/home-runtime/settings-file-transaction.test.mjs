@@ -38,6 +38,13 @@ test('actual Windows atomic swap retains custom ACL and exact original bytes thr
   assert.equal(result.before,result.after);assert.equal(result.before,result.restored);assert.equal(result.applied.inMemoryEnforcementProved,false);
   assert.deepEqual(readFileSync(f.target),original);assert.deepEqual(readFileSync(path.join(f.directory,'actual-preimage.bin')),original);
 });
+test('atomic replacement does not reconstruct the target ACL on either staging file',{skip:process.platform!=='win32'},()=>{
+  const sourceText=readFileSync(source,'utf8');
+  assert.doesNotMatch(sourceText,/Set-SettingsAcl/u);
+  assert.match(sourceText,/Settings-Acl \$target\)-cne\$intent\.aclSddl/u);
+  assert.match(sourceText,/Settings-Acl \$backup\)-cne\$intent\.aclSddl/u);
+  assert.match(sourceText,/Settings-Acl \$displaced\)-cne\$priorAcl/u);
+});
 test('foreign edit or ACL change before swap is never overwritten',{skip:process.platform!=='win32'},t=>{
   for(const kind of ['bytes','acl']){
     const f=fixture(t);ps(f,create);

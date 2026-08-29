@@ -25,10 +25,6 @@ function Write-SettingsNew([string]$Path,[byte[]]$Bytes){
 function Write-SettingsRecord([string]$Path,$Value){Write-SettingsNew $Path ([Text.UTF8Encoding]::new($false).GetBytes(($Value|ConvertTo-Json -Depth 10 -Compress)+"`n"))}
 function Read-SettingsRecord([string]$Path){[Text.UTF8Encoding]::new($false,$true).GetString((Read-SettingsBytes $Path))|ConvertFrom-Json}
 function Settings-Acl([string]$Path){(Get-Acl -LiteralPath $Path).Sddl}
-function Set-SettingsAcl([string]$Path,[string]$Sddl){
-  $acl=New-Object Security.AccessControl.FileSecurity;$acl.SetSecurityDescriptorSddlForm($Sddl)
-  Set-Acl -LiteralPath $Path -AclObject $acl;if((Settings-Acl $Path)-cne$Sddl){throw 'settings-acl-unconfirmed'}
-}
 function New-SettingsFileIntent([string]$Target,[string]$Directory,[string]$ExpectedOriginalSha256,[byte[]]$Candidate){
   Assert-SettingsPlain $Target;Assert-SettingsPlain $Directory $true
   if($ExpectedOriginalSha256-notmatch'^[a-f0-9]{64}$'-or$Candidate.Length-gt4096){throw 'settings-intent'}
@@ -69,7 +65,10 @@ function Restore-SettingsActualPreimage([string]$Directory,[string]$ExpectedCurr
   if((Settings-Hash $prior)-cne$intent.originalSha256-or$priorAcl-cne$intent.aclSddl){throw 'settings-unowned-preimage-retained'}
   if((Settings-Hash (Read-SettingsBytes $target))-cne$ExpectedCurrentSha256-or(Settings-Acl $target)-cne$priorAcl){throw 'settings-rollback-unrelated-drift'}
   $id=[Guid]::NewGuid().ToString('N');$pending=$Directory+'\restore-'+$id+'.bin';$displaced=$Directory+'\displaced-'+$id+'.bin'
-  Write-SettingsNew $pending $prior;Set-SettingsAcl $pending $priorAcl
+  # ReplaceFile preserves the existing target security descriptor. Rebuilding it
+  # on the staging file can canonicalize ACE order and is neither needed nor an
+  # exact-byte/ACL preservation proof. Verify target and displaced ACLs instead.
+  Write-SettingsNew $pending $prior
   # Replace captures the exact bytes actually displaced, including a writer racing our last check.
   if($null-ne$BeforeReplace){& $BeforeReplace}
   [IO.File]::Replace($pending,$target,$displaced,$false)
@@ -91,7 +90,6 @@ function Invoke-SettingsFileSwap([string]$Directory,[scriptblock]$BeforeReplace=
   if((Settings-Hash (Read-SettingsBytes $pending))-cne$intent.candidateSha256){throw 'settings-candidate-drift'}
   if((Settings-Hash (Read-SettingsBytes $target))-cne$intent.originalSha256-or(Settings-Acl $target)-cne$intent.aclSddl){throw 'settings-preapply-unrelated-drift'}
   $backup=$Directory+'\actual-preimage.bin';if(Test-Path -LiteralPath $backup){throw 'settings-existing-swap'}
-  Set-SettingsAcl $pending $intent.aclSddl
   # Test-only injected race seam. Production entrypoints never accept a script block/input command.
   if($null-ne$BeforeReplace){& $BeforeReplace}
   [IO.File]::Replace($pending,$target,$backup,$false)

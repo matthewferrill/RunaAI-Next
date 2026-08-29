@@ -31,6 +31,17 @@ function send(port,certs,{client='control',pathName='/v1/chat/completions',metho
     servername:'runa-home-legacy.internal',agent:new Agent({maxCachedSessions:0}),headers:{'content-type':'application/json','content-length':String(body.length)}},async res=>{
       const chunks=[];for await(const chunk of res)chunks.push(chunk);resolve({status:res.statusCode,raw:Buffer.concat(chunks)});});req.once('error',reject);req.end(body);
 });}
+function beginIncomplete(port,certs){let req,settled=false;const credentials=certs.client('control'),response=new Promise((resolve,reject)=>{
+  req=httpsRequest({host:'127.0.0.1',port,path:'/v1/chat/completions',method:'POST',ca:certs.ca,...credentials,
+    servername:'runa-home-legacy.internal',agent:new Agent({maxCachedSessions:0}),headers:{'content-type':'application/json','content-length':'100'}},async res=>{
+      const chunks=[];for await(const chunk of res)chunks.push(chunk);settled=true;resolve({status:res.statusCode,headers:res.headers,raw:Buffer.concat(chunks)});});
+  req.once('error',error=>{if(!settled)reject(error);});req.write('{');
+});return {req,response};}
+function sendDeclaredOverflow(port,certs,declaredLength){return new Promise((resolve,reject)=>{const credentials=certs.client('control');
+  const req=httpsRequest({host:'127.0.0.1',port,path:'/v1/chat/completions',method:'POST',ca:certs.ca,...credentials,
+    servername:'runa-home-legacy.internal',agent:new Agent({maxCachedSessions:0}),headers:{'content-type':'application/json','content-length':String(declaredLength)}},async res=>{
+      const chunks=[];for await(const chunk of res)chunks.push(chunk);resolve({status:res.statusCode,raw:Buffer.concat(chunks)});});req.once('error',reject);req.end();
+});}
 function requestNative(port,item){return new Promise((resolve,reject)=>{const req=httpRequest({host:'127.0.0.1',port,path:item.pathname,method:item.method,signal:item.signal,
     headers:item.raw.length?{'content-type':'application/json','content-length':String(item.raw.length)}:{}},async res=>{const chunks=[];for await(const chunk of res)chunks.push(chunk);
     resolve({status:res.statusCode,headers:{'content-type':res.headers['content-type']??''},raw:Buffer.concat(chunks)});});req.once('error',reject);req.end(item.raw);});}
@@ -44,7 +55,7 @@ test('actual disposable mTLS wire preserves legacy requests, rejects foreign cli
       control:{endpoint:'127.0.0.1:9771',sourceAddress:'127.0.0.1',caddyBinarySha256:hex(3),clientCertificateSha256:pin(client.cert)},
       home:{endpoint:'192.168.50.165:9777',serverName:'runa-home-legacy.internal',serverCertificateSha256:pin(certs.home),nativeEndpoint:'127.0.0.1:1234'},
       models:{mappedPrimaryId:'installed-primary',mappedPrimaryFingerprint:hex(6),embeddingId:'text-embedding-nomic-embed-text-v1.5',embeddingFingerprint:hex(7)},
-      limits:{requestMs:65000,bodyBytes:2*1024*1024,responseBytes:4*1024*1024,maximumOutputTokens:4000,sampleMs:1},privateValuesIncluded:false};
+      limits:{requestMs:65000,bodyMs:100,bodyBytes:2*1024*1024,responseBytes:4*1024*1024,maximumOutputTokens:4000,sampleMs:1},privateValuesIncluded:false};
     native=createHttpServer(async(req,res)=>{const chunks=[];for await(const chunk of req)chunks.push(chunk);const raw=Buffer.concat(chunks),body=raw.length?JSON.parse(raw):null;
       nativeCalls.push({method:req.method,path:req.url,raw});res.writeHead(200,{'content-type':'application/json'});
       if(req.url==='/v1/chat/completions')res.end(JSON.stringify({model:body.model,choices:[{message:{role:'assistant',content:'synthetic',tool_calls:body.tools?[{id:'call-1',type:'function',function:{name:'status',arguments:'{}'}}]:undefined},finish_reason:body.tools?'tool_calls':'stop'}]}));
@@ -63,7 +74,7 @@ test('actual disposable mTLS wire preserves legacy requests, rejects foreign cli
         bindingSha256:journal.bindingSha256,intentId,managedReceiptSha256,endpoint:binding.control.endpoint,terminalReceiptSha256:hex(12),observationSha256:hex(13),
         observedAt:new Date(now).toISOString(),privateValuesIncluded:false};}};
     const adapter=createLegacyCompatibilityAdapter({binding,journal,upstream:{request:item=>requestNative(nativePort,item)},runtime:{observe:async()=>observed()},route,
-      clock:()=>now,randomId:()=>id(nextId++),delay:async ms=>{now+=ms;},event:value=>events.push(value)});
+      clock:()=>now,randomId:()=>id(nextId++),delay:async ms=>{await new Promise(resolve=>setTimeout(resolve,ms));now+=ms;},event:value=>events.push(value)});
     wire=createLegacyCompatibilityServer({binding,adapter,tls:{key:certs.homeKey,cert:certs.home,ca:certs.ca},event:value=>events.push(value)});const wirePort=await listen(wire);
     const tools=[{type:'function',function:{name:'status',parameters:{type:'object',properties:{},additionalProperties:false}}}],chat=Buffer.from(JSON.stringify({model:binding.legacy.modelAlias,
       messages:[{role:'user',content:'status'}],temperature:0.3,max_tokens:2000,tools}));
@@ -74,7 +85,20 @@ test('actual disposable mTLS wire preserves legacy requests, rejects foreign cli
     const before=nativeCalls.length;assert.equal((await send(wirePort,certs,{client:'other',body:chat})).status,403);
     assert.equal((await send(wirePort,certs,{pathName:'/api/v1/models/load',body:Buffer.from('{}')})).status,400);assert.equal(nativeCalls.length,before);
     await assert.rejects(send(wirePort,certs,{client:null,body:chat}));assert.equal(nativeCalls.length,before);
-    const closure=await adapter.close();assert.equal(closure.samples.length,3);assert.equal((await send(wirePort,certs,{body:chat})).status,503);assert.equal(nativeCalls.length,before);
+    const dropped=beginIncomplete(wirePort,certs);for(let index=0;index<100&&(await adapter.status()).activeRequests===0;index++)await new Promise(resolve=>setTimeout(resolve,5));
+    assert.equal((await adapter.status()).activeRequests,1);dropped.req.destroy();await assert.rejects(dropped.response);
+    for(let index=0;index<100&&(await adapter.status()).activeRequests!==0;index++)await new Promise(resolve=>setTimeout(resolve,5));
+    assert.equal((await adapter.status()).activeRequests,0);assert.equal(nativeCalls.length,before);
+    const overflow=await sendDeclaredOverflow(wirePort,certs,binding.limits.bodyBytes+1);assert.equal(overflow.status,400);
+    assert.equal((await adapter.status()).activeRequests,0);assert.equal(nativeCalls.length,before);
+    const slow=beginIncomplete(wirePort,certs),incomplete=slow.response;for(let index=0;index<100&&(await adapter.status()).activeRequests===0;index++)await new Promise(resolve=>setTimeout(resolve,5));
+    assert.equal((await adapter.status()).activeRequests,1);let closeFinished=false;const closing=adapter.close().finally(()=>{closeFinished=true;});
+    await new Promise(resolve=>setTimeout(resolve,20));assert.equal(closeFinished,false);
+    const timedOut=await incomplete;assert.equal(timedOut.status,408);assert.equal(timedOut.headers.connection,'close');
+    assert.deepEqual(JSON.parse(timedOut.raw),{schemaVersion:'runaai-legacy-compatibility-error/v1',errorCode:'m1-legacy-server-body-timeout',privateValuesIncluded:false});
+    assert.equal(nativeCalls.length,before);
+    const closure=await closing;assert.equal(closure.samples.length,3);assert.equal((await adapter.status()).activeRequests,0);
+    assert.equal((await send(wirePort,certs,{body:chat})).status,503);assert.equal(nativeCalls.length,before);
     const managedReceiptSha256=hex(40);await adapter.linkManaged({managedReceiptSha256,nextReceiptSha256:hex(41),legacyReceiptSha256:closure.terminalReceiptSha256});
     await adapter.restore({managedReceiptSha256});assert.equal((await send(wirePort,certs,{method:'GET',pathName:'/v1/models'})).status,200);assert.equal(nativeCalls.length,before+1);
     assert.equal(events.some(value=>value.kind==='legacy-wire-tls-denial'),true);assert.equal(wirePort!==9777&&nativePort!==1234,true);

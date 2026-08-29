@@ -13,7 +13,7 @@ function binding(){return {schemaVersion:'runaai-legacy-compatibility-binding/v1
   modelAlias:'qwen/qwen3-4b',embeddingModel:'text-embedding-nomic-embed-text-v1.5'},control:{endpoint:'127.0.0.1:9771',sourceAddress:'192.168.50.150',
     caddyBinarySha256:sha(3),clientCertificateSha256:sha(4)},home:{endpoint:'192.168.50.165:9777',serverName:'runa-home-legacy.internal',
     serverCertificateSha256:sha(5),nativeEndpoint:'127.0.0.1:1234'},models:{mappedPrimaryId:'qualified-primary',mappedPrimaryFingerprint:sha(6),
-    embeddingId:'text-embedding-nomic-embed-text-v1.5',embeddingFingerprint:sha(7)},limits:{requestMs:65000,bodyBytes:2*1024*1024,
+    embeddingId:'text-embedding-nomic-embed-text-v1.5',embeddingFingerprint:sha(7)},limits:{requestMs:65000,bodyMs:100,bodyBytes:2*1024*1024,
     responseBytes:4*1024*1024,maximumOutputTokens:4000,sampleMs:1},privateValuesIncluded:false};}
 const request=(body,pathname='/v1/chat/completions')=>({sourceAddress:'192.168.50.150',clientCertificateSha256:sha(4),pathname,method:'POST',raw:Buffer.from(JSON.stringify(body))});
 const chat=(extra={})=>({model:'qwen/qwen3-4b',messages:[{role:'system',content:'Be useful.'},{role:'user',content:'Inspect the status.'}],temperature:0.3,max_tokens:2000,...extra});
@@ -109,6 +109,15 @@ test('bounded non-success response bytes remain exact and unsafe response header
   const raw=Buffer.from('legacy synthetic rate limit\n');f.upstream.request=async()=>({status:429,headers:{'content-type':'text/plain','set-cookie':'secret'},raw});
   const result=await f.adapter.dispatch(request(chat()));assert.equal(result.status,429);assert.equal(result.raw.equals(raw),true);
   assert.deepEqual(result.headers,{'content-type':'text/plain'});
+}finally{await f.close();}});
+
+test('ingress leases count before dispatch and are single-use with idempotent release',async()=>{const f=await fixture();try{
+  const identity={sourceAddress:f.binding.control.sourceAddress,clientCertificateSha256:f.binding.control.clientCertificateSha256};
+  const ingress=await f.adapter.acquireIngress(identity);assert.equal((await f.adapter.status()).activeRequests,1);
+  await ingress.dispatch(request(chat()));await assert.rejects(ingress.dispatch(request(chat())),/ingress-use/u);
+  await ingress.release();await ingress.release();assert.equal((await f.adapter.status()).activeRequests,0);
+  const released=await f.adapter.acquireIngress(identity);await released.release();await assert.rejects(released.dispatch(request(chat())),/ingress-use/u);
+  assert.equal((await f.adapter.status()).activeRequests,0);assert.equal(f.calls.filter(value=>value.kind==='upstream').length,1);
 }finally{await f.close();}});
 
 test('close drains an admitted slow request, records three zero samples and denies later dispatch',async()=>{const f=await fixture();try{

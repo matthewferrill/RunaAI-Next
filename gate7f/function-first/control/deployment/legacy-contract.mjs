@@ -22,8 +22,9 @@ export function validateLegacyCompatibilityBinding(value){
     &&exact(value.models,'mappedPrimaryId,mappedPrimaryFingerprint,embeddingId,embeddingFingerprint')
     &&string(value.models.mappedPrimaryId,200)&&HASH.test(value.models.mappedPrimaryFingerprint)
     &&value.models.embeddingId===value.legacy.embeddingModel&&HASH.test(value.models.embeddingFingerprint)
-    &&exact(value.limits,'requestMs,bodyBytes,responseBytes,maximumOutputTokens,sampleMs')
+    &&exact(value.limits,'requestMs,bodyMs,bodyBytes,responseBytes,maximumOutputTokens,sampleMs')
     &&value.limits.requestMs===65000&&value.limits.bodyBytes===2*1024*1024&&value.limits.responseBytes===4*1024*1024
+    &&Number.isSafeInteger(value.limits.bodyMs)&&value.limits.bodyMs>=100&&value.limits.bodyMs<=10000
     &&Number.isSafeInteger(value.limits.maximumOutputTokens)&&value.limits.maximumOutputTokens>=2000&&value.limits.maximumOutputTokens<=8192
     &&Number.isSafeInteger(value.limits.sampleMs)&&value.limits.sampleMs>=1&&value.limits.sampleMs<=5000
     &&value.privateValuesIncluded===false,'binding');

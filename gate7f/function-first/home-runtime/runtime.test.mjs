@@ -225,7 +225,7 @@ test('qualified 60-second answer admission is not clipped by the outer proxy dea
   }finally{t.mock.timers.reset();await close(proxy);await close(upstream);await f.controller.stop();}
 });
 
-test('a real incomplete HTTP request body is destroyed on its bounded deadline, with no admission',async t=>{
+test('a real incomplete HTTP request body is counted until its bounded deadline, with no upstream dispatch',async t=>{
   const f=fixture();await f.controller.start();let calls=0;const events=[];
   const proxy=createRuntimeProxy({controller:f.controller,allowedClients:['127.0.0.1'],fetchImpl:async()=>{calls++;throw Error('unexpected');},event:e=>events.push(e)});
   const url=new URL(await listen(proxy));t.mock.timers.enable({apis:['setTimeout']});
@@ -233,7 +233,7 @@ test('a real incomplete HTTP request body is destroyed on its bounded deadline, 
   try{
     await once(socket,'connect');const received=once(proxy,'request');
     socket.write('POST /v1/chat/completions HTTP/1.1\r\nHost: localhost\r\nContent-Type: application/json\r\nContent-Length: 1000\r\n\r\n{');
-    await received;await settle();const ended=once(socket,'close');t.mock.timers.tick(RUNTIME_LIMITS.bodyMs);await settle();
+    await received;await settle();assert.equal(f.controller.status.activeRequests,1);const ended=once(socket,'close');t.mock.timers.tick(RUNTIME_LIMITS.bodyMs);await settle();
     t.mock.timers.tick(100);await ended;await settle();
     assert.equal(calls,0);assert.equal(f.controller.status.activeRequests,0);assert.equal(events.length,1);
     assert.equal(events[0].code,'runtime-request-body-timeout');

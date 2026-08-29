@@ -23,7 +23,7 @@ export async function readRequestBody(req,{signal,limit=RUNTIME_LIMITS.requestBy
   };signal.addEventListener('abort',stop,{once:true});
   try{const chunks=[];let size=0;for await(const chunk of req){signal.throwIfAborted();size+=chunk.length;
       demand(size<=limit,'request-cap');chunks.push(chunk);}signal.throwIfAborted();return Buffer.concat(chunks);
-  }finally{clearTimeout(forceClose);signal.removeEventListener('abort',stop);}
+  }finally{signal.removeEventListener('abort',stop);}
 }
 export function createRuntimeProxy({controller,upstream='http://127.0.0.1:1234',allowedClients=['192.168.50.169'],fetchImpl=rawHttpRequest,event=()=>{},
   rerankerUpstream='http://127.0.0.1:8412',serverFactory=createServer,authorizeClient=()=>true}){
@@ -50,14 +50,18 @@ export function createRuntimeProxy({controller,upstream='http://127.0.0.1:1234',
       demand(req.url&&!req.url.includes('?')&&!req.url.includes('#'),'endpoint-denied');
       if(req.method==='POST')demand(/^application\/json(?:\s*;\s*charset=utf-8)?$/i.test(req.headers['content-type']??''),'content-type');
       demand(!req.headers['content-encoding'],'content-encoding');
+      // The privileged ticket is also the authoritative ingress count. Acquire it before
+      // awaiting any body byte so drain cannot observe zero while an accepted request remains
+      // capable of reaching validation and native dispatch.
+      ticket=await controller.admit({signal:abort.signal});
+      const requestSignal=AbortSignal.any([abort.signal,ticket.signal]);
       bodyTimeout=setTimeout(()=>abort.abort(error('request-body-timeout')),RUNTIME_LIMITS.bodyMs);
-      const raw=await readRequestBody(req,{signal:abort.signal,replyToBodyTimeout:()=>reject(408,'runtime-request-body-timeout',true)});
+      const raw=await readRequestBody(req,{signal:requestSignal,replyToBodyTimeout:()=>reject(408,'runtime-request-body-timeout',true)});
       clearTimeout(bodyTimeout);bodyTimeout=null;
       validateRequest(controller.profile,req.url,req.method,raw);
-      ticket=await controller.admit({signal:abort.signal});
       const response=await fetchImpl(new URL(req.url,isReranker?reranker:base),{method:req.method,redirect:'error',
         headers:{...(req.headers['content-type']?{'content-type':req.headers['content-type']}:{}),...(req.headers.accept?{accept:req.headers.accept}:{})},
-        body:req.method==='POST'?raw:undefined,signal:AbortSignal.any([abort.signal,ticket.signal])});
+        body:req.method==='POST'?raw:undefined,signal:requestSignal});
       demand(response.status<300||response.status>=400,'upstream-redirect');
       const replies=[];let responseBytes=0;
       for await(const chunk of response.body){responseBytes+=chunk.length;demand(responseBytes<=RUNTIME_LIMITS.responseBytes,'response-cap');replies.push(chunk);}

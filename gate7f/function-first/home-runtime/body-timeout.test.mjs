@@ -10,7 +10,8 @@ test('body timeout attempts reply before a finite exact-reader destruction',asyn
   const input=new PassThrough(),abort=new AbortController(),events=[];input.on('close',()=>events.push('closed'));
   const pending=readRequestBody(input,{signal:abort.signal,replyToBodyTimeout:()=>{events.push('reply');return true;}});
   const started=Date.now();abort.abort(error('request-body-timeout'));assert.deepEqual(events,['reply']);assert.equal(input.destroyed,false);
-  await assert.rejects(pending,/runtime-request-body-timeout/u);assert.ok(Date.now()-started<1000);assert.equal(input.destroyed,true);
+  await assert.rejects(pending,/runtime-request-body-timeout/u);await new Promise(resolve=>setTimeout(resolve,120));
+  assert.ok(Date.now()-started<1000);assert.equal(input.destroyed,true);
   assert.deepEqual(events,['reply','closed']);
 });
 for(const callback of [()=>false,()=>{throw Error('synthetic-write-failure');}]){
@@ -29,9 +30,22 @@ test('completed body leaves no timeout callback or later destruction',async()=>{
   const pending=readRequestBody(input,{signal:abort.signal,replyToBodyTimeout:()=>{replies++;return true;}});
   input.end(Buffer.from('unchanged input'));assert.equal((await pending).toString(),'unchanged input');abort.abort(error('request-body-timeout'));assert.equal(replies,0);
 });
-test('actual ten-second incomplete HTTP body receives complete408 before close with zero admission',{timeout:15000},async()=>{
-  let admissions=0,upstream=0;const events=[],sockets=new Set();
-  const server=createRuntimeProxy({controller:{profile:{},admit:async()=>{admissions++;throw Error('must not admit');}},allowedClients:['127.0.0.1'],
+test('lifecycle revocation interrupts a counted incomplete body before any upstream call',async()=>{
+  let active=0,upstream=0,revoke;const server=createRuntimeProxy({controller:{profile:{},admit:async()=>{const controller=new AbortController();
+      revoke=()=>controller.abort(error('drain-timeout'));active++;return {generation:'synthetic',signal:controller.signal,release:async()=>{active--;}};}},
+    allowedClients:['127.0.0.1'],fetchImpl:async()=>{upstream++;throw Error('must not dispatch');}});
+  server.listen(0,'127.0.0.1');await once(server,'listening');const client=net.connect(server.address().port,'127.0.0.1');
+  try{
+    client.on('error',()=>{});await once(client,'connect');client.write('POST /v1/chat/completions HTTP/1.1\r\nHost: synthetic\r\nContent-Type: application/json\r\nContent-Length: 100\r\n\r\n{');
+    for(let index=0;index<100&&active===0;index++)await new Promise(resolve=>setTimeout(resolve,5));assert.equal(active,1);
+    revoke();await once(client,'close');for(let index=0;index<100&&active!==0;index++)await new Promise(resolve=>setTimeout(resolve,5));
+    assert.equal(active,0);assert.equal(upstream,0);
+  }finally{client.destroy();server.closeAllConnections();await new Promise(resolve=>server.close(resolve));}
+});
+test('actual ten-second incomplete HTTP body is counted, receives complete408 and releases before close',{timeout:15000},async()=>{
+  let admissions=0,releases=0,active=0,upstream=0;const events=[],sockets=new Set();
+  const server=createRuntimeProxy({controller:{profile:{},admit:async()=>{admissions++;active++;return {generation:'synthetic',signal:new AbortController().signal,
+      release:async()=>{releases++;active--;}};}},allowedClients:['127.0.0.1'],
     fetchImpl:async()=>{upstream++;throw Error('must not dispatch');},event:value=>events.push(value)});
   server.on('connection',socket=>{sockets.add(socket);socket.on('close',()=>sockets.delete(socket));});server.listen(0,'127.0.0.1');await once(server,'listening');
   const port=server.address().port,started=Date.now();let client;
@@ -45,7 +59,7 @@ test('actual ten-second incomplete HTTP body receives complete408 before close w
       schemaVersion:'runaai-home-runtime-error/v1',errorCode:'runtime-request-body-timeout',privateValuesIncluded:false});
     const length=Number(text.match(/content-length: (\d+)/iu)[1]);assert.equal(Buffer.byteLength(body),length);
     assert.ok(Date.now()-started>=RUNTIME_LIMITS.bodyMs-100);assert.ok(Date.now()-started<11500);
-    await new Promise(resolve=>setTimeout(resolve,150));assert.equal(admissions,0);assert.equal(upstream,0);
+    await new Promise(resolve=>setTimeout(resolve,150));assert.equal(admissions,1);assert.equal(releases,1);assert.equal(active,0);assert.equal(upstream,0);
     assert.ok(events.some(event=>event.type==='denied'));assert.equal(sockets.size,0);
   }finally{client?.destroy();for(const socket of sockets)socket.destroy();await new Promise(resolve=>server.close(resolve));}
 });

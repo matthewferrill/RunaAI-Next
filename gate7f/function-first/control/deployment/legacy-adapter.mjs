@@ -53,6 +53,30 @@ export function createLegacyCompatibilityAdapter({binding:input,journal,upstream
   let active=0,queue=Promise.resolve();
   const exclusive=work=>{const run=queue.then(work,work);queue=run.then(()=>undefined,()=>undefined);return run;};
   async function observed(){return runtimeObservation(await runtime.observe(binding),binding,clock);}
+  async function acquireIngress(identity){
+    need(exact(identity,'sourceAddress,clientCertificateSha256')&&identity.sourceAddress===binding.control.sourceAddress
+      &&identity.clientCertificateSha256===binding.control.clientCertificateSha256,'client-identity');
+    await exclusive(async()=>{const state=await journal.load();need(state.mode==='open'&&state.pending===null,'admission-closed');active++;});
+    let released=false,used=false;
+    return Object.freeze({
+      async dispatch(request){
+        need(!released&&!used,'ingress-use');used=true;
+        const prepared=prepareLegacyCompatibilityRequest(binding,request);
+        const controller=new AbortController(),onAbort=()=>controller.abort(request.signal?.reason),timer=setTimeout(()=>controller.abort(),binding.limits.requestMs);
+        if(request.signal){if(request.signal.aborted)controller.abort(request.signal.reason);else request.signal.addEventListener('abort',onAbort,{once:true});}
+        try{
+          const observation=await observed();event({kind:'legacy-dispatch-start',requestSha256:prepared.requestSha256,requestKind:prepared.kind,
+            observationSha256:legacyCompatibilityHash(observation),activeRequests:active});
+          const response=await upstream.request({endpoint:binding.home.nativeEndpoint,pathname:prepared.pathname,method:prepared.method,
+            raw:prepared.raw,signal:controller.signal});
+          const projected=projectLegacyCompatibilityResponse(binding,{kind:prepared.kind,inputCount:prepared.inputCount,...response});
+          event({kind:'legacy-dispatch-finish',requestSha256:prepared.requestSha256,requestKind:prepared.kind,status:projected.status,activeRequests:active});
+          return projected;
+        }finally{clearTimeout(timer);if(request.signal)request.signal.removeEventListener('abort',onAbort);}
+      },
+      async release(){if(released)return;released=true;await exclusive(async()=>{active--;need(active>=0,'active-underflow');});},
+    });
+  }
   async function samples(){const values=[];for(let index=0;index<3;index++){if(index)await delay(binding.limits.sampleMs);
       values.push({observedAt:iso(clock),activeRequests:active});}return values;}
   async function currentClosure(){const state=await journal.load();need(state.mode==='closed'&&state.pending===null,'not-closed');
@@ -60,21 +84,10 @@ export function createLegacyCompatibilityAdapter({binding:input,journal,upstream
     const observation=await observed(),values=await samples();return closureReceipt(binding,state,values,observation,routeReceipt,clock);}
   return Object.freeze({
     get binding(){return clone(binding);},
+    acquireIngress,
     async dispatch(request){
-      const prepared=prepareLegacyCompatibilityRequest(binding,request);
-      await exclusive(async()=>{const state=await journal.load();need(state.mode==='open'&&state.pending===null,'admission-closed');active++;});
-      const controller=new AbortController(),onAbort=()=>controller.abort(),timer=setTimeout(()=>controller.abort(),binding.limits.requestMs);
-      if(request.signal){if(request.signal.aborted)controller.abort();else request.signal.addEventListener('abort',onAbort,{once:true});}
-      try{
-        const observation=await observed();event({kind:'legacy-dispatch-start',requestSha256:prepared.requestSha256,requestKind:prepared.kind,
-          observationSha256:legacyCompatibilityHash(observation),activeRequests:active});
-        const response=await upstream.request({endpoint:binding.home.nativeEndpoint,pathname:prepared.pathname,method:prepared.method,
-          raw:prepared.raw,signal:controller.signal});
-        const projected=projectLegacyCompatibilityResponse(binding,{kind:prepared.kind,inputCount:prepared.inputCount,...response});
-        event({kind:'legacy-dispatch-finish',requestSha256:prepared.requestSha256,requestKind:prepared.kind,status:projected.status,activeRequests:active});
-        return projected;
-      }finally{clearTimeout(timer);if(request.signal)request.signal.removeEventListener('abort',onAbort);
-        await exclusive(async()=>{active--;need(active>=0,'active-underflow');});}
+      const ingress=await acquireIngress({sourceAddress:request?.sourceAddress,clientCertificateSha256:request?.clientCertificateSha256});
+      try{return await ingress.dispatch(request);}finally{await ingress.release();}
     },
     async close(){
       const intentId=randomId();need(ID.test(intentId),'intent-id');let state;

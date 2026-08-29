@@ -117,6 +117,26 @@ nonredirected `.NET ProcessStartInfo` child. A direct Control probe of that
 pattern completed and retained a deliberate child exit code `7`. This is still
 prospective until a new immutable stage executes the full runner.
 
+Phase-level evidence on that disqualified stage then retained all eleven
+markers through child exit `1` and process disposal (trace SHA-256
+`b970014c4523decc5e7ea20457c5a547026c7500a31e2fcabeb1191f4f8f270b`) while
+the dedicated PowerShell host remained resident. This locates the stall in
+normal PowerShell host teardown, after the runner was complete, rather than in
+validation, child start, child wait, output, cleanup or disposal. A matched
+Control probe using `[Environment]::Exit` returned the exact child exit `1` in
+7.85 seconds. Because this is a dedicated noninteractive owner process and the
+child has already been waited and disposed, the wrapper now terminates that host
+directly with the exact child exit code instead of entering the faulty teardown
+path.
+
+Independent failure-path review identified that validation, start, wait or
+dispose exceptions could otherwise still enter that same teardown layer. The
+dedicated entry point therefore has one outer terminal boundary: pre-child or
+wrapper exceptions map to fixed exit `125`, a started child is disposed in its
+nested `finally`, an ordinary child result retains its exact exit code, and the
+outermost `finally` calls `[Environment]::Exit` on every path. No exception can
+skip child disposal or fall back into normal host teardown.
+
 The next execution must create a fresh exact stage and prospective manifest for
 the final selected source, then run the fixed PowerShell entry point on Control.
 Only that execution can prove the pinned Control PostgreSQL/Qdrant/QuickJS/MXC

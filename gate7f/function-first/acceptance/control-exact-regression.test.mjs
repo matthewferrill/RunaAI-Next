@@ -140,7 +140,9 @@ test('owner PowerShell entry point parses in Windows PowerShell 5 and contains n
   assert.equal(parsed.status,0,parsed.stderr);assert.match(text,/RUNA-CONTROL\\Matthew/u);assert.match(text,/control-exact-regression-owner\.mjs/u);
   assert.match(text,/EnvironmentVariables\.Clear\(\)/u);assert.match(text,/\$safeNames/u);
   assert.match(text,/GetEnvironmentVariable\(\$name,'Process'\)/u);assert.doesNotMatch(text,/SetEnvironmentVariable|\$originalEnvironment/u);
-  assert.match(text,/exit \$childExitCode/u);assert.doesNotMatch(text,/throw'm1-control-regression-run-failed'/u);
+  assert.match(text,/\$terminalCode=125/u);assert.match(text,/\$terminalCode=\$childExitCode/u);
+  assert.match(text,/finally\{\s*\[Environment\]::Exit\(\$terminalCode\)\s*\}/u);
+  assert.doesNotMatch(text,/throw'm1-control-regression-run-failed'|if\(\$childExitCode-ne0\)\{exit/u);
   assert.match(text,/System\.Diagnostics\.ProcessStartInfo/u);assert.match(text,/\.WaitForExit\(\)/u);
   assert.match(text,/RedirectStandardInput=\$false/u);assert.match(text,/RedirectStandardOutput=\$false/u);assert.match(text,/RedirectStandardError=\$false/u);
   assert.doesNotMatch(text,/Start-Process|& \$node @arguments/u);

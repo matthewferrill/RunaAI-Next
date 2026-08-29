@@ -7,6 +7,8 @@ param(
 Set-StrictMode -Version Latest
 $ErrorActionPreference='Stop'
 $ProgressPreference='SilentlyContinue'
+$terminalCode=125
+try{
 $fixedParent='C:\AI\RunaAI-Next-Candidate\staging'
 $fixedRelease='C:\AI\RunaAI-Next-Candidate\releases\runaai-next-gate7a-lan-gate7e-2026-08-26-747aabc'
 $fixedNodeSha='bae898add4643fcf890a83ad8ae56e20dce7e781cab161a53991ceba70c99ffb'
@@ -49,4 +51,9 @@ try{
 }finally{
   $child.Dispose()
 }
-if($childExitCode-ne0){exit $childExitCode}
+$terminalCode=$childExitCode
+}catch{
+  $terminalCode=125
+}finally{
+  [Environment]::Exit($terminalCode)
+}

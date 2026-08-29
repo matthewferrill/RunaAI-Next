@@ -45,9 +45,18 @@ test('all native runtime scripts parse in PS5 and its handle-based hardlink meta
   const literals=files.map(file=>"'"+file.replaceAll("'","''")+"'").join(',');
   const command=`$ErrorActionPreference='Stop';foreach($file in @(${literals})){$errors=$null;$tokens=$null;[void][Management.Automation.Language.Parser]::ParseFile($file,[ref]$tokens,[ref]$errors);if($errors.Count){throw 'parse-failed'}};. '${source.replaceAll("'","''")}';`+
     `$stream=[IO.File]::OpenRead('${source.replaceAll("'","''")}');try{$info=New-Object RunaRuntimeFile+Info;if(-not[RunaRuntimeFile]::GetFileInformationByHandle($stream.SafeFileHandle,[ref]$info)-or$info.links-ne1){throw 'native-file-info'}}finally{$stream.Dispose()};`+
-    `$settings=New-ScheduledTaskSettingsSet;$settings.Enabled=$false;if($settings.Enabled){throw 'task-disable'};[Console]::Write('PS'+$PSVersionTable.PSVersion.Major+'-native-helper-pass')`;
+    `[Console]::Write('PS'+$PSVersionTable.PSVersion.Major+'-native-helper-pass')`;
   const output=execFileSync('powershell.exe',['-NoProfile','-NonInteractive','-ExecutionPolicy','Bypass','-EncodedCommand',Buffer.from(command,'utf16le').toString('base64')],{encoding:'utf8',windowsHide:true});
   assert.equal(output.trim(),'PS5-native-helper-pass');
+});
+
+test('installer deterministically disables both scheduled tasks before registration',()=>{
+  const installer=readFileSync(fileURLToPath(new URL('./Install-HomeRuntime.ps1',import.meta.url)),'utf8');
+  assert.match(installer,/New-ScheduledTaskSettingsSet[^\r\n]+/u);
+  assert.match(installer,/for\(\$index=0;\$index-lt2;\$index\+\+\)/u);
+  assert.equal((installer.match(/\$settings\.Enabled=\$false/gu)||[]).length,1);
+  assert.equal((installer.match(/Register-ScheduledTask/gu)||[]).length,2);
+  assert.ok(installer.indexOf('$settings.Enabled=$false')<installer.indexOf('Register-ScheduledTask'));
 });
 
 test('native watchdog child probe has a real finite deadline and bounded output, independent of CIM',()=>{

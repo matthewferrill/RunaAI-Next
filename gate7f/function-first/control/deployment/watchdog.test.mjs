@@ -61,7 +61,9 @@ test('atomic job starts suspended, records identity, inherits only stdin EOF, re
 
 test('finite deadline stops actual companion/grandchild, not an unrelated sentinel; replay forbidden',async t=>{
   const sentinel=spawn(process.execPath,['-e','setTimeout(()=>{},20000)'],{stdio:'ignore',windowsHide:true});
-  const f=await fixture('tree',{maximumMs:4000});try{const run=await f.launch();const grand=JSON.parse(await waitFor(f.grand));
+  const f=await fixture('tree',{maximumMs:4000});try{const run=await f.launch();
+    await waitFor(path.join(f.directory,'started.json'),30000);
+    const grand=JSON.parse(await waitFor(f.grand,6000));
     assert.equal((await run.completion).status,'needs-reconciliation');const actual=await f.observation();t.diagnostic(JSON.stringify(actual));
     assert.equal(actual.status,'needs-reconciliation');assert.equal(actual.result.TimedOut,true);assert.equal(actual.result.ActiveProcesses,0);
     assert.equal(await stopConfirmed(grand.pid),true);assert.equal(isRunning(sentinel.pid),true);

@@ -1,0 +1,26 @@
+{
+  "schemaVersion": "runa-m1-campaign-lease-result/v1",
+  "leaseId": "20260828-campaign-gemma-r6",
+  "sealSha256": "b27f94d4c1cecf7b3d151106292a6f4c7b2d64eca3d2d8dadbfbffb55a2f4f69",
+  "endedAt": "2026-08-29T09:46:42.327Z",
+  "failure": null,
+  "completion": "completed",
+  "cleanupVerified": true,
+  "powerRestored": true,
+  "owned": [
+    {
+      "key": "gemma-4-26b-a4b-it-qat",
+      "id": "gemma-4-26b-a4b-it-qat",
+      "fingerprint": "cbf5fe1426acdc624c6f3a33abd5ebe5486fc247441b0f05996dd4ef8ab4986b"
+    },
+    {
+      "key": "text-embedding-nomic-embed-text-v1.5",
+      "id": "text-embedding-nomic-embed-text-v1.5",
+      "fingerprint": "66f5db3ab6ec2819b698b24780d7511d0d343f5d0d911dfd5c74640a1b3233db"
+    }
+  ],
+  "ambiguousLoad": null,
+  "productionRoutingChanged": false,
+  "protectedDataIncluded": false,
+  "inferenceCalledByOperator": false
+}

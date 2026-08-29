@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { mkdtemp, readFile, writeFile, rm } from "node:fs/promises";
+import { mkdtemp, readFile, writeFile, rm, symlink, mkdir } from "node:fs/promises";
+import { readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { createBrowserCheckpoint } from "./browser-checkpoint.mjs";
@@ -34,6 +35,28 @@ function preparationAck(request) {
     evidence: [{ id: "unit-preparation", source: "browser", kind: "browser-preparation", data: {
       scope: request.scope, url: request.baseUrl + "/", observedAt: new Date().toISOString(),
       projectName: request.projectName, taskObjective: request.taskObjective, note: "UNIT fixture, not customer proof" } }] };
+}
+
+function controlFixture() {
+  const item = CONTROL_CASES.find(value => value.id === "control-10-unknown-execution");
+  const ledger = new ObservationLedger(newObservation({ ...item, role: "control" }, { runtimeSealSha256: "a".repeat(64) }));
+  const principalId = "m1-test-" + "a".repeat(32), session = { principalId, sessionId: "b".repeat(64) };
+  const client = { ledger, item: { setup: { project: "fixture" } }, principalId, session, projectId: "fixture", experience: "code",
+    host: { baseUrl: "http://127.0.0.1:12345", async createBootstrap(id, options) {
+      assert.equal(id, principalId); assert.deepEqual(options.session, session);
+      return { url: "http://127.0.0.1:12345/__acceptance/session", nonce: "synthetic-unit-nonce" };
+    } } };
+  return { item, ledger, client };
+}
+
+function gradedAck(request, overrides = {}) {
+  const descriptor = request.checks[0];
+  return { schemaVersion: "runaai-m1-browser-checkpoint-ack/v1", checkpointId: request.checkpointId,
+    caseId: request.caseId, runtimeSealSha256: request.runtimeSealSha256,
+    evidence: [{ id: "unit-browser", source: "browser", kind: descriptor.kind,
+      data: { checkId: descriptor.checkId, actual: true, note: "UNIT FIXTURE ONLY, not real browser qualification" } }],
+    checks: [{ checkId: descriptor.checkId, kind: descriptor.kind, actual: true,
+      evidenceRefs: [{ id: "unit-browser", pointer: "/actual" }] }], ...overrides };
 }
 test("cancel browser prep is ungraded and actual in-flight checkpoint reuses the same session", async t => {
   const directory = await mkdtemp(path.join(tmpdir(), "m1-browser-prep-"));
@@ -98,23 +121,111 @@ test("campaign cancellation ends a pending browser checkpoint without consuming 
   assert.equal(ledger.observation.checks.length,0);
 });
 
-test("operator checkpoint consumes exact bound browser evidence without pretending to inspect a DOM", async t => {
+for (const transientCode of ["EBUSY", "EPERM"]) test(`operator checkpoint retries ${transientCode} then consumes exact bound evidence`, async t => {
   const directory = await mkdtemp(path.join(tmpdir(), "m1-browser-bridge-")); t.after(() => rm(directory, { recursive: true, force: true }));
-  const item = CONTROL_CASES.find(item => item.id === "control-10-unknown-execution");
-  const ledger = new ObservationLedger(newObservation({ ...item, role: "control" }, { runtimeSealSha256: "a".repeat(64) }));
-  const principalId = "m1-test-" + "a".repeat(32), session = { principalId, sessionId: "b".repeat(64) };
-  let writer;
-  const checkpoint = createBrowserCheckpoint({ directory, maximumWaitMs: 2000, announce(value) {
-    writer = (async () => { const request = JSON.parse(await readFile(value.requestPath, "utf8")), descriptor = request.checks[0];
-      await writeFile(request.ackPath, JSON.stringify({ schemaVersion: "runaai-m1-browser-checkpoint-ack/v1", checkpointId: request.checkpointId,
-        caseId: item.id, runtimeSealSha256: request.runtimeSealSha256,
-        evidence: [{ id: "unit-browser", source: "browser", kind: descriptor.kind,
-          data: { checkId: descriptor.checkId, actual: true, note: "UNIT FIXTURE ONLY, not real browser qualification" } }],
-        checks: [{ checkId: descriptor.checkId, kind: descriptor.kind, actual: true, evidenceRefs: [{ id: "unit-browser", pointer: "/actual" }] }] })); })();
+  const { ledger, client } = controlFixture();
+  let writer, busy = true;
+  const checkpoint = createBrowserCheckpoint({ directory, maximumWaitMs: 2000,
+    async readAck(ackPath) {
+      if (busy) { busy = false; throw Object.assign(new Error("synthetic Windows share window"), { code: transientCode }); }
+      return readFile(ackPath, "utf8");
+    }, announce(value) {
+    writer = (async () => { const request = JSON.parse(await readFile(value.requestPath, "utf8"));
+      await writeFile(request.ackPath, JSON.stringify(gradedAck(request))); })();
   } });
-  await checkpoint({ client: { ledger, item: { setup: { project: "fixture" } }, principalId, session, projectId: "fixture", experience: "code",
-    host: { baseUrl: "http://127.0.0.1:12345", async createBootstrap(id, options) { assert.equal(id, principalId); assert.deepEqual(options.session, session);
-      return { url: "http://127.0.0.1:12345/__acceptance/session", nonce: "synthetic-unit-nonce" }; } } }, phase: "unknown", stage: "unknown" });
-  await writer; assert.equal(ledger.observation.checks.length, 1); assert.equal(ledger.observation.evidence[0].source, "browser");
+  await checkpoint({ client, phase: "unknown", stage: "unknown" });
+  await writer; assert.equal(busy, false); assert.equal(ledger.observation.checks.length, 1); assert.equal(ledger.observation.evidence[0].source, "browser");
   assert.match(ledger.observation.evidence[0].data.note, /UNIT FIXTURE ONLY/);
+});
+
+test("nontransient reader failure is immediate and leaves the ledger unchanged", async t => {
+  const directory = await mkdtemp(path.join(tmpdir(), "m1-browser-eacces-")); t.after(() => rm(directory, { recursive: true, force: true }));
+  const { ledger, client } = controlFixture(); let pauses = 0;
+  const checkpoint = createBrowserCheckpoint({ directory, maximumWaitMs: 1000,
+    async readAck() { throw Object.assign(new Error("denied"), { code: "EACCES" }); }, async pause() { pauses++; } });
+  await assert.rejects(checkpoint({ client, phase: "unknown", stage: "unknown" }), error => error.code === "EACCES");
+  assert.equal(pauses, 0); assert.deepEqual([ledger.observation.evidence.length, ledger.observation.checks.length, ledger.observation.browserExercised], [0, 0, false]);
+});
+
+test("persistent transient sharing failures expire without ledger mutation", async t => {
+  const directory = await mkdtemp(path.join(tmpdir(), "m1-browser-timeout-")); t.after(() => rm(directory, { recursive: true, force: true }));
+  const { ledger, client } = controlFixture(); let clock = 0, reads = 0;
+  const checkpoint = createBrowserCheckpoint({ directory, maximumWaitMs: 1000, now: () => clock, pause: async ms => { clock += ms; },
+    async readAck() { reads++; throw Object.assign(new Error("busy"), { code: reads % 2 ? "EBUSY" : "EPERM" }); } });
+  await assert.rejects(checkpoint({ client, phase: "unknown", stage: "unknown" }), /m1-browser-checkpoint-unobserved/u);
+  assert.equal(reads, 4); assert.deepEqual([ledger.observation.evidence.length, ledger.observation.checks.length, ledger.observation.browserExercised], [0, 0, false]);
+});
+
+test("a valid ack returned after the deadline is rejected without parsing or mutation", async t => {
+  const directory = await mkdtemp(path.join(tmpdir(), "m1-browser-late-")); t.after(() => rm(directory, { recursive: true, force: true }));
+  const { ledger, client } = controlFixture(); let clock = 0;
+  const checkpoint = createBrowserCheckpoint({ directory, maximumWaitMs: 1000, now: () => clock, pause: async () => {},
+    announce() {}, async readAck(ackPath) {
+      const request = JSON.parse(await readFile(path.join(path.dirname(ackPath), "request.json"), "utf8"));
+      clock = 1000; return JSON.stringify(gradedAck(request));
+    } });
+  await assert.rejects(checkpoint({ client, phase: "unknown", stage: "unknown" }), /m1-browser-checkpoint-unobserved/u);
+  assert.deepEqual([ledger.observation.evidence.length, ledger.observation.checks.length, ledger.observation.browserExercised], [0, 0, false]);
+});
+
+test("operator-visible expiresAt and enforcement use one deadline even when announce consumes time", async t => {
+  const directory = await mkdtemp(path.join(tmpdir(), "m1-browser-one-deadline-")); t.after(() => rm(directory, { recursive: true, force: true }));
+  const { ledger, client } = controlFixture(); let clock = 0, requestExpiry = null;
+  const checkpoint = createBrowserCheckpoint({ directory, maximumWaitMs: 1000, now: () => clock, pause: async () => {},
+    announce(value) { const request = JSON.parse(readFileSync(value.requestPath, "utf8")); requestExpiry = Date.parse(request.expiresAt); clock = 900; },
+    async readAck(ackPath) {
+      const request = JSON.parse(await readFile(path.join(path.dirname(ackPath), "request.json"), "utf8"));
+      clock = 1000; return JSON.stringify(gradedAck(request));
+    } });
+  await assert.rejects(checkpoint({ client, phase: "unknown", stage: "unknown" }), /m1-browser-checkpoint-unobserved/u);
+  assert.equal(requestExpiry, 1000); assert.deepEqual([ledger.observation.evidence.length, ledger.observation.checks.length, ledger.observation.browserExercised], [0, 0, false]);
+});
+
+test("transient observation followed by malformed JSON fails immediately", async t => {
+  const directory = await mkdtemp(path.join(tmpdir(), "m1-browser-malformed-")); t.after(() => rm(directory, { recursive: true, force: true }));
+  const { ledger, client } = controlFixture(); let reads = 0, pauses = 0;
+  const checkpoint = createBrowserCheckpoint({ directory, maximumWaitMs: 1000, pause: async () => { pauses++; }, async readAck() {
+    reads++; if (reads === 1) throw Object.assign(new Error("busy"), { code: "EBUSY" }); return "{";
+  } });
+  await assert.rejects(checkpoint({ client, phase: "unknown", stage: "unknown" }), /m1-browser-ack-invalid/u);
+  assert.equal(reads, 2); assert.equal(pauses, 1); assert.deepEqual([ledger.observation.evidence.length, ledger.observation.checks.length, ledger.observation.browserExercised], [0, 0, false]);
+});
+
+for (const invalidPart of ["evidence", "check", "reference"]) test(`a malformed ${invalidPart} after a valid prefix cannot partially mutate the ledger`, async t => {
+  const directory = await mkdtemp(path.join(tmpdir(), `m1-browser-atomic-${invalidPart}-`)); t.after(() => rm(directory, { recursive: true, force: true }));
+  const { ledger, client } = controlFixture();
+  const checkpoint = createBrowserCheckpoint({ directory, maximumWaitMs: 1000, async readAck(ackPath) {
+    const request = JSON.parse(await readFile(path.join(path.dirname(ackPath), "request.json"), "utf8")), ack = gradedAck(request);
+    if (invalidPart === "evidence") ack.evidence.push({ id: "bad", source: "model", kind: "bad", data: {} });
+    if (invalidPart === "check") ack.checks.push({ checkId: "unknown", kind: "ui.unknown", actual: true, evidenceRefs: [{ id: "unit-browser", pointer: "/actual" }] });
+    if (invalidPart === "reference") ack.checks[0].evidenceRefs.push({ id: "missing", pointer: "/actual" });
+    return JSON.stringify(ack);
+  } });
+  await assert.rejects(checkpoint({ client, phase: "unknown", stage: "unknown" }), /m1-browser-(evidence|check|reference)-invalid/u);
+  assert.deepEqual([ledger.observation.evidence.length, ledger.observation.checks.length, ledger.observation.browserExercised], [0, 0, false]);
+});
+
+test("an ack missing a required frozen browser check is rejected without ledger mutation", async t => {
+  const directory = await mkdtemp(path.join(tmpdir(), "m1-browser-missing-check-")); t.after(() => rm(directory, { recursive: true, force: true }));
+  const { ledger, client } = controlFixture();
+  const checkpoint = createBrowserCheckpoint({ directory, maximumWaitMs: 1000, async readAck(ackPath) {
+    const request = JSON.parse(await readFile(path.join(path.dirname(ackPath), "request.json"), "utf8"));
+    return JSON.stringify(gradedAck(request, { checks: [] }));
+  } });
+  await assert.rejects(checkpoint({ client, phase: "unknown", stage: "unknown" }), /m1-browser-check-invalid/u);
+  assert.deepEqual([ledger.observation.evidence.length, ledger.observation.checks.length, ledger.observation.browserExercised], [0, 0, false]);
+});
+
+test("the default reader rejects oversized and reparse-point acknowledgments", async t => {
+  for (const kind of ["oversized", "junction"]) {
+    const directory = await mkdtemp(path.join(tmpdir(), `m1-browser-${kind}-`)); t.after(() => rm(directory, { recursive: true, force: true }));
+    const { ledger, client } = controlFixture(); let writer;
+    const checkpoint = createBrowserCheckpoint({ directory, maximumWaitMs: 1000, announce(value) { writer = (async () => {
+      const request = JSON.parse(await readFile(value.requestPath, "utf8"));
+      if (kind === "oversized") await writeFile(request.ackPath, "x".repeat(262145));
+      else { const target = path.join(directory, "external-ack-directory"); await mkdir(target); await symlink(target, request.ackPath, "junction"); }
+    })(); } });
+    await assert.rejects(checkpoint({ client, phase: "unknown", stage: "unknown" }), /m1-browser-ack-invalid/u); await writer;
+    assert.deepEqual([ledger.observation.evidence.length, ledger.observation.checks.length, ledger.observation.browserExercised], [0, 0, false]);
+  }
 });

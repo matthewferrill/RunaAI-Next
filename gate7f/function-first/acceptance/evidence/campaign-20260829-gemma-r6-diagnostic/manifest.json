@@ -1,0 +1,92 @@
+{
+  "schemaVersion": "runaai-m1-diagnostic-campaign-evidence-manifest/v1",
+  "recordedAt": "2026-08-29",
+  "classification": "diagnostic-only-no-model-quality-claim",
+  "candidateId": "gemma4-26b-a4b",
+  "sourceCommit": "53ff5951d3fab272682b57a9fdc5f58123ee3a4d",
+  "runtimeSealSha256": "eb01ecfd1d426cc45727b5034930451b9307aad5e13596dab7e9127184a85c35",
+  "caseBundleSha256": "8713db8fb54bebe069f73edfef7cd179c13a3caba1d4d15bd8567f39aaa418ed",
+  "controlRetention": {
+    "stage": "C:\\AI\\RunaAI-Next-Candidate\\staging\\m1-task-native-1b52b6285bb14f579c5db32e3b9b29bd",
+    "campaignDirectory": "acceptance-evidence\\campaign-gemma4-26b-a4b-eb01ecfd1d426cc4"
+  },
+  "plan": {
+    "schemaVersion": "runaai-m1-candidate-batch-plan/v1",
+    "sha256": "2ce11a0522297b4b956b6340ca260e9093606dbd21838f345d6d299f9f0ddc35",
+    "plannedCampaignAttempts": 360,
+    "plannedCandidateAttempts": 120,
+    "attempts": 120
+  },
+  "result": {
+    "schemaVersion": "runaai-m1-candidate-batch-result/v1",
+    "sha256": "d360c5f7e00f541d09c4ef53f0ee5eb5852b1a438b6de2c694aee99d76d56b93",
+    "recordedAttempts": 120,
+    "attempts": 120,
+    "completed": 116,
+    "failed": 4,
+    "notExecuted": 0,
+    "stopCode": null,
+    "denominatorChanged": false,
+    "independentSemanticReviewPending": true,
+    "productionChanged": false,
+    "protectedDataRead": false
+  },
+  "failedAttempts": [
+    {
+      "attemptId": "gemma4-26b-a4b--agent-05-cancel-drain--1",
+      "rawSha256": "914623c703160223a6b9440d96ff914ed5ac9a4c7e73e7d10a981ed2e4ef4daa",
+      "phase": "1:run.start",
+      "errorCode": "m1-browser-preparation-unproven"
+    },
+    {
+      "attemptId": "gemma4-26b-a4b--agent-05-cancel-drain--2",
+      "rawSha256": "591fe05984b0f3ecd503726efdb0151882fa57d655bf0263087c53a6ce390add",
+      "phase": "2:user.cancel-after-native-dispatch",
+      "errorCode": "m1-browser-checkpoint-unobserved"
+    },
+    {
+      "attemptId": "gemma4-26b-a4b--agent-05-cancel-drain--3",
+      "rawSha256": "9edd8873a4f830bd635bdefb8e200c595d5b513087e36a3a853a739e1c0a1e0a",
+      "phase": "1:run.start",
+      "errorCode": "EBUSY",
+      "browserCheckpoint": {
+        "directory": "browser-ce88c356-0fd3-4793-a314-8f4fd3aee5c7",
+        "stage": "before-native-dispatch",
+        "requestSha256": "0cf90c07dab8b3062015b2e3c4c9c7a54b3108fc7d7e06b2587b86757407e2c3",
+        "ackSha256": "6b5cf9162d643e852d3d78935a5811a2579e7df2eab1a46aab2ee12d02d7c384",
+        "ackPresent": true,
+        "consumedMarkerPresent": false
+      }
+    },
+    {
+      "attemptId": "gemma4-26b-a4b--agent-06-crash-reconcile--2",
+      "rawSha256": "8242c503b75134795f937db600b94791c0b81931178887c2661659913090eb82",
+      "phase": "3:worker.restart",
+      "errorCode": "EBUSY",
+      "browserCheckpoint": {
+        "directory": "browser-44494f12-8154-41e2-b5bf-e6b250794410",
+        "stage": "unknown",
+        "requestSha256": "a5c9e8febdffb84f1fb99093276c0d7e115ed510a26111da7b8166276e242abe",
+        "ackSha256": "68389718ab0b2b131fe571f3b70529789f9fb23175007957b85584ac99e6bbca",
+        "ackPresent": true,
+        "consumedMarkerPresent": false
+      }
+    }
+  ],
+  "sourceFlowBinding": {
+    "agent05": [
+      "gate7f/function-first/acceptance/run-model-campaign.mjs:createCampaignActionExtensions/run.start invokes checkpoint before native dispatch",
+      "gate7f/function-first/acceptance/run-model-campaign.mjs:needsBrowserCheckpoint binds before-native-dispatch to agent-05-cancel-drain"
+    ],
+    "agent06": [
+      "gate7f/function-first/acceptance/fault-actions.mjs:worker.restart invokes inspectCheckpoint at stage unknown after state capture",
+      "gate7f/function-first/acceptance/run-model-campaign.mjs:needsBrowserCheckpoint binds unknown to agent-06-crash-reconcile"
+    ],
+    "interpretation": "Each EBUSY record is phase-bound to the one browser bridge call selected at that stage. A complete bound ACK exists, but no consumed marker exists. The diagnostic files retain no stack trace, so this is source-flow and artifact evidence rather than a claim of stack-trace proof."
+  },
+  "hardwareOutcome": {
+    "path": "gate7f/function-first/readiness/evidence/20260828-campaign-gemma-r6-outcome",
+    "applicationAttemptCountsNotInferred": true,
+    "qualityClaimMade": false
+  }
+}

@@ -20,7 +20,7 @@ function send(res,code,body,headers={}){
   if(res.headersSent||res.destroyed)return false;const raw=Buffer.isBuffer(body)?body:Buffer.from(body);
   res.writeHead(code,{...headers,'content-length':String(raw.length),'connection':'close'});res.end(raw);return true;
 }
-async function bytes(req,maximum,signal,replyToBodyTimeout){
+export async function readLegacyRequestBody(req,maximum,signal,replyToBodyTimeout){
   need(!Object.hasOwn(req.headers,'content-encoding'),'content-encoding');
   const declared=req.headers['content-length'];if(declared!==undefined){need(/^\d+$/u.test(declared),'content-length');need(Number(declared)<=maximum,'body-bounds');}
   signal.throwIfAborted();let forceClose=null;
@@ -28,8 +28,10 @@ async function bytes(req,maximum,signal,replyToBodyTimeout){
       try{if(replyToBodyTimeout()===true){forceClose=setTimeout(()=>req.destroy(signal.reason),100);return;}}catch{}}
     req.destroy(signal.reason);};
   signal.addEventListener('abort',stop,{once:true});
-  try{const chunks=[];let total=0;for await(const chunk of req){signal.throwIfAborted();total+=chunk.length;need(total<=maximum,'body-bounds');chunks.push(chunk);}
+  try{const chunks=[];let total=0,iterable=typeof req.iterator==='function'?req.iterator({destroyOnReturn:false}):req;
+    for await(const chunk of iterable){signal.throwIfAborted();total+=chunk.length;need(total<=maximum,'body-bounds');chunks.push(chunk);}
     signal.throwIfAborted();return Buffer.concat(chunks,total);
+  }catch(cause){if(forceClose===null&&!req.destroyed)req.destroy(cause);throw cause;
   }finally{signal.removeEventListener('abort',stop);}
 }
 
@@ -49,7 +51,7 @@ export function createLegacyCompatibilityServer({binding:input,adapter,tls,event
       const method=String(req.method??''),pathname=String(req.url??'');
       ingress=await adapter.acquireIngress({sourceAddress,clientCertificateSha256:hash(peer.raw)});
       bodyTimer=setTimeout(()=>controller.abort(fail('body-timeout')),binding.limits.bodyMs);
-      const raw=await bytes(req,binding.limits.bodyBytes,controller.signal,()=>send(res,408,
+      const raw=await readLegacyRequestBody(req,binding.limits.bodyBytes,controller.signal,()=>send(res,408,
         JSON.stringify({schemaVersion:'runaai-legacy-compatibility-error/v1',errorCode:'m1-legacy-server-body-timeout',privateValuesIncluded:false}),
         {'content-type':'application/json'}));
       clearTimeout(bodyTimer);bodyTimer=null;if(method==='GET')need(raw.length===0,'get-body');

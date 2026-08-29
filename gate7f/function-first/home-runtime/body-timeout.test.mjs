@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {PassThrough} from 'node:stream';
 import net from 'node:net';
-import {once} from 'node:events';
+import {EventEmitter,once} from 'node:events';
 import {readRequestBody,createRuntimeProxy} from './proxy.mjs';
 import {error,RUNTIME_LIMITS} from './contracts.mjs';
 
@@ -29,6 +29,24 @@ test('completed body leaves no timeout callback or later destruction',async()=>{
   const input=new PassThrough(),abort=new AbortController();let replies=0;
   const pending=readRequestBody(input,{signal:abort.signal,replyToBodyTimeout:()=>{replies++;return true;}});
   input.end(Buffer.from('unchanged input'));assert.equal((await pending).toString(),'unchanged input');abort.abort(error('request-body-timeout'));assert.equal(replies,0);
+});
+test('a body chunk during the selected 408 flush window cannot trigger an early response destroy',async t=>{
+  let handler,releases=0,upstream=0;const server=createRuntimeProxy({controller:{profile:{},admit:async()=>({generation:'synthetic',
+      signal:new AbortController().signal,release:async()=>{releases++;}})},allowedClients:['127.0.0.1'],
+    fetchImpl:async()=>{upstream++;throw Error('must not dispatch');},serverFactory:value=>{handler=value;return {};}});
+  assert.ok(server);t.mock.timers.enable({apis:['setTimeout']});
+  const req=new PassThrough();req.on('error',()=>{});req.socket={remoteAddress:'127.0.0.1'};req.method='POST';req.url='/v1/chat/completions';
+  req.headers={'content-type':'application/json','content-length':'100'};
+  const res=Object.assign(new EventEmitter(),{headersSent:false,destroyed:false,writableEnded:false,status:null,headers:null,body:null,
+    writeHead(status,headers){this.headersSent=true;this.status=status;this.headers=headers;return this;},
+    end(bytes){this.writableEnded=true;this.body=Buffer.from(bytes);return this;},destroy(){this.destroyed=true;return this;}});
+  try{
+    const pending=handler(req,res);await new Promise(resolve=>setImmediate(resolve));t.mock.timers.tick(RUNTIME_LIMITS.bodyMs);
+    assert.equal(res.status,408);assert.equal(res.destroyed,false);req.write('x');await pending;
+    assert.equal(res.destroyed,false);assert.equal(releases,1);assert.equal(upstream,0);
+    assert.deepEqual(JSON.parse(res.body),{schemaVersion:'runaai-home-runtime-error/v1',errorCode:'runtime-request-body-timeout',privateValuesIncluded:false});
+    t.mock.timers.tick(99);assert.equal(req.destroyed,false);t.mock.timers.tick(1);assert.equal(req.destroyed,true);
+  }finally{t.mock.timers.reset();req.destroy();}
 });
 test('lifecycle revocation interrupts a counted incomplete body before any upstream call',async()=>{
   let active=0,upstream=0,revoke;const server=createRuntimeProxy({controller:{profile:{},admit:async()=>{const controller=new AbortController();

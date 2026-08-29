@@ -21,8 +21,10 @@ export async function readRequestBody(req,{signal,limit=RUNTIME_LIMITS.requestBy
     }
     req.destroy(signal.reason);
   };signal.addEventListener('abort',stop,{once:true});
-  try{const chunks=[];let size=0;for await(const chunk of req){signal.throwIfAborted();size+=chunk.length;
+  try{const chunks=[];let size=0,iterable=typeof req.iterator==='function'?req.iterator({destroyOnReturn:false}):req;
+    for await(const chunk of iterable){signal.throwIfAborted();size+=chunk.length;
       demand(size<=limit,'request-cap');chunks.push(chunk);}signal.throwIfAborted();return Buffer.concat(chunks);
+  }catch(cause){if(forceClose===null&&!req.destroyed)req.destroy(cause);throw cause;
   }finally{signal.removeEventListener('abort',stop);}
 }
 export function createRuntimeProxy({controller,upstream='http://127.0.0.1:1234',allowedClients=['192.168.50.169'],fetchImpl=rawHttpRequest,event=()=>{},

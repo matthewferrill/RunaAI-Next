@@ -14,7 +14,7 @@ export const digest=bytes=>createHash('sha256').update(bytes).digest('hex');
 export const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
 export const SOURCE_PINS=Object.freeze({
   'home-runtime/tls-proxy.mjs':'1c063e289ad2f1fc5be25c32fc7b39796d0a415943a868f0de5ae977ed0ef7f9',
-  'home-runtime/proxy.mjs':'e965a57eed957e6797f8883e4d71f69c6a7c01911f39f44dd426db8043edaa2c',
+  'home-runtime/proxy.mjs':'f4c6f6f9fbf092633aaf1b2338ce53ab31e23a9f668545b12e161c3316703a18',
   'home-runtime/contracts.mjs':'995339141c0928312827ed7169a98d8ab2f2de7d7fbbf52e6ae1b54377de39e0',
   'evidence-output.mjs':'ef61fd605d598dfda83782c54c8a1d019bc8a3d21a08aa81aa709ebe691d9f9a',
   'home-runtime/controller.mjs':'6e05d363c882fd1909d31893c0ab3cfee1eef4bdf148e2c6a177cb07d9957daa',

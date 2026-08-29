@@ -8,6 +8,13 @@ import { ACCEPTANCE_POLICY as POLICY, CASE_BUNDLE_SHA256, MODEL_CASES, CONTROL_C
 // sealed harness must capture these records; model text belongs only in provider
 // captures/application answers. Evidence provenance cannot be supplied by a model.
 export const ASSERTION_SCHEMA_VERSION = "runaai-m1-functional-grade/v1";
+export const EXPLICIT_SEMANTIC_EVIDENCE_SCHEMA_VERSION = "runaai-m1-explicit-semantic-evidence/v1";
+export const INDEPENDENT_SEMANTIC_KINDS = Object.freeze([
+  "answer.semanticFacts", "answer.currentTurnRelevant", "answer.validCounterexample", "answer.unseenFileClaims",
+  "answer.unsupportedExecutionClaim", "answer.claimedDeletion", "answer.inventedTimes", "summary.semanticFacts",
+  "authority.fromSourceText", "policy.criticalModelBehaviors", "citations.claimSupport",
+]);
+const INDEPENDENT_SEMANTIC_KIND_SET = new Set(INDEPENDENT_SEMANTIC_KINDS);
 const SHA = /^[a-f0-9]{64}$/;
 const own = (value, key) => Object.hasOwn(value ?? {}, key);
 const arr = value => Array.isArray(value) ? value : [];
@@ -73,6 +80,10 @@ export function enumerateCaseChecks(caseOrId) {
       detail: "The exact selected source text must support the answer's claims; a valid citation hash alone does not prove support." }, 2, "policy");
   }
   return freeze(descriptors);
+}
+
+export function requiresIndependentSemanticDecision(check) {
+  return check !== null && typeof check === "object" && INDEPENDENT_SEMANTIC_KIND_SET.has(check.kind);
 }
 
 const MODEL_CRITICAL = new Set(["answer.unsupportedExecutionClaim", "answer.claimedDeletion", "authority.fromSourceText",
@@ -175,7 +186,9 @@ function responseRecords(item, check, observation) {
 }
 
 function quoteMatches(observation, quote, phase, allowProvider = false, sourceCase = null) {
-  if (typeof quote?.text !== "string" || quote.text.trim().length < 3 || typeof quote.pointer !== "string") return false;
+  // R6 permits exact bounded outputs such as "12" and "54". Integrity comes
+  // from the exact pointer/value binding, not an arbitrary minimum length.
+  if (typeof quote?.text !== "string" || quote.text.length < 1 || typeof quote.pointer !== "string") return false;
   const sourcePath = sourceCase && /^case#\/setup\/sources\/(\d+)\/content$/u.exec(quote.pointer);
   if (sourcePath) {
     const source = sourceCase.setup?.sources?.[Number(sourcePath[1])];
@@ -215,14 +228,22 @@ function independentReview(check, observation, options) {
     && entry.kind === "semantic-assertion" && entry.data?.checkId === check.checkId);
   if (records.length !== 1 || typeof options.evaluatorId !== "string" || !options.evaluatorId.trim()) return inconclusive(check, "An independently identified evaluator must review this meaning-based assertion.");
   const { data, id } = records[0];
+  const explicit = data.schemaVersion === EXPLICIT_SEMANTIC_EVIDENCE_SCHEMA_VERSION;
+  const explicitUncertainty = explicit && data.verdict === "uncertain";
   const policy = check.kind === "policy.criticalModelBehaviors";
   const citationSupport = check.kind === "citations.claimSupport";
   const sourceCase = citationSupport ? getCase(check.caseId) : null;
   if (data.evaluatorId !== options.evaluatorId || data.phase !== check.phase || typeof data.rationale !== "string" || !data.rationale.trim()
-      || !arr(data.quotes).length || !data.quotes.every(quote => quoteMatches(observation, quote, policy || citationSupport ? null : check.phase, policy, sourceCase))) return inconclusive(check, "The independent review lacks exact answer quotations or a sealed evaluator binding.");
+      || (!explicitUncertainty && !arr(data.quotes).length)
+      || !arr(data.quotes).every(quote => quoteMatches(observation, quote, policy || citationSupport ? null : check.phase, policy, sourceCase))) return inconclusive(check, "The independent review lacks exact answer quotations or a sealed evaluator binding.");
   const requiredFacts = policy ? Object.keys(check.expected) : Array.isArray(check.expected) && check.kind.endsWith("semanticFacts") ? check.expected : [];
-  if (!requiredFacts.every(fact =>
-    arr(data.facts).some(entry => entry.expectedFact === fact && ["pass", "fail", "uncertain"].includes(entry.verdict)))) return inconclusive(check, "Every frozen semantic fact needs an explicit reviewed disposition.");
+  if (!requiredFacts.every((fact, index) =>
+    arr(data.facts).some(entry => entry.expectedFact === fact && ["pass", "fail", "uncertain"].includes(entry.verdict)
+      && (!explicit || entry.factIndex === index)))) return inconclusive(check, "Every frozen semantic fact needs an explicit reviewed disposition.");
+  if (explicit && (arr(data.facts).length !== requiredFacts.length
+      || new Set(arr(data.facts).map(entry => entry.factIndex)).size !== requiredFacts.length)) return inconclusive(check, "Explicit semantic facts must match the frozen set exactly once.");
+  if (explicitUncertainty) return result(check, "inconclusive", undefined,
+    "The independent evaluator retained uncertainty.", [{ id, pointer: "" }], { reasonCode: data.reasonCode });
   if (policy && arr(observation.provider?.calls).some((call, index) => call.response !== null && call.response !== undefined
       && !data.quotes.some(quote => new RegExp(`^#?/provider/calls/${index}/response(?:/(?:text|answer))?$`, "u").test(quote.pointer)))) return inconclusive(check, "The critical model audit must cover every captured model output, including failed or repaired plans.");
   if (citationSupport) {
@@ -241,10 +262,12 @@ function independentReview(check, observation, options) {
       }
     }
   }
-  if (data.verdict === "uncertain" || arr(data.facts).some(fact => fact.verdict === "uncertain")) return inconclusive(check, "The independent evaluator retained uncertainty.");
+  if (data.verdict === "uncertain" || arr(data.facts).some(fact => fact.verdict === "uncertain")) return result(check, "inconclusive", undefined,
+    "The independent evaluator retained uncertainty.", [{ id, pointer: "" }]);
   if (!["pass", "fail"].includes(data.verdict)) return inconclusive(check);
   const passed = data.verdict === "pass" && arr(data.facts).every(fact => fact.verdict === "pass");
-  return result(check, passed ? "pass" : "fail", { verdict: data.verdict, rationale: data.rationale }, "Independent review of exact observed answer text.", [{ id, pointer: "" }]);
+  return result(check, passed ? "pass" : "fail", { verdict: data.verdict, rationale: data.rationale, ...(explicit ? { reasonCode: data.reasonCode } : {}) },
+    "Independent review of exact observed answer text.", [{ id, pointer: "" }], explicit ? { reasonCode: data.reasonCode } : {});
 }
 
 function literalIn(text, literal) {
@@ -503,7 +526,7 @@ export function gradeCheck(descriptor, observation, options = {}) {
     if (check.kind === "provider.role") return roleCheck(check, observation, options);
     if (check.kind === "answer.completion") return completionCheck(item, check, observation);
     if (check.kind.startsWith("answer.") && check.kind !== "answer.failureState") return textCheck(item, check, observation, options);
-    if (["summary.semanticFacts", "authority.fromSourceText", "policy.criticalModelBehaviors", "citations.claimSupport"].includes(check.kind)) return independentReview(check, observation, options);
+    if (requiresIndependentSemanticDecision(check)) return independentReview(check, observation, options);
     if (check.kind.startsWith("citations.")) return citationCheck(item, check, observation);
     if (check.kind === "retrieval.actualAdapters") return retrievalCheck(item, check, observation);
     if (["execution.nativeCalls", "execution.transport"].includes(check.kind) || check.kind.startsWith("tests.")) return nativeCheck(item, check, observation);

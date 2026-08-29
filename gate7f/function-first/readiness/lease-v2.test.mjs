@@ -71,6 +71,14 @@ test('PowerShell supervisor and dispatcher pin finite82/86 ceilings and only the
   assert.match(invoke,/New-TimeSpan -Minutes 86/u);assert.doesNotMatch(invoke,/New-TimeSpan -Minutes 74/u);
   assert.ok(completion.indexOf('validV2BatchResult(JSON.parse(resultBytes),reason)')<completion.indexOf("execFileSync('ssh.exe'"));
 });
+test('v2 watchdog keeps hardware telemetry but does not query LM Studio during its load transaction',async()=>{
+  const worker=await readFile(path.join(import.meta.dirname,'home-campaign-lease-v2.mjs'),'utf8');
+  assert.match(worker,/async function sample\(verifyResidency=true\)/u);
+  assert.match(worker,/checkHardware\(value,expectedPower\);\s*if\(verifyResidency\)checkResidents/u);
+  assert.match(worker,/sample\(phase!=='loading'\)\.catch/u);
+  assert.match(worker,/controller\.signal\.throwIfAborted\(\);checkResidents\(await api\('\/api\/v1\/models'\),owned\);/u);
+  assert.match(worker,/const found=checkResidents\(await api\('\/api\/v1\/models'\),owned\)/u);
+});
 test('all v2 PowerShell operators parse under Windows PowerShell',()=>{
   if(process.platform!=='win32')return;
   for(const name of ['Run-HomeCampaignLeaseV2.ps1','Invoke-HomeCampaignLeaseV2.ps1','Write-HomeCampaignCompletionV2.ps1']){

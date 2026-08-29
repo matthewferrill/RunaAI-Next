@@ -36,13 +36,13 @@ function hardware(){
   const raw=execFileSync('nvidia-smi.exe',['--query-gpu=index,name,uuid,memory.total,memory.used,temperature.gpu,power.limit,power.draw,utilization.gpu','--format=csv,noheader,nounits'],{encoding:'utf8',timeout:5000,windowsHide:true});
   return {freeMemoryBytes:freemem(),gpus:raw.trim().split(/\r?\n/).map(line=>{const f=line.split(',').map(value=>value.trim());return {index:+f[0],name:f[1],uuid:f[2],memoryTotalMiB:+f[3],memoryUsedMiB:+f[4],temperatureC:+f[5],powerLimitWatts:+f[6],powerWatts:+f[7],utilization:+f[8]};})};
 }
-async function sample(){
+async function sample(verifyResidency=true){
   const now=Date.now(),value=hardware();event('telemetry',{phase,...value,gapMs:now-lastSample});
   assert(now-lastSample<=P.maximumGapMs,'v2-telemetry-gap');lastSample=now;checkHardware(value,expectedPower);
-  checkResidents(await api('/api/v1/models'),owned,pendingKey);return value;
+  if(verifyResidency)checkResidents(await api('/api/v1/models'),owned,pendingKey);return value;
 }
 const monitor=setInterval(()=>{if(sampling||phase==='power-transition'||phase==='cleanup')return;sampling=true;
-  sample().catch(error=>{event('watchdog-failure',{code:error.message});controller.abort(error);}).finally(()=>{sampling=false;});},P.sampleMs);
+  sample(phase!=='loading').catch(error=>{event('watchdog-failure',{code:error.message});controller.abort(error);}).finally(()=>{sampling=false;});},P.sampleMs);
 async function pause(){await new Promise(resolve=>setTimeout(resolve,5000));controller.signal.throwIfAborted();}
 async function hash(file){assert(!lstatSync(file).isSymbolicLink(),'v2-pin-link');const digest=createHash('sha256');
   for await(const bytes of createReadStream(file,{highWaterMark:4194304})){controller.signal.throwIfAborted();digest.update(bytes);}return digest.digest('hex');}

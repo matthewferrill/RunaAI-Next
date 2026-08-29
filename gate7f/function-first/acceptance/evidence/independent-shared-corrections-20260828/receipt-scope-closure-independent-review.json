@@ -1,0 +1,44 @@
+{
+  "schemaVersion": "runaai-independent-receipt-scope-closure/v1",
+  "reviewDate": "2026-08-28",
+  "evaluatorId": "codex-independent-model-role-review-20260828",
+  "reviewerIndependence": {
+    "freshIndependentAgent": true,
+    "plannerAuthor": false,
+    "modelAdapterAuthor": false
+  },
+  "priorFindingCommit": "aaa1d3df6199223ea3106adef58cb76d9b535787",
+  "implementationCommit": "a46fab1acc796cd86857bd05090e5d49e8dd361d",
+  "intentAssertionCommit": "1738aff9451724f65ae4159ef178ede2cb9d8deb",
+  "evidenceCommit": "0417474044330f669954b7a1e4c018ab94647731",
+  "disposition": "closed-within-fixed-receipt-scope-criterion",
+  "remainingDefect": null,
+  "verified": {
+    "restorePathsFilteredByCurrentGrant": true,
+    "freshServicePreflightRetained": true,
+    "omittedReceiptAbsentFromPlannerInput": true,
+    "guessedReceiptRejectedBeforePlan": true,
+    "plansUnchanged": true,
+    "proposalsUnchanged": true,
+    "intentsUnchanged": true,
+    "receiptsUnchanged": true,
+    "adapterMutationsUnchanged": true,
+    "sourcePinsMatchGitBlobs": 8,
+    "sourcePinsMatchArchiveEntries": 8,
+    "tests": 70,
+    "pass": 70,
+    "fail": 0,
+    "skipped": 0,
+    "cancelled": 0
+  },
+  "hashes": {
+    "archiveSha256": "28c1590d71987772c1b9be63217940895be168053a1fc5ba0fd68697485d664a",
+    "testsTapSha256": "0077d596049aa8517525da3ff0b20045d3adef52b30b49939fbec24fa651ca45",
+    "resultSha256": "756eccf2aa877b69730e27cf31d77d8a738828a5d64c4a3bdc06f88314d08f9b",
+    "sealSha256": "2a3da6a9fa3c902e27e0e482aaa919f4c73419b5bbfb4a467d83b6a1b4662afe"
+  },
+  "baselineEvidenceChanged": false,
+  "baselineGradesChanged": false,
+  "qualificationClaimed": false,
+  "productionAuthorized": false
+}

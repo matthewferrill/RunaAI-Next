@@ -9,7 +9,9 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { AGENT05_BOUNDED_DRAIN_NOTICE } from "./browser-checkpoint.mjs";
+import { browserWitnessFromAck, browserWitnessSha256 } from "./browser-witness.mjs";
 import { buildBrowserAck, publishBrowserObservation } from "./operator-browser-ack-helper.mjs";
+import { buildBrowserWitnessPublication, publishBrowserWitness } from "./operator-browser-witness-helper.mjs";
 
 const observedAt = "2026-08-29T23:40:05.000Z";
 const seal = "a".repeat(64);
@@ -75,24 +77,40 @@ test("in-flight acknowledgement carries the authoritative preparation, cancellat
     actual: false, details: changed }), /browser-ack-helper-in-flight-request/u);
 });
 
-test("live publication sends the exact acknowledgement once to the bound loopback endpoint", async t => {
-  let received = null, calls = 0;
+test("live witness and acknowledgement publications use separate bound one-time endpoints", async t => {
+  const received = []; let calls = 0;
   const server = createServer(async (request, response) => {
     const parts = []; for await (const part of request) parts.push(part);
-    calls++; received = JSON.parse(Buffer.concat(parts).toString("utf8")); response.writeHead(204); response.end();
+    calls++; received.push({ url: request.url, body: JSON.parse(Buffer.concat(parts).toString("utf8")) });
+    response.writeHead(204); response.end();
   });
   server.listen(0, "127.0.0.1"); await once(server, "listening");
   t.after(() => new Promise(resolve => { server.close(resolve); server.closeAllConnections(); }));
   const baseUrl = `http://127.0.0.1:${server.address().port}`;
-  const request = { ...base, baseUrl, observationEndpoint: { schemaVersion: "runaai-m1-browser-observation-endpoint/v1",
-    url: `${baseUrl}/__acceptance/browser-observation`, token: "f".repeat(64) },
-    preparationOnly: false, reusePreparedBrowser: false, scope: null, checks: [check] };
-  const ack = buildBrowserAck({ mode: "graded", request, url: `${baseUrl}/`, observedAt, actual: false, details: {} });
+  const request = { ...base, baseUrl, caseId: "agent-05-cancel-drain", stage: "in-flight",
+    observationEndpoint: { schemaVersion: "runaai-m1-browser-observation-endpoint/v2",
+      witnessUrl: `${baseUrl}/__acceptance/browser-observation-witness`, witnessToken: "e".repeat(64),
+      ackUrl: `${baseUrl}/__acceptance/browser-observation-ack`, ackToken: "f".repeat(64),
+      witnessExpiresAt: "2026-08-30T12:00:24.000Z", publishExpiresAt: "2026-08-30T12:01:24.000Z" },
+    preparationOnly: false, reusePreparedBrowser: true, scope, bootstrap: null,
+    preparationCheckpointId: "aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee",
+    cancellationAt: "2026-08-30T12:00:00.000Z", checks: [{ ...check,
+      checkId: "agent-05-cancel-drain/case/9:ui.claimedImmediateKill", kind: "ui.claimedImmediateKill" }] };
+  const details = { observation: "The bounded drain notice was visible.", taskStatus: "cancelled",
+    notice: AGENT05_BOUNDED_DRAIN_NOTICE, claimedImmediateKill: false, boundedDrain };
+  const ack = buildBrowserAck({ mode: "graded", request, url: `${baseUrl}/`, observedAt,
+    actual: false, details });
+  const publication = buildBrowserWitnessPublication(request);
+  assert.equal(await publishBrowserWitness(request), publication.witnessSha256);
   assert.equal(await publishBrowserObservation(request, ack), true);
-  assert.equal(calls, 1); assert.equal(received.checkpointId, request.checkpointId);
-  assert.equal(received.token, request.observationEndpoint.token); assert.deepEqual(received.ack, ack);
+  assert.equal(calls, 2); assert.equal(received[0].url, "/__acceptance/browser-observation-witness");
+  assert.deepEqual(received[0].body, publication.body);
+  assert.equal(received[1].url, "/__acceptance/browser-observation-ack");
+  assert.equal(received[1].body.checkpointId, request.checkpointId);
+  assert.equal(received[1].body.token, request.observationEndpoint.ackToken); assert.deepEqual(received[1].body.ack, ack);
+  assert.equal(received[1].body.witnessSha256, browserWitnessSha256(browserWitnessFromAck(ack)));
   await assert.rejects(publishBrowserObservation({ ...request, observationEndpoint: { ...request.observationEndpoint,
-    url: `${baseUrl}/wrong` } }, ack), /endpoint-invalid/u);
+    ackUrl: `${baseUrl}/wrong` } }, ack), /endpoint-invalid/u);
 });
 
 test("the CLI writes one fsynced create-only acknowledgement from base64 inputs", async t => {

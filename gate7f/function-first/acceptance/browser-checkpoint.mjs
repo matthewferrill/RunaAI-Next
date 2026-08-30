@@ -4,10 +4,13 @@ import { randomUUID, createHash } from "node:crypto";
 import { isDeepStrictEqual } from "node:util";
 import { enumerateCaseChecks } from "./assertions.mjs";
 import { fail } from "./runner-contract.mjs";
+import { AGENT05_BOUNDED_DRAIN, AGENT05_BOUNDED_DRAIN_NOTICE,
+  browserWitnessFromAck, browserWitnessSha256, canonicalBrowserWitness } from "./browser-witness.mjs";
 
 const TRANSIENT_WINDOWS_OBSERVATION = new Set(["ENOENT", "EBUSY", "EPERM"]);
 export const AGENT05_IN_FLIGHT_OBSERVATION_MS = 24_000;
-export const AGENT05_BOUNDED_DRAIN_NOTICE = "Cancellation requested. No new steps will start. An already-dispatched step may still be finishing or awaiting reconciliation; its actual result will be retained when observed.";
+export const AGENT05_ACK_PUBLICATION_GRACE_MS = 60_000;
+export { AGENT05_BOUNDED_DRAIN_NOTICE };
 
 async function readAckFile(ackPath) {
   const info = await lstat(ackPath);
@@ -87,7 +90,40 @@ function requireCancellationBinding(observation, scope, cancellationAt) {
   return cancelledAt;
 }
 
-function validateInFlightAck(ack, request, prior, observation, observedAt, deadline) {
+function validateInFlightAck(ack, request, prior, observation, envelope, observationDeadline, publicationDeadline) {
+  const cancellationTime = requireCancellationBinding(observation, request.scope, request.cancellationAt);
+  if (!isDeepStrictEqual(ack.preparedScope, request.scope) || ack.preparationCheckpointId !== prior.checkpointId
+      || ack.cancellationAt !== request.cancellationAt || ack.evidence.length !== 1 || ack.checks.length !== 1) {
+    throw fail("m1-browser-in-flight-binding-invalid");
+  }
+  const proof = ack.evidence[0], check = ack.checks[0], data = proof?.data;
+  let url;
+  try { url = new URL(data?.url); } catch { throw fail("m1-browser-in-flight-dom-invalid"); }
+  const witnessReceivedAt = envelope?.witnessReceivedAtMs, publicationReceivedAt = envelope?.receivedAtMs;
+  const boundedDrain = data?.boundedDrain;
+  if (proof.source !== "browser" || proof.kind !== "ui.claimedImmediateKill"
+      || data?.checkId !== request.checks[0]?.checkId || data.actual !== false
+      || !isDeepStrictEqual(data.scope, request.scope) || data.projectName !== request.projectName
+      || data.projectId !== request.projectId || data.taskId !== request.taskId || data.experience !== request.experience
+      || data.taskStatus !== "cancelled" || data.cancellationAt !== request.cancellationAt
+      || data.notice !== AGENT05_BOUNDED_DRAIN_NOTICE || data.claimedImmediateKill !== false
+      || !isDeepStrictEqual(boundedDrain, AGENT05_BOUNDED_DRAIN)
+      || url.origin !== request.baseUrl || url.pathname !== "/" || url.username || url.password || url.search || url.hash
+      || !Number.isFinite(witnessReceivedAt) || witnessReceivedAt < cancellationTime || witnessReceivedAt > observationDeadline
+      || !Number.isFinite(publicationReceivedAt) || publicationReceivedAt < witnessReceivedAt || publicationReceivedAt > publicationDeadline
+      || !isDeepStrictEqual(canonicalBrowserWitness(envelope.witness), browserWitnessFromAck(ack))
+      || browserWitnessSha256(envelope.witness) !== envelope.witnessSha256
+      || browserWitnessSha256(browserWitnessFromAck(ack)) !== envelope.witnessSha256
+      || check.checkId !== request.checks[0]?.checkId || check.kind !== "ui.claimedImmediateKill" || check.actual !== false
+      || check.evidenceRefs?.length !== 1 || check.evidenceRefs[0]?.id !== proof.id || check.evidenceRefs[0]?.pointer !== "/actual") {
+    throw fail("m1-browser-in-flight-dom-invalid");
+  }
+  data.observedAt = new Date(witnessReceivedAt).toISOString();
+  data.publicationReceivedAt = new Date(publicationReceivedAt).toISOString();
+  data.witnessSha256 = envelope.witnessSha256;
+}
+
+function validateInFlightFileAck(ack, request, prior, observation, acceptedAt, deadline) {
   const cancellationTime = requireCancellationBinding(observation, request.scope, request.cancellationAt);
   if (!isDeepStrictEqual(ack.preparedScope, request.scope) || ack.preparationCheckpointId !== prior.checkpointId
       || ack.cancellationAt !== request.cancellationAt || ack.evidence.length !== 1 || ack.checks.length !== 1) {
@@ -97,17 +133,15 @@ function validateInFlightAck(ack, request, prior, observation, observedAt, deadl
   let url;
   try { url = new URL(data?.url); } catch { throw fail("m1-browser-in-flight-dom-invalid"); }
   const seenAt = timestamp(data?.observedAt, "m1-browser-in-flight-dom-invalid");
-  const boundedDrain = data?.boundedDrain;
   if (proof.source !== "browser" || proof.kind !== "ui.claimedImmediateKill"
       || data?.checkId !== request.checks[0]?.checkId || data.actual !== false
       || !isDeepStrictEqual(data.scope, request.scope) || data.projectName !== request.projectName
       || data.projectId !== request.projectId || data.taskId !== request.taskId || data.experience !== request.experience
       || data.taskStatus !== "cancelled" || data.cancellationAt !== request.cancellationAt
       || data.notice !== AGENT05_BOUNDED_DRAIN_NOTICE || data.claimedImmediateKill !== false
-      || !isDeepStrictEqual(boundedDrain, { noNewSteps: true, alreadyDispatchedMayFinish: true,
-        awaitingReconciliation: true, resultWillBeRetained: true })
+      || !isDeepStrictEqual(data.boundedDrain, AGENT05_BOUNDED_DRAIN)
       || url.origin !== request.baseUrl || url.pathname !== "/" || url.username || url.password || url.search || url.hash
-      || seenAt < cancellationTime || seenAt > deadline || seenAt > observedAt + 2000
+      || seenAt < cancellationTime || seenAt > deadline || seenAt > acceptedAt + 2000
       || check.checkId !== request.checks[0]?.checkId || check.kind !== "ui.claimedImmediateKill" || check.actual !== false
       || check.evidenceRefs?.length !== 1 || check.evidenceRefs[0]?.id !== proof.id || check.evidenceRefs[0]?.pointer !== "/actual") {
     throw fail("m1-browser-in-flight-dom-invalid");
@@ -150,8 +184,11 @@ export function createBrowserCheckpoint({ directory, maximumWaitMs = 300000, ann
     const waitMs = inFlight ? Math.min(AGENT05_IN_FLIGHT_OBSERVATION_MS, maximumWaitMs) : maximumWaitMs;
     const deadline = now() + waitMs;
     const liveObservation = inFlight && typeof client.host.createBrowserObservation === "function"
-      && typeof client.host.readBrowserObservation === "function" && typeof client.host.consumeBrowserObservation === "function";
-    const observationEndpoint = liveObservation ? client.host.createBrowserObservation(checkpointId, deadline) : null;
+      && typeof client.host.readBrowserWitness === "function" && typeof client.host.readBrowserObservation === "function"
+      && typeof client.host.consumeBrowserObservation === "function";
+    const publicationDeadline = liveObservation ? deadline + AGENT05_ACK_PUBLICATION_GRACE_MS : deadline;
+    const observationEndpoint = liveObservation
+      ? client.host.createBrowserObservation(checkpointId, deadline, publicationDeadline) : null;
     const request = { schemaVersion: "runaai-m1-browser-checkpoint/v1", checkpointId,
       caseId: client.ledger.observation.caseId, candidateId: client.ledger.observation.candidateId,
       repetition: client.ledger.observation.repetition, phase, stage,
@@ -162,11 +199,99 @@ export function createBrowserCheckpoint({ directory, maximumWaitMs = 300000, ann
       cancellationAt: inFlight ? cancellationAt : null,
       taskObjective: client.task?.objective ?? client.item.objective ?? null,
       checks: descriptors, ackPath: path.join(checkpointDirectory, "browser-ack.json"), observationEndpoint,
-      expiresAt: new Date(deadline).toISOString() };
+      observationDeadline: new Date(deadline).toISOString(), expiresAt: new Date(publicationDeadline).toISOString() };
     const requestPath = path.join(checkpointDirectory, "request.json");
     await writeFile(requestPath, JSON.stringify(request, null, 2), { flag: "wx" });
     announce({ checkpointId, requestPath, baseUrl: request.baseUrl, caseId: request.caseId, phase, stage });
+    let publicationOwnsSlot = false;
+    const acceptAck = async (raw, envelope, acceptedAt) => {
+      const ack = parseAck(raw);
+      if (ack.schemaVersion !== "runaai-m1-browser-checkpoint-ack/v1" || ack.checkpointId !== checkpointId
+        || ack.caseId !== request.caseId || ack.runtimeSealSha256 !== request.runtimeSealSha256
+        || !Array.isArray(ack.evidence) || !Array.isArray(ack.checks)) throw fail("m1-browser-ack-invalid");
+      if (preparationOnly) {
+        const sameSession = observation.evidence.slice(evidenceStart).some(value => value.kind === "synthetic-session-bootstrap"
+          && value.data?.principalId === client.principalId && value.data?.sameSessionReattached === true && value.data?.oneTimeNonceConsumed === true);
+        const proof = ack.evidence.length === 1 ? ack.evidence[0] : null;
+        let url;
+        try { url = new URL(proof?.data?.url); } catch { throw fail("m1-browser-preparation-unproven"); }
+        const seenAt = Date.parse(proof.data.observedAt), observedAt = now();
+        if (ack.checks.length || !sameSession || !isDeepStrictEqual(ack.preparedScope, scope)
+            || proof.source !== "browser" || proof.kind !== "browser-preparation" || !isDeepStrictEqual(proof.data.scope, scope)
+            || proof.data.projectName !== request.projectName || proof.data.taskObjective !== request.taskObjective
+            || !request.taskObjective || url.origin !== request.baseUrl || url.pathname !== "/" || url.username || url.password
+            || !Number.isFinite(seenAt) || seenAt > observedAt + 2000 || observedAt - seenAt > 30000) throw fail("m1-browser-preparation-unproven");
+        client.ledger.evidence("browser", "browser-preparation", proof.data);
+        const ticket = { preparationOnly: true, checkpointId, scope, baseUrl: request.baseUrl,
+          preparedAt: new Date(observedAt).toISOString(), expiresAt: observedAt + 300000 };
+        prepared.set(attemptKey, ticket);
+        await writeFile(path.join(checkpointDirectory, "consumed.json"), JSON.stringify({ checkpointId, consumedAt: ticket.preparedAt, preparationOnly: true }), { flag: "wx" });
+        return structuredClone(ticket);
+      }
+      if (inFlight) {
+        if (liveObservation) validateInFlightAck(ack, request, prior, observation, envelope, deadline, publicationDeadline);
+        else validateInFlightFileAck(ack, request, prior, observation, acceptedAt, deadline);
+      }
+      const pending = validateGradedAck(ack, descriptors, observation);
+      const evidenceLength = observation.evidence.length, checksLength = observation.checks.length;
+      const priorBrowserExercised = observation.browserExercised;
+      try {
+        for (const evidence of pending.pendingEvidence) client.ledger.evidence("browser", evidence.kind, evidence.data);
+        observation.checks.push(...pending.pendingChecks);
+        observation.browserExercised = true;
+      } catch (error) {
+        observation.evidence.length = evidenceLength;
+        observation.checks.length = checksLength;
+        observation.browserExercised = priorBrowserExercised;
+        throw error;
+      }
+      if (inFlight) prepared.delete(attemptKey);
+      await writeFile(path.join(checkpointDirectory, "consumed.json"), JSON.stringify({ checkpointId, consumedAt: new Date().toISOString() }), { flag: "wx" });
+    };
     try {
+    if (liveObservation) {
+      let witnessEnvelope = null;
+      while (now() <= deadline) {
+        if (signal?.aborted) throw fail("m1-browser-checkpoint-aborted");
+        try { witnessEnvelope = client.host.readBrowserWitness(checkpointId); }
+        catch (error) { if (!TRANSIENT_WINDOWS_OBSERVATION.has(error.code)) throw error; }
+        const readAt = now(), receivedAt = witnessEnvelope?.receivedAtMs;
+        if (witnessEnvelope) {
+          if (!Number.isFinite(receivedAt) || receivedAt > deadline
+              || browserWitnessSha256(witnessEnvelope.witness) !== witnessEnvelope.witnessSha256) {
+            throw fail("m1-browser-checkpoint-unobserved");
+          }
+          break;
+        }
+        if (readAt >= deadline) throw fail("m1-browser-checkpoint-unobserved");
+        await pause(250);
+      }
+      if (!witnessEnvelope) throw fail("m1-browser-checkpoint-unobserved");
+      publicationOwnsSlot = true;
+      const publication = (async () => {
+        try {
+          while (now() <= publicationDeadline) {
+            if (signal?.aborted) throw fail("m1-browser-checkpoint-aborted");
+            let envelope = null;
+            try { envelope = client.host.readBrowserObservation(checkpointId); }
+            catch (error) { if (!TRANSIENT_WINDOWS_OBSERVATION.has(error.code)) throw error; }
+            const readAt = now(), receivedAt = envelope?.receivedAtMs;
+            if (envelope) {
+              if (!Number.isFinite(receivedAt) || receivedAt > publicationDeadline) throw fail("m1-browser-ack-publication-expired");
+              await acceptAck(envelope.raw, envelope, receivedAt);
+              return;
+            }
+            if (readAt >= publicationDeadline) throw fail("m1-browser-ack-publication-expired");
+            await pause(250);
+          }
+          throw fail("m1-browser-ack-publication-expired");
+        } finally { client.host.consumeBrowserObservation(checkpointId); }
+      })();
+      publication.catch(() => {});
+      return { schemaVersion: "runaai-m1-browser-witness-ticket/v1", checkpointId,
+        witnessReceivedAt: new Date(witnessEnvelope.receivedAtMs).toISOString(),
+        witnessSha256: witnessEnvelope.witnessSha256, publication };
+    }
     while (inFlight ? now() <= deadline : now() < deadline) {
       if (signal?.aborted) throw fail("m1-browser-checkpoint-aborted");
       let raw, observed = false, receivedAt = null;
@@ -188,48 +313,7 @@ export function createBrowserCheckpoint({ directory, maximumWaitMs = 300000, ann
       if (!Number.isFinite(acceptedAt) || acceptedAt > deadline || (!inFlight && acceptedAt >= deadline)
           || (!observed && readAt >= deadline)) throw fail("m1-browser-checkpoint-unobserved");
       if (observed) {
-        const ack = parseAck(raw);
-        if (ack.schemaVersion !== "runaai-m1-browser-checkpoint-ack/v1" || ack.checkpointId !== checkpointId
-          || ack.caseId !== request.caseId || ack.runtimeSealSha256 !== request.runtimeSealSha256
-          || !Array.isArray(ack.evidence) || !Array.isArray(ack.checks)) throw fail("m1-browser-ack-invalid");
-        if (preparationOnly) {
-          const sameSession = observation.evidence.slice(evidenceStart).some(value => value.kind === "synthetic-session-bootstrap"
-            && value.data?.principalId === client.principalId && value.data?.sameSessionReattached === true && value.data?.oneTimeNonceConsumed === true);
-          const proof = ack.evidence.length === 1 ? ack.evidence[0] : null;
-          let url;
-          try { url = new URL(proof?.data?.url); } catch { throw fail("m1-browser-preparation-unproven"); }
-          const seenAt = Date.parse(proof.data.observedAt), observedAt = now();
-          if (ack.checks.length || !sameSession || !isDeepStrictEqual(ack.preparedScope, scope)
-              || proof.source !== "browser" || proof.kind !== "browser-preparation" || !isDeepStrictEqual(proof.data.scope, scope)
-              || proof.data.projectName !== request.projectName || proof.data.taskObjective !== request.taskObjective
-              || !request.taskObjective || url.origin !== request.baseUrl || url.pathname !== "/" || url.username || url.password
-              || !Number.isFinite(seenAt) || seenAt > observedAt + 2000 || observedAt - seenAt > 30000) throw fail("m1-browser-preparation-unproven");
-          // Preparation data cannot satisfy any ui.* frozen check. In particular
-          // do not copy ack.checks or set the graded browserExercised flag here.
-          client.ledger.evidence("browser", "browser-preparation", proof.data);
-          const ticket = { preparationOnly: true, checkpointId, scope, baseUrl: request.baseUrl,
-            preparedAt: new Date(observedAt).toISOString(), expiresAt: observedAt + 300000 };
-          prepared.set(attemptKey, ticket);
-          await writeFile(path.join(checkpointDirectory, "consumed.json"), JSON.stringify({ checkpointId, consumedAt: ticket.preparedAt, preparationOnly: true }), { flag: "wx" });
-          return structuredClone(ticket);
-        }
-        if (inFlight) validateInFlightAck(ack, request, prior, observation, acceptedAt, deadline);
-        const pending = validateGradedAck(ack, descriptors, observation);
-        const evidenceLength = observation.evidence.length, checksLength = observation.checks.length;
-        const priorBrowserExercised = observation.browserExercised;
-        try {
-          for (const evidence of pending.pendingEvidence) client.ledger.evidence("browser", evidence.kind, evidence.data);
-          observation.checks.push(...pending.pendingChecks);
-          observation.browserExercised = true;
-        } catch (error) {
-          observation.evidence.length = evidenceLength;
-          observation.checks.length = checksLength;
-          observation.browserExercised = priorBrowserExercised;
-          throw error;
-        }
-        if (inFlight) prepared.delete(attemptKey);
-        await writeFile(path.join(checkpointDirectory, "consumed.json"), JSON.stringify({ checkpointId, consumedAt: new Date().toISOString() }), { flag: "wx" });
-        return;
+        return acceptAck(raw, null, acceptedAt);
       }
       await pause(250);
     }
@@ -238,7 +322,7 @@ export function createBrowserCheckpoint({ directory, maximumWaitMs = 300000, ann
       // Live observation slots are one-use, bounded harness state.  Clear the
       // slot on every terminal path, including malformed, late and aborted
       // acknowledgements, so repeated failed attempts cannot exhaust the cap.
-      if (liveObservation) client.host.consumeBrowserObservation(checkpointId);
+      if (liveObservation && !publicationOwnsSlot) client.host.consumeBrowserObservation(checkpointId);
     }
   };
 }

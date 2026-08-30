@@ -304,8 +304,9 @@ export function createFaultActions({ checkpoint = null } = {}) {
     },
     "user.cancel-after-native-dispatch": async client => {
       if (!state(client).held) throw fail("m1-native-dispatch-not-observed");
+      let checkpointTicket = null, result;
       try {
-        const result = await client.m1("task.cancel", { taskId: client.task.taskId });
+        result = await client.m1("task.cancel", { taskId: client.task.taskId });
         const cancelledAt = typeof result?.updatedAt === "string" ? Date.parse(result.updatedAt) : NaN;
         if (result?.schemaVersion !== "runa-m1-task/v1" || result.status !== "cancelled" || result.taskId !== client.task.taskId
             || result.participantId !== client.principalId || result.projectId !== client.projectId || !Number.isFinite(cancelledAt)) {
@@ -314,9 +315,14 @@ export function createFaultActions({ checkpoint = null } = {}) {
         const cancellationAt = result.updatedAt;
         client.ledger.evidence("postgresql", "fault-cancel-after-native-dispatch", { taskId: client.task.taskId,
           result, held: state(client).held, cancellationAt });
-        await inspectCheckpoint(client, "in-flight", { cancellationAt });
-        return result;
+        checkpointTicket = await inspectCheckpoint(client, "in-flight", { cancellationAt });
       } finally { controller(client).releaseNativeReceipt(); }
+      // The trusted browser witness is enough to end the native receipt hold.
+      // Full evidence publication remains mandatory, but its bounded grace runs
+      // after release so operator transport latency cannot become an executor
+      // failure or extend the 25-second native hold.
+      if (checkpointTicket?.publication) await checkpointTicket.publication;
+      return result;
     },
     "run.observe-drain": async client => {
       if (!state(client).pendingRun) throw fail("m1-cancel-run-not-pending");

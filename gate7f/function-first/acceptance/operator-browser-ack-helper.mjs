@@ -2,18 +2,14 @@ import { closeSync, fsyncSync, openSync, readFileSync, writeSync } from "node:fs
 import { fileURLToPath } from "node:url";
 import { isDeepStrictEqual } from "node:util";
 
-import { AGENT05_BOUNDED_DRAIN_NOTICE } from "./browser-checkpoint.mjs";
+import { AGENT05_BOUNDED_DRAIN, AGENT05_BOUNDED_DRAIN_NOTICE,
+  browserWitnessFromAck, browserWitnessSha256 } from "./browser-witness.mjs";
 
 const UUID = /^[a-f0-9]{8}-(?:[a-f0-9]{4}-){3}[a-f0-9]{12}$/u;
 const SHA256 = /^[a-f0-9]{64}$/u;
 const IN_FLIGHT_DETAILS = new Set(["observation", "taskStatus", "notice", "claimedImmediateKill", "boundedDrain"]);
 const ORDINARY_DETAILS = new Set(["observation"]);
-const BOUNDED_DRAIN = Object.freeze({
-  noNewSteps: true,
-  alreadyDispatchedMayFinish: true,
-  awaitingReconciliation: true,
-  resultWillBeRetained: true
-});
+const BOUNDED_DRAIN = AGENT05_BOUNDED_DRAIN;
 
 function fail(code) {
   const error = new Error(code);
@@ -180,13 +176,20 @@ function writeCreateOnly(path, value) {
 export async function publishBrowserObservation(request, value) {
   const endpoint = request.observationEndpoint;
   if (endpoint === null || endpoint === undefined) return false;
-  if (endpoint.schemaVersion !== "runaai-m1-browser-observation-endpoint/v1"
-      || endpoint.url !== `${request.baseUrl}/__acceptance/browser-observation`
-      || !/^[a-f0-9]{64}$/u.test(endpoint.token ?? "")) throw fail("browser-ack-helper-observation-endpoint-invalid");
+  if (endpoint.schemaVersion !== "runaai-m1-browser-observation-endpoint/v2"
+      || endpoint.ackUrl !== `${request.baseUrl}/__acceptance/browser-observation-ack`
+      || endpoint.witnessUrl !== `${request.baseUrl}/__acceptance/browser-observation-witness`
+      || !/^[a-f0-9]{64}$/u.test(endpoint.ackToken ?? "") || !/^[a-f0-9]{64}$/u.test(endpoint.witnessToken ?? "")
+      || !Number.isFinite(Date.parse(endpoint.witnessExpiresAt)) || !Number.isFinite(Date.parse(endpoint.publishExpiresAt))) {
+    throw fail("browser-ack-helper-observation-endpoint-invalid");
+  }
+  let witnessSha256;
+  try { witnessSha256 = browserWitnessSha256(browserWitnessFromAck(value)); }
+  catch { throw fail("browser-ack-helper-observation-endpoint-invalid"); }
   let response;
-  try { response = await fetch(endpoint.url, { method: "POST", redirect: "error",
+  try { response = await fetch(endpoint.ackUrl, { method: "POST", redirect: "error",
     headers: { "content-type": "application/json" },
-    body: JSON.stringify({ checkpointId: request.checkpointId, token: endpoint.token, ack: value }) }); }
+    body: JSON.stringify({ checkpointId: request.checkpointId, token: endpoint.ackToken, witnessSha256, ack: value }) }); }
   catch { throw fail("browser-ack-helper-observation-publication-failed"); }
   if (response.status !== 204) throw fail("browser-ack-helper-observation-publication-failed");
   return true;

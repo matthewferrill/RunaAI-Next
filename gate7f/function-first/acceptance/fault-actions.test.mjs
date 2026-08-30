@@ -191,6 +191,36 @@ test("Agent05 binds the authoritative cancellation time, releases once and intro
   } finally { releaseRun({ status: "cancelled" }); extension.close(); }
 });
 
+test("Agent05 releases the native receipt after the witness and before full acknowledgement publication", async () => {
+  const observed = ledger(); let releases = 0, finishPublication, actionSettled = false;
+  const publication = new Promise(resolve => { finishPublication = resolve; });
+  const held = { requestId: "native-request", receiptId: "native-receipt", sourceSha256: "c".repeat(64),
+    runtimeStatus: "executed", heldAt: "2026-08-29T15:05:00.000Z", nativeCompletedBeforeHold: true };
+  const cancelled = { schemaVersion: "runa-m1-task/v1", status: "cancelled", taskId: "fixture-task",
+    participantId: scope.participantId, projectId: scope.projectId, updatedAt: "2026-08-29T15:05:01.000Z" };
+  const faults = { armProviderResponseDrop() {}, armNativeReceiptHold() {}, async waitNativeReceiptHeld() { return held; },
+    releaseNativeReceipt() { releases++; }, clear() {} };
+  const extension = createFaultActions({ async checkpoint() {
+    return { schemaVersion: "runaai-m1-browser-witness-ticket/v1", publication };
+  } });
+  const client = { item: { id: "agent-05-cancel-drain", role: "agent" }, principalId: scope.participantId,
+    projectId: scope.projectId, task: { taskId: "fixture-task" }, grant: { grantId: "fixture-grant", revision: 1 },
+    id: () => "fixture-request", ledger: observed, host: { faults }, async m1(operation) {
+      if (operation === "run.start") return new Promise(() => {});
+      if (operation === "task.cancel") return structuredClone(cancelled);
+      throw new Error("unexpected operation");
+    } };
+  try {
+    await extension.actions["run.start"](client);
+    const action = extension.actions["user.cancel-after-native-dispatch"](client).finally(() => { actionSettled = true; });
+    await new Promise(resolve => setImmediate(resolve));
+    assert.equal(releases, 1, "on-time witness ended the native hold");
+    assert.equal(actionSettled, false, "full acknowledgement remained mandatory");
+    finishPublication();
+    assert.deepEqual(await action, cancelled); assert.equal(releases, 1);
+  } finally { extension.close(); }
+});
+
 for (const scenario of ["checkpoint-failure", "invalid-cancel-result"]) test(`Agent05 always releases its held receipt after ${scenario}`, async () => {
   const observed = ledger(), calls = []; let releases = 0, checkpointCalls = 0;
   const held = { requestId: "native-request", receiptId: "native-receipt", sourceSha256: "c".repeat(64),

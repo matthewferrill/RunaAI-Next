@@ -1,5 +1,6 @@
 import { randomBytes, timingSafeEqual } from "node:crypto";
 import { createServer } from "node:http";
+import { browserWitnessFromAck, browserWitnessSha256, canonicalBrowserWitness } from "./browser-witness.mjs";
 
 const submitScript = `const form=document.querySelector('form');form.addEventListener('submit',async event=>{event.preventDefault();const output=document.querySelector('[role=status]'),button=form.querySelector('button');button.disabled=true;output.textContent='Starting synthetic session…';try{const response=await fetch('/__acceptance/session',{method:'POST',credentials:'same-origin',headers:{'content-type':'application/x-www-form-urlencoded'},body:new URLSearchParams(new FormData(form))});if(!response.ok)throw new Error('denied');location.assign('/');}catch{output.textContent='Synthetic session was not started. Check the one-time nonce or request a new test checkpoint.';button.disabled=false;}});`;
 
@@ -7,7 +8,8 @@ const submitScript = `const form=document.querySelector('form');form.addEventLis
 // an OIDC bypass in the application or a production-configurable endpoint.
 export function withSyntheticBootstrap(shippedServer, { identities, getLedger }) {
   const handlers = shippedServer.listeners("request"), pending = new Map(), browserObservations = new Map();
-  const counters = { get: 0, post: 0, issued: 0, denied: 0, browserObservationAccepted: 0, browserObservationDenied: 0 };
+  const counters = { get: 0, post: 0, issued: 0, denied: 0,
+    browserWitnessAccepted: 0, browserWitnessDenied: 0, browserObservationAccepted: 0, browserObservationDenied: 0 };
   if (handlers.length !== 1) throw new Error("m1-bootstrap-listener-contract");
   const server = createServer(async (request, response) => {
     const url = new URL(request.url, "http://127.0.0.1");
@@ -18,25 +20,38 @@ export function withSyntheticBootstrap(shippedServer, { identities, getLedger })
     if (request.method === "GET" && url.pathname === "/__acceptance/bootstrap.js") {
       response.writeHead(200, { "content-type": "text/javascript; charset=utf-8", "cache-control": "no-store" }); return response.end(submitScript);
     }
-    if (url.pathname === "/__acceptance/browser-observation") {
+    if (["/__acceptance/browser-observation-witness", "/__acceptance/browser-observation-ack"].includes(url.pathname)) {
       response.setHeader("cache-control", "no-store");
       try {
         const remote = request.socket.remoteAddress;
         if (request.method !== "POST" || !["127.0.0.1", "::1", "::ffff:127.0.0.1"].includes(remote)) throw new Error("denied");
         let raw = ""; for await (const part of request) { raw += part.toString("utf8"); if (Buffer.byteLength(raw) > 262144) throw new Error("denied"); }
         const body = JSON.parse(raw), entry = browserObservations.get(body?.checkpointId);
-        if (!entry || entry.ackRaw !== null || entry.expiresAtMs < Date.now()
-            || !/^[a-f0-9]{64}$/.test(body?.token ?? "") || body.token.length !== entry.token.length
-            || !timingSafeEqual(Buffer.from(body.token), Buffer.from(entry.token))
-            || !body.ack || typeof body.ack !== "object" || Array.isArray(body.ack)) throw new Error("denied");
-        const ackRaw = JSON.stringify(body.ack);
-        if (Buffer.byteLength(ackRaw) > 262144) throw new Error("denied");
-        entry.ackRaw = ackRaw; entry.receivedAtMs = Date.now(); counters.browserObservationAccepted++;
-        getLedger()?.evidence("application", "browser-observation-received", { checkpointId: body.checkpointId,
-          receivedAt: new Date(entry.receivedAtMs).toISOString(), loopbackOnly: true, oneTimeTokenConsumed: true });
+        const witnessPhase = url.pathname.endsWith("-witness"), expectedToken = witnessPhase ? entry?.witnessToken : entry?.ackToken;
+        if (!entry || !/^[a-f0-9]{64}$/.test(body?.token ?? "") || body.token.length !== expectedToken?.length
+            || !timingSafeEqual(Buffer.from(body.token), Buffer.from(expectedToken))) throw new Error("denied");
+        const receivedAtMs = Date.now();
+        if (witnessPhase) {
+          if (entry.witness !== null || receivedAtMs > entry.witnessExpiresAtMs) throw new Error("denied");
+          entry.witness = canonicalBrowserWitness(body.witness); entry.witnessSha256 = browserWitnessSha256(entry.witness);
+          entry.witnessReceivedAtMs = receivedAtMs; counters.browserWitnessAccepted++;
+          getLedger()?.evidence("application", "browser-observation-witness-received", { checkpointId: body.checkpointId,
+            witnessSha256: entry.witnessSha256, receivedAt: new Date(receivedAtMs).toISOString(), loopbackOnly: true,
+            oneTimeWitnessTokenConsumed: true });
+        } else {
+          if (entry.witness === null || entry.ackRaw !== null || receivedAtMs > entry.publishExpiresAtMs
+              || body.witnessSha256 !== entry.witnessSha256
+              || browserWitnessSha256(browserWitnessFromAck(body.ack)) !== entry.witnessSha256) throw new Error("denied");
+          const ackRaw = JSON.stringify(body.ack);
+          if (Buffer.byteLength(ackRaw) > 262144) throw new Error("denied");
+          entry.ackRaw = ackRaw; entry.receivedAtMs = receivedAtMs; counters.browserObservationAccepted++;
+          getLedger()?.evidence("application", "browser-observation-received", { checkpointId: body.checkpointId,
+            witnessSha256: entry.witnessSha256, witnessReceivedAt: new Date(entry.witnessReceivedAtMs).toISOString(),
+            receivedAt: new Date(receivedAtMs).toISOString(), loopbackOnly: true, oneTimeAckTokenConsumed: true });
+        }
         response.writeHead(204); return response.end();
       } catch {
-        counters.browserObservationDenied++;
+        if (url.pathname.endsWith("-witness")) counters.browserWitnessDenied++; else counters.browserObservationDenied++;
         response.writeHead(403, { "content-type": "application/json" });
         return response.end('{"errorCode":"m1-browser-observation-denied"}');
       }
@@ -75,16 +90,26 @@ export function withSyntheticBootstrap(shippedServer, { identities, getLedger })
     if (session && (session.principalId !== principalId || (await identities.participant(session.sessionId)).principalId !== principalId)) throw new Error("m1-bootstrap-session-mismatch");
     const nonce = randomBytes(32).toString("hex"); pending.set(nonce, { principalId, sessionId: session?.sessionId ?? null, expiresAt: Date.now() + 300000 });
     return { url: `${identities.publicBaseUrl}/__acceptance/session`, nonce, expiresInSeconds: 300 };
-  }, createBrowserObservation(checkpointId, expiresAtMs) {
+  }, createBrowserObservation(checkpointId, witnessExpiresAtMs, publishExpiresAtMs) {
     if (!/^[a-f0-9]{8}-(?:[a-f0-9]{4}-){3}[a-f0-9]{12}$/.test(checkpointId)
-        || !Number.isFinite(expiresAtMs) || expiresAtMs <= Date.now() || browserObservations.size >= 8) throw new Error("m1-browser-observation-scope-invalid");
-    const token = randomBytes(32).toString("hex");
-    browserObservations.set(checkpointId, { token, expiresAtMs, ackRaw: null, receivedAtMs: null });
-    return { schemaVersion: "runaai-m1-browser-observation-endpoint/v1",
-      url: `${identities.publicBaseUrl}/__acceptance/browser-observation`, token };
+        || !Number.isFinite(witnessExpiresAtMs) || !Number.isFinite(publishExpiresAtMs)
+        || witnessExpiresAtMs <= Date.now() || publishExpiresAtMs <= witnessExpiresAtMs
+        || browserObservations.size >= 8) throw new Error("m1-browser-observation-scope-invalid");
+    const witnessToken = randomBytes(32).toString("hex"), ackToken = randomBytes(32).toString("hex");
+    browserObservations.set(checkpointId, { witnessToken, ackToken, witnessExpiresAtMs, publishExpiresAtMs,
+      witness: null, witnessSha256: null, witnessReceivedAtMs: null, ackRaw: null, receivedAtMs: null });
+    return { schemaVersion: "runaai-m1-browser-observation-endpoint/v2",
+      witnessUrl: `${identities.publicBaseUrl}/__acceptance/browser-observation-witness`, witnessToken,
+      ackUrl: `${identities.publicBaseUrl}/__acceptance/browser-observation-ack`, ackToken,
+      witnessExpiresAt: new Date(witnessExpiresAtMs).toISOString(), publishExpiresAt: new Date(publishExpiresAtMs).toISOString() };
+  }, readBrowserWitness(checkpointId) {
+    const entry = browserObservations.get(checkpointId);
+    if (!entry?.witness) throw Object.assign(new Error("not witnessed"), { code: "ENOENT" });
+    return { witness: structuredClone(entry.witness), witnessSha256: entry.witnessSha256, receivedAtMs: entry.witnessReceivedAtMs };
   }, readBrowserObservation(checkpointId) {
     const entry = browserObservations.get(checkpointId);
     if (!entry?.ackRaw) throw Object.assign(new Error("not observed"), { code: "ENOENT" });
-    return { raw: entry.ackRaw, receivedAtMs: entry.receivedAtMs };
+    return { raw: entry.ackRaw, receivedAtMs: entry.receivedAtMs, witness: structuredClone(entry.witness),
+      witnessSha256: entry.witnessSha256, witnessReceivedAtMs: entry.witnessReceivedAtMs };
   }, consumeBrowserObservation(checkpointId) { browserObservations.delete(checkpointId); } };
 }

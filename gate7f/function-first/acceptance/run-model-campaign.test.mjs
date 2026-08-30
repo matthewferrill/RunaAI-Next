@@ -6,7 +6,7 @@ import path from "node:path";
 import { ACCEPTANCE_POLICY, MODEL_CASES, CONTROL_CASES, CASE_BUNDLE_SHA256 } from "./cases.mjs";
 import { QDRANT_PIN, sha256, newObservation } from "./runner-contract.mjs";
 import { enumerateCaseChecks, evaluateAttempt, evaluateControl } from "./assertions.mjs";
-import { AGENT05_IN_FLIGHT_OBSERVATION_MS } from "./browser-checkpoint.mjs";
+import { AGENT05_ACK_PUBLICATION_GRACE_MS, AGENT05_IN_FLIGHT_OBSERVATION_MS } from "./browser-checkpoint.mjs";
 import { AGENT05_POST_RECEIPT_HOLD_MS } from "./fault-actions.mjs";
 import { parseCampaignArguments, campaignPlan, qualifiedControlSuite, validateHomeReady, validateLiveHome,
   verifyExtractedArchive, createCampaignWriter, needsBrowserCheckpoint, createCampaignActionExtensions, executeCandidateAttempts, runModelCampaign } from "./run-model-campaign.mjs";
@@ -159,7 +159,10 @@ test("browser checkpoints select realpending/cancel/unknown/finalstates only", (
 test("Agent05 browser observation overlaps one finite post-receipt hold inside the application route", () => {
   const plannerDeadlineMs = sealFixture().roles.agent.deadlineMs, sandboxProcessCeilingMs = 2000, applicationRouteMs = 60000;
   assert.equal(AGENT05_IN_FLIGHT_OBSERVATION_MS, 24000); assert.equal(AGENT05_POST_RECEIPT_HOLD_MS, 25000);
+  assert.equal(AGENT05_ACK_PUBLICATION_GRACE_MS, 60000);
   assert.ok(AGENT05_IN_FLIGHT_OBSERVATION_MS < AGENT05_POST_RECEIPT_HOLD_MS);
+  assert.ok(AGENT05_IN_FLIGHT_OBSERVATION_MS + AGENT05_ACK_PUBLICATION_GRACE_MS > AGENT05_POST_RECEIPT_HOLD_MS,
+    "publication grace is deliberately outside the native receipt hold");
   assert.ok(plannerDeadlineMs + sandboxProcessCeilingMs + AGENT05_POST_RECEIPT_HOLD_MS < applicationRouteMs);
 });
 test("cancel run does not arm its native hold until ungraded browser preparation completes", async () => {

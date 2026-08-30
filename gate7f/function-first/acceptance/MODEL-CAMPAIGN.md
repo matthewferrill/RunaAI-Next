@@ -71,13 +71,18 @@ No frozen check or graded browser flag is credited by preparation.
 
 The later `in-flight` request has `bootstrap:null`, `reusePreparedBrowser:true` and
 the preparation checkpoint ID. Refresh/observe that already-open task directly;
-do not start another login/navigation sequence. This acknowledgement remains
-graded and has at most 24 seconds inside the 25-second post-receipt native-delivery
-hold. It binds the authoritative cancelled task's `updatedAt`, exact prepared
+do not start another login/navigation sequence. The actual browser publishes the
+tracked canonical witness within 24 seconds inside the 25-second post-receipt
+native-delivery hold. The server timestamps the witness and the hold ends as soon
+as it is accepted. The complete acknowledgement remains graded and has a separate
+60-second publication grace which never extends the native hold. It binds the
+authoritative cancelled task's `updatedAt`, exact prepared
 principal/project/task/experience/session scope and a post-cancellation actual DOM
 observation of the bounded-drain notice. A generic false value, pre-cancel view,
-stale or different-session/task preparation fails closed. The native receipt is
-always released when that bounded checkpoint ends. Other browser
+stale or different-session/task preparation, missing/late witness, mismatched
+witness digest, replay or late full publication fails closed without graded-ledger
+mutation. The native receipt is always released when the witness checkpoint ends.
+Other browser
 cases observe stable pending/revoked/unknown/restored states with the ordinary
 five-minute bridge bound and do not need a pre-dispatch rendezvous.
 
@@ -86,8 +91,9 @@ browser before acknowledging. The DOM must show `Task: cancelled`, the exact
 bounded-drain notice, `claimedImmediateKill:false`, and all four true drain facts:
 no new steps, an already-dispatched step may finish, reconciliation may still be
 pending, and its result will be retained. Only the tracked
-`operator-browser-ack-helper.mjs`, invoked through the tracked owner wrapper, may
-serialize this acknowledgement. Operator-supplied details cannot replace scope,
+`operator-browser-witness-helper.mjs` may serialize the witness, and only the
+tracked `operator-browser-ack-helper.mjs`, invoked through the tracked owner
+wrapper, may serialize the complete acknowledgement. Operator-supplied details cannot replace scope,
 checkpoint, cancellation, check or result bindings. A hand-authored or generic
 acknowledgement is invalid even when its Boolean happens to match the expected value.
 

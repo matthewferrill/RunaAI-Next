@@ -4,7 +4,9 @@ import { mkdtemp, readFile, writeFile, rm, symlink, mkdir } from "node:fs/promis
 import { readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
-import { AGENT05_BOUNDED_DRAIN_NOTICE, AGENT05_IN_FLIGHT_OBSERVATION_MS, createBrowserCheckpoint } from "./browser-checkpoint.mjs";
+import { AGENT05_ACK_PUBLICATION_GRACE_MS, AGENT05_BOUNDED_DRAIN_NOTICE,
+  AGENT05_IN_FLIGHT_OBSERVATION_MS, createBrowserCheckpoint } from "./browser-checkpoint.mjs";
+import { AGENT05_BOUNDED_DRAIN, browserWitnessFromAck, browserWitnessSha256 } from "./browser-witness.mjs";
 import { CONTROL_CASES, MODEL_CASES } from "./cases.mjs";
 import { newObservation, ObservationLedger } from "./runner-contract.mjs";
 
@@ -113,20 +115,29 @@ test("cancel browser prep is ungraded and actual in-flight checkpoint reuses the
   assert.equal(client.ledger.observation.checks.length, 1); assert.equal(client.ledger.observation.browserExercised, true);
 });
 
-test("in-flight proof uses the harness-owned live receipt and does not depend on ack-file publication", async t => {
+test("on-time live witness releases the checkpoint before a matching acknowledgement publication", async t => {
   const directory = await mkdtemp(path.join(tmpdir(), "m1-browser-live-receipt-"));
   t.after(() => rm(directory, { recursive: true, force: true }));
   const client = cancelClient(), start = Date.parse("2026-08-30T12:00:00.000Z"); let clock = start;
   let request, consumed = false, fileReads = 0;
+  const witness = { boundedDrain: AGENT05_BOUNDED_DRAIN, claimedImmediateKill: false,
+    notice: AGENT05_BOUNDED_DRAIN_NOTICE, taskStatus: "cancelled" };
   Object.assign(client.host, {
-    createBrowserObservation(checkpointId, expiresAtMs) {
-      return { schemaVersion: "runaai-m1-browser-observation-endpoint/v1",
-        url: `${client.host.baseUrl}/__acceptance/browser-observation`, token: "d".repeat(64), checkpointId, expiresAtMs };
+    createBrowserObservation(checkpointId, witnessExpiresAtMs, publishExpiresAtMs) {
+      return { schemaVersion: "runaai-m1-browser-observation-endpoint/v2",
+        witnessUrl: `${client.host.baseUrl}/__acceptance/browser-observation-witness`, witnessToken: "c".repeat(64),
+        ackUrl: `${client.host.baseUrl}/__acceptance/browser-observation-ack`, ackToken: "d".repeat(64),
+        witnessExpiresAt: new Date(witnessExpiresAtMs).toISOString(), publishExpiresAt: new Date(publishExpiresAtMs).toISOString() };
+    },
+    readBrowserWitness() {
+      if (clock - start < 23999) throw Object.assign(new Error("not witnessed"), { code: "ENOENT" });
+      return { witness, witnessSha256: browserWitnessSha256(witness), receivedAtMs: start + 23999 };
     },
     readBrowserObservation() {
-      if (clock - start < 15000) throw Object.assign(new Error("not observed"), { code: "ENOENT" });
-      return { raw: JSON.stringify(inFlightAck(request, { data: { observedAt: new Date(start + 15000).toISOString() } })),
-        receivedAtMs: start + 15000 };
+      if (clock - start < 83999) throw Object.assign(new Error("not published"), { code: "ENOENT" });
+      const ack = inFlightAck(request, { data: { observedAt: new Date(start + 83999).toISOString() } });
+      return { raw: JSON.stringify(ack), receivedAtMs: start + 83999, witness,
+        witnessSha256: browserWitnessSha256(browserWitnessFromAck(ack)), witnessReceivedAtMs: start + 23999 };
     },
     consumeBrowserObservation() { consumed = true; }
   });
@@ -139,11 +150,55 @@ test("in-flight proof uses the harness-owned live receipt and does not depend on
       if (!valueRequest.preparationOnly) request = valueRequest; } });
   await checkpoint({ client, phase: "1:run.start", stage: "before-native-dispatch" });
   const cancelled = cancellation(client, new Date(start).toISOString());
-  await checkpoint({ client, phase: "2:user.cancel-after-native-dispatch", stage: "in-flight", cancellationAt: cancelled.cancellationAt });
+  const ticket = await checkpoint({ client, phase: "2:user.cancel-after-native-dispatch", stage: "in-flight", cancellationAt: cancelled.cancellationAt });
+  assert.equal(ticket.schemaVersion, "runaai-m1-browser-witness-ticket/v1");
+  assert.equal(ticket.witnessReceivedAt, new Date(start + 23999).toISOString());
+  await ticket.publication;
   assert.equal(fileReads, 1, "only preparation used the file reader");
-  assert.equal(request.observationEndpoint.schemaVersion, "runaai-m1-browser-observation-endpoint/v1");
-  assert.equal(clock - start, 15000); assert.equal(consumed, true);
+  assert.equal(request.observationEndpoint.schemaVersion, "runaai-m1-browser-observation-endpoint/v2");
+  assert.equal(Date.parse(request.observationDeadline) - start, AGENT05_IN_FLIGHT_OBSERVATION_MS);
+  assert.equal(Date.parse(request.expiresAt) - start, AGENT05_IN_FLIGHT_OBSERVATION_MS + AGENT05_ACK_PUBLICATION_GRACE_MS);
+  assert.equal(clock - start, 84000); assert.equal(consumed, true);
   assert.equal(client.ledger.observation.checks[0].actual, false);
+});
+
+test("on-time witness cannot authorize acknowledgement publication after the grace deadline", async t => {
+  const directory = await mkdtemp(path.join(tmpdir(), "m1-browser-live-publication-expired-"));
+  t.after(() => rm(directory, { recursive: true, force: true }));
+  const client = cancelClient(), start = Date.parse("2026-08-30T12:15:00.000Z"); let clock = start, request, consumed = 0;
+  const witness = { boundedDrain: AGENT05_BOUNDED_DRAIN, claimedImmediateKill: false,
+    notice: AGENT05_BOUNDED_DRAIN_NOTICE, taskStatus: "cancelled" };
+  Object.assign(client.host, {
+    createBrowserObservation(_checkpointId, witnessExpiresAtMs, publishExpiresAtMs) {
+      return { schemaVersion: "runaai-m1-browser-observation-endpoint/v2",
+        witnessUrl: `${client.host.baseUrl}/__acceptance/browser-observation-witness`, witnessToken: "c".repeat(64),
+        ackUrl: `${client.host.baseUrl}/__acceptance/browser-observation-ack`, ackToken: "d".repeat(64),
+        witnessExpiresAt: new Date(witnessExpiresAtMs).toISOString(), publishExpiresAt: new Date(publishExpiresAtMs).toISOString() };
+    },
+    readBrowserWitness() {
+      if (clock - start < 10000) throw Object.assign(new Error("not witnessed"), { code: "ENOENT" });
+      return { witness, witnessSha256: browserWitnessSha256(witness), receivedAtMs: start + 10000 };
+    },
+    readBrowserObservation() {
+      if (clock - start < 84000) throw Object.assign(new Error("not published"), { code: "ENOENT" });
+      const ack = inFlightAck(request, { data: { observedAt: new Date(start + 10000).toISOString() } });
+      return { raw: JSON.stringify(ack), receivedAtMs: start + 84001, witness,
+        witnessSha256: browserWitnessSha256(witness), witnessReceivedAtMs: start + 10000 };
+    },
+    consumeBrowserObservation() { consumed++; }
+  });
+  const checkpoint = createBrowserCheckpoint({ directory, maximumWaitMs: 30000, now: () => clock,
+    pause: async ms => { clock += ms; }, async readAck(ackPath) {
+      const value = JSON.parse(await readFile(path.join(path.dirname(ackPath), "request.json"), "utf8"));
+      return JSON.stringify(preparationAck(value, new Date(clock).toISOString()));
+    }, announce(value) { const valueRequest = JSON.parse(readFileSync(value.requestPath, "utf8"));
+      if (!valueRequest.preparationOnly) request = valueRequest; } });
+  await checkpoint({ client, phase: "1:run.start", stage: "before-native-dispatch" });
+  const cancelled = cancellation(client, new Date(start).toISOString()), evidenceBefore = client.ledger.observation.evidence.length;
+  const ticket = await checkpoint({ client, phase: "2:user.cancel-after-native-dispatch", stage: "in-flight", cancellationAt: cancelled.cancellationAt });
+  await assert.rejects(ticket.publication, /m1-browser-ack-publication-expired/u);
+  assert.equal(consumed, 1); assert.deepEqual([client.ledger.observation.evidence.length,
+    client.ledger.observation.checks.length, client.ledger.observation.browserExercised], [evidenceBefore, 0, false]);
 });
 
 test("failed live observation consumes its bounded harness slot", async t => {
@@ -151,10 +206,13 @@ test("failed live observation consumes its bounded harness slot", async t => {
   t.after(() => rm(directory, { recursive: true, force: true }));
   const client = cancelClient(), start = Date.parse("2026-08-30T12:30:00.000Z"); let clock = start, consumed = 0;
   Object.assign(client.host, {
-    createBrowserObservation(checkpointId, expiresAtMs) {
-      return { schemaVersion: "runaai-m1-browser-observation-endpoint/v1",
-        url: `${client.host.baseUrl}/__acceptance/browser-observation`, token: "e".repeat(64), checkpointId, expiresAtMs };
+    createBrowserObservation(_checkpointId, witnessExpiresAtMs, publishExpiresAtMs) {
+      return { schemaVersion: "runaai-m1-browser-observation-endpoint/v2",
+        witnessUrl: `${client.host.baseUrl}/__acceptance/browser-observation-witness`, witnessToken: "d".repeat(64),
+        ackUrl: `${client.host.baseUrl}/__acceptance/browser-observation-ack`, ackToken: "e".repeat(64),
+        witnessExpiresAt: new Date(witnessExpiresAtMs).toISOString(), publishExpiresAt: new Date(publishExpiresAtMs).toISOString() };
     },
+    readBrowserWitness() { throw Object.assign(new Error("not witnessed"), { code: "ENOENT" }); },
     readBrowserObservation() { throw Object.assign(new Error("not observed"), { code: "ENOENT" }); },
     consumeBrowserObservation() { consumed++; },
   });

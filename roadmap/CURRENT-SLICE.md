@@ -5,6 +5,14 @@ Milestone: M1
 Slice ID: M1-S2
 Status: in progress, acceptance frozen before implementation; not complete or production-qualified.
 
+R6J evaluation update, 2026-08-30: the frozen corrected application completed all
+360 model attempts and independent candidate-blind review. The 12 shared controls
+passed, but no candidate met every role threshold, so no model was selected and no
+customer trial is ready. Exact results and the prospective corrective boundary are
+in `../gate7f/function-first/M1-S2-R6J-THREE-MODEL-RESULTS-2026-08-30.md`. R6J is
+immutable evidence; the next source, rubric and runtime seal must be versioned rather
+than retroactively changing its prompts, grades or denominator.
+
 Read `PRODUCT-ROADMAP.md` first. This slice is the first milestone only; it does not replace, complete
 or retire the rest of the roadmap. All 17 capability families remain tracked in `capabilities.json`.
 The current Git branch continues the existing Gate 7F foundation descended from integration `f092d358`;

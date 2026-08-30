@@ -17,6 +17,17 @@ permission requests. Human involvement is reserved for genuine customer tests or
 
 ### Current checkpoint: complete baseline; corrected-stack qualification continues
 
+On 2026-08-30 the R6J corrected-stack comparison reached a complete independent
+result at source `334551198b1095d33e826f197b99750b3f64c2a2`: 360/360 model attempts,
+12/12 shared controls and 963/963 semantic checks were covered. No whole candidate
+qualified. Gemma recorded 24/21/24/21/21 acceptable attempts across
+Chat/Research/Code/Agent/Review, Coder 23/21/21/16/13 and Qwen3.6 18/21/21/21/19,
+each over a fixed denominator of 24 per role. No model was selected or promoted.
+See `gate7f/function-first/M1-S2-R6J-THREE-MODEL-RESULTS-2026-08-30.md` for exact
+pins, attribution and the prospective corrective boundary. Production remained
+unchanged, protected data was not used and Home cleanup restored zero owned model
+residency plus both 260-W limits. M1 and the human customer trial remain open.
+
 The frozen application is `9556ed01f9dbabe8c93eea309e482aad60bf809f`, common runtime seal
 `416102ff7129e5adb00de51b2f0fc3e5ca542c18a82941a32fdc4075b6a1c89f`. The complete actual Control
 regression passed **1,266/1,266, zero skips**; all **12/12 formal functional controls** then passed

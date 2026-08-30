@@ -3,9 +3,10 @@ import { noopLogger } from "@mastra/core/logger";
 import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
 import { z } from "zod";
 import { resolveModelRole } from "./model-roles.mjs";
-import { CAPABILITIES } from "./tasks/contracts.mjs";
+import { CAPABILITIES, digest } from "./tasks/contracts.mjs";
 import { controlledProviderFetch } from "./provider-transport.mjs";
 import { plannerProgress } from "./planner-progress.mjs";
+import { describePlanProtocol, planProtocolViolations } from "./planner-protocol.mjs";
 
 const fail = code => Object.assign(new Error(code), { code });
 const schema = z.object({ summary: z.string().max(1500), steps: z.array(z.object({
@@ -48,12 +49,34 @@ export class MastraM1Planner {
     if (!agent) this.agent.__setLogger(noopLogger);
   }
   async plan({ signal, ...input }) {
-    // Keep the existing transport/budgets; adding a versioned projection does not add another attempt.
+    // The containing orchestrator owns one total planning deadline. A protocol
+    // correction remains inside it and never becomes another authority attempt.
     if (Buffer.byteLength(JSON.stringify(input)) > 96_000) throw fail("m1-planner-input-limited");
     if (signal?.aborted) throw fail("m1-planner-aborted");
     const progress = plannerProgress(input);
-    const prompt = JSON.stringify({ schemaVersion: "runaai-m1-planner-input/v1", ...input, progress });
+    const planProtocol = describePlanProtocol(input.capabilityIds, input.workIntent);
+    const prompt = JSON.stringify({ schemaVersion: "runaai-m1-planner-input/v2", ...input, progress, planProtocol });
     if (Buffer.byteLength(prompt) > 96_000) throw fail("m1-planner-input-limited");
+    let value = await this.#generatePlan(prompt, signal);
+    let violations = planProtocolViolations(value, input.capabilityIds, input.workIntent);
+    const attempts = [{ plan: structuredClone(value), planDigest: digest(value), violations: [...violations] }];
+    if (violations.length) {
+      const correction = JSON.stringify({ schemaVersion: "runaai-m1-plan-protocol-correction/v1",
+        input: { ...input, progress, planProtocol }, rejectedPlan: value, violations,
+        instruction: "Return one corrected plan JSON object. Keep the user's requested outcome and exact grant. Do not add permission, approval, receipt, or capability fields." });
+      if (Buffer.byteLength(correction) > 96_000) throw fail("m1-planner-input-limited");
+      value = await this.#generatePlan(correction, signal);
+      violations = planProtocolViolations(value, input.capabilityIds, input.workIntent);
+      attempts.push({ plan: structuredClone(value), planDigest: digest(value), violations: [...violations] });
+      if (violations.length) throw fail("m1-planner-protocol-invalid");
+    }
+    // Returning this does not create a proposal or execute anything; the service rechecks all arguments.
+    return { ...value, planningProtocol: { schemaVersion: "runaai-m1-plan-protocol-record/v1",
+      protocol: planProtocol, modelId: this.modelId, role: this.role,
+      settings: { temperature: 0, maximumOutputTokens: this.maxOutputTokens },
+      providerAttemptCount: attempts.length, correctionCount: attempts.length - 1, attempts } };
+  }
+  async #generatePlan(prompt, signal) {
     if (signal?.aborted) throw fail("m1-planner-aborted");
     let response;
     try { response = await this.agent.generate(prompt, { abortSignal: signal,
@@ -63,10 +86,7 @@ export class MastraM1Planner {
     if (response?.response?.modelId !== this.modelId) throw fail("m1-planner-model-mismatch");
     if (response.finishReason !== "stop") throw fail("m1-planner-incomplete");
     if (typeof response.text !== "string" || Buffer.byteLength(response.text) > 24_000) throw fail("m1-planner-output-limited");
-    let value;
-    try { value = schema.parse(JSON.parse(response.text.trim().replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/, ""))); }
+    try { return schema.parse(JSON.parse(response.text.trim().replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/, ""))); }
     catch { throw fail("m1-planner-output-invalid"); }
-    // Returning this does not create a proposal or execute anything; the service rechecks all arguments.
-    return value;
   }
 }

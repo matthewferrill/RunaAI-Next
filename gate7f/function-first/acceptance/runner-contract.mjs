@@ -1,7 +1,7 @@
 import { createHash } from "node:crypto";
 import path from "node:path";
 import { z } from "zod";
-import { ACCEPTANCE_POLICY, CASE_BUNDLE_SHA256, MODEL_CASES, CONTROL_CASES } from "./cases.mjs";
+import { ACCEPTANCE_POLICY, CASE_BUNDLE_SHA256, R6J_CASE_BUNDLE_SHA256, MODEL_CASES, CONTROL_CASES } from "./cases.mjs";
 
 export const fail = code => Object.assign(new Error(code), { code });
 export const sha256 = value => createHash("sha256").update(value).digest("hex");
@@ -21,8 +21,8 @@ export function assertOwnedStage(value) {
 
 const hex = z.string().regex(/^[a-f0-9]{64}$/);
 const model = z.object({ modelId: z.string().min(1).max(200), artifactSha256: hex, artifactBytes: z.number().int().positive() }).strict();
-const runtimeSealFields = {
-  sourceCommit: z.string().regex(/^[a-f0-9]{40}$/), caseBundleSha256: z.literal(CASE_BUNDLE_SHA256),
+const runtimeSealFields = caseBundleSha256 => ({
+  sourceCommit: z.string().regex(/^[a-f0-9]{40}$/), caseBundleSha256: z.literal(caseBundleSha256),
   runtime: z.object({ nodeSha256: hex, sourceArchiveSha256: hex, packageLockSha256: hex,
     qdrantSha256: z.literal(QDRANT_PIN.sha256), modelRuntimeSha256: hex, modelRuntimeVersion: z.string().min(1) }).strict(),
   candidates: z.array(z.object({ candidateId: z.enum(ACCEPTANCE_POLICY.roster.map(item => item.candidateId)), ...model.shape,
@@ -40,14 +40,19 @@ const runtimeSealFields = {
     effectiveReasoningEvidenceSha256: hex, telemetryPolicySha256: hex }).strict(),
   suites: z.record(z.string(), hex), evaluatorId: z.string().min(1).max(160),
   maximumBatchMs: z.number().int().min(1000).max(3600000), productionRoutingChanged: z.literal(false),
-};
-const RuntimeSealV1Schema = z.object({ schemaVersion: z.literal("runaai-m1-functional-runtime-seal/v1"), ...runtimeSealFields }).strict();
-const RuntimeSealV2Schema = z.object({ schemaVersion: z.literal("runaai-m1-functional-runtime-seal/v2"), ...runtimeSealFields,
+});
+const RuntimeSealV1Schema = z.object({ schemaVersion: z.literal("runaai-m1-functional-runtime-seal/v1"), ...runtimeSealFields(R6J_CASE_BUNDLE_SHA256) }).strict();
+const RuntimeSealV2Schema = z.object({ schemaVersion: z.literal("runaai-m1-functional-runtime-seal/v2"), ...runtimeSealFields(R6J_CASE_BUNDLE_SHA256),
   qualificationCriteria: z.object({ schemaVersion: z.literal("runaai-m1-common-qualification-criteria/v1"),
     entries: z.array(z.object({ id: z.enum(["lease-publication-margin", "agent05-browser-checkpoint", "determinate-function-qualification"]),
       sha256: hex, normalizedSha256: hex }).strict()).length(3), combinedSha256: hex }).strict(),
 }).strict();
-export const RuntimeSealSchema = z.union([RuntimeSealV1Schema, RuntimeSealV2Schema]);
+const RuntimeSealV3Schema = z.object({ schemaVersion: z.literal("runaai-m1-functional-runtime-seal/v3"), ...runtimeSealFields(CASE_BUNDLE_SHA256),
+  qualificationCriteria: z.object({ schemaVersion: z.literal("runaai-m1-r7-qualification-criteria/v1"),
+    path: z.literal("gate7f/function-first/M1-S2-R7-CORRECTIVE-CRITERIA-2026-08-30.md"),
+    sha256: hex, normalizedSha256: hex, rubricVersion: z.literal("2026-08-30.r7-function-contract") }).strict(),
+}).strict();
+export const RuntimeSealSchema = z.union([RuntimeSealV1Schema, RuntimeSealV2Schema, RuntimeSealV3Schema]);
 
 export function validateRuntimeSeal(value, { sourceCommit, candidateId } = {}) {
   const seal = RuntimeSealSchema.parse(value);

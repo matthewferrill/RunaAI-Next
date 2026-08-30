@@ -14,11 +14,47 @@ function fixture(overrides = {}) {
 }
 test("planner selects the explicit agent role and returns advice without an execution port", async () => {
   const { calls, planner } = fixture();
-  assert.deepEqual(await planner.plan({ objective: "Inspect", snapshot: { files: [] }, signal: new AbortController().signal }), valid);
+  const result = await planner.plan({ objective: "Inspect", snapshot: { files: [] }, signal: new AbortController().signal });
+  assert.deepEqual({ summary: result.summary, steps: result.steps }, valid);
+  assert.equal(result.planningProtocol.providerAttemptCount, 1);
+  assert.equal(result.planningProtocol.correctionCount, 0);
+  assert.equal(result.planningProtocol.attempts[0].violations.length, 0);
   assert.equal(calls[0].options.modelSettings.temperature, 0);
   assert.equal(calls[0].options.modelSettings.maxOutputTokens, 1536);
   assert.equal(calls[0].prompt.objective, "Inspect");
   assert.equal(typeof planner.execute, "undefined");
+});
+
+test("planner makes one advisory correction and records both attempts without expanding authority", async () => {
+  const rejected = { summary: "Preview only", steps: [{ capabilityId: "project.preview-change",
+    arguments: { path: "calculator.js", content: "new", expectedSha256: "a".repeat(64) } }] };
+  const corrected = { summary: "Preview and apply", steps: [...rejected.steps, { capabilityId: "project.apply-change",
+    arguments: structuredClone(rejected.steps[0].arguments) }] };
+  let index = 0;
+  const calls = [], agent = { async generate(prompt) { calls.push(JSON.parse(prompt));
+    return { text: JSON.stringify(index++ === 0 ? rejected : corrected), finishReason: "stop", response: { modelId: "agent-model" } }; } };
+  const planner = new MastraM1Planner({ provider, agent });
+  const result = await planner.plan({ objective: "Change calculator.js", snapshot: { files: [] }, workIntent: "effect-requested",
+    capabilityIds: ["project.inspect", "project.preview-change", "project.apply-change"] });
+  assert.deepEqual(result.steps, corrected.steps);
+  assert.equal(calls.length, 2);
+  assert.equal(calls[1].schemaVersion, "runaai-m1-plan-protocol-correction/v1");
+  assert.deepEqual(calls[1].input.capabilityIds, ["project.inspect", "project.preview-change", "project.apply-change"]);
+  assert.equal(result.planningProtocol.providerAttemptCount, 2);
+  assert.equal(result.planningProtocol.correctionCount, 1);
+  assert.deepEqual(result.planningProtocol.attempts[0].violations, ["preview-without-matching-later-apply"]);
+  assert.deepEqual(result.planningProtocol.attempts[1].violations, []);
+});
+
+test("planner fails closed after the one allowed correction", async () => {
+  const rejected = { summary: "Apply", steps: [{ capabilityId: "project.apply-change",
+    arguments: { path: "calculator.js", content: "new", expectedSha256: "a".repeat(64) } }] };
+  let calls = 0;
+  const planner = new MastraM1Planner({ provider, agent: { async generate() { calls++;
+    return { text: JSON.stringify(rejected), finishReason: "stop", response: { modelId: "agent-model" } }; } } });
+  await assert.rejects(planner.plan({ objective: "Change calculator.js", workIntent: "effect-requested",
+    capabilityIds: ["project.preview-change", "project.apply-change"] }), /protocol-invalid/);
+  assert.equal(calls, 2);
 });
 for (const [label, result, code] of [
   ["wrong model", { response: { modelId: "chat-model" } }, /model-mismatch/],

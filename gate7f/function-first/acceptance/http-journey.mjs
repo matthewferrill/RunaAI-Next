@@ -103,7 +103,8 @@ export class FunctionalHttpJourney {
     if (JSON.stringify(Object.entries(actual).sort()) !== JSON.stringify(Object.entries(this.item.setup.files).sort())) throw fail("m1-fixture-composition-not-bound");
     this.ledger.observation.project.initial = initial;
     this.ledger.evidence("host-filesystem", "project-snapshot", initial);
-    this.task = await this.m1("task.create", { requestId: this.id("task"), objective: this.item.objective });
+    this.task = await this.m1("task.create", { requestId: this.id("task"), objective: this.item.objective,
+      workIntent: this.item.setup.workIntent ?? (this.item.setup.profile === "read-only" ? "analysis-only" : "effect-requested") });
     this.grant = await this.m1("grant.create", { taskId: this.task.taskId, profile: this.item.setup.profile,
       allowedPaths: this.item.setup.allowedPaths, allowedSuites: this.item.setup.allowedSuites,
       expiresAt: new Date(Date.now() + 900000).toISOString() });
@@ -135,6 +136,10 @@ export class FunctionalHttpJourney {
     this.ledger.evidence("host-filesystem", "project-snapshot", snapshot);
     this.lastState = state ?? (this.run ? await this.m1("run.status", { runId: this.run.runId }) : status);
     if (this.lastState.run) this.ledger.observation.workflow.run = this.lastState.run;
+    if (this.lastState.runEvidence) {
+      this.ledger.observation.workflow.runEvidence = this.lastState.runEvidence;
+      this.ledger.evidence("application", "run-evidence", this.lastState.runEvidence);
+    }
     return this.lastState;
   }
   async startRun() {

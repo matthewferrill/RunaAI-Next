@@ -560,9 +560,9 @@ test("blocked/not-implemented observations and absent records never become passe
   assert.equal(evaluateAttempt("chat-01-fresh-note", null, sealed).passed, false);
 });
 
-test("campaign policy still contains three candidates, five roles and the original acceptance thresholds", () => {
+test("prospective campaign policy retains three candidates, five roles and the original acceptance thresholds", () => {
   assert.equal(ACCEPTANCE_POLICY.minimumAcceptableAttemptsPerRolePerCandidate, 22);
   assert.equal(ACCEPTANCE_POLICY.maximumCriticalModelFailures, 0);
   assert.equal(ACCEPTANCE_POLICY.maximumCriticalProductFailures, 0);
-  assert.equal(CASE_BUNDLE_SHA256, "8713db8fb54bebe069f73edfef7cd179c13a3caba1d4d15bd8567f39aaa418ed");
+  assert.equal(CASE_BUNDLE_SHA256, "87f08a861d1b109fa5d3fb64f9dc10aacba023eee80a3ab4762b07b2d987524d");
 });

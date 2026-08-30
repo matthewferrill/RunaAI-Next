@@ -112,6 +112,63 @@ test("cancel browser prep is ungraded and actual in-flight checkpoint reuses the
   assert.equal(requests[1].cancellationAt, cancelled.cancellationAt); assert.deepEqual(requests[1].scope, ticket.scope);
   assert.equal(client.ledger.observation.checks.length, 1); assert.equal(client.ledger.observation.browserExercised, true);
 });
+
+test("in-flight proof uses the harness-owned live receipt and does not depend on ack-file publication", async t => {
+  const directory = await mkdtemp(path.join(tmpdir(), "m1-browser-live-receipt-"));
+  t.after(() => rm(directory, { recursive: true, force: true }));
+  const client = cancelClient(), start = Date.parse("2026-08-30T12:00:00.000Z"); let clock = start;
+  let request, consumed = false, fileReads = 0;
+  Object.assign(client.host, {
+    createBrowserObservation(checkpointId, expiresAtMs) {
+      return { schemaVersion: "runaai-m1-browser-observation-endpoint/v1",
+        url: `${client.host.baseUrl}/__acceptance/browser-observation`, token: "d".repeat(64), checkpointId, expiresAtMs };
+    },
+    readBrowserObservation() {
+      if (clock - start < 15000) throw Object.assign(new Error("not observed"), { code: "ENOENT" });
+      return { raw: JSON.stringify(inFlightAck(request, { data: { observedAt: new Date(start + 15000).toISOString() } })),
+        receivedAtMs: start + 15000 };
+    },
+    consumeBrowserObservation() { consumed = true; }
+  });
+  const checkpoint = createBrowserCheckpoint({ directory, maximumWaitMs: 30000, now: () => clock,
+    pause: async ms => { clock += ms; }, async readAck(ackPath) {
+      fileReads++;
+      const value = JSON.parse(await readFile(path.join(path.dirname(ackPath), "request.json"), "utf8"));
+      return JSON.stringify(preparationAck(value, new Date(clock).toISOString()));
+    }, announce(value) { const valueRequest = JSON.parse(readFileSync(value.requestPath, "utf8"));
+      if (!valueRequest.preparationOnly) request = valueRequest; } });
+  await checkpoint({ client, phase: "1:run.start", stage: "before-native-dispatch" });
+  const cancelled = cancellation(client, new Date(start).toISOString());
+  await checkpoint({ client, phase: "2:user.cancel-after-native-dispatch", stage: "in-flight", cancellationAt: cancelled.cancellationAt });
+  assert.equal(fileReads, 1, "only preparation used the file reader");
+  assert.equal(request.observationEndpoint.schemaVersion, "runaai-m1-browser-observation-endpoint/v1");
+  assert.equal(clock - start, 15000); assert.equal(consumed, true);
+  assert.equal(client.ledger.observation.checks[0].actual, false);
+});
+
+test("failed live observation consumes its bounded harness slot", async t => {
+  const directory = await mkdtemp(path.join(tmpdir(), "m1-browser-live-cleanup-"));
+  t.after(() => rm(directory, { recursive: true, force: true }));
+  const client = cancelClient(), start = Date.parse("2026-08-30T12:30:00.000Z"); let clock = start, consumed = 0;
+  Object.assign(client.host, {
+    createBrowserObservation(checkpointId, expiresAtMs) {
+      return { schemaVersion: "runaai-m1-browser-observation-endpoint/v1",
+        url: `${client.host.baseUrl}/__acceptance/browser-observation`, token: "e".repeat(64), checkpointId, expiresAtMs };
+    },
+    readBrowserObservation() { throw Object.assign(new Error("not observed"), { code: "ENOENT" }); },
+    consumeBrowserObservation() { consumed++; },
+  });
+  const checkpoint = createBrowserCheckpoint({ directory, maximumWaitMs: 1000, now: () => clock,
+    pause: async ms => { clock += ms; }, async readAck(ackPath) {
+      const request = JSON.parse(await readFile(path.join(path.dirname(ackPath), "request.json"), "utf8"));
+      return JSON.stringify(preparationAck(request, new Date(clock).toISOString()));
+    } });
+  await checkpoint({ client, phase: "1:run.start", stage: "before-native-dispatch" });
+  const cancelled = cancellation(client, new Date(start).toISOString());
+  await assert.rejects(checkpoint({ client, phase: "2:user.cancel-after-native-dispatch", stage: "in-flight",
+    cancellationAt: cancelled.cancellationAt }), /m1-browser-checkpoint-unobserved/u);
+  assert.equal(consumed, 1);
+});
 test("in-flight cancel cannot bootstrap late or borrow another task/session preparation", async t => {
   const directory = await mkdtemp(path.join(tmpdir(), "m1-browser-prep-scope-"));
   t.after(async () => { assert.equal(path.dirname(directory), path.resolve(tmpdir())); await rm(directory, { recursive: true, force: true }); });

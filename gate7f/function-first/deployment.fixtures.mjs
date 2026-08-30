@@ -25,7 +25,7 @@ export function qualifiedDeploymentFixture() {
     reranker: { baseUrl: "http://192.168.50.165:8412", windowCharacters: 2000, overlapCharacters: 300, batchSize: 32 } };
   successor.services.caddy.configurationDigest = "c".repeat(64);
   const hex = "a".repeat(64);
-  const runtimeSeal = { schemaVersion: "runaai-m1-functional-runtime-seal/v1", sourceCommit: DEPLOYMENT_FIXTURE_COMMIT,
+  const runtimeSeal = { schemaVersion: "runaai-m1-functional-runtime-seal/v3", sourceCommit: DEPLOYMENT_FIXTURE_COMMIT,
     caseBundleSha256: CASE_BUNDLE_SHA256,
     runtime: { nodeSha256: hex, sourceArchiveSha256: hex, packageLockSha256: hex, qdrantSha256: QDRANT_PIN.sha256,
       modelRuntimeSha256: hex, modelRuntimeVersion: "synthetic-runtime-test-only" },
@@ -39,6 +39,9 @@ export function qualifiedDeploymentFixture() {
     reranker: { baseUrl: "http://127.0.0.1:17771", artifactSha256: hex, windowCharacters: 2000, overlapCharacters: 300, batchSize: 32 },
     residency: { oneLargeModelAtATime: true, readinessEvidenceSha256: hex, effectiveReasoningEvidenceSha256: hex, telemetryPolicySha256: hex },
     suites: Object.fromEntries(MODEL_CASES.flatMap(item => (item.setup.suites ?? []).map(suite => [suite.suiteId, hash(suite)]))),
+    qualificationCriteria: { schemaVersion: "runaai-m1-r7-qualification-criteria/v1",
+      path: "gate7f/function-first/M1-S2-R7-CORRECTIVE-CRITERIA-2026-08-30.md", sha256: hex, normalizedSha256: hex,
+      rubricVersion: "2026-08-30.r7-function-contract" },
     evaluatorId: "independent-synthetic-verifier-test", maximumBatchMs: 300000, productionRoutingChanged: false };
   const runtimeSealBytes = bytes(runtimeSeal);
   function grade(item, candidateId = null, repetition = null) {

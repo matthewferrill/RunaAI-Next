@@ -113,10 +113,12 @@ export async function createFunctionalHost({ pool, cipher, configuration, provid
   const publicStatus = acceptancePublicStatus({ application, sourceIdentity, dependencyHealth: () => m1.health() });
   const shippedServer = createCandidateHttpServer({ application, ordinarySessions: identities, m1Functions: surface,
     staticRoot: resolve(sourceRoot, "gate6b/public"), ...publicStatus, dependencyHealth: () => m1.health() });
-  const { server, createBootstrap } = withSyntheticBootstrap(shippedServer, { identities, getLedger });
+  const { server, createBootstrap, createBrowserObservation, readBrowserObservation,
+    consumeBrowserObservation } = withSyntheticBootstrap(shippedServer, { identities, getLedger });
   server.listen(0, "127.0.0.1"); await once(server, "listening");
   const baseUrl = `http://127.0.0.1:${server.address().port}`; identities.publicBaseUrl = baseUrl;
   return { application, m1, surface, workspace, continuity, identities, pool, baseUrl, faults, createBootstrap,
+    createBrowserObservation, readBrowserObservation, consumeBrowserObservation,
     bindFixture(context, item) {
       if (!item.setup.files) throw fail("m1-fixture-has-no-files");
       fixtures.set(JSON.stringify([context.principalId, context.projectId]), {

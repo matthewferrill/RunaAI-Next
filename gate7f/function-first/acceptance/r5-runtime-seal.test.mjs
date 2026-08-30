@@ -4,7 +4,7 @@ import {mkdtemp,mkdir,readFile,writeFile,rm} from 'node:fs/promises';
 import path from 'node:path';
 import {tmpdir} from 'node:os';
 import {canonicalJson,sha256} from '../../../gate4/canonical.mjs';
-import {CASE_BUNDLE_SHA256,MODEL_CASES} from './cases.mjs';
+import {R6J_CASE_BUNDLE_SHA256} from './cases.mjs';
 import {R5_SEAL_AUTHORITIES,deriveR5RuntimeSeal,createR5RuntimeSeal} from './r5-runtime-seal.mjs';
 
 const readinessPath=path.resolve('gate7f/function-first/readiness/evidence/20260828-functional-prerequisites.json');
@@ -29,12 +29,11 @@ async function fixture(){const root=await mkdtemp(path.join(tmpdir(),'m1-r5-seal
   const manifestPath=path.join(root,'input.json');await writeFile(manifestPath,canonicalJson(made.value)+'\n');return {root,files,evidence,...made,manifestPath,async close(){await rm(root,{recursive:true,force:true});}};}
 function derive(f,manifestValue=f.value,overrides={}){return deriveR5RuntimeSeal({manifest:manifestValue,...f.files,...overrides});}
 
-test('deterministically derives all fixed R5 fields and recomputes every suite from cases',async()=>{const f=await fixture();try{
+test('deterministically derives fixed R5 fields and retains its historical pinned suites',async()=>{const f=await fixture();try{
   const first=derive(f),second=derive(f),seal=first.seal,template=JSON.parse(f.files.templateBytes);assert.deepEqual(first.bytes,second.bytes);
   assert.equal(seal.sourceCommit,f.value.source.commit);assert.equal(seal.runtime.sourceArchiveSha256,f.value.source.archiveSha256);
-  assert.equal(seal.runtime.packageLockSha256,f.value.source.packageLockSha256);assert.equal(seal.caseBundleSha256,CASE_BUNDLE_SHA256);
-  const suites=Object.fromEntries(MODEL_CASES.flatMap(item=>(item.setup.suites??[]).map(value=>[value.suiteId,sha256(canonicalJson(value))])));
-  assert.deepEqual(seal.suites,suites);assert.deepEqual(seal.candidates,template.candidates);assert.deepEqual(seal.roles,template.roles);
+  assert.equal(seal.runtime.packageLockSha256,f.value.source.packageLockSha256);assert.equal(seal.caseBundleSha256,R6J_CASE_BUNDLE_SHA256);
+  assert.deepEqual(seal.suites,template.suites);assert.deepEqual(seal.candidates,template.candidates);assert.deepEqual(seal.roles,template.roles);
   assert.deepEqual(seal.runtime,{...template.runtime,sourceArchiveSha256:f.value.source.archiveSha256,packageLockSha256:f.value.source.packageLockSha256});
   assert.equal(first.bytes.equals(Buffer.from(canonicalJson(seal)+'\n')),true);
 }finally{await f.close();}});

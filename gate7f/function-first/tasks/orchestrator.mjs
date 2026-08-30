@@ -7,9 +7,22 @@ const startSchema = z.object({ taskId: z.string(), grantId: z.string(), grantRev
 const resumeSchema = z.object({ runId: z.string(), grantId: z.string().optional(),
   grantRevision: z.number().int().positive().optional() }).strict()
   .refine(value => (value.grantId === undefined) === (value.grantRevision === undefined));
-const planSchema = z.object({ summary: z.string().max(1500), steps: z.array(z.object({
-  capabilityId: z.enum(Object.keys(CAPABILITIES)), arguments: z.unknown(),
-}).strict()).min(1).max(6) }).strict();
+const planStepSchema = z.object({ capabilityId: z.enum(Object.keys(CAPABILITIES)), arguments: z.unknown() }).strict();
+const planCoreSchema = z.object({ summary: z.string().max(1500), steps: z.array(planStepSchema).min(1).max(6) }).strict();
+const protocolRecordSchema = z.object({ schemaVersion: z.literal("runaai-m1-plan-protocol-record/v1"),
+  protocol: z.object({ schemaVersion: z.literal("runaai-m1-plan-protocol/v1"),
+    workIntent: z.enum(["analysis-only", "preview-only", "effect-requested"]),
+    previewApplyPairing: z.string(), correctionLimit: z.literal(1), correctionAuthority: z.string() }).strict(),
+  modelId: z.string().min(1), role: z.enum(["code", "agent"]),
+  settings: z.object({ temperature: z.literal(0), maximumOutputTokens: z.number().int().positive().max(1536) }).strict(),
+  providerAttemptCount: z.number().int().min(1).max(2), correctionCount: z.number().int().min(0).max(1),
+  attempts: z.array(z.object({ plan: planCoreSchema, planDigest: z.string().regex(/^[a-f0-9]{64}$/),
+    violations: z.array(z.string()).max(4) }).strict()).min(1).max(2),
+}).strict().refine(value => value.providerAttemptCount === value.attempts.length
+  && value.correctionCount === value.attempts.length - 1
+  && value.attempts.every(item => item.planDigest === digest(item.plan))
+  && value.attempts.at(-1).violations.length === 0);
+const planSchema = planCoreSchema.extend({ planningProtocol: protocolRecordSchema.optional() }).strict();
 const finished = new Set(["completed", "cancelled", "failed", "budget-exhausted"]);
 const DEFAULT_BUDGETS = Object.freeze({ maxPlans: 2, maxActions: 12, planningTimeoutMs: 120_000,
   maximumActiveMs: 300_000, maximumAgeMs: 3_600_000 });
@@ -38,7 +51,7 @@ export class M1TaskOrchestrator {
         plannerRole: this.plannerRole,
         participantId: context.principalId, projectId: context.projectId, sessionId: context.sessionId,
         requestDigest, grantDefinitionDigest: grant.definitionDigest, objective: task.objective,
-        status: "ready-to-plan", planAttempts: 0, plans: [], activePlan: 0, nextStep: 0,
+        status: "ready-to-plan", planAttempts: 0, protocolCorrectionCount: 0, plans: [], activePlan: 0, nextStep: 0,
         actions: [], pendingProposalId: null, outcome: null, errorCode: null, consumedMs: 0,
         budgets: { ...this.budgets }, createdAtMs: this.now(), updatedAtMs: this.now() };
       await tx.save("run", run.runId, run, { insertOnly: true, requestKey: key });
@@ -55,7 +68,7 @@ export class M1TaskOrchestrator {
     const task = await this.service.status(context, { taskId: run.taskId });
     return { run, task: task.task, project: task.project, proposals: task.proposals, receipts: task.receipts,
       pendingProposal: task.proposals.find(value => value.proposalId === run.pendingProposalId) ?? null,
-      pendingReconciliation: task.pendingReconciliation };
+      pendingReconciliation: task.pendingReconciliation, runEvidence: runEvidenceProjection(run, task) };
   }
 
   async list(rawContext) {
@@ -250,10 +263,12 @@ export class M1TaskOrchestrator {
       }, 250);
       poll.unref?.();
       const rawPlan = await Promise.race([this.planner.plan({ objective: run.objective,
+        workIntent: taskState.task.workIntent ?? "effect-requested",
         snapshot: structuredClone(plannerSnapshot),
         receipts: structuredClone(permittedReceipts
           .map(({ beforeReference, afterReference, rollbackReference, ...receipt }) => receipt)),
-        previousPlans: structuredClone(run.plans.filter(plan => plan.steps.every(permittedStep))), repair: run.status === "repair-required",
+        previousPlans: structuredClone(run.plans.filter(plan => plan.steps.every(permittedStep))
+          .map(({ summary, steps }) => ({ summary, steps }))), repair: run.status === "repair-required",
         allowedPaths: [...grant.allowedPaths], allowedSuites: [...grant.allowedSuites],
         capabilityIds: grant.capabilityIds.filter(id => grant.profile !== "read-only" || !CAPABILITIES[id].effectful),
         signal: controller.signal }), timeoutPromise]);
@@ -287,12 +302,18 @@ export class M1TaskOrchestrator {
           precedingMutation ||= ["project.apply-change", "project.restore"].includes(step.capabilityId);
         }
         const current = await tx.get("run", run.runId);
+        const planningProtocol = plan.planningProtocol ? structuredClone(plan.planningProtocol) : null;
+        const protocolDigest = planningProtocol ? digest(planningProtocol) : null;
         current.plans.push({ summary: plan.summary, steps, planDigest: digest({ summary: plan.summary, steps }),
+          planningProtocol, protocolDigest,
           sourceProjectRevision: taskState.project.revision, sourceWorkspaceSha256: snapshot.workspaceSha256 });
+        current.protocolCorrectionCount = (current.protocolCorrectionCount ?? 0) + (planningProtocol?.correctionCount ?? 0);
         current.activePlan = current.plans.length - 1; current.nextStep = 0; current.pendingProposalId = null;
         current.status = "running"; current.updatedAtMs = this.now();
         await tx.save("run", current.runId, current);
-        await tx.audit("conversational-plan-recorded", current.runId, { planDigest: current.plans.at(-1).planDigest });
+        await tx.audit("conversational-plan-recorded", current.runId, { planDigest: current.plans.at(-1).planDigest,
+          protocolDigest, providerAttemptCount: planningProtocol?.providerAttemptCount ?? null,
+          protocolCorrectionCount: planningProtocol?.correctionCount ?? 0 });
       });
       return true;
     } finally { clearTimeout(timer); clearInterval(poll); }
@@ -321,7 +342,11 @@ export class M1TaskOrchestrator {
     return this.store.transaction(context, async tx => {
       const run = await tx.get("run", runId);
       assert(run, "m1-run-not-found");
-      for (const plan of run.plans) assert(plan.planDigest === digest({ summary: plan.summary, steps: plan.steps }), "m1-plan-integrity-failed");
+      for (const plan of run.plans) {
+        assert(plan.planDigest === digest({ summary: plan.summary, steps: plan.steps }), "m1-plan-integrity-failed");
+        assert((plan.planningProtocol === null || plan.planningProtocol === undefined) === (plan.protocolDigest === null || plan.protocolDigest === undefined)
+          && (!plan.planningProtocol || plan.protocolDigest === digest(plan.planningProtocol)), "m1-plan-integrity-failed");
+      }
       return run;
     });
   }
@@ -333,6 +358,23 @@ export class M1TaskOrchestrator {
       return run;
     });
   }
+}
+
+export function runEvidenceProjection(run, taskState) {
+  const actions = new Set((run.actions ?? []).map(action => action.receiptId));
+  const proposals = new Set((run.actions ?? []).map(action => action.proposalId));
+  if (run.pendingProposalId) proposals.add(run.pendingProposalId);
+  const receipts = (taskState.receipts ?? []).filter(receipt => actions.has(receipt.receiptId));
+  const unsettled = (taskState.pendingReconciliation ?? []).some(item => proposals.has(item.proposalId))
+    || (taskState.proposals ?? []).some(item => proposals.has(item.proposalId) && ["dispatching", "unknown"].includes(item.status));
+  const applied = receipts.some(receipt => ["project.apply-change", "project.restore"].includes(receipt.capabilityId)
+    && receipt.executionStatus === "published");
+  const tests = receipts.filter(receipt => receipt.capabilityId === "project.run-tests");
+  const terminal = finished.has(run.status);
+  return Object.freeze({ schemaVersion: "runaai-m1-run-evidence/v1", runId: run.runId,
+    changeStatus: unsettled ? "unknown" : applied ? "applied" : terminal ? "none-recorded" : "pending",
+    testStatus: unsettled ? "unknown" : tests.some(receipt => receipt.executionStatus === "ran") ? "ran"
+      : tests.length ? "attempted-not-run" : terminal ? "none-recorded" : "pending" });
 }
 
 function parse(schema, value) { const parsed = schema.safeParse(value); assert(parsed.success, "m1-invalid-plan"); return parsed.data; }

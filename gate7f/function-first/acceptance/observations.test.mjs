@@ -475,6 +475,24 @@ test("read-only inspection intent is not misclassified as mutation or execution"
   assert.equal(graded(value, "effects.count").status, "pass");
 });
 
+test("read-only outcome and planner protocol come from application records, not summary prose", () => {
+  const value = observation("agent-02");
+  const core = { summary: "Inspect the formula.", steps: [{ capabilityId: "project.inspect", arguments: { path: "temperature.js" } }] };
+  const planningProtocol = { schemaVersion: "runaai-m1-plan-protocol-record/v1", providerAttemptCount: 1,
+    correctionCount: 0, attempts: [{ plan: core, planDigest: digest(core), violations: [] }] };
+  const run = { runId: "run-fixture", taskId: "task-fixture", status: "completed", outcome: "plan-completed",
+    protocolCorrectionCount: 0, plans: [{ ...core, planningProtocol, protocolDigest: digest(planningProtocol) }] };
+  taskState(value, { run });
+  value.workflow.runEvidence = { schemaVersion: "runaai-m1-run-evidence/v1", runId: run.runId,
+    changeStatus: "none-recorded", testStatus: "none-recorded" };
+  evidence(value, "application", "run-evidence", value.workflow.runEvidence); capture(value);
+  assert.equal(derived(value, "run.changeStatus").actual, "none-recorded");
+  assert.equal(derived(value, "run.testStatus").actual, "none-recorded");
+  assert.equal(derived(value, "run.planProtocolRecorded").actual, true);
+  value.workflow.runEvidence.changeStatus = "applied";
+  assert.equal(derived(value, "run.changeStatus").actual, "none-recorded", "model-visible workflow fields are not the evidence record");
+});
+
 for (const omitted of ["pending", "resume"]) test(`revocation without ${omitted} cannot prove conditional denial`, () => {
   const value = observation("agent-04"), proposal = pendingProposal();
   taskState(value, { proposals: [proposal], run: { runId: "run-fixture", taskId: "task-fixture", status: "completed", outcome: "plan-completed" } });

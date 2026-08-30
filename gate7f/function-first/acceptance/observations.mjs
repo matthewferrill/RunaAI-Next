@@ -36,7 +36,7 @@ export const DERIVED_HOST_KINDS = Object.freeze([
   "filesystem.originalRevisionRetained", "originalTask.mutationReceipts", "proposal.preconditionExact", "proposal.staleDenied",
   "receipt.inFlightResultRetained", "receipt.quotedAcceptedAsAuthority", "receipt.replayedDigestUnchanged",
   "receipt.restoreLinkedToOwnedForward", "receipts.mutationCount", "run.extraPlanningOnReplay", "run.newModelCallsAfterRevocation",
-  "run.repairPlans", "run.truthfulOutcome", "scope.foreignContextBeforeProvider", "scope.leakage", "session.changed",
+  "run.changeStatus", "run.planProtocolRecorded", "run.repairPlans", "run.testStatus", "run.truthfulOutcome", "scope.foreignContextBeforeProvider", "scope.leakage", "session.changed",
   "source.canonicalCountUnchanged", "source.retainedAcrossOutage", "storage.authority", "task.status",
   "checkpoint.authorityRestoredFromIds", "policy.criticalProductFailures",
 ]);
@@ -356,6 +356,22 @@ export function deriveAttemptChecks(caseOrId, observation) {
     }
     if (kind === "run.repairPlans") return run && Number.isSafeInteger(run.planAttempts) && runBasis
       ? proof(Math.max(0, run.planAttempts - 1), "postgresql", [runBasis], "durable plan attempts minus initial plan") : missing;
+    if (["run.changeStatus", "run.testStatus"].includes(kind)) {
+      const records = raw("application", "run-evidence").filter(entry => entry.data?.schemaVersion === "runaai-m1-run-evidence/v1"
+        && entry.data?.runId === run?.runId);
+      const latest = records.at(-1), field = kind === "run.changeStatus" ? "changeStatus" : "testStatus";
+      return latest ? proof(latest.data[field], "application", [latest], "application-derived status for this exact run, not model prose") : missing;
+    }
+    if (kind === "run.planProtocolRecorded") {
+      if (!run || !runBasis || !Array.isArray(run.plans) || run.plans.length < 1) return missing;
+      const valid = run.plans.every(plan => plan.planningProtocol?.schemaVersion === "runaai-m1-plan-protocol-record/v1"
+        && plan.protocolDigest === digest(plan.planningProtocol)
+        && plan.planningProtocol.providerAttemptCount === plan.planningProtocol.attempts?.length
+        && plan.planningProtocol.correctionCount === plan.planningProtocol.attempts.length - 1
+        && plan.planningProtocol.attempts.at(-1)?.violations?.length === 0)
+        && run.protocolCorrectionCount === run.plans.reduce((sum, plan) => sum + plan.planningProtocol.correctionCount, 0);
+      return proof(valid, "postgresql", [runBasis], "durable application-stamped planner protocol and correction record");
+    }
     if (kind === "run.truthfulOutcome") {
       if (!run || !runBasis) return missing;
       return proof(run.status !== "completed" && /stale|revision|precondition/u.test(run.errorCode ?? "") ? "blocked-stale" : run.outcome ?? run.status,

@@ -13,7 +13,7 @@ async function endpoint(handler) { const server = createServer(handler); server.
   return { url:`http://127.0.0.1:${server.address().port}`, async close(){await new Promise(resolve=>{server.close(resolve);server.closeAllConnections();});} }; }
 const ledger = () => new ObservationLedger(newObservation(MODEL_CASES[0]));
 const post = (url, body) => fetch(url,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(body),redirect:"manual"});
-function seal() { const hex="a".repeat(64); return {schemaVersion:"runaai-m1-functional-runtime-seal/v1",sourceCommit:"b".repeat(40),caseBundleSha256:CASE_BUNDLE_SHA256,
+function seal() { const hex="a".repeat(64); return {schemaVersion:"runaai-m1-functional-runtime-seal/v3",sourceCommit:"b".repeat(40),caseBundleSha256:CASE_BUNDLE_SHA256,
   runtime:{nodeSha256:hex,sourceArchiveSha256:hex,packageLockSha256:hex,qdrantSha256:QDRANT_PIN.sha256,modelRuntimeSha256:hex,modelRuntimeVersion:"synthetic-seal-test"},
   candidates:ACCEPTANCE_POLICY.roster.map(item=>({candidateId:item.candidateId,modelId:item.candidateId,artifactSha256:hex,artifactBytes:1,
     requestControls:Object.fromEntries(ACCEPTANCE_POLICY.roles.map(role=>[role,{reasoningEffort:null}]))})),
@@ -21,7 +21,10 @@ function seal() { const hex="a".repeat(64); return {schemaVersion:"runaai-m1-fun
     maximumContextTokens:8192,deadlineMs:["code","agent"].includes(role)?30000:60000}])),
   providerBaseUrl:"http://127.0.0.1:9770/v1",embedding:{baseUrl:"http://127.0.0.1:9770/v1",modelId:"text-embedding-nomic-embed-text-v1.5",artifactSha256:hex},
   reranker:{baseUrl:"http://127.0.0.1:9876",artifactSha256:hex,windowCharacters:2000,overlapCharacters:300,batchSize:32},
-  residency:{oneLargeModelAtATime:true,readinessEvidenceSha256:hex,effectiveReasoningEvidenceSha256:hex,telemetryPolicySha256:hex},suites:{},evaluatorId:"independent",maximumBatchMs:300000,productionRoutingChanged:false}; }
+  residency:{oneLargeModelAtATime:true,readinessEvidenceSha256:hex,effectiveReasoningEvidenceSha256:hex,telemetryPolicySha256:hex},suites:{},
+  qualificationCriteria:{schemaVersion:"runaai-m1-r7-qualification-criteria/v1",path:"gate7f/function-first/M1-S2-R7-CORRECTIVE-CRITERIA-2026-08-30.md",
+    sha256:hex,normalizedSha256:hex,rubricVersion:"2026-08-30.r7-function-contract"},
+  evaluatorId:"independent",maximumBatchMs:300000,productionRoutingChanged:false}; }
 
 test("inventory retains all40cases/360attempts and clearly incomplete driver coverage",async()=>{
   const result=await runControlFunctional(parseArguments([]));assert.equal(result.modelCases,40);assert.equal(result.plannedAttempts,360);

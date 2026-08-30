@@ -32,8 +32,10 @@ test("smoke calls actual Mastra answer/planner and auxiliary adapters, records n
     if (url.endsWith("/rerank")) return json({ results: [{ index: 0, score: 0.9 }, { index: 1, score: 0.1 }] });
     assert.equal(body.reasoning_effort, "none"); assert.doesNotMatch(JSON.stringify(body), /\/no_think/);
     const prompt = JSON.parse(body.messages.at(-1).content);
-    const text = prompt.schemaVersion === "runaai-m1-planner-input/v1"
+    const text = prompt.schemaVersion === "runaai-m1-planner-input/v2"
       ? JSON.stringify({ summary: "Inspect only", steps: [{ capabilityId: "project.inspect", arguments: { path: "echo.js" } }] })
+      : prompt.schemaVersion === "runaai-m1-plan-protocol-correction/v1"
+        ? JSON.stringify({ summary: "Inspect only", steps: [{ capabilityId: "project.inspect", arguments: { path: "echo.js" } }] })
       : prompt.evidence.length ? JSON.stringify({ answer: "The north room [1].", citations: [{ sourceId: "smoke-note", sectionId: "provided" }] })
       : "Hello, Garden Circle.";
     return json({ id: "synthetic-completion", object: "chat.completion", created: 1, model: value.modelId,

@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { functionAnswerSelection, functionDescription, approvalIsAvailable, restoredWorkspaceNotice, taskPresentation } from "../../gate6b/public/function-panel.mjs";
+import { functionAnswerSelection, functionDescription, approvalIsAvailable, restoredWorkspaceNotice, runEvidenceNotice, taskPresentation } from "../../gate6b/public/function-panel.mjs";
 test("ordinary conversation keeps Chat and Code routes separate", () => {
   assert.deepEqual(functionAnswerSelection("conversation", [], "chat"), { lane: "general" });
   assert.deepEqual(functionAnswerSelection("conversation", [], "code"), { lane: "code" });
@@ -80,4 +80,13 @@ test("reopened stale and revoked runs explain the actual durable stop without im
   const revoked = taskPresentation({ task: { status: "active" }, run: { status: "failed", errorCode: "m1-grant-revoked" } });
   assert.match(revoked.notice, /permission is no longer valid/);
   assert.equal(taskPresentation({ task: { status: "active" }, run: { status: "needs-reconciliation", errorCode: "m1-stale-project" } }).notice, null);
+});
+
+test("run outcome wording comes only from server-derived evidence", () => {
+  const evidence = (changeStatus, testStatus) => ({ schemaVersion: "runaai-m1-run-evidence/v1", changeStatus, testStatus });
+  assert.match(runEvidenceNotice(evidence("none-recorded", "none-recorded")), /this run recorded no applied file change/i);
+  assert.match(runEvidenceNotice(evidence("none-recorded", "none-recorded")), /this run did not execute tests/i);
+  assert.match(runEvidenceNotice(evidence("applied", "ran")), /applied file change/i);
+  assert.match(runEvidenceNotice(evidence("unknown", "unknown")), /unresolved/i);
+  assert.equal(runEvidenceNotice(null), null);
 });

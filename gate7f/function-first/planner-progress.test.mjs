@@ -115,7 +115,10 @@ for (const [modelId, reasoningEffort] of candidates) for (const role of ["code",
     } });
     for (const repair of [false, true]) {
       const value = input(); value.repair = repair; const before = structuredClone(value);
-      assert.deepEqual(await planner.plan(value), validPlan); assert.deepEqual(value, before);
+      const result = await planner.plan(value);
+      assert.deepEqual({ summary: result.summary, steps: result.steps }, validPlan);
+      assert.equal(result.planningProtocol.providerAttemptCount, 1);
+      assert.deepEqual(value, before);
     }
     assert.equal(calls.length, 2);
     for (let index = 0; index < calls.length; index++) {

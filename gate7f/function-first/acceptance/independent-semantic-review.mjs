@@ -9,7 +9,7 @@ import { EXPLICIT_SEMANTIC_EVIDENCE_SCHEMA_VERSION, enumerateCaseChecks, evaluat
 // Human review supplies every verdict; this code binds it to the exact frozen
 // attempt, output and assertion set and rejects omissions or schema drift.
 export const EXPLICIT_SEMANTIC_DECISION_SCHEMA_VERSION = "runaai-m1-explicit-semantic-decisions/v1";
-export const EXPLICIT_SEMANTIC_RUBRIC_VERSION = "2026-08-29.r6i-determinate";
+export const EXPLICIT_SEMANTIC_RUBRIC_VERSION = "2026-08-30.r7-function-contract";
 export const REVIEWER_INDEPENDENCE_DECLARATION = "author-of-neither-planner-nor-model-adapter";
 export const CANDIDATE_BLIND_ORDER_VERSION = "runaai-m1-candidate-blind-order/v1";
 

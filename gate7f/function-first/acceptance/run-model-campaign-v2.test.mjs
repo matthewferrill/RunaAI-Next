@@ -10,7 +10,7 @@ const candidateId='gemma4-26b-a4b',readyAt=Date.parse('2026-08-29T12:00:00.000Z'
 const stable=value=>Array.isArray(value)?value.map(stable):value&&typeof value==='object'
   ?Object.fromEntries(Object.keys(value).sort().map(key=>[key,stable(value[key])])):value;
 const digest=value=>sha256(JSON.stringify(stable(value)));
-function seal(){return {schemaVersion:'runaai-m1-functional-runtime-seal/v1',sourceCommit,caseBundleSha256:CASE_BUNDLE_SHA256,
+function seal(){return {schemaVersion:'runaai-m1-functional-runtime-seal/v3',sourceCommit,caseBundleSha256:CASE_BUNDLE_SHA256,
   runtime:{nodeSha256:hash,sourceArchiveSha256:hash,packageLockSha256:hash,qdrantSha256:QDRANT_PIN.sha256,
     modelRuntimeSha256:runtimeHash,modelRuntimeVersion:'model-free-v2-fixture'},
   candidates:ACCEPTANCE_POLICY.roster.map(value=>({candidateId:value.candidateId,modelId:value.candidateId,artifactSha256:hash,artifactBytes:123,
@@ -21,6 +21,9 @@ function seal(){return {schemaVersion:'runaai-m1-functional-runtime-seal/v1',sou
   reranker:{baseUrl:'http://127.0.0.1:8412',artifactSha256:hash,windowCharacters:2000,overlapCharacters:300,batchSize:32},
   residency:{oneLargeModelAtATime:true,readinessEvidenceSha256:hash,effectiveReasoningEvidenceSha256:hash,telemetryPolicySha256:hardwareHash},
   suites:Object.fromEntries(MODEL_CASES.flatMap(item=>(item.setup.suites??[]).map(value=>[value.suiteId,digest(value)]))),
+  qualificationCriteria:{schemaVersion:'runaai-m1-r7-qualification-criteria/v1',
+    path:'gate7f/function-first/M1-S2-R7-CORRECTIVE-CRITERIA-2026-08-30.md',sha256:hash,normalizedSha256:hash,
+    rubricVersion:'2026-08-30.r7-function-contract'},
   evaluatorId:'independent-v2-fixture',maximumBatchMs:3600000,productionRoutingChanged:false};}
 function ready(){return {schemaVersion:'runa-m1-campaign-lease-ready/v2',leaseId:'20260829-campaign-gemma-r6',sealSha256:hash,
   campaignHardwarePlanSha256:hardwareHash,candidateId:'gemma',modelId:candidateId,primaryInstanceId:'primary',primaryArtifactSha256:hash,

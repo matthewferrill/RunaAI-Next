@@ -1,6 +1,6 @@
 # RunaAI migration status
 
-Status date: 2026-08-28. This is the living migration handoff for RunaAI-Next. Update it in the same
+Status date: 2026-08-30. This is the living migration handoff for RunaAI-Next. Update it in the same
 commit whenever a gate changes repository direction, authority, implementation status, safety
 boundaries, verification state, or the next planned work.
 
@@ -27,6 +27,23 @@ See `gate7f/function-first/M1-S2-R6J-THREE-MODEL-RESULTS-2026-08-30.md` for exac
 pins, attribution and the prospective corrective boundary. Production remained
 unchanged, protected data was not used and Home cleanup restored zero owned model
 residency plus both 260-W limits. M1 and the human customer trial remain open.
+
+The prospective R7 correction is now implemented locally and frozen in
+`gate7f/function-first/M1-S2-R7-CORRECTIVE-CRITERIA-2026-08-30.md`. It adds
+generic complete-request and negative-evidence handling, explicit analysis/
+preview/effect task intent, least-capability grants, one application-checked
+planner correction with durable evidence, application-owned per-run change/test
+status, and a one-use loopback browser receipt that removes Agent05's ack-file
+timing dependency without letting the harness invent a DOM observation. The
+prospective case bundle is
+`87f08a861d1b109fa5d3fb64f9dc10aacba023eee80a3ab4762b07b2d987524d`
+and rubric is `2026-08-30.r7-function-contract`. R7 has not yet been source-
+archived, runtime-sealed or scored; no result or model selection is claimed.
+The create-only R7 seal builder is implemented and binds the new case/rubric,
+source archive, package lock, current fixed suites, three-candidate roster and
+readiness/reasoning/telemetry evidence. Historical v1/v2 validation remains
+bound to R6J instead of being silently reinterpreted through the prospective
+case bundle. Actual seal publication follows the corrective source commit.
 
 The frozen application is `9556ed01f9dbabe8c93eea309e482aad60bf809f`, common runtime seal
 `416102ff7129e5adb00de51b2f0fc3e5ca542c18a82941a32fdc4075b6a1c89f`. The complete actual Control

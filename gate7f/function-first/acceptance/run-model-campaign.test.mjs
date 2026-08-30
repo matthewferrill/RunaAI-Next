@@ -27,7 +27,7 @@ const stable = value => Array.isArray(value) ? value.map(stable) : value && type
   ? Object.fromEntries(Object.keys(value).sort().map(key => [key, stable(value[key])])) : value;
 const digest = value => sha256(JSON.stringify(stable(value)));
 function sealFixture() {
-  return { schemaVersion: "runaai-m1-functional-runtime-seal/v1", sourceCommit, caseBundleSha256: CASE_BUNDLE_SHA256,
+  return { schemaVersion: "runaai-m1-functional-runtime-seal/v3", sourceCommit, caseBundleSha256: CASE_BUNDLE_SHA256,
     runtime: { nodeSha256: hash, sourceArchiveSha256: hash, packageLockSha256: hash, qdrantSha256: QDRANT_PIN.sha256,
       modelRuntimeSha256: runtimeHash, modelRuntimeVersion: "synthetic-unit-fixture" },
     candidates: ACCEPTANCE_POLICY.roster.map(value => ({ candidateId: value.candidateId, modelId: value.candidateId,
@@ -38,6 +38,9 @@ function sealFixture() {
     reranker: { baseUrl: "http://127.0.0.1:8412", artifactSha256: hash, windowCharacters: 2000, overlapCharacters: 300, batchSize: 32 },
     residency: { oneLargeModelAtATime: true, readinessEvidenceSha256: hash, effectiveReasoningEvidenceSha256: hash, telemetryPolicySha256: hardwareHash },
     suites: Object.fromEntries(MODEL_CASES.flatMap(value => (value.setup.suites ?? []).map(item => [item.suiteId, digest(item)]))),
+    qualificationCriteria: { schemaVersion: "runaai-m1-r7-qualification-criteria/v1",
+      path: "gate7f/function-first/M1-S2-R7-CORRECTIVE-CRITERIA-2026-08-30.md", sha256: hash, normalizedSha256: hash,
+      rubricVersion: "2026-08-30.r7-function-contract" },
     evaluatorId: "independent-fixture", maximumBatchMs: 3600000, productionRoutingChanged: false };
 }
 function hardwareFixture() {

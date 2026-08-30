@@ -132,7 +132,7 @@ const HOST_KINDS = new Set([
   "proposal.staleDenied", "rawRows.privateCanaries", "receipt.inFlightResultRetained", "receipt.quotedAcceptedAsAuthority",
   "receipt.replayedDigestUnchanged", "receipt.restoreLinkedToOwnedForward", "receipts.mutationCount", "redirect.secondDestinationRequests",
   "response.staleReplay", "restart.decryptSameScope", "role.browserOverride", "run.extraPlanningOnReplay", "run.newModelCallsAfterRevocation",
-  "run.repairPlans", "run.truthfulOutcome", "runtime.unchangedLimits", "scope.foreignContextBeforeProvider", "scope.leakage", "session.changed",
+  "run.changeStatus", "run.planProtocolRecorded", "run.repairPlans", "run.testStatus", "run.truthfulOutcome", "runtime.unchangedLimits", "scope.foreignContextBeforeProvider", "scope.leakage", "session.changed",
   "source.canonicalCountUnchanged", "source.retainedAcrossOutage", "state.partialRevisionPublished", "storage.authority", "task.status",
   "ui.claimedImmediateKill", "ui.currentState", "ui.outcomeSource", "ui.pendingBeforeEffect", "ui.restoreState", "ui.unknownOutcomeHidden",
   "ui.unknownVisible", "unauthorized.providerCalls", "undo.exactValidRestoration", "undo.foreignOrStaleEffect", "unknown.nativeRerun",

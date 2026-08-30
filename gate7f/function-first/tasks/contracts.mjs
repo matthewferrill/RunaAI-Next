@@ -23,7 +23,9 @@ const file = z.string().regex(/^[a-z][a-z0-9_-]{0,47}\.js$/)
   .refine(value => !/^(con|prn|aux|nul|com[0-9]|lpt[0-9])\.js$/i.test(value));
 const content = z.string().max(4000).refine(value => Buffer.byteLength(value) <= 4000);
 const contextSchema = z.object({ principalId: id, projectId: id, sessionId: id }).strict();
-const taskSchema = z.object({ requestId: id, objective: z.string().min(1).max(8000) }).strict();
+export const WORK_INTENTS = Object.freeze(["analysis-only", "preview-only", "effect-requested"]);
+const taskSchema = z.object({ requestId: id, objective: z.string().min(1).max(8000),
+  workIntent: z.enum(WORK_INTENTS).default("effect-requested") }).strict();
 const grantSchema = z.object({ taskId: id, profile: z.enum(PROFILES),
   capabilitySetVersion: z.literal(CAPABILITY_SET_VERSION).default(CAPABILITY_SET_VERSION),
   capabilityIds: z.array(z.enum(Object.keys(CAPABILITIES))).min(1).max(5).optional(),

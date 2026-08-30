@@ -13,6 +13,16 @@ in `../gate7f/function-first/M1-S2-R6J-THREE-MODEL-RESULTS-2026-08-30.md`. R6J i
 immutable evidence; the next source, rubric and runtime seal must be versioned rather
 than retroactively changing its prompts, grades or denominator.
 
+R7 prospective correction update, 2026-08-30: the model-neutral corrective
+contract and implementation are frozen in
+`../gate7f/function-first/M1-S2-R7-CORRECTIVE-CRITERIA-2026-08-30.md`. The new
+case bundle and rubric are versioned separately from R6J. This is implementation
+progress only. A create-only v3 seal builder now preserves the historical v1/v2
+R6J authority while binding the prospective source, case, rubric, suites and
+runtime evidence. An actual source archive and seal publication, 12 controls,
+360 fresh attempts and independent grade still precede any human customer trial
+or model selection.
+
 Read `PRODUCT-ROADMAP.md` first. This slice is the first milestone only; it does not replace, complete
 or retire the rest of the roadmap. All 17 capability families remain tracked in `capabilities.json`.
 The current Git branch continues the existing Gate 7F foundation descended from integration `f092d358`;

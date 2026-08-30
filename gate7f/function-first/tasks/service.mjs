@@ -74,7 +74,7 @@ export class M1TaskService {
       const task = { schemaVersion: "runa-m1-task/v1", taskId: makeId("task"),
         participantId: context.principalId, projectId: context.projectId, environmentId: project.environmentId,
         createdSessionId: context.sessionId, requestId: input.requestId, requestDigest,
-        objective: input.objective, status: "active", createdAt: this.timestamp(), updatedAt: this.timestamp() };
+        objective: input.objective, workIntent: input.workIntent, status: "active", createdAt: this.timestamp(), updatedAt: this.timestamp() };
       await tx.save("task", task.taskId, task, { insertOnly: true, requestKey: key });
       await tx.audit("task-created", task.taskId, { requestDigest });
       return task;

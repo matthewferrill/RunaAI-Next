@@ -7,12 +7,30 @@ import { digest } from "./contracts.mjs";
 import { PostgresTaskStore } from "./postgres.mjs";
 import { M1TaskService } from "./service.mjs";
 import { createM1TaskWorkflow } from "./workflow.mjs";
-import { M1TaskOrchestrator } from "./orchestrator.mjs";
+import { M1TaskOrchestrator, runEvidenceProjection } from "./orchestrator.mjs";
 import { testCipher } from "../../../gate4/fixtures.mjs";
 import { MastraM1Planner } from "../planner.mjs";
 
 const integration = process.env.M1_TASK_PG_URL ? test : test.skip;
 const context = { principalId: "orch-alice", projectId: "orch-project", sessionId: "orch-session" };
+
+test("run evidence is derived from this run's receipts and unsettled proposals only", () => {
+  const run = { runId: "run-1", status: "completed", pendingProposalId: null,
+    actions: [{ proposalId: "proposal-edit", receiptId: "receipt-edit" },
+      { proposalId: "proposal-test", receiptId: "receipt-test" }] };
+  const state = { receipts: [
+    { receiptId: "receipt-edit", capabilityId: "project.apply-change", executionStatus: "published" },
+    { receiptId: "receipt-test", capabilityId: "project.run-tests", executionStatus: "ran" },
+    { receiptId: "foreign", capabilityId: "project.restore", executionStatus: "published" },
+  ], proposals: [], pendingReconciliation: [] };
+  assert.deepEqual(runEvidenceProjection(run, state), { schemaVersion: "runaai-m1-run-evidence/v1", runId: "run-1",
+    changeStatus: "applied", testStatus: "ran" });
+  assert.deepEqual(runEvidenceProjection({ ...run, actions: [] }, state), { schemaVersion: "runaai-m1-run-evidence/v1", runId: "run-1",
+    changeStatus: "none-recorded", testStatus: "none-recorded" });
+  const unsettled = { ...state, proposals: [{ proposalId: "proposal-edit", status: "unknown" }] };
+  assert.deepEqual(runEvidenceProjection(run, unsettled), { schemaVersion: "runaai-m1-run-evidence/v1", runId: "run-1",
+    changeStatus: "unknown", testStatus: "unknown" });
+});
 
 // Deliberately a deterministic executor double; native process proof is project.integration.test.mjs.
 class Adapter {

@@ -4,6 +4,7 @@ const element = (root, tag, text, className) => {
 };
 const terminalRuns = new Set(["completed", "cancelled", "failed", "budget-exhausted"]);
 const profiles = new Set(["ask-every-time", "safe-autopilot", "read-only"]);
+const workIntents = new Set(["analysis-only", "preview-only", "effect-requested"]);
 export function approvalIsAvailable(result, proposal) {
   return result?.task?.status === "active" && proposal?.status === "pending-approval"
     && Array.isArray(result.approvableProposalIds) && result.approvableProposalIds.includes(proposal.proposalId)
@@ -40,6 +41,19 @@ export function taskPresentation(result) {
   return { status: "cancelled", notice: unsettled
     ? "Cancellation requested. No new steps will start. An already-dispatched step may still be finishing or awaiting reconciliation; its actual result will be retained when observed."
     : "Task cancelled. No new steps will start. Already-recorded receipts remain historical results." };
+}
+export function runEvidenceNotice(value) {
+  if (value?.schemaVersion !== "runaai-m1-run-evidence/v1") return null;
+  const change = value.changeStatus === "applied" ? "this run recorded an applied file change"
+    : value.changeStatus === "none-recorded" ? "this run recorded no applied file change"
+    : value.changeStatus === "unknown" ? "this run has an unresolved file-change outcome"
+    : "this run has no terminal file-change result yet";
+  const tests = value.testStatus === "ran" ? "this run executed a selected test suite"
+    : value.testStatus === "none-recorded" ? "this run did not execute tests"
+    : value.testStatus === "attempted-not-run" ? "this run recorded a test attempt that did not execute"
+    : value.testStatus === "unknown" ? "this run has an unresolved test outcome"
+    : "this run has no terminal test result yet";
+  return `Application-verified status: ${change}; ${tests}.`;
 }
 const publicErrors = new Set(["m1-grant-session-mismatch", "m1-grant-expired", "m1-stale-project",
   "m1-restore-stale", "m1-operation-in-progress", "m1-source-index-unavailable",
@@ -123,6 +137,11 @@ export async function initializeFunctionPanel({ root = document, request, getCon
   for (const [value, text] of [["code", "Code task"], ["agent", "Guided task"]]) {
     const option = element(root, "option", text); option.value = value; workflow.append(option);
   }
+  const workIntent = element(root, "select"); workIntent.id = "m1-work-intent"; workIntent.setAttribute("aria-label", "Task effect intent");
+  for (const [value, text] of [["", "Choose what this task may propose"], ["analysis-only", "Analyze only"],
+    ["preview-only", "Prepare a preview only"], ["effect-requested", "Complete requested bounded work"]]) {
+    const option = element(root, "option", text); option.value = value; workIntent.append(option);
+  }
   const profile = element(root, "select"); profile.id = "m1-profile"; profile.setAttribute("aria-label", "Code action approval profile");
   for (const [value, text] of [["","Choose an approval profile"],["ask-every-time","Ask before each action"],
     ["safe-autopilot","Auto-approve this harmless workspace"],["read-only","Read-only — no effects"]]) {
@@ -131,7 +150,7 @@ export async function initializeFunctionPanel({ root = document, request, getCon
   const catalog = element(root, "div"); catalog.id = "m1-task-list";
   const taskView = element(root, "div"); taskView.id = "m1-task"; taskView.setAttribute("aria-live", "polite");
   const reload = element(root, "button", "Reload saved tasks"); reload.type = "button";
-  codePanel.append(prepare, workflow, element(root, "p", "Code and guided tasks use their configured model roles. Both stay inside the same harmless workspace.", "navigation-empty"),
+  codePanel.append(prepare, workflow, workIntent, element(root, "p", "Code and guided tasks use their configured model roles. Task intent limits what can be proposed; the approval profile separately controls each permitted effect.", "navigation-empty"),
     profile, element(root, "h3", "Saved tasks"), reload, catalog, taskView); host.append(codePanel);
   const status = element(root, "p"); status.setAttribute("role", "status"); host.append(status);
   let selected = [], epoch = 0, viewEpoch = 0, sourceAttempt = null, startAttempt = null;
@@ -262,9 +281,15 @@ export async function initializeFunctionPanel({ root = document, request, getCon
     try { renderTask(await readTask(target, taskId, runId), target, { taskId, runId, restored }); }
     catch (error) { if (visible(target)) { taskView.textContent = "Task could not be loaded. No actions were started."; reportError(error, target); } }
   }
-  function makeGrant(token, taskId, selectedProfile) {
+  function capabilitiesFor(workIntentValue) {
+    if (workIntentValue === "analysis-only") return ["project.inspect"];
+    if (workIntentValue === "preview-only") return ["project.inspect", "project.preview-change"];
+    return ["project.inspect", "project.preview-change", "project.apply-change", "project.run-tests", "project.restore"];
+  }
+  function makeGrant(token, taskId, selectedProfile, workIntentValue = "effect-requested", exactCapabilities = null) {
     return call("grant.create", { taskId, profile: selectedProfile, allowedPaths: ["calculator.js"],
-      allowedSuites: ["calculator-add-v1"], expiresAt: new Date(Date.now() + 3_600_000).toISOString() }, token);
+      allowedSuites: ["calculator-add-v1"], capabilityIds: exactCapabilities ?? capabilitiesFor(workIntentValue),
+      expiresAt: new Date(Date.now() + 3_600_000).toISOString() }, token);
   }
   function renderTask(result, token, ids) {
     if (!visible(token)) return;
@@ -280,6 +305,8 @@ export async function initializeFunctionPanel({ root = document, request, getCon
       const planBox = element(root, "details"), planTitle = element(root, "summary", "Proposed plan — not execution evidence");
       planBox.append(planTitle, element(root, "p", plan.summary)); taskView.append(planBox);
     }
+    const evidenceNotice = runEvidenceNotice(result.runEvidence);
+    if (evidenceNotice) taskView.append(element(root, "p", evidenceNotice));
     const showData = (title, data, parent = taskView) => {
       const details = element(root, "details"); details.append(element(root, "summary", title),
         element(root, "pre", JSON.stringify(data, null, 2), "execution-output")); parent.append(details);
@@ -328,7 +355,7 @@ export async function initializeFunctionPanel({ root = document, request, getCon
           if (!profiles.has(choice)) { setStatus("Choose an approval profile before proposing undo.", token); return; }
           // Restore is deliberately receipt-bound to its originating task. A new
           // task would not own that receipt and must not be used to evade scope.
-          const grant = await makeGrant(token, taskId, choice);
+          const grant = await makeGrant(token, taskId, choice, result.task?.workIntent, ["project.restore"]);
           if (!visible(token)) return;
           const proposal = await call("proposal.create", { taskId, grantId: grant.grantId, grantRevision: grant.revision,
             requestId: `restore-${crypto.randomUUID()}`, capabilityId: "project.restore", arguments: { receiptId: receipt.receiptId } }, token);
@@ -361,7 +388,8 @@ export async function initializeFunctionPanel({ root = document, request, getCon
         const choice = profile.value;
         if (!profiles.has(choice)) { setStatus("Choose an approval profile before continuing this task.", token); return; }
         if (!runId && pendingIds.size) { setStatus("Reconcile the uncertain action before continuing.", token); return; }
-        const grant = await makeGrant(token, taskId, choice); if (!visible(token)) return;
+        const grant = await makeGrant(token, taskId, choice, result.task?.workIntent,
+          !runId && standaloneProposal ? [standaloneProposal.capabilityId] : null); if (!visible(token)) return;
         if (runId) await call("run.resume", { runId, grantId: grant.grantId, grantRevision: grant.revision }, token);
         else {
           const proposal = await call("proposal.create", { taskId, grantId: grant.grantId, grantRevision: grant.revision,
@@ -380,21 +408,23 @@ export async function initializeFunctionPanel({ root = document, request, getCon
     });
   }
   async function startWork(objective) {
-    const token = { ...ticket(), view: ++viewEpoch }, choice = profile.value, selectedWorkflow = workflow.value;
+    const token = { ...ticket(), view: ++viewEpoch, selectedWorkIntent: workIntent.value },
+      choice = profile.value, selectedWorkflow = workflow.value;
     if (!profiles.has(choice)) { setStatus("Choose an approval profile before starting work.", token); return false; }
+    if (!workIntents.has(token.selectedWorkIntent)) { setStatus("Choose what this task may propose before starting work.", token); return false; }
     if (token.context.experience !== "code" || ["runa:personal", "runa:ephemeral"].includes(token.context.projectId)) {
       setStatus("Select a Code project and prepare its disposable exercise first.", token); return false;
     }
     if (startAttempt?.objective !== objective || startAttempt?.choice !== choice || startAttempt?.key !== token.key
-      || startAttempt?.workflow !== selectedWorkflow) {
-      startAttempt = { objective, choice, key: token.key, workflow: selectedWorkflow,
+      || startAttempt?.workflow !== selectedWorkflow || startAttempt?.workIntent !== token.selectedWorkIntent) {
+      startAttempt = { objective, choice, key: token.key, workflow: selectedWorkflow, workIntent: token.selectedWorkIntent,
         taskRequestId: `task-${crypto.randomUUID()}`, runRequestId: `run-${crypto.randomUUID()}` };
     }
     const attempt = startAttempt;
     try {
-      const task = await call("task.create", { requestId: attempt.taskRequestId, objective }, token);
+      const task = await call("task.create", { requestId: attempt.taskRequestId, objective, workIntent: attempt.workIntent }, token);
       if (!visible(token)) return false;
-      const grant = attempt.grant ?? await makeGrant(token, task.taskId, choice); attempt.grant = grant;
+      const grant = attempt.grant ?? await makeGrant(token, task.taskId, choice, attempt.workIntent); attempt.grant = grant;
       if (!visible(token)) return false;
       setStatus("Planning bounded workspace work…", token);
       const started = await call("run.start", { taskId: task.taskId, grantId: grant.grantId, grantRevision: grant.revision,

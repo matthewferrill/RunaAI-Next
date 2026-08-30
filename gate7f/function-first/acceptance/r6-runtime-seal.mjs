@@ -3,7 +3,7 @@ import {link,lstat,open,readFile,realpath,unlink} from 'node:fs/promises';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {canonicalJson,sha256} from '../../../gate4/canonical.mjs';
-import {ACCEPTANCE_POLICY,CASE_BUNDLE_SHA256,MODEL_CASES} from './cases.mjs';
+import {ACCEPTANCE_POLICY,R6J_CASE_BUNDLE_SHA256} from './cases.mjs';
 import {validateRuntimeSeal} from './runner-contract.mjs';
 import {CAMPAIGN_V2_POLICY,validateCampaignV2Policy} from '../readiness/lease-v2-contract.mjs';
 
@@ -24,10 +24,6 @@ export const R6_SEAL_AUTHORITIES=Object.freeze({
   criteriaPath:path.resolve(HERE,'../readiness/R6-CAMPAIGN-LEASE-PUBLICATION-MARGIN-CRITERIA-2026-08-29.md'),
   templatePath:path.join(HERE,'evidence','campaign-20260828-r4b','runtime-seal.json'),
 });
-
-function suites(){const result={};for(const item of MODEL_CASES)for(const suite of item.setup.suites??[]){
-  const digest=sha256(canonicalJson(suite));need(!Object.hasOwn(result,suite.suiteId)||result[suite.suiteId]===digest,'suite-duplicate');result[suite.suiteId]=digest;
-}return result;}
 
 function validateManifest(value){
   need(exact(value,'schemaVersion,campaignId,authorities,source,evidence,declaration,privateValuesIncluded')
@@ -82,8 +78,8 @@ function validateTelemetry(value,template){
   return value;
 }
 function fixedTemplate(value){
-  const seal=validateRuntimeSeal(value);need(seal.caseBundleSha256===CASE_BUNDLE_SHA256&&CASE_BUNDLE_SHA256===R6_SEAL_AUTHORITIES.caseBundleSha256
-    &&canonicalJson(seal.suites)===canonicalJson(suites())&&seal.candidates.map(item=>item.candidateId).join()===ACCEPTANCE_POLICY.roster.map(item=>item.candidateId).join()
+  const seal=validateRuntimeSeal(value);need(seal.caseBundleSha256===R6J_CASE_BUNDLE_SHA256&&R6J_CASE_BUNDLE_SHA256===R6_SEAL_AUTHORITIES.caseBundleSha256
+    &&Object.keys(seal.suites).length>0&&seal.candidates.map(item=>item.candidateId).join()===ACCEPTANCE_POLICY.roster.map(item=>item.candidateId).join()
     &&seal.maximumBatchMs===CAMPAIGN_V2_POLICY.maximumBatchMs&&seal.productionRoutingChanged===false,'template-contract');return seal;
 }
 
@@ -107,7 +103,7 @@ export function deriveR6RuntimeSeal({manifest:input,templateBytes,criteriaFiles,
   const seal={...clone(template),schemaVersion:'runaai-m1-functional-runtime-seal/v2',qualificationCriteria,sourceCommit:manifest.source.commit,
     runtime:{...clone(template.runtime),sourceArchiveSha256:manifest.source.archiveSha256,
     packageLockSha256:manifest.source.packageLockSha256},residency:{...clone(template.residency),readinessEvidenceSha256:manifest.evidence.readiness.sha256,
-    effectiveReasoningEvidenceSha256:manifest.evidence.effectiveReasoning.sha256,telemetryPolicySha256:manifest.evidence.telemetry.sha256},suites:suites()};
+    effectiveReasoningEvidenceSha256:manifest.evidence.effectiveReasoning.sha256,telemetryPolicySha256:manifest.evidence.telemetry.sha256}};
   validateRuntimeSeal(seal,{sourceCommit:manifest.source.commit});return Object.freeze({seal:Object.freeze(seal),bytes:Buffer.from(canonicalJson(seal)+'\n')});
 }
 

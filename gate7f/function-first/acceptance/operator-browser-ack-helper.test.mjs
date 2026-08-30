@@ -1,13 +1,15 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
+import { createServer } from "node:http";
+import { once } from "node:events";
 import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { AGENT05_BOUNDED_DRAIN_NOTICE } from "./browser-checkpoint.mjs";
-import { buildBrowserAck } from "./operator-browser-ack-helper.mjs";
+import { buildBrowserAck, publishBrowserObservation } from "./operator-browser-ack-helper.mjs";
 
 const observedAt = "2026-08-29T23:40:05.000Z";
 const seal = "a".repeat(64);
@@ -71,6 +73,26 @@ test("in-flight acknowledgement carries the authoritative preparation, cancellat
     { ...details, boundedDrain: { noNewSteps: true } }
   ]) assert.throws(() => buildBrowserAck({ mode: "graded", request, url: `${base.baseUrl}/`, observedAt,
     actual: false, details: changed }), /browser-ack-helper-in-flight-request/u);
+});
+
+test("live publication sends the exact acknowledgement once to the bound loopback endpoint", async t => {
+  let received = null, calls = 0;
+  const server = createServer(async (request, response) => {
+    const parts = []; for await (const part of request) parts.push(part);
+    calls++; received = JSON.parse(Buffer.concat(parts).toString("utf8")); response.writeHead(204); response.end();
+  });
+  server.listen(0, "127.0.0.1"); await once(server, "listening");
+  t.after(() => new Promise(resolve => { server.close(resolve); server.closeAllConnections(); }));
+  const baseUrl = `http://127.0.0.1:${server.address().port}`;
+  const request = { ...base, baseUrl, observationEndpoint: { schemaVersion: "runaai-m1-browser-observation-endpoint/v1",
+    url: `${baseUrl}/__acceptance/browser-observation`, token: "f".repeat(64) },
+    preparationOnly: false, reusePreparedBrowser: false, scope: null, checks: [check] };
+  const ack = buildBrowserAck({ mode: "graded", request, url: `${baseUrl}/`, observedAt, actual: false, details: {} });
+  assert.equal(await publishBrowserObservation(request, ack), true);
+  assert.equal(calls, 1); assert.equal(received.checkpointId, request.checkpointId);
+  assert.equal(received.token, request.observationEndpoint.token); assert.deepEqual(received.ack, ack);
+  await assert.rejects(publishBrowserObservation({ ...request, observationEndpoint: { ...request.observationEndpoint,
+    url: `${baseUrl}/wrong` } }, ack), /endpoint-invalid/u);
 });
 
 test("the CLI writes one fsynced create-only acknowledgement from base64 inputs", async t => {

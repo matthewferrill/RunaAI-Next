@@ -177,7 +177,22 @@ function writeCreateOnly(path, value) {
   return bytes.byteLength;
 }
 
-function main() {
+export async function publishBrowserObservation(request, value) {
+  const endpoint = request.observationEndpoint;
+  if (endpoint === null || endpoint === undefined) return false;
+  if (endpoint.schemaVersion !== "runaai-m1-browser-observation-endpoint/v1"
+      || endpoint.url !== `${request.baseUrl}/__acceptance/browser-observation`
+      || !/^[a-f0-9]{64}$/u.test(endpoint.token ?? "")) throw fail("browser-ack-helper-observation-endpoint-invalid");
+  let response;
+  try { response = await fetch(endpoint.url, { method: "POST", redirect: "error",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ checkpointId: request.checkpointId, token: endpoint.token, ack: value }) }); }
+  catch { throw fail("browser-ack-helper-observation-publication-failed"); }
+  if (response.status !== 204) throw fail("browser-ack-helper-observation-publication-failed");
+  return true;
+}
+
+async function main() {
   const [mode, requestPath, outputPath, url, actualBase64, detailsBase64, observedAt] = process.argv.slice(2);
   if (!mode || !requestPath || !outputPath || !url || !actualBase64 || !detailsBase64 || !observedAt) {
     throw fail("browser-ack-helper-arguments");
@@ -186,9 +201,12 @@ function main() {
   const actual = decodeJson(actualBase64, "browser-ack-helper-actual-invalid");
   const details = decodeJson(detailsBase64, "browser-ack-helper-details-invalid");
   const value = buildBrowserAck({ mode, request, url, actual, details, observedAt });
+  const livePublished = await publishBrowserObservation(request, value);
   const bytes = writeCreateOnly(outputPath, value);
   process.stdout.write(JSON.stringify({ schemaVersion: "runaai-m1-browser-ack-publication/v2",
-    checkpointId: request.checkpointId, mode, observedAt, bytes }));
+    checkpointId: request.checkpointId, mode, observedAt, bytes, livePublished }));
 }
 
-if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) main();
+if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) main().catch(error => {
+  process.stderr.write(`${error?.code ?? "browser-ack-helper-failed"}\n`); process.exitCode = 1;
+});

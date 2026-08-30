@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { CAPABILITY_SET_DIGEST, CAPABILITY_SET_VERSION, digest, enforceArguments, evaluatePolicy,
-  parseContext, parseGrant, parseProposal, proposalDigest, receiptDigest } from "./contracts.mjs";
+  parseContext, parseGrant, parseProposal, parseTask, proposalDigest, receiptDigest } from "./contracts.mjs";
 
 const base = { taskId: "task-1", grantId: "grant-1", grantRevision: 1, requestId: "request-1" };
 const grant = { capabilitySetVersion: CAPABILITY_SET_VERSION, capabilitySetDigest: CAPABILITY_SET_DIGEST,
@@ -12,6 +12,11 @@ test("context is an exact server-derived identity tuple, not a verified flag", (
   assert.deepEqual(parseContext({ principalId: "alice", projectId: "project-a", sessionId: "session-a" }),
     { principalId: "alice", projectId: "project-a", sessionId: "session-a" });
   assert.throws(() => parseContext({ principalId: "alice", projectId: "project-a", sessionId: "session-a", verified: true }));
+});
+test("task intent is explicit, bounded and defaults only at the compatibility boundary", () => {
+  assert.equal(parseTask({ requestId: "request-1", objective: "Inspect", workIntent: "analysis-only" }).workIntent, "analysis-only");
+  assert.equal(parseTask({ requestId: "request-1", objective: "Inspect" }).workIntent, "effect-requested");
+  assert.throws(() => parseTask({ requestId: "request-1", objective: "Inspect", workIntent: "unbounded" }), /m1-invalid-request/);
 });
 test("proposal rejects an authority field, unknown executor, forged reference and unbounded path", () => {
   const value = { ...base, capabilityId: "project.inspect", arguments: { path: "index.js" } };

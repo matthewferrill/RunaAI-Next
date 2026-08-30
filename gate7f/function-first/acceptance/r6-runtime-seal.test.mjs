@@ -4,7 +4,7 @@ import {mkdtemp,mkdir,readFile,writeFile,rm} from 'node:fs/promises';
 import path from 'node:path';
 import {tmpdir} from 'node:os';
 import {canonicalJson,sha256} from '../../../gate4/canonical.mjs';
-import {CASE_BUNDLE_SHA256,MODEL_CASES} from './cases.mjs';
+import {R6J_CASE_BUNDLE_SHA256} from './cases.mjs';
 import {R6_SEAL_AUTHORITIES,createR6RuntimeSeal,deriveR6RuntimeSeal} from './r6-runtime-seal.mjs';
 import {validateRuntimeSeal} from './runner-contract.mjs';
 import {CAMPAIGN_V2_POLICY} from '../readiness/lease-v2-contract.mjs';
@@ -42,14 +42,13 @@ async function fixture(){const root=await mkdtemp(path.join(tmpdir(),'m1-r6-seal
   return {root,files,evidence,...made,manifestPath,async close(){await rm(root,{recursive:true,force:true});}};}
 function derive(f,value=f.value,overrides={}){return deriveR6RuntimeSeal({manifest:value,...f.files,...overrides});}
 
-test('R6 deterministically keeps the fixed roster roles budgets and recomputed suites',async()=>{const f=await fixture();try{
+test('R6 deterministically keeps its fixed roster roles budgets and historical pinned suites',async()=>{const f=await fixture();try{
   const first=derive(f),second=derive(f),seal=first.seal,template=JSON.parse(f.files.templateBytes);assert.deepEqual(first.bytes,second.bytes);
   assert.equal(seal.schemaVersion,'runaai-m1-functional-runtime-seal/v2');assert.equal(seal.sourceCommit,f.value.source.commit);
-  assert.equal(seal.maximumBatchMs,3600000);assert.equal(seal.caseBundleSha256,CASE_BUNDLE_SHA256);
+  assert.equal(seal.maximumBatchMs,3600000);assert.equal(seal.caseBundleSha256,R6J_CASE_BUNDLE_SHA256);
   assert.deepEqual(seal.qualificationCriteria.entries.map(item=>item.id),R6_SEAL_AUTHORITIES.criteriaIds);
   assert.deepEqual(seal.candidates,template.candidates);assert.deepEqual(seal.roles,template.roles);
-  const suites=Object.fromEntries(MODEL_CASES.flatMap(item=>(item.setup.suites??[]).map(value=>[value.suiteId,sha256(canonicalJson(value))])));
-  assert.deepEqual(seal.suites,suites);assert.deepEqual(first.bytes,Buffer.from(canonicalJson(seal)+'\n'));
+  assert.deepEqual(seal.suites,template.suites);assert.deepEqual(first.bytes,Buffer.from(canonicalJson(seal)+'\n'));
   assert.equal(validateRuntimeSeal(JSON.parse(first.bytes)).schemaVersion,'runaai-m1-functional-runtime-seal/v2');
 }finally{await f.close();}});
 

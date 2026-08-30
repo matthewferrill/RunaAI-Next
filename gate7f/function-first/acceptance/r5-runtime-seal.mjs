@@ -3,7 +3,7 @@ import {link,lstat,open,readFile,realpath,unlink} from 'node:fs/promises';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {canonicalJson,sha256} from '../../../gate4/canonical.mjs';
-import {ACCEPTANCE_POLICY,CASE_BUNDLE_SHA256,MODEL_CASES} from './cases.mjs';
+import {ACCEPTANCE_POLICY,R6J_CASE_BUNDLE_SHA256} from './cases.mjs';
 import {validateRuntimeSeal} from './runner-contract.mjs';
 
 const HERE=path.dirname(fileURLToPath(import.meta.url));
@@ -59,9 +59,6 @@ function validateReadiness(value){
     &&value.controls.qwen36==='reasoning_effort none'&&value.controls.qwen3Coder==='reasoning_effort omitted'
     &&value.productionRoutingChanged===false&&value.protectedDataIncluded===false,'readiness');return value;
 }
-function suites(){const result={};for(const item of MODEL_CASES)for(const suite of item.setup.suites??[]){
-    const digest=sha256(canonicalJson(suite));need(!Object.hasOwn(result,suite.suiteId)||result[suite.suiteId]===digest,'suite-duplicate');result[suite.suiteId]=digest;
-  }return result;}
 function validateTelemetry(value,template){
   need(value?.schemaVersion==='runa-m1-campaign-hardware-plan/v1'&&value.createdBeforeLoads===true
     &&value.classification==='prospective-hardware-only-not-functional-qualification'&&value.maximumConcurrentPrimaries===1
@@ -79,8 +76,8 @@ function validateTelemetry(value,template){
   return value;
 }
 function fixedTemplate(value){
-  const seal=validateRuntimeSeal(value);need(seal.caseBundleSha256===CASE_BUNDLE_SHA256&&CASE_BUNDLE_SHA256===R5_SEAL_AUTHORITIES.caseBundleSha256
-    &&canonicalJson(seal.suites)===canonicalJson(suites())&&seal.candidates.map(item=>item.candidateId).join()===ACCEPTANCE_POLICY.roster.map(item=>item.candidateId).join()
+  const seal=validateRuntimeSeal(value);need(seal.caseBundleSha256===R6J_CASE_BUNDLE_SHA256&&R6J_CASE_BUNDLE_SHA256===R5_SEAL_AUTHORITIES.caseBundleSha256
+    &&Object.keys(seal.suites).length>0&&seal.candidates.map(item=>item.candidateId).join()===ACCEPTANCE_POLICY.roster.map(item=>item.candidateId).join()
     &&seal.productionRoutingChanged===false,'template-contract');return seal;
 }
 
@@ -94,7 +91,7 @@ export function deriveR5RuntimeSeal({manifest:input,templateBytes,criteriaBytes,
   validateReadiness(decode(readinessBytes));validateReadiness(decode(effectiveReasoningBytes));validateTelemetry(decode(telemetryBytes),template);
   const seal={...clone(template),sourceCommit:manifest.source.commit,runtime:{...clone(template.runtime),sourceArchiveSha256:manifest.source.archiveSha256,
       packageLockSha256:manifest.source.packageLockSha256},residency:{...clone(template.residency),readinessEvidenceSha256:manifest.evidence.readiness.sha256,
-      effectiveReasoningEvidenceSha256:manifest.evidence.effectiveReasoning.sha256,telemetryPolicySha256:manifest.evidence.telemetry.sha256},suites:suites()};
+      effectiveReasoningEvidenceSha256:manifest.evidence.effectiveReasoning.sha256,telemetryPolicySha256:manifest.evidence.telemetry.sha256}};
   validateRuntimeSeal(seal,{sourceCommit:manifest.source.commit});return Object.freeze({seal:Object.freeze(seal),bytes:Buffer.from(canonicalJson(seal)+'\n')});
 }
 

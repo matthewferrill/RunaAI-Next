@@ -149,6 +149,9 @@ export function createBrowserCheckpoint({ directory, maximumWaitMs = 300000, ann
     const bootstrap = inFlight ? null : await client.host.createBootstrap(client.principalId, { session: client.session });
     const waitMs = inFlight ? Math.min(AGENT05_IN_FLIGHT_OBSERVATION_MS, maximumWaitMs) : maximumWaitMs;
     const deadline = now() + waitMs;
+    const liveObservation = inFlight && typeof client.host.createBrowserObservation === "function"
+      && typeof client.host.readBrowserObservation === "function" && typeof client.host.consumeBrowserObservation === "function";
+    const observationEndpoint = liveObservation ? client.host.createBrowserObservation(checkpointId, deadline) : null;
     const request = { schemaVersion: "runaai-m1-browser-checkpoint/v1", checkpointId,
       caseId: client.ledger.observation.caseId, candidateId: client.ledger.observation.candidateId,
       repetition: client.ledger.observation.repetition, phase, stage,
@@ -158,16 +161,20 @@ export function createBrowserCheckpoint({ directory, maximumWaitMs = 300000, ann
       preparationOnly, reusePreparedBrowser: inFlight, scope, preparationCheckpointId: prior?.checkpointId ?? null,
       cancellationAt: inFlight ? cancellationAt : null,
       taskObjective: client.task?.objective ?? client.item.objective ?? null,
-      checks: descriptors, ackPath: path.join(checkpointDirectory, "browser-ack.json"),
+      checks: descriptors, ackPath: path.join(checkpointDirectory, "browser-ack.json"), observationEndpoint,
       expiresAt: new Date(deadline).toISOString() };
     const requestPath = path.join(checkpointDirectory, "request.json");
     await writeFile(requestPath, JSON.stringify(request, null, 2), { flag: "wx" });
     announce({ checkpointId, requestPath, baseUrl: request.baseUrl, caseId: request.caseId, phase, stage });
+    try {
     while (inFlight ? now() <= deadline : now() < deadline) {
       if (signal?.aborted) throw fail("m1-browser-checkpoint-aborted");
-      let raw, observed = false;
+      let raw, observed = false, receivedAt = null;
       try {
-        raw = await readAck(request.ackPath);
+        if (liveObservation) {
+          const envelope = client.host.readBrowserObservation(checkpointId);
+          raw = envelope.raw; receivedAt = envelope.receivedAtMs;
+        } else raw = await readAck(request.ackPath);
         observed = true;
       } catch (error) {
         // The owner-side publisher creates and fsyncs this file under an
@@ -177,8 +184,9 @@ export function createBrowserCheckpoint({ directory, maximumWaitMs = 300000, ann
         // malformed, oversized or otherwise invalid evidence still fails shut.
         if (!TRANSIENT_WINDOWS_OBSERVATION.has(error.code)) throw error;
       }
-      const readAt = now();
-      if (readAt > deadline || (!inFlight && readAt >= deadline) || (!observed && readAt >= deadline)) throw fail("m1-browser-checkpoint-unobserved");
+      const readAt = now(), acceptedAt = liveObservation && observed ? receivedAt : readAt;
+      if (!Number.isFinite(acceptedAt) || acceptedAt > deadline || (!inFlight && acceptedAt >= deadline)
+          || (!observed && readAt >= deadline)) throw fail("m1-browser-checkpoint-unobserved");
       if (observed) {
         const ack = parseAck(raw);
         if (ack.schemaVersion !== "runaai-m1-browser-checkpoint-ack/v1" || ack.checkpointId !== checkpointId
@@ -205,7 +213,7 @@ export function createBrowserCheckpoint({ directory, maximumWaitMs = 300000, ann
           await writeFile(path.join(checkpointDirectory, "consumed.json"), JSON.stringify({ checkpointId, consumedAt: ticket.preparedAt, preparationOnly: true }), { flag: "wx" });
           return structuredClone(ticket);
         }
-        if (inFlight) validateInFlightAck(ack, request, prior, observation, now(), deadline);
+        if (inFlight) validateInFlightAck(ack, request, prior, observation, acceptedAt, deadline);
         const pending = validateGradedAck(ack, descriptors, observation);
         const evidenceLength = observation.evidence.length, checksLength = observation.checks.length;
         const priorBrowserExercised = observation.browserExercised;
@@ -226,5 +234,11 @@ export function createBrowserCheckpoint({ directory, maximumWaitMs = 300000, ann
       await pause(250);
     }
     throw fail("m1-browser-checkpoint-unobserved");
+    } finally {
+      // Live observation slots are one-use, bounded harness state.  Clear the
+      // slot on every terminal path, including malformed, late and aborted
+      // acknowledgements, so repeated failed attempts cannot exhaust the cap.
+      if (liveObservation) client.host.consumeBrowserObservation(checkpointId);
+    }
   };
 }

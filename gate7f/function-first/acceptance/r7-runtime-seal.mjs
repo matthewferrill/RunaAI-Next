@@ -4,6 +4,7 @@ import { fileURLToPath } from "node:url";
 import { canonicalJson, sha256 } from "../../../gate4/canonical.mjs";
 import { ACCEPTANCE_POLICY, CASE_BUNDLE_SHA256, MODEL_CASES } from "./cases.mjs";
 import { validateRuntimeSeal } from "./runner-contract.mjs";
+import { CAMPAIGN_V2_POLICY, validateCampaignV2Policy } from "../readiness/lease-v2-contract.mjs";
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const HASH = /^[a-f0-9]{64}$/u, COMMIT = /^[a-f0-9]{40}$/u;
@@ -59,6 +60,41 @@ export function validateR7Manifest(value) {
   return structuredClone({ ...value, seal });
 }
 
+function validateReadiness(value) {
+  need(exact(value, ["schemaVersion", "createdBeforeScoredInference", "qualification", "scope", "files", "modelRuntime",
+    "controls", "changedCompositionSinceSmoke", "productionRoutingChanged", "protectedDataIncluded"])
+    && value.schemaVersion === "runaai-m1-functional-readiness-reference/v1" && value.createdBeforeScoredInference === true
+    && value.qualification === false && typeof value.scope === "string" && value.scope.includes("Not a substitute for functional qualification")
+    && Array.isArray(value.files) && value.files.length === 6
+    && value.files.every(item => exact(item, ["path", "sha256"]) && typeof item.path === "string" && HASH.test(item.sha256))
+    && exact(value.modelRuntime, ["path", "sha256"]) && typeof value.modelRuntime.path === "string" && HASH.test(value.modelRuntime.sha256)
+    && exact(value.controls, ["gemma4", "qwen36", "qwen3Coder"])
+    && value.controls.gemma4 === "reasoning_effort none" && value.controls.qwen36 === "reasoning_effort none"
+    && value.controls.qwen3Coder === "reasoning_effort omitted" && value.productionRoutingChanged === false
+    && value.protectedDataIncluded === false, "readiness");
+}
+
+function validateTelemetry(value, seal) {
+  try { validateCampaignV2Policy(value?.policy); } catch { throw fail("telemetry"); }
+  need(value?.schemaVersion === "runa-m1-campaign-hardware-plan/v2" && value.createdBeforeLoads === true
+    && value.sourceCommit === seal.sourceCommit && value.classification === "prospective-r7-hardware-only-not-functional-qualification"
+    && value.maximumConcurrentPrimaries === 1 && value.productionRoutingChanged === false && value.protectedDataIncluded === false
+    && canonicalJson(value.policy) === canonicalJson(CAMPAIGN_V2_POLICY)
+    && value.existingReranker?.url === seal.reranker.baseUrl && value.existingReranker.changed === false
+    && value.auxiliary?.artifact?.key === seal.embedding.modelId && value.auxiliary.artifact.sha256 === seal.embedding.artifactSha256
+    && value.auxiliary.loadRequest?.model === seal.embedding.modelId && value.auxiliary.loadRequest.context_length === 2048
+    && Array.isArray(value.runtimeFiles) && value.runtimeFiles.some(item => item?.sha256 === seal.runtime.modelRuntimeSha256)
+    && Array.isArray(value.candidates) && value.candidates.length === 3, "telemetry");
+  const byId = new Map(value.candidates.map(item => [item.candidateId, item])); need(byId.size === 3, "telemetry-roster");
+  for (const expected of seal.candidates) {
+    const actual = byId.get(expected.candidateId), controls = Object.values(expected.requestControls).map(item => item.reasoningEffort);
+    need(actual?.artifact?.key === expected.modelId && actual.artifact.sha256 === expected.artifactSha256
+      && actual.artifact.bytes === expected.artifactBytes && new Set(controls).size === 1
+      && actual.requestReasoningEffort === controls[0] && actual.loadRequest?.model === expected.modelId
+      && actual.loadRequest.context_length === 32768, "telemetry-candidate");
+  }
+}
+
 async function boundedFile(filename, maximum) {
   need(path.isAbsolute(filename), "path");
   const resolved = path.resolve(filename), actual = await realpath(resolved);
@@ -86,6 +122,8 @@ export async function deriveR7RuntimeSeal({ manifest: input, sourceArchiveBytes,
   need(sha256(readinessBytes) === seal.residency.readinessEvidenceSha256
     && sha256(effectiveReasoningBytes) === seal.residency.effectiveReasoningEvidenceSha256
     && sha256(telemetryBytes) === seal.residency.telemetryPolicySha256, "evidence-drift");
+  validateReadiness(decode(readinessBytes)); validateReadiness(decode(effectiveReasoningBytes));
+  validateTelemetry(decode(telemetryBytes), seal);
   const bytes = Buffer.from(`${canonicalJson(seal)}\n`);
   return Object.freeze({ seal: Object.freeze(seal), bytes, runtimeSealSha256: sha256(bytes) });
 }

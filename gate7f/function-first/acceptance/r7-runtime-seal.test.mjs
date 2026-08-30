@@ -7,6 +7,7 @@ import { canonicalJson, sha256 } from "../../../gate4/canonical.mjs";
 import { ACCEPTANCE_POLICY, CASE_BUNDLE_SHA256, MODEL_CASES } from "./cases.mjs";
 import { QDRANT_PIN, validateRuntimeSeal } from "./runner-contract.mjs";
 import { createR7RuntimeSeal, deriveR7RuntimeSeal, R7_SEAL_AUTHORITIES, validateR7Manifest } from "./r7-runtime-seal.mjs";
+import { CAMPAIGN_V2_POLICY } from "../readiness/lease-v2-contract.mjs";
 
 const hex = "a".repeat(64), sourceCommit = "f".repeat(40);
 const stableSuites = () => Object.fromEntries(MODEL_CASES.flatMap(item => (item.setup.suites ?? [])
@@ -14,12 +15,33 @@ const stableSuites = () => Object.fromEntries(MODEL_CASES.flatMap(item => (item.
 const normalize = bytes => Buffer.from(bytes.toString("utf8").replaceAll("\r\n", "\n"));
 const copy = value => structuredClone(value);
 
+test("shared v2 hardware builder accepts an explicit truthful R7 classification while retaining its historical default", async () => {
+  const source = await readFile(path.resolve("gate7f/function-first/readiness/build-campaign-hardware-v2.mjs"), "utf8");
+  assert.match(source, /process\.argv\[3\].*prospective-r6-hardware-only-not-functional-qualification/u);
+  assert.match(source, /prospective-r7-hardware-only-not-functional-qualification/u);
+  assert.match(source, /classification,policy:CAMPAIGN_V2_POLICY/u);
+});
+
 async function fixture() {
   const root = await mkdtemp(path.join(tmpdir(), "m1-r7-seal-"));
+  const readiness = await readFile(path.resolve("gate7f/function-first/readiness/evidence/20260828-functional-prerequisites.json"));
+  const candidates = ACCEPTANCE_POLICY.roster.map((item, index) => ({ candidateId: item.candidateId, modelId: `r7-model-${index}`,
+    artifactSha256: String(index + 1).repeat(64), artifactBytes: index + 1,
+    requestControls: Object.fromEntries(ACCEPTANCE_POLICY.roles.map(role => [role, { reasoningEffort: index === 1 ? null : "none" }])) }));
+  const telemetry = { schemaVersion: "runa-m1-campaign-hardware-plan/v2", createdBeforeLoads: true, sourceCommit,
+    classification: "prospective-r7-hardware-only-not-functional-qualification", policy: CAMPAIGN_V2_POLICY,
+    maximumConcurrentPrimaries: 1, productionRoutingChanged: false, protectedDataIncluded: false,
+    existingReranker: { url: "http://192.168.50.165:8412", changed: false },
+    auxiliary: { artifact: { key: "text-embedding-nomic-embed-text-v1.5", sha256: hex },
+      loadRequest: { model: "text-embedding-nomic-embed-text-v1.5", context_length: 2048 } },
+    runtimeFiles: [{ sha256: hex }], candidates: candidates.map(item => ({ candidateId: item.candidateId,
+      artifact: { key: item.modelId, sha256: item.artifactSha256, bytes: item.artifactBytes },
+      requestReasoningEffort: item.requestControls.chat.reasoningEffort,
+      loadRequest: { model: item.modelId, context_length: 32768 } })) };
   const values = {
     sourceArchive: Buffer.from("prospective-r7-source-archive"), packageLock: Buffer.from('{"lockfileVersion":3}\n'),
-    criteria: await readFile(R7_SEAL_AUTHORITIES.criteriaPath), readiness: Buffer.from('{"ready":true}\n'),
-    effectiveReasoning: Buffer.from('{"reasoning":"sealed"}\n'), telemetry: Buffer.from('{"telemetry":"sealed"}\n'),
+    criteria: await readFile(R7_SEAL_AUTHORITIES.criteriaPath), readiness, effectiveReasoning: readiness,
+    telemetry: Buffer.from(`${canonicalJson(telemetry)}\n`),
   };
   const files = {
     sourceArchivePath: path.join(root, "source.tar"), packageLockPath: path.join(root, "package-lock.json"),
@@ -32,9 +54,7 @@ async function fixture() {
   const seal = { schemaVersion: "runaai-m1-functional-runtime-seal/v3", sourceCommit, caseBundleSha256: CASE_BUNDLE_SHA256,
     runtime: { nodeSha256: hex, sourceArchiveSha256: sha256(values.sourceArchive), packageLockSha256: sha256(values.packageLock),
       qdrantSha256: QDRANT_PIN.sha256, modelRuntimeSha256: hex, modelRuntimeVersion: "synthetic-r7-runtime" },
-    candidates: ACCEPTANCE_POLICY.roster.map((item, index) => ({ candidateId: item.candidateId, modelId: `r7-model-${index}`,
-      artifactSha256: String(index + 1).repeat(64), artifactBytes: index + 1,
-      requestControls: Object.fromEntries(ACCEPTANCE_POLICY.roles.map(role => [role, { reasoningEffort: index === 1 ? null : "none" }])) })),
+    candidates,
     roles: Object.fromEntries(ACCEPTANCE_POLICY.roles.map(role => [role, { maximumOutputTokens: ["code", "agent"].includes(role) ? 1536 : 512,
       maximumContextTokens: 32768, deadlineMs: ["code", "agent"].includes(role) ? 30000 : 60000 }])),
     providerBaseUrl: "http://127.0.0.1:9770/v1",

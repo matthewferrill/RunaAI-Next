@@ -53,3 +53,10 @@ The publisher refuses prior observations, imported attempts, partial rosters,
 inherited evidence, criteria substitution and input drift. R7 seal versions and
 records remain accepted only as their original historical evidence; they cannot
 qualify an R8 attempt.
+
+The sealed `run-r8-browser-witness-control.mjs` driver exercises the same
+synthetic application, task store, executor and browser UI without permitting a
+model call. It requires an on-time server-stamped witness, deliberately waits
+for the complete acknowledgement until after the observation deadline, proves
+the native receipt was released inside the unchanged 25-second ceiling and
+fails unless the full acknowledgement remains inside its separate grace window.

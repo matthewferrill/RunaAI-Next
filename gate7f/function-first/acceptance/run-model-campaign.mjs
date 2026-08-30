@@ -25,6 +25,44 @@ const stamp = () => new Date().toISOString();
 const age = (value, now) => now - Date.parse(value);
 const within = (value, now, maximumMs) => Number.isFinite(age(value, now)) && age(value, now) >= -2000 && age(value, now) <= maximumMs;
 const abortError = signal => signal.reason?.code ? signal.reason : fail("m1-campaign-aborted");
+export const LIVE_PROBE_READ_TIMEOUT_MS = 20_000;
+
+export async function readLiveLeaseBounded(readLease, { maximumMs = LIVE_PROBE_READ_TIMEOUT_MS, signal = null } = {}) {
+  if (typeof readLease !== "function" || !Number.isSafeInteger(maximumMs) || maximumMs < 1 || maximumMs > 30_000
+      || (signal !== null && (typeof signal.aborted !== "boolean" || typeof signal.addEventListener !== "function"))) {
+    throw fail("m1-campaign-live-probe-boundary-invalid");
+  }
+  if (signal?.aborted) throw abortError(signal);
+  const controller = new AbortController(); let timer, onAbort;
+  try {
+    const pending = [
+      Promise.resolve().then(() => readLease(controller.signal)),
+      new Promise((_, reject) => { timer = setTimeout(() => {
+        reject(fail("m1-campaign-live-probe-timeout")); controller.abort();
+      }, maximumMs); })
+    ];
+    if (signal) pending.push(new Promise((_, reject) => {
+      onAbort = () => { const error = abortError(signal); reject(error); controller.abort(error); };
+      signal.addEventListener("abort", onAbort, { once: true });
+    }));
+    return await Promise.race(pending);
+  } finally {
+    clearTimeout(timer);
+    if (onAbort) signal.removeEventListener("abort", onAbort);
+  }
+}
+
+export function createCoalescedLeaseReader(readLease, options = {}) {
+  let inFlight = null;
+  return () => {
+    if (!inFlight) {
+      let shared;
+      shared = readLiveLeaseBounded(readLease, options).finally(() => { if (inFlight === shared) inFlight = null; });
+      inFlight = shared;
+    }
+    return inFlight;
+  };
+}
 
 export function parseCampaignArguments(argv) {
   const result = { mode: "inventory" }, seen = new Set();
@@ -359,12 +397,14 @@ export async function runModelCampaign(args, { checkpoint = null, getLeaseObserv
   const {maximumMs,stopCode:deadlineStopCode}=campaignExecutionWindow(plan,ready),v2=plan.lifecycleVersion==='v2';
   let resources, testbed, worker, ledger = null, registryDigest = null, monitoring = false, cleanupPromise = Promise.resolve(), faults, result;
   const closedResources = new Set();
-  const readLease = getLeaseObservation ?? (async () => { await regularFile(inputs.homeStatus, 2 * 1024 * 1024); return JSON.parse(await readFile(inputs.homeStatus, "utf8")); });
+  const readLease = getLeaseObservation ?? (async signal => {
+    await regularFile(inputs.homeStatus, 2 * 1024 * 1024);
+    return JSON.parse(await readFile(inputs.homeStatus, { encoding: "utf8", signal }));
+  });
+  const readCurrentLease = createCoalescedLeaseReader(readLease, { signal });
   const checkLease = async (record = false) => {
     const capturedLedger = ledger;
-    let readTimer;
-    const raw = await Promise.race([readLease(), new Promise((_, reject) => { readTimer = setTimeout(() => reject(fail("m1-campaign-live-probe-timeout")), 5000); })])
-      .finally(() => clearTimeout(readTimer));
+    const raw = await readCurrentLease();
     const checked = validateLiveHome(raw, { ready, hardwarePlan: inputs.hardwarePlan, priorRegistryDigest: registryDigest });
     registryDigest ??= checked.registryDigest;
     if (signal.aborted) throw abortError(signal);

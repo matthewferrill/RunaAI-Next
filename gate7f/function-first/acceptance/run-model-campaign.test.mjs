@@ -9,12 +9,56 @@ import { enumerateCaseChecks, evaluateAttempt, evaluateControl } from "./asserti
 import { AGENT05_ACK_PUBLICATION_GRACE_MS, AGENT05_IN_FLIGHT_OBSERVATION_MS } from "./browser-checkpoint.mjs";
 import { AGENT05_POST_RECEIPT_HOLD_MS } from "./fault-actions.mjs";
 import { parseCampaignArguments, campaignPlan, qualifiedControlSuite, validateHomeReady, validateLiveHome,
-  verifyExtractedArchive, createCampaignWriter, needsBrowserCheckpoint, createCampaignActionExtensions, executeCandidateAttempts, runModelCampaign } from "./run-model-campaign.mjs";
+  verifyExtractedArchive, createCampaignWriter, needsBrowserCheckpoint, createCampaignActionExtensions, executeCandidateAttempts, runModelCampaign,
+  LIVE_PROBE_READ_TIMEOUT_MS, readLiveLeaseBounded, createCoalescedLeaseReader } from "./run-model-campaign.mjs";
 import { CAMPAIGN_V2_POLICY } from "../readiness/lease-v2-contract.mjs";
 
 // These are deliberately model-free unit fixtures. They test the runner's
 // serialization, immutable evidence and fail-closed contracts, not acceptance.
 const hash = "a".repeat(64), hardwareHash = "d".repeat(64), runtimeHash = "e".repeat(64), sourceCommit = "b".repeat(40);
+
+test("live lease reads allow the measured transient while remaining abortable and below the freshness ceiling", async () => {
+  assert.equal(LIVE_PROBE_READ_TIMEOUT_MS, 20_000);
+  assert.ok(LIVE_PROBE_READ_TIMEOUT_MS < 30_000);
+  const value = await readLiveLeaseBounded(async signal => {
+    assert.equal(signal.aborted, false); await new Promise(resolve => setTimeout(resolve, 60)); return { observed: true };
+  }, { maximumMs: 100 });
+  assert.deepEqual(value, { observed: true });
+  let aborted = false;
+  await assert.rejects(readLiveLeaseBounded(signal => new Promise((_, reject) => signal.addEventListener("abort", () => {
+    aborted = true; reject(Object.assign(new Error("aborted"), { code: "synthetic-read-aborted" }));
+  }, { once: true })), { maximumMs: 20 }), /m1-campaign-live-probe-timeout/u);
+  assert.equal(aborted, true);
+  await assert.rejects(readLiveLeaseBounded(async () => ({}), { maximumMs: 30_001 }), /m1-campaign-live-probe-boundary-invalid/u);
+});
+
+test("overlapping live checks share one read while each caller receives the immutable observation", async () => {
+  let reads = 0, release;
+  const readCurrent = createCoalescedLeaseReader(async () => {
+    reads += 1;
+    if (reads === 1) await new Promise(resolve => { release = resolve; });
+    return Object.freeze({ observed: "once" });
+  }, { maximumMs: 100 });
+  const first = readCurrent(), second = readCurrent();
+  await new Promise(resolve => setImmediate(resolve));
+  assert.equal(reads, 1); release();
+  assert.deepEqual(await Promise.all([first, second]), [{ observed: "once" }, { observed: "once" }]);
+  await readCurrent(); assert.equal(reads, 2);
+});
+
+test("campaign abort cancels a live read promptly and reader errors are never retried", async () => {
+  const campaign = new AbortController(); let readAborted = false;
+  const pending = readLiveLeaseBounded(signal => new Promise((_, reject) => signal.addEventListener("abort", () => {
+    readAborted = true; reject(signal.reason);
+  }, { once: true })), { maximumMs: 1000, signal: campaign.signal });
+  await new Promise(resolve => setImmediate(resolve));
+  campaign.abort(Object.assign(new Error("operator stop"), { code: "m1-campaign-operator-stop" }));
+  await assert.rejects(pending, /operator stop/u); assert.equal(readAborted, true);
+  let calls = 0;
+  const accessError = Object.assign(new Error("access denied"), { code: "EACCES" });
+  await assert.rejects(createCoalescedLeaseReader(async () => { calls += 1; throw accessError; })(), error => error === accessError);
+  assert.equal(calls, 1);
+});
 
 test("Control staging exports source with checkout conversion disabled", async () => {
   const source = await readFile(new URL("./Prepare-ControlFunctionalStage.ps1", import.meta.url), "utf8");

@@ -42,3 +42,14 @@ publication receipt separately.
 
 R7-v4 remains unchanged. R8 starts only from a newly committed source archive
 and runtime seal after the full local controls pass.
+
+## Prospective seal authority
+
+R8 uses `runaai-m1-functional-runtime-seal/v4`. The seal binds this R8
+criteria file, the unchanged case-bundle digest and candidate roster, the exact
+new source archive, the existing readiness evidence and a freshly created
+`prospective-r8-hardware-only-not-functional-qualification` telemetry plan.
+The publisher refuses prior observations, imported attempts, partial rosters,
+inherited evidence, criteria substitution and input drift. R7 seal versions and
+records remain accepted only as their original historical evidence; they cannot
+qualify an R8 attempt.

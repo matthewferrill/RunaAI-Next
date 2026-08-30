@@ -52,7 +52,12 @@ const RuntimeSealV3Schema = z.object({ schemaVersion: z.literal("runaai-m1-funct
     path: z.literal("gate7f/function-first/M1-S2-R7-CORRECTIVE-CRITERIA-2026-08-30.md"),
     sha256: hex, normalizedSha256: hex, rubricVersion: z.literal("2026-08-30.r7-function-contract") }).strict(),
 }).strict();
-export const RuntimeSealSchema = z.union([RuntimeSealV1Schema, RuntimeSealV2Schema, RuntimeSealV3Schema]);
+const RuntimeSealV4Schema = z.object({ schemaVersion: z.literal("runaai-m1-functional-runtime-seal/v4"), ...runtimeSealFields(CASE_BUNDLE_SHA256),
+  qualificationCriteria: z.object({ schemaVersion: z.literal("runaai-m1-r8-qualification-criteria/v1"),
+    path: z.literal("gate7f/function-first/M1-S2-R8-TWO-PHASE-BROWSER-WITNESS-CRITERIA-2026-08-30.md"),
+    sha256: hex, normalizedSha256: hex, rubricVersion: z.literal("2026-08-30.r8-two-phase-browser-witness") }).strict(),
+}).strict();
+export const RuntimeSealSchema = z.union([RuntimeSealV1Schema, RuntimeSealV2Schema, RuntimeSealV3Schema, RuntimeSealV4Schema]);
 
 export function validateRuntimeSeal(value, { sourceCommit, candidateId } = {}) {
   const seal = RuntimeSealSchema.parse(value);

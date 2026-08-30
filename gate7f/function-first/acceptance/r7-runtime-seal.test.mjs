@@ -19,6 +19,7 @@ test("shared v2 hardware builder accepts an explicit truthful R7 classification 
   const source = await readFile(path.resolve("gate7f/function-first/readiness/build-campaign-hardware-v2.mjs"), "utf8");
   assert.match(source, /process\.argv\[3\].*prospective-r6-hardware-only-not-functional-qualification/u);
   assert.match(source, /prospective-r7-hardware-only-not-functional-qualification/u);
+  assert.match(source, /prospective-r8-hardware-only-not-functional-qualification/u);
   assert.match(source, /classification,policy:CAMPAIGN_V2_POLICY/u);
 });
 

@@ -7,7 +7,8 @@ import {sha,assert,CAMPAIGN_V2_POLICY,NOMICS,primaryLoad,validateCampaignV2Polic
 const here=import.meta.dirname,root=path.resolve(here,'../../..'),target=path.resolve(process.argv[2]);
 assert(!existsSync(target),'v2-campaign-plan-exists');validateCampaignV2Policy(CAMPAIGN_V2_POLICY);
 const classification=process.argv[3]??'prospective-r6-hardware-only-not-functional-qualification';
-assert(['prospective-r6-hardware-only-not-functional-qualification','prospective-r7-hardware-only-not-functional-qualification'].includes(classification),'v2-campaign-classification');
+assert(['prospective-r6-hardware-only-not-functional-qualification','prospective-r7-hardware-only-not-functional-qualification',
+  'prospective-r8-hardware-only-not-functional-qualification'].includes(classification),'v2-campaign-classification');
 const sourceNames=['home-campaign-lease-v2.mjs','lease-v2-contract.mjs','lease-contract.mjs','Run-HomeCampaignLeaseV2.ps1'];
 const sources=Object.fromEntries(sourceNames.map(name=>[name,sha(readFileSync(path.join(here,name)))]));
 sources['gguf-metadata.mjs']=sha(readFileSync(path.join(root,'gate7f/evaluation/home/gguf-metadata.mjs')));

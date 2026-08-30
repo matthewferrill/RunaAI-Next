@@ -158,7 +158,7 @@ test("browser checkpoints select realpending/cancel/unknown/finalstates only", (
 });
 test("Agent05 browser observation overlaps one finite post-receipt hold inside the application route", () => {
   const plannerDeadlineMs = sealFixture().roles.agent.deadlineMs, sandboxProcessCeilingMs = 2000, applicationRouteMs = 60000;
-  assert.equal(AGENT05_IN_FLIGHT_OBSERVATION_MS, 20000); assert.equal(AGENT05_POST_RECEIPT_HOLD_MS, 25000);
+  assert.equal(AGENT05_IN_FLIGHT_OBSERVATION_MS, 24000); assert.equal(AGENT05_POST_RECEIPT_HOLD_MS, 25000);
   assert.ok(AGENT05_IN_FLIGHT_OBSERVATION_MS < AGENT05_POST_RECEIPT_HOLD_MS);
   assert.ok(plannerDeadlineMs + sandboxProcessCeilingMs + AGENT05_POST_RECEIPT_HOLD_MS < applicationRouteMs);
 });

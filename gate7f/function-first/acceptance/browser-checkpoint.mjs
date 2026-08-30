@@ -6,7 +6,7 @@ import { enumerateCaseChecks } from "./assertions.mjs";
 import { fail } from "./runner-contract.mjs";
 
 const TRANSIENT_WINDOWS_OBSERVATION = new Set(["ENOENT", "EBUSY", "EPERM"]);
-export const AGENT05_IN_FLIGHT_OBSERVATION_MS = 20_000;
+export const AGENT05_IN_FLIGHT_OBSERVATION_MS = 24_000;
 export const AGENT05_BOUNDED_DRAIN_NOTICE = "Cancellation requested. No new steps will start. An already-dispatched step may still be finishing or awaiting reconciliation; its actual result will be retained when observed.";
 
 async function readAckFile(ackPath) {

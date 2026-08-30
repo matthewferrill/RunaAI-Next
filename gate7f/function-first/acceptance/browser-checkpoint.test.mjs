@@ -185,7 +185,7 @@ test("in-flight cancel cannot bootstrap late or borrow another task/session prep
   await assert.rejects(checkpoint({ client, stage: "in-flight" }), /preparation-required/u); assert.equal(client.bootstrapCalls, 1);
 });
 
-for (const acknowledgementMs of [10000, 15000, 20000]) test(`post-cancel browser evidence at ${acknowledgementMs / 1000}s uses the authoritative timestamp and passes`, async t => {
+for (const acknowledgementMs of [10000, 20000, 24000]) test(`post-cancel browser evidence at ${acknowledgementMs / 1000}s uses the authoritative timestamp and passes`, async t => {
   const directory = await mkdtemp(path.join(tmpdir(), "m1-browser-inflight-late-valid-"));
   t.after(() => rm(directory, { recursive: true, force: true }));
   const client = cancelClient(), start = Date.parse("2026-08-29T14:00:00.000Z"); let clock = start, inFlightRequest;
@@ -206,7 +206,7 @@ for (const acknowledgementMs of [10000, 15000, 20000]) test(`post-cancel browser
   assert.equal(client.ledger.observation.checks[0].actual, false); assert.equal(client.ledger.observation.browserExercised, true);
 });
 
-test("post-cancel browser evidence beyond twenty seconds expires without grading the DOM", async t => {
+test("post-cancel browser evidence beyond twenty-four seconds expires without grading the DOM", async t => {
   const directory = await mkdtemp(path.join(tmpdir(), "m1-browser-inflight-expired-"));
   t.after(() => rm(directory, { recursive: true, force: true }));
   const client = cancelClient(), start = Date.parse("2026-08-29T14:30:00.000Z"); let clock = start;

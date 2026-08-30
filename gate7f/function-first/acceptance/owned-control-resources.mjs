@@ -54,7 +54,7 @@ async function removeOwned(root, name) {
 // Production binaries/dependencies may be read, but no production connection string,
 // store, service, ACL, configuration or model-residency operation is accepted here.
 export async function createOwnedControlResources({ root: suppliedRoot, maximumMs = 300000 }) {
-  if (process.platform !== "win32" || maximumMs < 1000 || maximumMs > 3600000) throw fail("m1-control-resource-boundary-invalid");
+  if (process.platform !== "win32" || maximumMs < 1000 || maximumMs > 4500000) throw fail("m1-control-resource-boundary-invalid");
   const root = assertOwnedStage(suppliedRoot);
   if (await realpath(root) !== root || (await lstat(root)).isSymbolicLink()) throw fail("m1-owned-stage-reparse");
   const qdrantExecutable = path.join(root, "tools/qdrant/bin/qdrant.exe");

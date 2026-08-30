@@ -4,7 +4,7 @@ import { assertOwnedStage } from "./runner-contract.mjs";
 
 const [rawRoot, parentText, qdrantText, durationText] = process.argv.slice(2);
 const root = assertOwnedStage(rawRoot), parent = Number(parentText), qdrant = Number(qdrantText), duration = Number(durationText);
-if (process.platform !== "win32" || ![parent, qdrant, duration].every(value => Number.isSafeInteger(value) && value > 0) || duration > 3600000) process.exit(2);
+if (process.platform !== "win32" || ![parent, qdrant, duration].every(value => Number.isSafeInteger(value) && value > 0) || duration > 4500000) process.exit(2);
 const deadline = Date.now() + duration;
 const timer = setInterval(() => {
   let alive = true; try { process.kill(parent, 0); } catch { alive = false; }

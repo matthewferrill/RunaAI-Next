@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import {readFile} from 'node:fs/promises';
 import {ACCEPTANCE_POLICY,CASE_BUNDLE_SHA256,MODEL_CASES} from './cases.mjs';
 import {newObservation,QDRANT_PIN,sha256} from './runner-contract.mjs';
 import {assertCampaignAttemptWindow,campaignExecutionWindow,campaignPlan,executeCandidateAttempts,validateHomeReady} from './run-model-campaign.mjs';
@@ -72,6 +73,14 @@ test('extended profile retains publication margins and provides the measured75mi
   assert.equal(campaignExecutionWindow(value,extendedReady,{now:windows.latestLaunchAt}).stopCode,'m1-campaign-batch-hard-stop');
   validateHomeReady(extendedReady,extendedHardware,{seal:{...seal(),maximumBatchMs:CAMPAIGN_V2_EXTENDED_POLICY.maximumBatchMs},
     candidateId,hardwarePlanSha256:hardwareHash,now:readyAt+1000});
+});
+
+test('owned disposable resources and their watchdog accept exactly the sealed75minute R9 ceiling',async()=>{
+  const [resources,watchdog]=await Promise.all([
+    readFile(new URL('./owned-control-resources.mjs',import.meta.url),'utf8'),
+    readFile(new URL('./owned-control-watchdog.mjs',import.meta.url),'utf8')]);
+  assert.match(resources,/maximumMs > 4500000/u);assert.doesNotMatch(resources,/maximumMs > 3600000/u);
+  assert.match(watchdog,/duration > 4500000/u);assert.doesNotMatch(watchdog,/duration > 3600000/u);
 });
 
 test('hard-stop interruption retains the started attempt and all119 denominator slots',async()=>{

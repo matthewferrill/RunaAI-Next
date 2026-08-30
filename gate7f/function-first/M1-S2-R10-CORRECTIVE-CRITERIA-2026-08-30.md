@@ -48,8 +48,9 @@ model roster, protected-data boundary, production route or broader roadmap.
 Local pre-seal verification completed on 2026-08-30:
 
 - corrected focused suites: 83/83 passed;
-- complete repository suite under normal Windows process authority: 1,787
-  passed, 0 failed and 77 intentionally skipped out of 1,864 tests;
+- complete repository suite under normal Windows process authority after the
+  prospective R10 seal was added: 1,789 passed, 0 failed and 77 intentionally
+  skipped out of 1,866 tests;
 - roadmap verification: 15/15 passed at the pinned digest above; and
 - `git diff --check`: passed (line-ending notices only).
 

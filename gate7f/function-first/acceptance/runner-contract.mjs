@@ -62,7 +62,13 @@ const RuntimeSealV5Schema = z.object({ schemaVersion: z.literal("runaai-m1-funct
     path: z.literal("gate7f/function-first/M1-S2-R9-EXTENDED-CAMPAIGN-WINDOW-CRITERIA-2026-08-30.md"),
     sha256: hex, normalizedSha256: hex, rubricVersion: z.literal("2026-08-30.r9-extended-campaign-window") }).strict(),
 }).strict();
-export const RuntimeSealSchema = z.union([RuntimeSealV1Schema, RuntimeSealV2Schema, RuntimeSealV3Schema, RuntimeSealV4Schema, RuntimeSealV5Schema]);
+const RuntimeSealV6Schema = z.object({ schemaVersion: z.literal("runaai-m1-functional-runtime-seal/v6"), ...runtimeSealFields(CASE_BUNDLE_SHA256),
+  qualificationCriteria: z.object({ schemaVersion: z.literal("runaai-m1-r10-qualification-criteria/v1"),
+    path: z.literal("gate7f/function-first/M1-S2-R10-CORRECTIVE-CRITERIA-2026-08-30.md"),
+    sha256: hex, normalizedSha256: hex, rubricVersion: z.literal("2026-08-30.r10-review-witness-correction") }).strict(),
+}).strict();
+export const RuntimeSealSchema = z.union([RuntimeSealV1Schema, RuntimeSealV2Schema, RuntimeSealV3Schema,
+  RuntimeSealV4Schema, RuntimeSealV5Schema, RuntimeSealV6Schema]);
 
 export function validateRuntimeSeal(value, { sourceCommit, candidateId } = {}) {
   const seal = RuntimeSealSchema.parse(value);
@@ -83,7 +89,9 @@ export function validateRuntimeSeal(value, { sourceCommit, candidateId } = {}) {
   }
   for (const [role, budget] of Object.entries(seal.roles)) {
     const planner = ["code", "agent"].includes(role);
-    if (budget.maximumOutputTokens !== (planner ? 1536 : 512) || budget.deadlineMs !== (planner ? 30000 : 60000)) {
+    const reviewCorrection = seal.schemaVersion === "runaai-m1-functional-runtime-seal/v6" && role === "review";
+    if (budget.maximumOutputTokens !== (planner ? 1536 : reviewCorrection ? 1024 : 512)
+        || budget.deadlineMs !== (planner ? 30000 : 60000)) {
       throw fail("m1-acceptance-unenforced-budget");
     }
   }

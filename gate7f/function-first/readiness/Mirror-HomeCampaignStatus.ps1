@@ -4,7 +4,7 @@ param(
   [Parameter(Mandatory)][string]$ExpectedSeal,
   [Parameter(Mandatory)][string]$ControlOwnedRoot,
   [Parameter(Mandatory)][string]$ExpectedControlSourceCommit,
-  [ValidateRange(5,3900)][int]$MaximumSeconds=3900
+  [ValidateRange(5,4800)][int]$MaximumSeconds=4800
 )
 Set-StrictMode -Version Latest
 $ErrorActionPreference='Stop'

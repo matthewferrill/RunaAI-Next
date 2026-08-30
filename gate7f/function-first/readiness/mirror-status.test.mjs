@@ -8,7 +8,7 @@ import path from 'node:path';
 const script = await readFile(new URL('./Mirror-HomeCampaignStatus.ps1', import.meta.url), 'utf8');
 const publisher = await readFile(new URL('./Publish-CampaignMetadata.ps1', import.meta.url), 'utf8');
 test('hardware mirror is bounded, exact-owned and observation-only on Home', () => {
-  for (const marker of ['ValidateRange(5,3900)', 'WaitForExit(20000)', 'Start-Sleep -Seconds 5',
+  for (const marker of ['ValidateRange(5,4800)', '[int]$MaximumSeconds=4800', 'WaitForExit(20000)', 'Start-Sleep -Seconds 5',
     'm1-mirror-pin-invalid', 'm1-mirror-target-invalid', 'mirror-source-drift', 'mirror-file-reparse',
     'mirror-existing-binding-mismatch', 'runaai-m1-campaign-live/v1', 'lastTelemetry=$telemetry']) assert.ok(script.includes(marker), marker);
   const probe = script.split("$homeProbe=@'")[1].split("'@")[0];

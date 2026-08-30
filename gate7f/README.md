@@ -9,6 +9,13 @@ the existing release composition; `function-first/M1-S1-RESULTS-2026-08-28.md` r
 and `function-first/QWEN36-READINESS-PLAN-2026-08-28.md` records the third-model diagnosis design.
 Run `npm run test:m1:roles` for the focused tests. This is not live qualification, a deployment or full M1.
 
+The complete R9 three-model functional comparison is recorded in
+`function-first/M1-S2-R9-THREE-MODEL-RESULTS-2026-08-30.md`. Four roles now have
+at least one qualifying candidate, but no candidate qualifies for Review and no
+whole candidate qualifies. The result is synthetic evidence under the frozen R9
+seal; it does not select or deploy a production route, close M1 or replace the
+remaining roadmap.
+
 Gate 7F-0 is the inert control plane for conversational project work. It implements task scope,
 capability schemas, deterministic approval profiles, exact proposals, remembered decisions, synthetic
 execution receipts, idempotency, restart continuity, and governed rollback without touching a real

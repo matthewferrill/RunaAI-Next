@@ -4,10 +4,12 @@
   "milestone": "M1",
   "sliceId": "M1-S2",
   "state": "in-progress",
-  "completionEvidence": [],
+  "completionEvidence": [
+    "gate7f/function-first/M1-S2-R9-THREE-MODEL-RESULTS-2026-08-30.md"
+  ],
   "scopeDocument": "roadmap/CURRENT-SLICE.md",
   "capabilityIds": ["C01", "C02", "C03", "C04", "C06", "C07", "C12", "C15", "C16"],
-  "nextWork": "Complete M1-S2 real customer functions, durable governed project work and matched three-model validation; continue until complete or human testing is needed, not after internal commits.",
+  "nextWork": "Correct and freshly seal the Review completeness contract and Agent05 witness publication; requalify affected role routes, then prepare rollback-protected all-five-function human testing.",
   "remainingRoadmapRequired": true,
   "completionClaim": "M1 completion is not whole-product completion."
 }

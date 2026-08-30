@@ -49,6 +49,14 @@ covered only Gemma and Qwen3 Coder, and neither passed a complete frozen role. P
 The 4B fallback, embeddings and reranker are not new large-model competitors. Voice/vision/media may
 need separate specialist artifacts later; text-model testing cannot establish those capabilities.
 
+The later R9 function-first comparison covers all three candidates across all five
+M1 roles. It qualifies Gemma or Coder for Chat and Research, every candidate for
+Code, and Qwen3.6 for Agent. No candidate qualifies for Review, and no candidate
+qualifies as a whole. This supports deterministic application-owned role routing;
+it does not authorize model self-selection, fallback pooling, production promotion
+or removal of the Review function. Exact evidence is in
+`gate7f/function-first/M1-S2-R9-THREE-MODEL-RESULTS-2026-08-30.md`.
+
 ## Complete capability register
 
 `roadmap/capabilities.json` is the machine-checked register. IDs are permanent. The starting states below

@@ -5,23 +5,20 @@ Milestone: M1
 Slice ID: M1-S2
 Status: in progress, acceptance frozen before implementation; not complete or production-qualified.
 
-R6J evaluation update, 2026-08-30: the frozen corrected application completed all
-360 model attempts and independent candidate-blind review. The 12 shared controls
-passed, but no candidate met every role threshold, so no model was selected and no
-customer trial is ready. Exact results and the prospective corrective boundary are
-in `../gate7f/function-first/M1-S2-R6J-THREE-MODEL-RESULTS-2026-08-30.md`. R6J is
-immutable evidence; the next source, rubric and runtime seal must be versioned rather
-than retroactively changing its prompts, grades or denominator.
+R9 evaluation update, 2026-08-30: the frozen corrected application completed all
+360 model attempts, 12/12 shared controls and independent review. Exact results
+are in
+`../gate7f/function-first/M1-S2-R9-THREE-MODEL-RESULTS-2026-08-30.md`.
+Gemma or Coder qualifies for Chat and Research, all three candidates qualify for
+Code, and Qwen3.6 qualifies for Agent. No candidate qualifies for Review, so no
+all-five-function route or customer trial is ready. No production route was
+selected or promoted.
 
-R7 prospective correction update, 2026-08-30: the model-neutral corrective
-contract and implementation are frozen in
-`../gate7f/function-first/M1-S2-R7-CORRECTIVE-CRITERIA-2026-08-30.md`. The new
-case bundle and rubric are versioned separately from R6J. This is implementation
-progress only. A create-only v3 seal builder now preserves the historical v1/v2
-R6J authority while binding the prospective source, case, rubric, suites and
-runtime evidence. An actual source archive and seal publication, 12 controls,
-360 fresh attempts and independent grade still precede any human customer trial
-or model selection.
+R9 is immutable evidence. The next finite correction is the model-neutral Review
+completeness contract plus the Agent05 live-witness defect. It must use a fresh
+source/archive/seal and preserve all R9 attempts. Role routing stays deterministic
+and application-owned; a model cannot select itself, change authority or inherit
+a pass from another role.
 
 Read `PRODUCT-ROADMAP.md` first. This slice is the first milestone only; it does not replace, complete
 or retire the rest of the roadmap. All 17 capability families remain tracked in `capabilities.json`.
@@ -120,9 +117,12 @@ function to work without erasing passed historical evidence or unrelated roadmap
 
 ## Next implementation slice
 
-Active work is M1-S2, specified in `../gate7f/function-first/M1-S2-FUNCTIONS-AND-GREEN-CRITERIA.md`.
-The steward reaffirmed continuation until completion or genuinely needed human testing. Internal module,
-commit and publication checkpoints are not turn-ending gates. The M1-S1 result below is retained history.
+Active work remains M1-S2, specified in
+`../gate7f/function-first/M1-S2-FUNCTIONS-AND-GREEN-CRITERIA.md`. R9 qualifies a
+candidate route for four functions but leaves Review and the Agent05 witness open.
+The steward reaffirmed continuation until completion or genuinely needed human
+testing. Internal module, commit and publication checkpoints are not turn-ending
+gates. The M1-S1 result below is retained history.
 
 M1-S1: role-separated provider contract and compatibility wiring, with current-state/receipt acceptance
 requirements captured for the later project tools. This is first because all three model comparisons and

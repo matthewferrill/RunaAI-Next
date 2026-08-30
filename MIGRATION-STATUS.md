@@ -15,35 +15,38 @@ are unchanged. M1 is authorized, not complete; its first local wiring result is 
 The steward authorized necessary non-destructive work and commit/push to RunaAI-Next without recurring
 permission requests. Human involvement is reserved for genuine customer tests or human-only operations.
 
-### Current checkpoint: complete baseline; corrected-stack qualification continues
+### Current checkpoint: R9 functional comparison complete; Review remains open
 
-On 2026-08-30 the R6J corrected-stack comparison reached a complete independent
-result at source `334551198b1095d33e826f197b99750b3f64c2a2`: 360/360 model attempts,
-12/12 shared controls and 963/963 semantic checks were covered. No whole candidate
-qualified. Gemma recorded 24/21/24/21/21 acceptable attempts across
-Chat/Research/Code/Agent/Review, Coder 23/21/21/16/13 and Qwen3.6 18/21/21/21/19,
-each over a fixed denominator of 24 per role. No model was selected or promoted.
-See `gate7f/function-first/M1-S2-R6J-THREE-MODEL-RESULTS-2026-08-30.md` for exact
-pins, attribution and the prospective corrective boundary. Production remained
-unchanged, protected data was not used and Home cleanup restored zero owned model
-residency plus both 260-W limits. M1 and the human customer trial remain open.
+On 2026-08-30 the R9 corrected-stack comparison completed 360/360 fixed model
+attempts and 12/12 model-free Control drivers on source
+`c8932ccf2b2f0bc19f6a6e32d6f0ca30631ed4fd`, runtime seal
+`9450a5aca5812b812d0dfe645d657315b0602609d6f755ff9007d8102841cd75`.
+Independent review verified all raw/ledger records and provider outputs with zero
+binding errors and found no critical model or product failure.
 
-The prospective R7 correction is now implemented locally and frozen in
-`gate7f/function-first/M1-S2-R7-CORRECTIVE-CRITERIA-2026-08-30.md`. It adds
-generic complete-request and negative-evidence handling, explicit analysis/
-preview/effect task intent, least-capability grants, one application-checked
-planner correction with durable evidence, application-owned per-run change/test
-status, and a one-use loopback browser receipt that removes Agent05's ack-file
-timing dependency without letting the harness invent a DOM observation. The
-prospective case bundle is
-`87f08a861d1b109fa5d3fb64f9dc10aacba023eee80a3ab4762b07b2d987524d`
-and rubric is `2026-08-30.r7-function-contract`. R7 has not yet been source-
-archived, runtime-sealed or scored; no result or model selection is claimed.
-The create-only R7 seal builder is implemented and binds the new case/rubric,
-source archive, package lock, current fixed suites, three-candidate roster and
-readiness/reasoning/telemetry evidence. Historical v1/v2 validation remains
-bound to R6J instead of being silently reinterpreted through the prospective
-case bundle. Actual seal publication follows the corrective source commit.
+No whole candidate qualified. Across Chat/Research/Code/Agent/Review, Qwen3.6
+recorded 18/21/24/24/18 acceptable model attempts, Gemma 24/22/24/21/17 and
+Coder 24/23/24/21/14, each over a fixed denominator of 24 per role. Deterministic
+role routing is therefore viable for four functions: Gemma or Coder for Chat,
+Gemma or Coder for Research, any candidate for Code and Qwen3.6 for Agent. No
+candidate qualifies for Review, so all-five-function customer testing is not yet
+ready and no production route is selected or promoted.
+
+Exact pins, result hashes, per-role findings, harness limitations and cleanup are
+in `gate7f/function-first/M1-S2-R9-THREE-MODEL-RESULTS-2026-08-30.md`. The three
+raw candidate results are retained under
+`gate7f/function-first/acceptance/evidence/campaign-20260830-r9/`. Production
+remained unchanged, protected data was not read, each Home lease ended with zero
+owned model residency, both GPU limits restored to 260 W and no owned campaign
+task. All temporary browser tunnels were closed.
+
+Four Coder attempts remain inconclusive rather than rewritten: Agent05's correct
+bounded-drain UI was visible in all three repetitions but its live witness POST
+was denied, and Agent06 repetition 2 missed observation because its temporary
+forward was started with `ClearAllForwardings=yes`. The latter operator error was
+corrected and repetitions 1 and 3 passed. The Agent05 witness defect and the
+model-neutral Review completeness contract are the next finite corrective work.
+M1 and the required human customer trial remain open; M2-M5 remain required.
 
 The frozen application is `9556ed01f9dbabe8c93eea309e482aad60bf809f`, common runtime seal
 `416102ff7129e5adb00de51b2f0fc3e5ca542c18a82941a32fdc4075b6a1c89f`. The complete actual Control

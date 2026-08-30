@@ -34,7 +34,8 @@
       "evidence": [
         "gate7b/customer-journey.test.mjs",
         "gate7d/navigation.test.mjs",
-        "gate7f/function-first/M1-S1-RESULTS-2026-08-28.md"
+        "gate7f/function-first/M1-S1-RESULTS-2026-08-28.md",
+        "gate7f/function-first/M1-S2-R9-THREE-MODEL-RESULTS-2026-08-30.md"
       ],
       "scope": "Personal conversation and explicitly selected project context.",
       "acceptance": "Continue a reopened conversation and satisfy new instructions without mixing users or old questions.",
@@ -42,8 +43,8 @@
       "proof": {
         "source": "partial",
         "deterministic": "partial",
-        "integration": "not-verified",
-        "modelQualification": "not-verified",
+        "integration": "partial",
+        "modelQualification": "partial",
         "release": "not-verified",
         "humanAcceptance": "not-verified"
       },
@@ -63,7 +64,8 @@
       "state": "partial",
       "evidence": [
         "gate4c/answer-context.mjs",
-        "gate7f/README.md"
+        "gate7f/README.md",
+        "gate7f/function-first/M1-S2-R9-THREE-MODEL-RESULTS-2026-08-30.md"
       ],
       "scope": "Personal/project knowledge; owner-governed learning changes remain distinct.",
       "acceptance": "Use approved knowledge, exclude revoked material and preserve scope across model changes.",
@@ -71,8 +73,8 @@
       "proof": {
         "source": "partial",
         "deterministic": "partial",
-        "integration": "not-verified",
-        "modelQualification": "not-verified",
+        "integration": "partial",
+        "modelQualification": "partial",
         "release": "not-verified",
         "humanAcceptance": "not-verified"
       },
@@ -92,7 +94,8 @@
       ],
       "state": "partial",
       "evidence": [
-        "gate6b/composition.mjs"
+        "gate6b/composition.mjs",
+        "gate7f/function-first/M1-S2-R9-THREE-MODEL-RESULTS-2026-08-30.md"
       ],
       "scope": "Explicit attachments and project-authorized files only.",
       "acceptance": "Extract correct content from supported inputs without executing macros or following unsafe external references.",
@@ -100,8 +103,8 @@
       "proof": {
         "source": "partial",
         "deterministic": "partial",
-        "integration": "not-verified",
-        "modelQualification": "not-verified",
+        "integration": "partial",
+        "modelQualification": "partial",
         "release": "not-verified",
         "humanAcceptance": "not-verified"
       },
@@ -121,7 +124,8 @@
       "state": "partial",
       "evidence": [
         "gate1/core.mjs",
-        "gate6b/composition.mjs"
+        "gate6b/composition.mjs",
+        "gate7f/function-first/M1-S2-R9-THREE-MODEL-RESULTS-2026-08-30.md"
       ],
       "scope": "Approved sources; later scoped outbound research.",
       "acceptance": "Produce supported citations, distinguish missing/conflicting evidence and exclude unauthorized sources.",
@@ -129,8 +133,8 @@
       "proof": {
         "source": "partial",
         "deterministic": "partial",
-        "integration": "not-verified",
-        "modelQualification": "not-verified",
+        "integration": "partial",
+        "modelQualification": "partial",
         "release": "not-verified",
         "humanAcceptance": "not-verified"
       },
@@ -179,7 +183,8 @@
       "state": "partial",
       "evidence": [
         "gate7e/contracts.mjs",
-        "gate7f/README.md"
+        "gate7f/README.md",
+        "gate7f/function-first/M1-S2-R9-THREE-MODEL-RESULTS-2026-08-30.md"
       ],
       "scope": "Disposable M1 projects; later explicitly granted retained project roots.",
       "acceptance": "Edit a real project, observe failing tests, fix the code and verify actual passing results.",
@@ -187,8 +192,8 @@
       "proof": {
         "source": "partial",
         "deterministic": "partial",
-        "integration": "not-verified",
-        "modelQualification": "not-verified",
+        "integration": "partial",
+        "modelQualification": "partial",
         "release": "not-verified",
         "humanAcceptance": "not-verified"
       },
@@ -205,7 +210,8 @@
       "dependsOn": [],
       "state": "partial",
       "evidence": [
-        "gate7e/mxc-javascript-executor.mjs"
+        "gate7e/mxc-javascript-executor.mjs",
+        "gate7f/function-first/M1-S2-R9-THREE-MODEL-RESULTS-2026-08-30.md"
       ],
       "scope": "Per-executor filesystem/network/secret/resource envelope.",
       "acceptance": "Run actual code and report exact source-bound output, limits and errors without escaping the sandbox.",
@@ -213,8 +219,8 @@
       "proof": {
         "source": "partial",
         "deterministic": "partial",
-        "integration": "not-verified",
-        "modelQualification": "not-verified",
+        "integration": "partial",
+        "modelQualification": "partial",
         "release": "not-verified",
         "humanAcceptance": "not-verified"
       },
@@ -345,7 +351,8 @@
       "state": "partial",
       "evidence": [
         "gate7f/core.mjs",
-        "gate7f/README.md"
+        "gate7f/README.md",
+        "gate7f/function-first/M1-S2-R9-THREE-MODEL-RESULTS-2026-08-30.md"
       ],
       "scope": "Current actor/project/task grants checked at every effect.",
       "acceptance": "Plan, act, inspect, correct, stop/resume and reconcile exact effects across restart.",
@@ -353,8 +360,8 @@
       "proof": {
         "source": "partial",
         "deterministic": "partial",
-        "integration": "not-verified",
-        "modelQualification": "not-verified",
+        "integration": "partial",
+        "modelQualification": "partial",
         "release": "not-verified",
         "humanAcceptance": "not-verified"
       },
@@ -429,7 +436,8 @@
       "state": "partial",
       "evidence": [
         "gate6b/public/workspace-shell.mjs",
-        "gate7c/ui-shell.test.mjs"
+        "gate7c/ui-shell.test.mjs",
+        "gate7f/function-first/M1-S2-R9-THREE-MODEL-RESULTS-2026-08-30.md"
       ],
       "scope": "Only the authenticated user's authorized task/project surfaces.",
       "acceptance": "Inspect real outputs, act on understandable approvals and recover from failure without losing work.",
@@ -437,8 +445,8 @@
       "proof": {
         "source": "partial",
         "deterministic": "partial",
-        "integration": "not-verified",
-        "modelQualification": "not-verified",
+        "integration": "partial",
+        "modelQualification": "partial",
         "release": "not-verified",
         "humanAcceptance": "not-verified"
       },
@@ -458,7 +466,8 @@
       "state": "partial",
       "evidence": [
         "gate7a/ordinary-session.test.mjs",
-        "MIGRATION-STATUS.md"
+        "MIGRATION-STATUS.md",
+        "gate7f/function-first/M1-S2-R9-THREE-MODEL-RESULTS-2026-08-30.md"
       ],
       "scope": "Ordinary users isolated; protected owner/admin actions retain step-up.",
       "acceptance": "Complete supported cross-device journeys while cross-user/session access is denied.",
@@ -466,8 +475,8 @@
       "proof": {
         "source": "partial",
         "deterministic": "partial",
-        "integration": "not-verified",
-        "modelQualification": "not-verified",
+        "integration": "partial",
+        "modelQualification": "partial",
         "release": "not-verified",
         "humanAcceptance": "not-verified"
       },

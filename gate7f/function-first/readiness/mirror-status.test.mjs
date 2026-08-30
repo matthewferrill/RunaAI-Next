@@ -21,6 +21,15 @@ test('hardware mirror is bounded, exact-owned and observation-only on Home', () 
   for (const marker of ['MoveFileExW', 'WRITE_THROUGH', 'mirror-publication-sharing-timeout',
     'mirror-publication-drift', 'mirror-publication-reparse']) assert.ok(publisher.includes(marker), marker);
   assert.match(script, /readOnlyOnHome=\$true/);
+  assert.match(script, /sharingRetries-isnot\[int\]-and\$ack\.sharingRetries-isnot\[long\]/);
+});
+test('Windows PowerShell JSON retry counts retain valid Int32 and Int64 widths', () => {
+  const program = `$values=@('{"sharingRetries":0}','{"sharingRetries":2147483648}')|ForEach-Object{($_|ConvertFrom-Json).sharingRetries};`+
+    `$valid=@($values|Where-Object{($_-is[int]-or$_-is[long])-and$_-ge0});[Console]::Out.Write(($valid.Count).ToString())`;
+  const output = execFileSync('powershell.exe', ['-NoProfile', '-NonInteractive', '-EncodedCommand',
+    Buffer.from(program, 'utf16le').toString('base64')], { encoding: 'utf8', windowsHide: true, timeout: 10000,
+    env: { ...process.env, PSModulePath: 'C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\Modules' } });
+  assert.equal(output, '2');
 });
 test('actual Windows PowerShell5 mirror replacement preserves the latest complete JSON', async () => {
   const parent = await realpath(os.tmpdir());

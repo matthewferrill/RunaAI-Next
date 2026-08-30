@@ -114,7 +114,7 @@ do{
   if($value.schemaVersion-ne'runaai-m1-campaign-live/v1'-or$value.leaseId-ne$LeaseId-or$value.sealSha256-ne$ExpectedSeal){throw 'm1-mirror-response-invalid'}
   $ack=(Invoke-BoundedSsh $controlArguments $raw)|ConvertFrom-Json
   if($ack.mirrored-ne$true){throw 'm1-mirror-write-unconfirmed'}
-  if($ack.sharingRetries-isnot[long]-or$ack.sharingRetries-lt0){throw 'm1-mirror-publication-evidence-invalid'}
+  if(($ack.sharingRetries-isnot[int]-and$ack.sharingRetries-isnot[long])-or$ack.sharingRetries-lt0){throw 'm1-mirror-publication-evidence-invalid'}
   $sharingRetries+=$ack.sharingRetries
   $samples++
   if($samples-eq1){[ordered]@{schemaVersion='runaai-m1-campaign-mirror-start/v1';leaseId=$LeaseId;mirrorPath=(Join-Path $target 'acceptance-evidence\home-live.json');readOnlyOnHome=$true}|ConvertTo-Json -Compress}

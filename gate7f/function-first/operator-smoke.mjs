@@ -7,9 +7,9 @@ import { MastraAnswerProvider } from "../../gate1/adapters/mastra-provider.mjs";
 import { OpenAICompatibleEmbedder, WindowedBgeReranker } from "../../gate1/adapters/qdrant.mjs";
 import { MastraM1Planner } from "./planner.mjs";
 
-export const SMOKE_POLICY = Object.freeze({ schemaVersion: "runaai-m1-operator-smoke-policy/v1", scored: false,
+export const SMOKE_POLICY = Object.freeze({ schemaVersion: "runaai-m1-operator-smoke-policy/v2", scored: false,
   answerRoles: ["chat", "research", "review"], plannerRoles: ["code", "agent"], answerTokens: 512,
-  plannerTokens: 1536, deadlineMs: 30_000, auxiliaryDeadlineMs: 10_000, maximumWireBytes: 2_000_000,
+  reviewTokens: 1024, plannerTokens: 1536, deadlineMs: 30_000, auxiliaryDeadlineMs: 10_000, maximumWireBytes: 2_000_000,
   noTextualReasoningSuffix: true, modelLifecycleOwnedBySealedOperator: true, productionChanged: false });
 export const SMOKE_SOURCE_FILES = Object.freeze(["gate7f/function-first/operator-smoke.mjs", "gate7f/function-first/planner.mjs",
   "gate7f/function-first/provider-transport.mjs", "gate7f/function-first/model-roles.mjs",
@@ -77,6 +77,7 @@ export async function runOperatorSmoke(seal, { fetchImpl = fetch, record = async
     source.contentSha256 = sha(source.content);
     for (role of SMOKE_POLICY.answerRoles) {
       const answerer = new MastraAnswerProvider({ baseURL: seal.baseUrl, modelId: seal.modelId, role,
+        maxOutputTokens: role === "review" ? SMOKE_POLICY.reviewTokens : SMOKE_POLICY.answerTokens,
         reasoningEffort: seal.reasoningEffort, preventRedirects: true, fetchImpl: wire });
       const request = { participantId: "synthetic-smoke", projectId: "smoke-garden", threadId: `smoke-${role}`, lane: "general",
         message: role === "chat" ? "In one short sentence, greet the fictional Garden Circle." : "Which room is marked by pale stones in the supplied fictional note? Cite the note and do not claim to have run anything." };

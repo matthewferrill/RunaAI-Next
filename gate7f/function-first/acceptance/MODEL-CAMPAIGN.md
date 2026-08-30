@@ -73,7 +73,11 @@ The later `in-flight` request has `bootstrap:null`, `reusePreparedBrowser:true` 
 the preparation checkpoint ID. Refresh/observe that already-open task directly;
 do not start another login/navigation sequence. The actual browser publishes the
 tracked canonical witness within 24 seconds inside the 25-second post-receipt
-native-delivery hold. The server timestamps the witness and the hold ends as soon
+native-delivery hold. The immediate checkpoint announcement includes only a
+strict, expiring `witnessPublication` ticket (checkpoint/case/stage, loopback URL,
+one-use witness token and expiry), so witness publication never waits for delivery
+of the complete request file. It never includes the acknowledgement token,
+session/scope material, nonce or cookie. The server timestamps the witness and the hold ends as soon
 as it is accepted. The complete acknowledgement remains graded and has a separate
 60-second publication grace which never extends the native hold. It binds the
 authoritative cancelled task's `updatedAt`, exact prepared

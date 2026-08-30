@@ -202,7 +202,13 @@ export function createBrowserCheckpoint({ directory, maximumWaitMs = 300000, ann
       observationDeadline: new Date(deadline).toISOString(), expiresAt: new Date(publicationDeadline).toISOString() };
     const requestPath = path.join(checkpointDirectory, "request.json");
     await writeFile(requestPath, JSON.stringify(request, null, 2), { flag: "wx" });
-    announce({ checkpointId, requestPath, baseUrl: request.baseUrl, caseId: request.caseId, phase, stage });
+    const witnessPublication = liveObservation ? {
+      schemaVersion: "runaai-m1-browser-witness-publication/v1", checkpointId, caseId: request.caseId, stage,
+      baseUrl: request.baseUrl, witnessUrl: observationEndpoint.witnessUrl,
+      witnessToken: observationEndpoint.witnessToken, witnessExpiresAt: observationEndpoint.witnessExpiresAt
+    } : null;
+    announce({ checkpointId, requestPath, baseUrl: request.baseUrl, caseId: request.caseId, phase, stage,
+      ...(witnessPublication ? { witnessPublication } : {}) });
     let publicationOwnsSlot = false;
     const acceptAck = async (raw, envelope, acceptedAt) => {
       const ack = parseAck(raw);

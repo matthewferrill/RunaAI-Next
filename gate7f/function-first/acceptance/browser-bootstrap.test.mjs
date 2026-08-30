@@ -42,6 +42,30 @@ test("loopback endpoint binds one on-time witness to one matching acknowledgemen
   const ackReplay = await fetch(endpoint.ackUrl, { method: "POST", headers: { "content-type": "application/json" },
     body: JSON.stringify({ checkpointId, token: endpoint.ackToken, witnessSha256: retained.witnessSha256, ack }) });
   assert.equal(ackReplay.status, 403);
+  const wrongMethod = await fetch(endpoint.witnessUrl);
+  assert.equal(wrongMethod.status, 403);
+  const malformed = await fetch(endpoint.witnessUrl, { method: "POST", headers: { "content-type": "application/json" }, body: "{" });
+  assert.equal(malformed.status, 403);
+  const missingCheckpoint = await fetch(endpoint.witnessUrl, { method: "POST", headers: { "content-type": "application/json" },
+    body: JSON.stringify({ checkpointId: "99999999-2222-4333-8444-555555555555", token: endpoint.witnessToken, witness }) });
+  assert.equal(missingCheckpoint.status, 403);
+  const expiringId = "aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee";
+  const expiring = wrapper.createBrowserObservation(expiringId, Date.now() + 5, Date.now() + 5000);
+  await new Promise(resolve => setTimeout(resolve, 10));
+  const expired = await fetch(expiring.witnessUrl, { method: "POST", headers: { "content-type": "application/json" },
+    body: JSON.stringify({ checkpointId: expiringId, token: expiring.witnessToken, witness }) });
+  assert.equal(expired.status, 403);
+  const status = await (await fetch(`${identities.publicBaseUrl}/__acceptance/bootstrap-status`)).json();
+  assert.equal(status.browserWitnessDenials["token-invalid"], 1);
+  assert.equal(status.browserWitnessDenials.replay, 1);
+  assert.equal(status.browserWitnessDenials["method-or-remote"], 1);
+  assert.equal(status.browserWitnessDenials["body-invalid"], 1);
+  assert.equal(status.browserWitnessDenials["checkpoint-unknown"], 1);
+  assert.equal(status.browserWitnessDenials.expired, 1);
+  assert.equal(status.browserObservationDenials["binding-invalid"], 1);
+  assert.equal(status.browserObservationDenials.replay, 1);
+  assert.equal(JSON.stringify(status).includes(endpoint.witnessToken), false);
+  assert.equal(JSON.stringify(status).includes(endpoint.ackToken), false);
   assert.equal(events.filter(value => value.kind === "browser-observation-witness-received").length, 1);
   assert.equal(events.filter(value => value.kind === "browser-observation-received").length, 1);
   wrapper.consumeBrowserObservation(checkpointId);

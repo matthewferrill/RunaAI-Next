@@ -63,7 +63,7 @@ export async function composeM1Functions({ configuration, provider, pool, cipher
     budgets: { planningTimeoutMs: 30_000, maximumActiveMs: 55_000 } });
   const orchestrator = new M1RoleOrchestrator({ code: forRole("code"), agent: forRole("agent") });
   const review = new MastraAnswerProvider({ ...resolveModelRole(provider, "review"), providerName: "private-openai-compatible",
-    reasoningEffort: config.requestControls.review.reasoningEffort, preventRedirects: true });
+    reasoningEffort: config.requestControls.review.reasoningEffort, preventRedirects: true, maxOutputTokens: 1024 });
   async function health() {
     const probe = async url => { try { return (await privateFetch(url, { signal: AbortSignal.timeout(2000) })).ok; } catch { return false; } };
     const [qdrant, embedding, reranker] = await Promise.all([

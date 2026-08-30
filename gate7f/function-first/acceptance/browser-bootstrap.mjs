@@ -3,13 +3,22 @@ import { createServer } from "node:http";
 import { browserWitnessFromAck, browserWitnessSha256, canonicalBrowserWitness } from "./browser-witness.mjs";
 
 const submitScript = `const form=document.querySelector('form');form.addEventListener('submit',async event=>{event.preventDefault();const output=document.querySelector('[role=status]'),button=form.querySelector('button');button.disabled=true;output.textContent='Starting synthetic session…';try{const response=await fetch('/__acceptance/session',{method:'POST',credentials:'same-origin',headers:{'content-type':'application/x-www-form-urlencoded'},body:new URLSearchParams(new FormData(form))});if(!response.ok)throw new Error('denied');location.assign('/');}catch{output.textContent='Synthetic session was not started. Check the one-time nonce or request a new test checkpoint.';button.disabled=false;}});`;
+const OBSERVATION_DENIALS = Object.freeze(["method-or-remote", "body-invalid", "checkpoint-unknown",
+  "token-invalid", "replay", "expired", "binding-invalid"]);
+
+function observationDenied(reason) {
+  const error = new Error("denied"); error.observationDenialReason = reason; return error;
+}
+
+function denialCounts() { return Object.fromEntries(OBSERVATION_DENIALS.map(reason => [reason, 0])); }
 
 // Test-only wrapper around the *unchanged* shipped request listener. This is not
 // an OIDC bypass in the application or a production-configurable endpoint.
 export function withSyntheticBootstrap(shippedServer, { identities, getLedger }) {
   const handlers = shippedServer.listeners("request"), pending = new Map(), browserObservations = new Map();
   const counters = { get: 0, post: 0, issued: 0, denied: 0,
-    browserWitnessAccepted: 0, browserWitnessDenied: 0, browserObservationAccepted: 0, browserObservationDenied: 0 };
+    browserWitnessAccepted: 0, browserWitnessDenied: 0, browserObservationAccepted: 0, browserObservationDenied: 0,
+    browserWitnessDenials: denialCounts(), browserObservationDenials: denialCounts() };
   if (handlers.length !== 1) throw new Error("m1-bootstrap-listener-contract");
   const server = createServer(async (request, response) => {
     const url = new URL(request.url, "http://127.0.0.1");
@@ -22,36 +31,48 @@ export function withSyntheticBootstrap(shippedServer, { identities, getLedger })
     }
     if (["/__acceptance/browser-observation-witness", "/__acceptance/browser-observation-ack"].includes(url.pathname)) {
       response.setHeader("cache-control", "no-store");
+      const witnessPhase = url.pathname.endsWith("-witness");
       try {
         const remote = request.socket.remoteAddress;
-        if (request.method !== "POST" || !["127.0.0.1", "::1", "::ffff:127.0.0.1"].includes(remote)) throw new Error("denied");
-        let raw = ""; for await (const part of request) { raw += part.toString("utf8"); if (Buffer.byteLength(raw) > 262144) throw new Error("denied"); }
-        const body = JSON.parse(raw), entry = browserObservations.get(body?.checkpointId);
-        const witnessPhase = url.pathname.endsWith("-witness"), expectedToken = witnessPhase ? entry?.witnessToken : entry?.ackToken;
-        if (!entry || !/^[a-f0-9]{64}$/.test(body?.token ?? "") || body.token.length !== expectedToken?.length
-            || !timingSafeEqual(Buffer.from(body.token), Buffer.from(expectedToken))) throw new Error("denied");
+        if (request.method !== "POST" || !["127.0.0.1", "::1", "::ffff:127.0.0.1"].includes(remote)) throw observationDenied("method-or-remote");
+        let raw = ""; for await (const part of request) { raw += part.toString("utf8"); if (Buffer.byteLength(raw) > 262144) throw observationDenied("body-invalid"); }
+        let body;
+        try { body = JSON.parse(raw); } catch { throw observationDenied("body-invalid"); }
+        const entry = browserObservations.get(body?.checkpointId);
+        if (!entry) throw observationDenied("checkpoint-unknown");
+        const expectedToken = witnessPhase ? entry.witnessToken : entry.ackToken;
+        if (!/^[a-f0-9]{64}$/.test(body?.token ?? "") || body.token.length !== expectedToken.length
+            || !timingSafeEqual(Buffer.from(body.token), Buffer.from(expectedToken))) throw observationDenied("token-invalid");
         const receivedAtMs = Date.now();
         if (witnessPhase) {
-          if (entry.witness !== null || receivedAtMs > entry.witnessExpiresAtMs) throw new Error("denied");
-          entry.witness = canonicalBrowserWitness(body.witness); entry.witnessSha256 = browserWitnessSha256(entry.witness);
+          if (entry.witness !== null) throw observationDenied("replay");
+          if (receivedAtMs > entry.witnessExpiresAtMs) throw observationDenied("expired");
+          try { entry.witness = canonicalBrowserWitness(body.witness); } catch { throw observationDenied("body-invalid"); }
+          entry.witnessSha256 = browserWitnessSha256(entry.witness);
           entry.witnessReceivedAtMs = receivedAtMs; counters.browserWitnessAccepted++;
           getLedger()?.evidence("application", "browser-observation-witness-received", { checkpointId: body.checkpointId,
             witnessSha256: entry.witnessSha256, receivedAt: new Date(receivedAtMs).toISOString(), loopbackOnly: true,
             oneTimeWitnessTokenConsumed: true });
         } else {
-          if (entry.witness === null || entry.ackRaw !== null || receivedAtMs > entry.publishExpiresAtMs
-              || body.witnessSha256 !== entry.witnessSha256
-              || browserWitnessSha256(browserWitnessFromAck(body.ack)) !== entry.witnessSha256) throw new Error("denied");
+          if (entry.ackRaw !== null) throw observationDenied("replay");
+          if (receivedAtMs > entry.publishExpiresAtMs) throw observationDenied("expired");
+          let ackWitnessSha256;
+          try { ackWitnessSha256 = browserWitnessSha256(browserWitnessFromAck(body.ack)); }
+          catch { throw observationDenied("body-invalid"); }
+          if (entry.witness === null || body.witnessSha256 !== entry.witnessSha256
+              || ackWitnessSha256 !== entry.witnessSha256) throw observationDenied("binding-invalid");
           const ackRaw = JSON.stringify(body.ack);
-          if (Buffer.byteLength(ackRaw) > 262144) throw new Error("denied");
+          if (Buffer.byteLength(ackRaw) > 262144) throw observationDenied("body-invalid");
           entry.ackRaw = ackRaw; entry.receivedAtMs = receivedAtMs; counters.browserObservationAccepted++;
           getLedger()?.evidence("application", "browser-observation-received", { checkpointId: body.checkpointId,
             witnessSha256: entry.witnessSha256, witnessReceivedAt: new Date(entry.witnessReceivedAtMs).toISOString(),
             receivedAt: new Date(receivedAtMs).toISOString(), loopbackOnly: true, oneTimeAckTokenConsumed: true });
         }
         response.writeHead(204); return response.end();
-      } catch {
-        if (url.pathname.endsWith("-witness")) counters.browserWitnessDenied++; else counters.browserObservationDenied++;
+      } catch (error) {
+        const reason = OBSERVATION_DENIALS.includes(error?.observationDenialReason) ? error.observationDenialReason : "body-invalid";
+        if (witnessPhase) { counters.browserWitnessDenied++; counters.browserWitnessDenials[reason]++; }
+        else { counters.browserObservationDenied++; counters.browserObservationDenials[reason]++; }
         response.writeHead(403, { "content-type": "application/json" });
         return response.end('{"errorCode":"m1-browser-observation-denied"}');
       }

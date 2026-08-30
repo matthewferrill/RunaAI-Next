@@ -7,40 +7,48 @@ import { pathToFileURL } from "node:url";
 import { validateSmokeSeal, SMOKE_POLICY } from "./operator-smoke.mjs";
 
 const sha = bytes => createHash("sha256").update(bytes).digest("hex");
+const LEGACY_SMOKE_POLICY = Object.freeze({ schemaVersion: "runaai-m1-operator-smoke-policy/v1", scored: false,
+  answerRoles: ["chat", "research", "review"], plannerRoles: ["code", "agent"], answerTokens: 512,
+  plannerTokens: 1536, deadlineMs: 30_000, auxiliaryDeadlineMs: 10_000, maximumWireBytes: 2_000_000,
+  noTextualReasoningSuffix: true, modelLifecycleOwnedBySealedOperator: true, productionChanged: false });
 export function verifyOperatorSmoke(events) {
   const sealed = events[0]; assert.equal(sealed.type, "seal");
   const seal = validateSmokeSeal(sealed.seal);
-  assert.deepEqual(sealed.policy, SMOKE_POLICY);
+  const legacy = sealed.policy?.schemaVersion === LEGACY_SMOKE_POLICY.schemaVersion;
+  assert.deepEqual(sealed.policy, legacy ? LEGACY_SMOKE_POLICY : SMOKE_POLICY);
   const requests = events.filter(item => item.type === "request"), responses = events.filter(item => item.type === "response");
-  const roles = ["chat", "research", "review", "code", "agent", "embedding", "reranker"];
+  const roles = legacy ? ["chat", "research", "review", "code", "agent", "embedding", "reranker"]
+    : ["chat", "research", "review", "review", "code", "agent", "embedding", "reranker"];
   assert.deepEqual(requests.map(item => item.role), roles); assert.deepEqual(responses.map(item => item.role), roles);
   assert.ok(!events.some(item => item.type === "transport-failure"));
   for (const item of events.filter(item => item.type === "residency")) {
     assert.deepEqual(item.loaded.map(value => value.id).sort(), [seal.primaryInstanceId, seal.embeddingInstanceId].sort());
   }
   assert.equal(events.filter(item => item.type === "residency").length, 2);
-  for (let index = 0; index < 5; index++) {
+  const primaryCalls = legacy ? 5 : 6;
+  for (let index = 0; index < primaryCalls; index++) {
     const input = requests[index].input, output = JSON.parse(responses[index].rawText);
     assert.equal(input.model, seal.modelId); assert.equal(output.model, seal.modelId);
-    assert.equal(input.max_tokens, index < 3 ? 512 : 1536); assert.equal(input.temperature, 0);
+    assert.equal(input.max_tokens, legacy ? index < 3 ? 512 : 1536 : index < 2 ? 512 : index < 4 ? 1024 : 1536); assert.equal(input.temperature, 0);
     assert.equal(input.reasoning_effort, seal.reasoningEffort ?? undefined);
     assert.ok(!JSON.stringify(input).includes("/no_think"));
     assert.equal(output.choices?.[0]?.finish_reason, "stop");
     assert.ok(output.choices[0].message.content.trim());
   }
-  assert.equal(requests[5].input.model, seal.embeddingModelId);
-  assert.ok(requests[5].input.input[0].startsWith("search_document: "));
-  assert.ok(requests[5].input.input[1].startsWith("search_query: "));
-  const embeddings = JSON.parse(responses[5].rawText);
+  const embeddingIndex = legacy ? 5 : 6, rerankerIndex = embeddingIndex + 1;
+  assert.equal(requests[embeddingIndex].input.model, seal.embeddingModelId);
+  assert.ok(requests[embeddingIndex].input.input[0].startsWith("search_document: "));
+  assert.ok(requests[embeddingIndex].input.input[1].startsWith("search_query: "));
+  const embeddings = JSON.parse(responses[embeddingIndex].rawText);
   assert.deepEqual(embeddings.data.map(item => item.index), [0, 1]);
   assert.ok(embeddings.data.every(item => item.embedding.length === 768 && item.embedding.every(Number.isFinite)));
-  const ranked = JSON.parse(responses[6].rawText);
+  const ranked = JSON.parse(responses[rerankerIndex].rawText);
   assert.deepEqual(ranked.results.map(item => item.index).sort(), [0, 1]);
   assert.ok(ranked.results.every(item => Number.isFinite(item.score)));
   assert.ok(responses.every(item => item.status === 200 && item.elapsedMs >= 0 && item.elapsedMs <= 30_000));
   const final = events.at(-1); assert.equal(final.type, "result");
   assert.equal(final.result.passed, true); assert.equal(final.result.scored, false);
-  assert.equal(final.result.productionChanged, false); assert.equal(final.result.providerCalls, 7);
+  assert.equal(final.result.productionChanged, false); assert.equal(final.result.providerCalls, legacy ? 7 : 8);
   assert.equal(final.result.modelsLoadedOrUnloaded, false); assert.equal(final.result.modelId, seal.modelId);
   assert.deepEqual(final.result.checks, ["chat-actual-answer-adapter", "research-actual-answer-adapter", "review-actual-answer-adapter",
     "code-actual-planner-adapter", "agent-actual-planner-adapter", "nomic-actual-prefix-and-dimension", "bge-actual-adapter"]);

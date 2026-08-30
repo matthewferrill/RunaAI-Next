@@ -119,7 +119,7 @@ test("on-time live witness releases the checkpoint before a matching acknowledge
   const directory = await mkdtemp(path.join(tmpdir(), "m1-browser-live-receipt-"));
   t.after(() => rm(directory, { recursive: true, force: true }));
   const client = cancelClient(), start = Date.parse("2026-08-30T12:00:00.000Z"); let clock = start;
-  let request, consumed = false, fileReads = 0;
+  let request, requestPath, announcedWitness, consumed = false, fileReads = 0, requestDeliveredAt = null;
   const witness = { boundedDrain: AGENT05_BOUNDED_DRAIN, claimedImmediateKill: false,
     notice: AGENT05_BOUNDED_DRAIN_NOTICE, taskStatus: "cancelled" };
   Object.assign(client.host, {
@@ -135,6 +135,7 @@ test("on-time live witness releases the checkpoint before a matching acknowledge
     },
     readBrowserObservation() {
       if (clock - start < 83999) throw Object.assign(new Error("not published"), { code: "ENOENT" });
+      request = JSON.parse(readFileSync(requestPath, "utf8")); requestDeliveredAt = clock;
       const ack = inFlightAck(request, { data: { observedAt: new Date(start + 83999).toISOString() } });
       return { raw: JSON.stringify(ack), receivedAtMs: start + 83999, witness,
         witnessSha256: browserWitnessSha256(browserWitnessFromAck(ack)), witnessReceivedAtMs: start + 23999 };
@@ -146,8 +147,9 @@ test("on-time live witness releases the checkpoint before a matching acknowledge
       fileReads++;
       const value = JSON.parse(await readFile(path.join(path.dirname(ackPath), "request.json"), "utf8"));
       return JSON.stringify(preparationAck(value, new Date(clock).toISOString()));
-    }, announce(value) { const valueRequest = JSON.parse(readFileSync(value.requestPath, "utf8"));
-      if (!valueRequest.preparationOnly) request = valueRequest; } });
+    }, announce(value) { if (value.witnessPublication) {
+      requestPath = value.requestPath; announcedWitness = value.witnessPublication;
+    } } });
   await checkpoint({ client, phase: "1:run.start", stage: "before-native-dispatch" });
   const cancelled = cancellation(client, new Date(start).toISOString());
   const ticket = await checkpoint({ client, phase: "2:user.cancel-after-native-dispatch", stage: "in-flight", cancellationAt: cancelled.cancellationAt });
@@ -155,6 +157,14 @@ test("on-time live witness releases the checkpoint before a matching acknowledge
   assert.equal(ticket.witnessReceivedAt, new Date(start + 23999).toISOString());
   await ticket.publication;
   assert.equal(fileReads, 1, "only preparation used the file reader");
+  assert.deepEqual(Object.keys(announcedWitness).sort(), ["baseUrl", "caseId", "checkpointId", "schemaVersion",
+    "stage", "witnessExpiresAt", "witnessToken", "witnessUrl"]);
+  assert.equal(announcedWitness.checkpointId, request.checkpointId);
+  assert.equal(announcedWitness.witnessToken, request.observationEndpoint.witnessToken);
+  assert.equal("ackToken" in announcedWitness, false); assert.equal("scope" in announcedWitness, false);
+  assert.equal("sessionSha256" in announcedWitness, false);
+  assert(requestDeliveredAt - start > AGENT05_IN_FLIGHT_OBSERVATION_MS,
+    "the complete request may arrive after the witness deadline without blocking the immediate ticket");
   assert.equal(request.observationEndpoint.schemaVersion, "runaai-m1-browser-observation-endpoint/v2");
   assert.equal(Date.parse(request.observationDeadline) - start, AGENT05_IN_FLIGHT_OBSERVATION_MS);
   assert.equal(Date.parse(request.expiresAt) - start, AGENT05_IN_FLIGHT_OBSERVATION_MS + AGENT05_ACK_PUBLICATION_GRACE_MS);

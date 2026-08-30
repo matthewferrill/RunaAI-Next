@@ -100,8 +100,11 @@ test("live witness and acknowledgement publications use separate bound one-time 
     notice: AGENT05_BOUNDED_DRAIN_NOTICE, claimedImmediateKill: false, boundedDrain };
   const ack = buildBrowserAck({ mode: "graded", request, url: `${baseUrl}/`, observedAt,
     actual: false, details });
-  const publication = buildBrowserWitnessPublication(request);
-  assert.equal(await publishBrowserWitness(request), publication.witnessSha256);
+  const witnessPublication = { schemaVersion: "runaai-m1-browser-witness-publication/v1", checkpointId,
+    caseId: request.caseId, stage: request.stage, baseUrl, witnessUrl: request.observationEndpoint.witnessUrl,
+    witnessToken: request.observationEndpoint.witnessToken, witnessExpiresAt: new Date(Date.now() + 60_000).toISOString() };
+  const publication = buildBrowserWitnessPublication(witnessPublication);
+  assert.equal(await publishBrowserWitness(witnessPublication), publication.witnessSha256);
   assert.equal(await publishBrowserObservation(request, ack), true);
   assert.equal(calls, 2); assert.equal(received[0].url, "/__acceptance/browser-observation-witness");
   assert.deepEqual(received[0].body, publication.body);
@@ -111,6 +114,27 @@ test("live witness and acknowledgement publications use separate bound one-time 
   assert.equal(received[1].body.witnessSha256, browserWitnessSha256(browserWitnessFromAck(ack)));
   await assert.rejects(publishBrowserObservation({ ...request, observationEndpoint: { ...request.observationEndpoint,
     ackUrl: `${baseUrl}/wrong` } }, ack), /endpoint-invalid/u);
+});
+
+test("immediate witness ticket is exact, time-bound and locally one-use before fetch", async () => {
+  const baseUrl = "http://127.0.0.1:12345", expires = new Date(Date.now() + 60_000).toISOString();
+  const ticket = { schemaVersion: "runaai-m1-browser-witness-publication/v1", checkpointId,
+    caseId: "agent-05-cancel-drain", stage: "in-flight", baseUrl,
+    witnessUrl: `${baseUrl}/__acceptance/browser-observation-witness`, witnessToken: "1".repeat(64),
+    witnessExpiresAt: expires };
+  for (const changed of [
+    { ...ticket, checkpointId: "wrong" },
+    { ...ticket, witnessUrl: `${baseUrl}/wrong` },
+    { ...ticket, stage: "before-native-dispatch" },
+    { ...ticket, witnessToken: "wrong" },
+    { ...ticket, witnessExpiresAt: new Date(Date.now() - 1).toISOString() },
+    { ...ticket, extra: true }
+  ]) assert.throws(() => buildBrowserWitnessPublication(changed), /browser-witness-helper-request-invalid/u);
+  let fetches = 0;
+  const fakeFetch = async () => { fetches++; return { status: 204 }; };
+  await publishBrowserWitness(ticket, fakeFetch);
+  await assert.rejects(publishBrowserWitness(ticket, fakeFetch), /browser-witness-helper-ticket-replayed/u);
+  assert.equal(fetches, 1);
 });
 
 test("the CLI writes one fsynced create-only acknowledgement from base64 inputs", async t => {

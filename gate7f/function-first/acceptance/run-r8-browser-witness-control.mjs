@@ -68,8 +68,6 @@ export async function runR8BrowserWitnessControl(args, { announce = value => pro
     ledger.phase = "model-free:native-dispatch"; faults.armNativeReceiptHold({ participantId: journey.principalId, projectId: journey.projectId });
     pending = journey.executeCapability("project.run-tests", { suiteId: "distance-v1" }); pending.catch(() => {});
     const held = await faults.waitNativeReceiptHeld();
-    ledger.observation.native.receipts.push({ requestId: held.requestId, receiptId: held.receiptId, sourceSha256: held.sourceSha256,
-      participantId: journey.principalId, projectId: journey.projectId });
     ledger.phase = "model-free:cancel-after-dispatch";
     const cancelled = await journey.m1("task.cancel", { taskId: journey.task.taskId });
     if (cancelled?.status !== "cancelled" || cancelled.taskId !== journey.task.taskId

@@ -23,4 +23,6 @@ test("R8 control is model-free and requires delayed publication actual browser a
   assert.match(source, /publicationAt > observationDeadline/u);
   assert.match(source, /ledger\.observation\.browserExercised === true/u);
   assert.match(source, /AGENT05_POST_RECEIPT_HOLD_MS/u);
+  assert.doesNotMatch(source, /observation\.native\.receipts\.push/u,
+    "the observing executor is the only authority that records the native receipt");
 });

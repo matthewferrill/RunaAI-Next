@@ -10,6 +10,7 @@ import { AGENT05_ACK_PUBLICATION_GRACE_MS, AGENT05_IN_FLIGHT_OBSERVATION_MS } fr
 import { AGENT05_POST_RECEIPT_HOLD_MS } from "./fault-actions.mjs";
 import { parseCampaignArguments, campaignPlan, qualifiedControlSuite, validateHomeReady, validateLiveHome,
   verifyExtractedArchive, createCampaignWriter, needsBrowserCheckpoint, createCampaignActionExtensions, executeCandidateAttempts, runModelCampaign } from "./run-model-campaign.mjs";
+import { CAMPAIGN_V2_POLICY } from "../readiness/lease-v2-contract.mjs";
 
 // These are deliberately model-free unit fixtures. They test the runner's
 // serialization, immutable evidence and fail-closed contracts, not acceptance.
@@ -67,7 +68,7 @@ function liveFixture() {
 const homeOptions = () => ({ seal: sealFixture(), candidateId, hardwarePlanSha256: hardwareHash, now });
 const liveOptions = () => ({ ready: readyFixture(), hardwarePlan: hardwareFixture(), now });
 const planFixture = () => campaignPlan({ seal: sealFixture(), runtimeSealSha256: hash, candidateId, controlsSha256: hash,
-  readySha256: hash, hardwarePlanSha256: hardwareHash, ready: readyFixture(), now });
+  readySha256: hash, hardwarePlanSha256: hardwareHash, hardwarePolicy: CAMPAIGN_V2_POLICY, ready: readyFixture(), now });
 const argsFixture = () => ["--mode", "scored", "--owned-root", "C:\\AI\\RunaAI-Next-Candidate\\staging\\m1-task-native-" + "a".repeat(32),
   "--source-commit", sourceCommit, "--runtime-seal", "seal.json", "--runtime-seal-sha256", hash, "--controls", "controls.json", "--controls-sha256", hash,
   "--candidate-id", candidateId, "--home-ready", "ready.json", "--home-ready-sha256", hash, "--hardware-plan", "hardware.json",

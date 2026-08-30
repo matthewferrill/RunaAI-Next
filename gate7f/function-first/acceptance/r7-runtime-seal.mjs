@@ -4,7 +4,7 @@ import { fileURLToPath } from "node:url";
 import { canonicalJson, sha256 } from "../../../gate4/canonical.mjs";
 import { ACCEPTANCE_POLICY, CASE_BUNDLE_SHA256, MODEL_CASES } from "./cases.mjs";
 import { validateRuntimeSeal } from "./runner-contract.mjs";
-import { CAMPAIGN_V2_POLICY, validateCampaignV2Policy } from "../readiness/lease-v2-contract.mjs";
+import { CAMPAIGN_V2_POLICY, campaignV2Policy } from "../readiness/lease-v2-contract.mjs";
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const HASH = /^[a-f0-9]{64}$/u, COMMIT = /^[a-f0-9]{40}$/u;
@@ -74,12 +74,13 @@ export function validateRuntimeSealReadiness(value) {
     && value.protectedDataIncluded === false, "readiness");
 }
 
-export function validateRuntimeSealTelemetry(value, seal, classification = "prospective-r7-hardware-only-not-functional-qualification") {
-  try { validateCampaignV2Policy(value?.policy); } catch { throw fail("telemetry"); }
+export function validateRuntimeSealTelemetry(value, seal, classification = "prospective-r7-hardware-only-not-functional-qualification",
+  expectedPolicy = CAMPAIGN_V2_POLICY) {
+  try { campaignV2Policy(expectedPolicy); } catch { throw fail("telemetry"); }
   need(value?.schemaVersion === "runa-m1-campaign-hardware-plan/v2" && value.createdBeforeLoads === true
     && value.sourceCommit === seal.sourceCommit && value.classification === classification
     && value.maximumConcurrentPrimaries === 1 && value.productionRoutingChanged === false && value.protectedDataIncluded === false
-    && canonicalJson(value.policy) === canonicalJson(CAMPAIGN_V2_POLICY)
+    && canonicalJson(value.policy) === canonicalJson(expectedPolicy)
     && value.existingReranker?.url === seal.reranker.baseUrl && value.existingReranker.changed === false
     && value.auxiliary?.artifact?.key === seal.embedding.modelId && value.auxiliary.artifact.sha256 === seal.embedding.artifactSha256
     && value.auxiliary.loadRequest?.model === seal.embedding.modelId && value.auxiliary.loadRequest.context_length === 2048

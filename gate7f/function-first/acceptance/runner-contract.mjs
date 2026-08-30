@@ -39,7 +39,7 @@ const runtimeSealFields = caseBundleSha256 => ({
   residency: z.object({ oneLargeModelAtATime: z.literal(true), readinessEvidenceSha256: hex,
     effectiveReasoningEvidenceSha256: hex, telemetryPolicySha256: hex }).strict(),
   suites: z.record(z.string(), hex), evaluatorId: z.string().min(1).max(160),
-  maximumBatchMs: z.number().int().min(1000).max(3600000), productionRoutingChanged: z.literal(false),
+  maximumBatchMs: z.number().int().min(1000).max(4500000), productionRoutingChanged: z.literal(false),
 });
 const RuntimeSealV1Schema = z.object({ schemaVersion: z.literal("runaai-m1-functional-runtime-seal/v1"), ...runtimeSealFields(R6J_CASE_BUNDLE_SHA256) }).strict();
 const RuntimeSealV2Schema = z.object({ schemaVersion: z.literal("runaai-m1-functional-runtime-seal/v2"), ...runtimeSealFields(R6J_CASE_BUNDLE_SHA256),
@@ -57,7 +57,12 @@ const RuntimeSealV4Schema = z.object({ schemaVersion: z.literal("runaai-m1-funct
     path: z.literal("gate7f/function-first/M1-S2-R8-TWO-PHASE-BROWSER-WITNESS-CRITERIA-2026-08-30.md"),
     sha256: hex, normalizedSha256: hex, rubricVersion: z.literal("2026-08-30.r8-two-phase-browser-witness") }).strict(),
 }).strict();
-export const RuntimeSealSchema = z.union([RuntimeSealV1Schema, RuntimeSealV2Schema, RuntimeSealV3Schema, RuntimeSealV4Schema]);
+const RuntimeSealV5Schema = z.object({ schemaVersion: z.literal("runaai-m1-functional-runtime-seal/v5"), ...runtimeSealFields(CASE_BUNDLE_SHA256),
+  qualificationCriteria: z.object({ schemaVersion: z.literal("runaai-m1-r9-qualification-criteria/v1"),
+    path: z.literal("gate7f/function-first/M1-S2-R9-EXTENDED-CAMPAIGN-WINDOW-CRITERIA-2026-08-30.md"),
+    sha256: hex, normalizedSha256: hex, rubricVersion: z.literal("2026-08-30.r9-extended-campaign-window") }).strict(),
+}).strict();
+export const RuntimeSealSchema = z.union([RuntimeSealV1Schema, RuntimeSealV2Schema, RuntimeSealV3Schema, RuntimeSealV4Schema, RuntimeSealV5Schema]);
 
 export function validateRuntimeSeal(value, { sourceCommit, candidateId } = {}) {
   const seal = RuntimeSealSchema.parse(value);

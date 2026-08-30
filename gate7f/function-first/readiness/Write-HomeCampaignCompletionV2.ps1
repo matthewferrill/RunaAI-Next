@@ -19,7 +19,8 @@ function Assert-PublicationWindowV2($Ready,[DateTime]$NowUtc){
   if($Ready.schemaVersion-cne'runa-m1-campaign-lease-ready/v2'){throw 'completion-v2-ready-schema'}
   $readyAt=[DateTime]::Parse($Ready.readyAt).ToUniversalTime();$expiresAt=[DateTime]::Parse($Ready.expiresAt).ToUniversalTime()
   $now=$NowUtc.ToUniversalTime()
-  if(($expiresAt-$readyAt).TotalMilliseconds-ne4200000-or$now-lt$readyAt-or$now-ge$expiresAt){throw 'completion-v2-expired'}
+  $duration=($expiresAt-$readyAt).TotalMilliseconds
+  if($duration-notin@(4200000,5100000)-or$now-lt$readyAt-or$now-ge$expiresAt){throw 'completion-v2-expired'}
 }
 if($LibraryOnly){return}
 if($env:COMPUTERNAME-cne'RUNA-HOME'-or$LeaseId-notmatch'^20260829-campaign-(gemma|coder|qwen36)-r[1-9][0-9]*$'-or$ExpectedSeal-notmatch'^[a-f0-9]{64}$'){throw 'completion-v2-host-binding'}

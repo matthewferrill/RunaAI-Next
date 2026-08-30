@@ -2,19 +2,19 @@ import {readFileSync,writeFileSync,mkdirSync,existsSync} from 'node:fs';
 import {execFileSync} from 'node:child_process';
 import path from 'node:path';
 import {MANIFEST} from './manifest.mjs';
-import {sha,assert,CAMPAIGN_V2_POLICY,NOMICS,validateCampaignV2Policy} from './lease-v2-contract.mjs';
+import {sha,assert,NOMICS,campaignV2Policy,campaignV2Profile} from './lease-v2-contract.mjs';
 
 const here=import.meta.dirname,root=path.resolve(here,'../../..');
 const candidate=MANIFEST.candidates.find(value=>value.id===process.argv[2]),leaseId=process.argv[3];
 assert(candidate&&new RegExp(`^20260829-campaign-${candidate.id}-r[1-9][0-9]*$`).test(leaseId),'v2-builder-arguments');
-validateCampaignV2Policy(CAMPAIGN_V2_POLICY);
 const campaignBytes=readFileSync(process.argv[4]),plan=JSON.parse(campaignBytes);
 const sourceCommit=execFileSync('git',['rev-parse','HEAD'],{cwd:root,encoding:'utf8'}).trim();
 assert(plan.schemaVersion==='runa-m1-campaign-hardware-plan/v2'&&plan.sourceCommit===sourceCommit,'v2-campaign-plan');
-validateCampaignV2Policy(plan.policy);
+const policy=campaignV2Policy(plan.policy);
+const profile=campaignV2Profile(policy);
 const target=path.join(root,'artifacts/m1-readiness',leaseId);assert(!existsSync(target),'v2-package-exists');mkdirSync(target,{recursive:true});
-const config={schemaVersion:'runa-m1-campaign-lease/v2',leaseId,candidate,auxiliary:NOMICS,policy:CAMPAIGN_V2_POLICY,
-  profile:'campaign-v2',campaignHardwarePlanSha256:sha(campaignBytes),homeRoot:'C:\\Users\\codex-audit\\AppData\\Local\\RunaM1Readiness\\'+leaseId,
+const config={schemaVersion:'runa-m1-campaign-lease/v2',leaseId,candidate,auxiliary:NOMICS,policy,
+  profile,campaignHardwarePlanSha256:sha(campaignBytes),homeRoot:'C:\\Users\\codex-audit\\AppData\\Local\\RunaM1Readiness\\'+leaseId,
   createdBeforeInference:true,inferenceOwner:'root-actual-application-adapters',lifecycleOwner:'roadmap_review'};
 const sourceNames=['home-campaign-lease-v2.mjs','lease-v2-contract.mjs','lease-contract.mjs','Run-HomeCampaignLeaseV2.ps1'];
 const files=Object.fromEntries(sourceNames.map(name=>[name,readFileSync(path.join(here,name))]));

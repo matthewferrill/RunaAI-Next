@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {ACCEPTANCE_POLICY,CASE_BUNDLE_SHA256,MODEL_CASES} from './cases.mjs';
 import {newObservation,QDRANT_PIN,sha256} from './runner-contract.mjs';
 import {assertCampaignAttemptWindow,campaignExecutionWindow,campaignPlan,executeCandidateAttempts,validateHomeReady} from './run-model-campaign.mjs';
-import {CAMPAIGN_V2_POLICY,campaignV2Windows} from '../readiness/lease-v2-contract.mjs';
+import {CAMPAIGN_V2_POLICY,CAMPAIGN_V2_EXTENDED_POLICY,campaignV2Windows} from '../readiness/lease-v2-contract.mjs';
 
 const hash='a'.repeat(64),hardwareHash='b'.repeat(64),runtimeHash='c'.repeat(64),sourceCommit='d'.repeat(40);
 const candidateId='gemma4-26b-a4b',readyAt=Date.parse('2026-08-29T12:00:00.000Z');
@@ -33,7 +33,7 @@ function hardware(){return {schemaVersion:'runa-m1-campaign-hardware-plan/v2',cr
   productionRoutingChanged:false,policy:CAMPAIGN_V2_POLICY,candidates:[{candidateId,id:'gemma',artifact:{key:candidateId,sha256:hash,bytes:123},requestReasoningEffort:'none'}],
   auxiliary:{artifact:{sha256:hash}},runtimeFiles:[{sha256:runtimeHash}]};}
 function plan(now=readyAt){return campaignPlan({seal:seal(),runtimeSealSha256:hash,candidateId,controlsSha256:hash,readySha256:hash,
-  hardwarePlanSha256:hardwareHash,ready:ready(),now});}
+  hardwarePlanSha256:hardwareHash,hardwarePolicy:CAMPAIGN_V2_POLICY,ready:ready(),now});}
 
 test('fake clock enforces exact63minute launch window while retaining full60minute batch',()=>{
   const windows=campaignV2Windows({readyAt,now:readyAt});
@@ -60,6 +60,20 @@ test('v2 READY validation binds exact70minute policy and rejects old or widened 
   assert.throws(()=>validateHomeReady(ready(),old,{seal:seal(),candidateId,hardwarePlanSha256:hardwareHash,now:readyAt+1000}),/lease-invalid/u);
 });
 
+test('extended profile retains publication margins and provides the measured75minute batch window',()=>{
+  const extendedReady={...ready(),expiresAt:new Date(readyAt+CAMPAIGN_V2_EXTENDED_POLICY.readyLeaseMs).toISOString()};
+  const extendedHardware={...hardware(),policy:CAMPAIGN_V2_EXTENDED_POLICY};
+  const windows=campaignV2Windows({readyAt,now:readyAt,policy:CAMPAIGN_V2_EXTENDED_POLICY});
+  const value=campaignPlan({seal:{...seal(),maximumBatchMs:CAMPAIGN_V2_EXTENDED_POLICY.maximumBatchMs},runtimeSealSha256:hash,
+    candidateId,controlsSha256:hash,readySha256:hash,hardwarePlanSha256:hardwareHash,
+    hardwarePolicy:CAMPAIGN_V2_EXTENDED_POLICY,ready:extendedReady,now:windows.latestLaunchAt});
+  assert.equal(value.maximumBatchMs,75*60000);assert.equal(value.publicationMarginMs,3*60000);
+  assert.equal(campaignExecutionWindow(value,extendedReady,{now:windows.latestLaunchAt}).maximumMs,75*60000);
+  assert.equal(campaignExecutionWindow(value,extendedReady,{now:windows.latestLaunchAt}).stopCode,'m1-campaign-batch-hard-stop');
+  validateHomeReady(extendedReady,extendedHardware,{seal:{...seal(),maximumBatchMs:CAMPAIGN_V2_EXTENDED_POLICY.maximumBatchMs},
+    candidateId,hardwarePlanSha256:hardwareHash,now:readyAt+1000});
+});
+
 test('hard-stop interruption retains the started attempt and all119 denominator slots',async()=>{
   const value=plan(readyAt),controller=new AbortController(),starts=[],finishes=[];
   const writer={async started(slot){starts.push(slot.attemptId);},async finished(slot){finishes.push(slot.attemptId);return {file:slot.attemptId+'.json',sha256:hash,bytes:1};}};
@@ -78,7 +92,7 @@ test('existing v1 READY produces the unchanged v1 plan without R6 fields',()=>{
   const oldReady={...ready(),schemaVersion:'runa-m1-campaign-lease-ready/v1',leaseId:'synthetic-campaign-gemma-r5',
     readyAt:new Date(readyAt-1000).toISOString(),expiresAt:new Date(readyAt+3599000).toISOString()};
   const value=campaignPlan({seal:seal(),runtimeSealSha256:hash,candidateId,controlsSha256:hash,readySha256:hash,
-    hardwarePlanSha256:hardwareHash,ready:oldReady,now:readyAt});
+    hardwarePlanSha256:hardwareHash,hardwarePolicy:CAMPAIGN_V2_POLICY,ready:oldReady,now:readyAt});
   assert.equal(value.schemaVersion,'runaai-m1-candidate-batch-plan/v1');assert.equal(value.lifecycleVersion,undefined);
   assert.equal(value.publicationMarginMs,undefined);assert.equal(value.maximumBatchMs,3600000);
 });

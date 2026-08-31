@@ -5,7 +5,8 @@ import { readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { AGENT05_ACK_PUBLICATION_GRACE_MS, AGENT05_BOUNDED_DRAIN_NOTICE,
-  AGENT05_IN_FLIGHT_OBSERVATION_MS, createBrowserCheckpoint } from "./browser-checkpoint.mjs";
+  AGENT05_IN_FLIGHT_OBSERVATION_MS, HUMAN_BROWSER_CHECKPOINT_MAXIMUM_MS,
+  createBrowserCheckpoint } from "./browser-checkpoint.mjs";
 import { AGENT05_BOUNDED_DRAIN, browserWitnessFromAck, browserWitnessSha256 } from "./browser-witness.mjs";
 import { CONTROL_CASES, MODEL_CASES } from "./cases.mjs";
 import { newObservation, ObservationLedger } from "./runner-contract.mjs";
@@ -113,6 +114,12 @@ test("cancel browser prep is ungraded and actual in-flight checkpoint reuses the
   assert.equal(requests[1].reusePreparedBrowser, true); assert.equal(requests[1].preparationCheckpointId, ticket.checkpointId);
   assert.equal(requests[1].cancellationAt, cancelled.cancellationAt); assert.deepEqual(requests[1].scope, ticket.scope);
   assert.equal(client.ledger.observation.checks.length, 1); assert.equal(client.ledger.observation.browserExercised, true);
+});
+
+test("human browser checkpoints allow fifteen minutes but remain bounded", () => {
+  assert.equal(HUMAN_BROWSER_CHECKPOINT_MAXIMUM_MS, 900000);
+  assert.doesNotThrow(() => createBrowserCheckpoint({ directory: "unused", maximumWaitMs: 900000 }));
+  assert.throws(() => createBrowserCheckpoint({ directory: "unused", maximumWaitMs: 900001 }), /m1-browser-checkpoint-budget-invalid/u);
 });
 
 test("on-time live witness releases the checkpoint before a matching acknowledgement publication", async t => {

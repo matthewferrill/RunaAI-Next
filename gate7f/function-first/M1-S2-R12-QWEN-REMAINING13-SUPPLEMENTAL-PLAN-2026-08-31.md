@@ -47,9 +47,13 @@ question of how Qwen behaves on the 13 previously unobserved attempts.
   attempt, 13 attempts project to about 9.1 minutes; the ceiling therefore
   provides more than eight times the measured requirement while retaining the
   existing cleanup and publication reserves.
-- Exercise the real browser checkpoint for Agent05. Missing or late browser
-  evidence remains a failed/inconclusive supplemental attempt; it is not
-  synthesized after the fact.
+- Exercise every required real-browser checkpoint. The synthetic one-time
+  bootstrap and ordinary human-observation checkpoints have a bounded
+  15-minute window. The Agent05 in-flight cancellation observation retains its
+  separate 24-second truth window and acknowledgement-publication grace; the
+  longer ordinary window does not weaken that timing assertion. Missing or
+  late browser evidence remains failed/inconclusive and is not synthesized
+  after the fact.
 - Preserve create-only raw attempts, starts, records, runtime/lease evidence,
   hardware telemetry, cleanup evidence and the exact prior-result binding.
 - Do not access protected data, change production routing, activate learning or
@@ -66,3 +70,20 @@ The supplemental result always carries
 `qualificationCompositionPermitted: false` and
 `productQualificationPassed: false`. Formal R12 eligibility remains governed by
 the original whole-arm criteria; this plan does not relax or rewrite them.
+
+## Human-window correction record
+
+Three model-free Control attempts on 2026-08-31 correctly failed closed because
+the browser acknowledgement was absent or arrived after the original five-minute
+deadline. The final browser showed the expected Code project and the saved task,
+outcome and `project.run-tests` proposal as `unknown`, with reconciliation
+required before successor work, but publication reached the completed stage too
+late to be accepted. The repeated failure demonstrated that five minutes did not
+cover human navigation plus communication and evidence publication latency.
+
+The correction changes only the synthetic bootstrap lifetime and the upper bound
+for ordinary human browser checkpoints from five to fifteen minutes. One-use
+nonces, loopback-only service binding, exact checkpoint/scope/seal matching,
+create-only acknowledgements, late-evidence rejection and disposable cleanup are
+unchanged. This is a harness-operability correction; it does not change a case,
+expected answer, model role, production route or grading rule.

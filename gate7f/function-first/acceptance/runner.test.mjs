@@ -117,6 +117,7 @@ test("ownedindex fault deniesactualendpoint andrecoverswithoutreplacingadapter",
 test("bootstrap onlyissuescookie once fromnonce; doesnotexposesessiontoscript",async()=>{let issued=0;const identities={publicBaseUrl:null,async issue(principalId){issued++;return{principalId,sessionId:"f".repeat(64)};}};
   const original=createServer((q,s)=>{s.end("shipped-route");});const fixture=withSyntheticBootstrap(original,{identities,getLedger:()=>null});fixture.server.listen(0,"127.0.0.1");await once(fixture.server,"listening");
   identities.publicBaseUrl=`http://127.0.0.1:${fixture.server.address().port}`;const bootstrap=await fixture.createBootstrap("m1-test-"+"a".repeat(32));
+  assert.equal(bootstrap.expiresInSeconds,900);
   try{const call=()=>fetch(bootstrap.url,{method:"POST",headers:{origin:identities.publicBaseUrl,"content-type":"application/x-www-form-urlencoded"},body:`nonce=${bootstrap.nonce}`,redirect:"manual"});
     const response=await call();assert.equal(response.status,303);assert.match(response.headers.get("set-cookie"),/HttpOnly/);assert.equal(await response.text(),"");assert.equal((await call()).status,403);assert.equal(issued,1);
     assert.equal(await(await fetch(identities.publicBaseUrl)).text(),"shipped-route");

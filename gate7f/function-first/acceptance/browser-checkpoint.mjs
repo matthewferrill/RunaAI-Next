@@ -151,9 +151,11 @@ function validateInFlightFileAck(ack, request, prior, observation, acceptedAt, d
 // Operator bridge for the parent agent's actual in-app browser. This module never
 // claims a DOM observation itself. The one-use nonce is synthetic-session access,
 // retained only in the owned temporary evidence directory, not a production key.
-export function createBrowserCheckpoint({ directory, maximumWaitMs = 300000, announce = () => {}, signal = null,
+export const HUMAN_BROWSER_CHECKPOINT_MAXIMUM_MS = 900000;
+
+export function createBrowserCheckpoint({ directory, maximumWaitMs = HUMAN_BROWSER_CHECKPOINT_MAXIMUM_MS, announce = () => {}, signal = null,
   readAck = readAckFile, now = Date.now, pause = ms => new Promise(resolve => setTimeout(resolve, ms)) }) {
-  if (!Number.isInteger(maximumWaitMs) || maximumWaitMs < 1000 || maximumWaitMs > 300000) throw fail("m1-browser-checkpoint-budget-invalid");
+  if (!Number.isInteger(maximumWaitMs) || maximumWaitMs < 1000 || maximumWaitMs > HUMAN_BROWSER_CHECKPOINT_MAXIMUM_MS) throw fail("m1-browser-checkpoint-budget-invalid");
   if (typeof readAck !== "function" || typeof now !== "function" || typeof pause !== "function") throw fail("m1-browser-checkpoint-reader-invalid");
   const prepared = new Map();
   return async ({ client, phase, stage, cancellationAt = null }) => {

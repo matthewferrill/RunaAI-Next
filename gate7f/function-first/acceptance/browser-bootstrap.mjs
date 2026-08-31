@@ -5,6 +5,7 @@ import { browserWitnessFromAck, browserWitnessSha256, canonicalBrowserWitness } 
 const submitScript = `const form=document.querySelector('form');form.addEventListener('submit',async event=>{event.preventDefault();const output=document.querySelector('[role=status]'),button=form.querySelector('button');button.disabled=true;output.textContent='Starting synthetic session…';try{const response=await fetch('/__acceptance/session',{method:'POST',credentials:'same-origin',headers:{'content-type':'application/x-www-form-urlencoded'},body:new URLSearchParams(new FormData(form))});if(!response.ok)throw new Error('denied');location.assign('/');}catch{output.textContent='Synthetic session was not started. Check the one-time nonce or request a new test checkpoint.';button.disabled=false;}});`;
 const OBSERVATION_DENIALS = Object.freeze(["method-or-remote", "body-invalid", "checkpoint-unknown",
   "token-invalid", "replay", "expired", "binding-invalid"]);
+const SYNTHETIC_BOOTSTRAP_TTL_MS = 900000;
 
 function observationDenied(reason) {
   const error = new Error("denied"); error.observationDenialReason = reason; return error;
@@ -109,8 +110,8 @@ export function withSyntheticBootstrap(shippedServer, { identities, getLedger })
   return { server, async createBootstrap(principalId, { session = null } = {}) {
     if (!/^m1-test-[a-f0-9]{24,64}$/.test(principalId) || pending.size >= 8) throw new Error("m1-bootstrap-scope-invalid");
     if (session && (session.principalId !== principalId || (await identities.participant(session.sessionId)).principalId !== principalId)) throw new Error("m1-bootstrap-session-mismatch");
-    const nonce = randomBytes(32).toString("hex"); pending.set(nonce, { principalId, sessionId: session?.sessionId ?? null, expiresAt: Date.now() + 300000 });
-    return { url: `${identities.publicBaseUrl}/__acceptance/session`, nonce, expiresInSeconds: 300 };
+    const nonce = randomBytes(32).toString("hex"); pending.set(nonce, { principalId, sessionId: session?.sessionId ?? null, expiresAt: Date.now() + SYNTHETIC_BOOTSTRAP_TTL_MS });
+    return { url: `${identities.publicBaseUrl}/__acceptance/session`, nonce, expiresInSeconds: SYNTHETIC_BOOTSTRAP_TTL_MS / 1000 };
   }, createBrowserObservation(checkpointId, witnessExpiresAtMs, publishExpiresAtMs) {
     if (!/^[a-f0-9]{8}-(?:[a-f0-9]{4}-){3}[a-f0-9]{12}$/.test(checkpointId)
         || !Number.isFinite(witnessExpiresAtMs) || !Number.isFinite(publishExpiresAtMs)

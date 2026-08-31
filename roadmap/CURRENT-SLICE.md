@@ -5,6 +5,14 @@ Milestone: M1
 Slice ID: M1-S2
 Status: in progress, acceptance frozen before implementation; not complete or production-qualified.
 
+R12 evaluation update, 2026-08-31: candidate-blind independent review is complete for all 360 rows,
+with 963 explicit semantic checks, 350 determinate final grades, 10 retained inconclusive grades and
+12/12 model-free controls. Gemma qualifies for Chat, Research and Code; Coder qualifies for Chat and
+Code; Qwen3.6 qualifies for Code. No candidate qualifies for Agent or Review, so no all-five-function
+route or customer trial is ready. Exact results are in
+`../gate7f/function-first/M1-S2-R12-INDEPENDENT-SEMANTIC-RESULTS-2026-08-31.md`. No route was selected or
+promoted.
+
 R10 evaluation update, 2026-08-30: the frozen corrected application completed all
 360 model attempts, 12/12 shared controls, strict lifecycle retention and
 candidate-blind independent review. Exact results are in
@@ -45,10 +53,10 @@ no runner stop, complete Control drain, and verified Home cleanup. The steward
 clarified that the 13 rows should be composed with the first 107 when the gap is
 timing-only. A machine audit proved identical model-facing seals and exactly
 three non-model-facing seal differences; the derived result preserves both
-execution windows and all 120 Qwen identities. All 360 three-candidate rows are
-now bound into a candidate-blind review input. Independent semantic review and
-frozen role scorecards are next; no production route or customer trial is yet
-authorized by these runner results.
+execution windows and all 120 Qwen identities. All 360 three-candidate rows were bound into a
+candidate-blind review input. Independent semantic review and frozen role scorecards are now complete.
+Agent and Review have no qualifying candidate, so no production route or customer trial is authorized
+by R12.
 
 Read `PRODUCT-ROADMAP.md` first. This slice is the first milestone only; it does not replace, complete
 or retire the rest of the roadmap. All 17 capability families remain tracked in `capabilities.json`.
@@ -153,10 +161,10 @@ result leaves only Chat and Code qualified and does not support a customer route
 R12 is the next finite correction under its prospectively frozen criteria. The
 steward reaffirmed continuation until completion or genuinely needed human
 testing. Internal module, commit and publication checkpoints are not turn-ending
-gates. R12 model execution is now complete through the timing-window equivalence
-composition. The next gate is independent semantic review of all 360 bound rows,
-followed by role disposition; the customer trial is exposed only if all five M1
-functions have a qualifying route. The M1-S1 result below is retained history.
+gates. R12 model execution and independent review are complete through the timing-window equivalence
+composition. The result does not provide qualifying Agent or Review routes. The next finite gate is a
+prospectively frozen correction and fresh acceptance for those exact deficits; the customer trial stays
+hidden until all five M1 functions have a qualifying route. The M1-S1 result below is retained history.
 
 M1-S1: role-separated provider contract and compatibility wiring, with current-state/receipt acceptance
 requirements captured for the later project tools. This is first because all three model comparisons and

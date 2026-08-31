@@ -1,0 +1,59 @@
+{
+  "schemaVersion": "runaai-m1-r12-independent-review-publication/v1",
+  "publishedAt": "2026-08-31",
+  "evaluatorId": "independent-r12-semantic-reviewer-2026-08-31",
+  "rubricVersion": "2026-08-30.r7-function-contract",
+  "candidateBlindReview": {
+    "worksheetCandidateLabelsPresent": false,
+    "decisionsFrozenBeforeCandidateIdentityMapping": true,
+    "attemptsReviewed": 360,
+    "explicitSemanticChecks": 963,
+    "failedSemanticChecks": 62
+  },
+  "bindings": {
+    "caseBundleSha256": "87f08a861d1b109fa5d3fb64f9dc10aacba023eee80a3ab4762b07b2d987524d",
+    "runtimeSealSha256": "386ebd07fd1d16834c2c57aa63c5c1e5ae9f9be21ce1abd880496aa6af055a59",
+    "reviewBindingSha256": "e5ac7d00a3049ee8734a3a7592b6f8419cf64786f0f03115cbd8db56d044be85",
+    "reviewInputManifest": {
+      "path": "../20260831-r12-equivalence-composition/review-input-manifest.json",
+      "bytes": 2091,
+      "sha256": "613be84d11c6fa0c89db56b9ec018b6be77324eef1950fe966ca1345fea26532"
+    },
+    "worksheet": {
+      "path": "artifacts/independent-semantic-r12-equivalence/review-worksheet.json",
+      "bytes": 1185910,
+      "sha256": "9226abf6db677e1f3c3d8f482a4cc2cdb4493a5d1df684c2ef5dc920c1c6f884"
+    },
+    "blindDecisions": {
+      "path": "artifacts/independent-semantic-r12-equivalence/review-decisions.json",
+      "bytes": 1615196,
+      "sha256": "33bfaf4b1d40af53535e6e44715cf8702276478f6e92dee70ed1e4a66dd91906"
+    },
+    "campaignGrade": {
+      "path": "artifacts/independent-semantic-r12-equivalence/campaign-grade.json",
+      "bytes": 3907369,
+      "sha256": "a78a4a3159b6942718db8bd20dd6d350505909097deda9bce962fe9f9b1302a9"
+    },
+    "publishedRoleScorecards": {
+      "path": "role-scorecards.json",
+      "bytes": 12161,
+      "sha256": "4fedad219eb92a0f4b7ce49894de8cb3a9547e398d2182c4c937fe79257f4acc"
+    },
+    "controls": {
+      "path": "artifacts/m1-readiness/20260831-campaign-r12-replacement-common-v1/control-evidence/controls-1788159502458.json",
+      "planned": 12,
+      "passed": 12,
+      "sha256": "d954cc59d8ee711723f33db750ee05136b916169b6cd1af47347518cdb3f9543"
+    }
+  },
+  "gradeSummary": {
+    "determinateAttempts": 350,
+    "indeterminateAttempts": 10,
+    "criticalModelFailures": 0,
+    "criticalProductFailures": 0,
+    "allFiveFunctionsHaveQualifyingRoute": false,
+    "productQualificationPassed": false,
+    "customerTrialReady": false,
+    "productionRoutingChanged": false
+  }
+}

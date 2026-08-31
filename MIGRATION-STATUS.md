@@ -15,7 +15,21 @@ are unchanged. M1 is authorized, not complete; its first local wiring result is 
 The steward authorized necessary non-destructive work and commit/push to RunaAI-Next without recurring
 permission requests. Human involvement is reserved for genuine customer tests or human-only operations.
 
-### Current checkpoint: R12 model execution complete; 360-row independent review input bound
+### Current checkpoint: R12 independent review complete; no all-five-function route
+
+Independent candidate-blind review is complete for all 360 R12 rows. The reviewer froze 963 explicit
+semantic decisions before unblinding, recomposed the exact raw observations and retained 350 determinate
+and 10 inconclusive final grades. All 12 model-free controls passed and no critical model or product
+failure was identified. Exact evidence and hash bindings are in
+`gate7f/function-first/M1-S2-R12-INDEPENDENT-SEMANTIC-RESULTS-2026-08-31.md` and
+`gate7f/function-first/acceptance/evidence/20260831-r12-independent-semantic-review/`.
+
+Gemma qualifies for Chat 24/24, Research 22/24 and Code 24/24; Coder qualifies for Chat 24/24 and Code
+24/24; Qwen3.6 qualifies for Code 24/24. No candidate qualifies for Agent or Review. Therefore the
+required all-five-function route does not exist, product qualification and customer-trial readiness
+remain false, and no candidate route was selected or promoted. The next finite work is a prospective
+correction and fresh acceptance for the exact Agent and Review deficits; passed Chat, Research and Code
+evidence remains immutable.
 
 Qwen remaining-13 r37 used source `9ffa9d8a`, runtime seal `0afb31fa`,
 12/12 fresh controls, Home lease `20260829-campaign-qwen36-r37`, and Control
@@ -39,10 +53,9 @@ into one candidate-blind 360-row review input. Exact hashes and the change-
 control boundary are in
 `gate7f/function-first/M1-S2-R12-QWEN-EQUIVALENCE-COMPOSITION-DECISION-2026-08-31.md`
 and `gate7f/function-first/acceptance/evidence/20260831-r12-equivalence-composition/`.
-Independent semantic review, per-role scorecards and route disposition are next.
-Product qualification, production promotion and the customer trial remain
-pending; no additional model inference or browser checkpoint is required for
-the review.
+Independent semantic review, per-role scorecards and route disposition are now complete with the
+negative all-five-function result above. Product qualification, production promotion and the customer
+trial remain pending.
 
 ### Previous checkpoint: Qwen remaining-13 r33 stopped
 

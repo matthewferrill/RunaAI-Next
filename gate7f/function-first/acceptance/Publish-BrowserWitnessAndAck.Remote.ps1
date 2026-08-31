@@ -25,7 +25,10 @@ $root = @($roots | Where-Object {
 if ($root.Count -ne 1) { throw 'browser-witness-ack-operator-root-invalid' }
 $root = [string]$root[0]
 if ([Security.Principal.WindowsIdentity]::GetCurrent().Name -cne 'RUNA-CONTROL\Matthew' -or
-    -not $CampaignDirectory.EndsWith($ExpectedRuntimeSeal.Substring(0, 16), [StringComparison]::Ordinal) -or
+    (($CampaignDirectory -like 'supplemental-*') -and
+      -not $CampaignDirectory.StartsWith(('supplemental-qwen36-27b-mtp-' + $ExpectedRuntimeSeal.Substring(0, 16) + '-'), [StringComparison]::Ordinal)) -or
+    (($CampaignDirectory -like 'campaign-*') -and
+      -not $CampaignDirectory.EndsWith($ExpectedRuntimeSeal.Substring(0, 16), [StringComparison]::Ordinal)) -or
     $Url -notmatch '^http://127\.0\.0\.1:[1-9][0-9]{3,4}/$' -or
     $WitnessTicketBase64.Length -gt 8192 -or $ObservedWitnessJson.Length -gt 4096 -or
     $ActualJson.Length -gt 4096 -or $DetailsJson.Length -gt 4096) {

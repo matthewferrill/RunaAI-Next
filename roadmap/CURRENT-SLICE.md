@@ -32,6 +32,13 @@ prospective correction changes only that narrow directory binding; a fresh
 source/archive/runtime seal, 12 controls, Home lease and Control stage precede
 the next exact 13-attempt run.
 
+The second supplemental arm then reached the Agent05 short-window checkpoint
+and exposed a remaining seal-position predicate in both witness wrappers. That
+r34 arm was stopped and cleaned with no qualification credit. The complete
+prospective correction now binds the runtime-seal prefix at its exact position
+in the Qwen supplemental name while retaining the full-campaign suffix rule;
+fresh source, controls, Home, and Control ownership are still required.
+
 Read `PRODUCT-ROADMAP.md` first. This slice is the first milestone only; it does not replace, complete
 or retire the rest of the roadmap. All 17 capability families remain tracked in `capabilities.json`.
 The current Git branch continues the existing Gate 7F foundation descended from integration `f092d358`;

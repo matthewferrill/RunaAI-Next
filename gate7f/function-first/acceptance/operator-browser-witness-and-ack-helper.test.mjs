@@ -98,5 +98,9 @@ test("browser witness wrappers admit only full campaigns or the exact Qwen suppl
     assert.equal(allowed.test(`supplemental-gemma4-26b-a4b-${"a".repeat(16)}-${"b".repeat(12)}`), false);
     assert.equal(allowed.test(`supplemental-qwen36-27b-mtp-${"a".repeat(16)}-${"b".repeat(11)}`), false);
     assert.equal(allowed.test(`../supplemental-qwen36-27b-mtp-${"a".repeat(16)}-${"b".repeat(12)}`), false);
+    assert.match(source, /StartsWith\(\('supplemental-qwen36-27b-mtp-' \+ \$ExpectedRuntimeSeal\.Substring\(0, 16\) \+ '-'\)/u,
+      `${name}: supplemental runtime-seal prefix is not position-bound`);
+    assert.match(source, /\$CampaignDirectory\.EndsWith\(\$ExpectedRuntimeSeal\.Substring\(0, 16\)/u,
+      `${name}: full-campaign runtime-seal suffix is not retained`);
   }
 });

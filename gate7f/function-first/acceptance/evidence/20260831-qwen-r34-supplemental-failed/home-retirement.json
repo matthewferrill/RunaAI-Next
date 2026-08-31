@@ -1,0 +1,13 @@
+{
+  "schemaVersion": "runaai-m1-aborted-lease-retirement/v1",
+  "leaseId": "20260829-campaign-qwen36-r34",
+  "sealSha256": "9299414ed9ce28e63abf4809b7002b091290b5c1ca5c69fac7833244c95a9347",
+  "completion": "abort",
+  "cleanupVerified": true,
+  "zeroResidencyAndPowerRestored": true,
+  "taskRemoved": true,
+  "evidenceDirectoryPreserved": true,
+  "productionRoutingChanged": false,
+  "protectedDataIncluded": false,
+  "observedAt": "2026-08-31T17:41:45.5544811Z"
+}

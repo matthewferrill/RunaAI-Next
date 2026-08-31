@@ -1,0 +1,33 @@
+{
+  "schemaVersion": "runaai-m1-failed-stage-evidence-manifest/v1",
+  "stageId": "d059a269cfc54b8bbcef0df0ddc7e8ad",
+  "campaignDirectory": "supplemental-qwen36-27b-mtp-2d2dff8c0d6a295f-8ffb2286760d",
+  "sourceCommit": "ea0b04d7e09f9991ae2ad67f8ec4b53b60a14f91",
+  "runtimeSealSha256": "2d2dff8c0d6a295f62f5c91a2cfff99602a0b0677dbe251a719c0dfa7a7be9e5",
+  "rawEvidenceRoot": "gate7f-r34-d059a269",
+  "files": [
+    {"path":"supplemental-qwen36-27b-mtp-2d2dff8c0d6a295f-8ffb2286760d/archive-proof.json","bytes":141,"sha256":"2692f849138931dfb2eca90f92aea278d48f0a3235f84b7418f1db901d4d910f"},
+    {"path":"supplemental-qwen36-27b-mtp-2d2dff8c0d6a295f-8ffb2286760d/browser-26a3501d-0659-4a0f-91cd-f37ccf595302/browser-ack.json","bytes":1126,"sha256":"698fa59757b7bd36da5c9ccc5158971b3e3444d0ddb0ff49b4803fd59803d4eb"},
+    {"path":"supplemental-qwen36-27b-mtp-2d2dff8c0d6a295f-8ffb2286760d/browser-26a3501d-0659-4a0f-91cd-f37ccf595302/consumed.json","bytes":95,"sha256":"ad32f37dfe430e31d3b31267f1aea5a8c1b13ffbac86ac759ea13a8dadbac811"},
+    {"path":"supplemental-qwen36-27b-mtp-2d2dff8c0d6a295f-8ffb2286760d/browser-26a3501d-0659-4a0f-91cd-f37ccf595302/request.json","bytes":1807,"sha256":"ec53d401e86228144ebe21df02af3acb95c58e25ab51da011d77776dc5855054"},
+    {"path":"supplemental-qwen36-27b-mtp-2d2dff8c0d6a295f-8ffb2286760d/browser-83f559f1-f471-4b7c-a3da-9bfddc90a581/request.json","bytes":2481,"sha256":"dbb91cca255a9b9fe84daa31cb1546a46a682e6323f7c7bc13ded87d43ff54c4"},
+    {"path":"supplemental-qwen36-27b-mtp-2d2dff8c0d6a295f-8ffb2286760d/browser-9186c1f0-e781-4dc6-b46f-96a41283f429/request.json","bytes":1816,"sha256":"a43c3b1dc0af79fb7fe6bb0b12448ea7d763b128697699692557280e7d2e446d"},
+    {"path":"supplemental-qwen36-27b-mtp-2d2dff8c0d6a295f-8ffb2286760d/browser-fd35def6-cc32-49cb-846d-ba39251237bd/browser-ack.json","bytes":1520,"sha256":"c5479be6c321daf6f251b7366651b06f9af4e7ffb759275806dbaccc7550cb08"},
+    {"path":"supplemental-qwen36-27b-mtp-2d2dff8c0d6a295f-8ffb2286760d/browser-fd35def6-cc32-49cb-846d-ba39251237bd/consumed.json","bytes":118,"sha256":"2e508864b79a69c8a882359ff303c96134c97cc517b25259a916d56bc810b420"},
+    {"path":"supplemental-qwen36-27b-mtp-2d2dff8c0d6a295f-8ffb2286760d/browser-fd35def6-cc32-49cb-846d-ba39251237bd/request.json","bytes":1791,"sha256":"96e611b23df7348b57e8fbe89c89ed9aeaaa0ee5226eac1c2761417065d2dbc5"},
+    {"path":"supplemental-qwen36-27b-mtp-2d2dff8c0d6a295f-8ffb2286760d/controls.json","bytes":2448090,"sha256":"265a3ad1eafa7ffa1c5df85a9d698f105418f2342f5a81d40556e869b6f26f12"},
+    {"path":"supplemental-qwen36-27b-mtp-2d2dff8c0d6a295f-8ffb2286760d/hardwarePlan.json","bytes":7494,"sha256":"52f43ccf56f9778bf44b1e4cd0db1f91813966553a1b8b966d3a3f389116221e"},
+    {"path":"supplemental-qwen36-27b-mtp-2d2dff8c0d6a295f-8ffb2286760d/homeReady.json","bytes":881,"sha256":"68b23ea222304fc4d2a5b252fa8fb9fa75f7a04227fb8030461264cd628493f7"},
+    {"path":"supplemental-qwen36-27b-mtp-2d2dff8c0d6a295f-8ffb2286760d/plan.json","bytes":4361,"sha256":"9bafe3a6a8762916a821b55d89c9401c47730bec4ed35d7b866219ed999db10a"},
+    {"path":"supplemental-qwen36-27b-mtp-2d2dff8c0d6a295f-8ffb2286760d/qwen36-27b-mtp--agent-04-revoked-plan--3.json","bytes":817630,"sha256":"55487b22ae082e47b07dd4d0a28533d0e7d2104c62303f8607ea1e62259223f1"},
+    {"path":"supplemental-qwen36-27b-mtp-2d2dff8c0d6a295f-8ffb2286760d/qwen36-27b-mtp--agent-04-revoked-plan--3.record.json","bytes":327,"sha256":"4e1a078d8babbc4a7e886eead2da947162e75decbdb99b1aae74a3b35bbaf6a8"},
+    {"path":"supplemental-qwen36-27b-mtp-2d2dff8c0d6a295f-8ffb2286760d/qwen36-27b-mtp--agent-04-revoked-plan--3.started.json","bytes":327,"sha256":"70232d299968940978af82417f00a0b00e375f1c8a437e38590e7413fbe3a52d"},
+    {"path":"supplemental-qwen36-27b-mtp-2d2dff8c0d6a295f-8ffb2286760d/qwen36-27b-mtp--agent-05-cancel-drain--3.json","bytes":458537,"sha256":"5f9021b0090fa56cfc8445b28d7a9ee3fc992bc699447b4357c2fd4b23610962"},
+    {"path":"supplemental-qwen36-27b-mtp-2d2dff8c0d6a295f-8ffb2286760d/qwen36-27b-mtp--agent-05-cancel-drain--3.record.json","bytes":324,"sha256":"206841fc6241dd8012693ee83bc112e2cd8ad78114a5a3705d0a19353aa37587"},
+    {"path":"supplemental-qwen36-27b-mtp-2d2dff8c0d6a295f-8ffb2286760d/qwen36-27b-mtp--agent-05-cancel-drain--3.started.json","bytes":327,"sha256":"367669c96a9accdd7a89a76edc8ef3e08b31fe4b78dee0580c37eb56b66e3b45"},
+    {"path":"supplemental-qwen36-27b-mtp-2d2dff8c0d6a295f-8ffb2286760d/qwen36-27b-mtp--agent-06-crash-reconcile--3.started.json","bytes":333,"sha256":"d66764ff5b2f29c4c77aec8814bfa09b19fcda4ca422515197a7c6602ad55ae2"},
+    {"path":"supplemental-qwen36-27b-mtp-2d2dff8c0d6a295f-8ffb2286760d/runtimeSeal.json","bytes":4679,"sha256":"2d2dff8c0d6a295f62f5c91a2cfff99602a0b0677dbe251a719c0dfa7a7be9e5"}
+  ],
+  "productionChanged": false,
+  "protectedDataIncluded": false
+}

@@ -23,7 +23,10 @@ $root = [string]$root[0]
 if ([Security.Principal.WindowsIdentity]::GetCurrent().Name -cne 'RUNA-CONTROL\Matthew' -or
     [IO.Path]::GetDirectoryName($root) -cne 'C:\AI\RunaAI-Next-Candidate\staging' -or
     [IO.Path]::GetFileName($root) -notmatch '^m1-task-native-[a-f0-9]{32}$' -or
-    -not $CampaignDirectory.EndsWith($ExpectedRuntimeSeal.Substring(0, 16), [StringComparison]::Ordinal) -or
+    (($CampaignDirectory -like 'supplemental-*') -and
+      -not $CampaignDirectory.StartsWith(('supplemental-qwen36-27b-mtp-' + $ExpectedRuntimeSeal.Substring(0, 16) + '-'), [StringComparison]::Ordinal)) -or
+    (($CampaignDirectory -like 'campaign-*') -and
+      -not $CampaignDirectory.EndsWith($ExpectedRuntimeSeal.Substring(0, 16), [StringComparison]::Ordinal)) -or
     $WitnessTicketBase64.Length -gt 8192 -or $ObservedWitnessJson.Length -gt 4096) {
   throw 'browser-witness-operator-binding-invalid'
 }

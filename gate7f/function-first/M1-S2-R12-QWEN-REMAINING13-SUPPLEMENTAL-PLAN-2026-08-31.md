@@ -4,7 +4,7 @@ Date: 2026-08-31
 
 Milestone/slice: M1 / M1-S2
 
-Roadmap digest: `60cbc0c40446a189f7b69e3d2ce4c6da954b19f6c74565b24483ad8a5cc6026e`
+Roadmap digest: `c536a42ac009b74f36bbb2f5e50d70080a617cb1475d96709f5915e0ba39d3c4`
 
 Capability IDs: C01, C02, C03, C04, C06, C07, C12, C15, C16
 
@@ -105,3 +105,23 @@ child paths and traversal forms denied. It changes no case, prompt, expected
 answer, threshold, model setting, prior result or production route. A new source
 commit, archive, runtime seal, 12-control run, Home lease and Control stage are
 required before all 13 identities are attempted again.
+
+## r34 stopped run and complete seal-position correction
+
+The second arm used source `ea0b04d7`, runtime seal `2d2dff8c`, 12/12 fresh
+controls, Home lease `20260829-campaign-qwen36-r34`, and Control stage
+`d059a269cfc54b8bbcef0df0ddc7e8ad`. Agent04 completed with its actual-browser
+revoked-state observation. Agent05 preparation also completed, but its combined
+24-second witness-and-ack publication exposed a second wrapper predicate: the
+directory allowlist accepted the supplemental name while the runtime-seal check
+still required that seal prefix at the end of the name. No witness or
+acknowledgement was published. The harness-invalid arm was stopped after
+Agent06 began and is not selectively resumed, pooled, or regraded.
+
+The exact raw-file manifest and Home abort/cleanup record are in
+`acceptance/evidence/20260831-qwen-r34-supplemental-failed/`. The complete
+prospective correction position-binds the runtime-seal prefix in the exact Qwen
+supplemental form and retains the full-campaign suffix binding. Focused tests
+exercise both predicates. A new source commit, archive, runtime seal, 12-control
+run, Home lease, and Control stage remain mandatory before the next 13-attempt
+run.

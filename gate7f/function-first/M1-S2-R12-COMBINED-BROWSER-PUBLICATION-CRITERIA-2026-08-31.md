@@ -1,6 +1,10 @@
 # M1-S2 R12 combined browser publication criteria
 
-Status: corrective criteria frozen before R12 sealing or inference.
+Status: corrective criteria revised before replacement R12 sealing or any inference.
+
+The first R12 seal was created before its required live-proof driver existed. It was never used for
+candidate inference and is retired. This revision adds only that model-free driver and its proof contract;
+it does not change a candidate, prompt, case, threshold, timing boundary, expected answer or product route.
 
 R12 addresses only the R11 diagnostic failure recorded in
 `M1-S2-R11-DIAGNOSTIC-CAMPAIGN-RESULTS-2026-08-31.md`. It does not change a product action, model prompt,
@@ -47,16 +51,19 @@ path or campaign binding. It must never publish the acknowledgement after a fail
 - The exact Control regression and all 12 model-free controls pass from the same source/runtime.
 - A live disposable Control proof uses the actual browser and the combined helper inside the unchanged
   24-second observation interval, then proves acknowledgement consumption and stage cleanup.
+- The proof is driven by `run-r12-browser-publication-control.mjs`; it runs Agent05 with no model calls,
+  retains the preparation and in-flight checkpoint bytes, and fails closed unless the live witness precedes
+  the acknowledgement, both arrive within the observation window, the acknowledgement is consumed, and
+  the held native result is released within its fixed ceiling.
 
 ## Pre-seal source verification
 
-The combined witness/acknowledgement and R12 seal tests passed 14/14. The complete repository suite then
-passed at its required Windows host-process boundary: 1,902 tests, 1,824 passed, zero failed and 78
-intentional environment-specific skips. A restricted-sandbox diagnostic run had correctly failed three
-child-tree containment tests because that boundary denied `taskkill`; the unchanged tests passed when
-rerun with host process authority. The roadmap verifier passed 15/15 and `git diff --check` reported no
-errors. These are source checks only; Control regression, 12 controls and the actual-browser proof remain
-mandatory against the committed R12 archive and seal before inference.
+The combined witness/acknowledgement, browser-checkpoint and new live-proof-driver focused tests passed
+42/42. The complete repository suite then passed at its required Windows host-process boundary: 1,904
+tests, 1,826 passed, zero failed and 78 intentional environment-specific skips. The roadmap verifier passed
+15/15 within that suite and `git diff --check` reported no errors. These are source checks only; exact
+Control regression, all 12 controls and the actual-browser proof remain mandatory against the replacement
+committed R12 archive and seal before inference. Evidence from the retired pre-proof seal is not reused.
 
 ## Required proof after inference
 

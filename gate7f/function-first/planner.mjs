@@ -55,10 +55,11 @@ export class MastraM1Planner {
     if (signal?.aborted) throw fail("m1-planner-aborted");
     const progress = plannerProgress(input);
     const planProtocol = describePlanProtocol(input.capabilityIds, input.workIntent);
+    const repairContext = { repair: input.repair === true, currentFailedTests: progress.currentFailedTests };
     const prompt = JSON.stringify({ schemaVersion: "runaai-m1-planner-input/v2", ...input, progress, planProtocol });
     if (Buffer.byteLength(prompt) > 96_000) throw fail("m1-planner-input-limited");
     let value = await this.#generatePlan(prompt, signal);
-    let violations = planProtocolViolations(value, input.capabilityIds, input.workIntent);
+    let violations = planProtocolViolations(value, input.capabilityIds, input.workIntent, repairContext);
     const attempts = [{ plan: structuredClone(value), planDigest: digest(value), violations: [...violations] }];
     if (violations.length) {
       const correction = JSON.stringify({ schemaVersion: "runaai-m1-plan-protocol-correction/v1",
@@ -66,7 +67,7 @@ export class MastraM1Planner {
         instruction: "Return one corrected plan JSON object. Keep the user's requested outcome and exact grant. Do not add permission, approval, receipt, or capability fields." });
       if (Buffer.byteLength(correction) > 96_000) throw fail("m1-planner-input-limited");
       value = await this.#generatePlan(correction, signal);
-      violations = planProtocolViolations(value, input.capabilityIds, input.workIntent);
+      violations = planProtocolViolations(value, input.capabilityIds, input.workIntent, repairContext);
       attempts.push({ plan: structuredClone(value), planDigest: digest(value), violations: [...violations] });
       if (violations.length) throw fail("m1-planner-protocol-invalid");
     }

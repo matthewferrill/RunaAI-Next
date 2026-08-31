@@ -103,8 +103,9 @@ test("live witness and acknowledgement publications use separate bound one-time 
   const witnessPublication = { schemaVersion: "runaai-m1-browser-witness-publication/v1", checkpointId,
     caseId: request.caseId, stage: request.stage, baseUrl, witnessUrl: request.observationEndpoint.witnessUrl,
     witnessToken: request.observationEndpoint.witnessToken, witnessExpiresAt: new Date(Date.now() + 60_000).toISOString() };
-  const publication = buildBrowserWitnessPublication(witnessPublication);
-  assert.equal(await publishBrowserWitness(witnessPublication), publication.witnessSha256);
+  const observedWitness = browserWitnessFromAck(ack);
+  const publication = buildBrowserWitnessPublication(witnessPublication, observedWitness);
+  assert.equal(await publishBrowserWitness(witnessPublication, observedWitness), publication.witnessSha256);
   assert.equal(await publishBrowserObservation(request, ack), true);
   assert.equal(calls, 2); assert.equal(received[0].url, "/__acceptance/browser-observation-witness");
   assert.deepEqual(received[0].body, publication.body);
@@ -129,11 +130,21 @@ test("immediate witness ticket is exact, time-bound and locally one-use before f
     { ...ticket, witnessToken: "wrong" },
     { ...ticket, witnessExpiresAt: new Date(Date.now() - 1).toISOString() },
     { ...ticket, extra: true }
-  ]) assert.throws(() => buildBrowserWitnessPublication(changed), /browser-witness-helper-request-invalid/u);
+  ]) assert.throws(() => buildBrowserWitnessPublication(changed, browserWitnessFromAck({ evidence: [{ data: {
+    boundedDrain, claimedImmediateKill: false, notice: AGENT05_BOUNDED_DRAIN_NOTICE, taskStatus: "cancelled" } }] })),
+    /browser-witness-helper-request-invalid/u);
+  const observedWitness = { boundedDrain, claimedImmediateKill: false,
+    notice: AGENT05_BOUNDED_DRAIN_NOTICE, taskStatus: "cancelled" };
+  for (const changed of [undefined, { ...observedWitness, taskStatus: "active" },
+    { ...observedWitness, notice: "Expected text copied from request metadata." },
+    { ...observedWitness, extra: true }]) {
+    assert.throws(() => buildBrowserWitnessPublication(ticket, changed), /browser-witness-helper-observation-invalid/u);
+  }
   let fetches = 0;
   const fakeFetch = async () => { fetches++; return { status: 204 }; };
-  await publishBrowserWitness(ticket, fakeFetch);
-  await assert.rejects(publishBrowserWitness(ticket, fakeFetch), /browser-witness-helper-ticket-replayed/u);
+  await assert.rejects(publishBrowserWitness(ticket, undefined, fakeFetch), /browser-witness-helper-observation-invalid/u);
+  await publishBrowserWitness(ticket, observedWitness, fakeFetch);
+  await assert.rejects(publishBrowserWitness(ticket, observedWitness, fakeFetch), /browser-witness-helper-ticket-replayed/u);
   assert.equal(fetches, 1);
 });
 

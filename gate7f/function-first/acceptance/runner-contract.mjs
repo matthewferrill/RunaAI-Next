@@ -67,8 +67,13 @@ const RuntimeSealV6Schema = z.object({ schemaVersion: z.literal("runaai-m1-funct
     path: z.literal("gate7f/function-first/M1-S2-R10-CORRECTIVE-CRITERIA-2026-08-30.md"),
     sha256: hex, normalizedSha256: hex, rubricVersion: z.literal("2026-08-30.r10-review-witness-correction") }).strict(),
 }).strict();
+const RuntimeSealV7Schema = z.object({ schemaVersion: z.literal("runaai-m1-functional-runtime-seal/v7"), ...runtimeSealFields(CASE_BUNDLE_SHA256),
+  qualificationCriteria: z.object({ schemaVersion: z.literal("runaai-m1-r11-qualification-criteria/v1"),
+    path: z.literal("gate7f/function-first/M1-S2-R11-CORRECTIVE-CRITERIA-2026-08-30.md"),
+    sha256: hex, normalizedSha256: hex, rubricVersion: z.literal("2026-08-30.r11-evidence-repair-correction") }).strict(),
+}).strict();
 export const RuntimeSealSchema = z.union([RuntimeSealV1Schema, RuntimeSealV2Schema, RuntimeSealV3Schema,
-  RuntimeSealV4Schema, RuntimeSealV5Schema, RuntimeSealV6Schema]);
+  RuntimeSealV4Schema, RuntimeSealV5Schema, RuntimeSealV6Schema, RuntimeSealV7Schema]);
 
 export function validateRuntimeSeal(value, { sourceCommit, candidateId } = {}) {
   const seal = RuntimeSealSchema.parse(value);
@@ -89,7 +94,8 @@ export function validateRuntimeSeal(value, { sourceCommit, candidateId } = {}) {
   }
   for (const [role, budget] of Object.entries(seal.roles)) {
     const planner = ["code", "agent"].includes(role);
-    const reviewCorrection = seal.schemaVersion === "runaai-m1-functional-runtime-seal/v6" && role === "review";
+    const reviewCorrection = ["runaai-m1-functional-runtime-seal/v6", "runaai-m1-functional-runtime-seal/v7"]
+      .includes(seal.schemaVersion) && role === "review";
     if (budget.maximumOutputTokens !== (planner ? 1536 : reviewCorrection ? 1024 : 512)
         || budget.deadlineMs !== (planner ? 30000 : 60000)) {
       throw fail("m1-acceptance-unenforced-budget");

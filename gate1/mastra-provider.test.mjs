@@ -86,7 +86,8 @@ test("standalone Code replaces an irrelevant draft only after the correction ver
     ground: "no-ground-needed", advisory: null, evidence: [],
   }, options);
   assert.equal(answer.answer, "function addNumbers(a, b) { return a + b; }");
-  assert.deepEqual(answer.responseCheck, { performed: true, corrected: true });
+  assert.deepEqual(answer.responseCheck, { performed: true, corrected: true, kind: "code",
+    finalAnswerOrigin: "checker-correction", attemptCount: 2 });
   assert.equal(context.verificationCalls.length, 2);
   assert.equal(context.verificationCalls[0].prompt.currentRequest,
     "Write a JavaScript function that adds two numbers.");
@@ -108,7 +109,8 @@ test("standalone Code rejects 76 and verifies 26 against the retained current tu
     ground: "no-ground-needed", advisory: null, evidence: [],
   }, options);
   assert.equal(answer.answer, "26");
-  assert.deepEqual(answer.responseCheck, { performed: true, corrected: true });
+  assert.deepEqual(answer.responseCheck, { performed: true, corrected: true, kind: "code",
+    finalAnswerOrigin: "checker-correction", attemptCount: 2 });
   assert.equal("conversationHistory" in context.verificationCalls[0].prompt, false);
   assert.equal("priorAssistantResponses" in context.verificationCalls[0].prompt, false);
 });
@@ -147,7 +149,8 @@ test("standalone Code accepts a relevant consistent draft with one verification"
     ground: "no-ground-needed", advisory: null, evidence: [],
   }, options);
   assert.equal(answer.answer, "Using 14 and 12, the result is 26.");
-  assert.deepEqual(answer.responseCheck, { performed: true, corrected: false });
+  assert.deepEqual(answer.responseCheck, { performed: true, corrected: false, kind: "code",
+    finalAnswerOrigin: "primary", attemptCount: 1 });
   assert.equal(context.verificationCalls.length, 1);
 });
 

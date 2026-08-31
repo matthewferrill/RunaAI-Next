@@ -17,7 +17,7 @@ function fixtureOrchestrator(host, text) {
         { capabilityId: "project.inspect", arguments: { path: "control.js" } },
         { capabilityId: "project.apply-change", arguments: { path: "control.js", content: `// ${text}\nexports.value=()=>8;`, expectedSha256: file.sha256 } },
       ] };
-    } }, budgets: { maximumActiveMs: 55000, planningTimeoutMs: 30000 } });
+    } }, budgets: { maximumRequestActiveMs: 55000, maximumRunActiveMs: 120000, planningTimeoutMs: 30000 } });
 }
 const startInput = client => ({ taskId: client.task.taskId, grantId: client.grant.grantId,
   grantRevision: client.grant.revision, requestId: client.id("control-run") });

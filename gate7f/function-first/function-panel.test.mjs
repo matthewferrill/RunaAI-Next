@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { functionAnswerSelection, functionDescription, approvalIsAvailable, restoredWorkspaceNotice, runEvidenceNotice, taskPresentation } from "../../gate6b/public/function-panel.mjs";
+import { functionAnswerSelection, functionDescription, approvalIsAvailable, repairContinuationIsAvailable,
+  restoredWorkspaceNotice, runEvidenceNotice, taskPresentation } from "../../gate6b/public/function-panel.mjs";
 test("ordinary conversation keeps Chat and Code routes separate", () => {
   assert.deepEqual(functionAnswerSelection("conversation", [], "chat"), { lane: "general" });
   assert.deepEqual(functionAnswerSelection("conversation", [], "code"), { lane: "code" });
@@ -89,4 +90,19 @@ test("run outcome wording comes only from server-derived evidence", () => {
   assert.match(runEvidenceNotice(evidence("applied", "ran")), /applied file change/i);
   assert.match(runEvidenceNotice(evidence("unknown", "unknown")), /unresolved/i);
   assert.equal(runEvidenceNotice(null), null);
+});
+
+test("repair continuation requires the same live session and exact active grant", () => {
+  const result = { task: { status: "active" }, run: { status: "repair-required", runId: "run-a",
+    grantId: "grant-a", grantRevision: 3, pendingProposalId: null }, sessionRebindRequired: false,
+  pendingReconciliation: [], grants: [{ grantId: "grant-a", revision: 3, status: "active" }] };
+  assert.equal(repairContinuationIsAvailable(result), true);
+  assert.match(taskPresentation(result).notice, /test failed/i);
+  assert.match(taskPresentation(result).notice, /No repair has started/);
+  for (const change of [
+    { sessionRebindRequired: true }, { pendingReconciliation: [{}] },
+    { run: { ...result.run, pendingProposalId: "proposal-a" } },
+    { grants: [{ grantId: "grant-a", revision: 4, status: "active" }] },
+    { grants: [{ grantId: "grant-a", revision: 3, status: "revoked" }] },
+  ]) assert.equal(repairContinuationIsAvailable({ ...result, ...change }), false);
 });

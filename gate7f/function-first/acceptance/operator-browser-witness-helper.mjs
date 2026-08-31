@@ -1,5 +1,4 @@
-import { AGENT05_BOUNDED_DRAIN, AGENT05_BOUNDED_DRAIN_NOTICE,
-  browserWitnessSha256, canonicalBrowserWitness } from "./browser-witness.mjs";
+import { browserWitnessSha256, canonicalBrowserWitness } from "./browser-witness.mjs";
 
 const TOKEN = /^[a-f0-9]{64}$/u;
 const CHECKPOINT = /^[a-f0-9]{8}-(?:[a-f0-9]{4}-){3}[a-f0-9]{12}$/u;
@@ -34,14 +33,13 @@ function validateTicket(ticket, now) {
   return { expiresAt, key: `${ticket.checkpointId}\u0000${ticket.witnessToken}` };
 }
 
-export function buildBrowserWitnessPublication(ticket, now = Date.now()) {
+export function buildBrowserWitnessPublication(ticket, observed, now = Date.now()) {
   validateTicket(ticket, now);
-  const witness = canonicalBrowserWitness({
-    boundedDrain: AGENT05_BOUNDED_DRAIN,
-    claimedImmediateKill: false,
-    notice: AGENT05_BOUNDED_DRAIN_NOTICE,
-    taskStatus: "cancelled"
-  });
+  // The helper serializes actual browser-derived state. It must never manufacture
+  // the expected state from ticket/request metadata merely because a checkpoint exists.
+  let witness;
+  try { witness = canonicalBrowserWitness(observed); }
+  catch { throw fail("browser-witness-helper-observation-invalid"); }
   return Object.freeze({
     url: ticket.witnessUrl,
     body: Object.freeze({ checkpointId: ticket.checkpointId, token: ticket.witnessToken, witness }),
@@ -49,11 +47,15 @@ export function buildBrowserWitnessPublication(ticket, now = Date.now()) {
   });
 }
 
-export async function publishBrowserWitness(ticket, fetchImplementation = fetch, now = Date.now()) {
+export async function publishBrowserWitness(ticket, observed, fetchImplementation = fetch, now = Date.now()) {
   const { key } = validateTicket(ticket, now);
+  // Validate before consuming the ticket so a malformed local observation does not
+  // prevent a later real browser observation from using the one permitted publication.
+  let publication;
+  try { publication = buildBrowserWitnessPublication(ticket, observed, now); }
+  catch (error) { throw error; }
   if (consumedTickets.has(key)) throw fail("browser-witness-helper-ticket-replayed");
   consumedTickets.add(key);
-  const publication = buildBrowserWitnessPublication(ticket, now);
   let response;
   try {
     response = await fetchImplementation(publication.url, { method: "POST", redirect: "error",

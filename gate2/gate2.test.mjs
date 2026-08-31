@@ -155,7 +155,8 @@ test("the observed Chat sequence and standalone Code bypass project knowledge", 
     research: new ScriptedProvider({ role: "research" }),
     code: new ScriptedProvider({ role: "code", reply: ({ request }) => ({
       answer: `Code current: ${request.message}`, citations: [],
-      responseCheck: { performed: true, corrected: false },
+      responseCheck: { kind: "code", performed: true, corrected: false,
+        finalAnswerOrigin: "primary", attemptCount: 1 },
     }) }),
   };
   const context = harness({ approvedKnowledge, providers });
@@ -176,8 +177,11 @@ test("the observed Chat sequence and standalone Code bypass project knowledge", 
     reason: "code-draft-only", sourceSha256: null, receiptId: null, systemStamped: true,
   });
   assert.equal(code.approvedKnowledge.reason, "not-applicable-code-conversation");
-  assert.ok(code.auditCodes.includes("code-response-check-performed"));
-  assert.ok(!code.auditCodes.includes("code-response-corrected-and-reverified"));
+  assert.ok(code.auditCodes.includes("response-check-kind:code"));
+  assert.ok(code.auditCodes.includes("response-check-performed:true"));
+  assert.ok(code.auditCodes.includes("response-check-corrected:false"));
+  assert.ok(code.auditCodes.includes("response-check-final-origin:primary"));
+  assert.ok(code.auditCodes.includes("response-check-attempt-count:1"));
   assert.equal(selections, 0);
   assert.equal(context.providers.chat.calls.length, 2);
   assert.equal(context.providers.code.calls.length, 1);

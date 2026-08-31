@@ -60,6 +60,24 @@ test("controls transport deniesall model,embedding andreranker inference beforeu
 test("scoredcapture forwards exactbody without injectingexpectedanswer",async()=>{let observed;const target=await endpoint(async(q,s)=>{let raw="";for await(const part of q)raw+=part;observed=JSON.parse(raw);s.setHeader("content-type","application/json");s.end(JSON.stringify({model:"pinned",choices:[]}));});
   const l=ledger(),capture=await startCaptureTransport({mode:"scored",targetBaseUrl:target.url,modelId:"pinned",getLedger:()=>l});
   try{const input={model:"pinned",messages:[{role:"user",content:"synthetic transport fixture"}],max_tokens:512};assert.equal((await post(`${capture.baseUrl}/chat/completions`,input)).status,200);assert.deepEqual(observed,input);assert.equal(l.observation.provider.calls.length,1);}finally{await capture.close();await target.close();}});
+test("provider capture classifies only application-owned request schemas and leaves unknown input unclassified",async()=>{
+  const target=await endpoint(async(q,s)=>{for await(const _ of q){}s.setHeader("content-type","application/json");s.end(JSON.stringify({model:"pinned",choices:[]}));});
+  const l=ledger(),capture=await startCaptureTransport({mode:"scored",targetBaseUrl:target.url,modelId:"pinned",getLedger:()=>l});
+  const rows=[
+    ["runa2-model-answer-input/v2","primary-answer"],
+    ["runa2-evidence-response-verification/v1","evidence-checker"],
+    ["runa2-code-response-verification/v2","code-checker"],
+    ["runaai-m1-planner-input/v2","initial-plan"],
+    ["runaai-m1-plan-protocol-correction/v1","plan-correction"],
+    ["foreign-schema/v1","unclassified"],
+  ];
+  try{
+    for(const [schemaVersion] of rows)assert.equal((await post(`${capture.baseUrl}/chat/completions`,{model:"pinned",max_tokens:512,
+      messages:[{role:"user",content:JSON.stringify({schemaVersion})}]})).status,200);
+    assert.deepEqual(l.observation.provider.calls.map(call=>call.purpose),rows.map(([,purpose])=>purpose));
+    assert.ok(l.observation.provider.calls.every(call=>call.request.messages[0].role==="user"));
+  }finally{await capture.close();await target.close();}
+});
 test("capture denies mismatchedmodel andunsealedrequest beforeupstream",async()=>{let reached=0;const target=await endpoint((q,s)=>{reached++;s.end("{}");}),l=ledger();
   const capture=await startCaptureTransport({mode:"scored",targetBaseUrl:target.url,modelId:"pinned",getLedger:()=>l,validateRequest(){throw new Error("unsealed");}});
   try{await post(`${capture.baseUrl}/chat/completions`,{model:"other"});await post(`${capture.baseUrl}/chat/completions`,{model:"pinned"});assert.equal(reached,0);}finally{await capture.close();await target.close();}});

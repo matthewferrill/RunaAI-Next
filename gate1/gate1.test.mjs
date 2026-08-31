@@ -60,6 +60,31 @@ test("general-evidence-answer: grounded answers carry recognized citations and n
   });
 });
 
+test("typed response-check attribution records kind, origin and exact attempt count without granting semantic credit", async () => {
+  const source = sourceSection({ projectId: projectA, sourceId: "typed-check", sectionId: "one",
+    content: "The selected note is synthetic." });
+  const provider = new ScriptedProvider({ role: "research", reply: () => ({
+    answer: "The selected note is synthetic.", citations: [{ sourceId: source.sourceId, sectionId: source.sectionId }],
+    responseCheck: { kind: "evidence-research", performed: true, corrected: true,
+      finalAnswerOrigin: "checker-correction", attemptCount: 2 },
+  }) });
+  const response = await harness({ sources: [source], provider }).slice.answer(
+    request("typed-check", "What does the selected note say?", "research"));
+  assert.ok(response.auditCodes.includes("response-check-kind:evidence-research"));
+  assert.ok(response.auditCodes.includes("response-check-performed:true"));
+  assert.ok(response.auditCodes.includes("response-check-corrected:true"));
+  assert.ok(response.auditCodes.includes("response-check-final-origin:checker-correction"));
+  assert.ok(response.auditCodes.includes("response-check-attempt-count:2"));
+});
+
+test("malformed response-check attribution fails closed", async () => {
+  const provider = new ScriptedProvider({ reply: () => ({ answer: "Synthetic.", citations: [],
+    responseCheck: { kind: "evidence-research", performed: true, corrected: true,
+      finalAnswerOrigin: "primary", attemptCount: 1 } }) });
+  await assert.rejects(harness({ retrievalPolicy: "none", provider }).slice.answer(
+    request("bad-check", "Draft a synthetic response.")), { code: "provider-response-check-invalid" });
+});
+
 test("general-honest-miss: an empty project record is explicit and never filled in", async () => {
   const context = harness();
   const response = await context.slice.answer(request("honest-miss", "What does this project say about the nonexistent Aurora protocol?"));

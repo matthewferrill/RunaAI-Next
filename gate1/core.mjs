@@ -35,6 +35,29 @@ async function withinDeadline(deadlineAt, operation) {
   } finally { clearTimeout(timer); }
 }
 
+const responseCheckKinds = new Set(["code", "evidence-research", "evidence-review"]);
+function responseCheckAttribution(value) {
+  if (value === undefined) return { kind: null, performed: false, corrected: false,
+    finalAnswerOrigin: "primary", attemptCount: 0 };
+  const validKind = value?.kind === null || responseCheckKinds.has(value?.kind);
+  const valid = validKind && typeof value?.performed === "boolean" && typeof value?.corrected === "boolean"
+    && ["primary", "checker-correction"].includes(value?.finalAnswerOrigin)
+    && Number.isInteger(value?.attemptCount) && value.attemptCount >= 0 && value.attemptCount <= 2
+    && (value.performed
+      ? value.kind !== null && value.attemptCount >= 1
+        && (value.corrected
+          ? value.finalAnswerOrigin === "checker-correction" && value.attemptCount === 2
+          : value.finalAnswerOrigin === "primary" && value.attemptCount === 1)
+      : value.kind === null && !value.corrected && value.finalAnswerOrigin === "primary" && value.attemptCount === 0);
+  if (!valid) {
+    const error = new Error("provider response-check attribution is invalid");
+    error.code = "provider-response-check-invalid";
+    throw error;
+  }
+  return { kind: value.kind, performed: value.performed, corrected: value.corrected,
+    finalAnswerOrigin: value.finalAnswerOrigin, attemptCount: value.attemptCount };
+}
+
 export function planResearchPasses(question, maximumPasses) {
   const words = [...new Set(String(question).toLowerCase().match(/[a-z0-9]+/g) ?? [])]
     .filter(word => word.length > 2 && !stopWords.has(word));
@@ -348,12 +371,11 @@ export class ReadOnlyAnswerSlice {
       response.model = generated.model;
       response.completion.outputLimited = generated.outputLimited === true;
       response.completion.reason = generated.outputLimited ? "output-limited" : "complete";
-      if (generated.responseCheck?.performed === true) {
-        response.auditCodes.push("code-response-check-performed");
-        if (generated.responseCheck.corrected === true) {
-          response.auditCodes.push("code-response-corrected-and-reverified");
-        }
-      }
+      const responseCheck = responseCheckAttribution(generated.responseCheck);
+      response.auditCodes.push(`response-check-kind:${responseCheck.kind ?? "none"}`,
+        `response-check-performed:${responseCheck.performed}`, `response-check-corrected:${responseCheck.corrected}`,
+        `response-check-final-origin:${responseCheck.finalAnswerOrigin}`,
+        `response-check-attempt-count:${responseCheck.attemptCount}`);
       if (checked.unknown.length) {
         response.answer += "\n\nI couldn't verify one or more references in that answer.";
         response.completion.reason = "citation-unverified";

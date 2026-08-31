@@ -107,6 +107,29 @@ test("actual DOM: saved runs reopen read-only; explicit profile replaces grant b
       request: async (path, body) => (await fetch(path, { method: 'POST', body: JSON.stringify(body) })).json() }); });
   await open(page); assert.equal(await page.locator("#m1-profile").inputValue(), "");
 });
+test("actual DOM: a same-session repair is visible and continues exactly once without a new grant", async t => {
+  let resumed = false;
+  const repairRun = () => ({ ...run(), status: resumed ? "completed" : "repair-required",
+    outcome: resumed ? "plan-completed" : null, pendingProposalId: null, grantId: "grant-new", grantRevision: 4 });
+  const { page, calls } = await panelPage(t, { handle: async payload => {
+    if (payload.operation === "run.list") return { runs: [repairRun()] };
+    if (payload.operation === "task.list") return { tasks: [] };
+    if (payload.operation === "task.status") return { task: task(), project: { revision: 2 },
+      grants: [{ grantId: "grant-new", revision: 4, status: "active" }], proposals: [], receipts: [],
+      currentReceiptIds: [], pendingReconciliation: [], approvableProposalIds: [] };
+    if (payload.operation === "run.status") return { run: repairRun(), task: task(), proposals: [], receipts: [],
+      pendingReconciliation: [], sessionRebindRequired: false };
+    if (payload.operation === "run.resume") { resumed = true; return { run: repairRun(), task: task(), proposals: [], receipts: [],
+      pendingReconciliation: [], sessionRebindRequired: false }; }
+  } });
+  await page.getByRole("button", { name: "Repair exercise a — repair-required", exact: true }).click();
+  await page.getByRole("button", { name: "Continue bounded repair", exact: true }).waitFor();
+  assert.match(await page.locator("#m1-task").textContent(), /No repair has started/);
+  await page.getByRole("button", { name: "Continue bounded repair", exact: true }).click();
+  await page.getByText(/recorded plan completed/i).waitFor();
+  assert.equal(calls.filter(call => call.operation === "run.resume").length, 1);
+  assert.equal(calls.some(call => call.operation === "grant.create"), false);
+});
 test("actual DOM: a saved standalone task exposes unknown outcome before it is opened", async t => {
   const { page, calls } = await panelPage(t, { handle: async payload => {
     if (payload.operation === "run.list") return { runs: [] };
@@ -199,6 +222,7 @@ test("actual DOM: Code and guided work capture their explicit role selection wit
   } });
   await page.locator('#m1-profile').selectOption('safe-autopilot');
   await page.locator('#m1-workflow').selectOption('agent');
+  await page.locator('#m1-work-intent').selectOption('effect-requested');
   assert.equal(await page.evaluate(() => window.syntheticPanel.startWork('Repair this synthetic exercise')), true);
   assert.equal(calls.find(call => call.operation === 'run.start').input.workflow, 'agent');
   assert.deepEqual(calls.find(call => call.operation === 'grant.create').input.allowedPaths, ['calculator.js']);

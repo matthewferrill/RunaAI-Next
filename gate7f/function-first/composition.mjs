@@ -60,7 +60,7 @@ export async function composeM1Functions({ configuration, provider, pool, cipher
   const forRole = role => new M1TaskOrchestrator({ service: tasks,
     planner: new MastraM1Planner({ provider, role, reasoningEffort: config.requestControls[role].reasoningEffort }), workflow,
     // Narrowed planning/active budgets; an interrupted HTTP acknowledgement is recovered from the run, never blindly retried.
-    budgets: { planningTimeoutMs: 30_000, maximumActiveMs: 55_000 } });
+    budgets: { planningTimeoutMs: 30_000, maximumRequestActiveMs: 55_000, maximumRunActiveMs: 120_000 } });
   const orchestrator = new M1RoleOrchestrator({ code: forRole("code"), agent: forRole("agent") });
   const review = new MastraAnswerProvider({ ...resolveModelRole(provider, "review"), providerName: "private-openai-compatible",
     reasoningEffort: config.requestControls.review.reasoningEffort, preventRedirects: true, maxOutputTokens: 1024 });

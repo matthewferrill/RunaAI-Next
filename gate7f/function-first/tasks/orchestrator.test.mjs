@@ -74,7 +74,7 @@ class Adapter {
 
 async function fixture({ planner, profile = "safe-autopilot", hooks = {}, budgets = {}, cipher = null, authorizeContext = null,
   files = { "index.js": "exports.add=(a,b)=>a-b;" }, allowedPaths = ["index.js"],
-  objective = "Fix and test the addition function." } = {}) {
+  objective = "Fix and test the addition function.", now = () => Date.now() } = {}) {
   const pool = new pg.Pool({ connectionString: process.env.M1_TASK_PG_URL });
   const schema = `m1_orch_${randomBytes(6).toString("hex")}`;
   const store = new PostgresTaskStore({ pool, schema, cipher, allowPlaintextForSynthetic: !cipher }); await store.initialize();
@@ -88,7 +88,7 @@ async function fixture({ planner, profile = "safe-autopilot", hooks = {}, budget
   const saver = new PostgresSaver(pool, undefined, { schema: `${schema}_cp` }); await saver.setup();
   const workflow = createM1TaskWorkflow({ service, checkpointer: saver });
   const chosen = planner ?? { async plan({ snapshot }) { return planFor(snapshot, true); } };
-  const orchestrator = new M1TaskOrchestrator({ service, planner: chosen, workflow, budgets });
+  const orchestrator = new M1TaskOrchestrator({ service, planner: chosen, workflow, budgets, now });
   const input = { taskId: task.taskId, grantId: grant.grantId, grantRevision: grant.revision, requestId: "conversation-run" };
   return { pool, schema, store, service, adapter, task, grant, saver, workflow, chosen, orchestrator, input,
     start: () => orchestrator.start(context, input), close: () => pool.end() };
@@ -206,7 +206,10 @@ integration("one bounded repair is based on a real failed test receipt and fresh
     return planFor(snapshot, plans === 2);
   } } });
   try {
-    const result = await f.start();
+    const failed = await f.start();
+    assert.equal(failed.run.status, "repair-required"); assert.equal(failed.run.planAttempts, 1);
+    assert.equal(plans, 1); assert.equal(f.adapter.edits, 1); assert.equal(f.adapter.tests, 1);
+    const result = await f.orchestrator.resume(context, { runId: failed.run.runId });
     assert.equal(result.run.status, "completed"); assert.equal(result.run.planAttempts, 2);
     assert.equal(result.run.actions.length, 4); assert.equal(f.adapter.edits, 2); assert.equal(f.adapter.tests, 2);
     assert(result.receipts.some(receipt => receipt.output.passed === false));
@@ -218,7 +221,9 @@ integration("repeated failed tests stop at the repair budget instead of forming 
   let plans = 0;
   const f = await fixture({ planner: { async plan({ snapshot }) { plans++; return planFor(snapshot, false); } } });
   try {
-    const result = await f.start();
+    const first = await f.start();
+    assert.equal(first.run.status, "repair-required"); assert.equal(plans, 1); assert.equal(f.adapter.tests, 1);
+    const result = await f.orchestrator.resume(context, { runId: first.run.runId });
     assert.equal(result.run.status, "failed"); assert.equal(result.run.errorCode, "m1-tests-failed");
     assert.equal(plans, 2); assert.equal(f.adapter.tests, 2);
   } finally { await f.close(); }
@@ -432,7 +437,10 @@ integration("actual planner receives durable failed-test progress before the sol
   } } });
   const f = await fixture({ planner, objective, cipher: testCipher() });
   try {
-    const result = await f.start();
+    const first = await f.start();
+    assert.equal(first.run.status, "repair-required"); assert.equal(first.run.planAttempts, 1);
+    assert.equal(calls.length, 1); assert.equal(f.adapter.tests, 1); assert.equal(f.adapter.edits, 0);
+    const result = await f.orchestrator.resume(context, { runId: first.run.runId });
     assert.equal(result.run.status, "completed"); assert.equal(result.run.planAttempts, 2);
     assert.equal(result.run.budgets.maxPlans, 2); assert.equal(result.run.budgets.maxActions, 12);
     assert.equal(calls.length, 2); assert.equal(f.adapter.tests, 2); assert.equal(f.adapter.edits, 1);
@@ -446,23 +454,28 @@ integration("actual planner receives durable failed-test progress before the sol
   } finally { await f.close(); }
 });
 
-integration("actual planner cannot gain a third attempt by disregarding the repair progress", async () => {
+integration("actual planner cannot execute another failed test when its repair omits the required correction", async () => {
   let calls = 0;
   const modelId = "synthetic-unrepaired-model";
   const planner = new MastraM1Planner({ provider: { baseUrl: "http://127.0.0.1:1234/v1", modelId }, role: "code",
     agent: { async generate(raw) {
-      const input = JSON.parse(raw); calls++; assert.equal(input.progress.phase, calls === 1 ? "initial" : "repair");
+      const payload = JSON.parse(raw), input = payload.schemaVersion === "runaai-m1-plan-protocol-correction/v1"
+        ? payload.input : payload;
+      calls++; assert.equal(input.progress.phase, calls === 1 ? "initial" : "repair");
       return { text: JSON.stringify({ summary: "Repeat the unchanged test.",
         steps: [{ capabilityId: "project.run-tests", arguments: { suiteId: "addition" } }] }),
         finishReason: "stop", response: { modelId } };
     } } });
   const f = await fixture({ planner });
   try {
-    const result = await f.start();
-    assert.equal(result.run.status, "failed"); assert.equal(result.run.errorCode, "m1-tests-failed");
-    assert.equal(result.run.planAttempts, 2); assert.equal(calls, 2);
-    assert.equal(f.adapter.tests, 2); assert.equal(f.adapter.edits, 0);
-    assert.equal(result.receipts.length, 2);
+    const first = await f.start();
+    assert.equal(first.run.status, "repair-required"); assert.equal(first.run.planAttempts, 1);
+    assert.equal(calls, 1); assert.equal(f.adapter.tests, 1);
+    const result = await f.orchestrator.resume(context, { runId: first.run.runId });
+    assert.equal(result.run.status, "failed"); assert.equal(result.run.errorCode, "m1-planner-protocol-invalid");
+    assert.equal(result.run.planAttempts, 2); assert.equal(calls, 3, "one initial plan plus one rejected repair and its sole correction");
+    assert.equal(f.adapter.tests, 1); assert.equal(f.adapter.edits, 0);
+    assert.equal(result.receipts.length, 1);
   } finally { await f.close(); }
 });
 
@@ -499,7 +512,9 @@ for (const role of ["code", "agent"]) for (const mode of ["preview-only", "appro
           choices: [{ index: 0, message: { role: "assistant", content: JSON.stringify({ summary, steps }) }, finish_reason: "stop" }],
           usage: { prompt_tokens: 40, completion_tokens: 40, total_tokens: 80 } });
       } });
-    const f = await fixture({ planner, objective, profile: ["read-only", "explain-only"].includes(mode) ? "read-only" : "ask-every-time", cipher: testCipher() });
+    const f = await fixture({ planner, objective,
+      profile: ["read-only", "explain-only", "preview-only"].includes(mode) ? "read-only" : "ask-every-time",
+      cipher: testCipher() });
     try {
       const initial = await f.start();
       assert.equal(initial.run.plannerRole, role); assert.equal(calls.length, 1);
@@ -599,7 +614,7 @@ integration("valid supplied current restore still requires exact approval and re
   } } });
   try {
     reference = (await seedOwnedEdit(f)).receiptId;
-    const result = await f.start();
+    const result = await f.start(); assert.equal(plans, 1);
     assert.equal(result.run.status, "waiting-approval"); assert.equal(f.adapter.edits, 1);
     assert.equal(result.pendingProposal.capabilityId, "project.restore");
     await f.service.approve(context, { proposalId: result.pendingProposal.proposalId,
@@ -609,6 +624,32 @@ integration("valid supplied current restore still requires exact approval and re
     const current = await f.service.currentProject(context);
     assert.equal((await f.adapter.inspectRevision({ reference: current.reference })).files[0].content, "exports.add=(a,b)=>a-b;");
     assert.equal(completed.receipts.at(-1).capabilityId, "project.restore");
+  } finally { await f.close(); }
+});
+
+integration("an abandoned active window is charged before a later continuation and cannot reset the total run budget", async () => {
+  let now = 1_000, plans = 0;
+  const f = await fixture({ now: () => now,
+    budgets: { maximumRequestActiveMs: 55, maximumRunActiveMs: 120, planningTimeoutMs: 30 },
+    planner: { async plan({ snapshot }) { plans++; now += 10; return planFor(snapshot, true); } } });
+  try {
+    const completed = await f.start(); assert.equal(completed.run.status, "completed");
+    const task = await f.service.createTask(context, { requestId: "abandoned-task", objective: "Inspect only." });
+    const grant = await f.service.createGrant(context, { taskId: task.taskId, profile: "safe-autopilot",
+      allowedPaths: ["index.js"], allowedSuites: ["addition"], expiresAt: new Date(Date.now() + 600_000).toISOString() });
+    const pending = await f.orchestrator.start(context,
+      { taskId: task.taskId, grantId: grant.grantId, grantRevision: grant.revision, requestId: "abandoned-run" });
+    assert.equal(pending.run.status, "completed");
+    await f.store.transaction(context, async tx => {
+      const run = await tx.get("run", pending.run.runId);
+      run.status = "ready-to-plan"; run.outcome = null; run.consumedMs = 70;
+      run.activeWindow = { windowId: "window-00000000-0000-4000-8000-000000000000", startedAtMs: now, reservedMs: 50 };
+      await tx.save("run", run.runId, run);
+    });
+    const exhausted = await f.orchestrator.resume(context, { runId: pending.run.runId });
+    assert.equal(exhausted.run.status, "budget-exhausted"); assert.equal(exhausted.run.consumedMs, 120);
+    assert.equal(exhausted.run.recoveredActiveWindowCount, 1);
+    assert.equal(exhausted.run.activeWindow, null);
   } finally { await f.close(); }
 });
 

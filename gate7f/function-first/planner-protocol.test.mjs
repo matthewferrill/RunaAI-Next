@@ -34,3 +34,38 @@ test("analysis and preview intents reject effects independently of model prose",
   assert.deepEqual(planProtocolViolations(plan([{ capabilityId: "project.apply-change", arguments: args }]),
     ["project.inspect", "project.preview-change", "project.apply-change"], "preview-only"), ["preview-only-plan-has-effect-step"]);
 });
+
+test("repair requires one exact replacement followed by the failed suite rerun", () => {
+  const capabilities = ["project.inspect", "project.preview-change", "project.apply-change", "project.run-tests"];
+  const repair = { repair: true, currentFailedTests: [{ suiteId: "addition" }] };
+  const preview = { capabilityId: "project.preview-change", arguments: args };
+  const apply = { capabilityId: "project.apply-change", arguments: structuredClone(args) };
+  const rerun = { capabilityId: "project.run-tests", arguments: { suiteId: "addition" } };
+  assert.deepEqual(planProtocolViolations(plan([preview, apply, rerun]), capabilities, "effect-requested", repair), []);
+  assert.deepEqual(planProtocolViolations(plan([rerun, preview, apply]), capabilities, "effect-requested", repair),
+    ["repair-failed-suite-rerun-before-correction", "repair-failed-suite-rerun-required"]);
+  assert.deepEqual(planProtocolViolations(plan([preview, apply]), capabilities, "effect-requested", repair),
+    ["repair-failed-suite-rerun-required"]);
+  assert.deepEqual(planProtocolViolations(plan([preview, apply,
+    { capabilityId: "project.run-tests", arguments: { suiteId: "another-suite" } }]), capabilities, "effect-requested", repair),
+  ["repair-unfailed-suite-selected", "repair-failed-suite-rerun-required"]);
+  assert.deepEqual(planProtocolViolations(plan([preview, rerun]), capabilities, "effect-requested", repair),
+    ["preview-without-matching-later-apply", "repair-preview-apply-required"]);
+  assert.deepEqual(planProtocolViolations(plan([
+    { capabilityId: "project.preview-change", arguments: args },
+    { capabilityId: "project.apply-change", arguments: { ...args, content: "module.exports = 2;" } }, rerun,
+  ]), capabilities, "effect-requested", repair),
+  ["preview-without-matching-later-apply", "apply-without-matching-earlier-preview"]);
+});
+
+test("repair completeness is not imposed without a failed suite or the complete grant", () => {
+  const incompleteGrant = ["project.inspect", "project.run-tests"];
+  assert.deepEqual(planProtocolViolations(plan([
+    { capabilityId: "project.run-tests", arguments: { suiteId: "addition" } },
+  ]), incompleteGrant, "effect-requested", { repair: true, currentFailedTests: [{ suiteId: "addition" }] }), []);
+  assert.deepEqual(planProtocolViolations(plan([
+    { capabilityId: "project.preview-change", arguments: args },
+    { capabilityId: "project.apply-change", arguments: structuredClone(args) },
+  ]), ["project.preview-change", "project.apply-change", "project.run-tests"], "effect-requested",
+  { repair: false, currentFailedTests: [] }), []);
+});

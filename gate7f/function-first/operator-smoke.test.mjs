@@ -36,7 +36,7 @@ test("smoke calls actual Mastra answer/planner and auxiliary adapters, records n
       ? JSON.stringify({ summary: "Inspect only", steps: [{ capabilityId: "project.inspect", arguments: { path: "echo.js" } }] })
       : prompt.schemaVersion === "runaai-m1-plan-protocol-correction/v1"
         ? JSON.stringify({ summary: "Inspect only", steps: [{ capabilityId: "project.inspect", arguments: { path: "echo.js" } }] })
-      : prompt.schemaVersion === "runa2-review-response-verification/v1"
+      : prompt.schemaVersion === "runa2-evidence-response-verification/v1"
         ? JSON.stringify({ accepted: true, reason: "Synthetic smoke response is complete.", correctedAnswer: null, citations: null })
       : prompt.evidence.length ? JSON.stringify({ answer: "The north room [1].", citations: [{ sourceId: "smoke-note", sectionId: "provided" }] })
       : "Hello, Garden Circle.";
@@ -45,9 +45,10 @@ test("smoke calls actual Mastra answer/planner and auxiliary adapters, records n
       usage: { prompt_tokens: 50, completion_tokens: 30, total_tokens: 80 } });
   } });
   assert.equal(result.passed, true); assert.equal(result.scored, false); assert.equal(result.modelsLoadedOrUnloaded, false);
-  assert.equal(result.checks.length, 7); assert.equal(result.providerCalls, 8);
-  assert.equal(requests.length, 10); assert.equal(events.filter(event => event.type === "residency").length, 2);
-  assert.deepEqual(events.filter(event => event.type === "request").map(event => event.role), ["chat", "research", "review", "review", "code", "agent", "embedding", "reranker"]);
+  assert.equal(result.checks.length, 7); assert.equal(result.providerCalls, 9);
+  assert.equal(requests.length, 11); assert.equal(events.filter(event => event.type === "residency").length, 2);
+  assert.deepEqual(events.filter(event => event.type === "request").map(event => event.role),
+    ["chat", "research", "research", "review", "review", "code", "agent", "embedding", "reranker"]);
 });
 
 test("an extra or wrong resident model aborts before any inference", async () => {

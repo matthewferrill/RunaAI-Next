@@ -48,7 +48,7 @@ for(const candidate of MANIFEST.candidates)test(`actual Mastra evidence/plain wi
   const upstream=createServer(async(req,res)=>{const pieces=[];for await(const chunk of req)pieces.push(chunk);
     const bytes=Buffer.concat(pieces),request=JSON.parse(bytes);wire.push({request,bytes});
     let payload;try{payload=JSON.parse(request.messages.find(message=>message.role==='user')?.content);}catch{}
-    const content=payload?.schemaVersion==='runa2-review-response-verification/v1'?JSON.stringify(reviewAccepted)
+    const content=payload?.schemaVersion==='runa2-evidence-response-verification/v1'?JSON.stringify(reviewAccepted)
       :request.response_format?JSON.stringify(answer):'A plain answer.';
     res.writeHead(200,{'content-type':'application/json'});res.end(JSON.stringify(completion(candidate.key,content)));});
   const endpoint=await listen(upstream),controller={profile:selected,async admit(){admitted++;return {generation:'fixture',
@@ -83,9 +83,51 @@ test('Review checker corrects one incomplete evidence answer and verifies the co
   const value=await provider.answer({request:{lane:'review',message:'State the colour and what remains unknown.',history:[]},
     ground:'record-answers',advisory:null,evidence},options);
   assert.equal(value.answer,'The note says cobalt; no completion date is established.');assert.deepEqual(value.citations,answer.citations);
-  assert.deepEqual(value.responseCheck,{performed:true,corrected:true});assert.equal(generated.length,2);
-  assert.equal(generated[0].schemaVersion,'runa2-review-response-verification/v1');
+  assert.deepEqual(value.responseCheck,{performed:true,corrected:true,kind:'evidence-review',
+    finalAnswerOrigin:'checker-correction',attemptCount:2});assert.equal(generated.length,2);
+  assert.equal(generated[0].schemaVersion,'runa2-evidence-response-verification/v1');
   assert.equal(JSON.stringify(generated).includes('eight-second'),false);
+});
+
+test('Research checker corrects omitted negative evidence and rechecks once inside the Research ceiling',async()=>{
+  const calls=[];const agent={async generate(){return {text:JSON.stringify({answer:'The selected note says cobalt.',citations:answer.citations}),
+    finishReason:'stop',response:{modelId:'synthetic'}};}};
+  const replies=[{accepted:false,reason:'A relevant unknown was omitted.',
+    correctedAnswer:'The selected note says cobalt; no completion date is established.',citations:answer.citations},
+    {...reviewAccepted,citations:answer.citations}];
+  const verifierAgent={async generate(prompt,options){calls.push({prompt:JSON.parse(prompt),options});return {text:JSON.stringify(replies.shift()),
+    finishReason:'stop',response:{modelId:'synthetic'}};}};
+  const provider=new MastraAnswerProvider({baseURL:'http://127.0.0.1:1/v1',modelId:'synthetic',role:'research',agent,verifierAgent,
+    maxOutputTokens:512});
+  const value=await provider.answer({request:{lane:'research',message:'State the colour and what remains unknown.',history:[]},
+    ground:'record-answers',advisory:null,evidence},options);
+  assert.equal(value.answer,'The selected note says cobalt; no completion date is established.');assert.deepEqual(value.citations,answer.citations);
+  assert.deepEqual(value.responseCheck,{performed:true,corrected:true,kind:'evidence-research',
+    finalAnswerOrigin:'checker-correction',attemptCount:2});assert.equal(calls.length,2);
+  assert.ok(calls.every(call=>call.prompt.schemaVersion==='runa2-evidence-response-verification/v1'
+    &&call.options.modelSettings.maxOutputTokens===512&&call.options.modelSettings.maxRetries===0));
+});
+
+test('accepted evidence checker permits null or the exact citation echo and rejects every changed set',async()=>{
+  const second={sourceId:'fixture-note-two',sectionId:'two',contentSha256:'b'.repeat(64),content:'The second selected note is retained.'};
+  const selected=[...evidence,second],citations=selected.map(({sourceId,sectionId})=>({sourceId,sectionId}));
+  for(const acceptedCitations of [null,structuredClone(citations)]){
+    const agent={async generate(){return {text:JSON.stringify({answer:'Both selected notes are cited.',citations}),finishReason:'stop',response:{modelId:'synthetic'}};}};
+    const verifierAgent={async generate(){return {text:JSON.stringify({...reviewAccepted,citations:acceptedCitations}),finishReason:'stop',response:{modelId:'synthetic'}};}};
+    const provider=new MastraAnswerProvider({baseURL:'http://127.0.0.1:1/v1',modelId:'synthetic',role:'review',agent,verifierAgent});
+    const value=await provider.answer({request:{lane:'review',message:'Review both notes.',history:[]},ground:'record-answers',advisory:null,evidence:selected},options);
+    assert.deepEqual(value.citations,citations);assert.equal(value.answer,'Both selected notes are cited.');
+    assert.deepEqual(value.responseCheck,{performed:true,corrected:false,kind:'evidence-review',finalAnswerOrigin:'primary',attemptCount:1});
+  }
+  const changed=[citations.slice(0,1),[citations[1],citations[0]],[citations[0],citations[0]],
+    [...citations,{sourceId:'foreign',sectionId:'one'}],[{...citations[0],sectionId:'changed'},citations[1]]];
+  for(const acceptedCitations of changed){
+    const agent={async generate(){return {text:JSON.stringify({answer:'Both selected notes are cited.',citations}),finishReason:'stop',response:{modelId:'synthetic'}};}};
+    const verifierAgent={async generate(){return {text:JSON.stringify({...reviewAccepted,citations:acceptedCitations}),finishReason:'stop',response:{modelId:'synthetic'}};}};
+    const provider=new MastraAnswerProvider({baseURL:'http://127.0.0.1:1/v1',modelId:'synthetic',role:'review',agent,verifierAgent});
+    await assert.rejects(provider.answer({request:{lane:'review',message:'Review both notes.',history:[]},
+      ground:'record-answers',advisory:null,evidence:selected},options),error=>['provider-shape-invalid','provider-response-invalid'].includes(error.code));
+  }
 });
 
 test('Review checker cannot accept missing or unselected citations even when its model says accepted',async()=>{

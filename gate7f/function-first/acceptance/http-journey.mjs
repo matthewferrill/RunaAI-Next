@@ -145,7 +145,13 @@ export class FunctionalHttpJourney {
   async startRun() {
     this.startInput = { requestId: this.id("run"), taskId: this.task.taskId, grantId: this.grant.grantId,
       grantRevision: this.grant.revision, workflow: this.item.role };
-    return this.recordState(await this.m1("run.start", this.startInput));
+    const started = await this.recordState(await this.m1("run.start", this.startInput));
+    if (started?.run?.status !== "repair-required") return started;
+    this.ledger.evidence("application", "repair-continuation-boundary", {
+      runId: started.run.runId, taskId: started.run.taskId, status: started.run.status,
+      planAttempts: started.run.planAttempts, pendingProposalId: started.run.pendingProposalId,
+    });
+    return this.recordState(await this.m1("run.resume", { runId: started.run.runId }));
   }
   async approveEach() {
     for (let count = 0; count < 12; count++) {

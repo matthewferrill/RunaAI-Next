@@ -25,7 +25,8 @@ const protocolRecordSchema = z.object({ schemaVersion: z.literal("runaai-m1-plan
 const planSchema = planCoreSchema.extend({ planningProtocol: protocolRecordSchema.optional() }).strict();
 const finished = new Set(["completed", "cancelled", "failed", "budget-exhausted"]);
 const DEFAULT_BUDGETS = Object.freeze({ maxPlans: 2, maxActions: 12, planningTimeoutMs: 120_000,
-  maximumActiveMs: 300_000, maximumAgeMs: 3_600_000 });
+  maximumRequestActiveMs: 300_000, maximumRunActiveMs: 300_000, maximumAgeMs: 3_600_000 });
+const BUDGET_KEYS = new Set(Object.keys(DEFAULT_BUDGETS));
 
 /** Bounded application loop. The injected planner returns data, never executable authority. */
 export class M1TaskOrchestrator {
@@ -34,9 +35,21 @@ export class M1TaskOrchestrator {
     this.service = service; this.store = service.store; this.planner = planner; this.workflow = workflow; this.now = now;
     this.plannerRole = planner.role ?? "agent";
     assert(["code", "agent"].includes(this.plannerRole), "m1-planner-role-invalid");
-    this.budgets = { ...DEFAULT_BUDGETS, ...budgets };
+    const supplied = { ...budgets };
+    // Constructor compatibility is deliberately no broader than the former
+    // single ceiling: a legacy value becomes both request and total run limit.
+    if (Object.hasOwn(supplied, "maximumActiveMs")) {
+      assert(!Object.hasOwn(supplied, "maximumRequestActiveMs") && !Object.hasOwn(supplied, "maximumRunActiveMs"),
+        "m1-orchestrator-budget-invalid");
+      supplied.maximumRequestActiveMs = supplied.maximumActiveMs;
+      supplied.maximumRunActiveMs = supplied.maximumActiveMs;
+      delete supplied.maximumActiveMs;
+    }
+    assert(Object.keys(supplied).every(key => BUDGET_KEYS.has(key)), "m1-orchestrator-budget-invalid");
+    this.budgets = { ...DEFAULT_BUDGETS, ...supplied };
     for (const [key, limit] of Object.entries(DEFAULT_BUDGETS)) assert(Number.isInteger(this.budgets[key])
       && this.budgets[key] > 0 && this.budgets[key] <= limit, "m1-orchestrator-budget-invalid");
+    assert(this.budgets.maximumRequestActiveMs <= this.budgets.maximumRunActiveMs, "m1-orchestrator-budget-invalid");
   }
 
   async start(rawContext, rawInput) {
@@ -53,6 +66,7 @@ export class M1TaskOrchestrator {
         requestDigest, grantDefinitionDigest: grant.definitionDigest, objective: task.objective,
         status: "ready-to-plan", planAttempts: 0, protocolCorrectionCount: 0, plans: [], activePlan: 0, nextStep: 0,
         actions: [], pendingProposalId: null, outcome: null, errorCode: null, consumedMs: 0,
+        activeWindow: null, recoveredActiveWindowCount: 0,
         budgets: { ...this.budgets }, createdAtMs: this.now(), updatedAtMs: this.now() };
       await tx.save("run", run.runId, run, { insertOnly: true, requestKey: key });
       await tx.audit("conversational-run-created", run.runId, { requestDigest });
@@ -68,7 +82,8 @@ export class M1TaskOrchestrator {
     const task = await this.service.status(context, { taskId: run.taskId });
     return { run, task: task.task, project: task.project, proposals: task.proposals, receipts: task.receipts,
       pendingProposal: task.proposals.find(value => value.proposalId === run.pendingProposalId) ?? null,
-      pendingReconciliation: task.pendingReconciliation, runEvidence: runEvidenceProjection(run, task) };
+      pendingReconciliation: task.pendingReconciliation, runEvidence: runEvidenceProjection(run, task),
+      sessionRebindRequired: run.sessionId !== context.sessionId };
   }
 
   async list(rawContext) {
@@ -87,42 +102,47 @@ export class M1TaskOrchestrator {
     const retained = await this.load(context, runId);
     assert((retained.plannerRole ?? "agent") === this.plannerRole, "m1-planner-role-mismatch");
     return this.store.operation(`orchestrator:${runId}`, async () => {
-      const activeStarted = this.now();
+      const activeWindow = await this.reserveActiveWindow(context, runId);
+      if (!activeWindow) return this.status(context, { runId });
       try {
-        if (grantId !== undefined) {
-          const rebound = await this.rebind(context, runId, { grantId, grantRevision });
-          if (!rebound) return this.status(context, { runId });
-        }
-        for (;;) {
+        drive: {
+          if (grantId !== undefined) {
+            const rebound = await this.rebind(context, runId, { grantId, grantRevision });
+            if (!rebound) break drive;
+          }
+          for (;;) {
           let run = await this.load(context, runId);
-          if (finished.has(run.status)) return this.status(context, { runId });
+          if (finished.has(run.status)) break drive;
           const taskState = await this.service.status(context, { taskId: run.taskId });
           if (taskState.task.status !== "active") {
             await this.update(context, runId, state => { state.status = "cancelled"; state.outcome = "cancelled"; });
-            return this.status(context, { runId });
+            break drive;
           }
           assert(context.sessionId === run.sessionId, "m1-grant-session-mismatch");
-          const elapsed = run.consumedMs + this.now() - activeStarted;
+          const requestElapsed = Math.max(0, this.now() - activeWindow.startedAtMs);
+          const elapsed = run.consumedMs + requestElapsed;
           const unfinishedActions = ["ready-to-plan", "planning", "repair-required"].includes(run.status)
             || run.pendingProposalId !== null || run.nextStep < (run.plans[run.activePlan]?.steps.length ?? 0);
-          if (elapsed >= run.budgets.maximumActiveMs || this.now() - run.createdAtMs >= run.budgets.maximumAgeMs
+          if (requestElapsed >= activeWindow.reservedMs || elapsed >= run.budgets.maximumRunActiveMs
+            || this.now() - run.createdAtMs >= run.budgets.maximumAgeMs
             || (run.actions.length >= run.budgets.maxActions && unfinishedActions)) {
             await this.update(context, runId, state => { state.status = "budget-exhausted"; state.errorCode = "m1-orchestration-budget-exhausted"; });
-            return this.status(context, { runId });
+            break drive;
           }
           if (run.status === "needs-reconciliation") {
             const result = await this.service.reconcile(context, { proposalId: run.pendingProposalId });
-            if (!result.receipt) return this.status(context, { runId });
-            await this.consume(context, runId, result);
+            if (!result.receipt) break drive;
+            const consumed = await this.consume(context, runId, result);
+            if (consumed.status === "repair-required") break drive;
             continue;
           }
           if (["ready-to-plan", "planning", "repair-required"].includes(run.status)) {
             if (run.planAttempts >= run.budgets.maxPlans) {
               await this.update(context, runId, state => { state.status = "failed"; state.errorCode = "m1-plan-budget-exhausted"; });
-              return this.status(context, { runId });
+              break drive;
             }
-            const planned = await this.makePlan(context, run, taskState, activeStarted);
-            if (!planned) return this.status(context, { runId });
+            const planned = await this.makePlan(context, run, taskState, activeWindow);
+            if (!planned) break drive;
             continue;
           }
           const currentPlan = run.plans[run.activePlan];
@@ -133,7 +153,7 @@ export class M1TaskOrchestrator {
               // This is verified completion of the accepted plan, not a model's assertion about arbitrary goals.
               state.outcome = "plan-completed";
             });
-            return this.status(context, { runId });
+            break drive;
           }
           let proposal;
           if (run.pendingProposalId) {
@@ -147,12 +167,12 @@ export class M1TaskOrchestrator {
           }
           if (proposal.status === "pending-approval") {
             await this.update(context, runId, state => { state.status = "waiting-approval"; });
-            return this.status(context, { runId });
+            break drive;
           }
           if (["denied", "stale", "cancelled", "failed", "not-published"].includes(proposal.status)) {
             await this.update(context, runId, state => { state.status = "failed";
               state.errorCode = proposal.errorCode ?? "m1-capability-denied"; });
-            return this.status(context, { runId });
+            break drive;
           }
           await this.update(context, runId, state => { state.status = "running"; });
           const result = await this.workflow.run(context, { proposalId: proposal.proposalId }, { resume: true });
@@ -161,9 +181,13 @@ export class M1TaskOrchestrator {
               state.status = ["unknown", "dispatched"].includes(result.proposal.status) ? "needs-reconciliation" : "failed";
               state.errorCode = result.proposal.errorCode ?? "m1-action-incomplete";
             });
-            return this.status(context, { runId });
+            break drive;
           }
-          await this.consume(context, runId, result);
+          const consumed = await this.consume(context, runId, result);
+          // A failed test is a durable quiescent boundary. A second planner call
+          // belongs only to a later explicit run.resume request.
+          if (consumed.status === "repair-required") break drive;
+          }
         }
       } catch (error) {
         const run = await this.load(context, runId);
@@ -174,10 +198,43 @@ export class M1TaskOrchestrator {
           else state.status = taskState.task.status !== "active" ? "cancelled" : "failed";
           state.errorCode = safeCode(error);
         });
-        return this.status(context, { runId });
       } finally {
-        await this.update(context, runId, state => { state.consumedMs += Math.max(0, this.now() - activeStarted); }).catch(() => {});
+        await this.settleActiveWindow(context, runId, activeWindow);
       }
+      return this.status(context, { runId });
+    });
+  }
+
+  async reserveActiveWindow(context, runId) {
+    const windowId = makeId("window"), startedAtMs = this.now();
+    const run = await this.update(context, runId, state => {
+      upgradeRunBudgets(state);
+      if (state.activeWindow !== null && state.activeWindow !== undefined) {
+        assertActiveWindow(state.activeWindow);
+        state.consumedMs += state.activeWindow.reservedMs;
+        state.recoveredActiveWindowCount = (state.recoveredActiveWindowCount ?? 0) + 1;
+        state.activeWindow = null;
+      }
+      if (finished.has(state.status)) return;
+      const remaining = state.budgets.maximumRunActiveMs - state.consumedMs;
+      if (remaining <= 0) {
+        state.status = "budget-exhausted"; state.errorCode = "m1-orchestration-budget-exhausted"; return;
+      }
+      state.activeWindow = { windowId, startedAtMs,
+        reservedMs: Math.min(state.budgets.maximumRequestActiveMs, remaining) };
+    });
+    return run.activeWindow?.windowId === windowId ? structuredClone(run.activeWindow) : null;
+  }
+
+  async settleActiveWindow(context, runId, activeWindow) {
+    await this.update(context, runId, state => {
+      assertActiveWindow(state.activeWindow);
+      assert(state.activeWindow.windowId === activeWindow.windowId
+        && state.activeWindow.startedAtMs === activeWindow.startedAtMs
+        && state.activeWindow.reservedMs === activeWindow.reservedMs, "m1-active-window-mismatch");
+      const elapsed = Math.max(0, this.now() - activeWindow.startedAtMs);
+      state.consumedMs += Math.min(activeWindow.reservedMs, elapsed);
+      state.activeWindow = null;
     });
   }
 
@@ -229,7 +286,7 @@ export class M1TaskOrchestrator {
     return true;
   }
 
-  async makePlan(context, run, taskState, activeStarted) {
+  async makePlan(context, run, taskState, activeWindow) {
     await this.store.transaction(context, tx => this.service.authority(tx, context, { taskId: run.taskId,
       grantId: run.grantId, grantRevision: run.grantRevision, capabilityId: "project.inspect" }));
     const grant = taskState.grants.find(value => value.grantId === run.grantId);
@@ -245,9 +302,21 @@ export class M1TaskOrchestrator {
     const plannerSnapshot = { workspaceSha256: snapshot.workspaceSha256, projectRevision: taskState.project.revision,
       files: snapshot.files.filter(file => grant.allowedPaths.includes(file.path)),
       omittedFileCount: snapshot.files.filter(file => !grant.allowedPaths.includes(file.path)).length };
+    if (run.status === "repair-required") {
+      assert(run.pendingProposalId === null && taskState.pendingReconciliation.length === 0, "m1-repair-intent-unsettled");
+      const failedReceiptIds = new Set(run.actions.filter(action => action.capabilityId === "project.run-tests")
+        .map(action => action.receiptId));
+      const currentFailure = permittedReceipts.some(receipt => failedReceiptIds.has(receipt.receiptId)
+        && receipt.capabilityId === "project.run-tests" && receipt.executionStatus === "ran"
+        && receipt.output?.passed === false && receipt.afterRevision === plannerSnapshot.projectRevision
+        && receipt.afterSha256 === plannerSnapshot.workspaceSha256);
+      assert(currentFailure, "m1-repair-basis-stale");
+    }
     await this.update(context, run.runId, state => { state.status = "planning"; state.planAttempts++; });
+    const requestElapsed = Math.max(0, this.now() - activeWindow.startedAtMs);
     const timeout = Math.min(run.budgets.planningTimeoutMs,
-      run.budgets.maximumActiveMs - run.consumedMs - (this.now() - activeStarted));
+      activeWindow.reservedMs - requestElapsed,
+      run.budgets.maximumRunActiveMs - run.consumedMs - requestElapsed);
     assert(timeout > 0, "m1-orchestration-budget-exhausted");
     const controller = new AbortController();
     let timer, poll;
@@ -322,7 +391,7 @@ export class M1TaskOrchestrator {
   async consume(context, runId, result) {
     assert(result.receipt, "m1-action-incomplete");
     this.service.verifyReceipt(result.receipt);
-    await this.update(context, runId, run => {
+    return this.update(context, runId, run => {
       assert(result.receipt.proposalId === run.pendingProposalId && result.receipt.taskId === run.taskId,
         "m1-receipt-binding-mismatch");
       if (!run.actions.some(action => action.receiptId === result.receipt.receiptId)) run.actions.push({
@@ -342,6 +411,15 @@ export class M1TaskOrchestrator {
     return this.store.transaction(context, async tx => {
       const run = await tx.get("run", runId);
       assert(run, "m1-run-not-found");
+      const budgets = validateRunBudgets(run);
+      assert(Number.isSafeInteger(run.recoveredActiveWindowCount ?? 0) && (run.recoveredActiveWindowCount ?? 0) >= 0,
+        "m1-active-window-invalid");
+      if (run.activeWindow !== null && run.activeWindow !== undefined) {
+        assertActiveWindow(run.activeWindow);
+        assert(run.activeWindow.reservedMs <= budgets.maximumRequestActiveMs
+          && run.consumedMs + run.activeWindow.reservedMs <= budgets.maximumRunActiveMs,
+        "m1-active-window-invalid");
+      }
       for (const plan of run.plans) {
         assert(plan.planDigest === digest({ summary: plan.summary, steps: plan.steps }), "m1-plan-integrity-failed");
         assert((plan.planningProtocol === null || plan.planningProtocol === undefined) === (plan.protocolDigest === null || plan.protocolDigest === undefined)
@@ -358,6 +436,45 @@ export class M1TaskOrchestrator {
       return run;
     });
   }
+}
+
+function upgradeRunBudgets(run) {
+  assert(run?.budgets && typeof run.budgets === "object" && !Array.isArray(run.budgets), "m1-orchestrator-budget-invalid");
+  if (Object.hasOwn(run.budgets, "maximumActiveMs")) {
+    assert(!Object.hasOwn(run.budgets, "maximumRequestActiveMs") && !Object.hasOwn(run.budgets, "maximumRunActiveMs"),
+      "m1-orchestrator-budget-invalid");
+    // Historical runs retain their exact former total ceiling. They never gain
+    // the larger R11 continuation budget merely by being reopened.
+    run.budgets.maximumRequestActiveMs = run.budgets.maximumActiveMs;
+    run.budgets.maximumRunActiveMs = run.budgets.maximumActiveMs;
+    delete run.budgets.maximumActiveMs;
+  }
+  validateRunBudgets(run);
+  run.recoveredActiveWindowCount ??= 0;
+  run.activeWindow ??= null;
+}
+
+function validateRunBudgets(run) {
+  const legacy = run?.budgets && Object.hasOwn(run.budgets, "maximumActiveMs");
+  const budgets = legacy ? { ...run.budgets,
+    maximumRequestActiveMs: run.budgets.maximumActiveMs, maximumRunActiveMs: run.budgets.maximumActiveMs } : run?.budgets;
+  if (legacy) delete budgets.maximumActiveMs;
+  assert(Number.isSafeInteger(run?.consumedMs) && run.consumedMs >= 0
+    && budgets && Object.keys(budgets).every(key => BUDGET_KEYS.has(key))
+    && Object.entries(DEFAULT_BUDGETS).every(([key, limit]) => Number.isInteger(budgets[key])
+      && budgets[key] > 0 && budgets[key] <= limit)
+    && budgets.maximumRequestActiveMs <= budgets.maximumRunActiveMs,
+  "m1-orchestrator-budget-invalid");
+  return budgets;
+}
+
+function assertActiveWindow(value) {
+  assert(value && typeof value === "object" && !Array.isArray(value)
+    && Object.keys(value).sort().join() === "reservedMs,startedAtMs,windowId"
+    && /^window-[a-f0-9-]{36}$/u.test(value.windowId)
+    && Number.isSafeInteger(value.startedAtMs) && value.startedAtMs >= 0
+    && Number.isSafeInteger(value.reservedMs) && value.reservedMs > 0,
+  "m1-active-window-invalid");
 }
 
 export function runEvidenceProjection(run, taskState) {

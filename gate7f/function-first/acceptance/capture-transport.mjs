@@ -4,6 +4,22 @@ import { fail, sha256 } from "./runner-contract.mjs";
 
 export const HEALTH_CAPTURE_LIMITS = Object.freeze({ deadlineMs: 2000, maximumBytes: 65_536, maximumRecords: 1024, maximumJournalBodyBytes: 8_388_608 });
 const healthRoutes = Object.freeze({ embedding: "/models", reranker: "/health" });
+const providerPurposes = Object.freeze({
+  "runa2-model-answer-input/v2": "primary-answer",
+  "runa2-evidence-response-verification/v1": "evidence-checker",
+  "runa2-code-response-verification/v2": "code-checker",
+  "runaai-m1-planner-input/v2": "initial-plan",
+  "runaai-m1-plan-protocol-correction/v1": "plan-correction",
+});
+function providerPurpose(body) {
+  const messages = Array.isArray(body?.messages) ? body.messages : [];
+  const users = messages.filter(message => message?.role === "user" && typeof message.content === "string");
+  if (users.length !== 1) return "unclassified";
+  try {
+    const payload = JSON.parse(users[0].content);
+    return providerPurposes[payload?.schemaVersion] ?? "unclassified";
+  } catch { return "unclassified"; }
+}
 const exactHealthRead = (kind, request) => request.method === "GET" && healthRoutes[kind]
   && request.url === healthRoutes[kind] && !request.headers["transfer-encoding"]
   && (!request.headers["content-length"] || request.headers["content-length"] === "0");
@@ -113,10 +129,11 @@ export async function startCaptureTransport({ mode, targetBaseUrl, modelId, kind
     const expected = kind === "provider" ? "/chat/completions" : kind === "embedding" ? "/embeddings" : "/rerank";
     const item = { sequence: (ledger?.observation.provider.calls.length ?? 0) + 1, kind,
       role: ledger?.observation.role ?? null, phase: ledger?.phase ?? "no-case", path, startedAt,
-      scope: structuredClone(ledger?.requestScope ?? null) };
+      scope: structuredClone(ledger?.requestScope ?? null), ...(kind === "provider" ? { purpose: "unclassified" } : {}) };
     try {
       if (request.method !== "POST" || request.url !== expected) throw fail("m1-capture-route-denied");
       body = JSON.parse((await bytes(request, 196_608)).toString("utf8")); item.request = body;
+      if (kind === "provider") item.purpose = providerPurpose(body);
       if (kind === "embedding") { item.adapter = "nomic";
         item.operation = body.input?.every(text => typeof text === "string" && text.startsWith("search_query: ")) ? "search" : "index"; }
       if (kind === "reranker") { item.adapter = "explicit-window-bge"; item.operation = "search"; item.windows = body.documents; }

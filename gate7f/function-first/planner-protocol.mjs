@@ -17,7 +17,7 @@ export function describePlanProtocol(capabilityIds = [], workIntent = "effect-re
   });
 }
 
-export function planProtocolViolations(plan, capabilityIds = [], workIntent = "effect-requested") {
+export function planProtocolViolations(plan, capabilityIds = [], workIntent = "effect-requested", repairContext = null) {
   const available = new Set(Array.isArray(capabilityIds) ? capabilityIds : []);
   const steps = Array.isArray(plan?.steps) ? plan.steps : [];
   if (workIntent === "analysis-only") {
@@ -27,7 +27,8 @@ export function planProtocolViolations(plan, capabilityIds = [], workIntent = "e
     return steps.some(step => !["project.inspect", "project.preview-change"].includes(step?.capabilityId))
       ? ["preview-only-plan-has-effect-step"] : [];
   }
-  if (!available.has("project.preview-change") || !available.has("project.apply-change")) return [];
+  const replacementAvailable = available.has("project.preview-change") && available.has("project.apply-change");
+  if (!replacementAvailable) return [];
   const previews = [], applies = [];
   for (let index = 0; index < steps.length; index++) {
     const step = steps[index], key = canonicalJson(step?.arguments);
@@ -44,5 +45,23 @@ export function planProtocolViolations(plan, capabilityIds = [], workIntent = "e
   for (const apply of applies) {
     if (!usedApplies.has(apply.index)) violations.push("apply-without-matching-earlier-preview");
   }
-  return [...new Set(violations)];
+  if (repairContext?.repair === true && replacementAvailable && available.has("project.run-tests")) {
+    const failedSuites = new Set((repairContext.currentFailedTests ?? []).map(value => value?.suiteId)
+      .filter(value => typeof value === "string" && value.length > 0));
+    if (failedSuites.size > 0) {
+      const lastApply = applies.at(-1)?.index ?? -1;
+      if (previews.length === 0 || applies.length === 0) violations.push("repair-preview-apply-required");
+      const tests = steps.map((step, index) => ({ step, index })).filter(value => value.step?.capabilityId === "project.run-tests");
+      if (tests.some(value => failedSuites.has(value.step.arguments?.suiteId) && value.index < lastApply)) {
+        violations.push("repair-failed-suite-rerun-before-correction");
+      }
+      if (tests.some(value => !failedSuites.has(value.step.arguments?.suiteId))) violations.push("repair-unfailed-suite-selected");
+      if ([...failedSuites].some(suiteId => !tests.some(value => value.step.arguments?.suiteId === suiteId && value.index > lastApply))) {
+        violations.push("repair-failed-suite-rerun-required");
+      }
+    }
+  }
+  // The retained protocol record has a hard four-code ceiling. These stable,
+  // model-neutral categories are sufficient to request one advisory correction.
+  return [...new Set(violations)].slice(0, 4);
 }

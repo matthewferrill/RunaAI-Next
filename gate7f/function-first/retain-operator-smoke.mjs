@@ -18,24 +18,26 @@ export function verifyOperatorSmoke(events) {
   assert.deepEqual(sealed.policy, legacy ? LEGACY_SMOKE_POLICY : SMOKE_POLICY);
   const requests = events.filter(item => item.type === "request"), responses = events.filter(item => item.type === "response");
   const roles = legacy ? ["chat", "research", "review", "code", "agent", "embedding", "reranker"]
-    : ["chat", "research", "review", "review", "code", "agent", "embedding", "reranker"];
+    : ["chat", "research", "research", "review", "review", "code", "agent", "embedding", "reranker"];
   assert.deepEqual(requests.map(item => item.role), roles); assert.deepEqual(responses.map(item => item.role), roles);
   assert.ok(!events.some(item => item.type === "transport-failure"));
   for (const item of events.filter(item => item.type === "residency")) {
     assert.deepEqual(item.loaded.map(value => value.id).sort(), [seal.primaryInstanceId, seal.embeddingInstanceId].sort());
   }
   assert.equal(events.filter(item => item.type === "residency").length, 2);
-  const primaryCalls = legacy ? 5 : 6;
+  const primaryCalls = legacy ? 5 : 7;
   for (let index = 0; index < primaryCalls; index++) {
     const input = requests[index].input, output = JSON.parse(responses[index].rawText);
     assert.equal(input.model, seal.modelId); assert.equal(output.model, seal.modelId);
-    assert.equal(input.max_tokens, legacy ? index < 3 ? 512 : 1536 : index < 2 ? 512 : index < 4 ? 1024 : 1536); assert.equal(input.temperature, 0);
+    const expectedTokens = legacy ? index < 3 ? 512 : 1536
+      : index < 3 ? 512 : index < 5 ? 1024 : 1536;
+    assert.equal(input.max_tokens, expectedTokens); assert.equal(input.temperature, 0);
     assert.equal(input.reasoning_effort, seal.reasoningEffort ?? undefined);
     assert.ok(!JSON.stringify(input).includes("/no_think"));
     assert.equal(output.choices?.[0]?.finish_reason, "stop");
     assert.ok(output.choices[0].message.content.trim());
   }
-  const embeddingIndex = legacy ? 5 : 6, rerankerIndex = embeddingIndex + 1;
+  const embeddingIndex = legacy ? 5 : 7, rerankerIndex = embeddingIndex + 1;
   assert.equal(requests[embeddingIndex].input.model, seal.embeddingModelId);
   assert.ok(requests[embeddingIndex].input.input[0].startsWith("search_document: "));
   assert.ok(requests[embeddingIndex].input.input[1].startsWith("search_query: "));
@@ -48,7 +50,7 @@ export function verifyOperatorSmoke(events) {
   assert.ok(responses.every(item => item.status === 200 && item.elapsedMs >= 0 && item.elapsedMs <= 30_000));
   const final = events.at(-1); assert.equal(final.type, "result");
   assert.equal(final.result.passed, true); assert.equal(final.result.scored, false);
-  assert.equal(final.result.productionChanged, false); assert.equal(final.result.providerCalls, legacy ? 7 : 8);
+  assert.equal(final.result.productionChanged, false); assert.equal(final.result.providerCalls, legacy ? 7 : 9);
   assert.equal(final.result.modelsLoadedOrUnloaded, false); assert.equal(final.result.modelId, seal.modelId);
   assert.deepEqual(final.result.checks, ["chat-actual-answer-adapter", "research-actual-answer-adapter", "review-actual-answer-adapter",
     "code-actual-planner-adapter", "agent-actual-planner-adapter", "nomic-actual-prefix-and-dimension", "bge-actual-adapter"]);

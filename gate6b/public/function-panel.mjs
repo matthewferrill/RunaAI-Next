@@ -12,6 +12,15 @@ export function approvalIsAvailable(result, proposal) {
     && (result.grants ?? []).some(grant => grant.status === "active"
       && grant.grantId === proposal.grantId && grant.revision === proposal.grantRevision);
 }
+export function repairContinuationIsAvailable(result) {
+  const run = result?.run;
+  return result?.task?.status === "active" && run?.status === "repair-required"
+    && result.sessionRebindRequired === false
+    && Array.isArray(result.pendingReconciliation) && result.pendingReconciliation.length === 0
+    && run.pendingProposalId === null
+    && (result.grants ?? []).some(grant => grant.status === "active"
+      && grant.grantId === run.grantId && grant.revision === run.grantRevision);
+}
 export function restoredWorkspaceNotice(result) {
   const current = new Set(result?.currentReceiptIds ?? []);
   return (result?.receipts ?? []).some(receipt => current.has(receipt.receiptId)
@@ -29,7 +38,9 @@ export function taskPresentation(result) {
     };
     const status = result?.run?.status ?? result?.task?.status ?? "unknown";
     const code = result?.run?.errorCode;
-    const notice = status === "failed" && code === "m1-stale-project"
+    const notice = status === "repair-required"
+      ? "A selected test failed and its receipt was retained. No repair has started. Continue bounded repair to request the one permitted correction plan."
+      : status === "failed" && code === "m1-stale-project"
       ? "Stopped: the project changed after this action was proposed. The newer files were preserved; this old action was not applied. Start a new task to work from the current files."
       : status === "failed" && ["m1-grant-revoked", "m1-grant-expired", "m1-stale-grant"].includes(code)
         ? "Stopped: this task's permission is no longer valid. No pending action was authorized by this failure."
@@ -323,6 +334,7 @@ export async function initializeFunctionPanel({ root = document, request, getCon
       }, parent); return control;
     };
     const pendingIds = new Set((result.pendingReconciliation ?? []).map(value => value.proposalId));
+    const repairReady = repairContinuationIsAvailable(result);
     for (const proposal of result.proposals ?? []) {
       const section = element(root, "section", null, "task-proposal");
       section.append(element(root, "p", `${proposal.capabilityId} — ${proposal.status}`));
@@ -368,6 +380,10 @@ export async function initializeFunctionPanel({ root = document, request, getCon
     }
     if (!(result.receipts ?? []).length) taskView.append(element(root, "p", "No execution receipts have been recorded for this task."));
     action("Refresh task status", () => reloadTask());
+    if (repairReady) action("Continue bounded repair", async () => {
+      await call("run.resume", { runId }, token);
+      await reloadTask(false);
+    });
     for (const grant of result.grants ?? []) if (grant.status === "active") {
       action("Revoke task permission", async () => {
         await call("grant.revoke", { grantId: grant.grantId }, token);
@@ -378,7 +394,7 @@ export async function initializeFunctionPanel({ root = document, request, getCon
     }
     const standaloneProposal = !runId ? [...(result.proposals ?? [])].reverse()
       .find(proposal => ["pending-approval", "authorized"].includes(proposal.status)) : null;
-    if (result.task?.status === "active" && ((runId && !terminalRuns.has(run?.status)) || standaloneProposal)) {
+    if (result.task?.status === "active" && !repairReady && ((runId && !terminalRuns.has(run?.status)) || standaloneProposal)) {
       taskView.append(element(root, "p", restored
         ? (result.approvableProposalIds?.length
           ? "Your current session can approve the exact pending action. Reopening this task has not started any work."

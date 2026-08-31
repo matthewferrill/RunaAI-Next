@@ -15,37 +15,37 @@ are unchanged. M1 is authorized, not complete; its first local wiring result is 
 The steward authorized necessary non-destructive work and commit/push to RunaAI-Next without recurring
 permission requests. Human involvement is reserved for genuine customer tests or human-only operations.
 
-### Current checkpoint: R9 functional comparison complete; Review remains open
+### Current checkpoint: R10 complete; prospective R11 correction frozen
 
-On 2026-08-30 the R9 corrected-stack comparison completed 360/360 fixed model
-attempts and 12/12 model-free Control drivers on source
-`c8932ccf2b2f0bc19f6a6e32d6f0ca30631ed4fd`, runtime seal
-`9450a5aca5812b812d0dfe645d657315b0602609d6f755ff9007d8102841cd75`.
-Independent review verified all raw/ledger records and provider outputs with zero
-binding errors and found no critical model or product failure.
+On 2026-08-30 R10 completed all 360 fixed model attempts plus 12/12 byte-identical
+model-free controls on source `ee1a15ae5d0c6ba18e9eaa24e623645be74a238b`,
+archive `a1ff6e01a378d6b93a0329cc6d733a31469754caf2f6946dea25b66469bd40a0`
+and runtime seal `ae29fe27c9ff6b937e612623e1d8f1b21d36f65d7b8edbd682bef683daf39b5d`.
+Candidate-blind independent review bound 360/360 raw and ledger records, covered
+520/520 provider outputs, adjudicated every semantic assertion and found no
+critical model or product failure.
 
-No whole candidate qualified. Across Chat/Research/Code/Agent/Review, Qwen3.6
-recorded 18/21/24/24/18 acceptable model attempts, Gemma 24/22/24/21/17 and
-Coder 24/23/24/21/14, each over a fixed denominator of 24 per role. Deterministic
-role routing is therefore viable for four functions: Gemma or Coder for Chat,
-Gemma or Coder for Research, any candidate for Code and Qwen3.6 for Agent. No
-candidate qualifies for Review, so all-five-function customer testing is not yet
-ready and no production route is selected or promoted.
+No whole candidate qualified. Across Chat/Research/Code/Agent/Review, Gemma
+recorded 24/19/24/20/0 acceptable attempts with one inconclusive Agent row,
+Coder 23/21/24/21/0, and Qwen3.6 18/21/21/20/19 with one inconclusive Agent row.
+Gemma and Coder qualify only for Chat and Code under whole-application grading.
+No candidate qualifies for Research, Agent or Review, so the customer trial is
+not ready and no production route is selected or promoted.
 
-Exact pins, result hashes, per-role findings, harness limitations and cleanup are
-in `gate7f/function-first/M1-S2-R9-THREE-MODEL-RESULTS-2026-08-30.md`. The three
-raw candidate results are retained under
-`gate7f/function-first/acceptance/evidence/campaign-20260830-r9/`. Production
-remained unchanged, protected data was not read, each Home lease ended with zero
-owned model residency, both GPU limits restored to 260 W and no owned campaign
-task. All temporary browser tunnels were closed.
+Exact pins, result hashes, attribution and cleanup are in
+`gate7f/function-first/M1-S2-R10-THREE-MODEL-RESULTS-2026-08-30.md`. The strict
+completed-campaign verifier passed all three Home leases and bound each result to
+its source/runtime/lease seals, complete export, before/after final observations,
+owned-task retirement and stable listener inventory. Each arm ended with zero
+owned model residency, both GPU limits restored to 260 W, production unchanged
+and no protected-data read.
 
-Four Coder attempts remain inconclusive rather than rewritten: Agent05's correct
-bounded-drain UI was visible in all three repetitions but its live witness POST
-was denied, and Agent06 repetition 2 missed observation because its temporary
-forward was started with `ClearAllForwardings=yes`. The latter operator error was
-corrected and repetitions 1 and 3 passed. The Agent05 witness defect and the
-model-neutral Review completeness contract are the next finite corrective work.
+The next finite correction is prospectively frozen in
+`gate7f/function-first/M1-S2-R11-CORRECTIVE-CRITERIA-2026-08-30.md`: exact accepted
+checker citation echoes, generic Research/Review completeness, typed attribution,
+two-request crash-bounded repair, repair-plan completeness and actual-browser-only
+witnessing. Cases, candidates, thresholds and the independent evaluator remain
+unchanged; R11 requires a fresh source/archive/runtime seal and full 360+12 run.
 M1 and the required human customer trial remain open; M2-M5 remain required.
 
 The frozen application is `9556ed01f9dbabe8c93eea309e482aad60bf809f`, common runtime seal

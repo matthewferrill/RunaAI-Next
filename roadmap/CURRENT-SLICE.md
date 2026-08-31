@@ -5,20 +5,21 @@ Milestone: M1
 Slice ID: M1-S2
 Status: in progress, acceptance frozen before implementation; not complete or production-qualified.
 
-R9 evaluation update, 2026-08-30: the frozen corrected application completed all
-360 model attempts, 12/12 shared controls and independent review. Exact results
-are in
-`../gate7f/function-first/M1-S2-R9-THREE-MODEL-RESULTS-2026-08-30.md`.
-Gemma or Coder qualifies for Chat and Research, all three candidates qualify for
-Code, and Qwen3.6 qualifies for Agent. No candidate qualifies for Review, so no
-all-five-function route or customer trial is ready. No production route was
-selected or promoted.
+R10 evaluation update, 2026-08-30: the frozen corrected application completed all
+360 model attempts, 12/12 shared controls, strict lifecycle retention and
+candidate-blind independent review. Exact results are in
+`../gate7f/function-first/M1-S2-R10-THREE-MODEL-RESULTS-2026-08-30.md`.
+Gemma and Coder qualify only for Chat and Code. No candidate qualifies for
+Research, Agent or Review, so no all-five-function route or customer trial is
+ready. No production route was selected or promoted.
 
-R9 is immutable evidence. The next finite correction is the model-neutral Review
-completeness contract plus the Agent05 live-witness defect. It must use a fresh
-source/archive/seal and preserve all R9 attempts. Role routing stays deterministic
-and application-owned; a model cannot select itself, change authority or inherit
-a pass from another role.
+R9 and R10 are immutable evidence. The prospective R11 criteria in
+`../gate7f/function-first/M1-S2-R11-CORRECTIVE-CRITERIA-2026-08-30.md` correct
+the exact checker-citation, Research-completeness, repair-continuation and actual
+browser-witness mechanics without changing cases, candidates, thresholds or the
+independent evaluator. R11 requires a fresh source/archive/seal and full 360+12
+denominator. Role routing stays deterministic and application-owned; a model
+cannot select itself, change authority or inherit a pass from another role.
 
 Read `PRODUCT-ROADMAP.md` first. This slice is the first milestone only; it does not replace, complete
 or retire the rest of the roadmap. All 17 capability families remain tracked in `capabilities.json`.
@@ -118,9 +119,10 @@ function to work without erasing passed historical evidence or unrelated roadmap
 ## Next implementation slice
 
 Active work remains M1-S2, specified in
-`../gate7f/function-first/M1-S2-FUNCTIONS-AND-GREEN-CRITERIA.md`. R9 qualifies a
-candidate route for four functions but leaves Review and the Agent05 witness open.
-The steward reaffirmed continuation until completion or genuinely needed human
+`../gate7f/function-first/M1-S2-FUNCTIONS-AND-GREEN-CRITERIA.md`. The complete R10
+result leaves only Chat and Code qualified and does not support a customer route.
+R11 is the next finite correction under its prospectively frozen criteria. The
+steward reaffirmed continuation until completion or genuinely needed human
 testing. Internal module, commit and publication checkpoints are not turn-ending
 gates. The M1-S1 result below is retained history.
 

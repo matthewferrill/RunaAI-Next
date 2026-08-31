@@ -15,7 +15,7 @@ are unchanged. M1 is authorized, not complete; its first local wiring result is 
 The steward authorized necessary non-destructive work and commit/push to RunaAI-Next without recurring
 permission requests. Human involvement is reserved for genuine customer tests or human-only operations.
 
-### Current checkpoint: R13 Agent and Review correction prospectively frozen
+### Current checkpoint: R13 Agent and Review correction implemented and verified
 
 R13 is the next finite correction under
 `gate7f/function-first/M1-S2-R13-AGENT-REVIEW-CORRECTIVE-CRITERIA-2026-08-31.md`. It addresses only the
@@ -23,8 +23,12 @@ R12 Agent failures in grounded final-result reporting, failed-test repair contin
 journey evidence, plus the Review failures in strict checker transport and generic evidence-completeness
 coverage. It does not embed case answers or change the candidate roster, case bundle, 360+12 denominator,
 22/24 role threshold, independent evaluator, protected-data boundary or production route. No R13 model
-inference has started. Deterministic proof, a fresh committed source/runtime seal, full three-candidate
-qualification and candidate-blind independent review are still required before any customer trial.
+inference has started. The application correction and deterministic proof are complete: the changed-path
+suite passed with zero failures, and the complete repository suite passed 1,841/1,919 with 78 intentional
+environment-dependent skips and zero failures. Exact evidence is in
+`gate7f/function-first/M1-S2-R13-CORRECTION-IMPLEMENTATION-RESULTS-2026-08-31.md`. A fresh committed
+source/runtime seal, full three-candidate qualification and candidate-blind independent review are still
+required before any customer trial.
 
 ### Previous checkpoint: R12 independent review complete; no all-five-function route
 

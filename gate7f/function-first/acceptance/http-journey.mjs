@@ -140,6 +140,10 @@ export class FunctionalHttpJourney {
       this.ledger.observation.workflow.runEvidence = this.lastState.runEvidence;
       this.ledger.evidence("application", "run-evidence", this.lastState.runEvidence);
     }
+    if (this.lastState.runResult) {
+      this.ledger.observation.workflow.runResult = this.lastState.runResult;
+      this.ledger.evidence("application", "grounded-run-result", this.lastState.runResult);
+    }
     return this.lastState;
   }
   async startRun() {

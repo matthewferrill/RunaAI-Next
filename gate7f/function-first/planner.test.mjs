@@ -46,6 +46,35 @@ test("planner makes one advisory correction and records both attempts without ex
   assert.deepEqual(result.planningProtocol.attempts[1].violations, []);
 });
 
+test("analysis-only plans receive one model-neutral grounding review that can revise only the summary",async()=>{
+  const generic={summary:"Inspect the selected file.",steps:structuredClone(valid.steps)};
+  const grounded={summary:"The supplied function adds rather than subtracts; no change was made.",steps:structuredClone(valid.steps)};
+  const calls=[];const agent={async generate(raw){const prompt=JSON.parse(raw);calls.push(prompt);return {text:JSON.stringify(calls.length===1?generic:grounded),
+    finishReason:"stop",response:{modelId:"agent-model"}};}};
+  const planner=new MastraM1Planner({provider,agent});
+  const content="exports.subtract=(a,b)=>a+b;";
+  const result=await planner.plan({objective:"Explain the defect without changing it.",workIntent:"analysis-only",
+    snapshot:{workspaceSha256:"a".repeat(64),projectRevision:1,omittedFileCount:0,
+      files:[{path:"calculator.js",content,sha256:"b".repeat(64),bytes:Buffer.byteLength(content)}]},
+    receipts:[],previousPlans:[],repair:false,capabilityIds:["project.inspect"]});
+  assert.equal(result.summary,grounded.summary);assert.deepEqual(result.steps,generic.steps);
+  assert.equal(calls.length,2);assert.equal(calls[1].schemaVersion,"runaai-m1-read-only-plan-grounding-review/v1");
+  assert.deepEqual(calls[1].candidatePlan,generic);assert.match(calls[1].instruction,/revise only summary/i);
+  assert.equal(result.planningProtocol.providerAttemptCount,1);
+  assert.equal(result.planningProtocol.groundingReview.performed,true);
+  assert.equal(result.planningProtocol.groundingReview.modelId,"agent-model");
+  assert.notEqual(result.planningProtocol.groundingReview.originalPlanDigest,result.planningProtocol.groundingReview.finalPlanDigest);
+});
+
+test("analysis-only grounding review cannot change the planned inspection",async()=>{
+  let count=0;const agent={async generate(){count++;return {text:JSON.stringify(count===1?valid:{summary:"Changed authority.",
+    steps:[{capabilityId:"project.inspect",arguments:{path:"other.js"}}]}),finishReason:"stop",response:{modelId:"agent-model"}};}};
+  const planner=new MastraM1Planner({provider,agent});
+  await assert.rejects(planner.plan({objective:"Inspect calculator.js",workIntent:"analysis-only",snapshot:{files:[]},
+    capabilityIds:["project.inspect"]}),/grounding-review-invalid/);
+  assert.equal(count,2);
+});
+
 test("planner fails closed after the one allowed correction", async () => {
   const rejected = { summary: "Apply", steps: [{ capabilityId: "project.apply-change",
     arguments: { path: "calculator.js", content: "new", expectedSha256: "a".repeat(64) } }] };

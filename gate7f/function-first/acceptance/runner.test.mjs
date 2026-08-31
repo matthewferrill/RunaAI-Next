@@ -69,6 +69,7 @@ test("provider capture classifies only application-owned request schemas and lea
     ["runa2-code-response-verification/v2","code-checker"],
     ["runaai-m1-planner-input/v2","initial-plan"],
     ["runaai-m1-plan-protocol-correction/v1","plan-correction"],
+    ["runaai-m1-read-only-plan-grounding-review/v1","read-only-plan-review"],
     ["foreign-schema/v1","unclassified"],
   ];
   try{

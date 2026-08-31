@@ -61,6 +61,7 @@ export class MastraM1Planner {
     let value = await this.#generatePlan(prompt, signal);
     let violations = planProtocolViolations(value, input.capabilityIds, input.workIntent, repairContext);
     const attempts = [{ plan: structuredClone(value), planDigest: digest(value), violations: [...violations] }];
+    let groundingReview = null;
     if (violations.length) {
       const correction = JSON.stringify({ schemaVersion: "runaai-m1-plan-protocol-correction/v1",
         input: { ...input, progress, planProtocol }, rejectedPlan: value, violations,
@@ -71,11 +72,27 @@ export class MastraM1Planner {
       attempts.push({ plan: structuredClone(value), planDigest: digest(value), violations: [...violations] });
       if (violations.length) throw fail("m1-planner-protocol-invalid");
     }
+    if (input.workIntent === "analysis-only") {
+      const originalPlan = structuredClone(value), originalPlanDigest = digest(value);
+      const groundingPrompt = JSON.stringify({ schemaVersion: "runaai-m1-read-only-plan-grounding-review/v1",
+        objective: input.objective, currentSnapshot: input.snapshot, applicationReceipts: input.receipts ?? [],
+        candidatePlan: originalPlan,
+        instruction: "Return one plan JSON object. Keep candidatePlan.steps byte-for-byte equivalent and revise only summary. Answer the user's actual read-only question from currentSnapshot bytes and applicationReceipts. Identify supported behavior or defects; do not merely restate that an inspection is planned. Do not claim a tool ran unless a supplied application receipt proves it." });
+      if (Buffer.byteLength(groundingPrompt) > 96_000) throw fail("m1-planner-input-limited");
+      value = await this.#generatePlan(groundingPrompt, signal);
+      if (digest(value.steps) !== digest(originalPlan.steps)
+          || planProtocolViolations(value, input.capabilityIds, input.workIntent, repairContext).length) {
+        throw fail("m1-planner-grounding-review-invalid");
+      }
+      groundingReview = { schemaVersion: "runaai-m1-read-only-grounding-review-record/v1", performed: true,
+        modelId: this.modelId, originalPlanDigest, finalPlanDigest: digest(value) };
+    }
     // Returning this does not create a proposal or execute anything; the service rechecks all arguments.
     return { ...value, planningProtocol: { schemaVersion: "runaai-m1-plan-protocol-record/v1",
       protocol: planProtocol, modelId: this.modelId, role: this.role,
       settings: { temperature: 0, maximumOutputTokens: this.maxOutputTokens },
-      providerAttemptCount: attempts.length, correctionCount: attempts.length - 1, attempts } };
+      providerAttemptCount: attempts.length, correctionCount: attempts.length - 1, attempts,
+      ...(groundingReview ? { groundingReview } : {}) } };
   }
   async #generatePlan(prompt, signal) {
     if (signal?.aborted) throw fail("m1-planner-aborted");

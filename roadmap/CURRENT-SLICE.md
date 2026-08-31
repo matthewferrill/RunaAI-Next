@@ -6,12 +6,15 @@ Slice ID: M1-S2
 Status: in progress, acceptance frozen before implementation; not complete or production-qualified.
 
 R13 correction update, 2026-08-31: the exact Agent and Review deficits from the immutable R12 review
-are now the next prospectively frozen correction. The contract is
+are prospectively frozen and the model-neutral application corrections are implemented. The contract is
 `../gate7f/function-first/M1-S2-R13-AGENT-REVIEW-CORRECTIVE-CRITERIA-2026-08-31.md`. It permits only
 model-neutral, case-agnostic improvements to grounded Agent completion/repair evidence and strict
 structured Review verification. It keeps all candidates, 40 cases, 360 model attempts, 12 controls,
-role thresholds and candidate-blind grading unchanged. No R13 model inference, role selection,
-production promotion or customer trial has started.
+role thresholds and candidate-blind grading unchanged. Deterministic verification is green at 1,919
+tests with zero failures; exact implementation evidence is in
+`../gate7f/function-first/M1-S2-R13-CORRECTION-IMPLEMENTATION-RESULTS-2026-08-31.md`. No R13 model
+inference, role selection, production promotion or customer trial has started. The next operation is
+the fresh committed R13 source archive and runtime seal followed by the complete 360+12 campaign.
 
 R12 evaluation update, 2026-08-31: candidate-blind independent review is complete for all 360 rows,
 with 963 explicit semantic checks, 350 determinate final grades, 10 retained inconclusive grades and

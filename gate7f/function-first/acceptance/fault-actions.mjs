@@ -351,7 +351,15 @@ export function createFaultActions({ checkpoint = null } = {}) {
       if (!result.receipt || result.executionRepeated === true) throw fail("m1-crash-reconciliation-not-complete");
       await client.recordState(); return result;
     },
-    "run.resume": async client => client.recordState(await client.m1("run.resume", { runId: client.run.runId })),
+    "run.resume": async client => {
+      const resumed = await client.recordState(await client.m1("run.resume", { runId: client.run.runId }));
+      if (resumed?.run?.status !== "repair-required") return resumed;
+      client.ledger.evidence("application", "repair-continuation-boundary", {
+        runId: resumed.run.runId, taskId: resumed.run.taskId, status: resumed.run.status,
+        planAttempts: resumed.run.planAttempts, pendingProposalId: resumed.run.pendingProposalId,
+      });
+      return client.recordState(await client.m1("run.resume", { runId: resumed.run.runId }));
+    },
     "fault.drop-http-ack-after-commit": async client => {
       const current = state(client);
       if (!current.ack || !current.committedReceipts) throw fail("m1-ack-fault-not-held-after-commit");

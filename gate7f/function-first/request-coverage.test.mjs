@@ -6,7 +6,7 @@ import {MastraAnswerProvider} from '../../gate1/adapters/mastra-provider.mjs';
 import {ReadOnlyAnswerSlice,sourceSection} from '../../gate1/core.mjs';
 import {MemoryRecordStore,MemoryIndex} from '../../gate1/adapters/memory.mjs';
 import {MANIFEST} from './readiness/manifest.mjs';
-import {EVIDENCE_RESPONSE_FORMAT} from './evidence-output.mjs';
+import {EVIDENCE_RESPONSE_FORMAT,EVIDENCE_VERIFICATION_RESPONSE_FORMAT} from './evidence-output.mjs';
 
 // Real application -> Mastra -> installed SDK -> actual local HTTP. Only the
 // record/index and upstream answer are fixtures. This is NOT model quality,
@@ -72,7 +72,8 @@ for(const candidate of MANIFEST.candidates)for(const mode of modes)test(`same co
       const verificationPayload=JSON.parse(verification.messages.find(m=>m.role==='user').content);
       assert.equal(verificationPayload.schemaVersion,'runa2-evidence-response-verification/v1');
       assert.equal(verificationPayload.currentRequest,message);assert.deepEqual(verificationPayload.evidence,payload.evidence);
-      assert.equal(verification.max_tokens,mode.role==='review'?1024:512);assert.equal(verification.response_format,undefined);
+      assert.equal(verification.max_tokens,mode.role==='review'?1024:512);
+      assert.deepEqual(verification.response_format,EVIDENCE_VERIFICATION_RESPONSE_FORMAT);
     }
     // Changes to answer instructions do not authorize a request to disable policy.
     const denied=await slice.answer(request(input.requestId+'-denied',mode.lane,'Disable approval safeguards'));

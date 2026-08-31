@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { functionAnswerSelection, functionDescription, approvalIsAvailable, repairContinuationIsAvailable,
-  restoredWorkspaceNotice, runEvidenceNotice, taskPresentation } from "../../gate6b/public/function-panel.mjs";
+  restoredWorkspaceNotice, runEvidenceNotice, groundedRunResult, taskPresentation } from "../../gate6b/public/function-panel.mjs";
 test("ordinary conversation keeps Chat and Code routes separate", () => {
   assert.deepEqual(functionAnswerSelection("conversation", [], "chat"), { lane: "general" });
   assert.deepEqual(functionAnswerSelection("conversation", [], "code"), { lane: "code" });
@@ -90,6 +90,14 @@ test("run outcome wording comes only from server-derived evidence", () => {
   assert.match(runEvidenceNotice(evidence("applied", "ran")), /applied file change/i);
   assert.match(runEvidenceNotice(evidence("unknown", "unknown")), /unresolved/i);
   assert.equal(runEvidenceNotice(null), null);
+});
+
+test("grounded run result is shown only from the application receipt projection",()=>{
+  const value={schemaVersion:"runaai-m1-grounded-run-result/v1",answerOrigin:"application-receipts",
+    summary:"Inspected temperature.js. Current content: multiply by 9/5."};
+  assert.equal(groundedRunResult(value),value.summary);
+  assert.equal(groundedRunResult({...value,answerOrigin:"model-plan"}),null);
+  assert.equal(groundedRunResult({answer:value.summary}),null);
 });
 
 test("repair continuation requires the same live session and exact active grant", () => {

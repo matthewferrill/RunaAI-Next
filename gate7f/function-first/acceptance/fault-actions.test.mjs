@@ -191,6 +191,21 @@ test("Agent05 binds the authoritative cancellation time, releases once and intro
   } finally { releaseRun({ status: "cancelled" }); extension.close(); }
 });
 
+test("crash reconciliation resume crosses a retained failed-test boundary only by one explicit continuation", async () => {
+  const observed=ledger(),calls=[];
+  const first={run:{runId:"run-fixture",taskId:"task-fixture",status:"repair-required",planAttempts:1,pendingProposalId:null}};
+  const second={run:{...first.run,status:"completed",planAttempts:2}};
+  const client={run:{runId:"run-fixture"},ledger:observed,async m1(operation,input){calls.push({operation,input});return calls.length===1?first:second;},
+    async recordState(value){this.run=value.run;return value;}};
+  const extension=createFaultActions();
+  try{
+    assert.deepEqual(await extension.actions["run.resume"](client),second);
+    assert.deepEqual(calls.map(value=>value.operation),["run.resume","run.resume"]);
+    const boundary=observed.observation.evidence.filter(value=>value.kind==="repair-continuation-boundary");
+    assert.equal(boundary.length,1);assert.equal(boundary[0].data.status,"repair-required");
+  }finally{extension.close();}
+});
+
 test("Agent05 releases the native receipt after the witness and before full acknowledgement publication", async () => {
   const observed = ledger(); let releases = 0, finishPublication, actionSettled = false;
   const publication = new Promise(resolve => { finishPublication = resolve; });

@@ -16,12 +16,16 @@ const protocolRecordSchema = z.object({ schemaVersion: z.literal("runaai-m1-plan
   modelId: z.string().min(1), role: z.enum(["code", "agent"]),
   settings: z.object({ temperature: z.literal(0), maximumOutputTokens: z.number().int().positive().max(1536) }).strict(),
   providerAttemptCount: z.number().int().min(1).max(2), correctionCount: z.number().int().min(0).max(1),
+  groundingReview: z.object({ schemaVersion: z.literal("runaai-m1-read-only-grounding-review-record/v1"),
+    performed: z.literal(true), modelId: z.string().min(1), originalPlanDigest: z.string().regex(/^[a-f0-9]{64}$/),
+    finalPlanDigest: z.string().regex(/^[a-f0-9]{64}$/) }).strict().optional(),
   attempts: z.array(z.object({ plan: planCoreSchema, planDigest: z.string().regex(/^[a-f0-9]{64}$/),
     violations: z.array(z.string()).max(4) }).strict()).min(1).max(2),
 }).strict().refine(value => value.providerAttemptCount === value.attempts.length
   && value.correctionCount === value.attempts.length - 1
   && value.attempts.every(item => item.planDigest === digest(item.plan))
-  && value.attempts.at(-1).violations.length === 0);
+  && value.attempts.at(-1).violations.length === 0
+  && (!value.groundingReview || value.groundingReview.modelId === value.modelId));
 const planSchema = planCoreSchema.extend({ planningProtocol: protocolRecordSchema.optional() }).strict();
 const finished = new Set(["completed", "cancelled", "failed", "budget-exhausted"]);
 const DEFAULT_BUDGETS = Object.freeze({ maxPlans: 2, maxActions: 12, planningTimeoutMs: 120_000,
@@ -83,6 +87,7 @@ export class M1TaskOrchestrator {
     return { run, task: task.task, project: task.project, proposals: task.proposals, receipts: task.receipts,
       pendingProposal: task.proposals.find(value => value.proposalId === run.pendingProposalId) ?? null,
       pendingReconciliation: task.pendingReconciliation, runEvidence: runEvidenceProjection(run, task),
+      runResult: runResultProjection(run, task),
       sessionRebindRequired: run.sessionId !== context.sessionId };
   }
 
@@ -492,6 +497,40 @@ export function runEvidenceProjection(run, taskState) {
     changeStatus: unsettled ? "unknown" : applied ? "applied" : terminal ? "none-recorded" : "pending",
     testStatus: unsettled ? "unknown" : tests.some(receipt => receipt.executionStatus === "ran") ? "ran"
       : tests.length ? "attempted-not-run" : terminal ? "none-recorded" : "pending" });
+}
+
+export function runResultProjection(run, taskState) {
+  const actionReceiptIds = new Set((run.actions ?? []).map(action => action.receiptId));
+  const actionProposalIds = new Set((run.actions ?? []).map(action => action.proposalId));
+  if (run.pendingProposalId) actionProposalIds.add(run.pendingProposalId);
+  const proposals = (taskState.proposals ?? []).filter(value => actionProposalIds.has(value.proposalId));
+  const receipts = (taskState.receipts ?? []).filter(value => actionReceiptIds.has(value.receiptId));
+  const unsettled = (taskState.pendingReconciliation ?? []).some(value => actionProposalIds.has(value.proposalId))
+    || proposals.some(value => ["dispatching", "unknown"].includes(value.status));
+  const lines = [];
+  for (const receipt of receipts) {
+    const proposal = proposals.find(value => value.proposalId === receipt.proposalId);
+    if (receipt.capabilityId === "project.inspect" && receipt.executionStatus === "observed" && receipt.output?.file) {
+      const file = receipt.output.file;
+      lines.push(`Inspected ${file.path} at SHA-256 ${file.sha256}. Current content:\n${file.content}`);
+    } else if (["project.apply-change", "project.restore"].includes(receipt.capabilityId)
+        && receipt.executionStatus === "published") {
+      const path = proposal?.arguments?.path;
+      lines.push(path ? `Applied and recorded the change to ${path}.` : "Applied and recorded the requested workspace change.");
+    } else if (receipt.capabilityId === "project.run-tests") {
+      const checks = Array.isArray(receipt.output?.checks) ? receipt.output.checks : [];
+      const passed = checks.filter(value => value.errorCode === null || value.errorCode === undefined).length;
+      const result = receipt.executionStatus === "ran" ? (receipt.output?.passed ? "passed" : "failed") : "did not run";
+      lines.push(`Test suite ${receipt.output?.suiteId ?? proposal?.arguments?.suiteId ?? "selected"} ${result}; ${passed}/${checks.length} fixed checks passed.`);
+    }
+  }
+  if (unsettled) lines.push("An action outcome is unresolved; reconcile it before any successor work.");
+  else if (run.status === "repair-required") lines.push("A fixed test failed. No repair has started; one explicit bounded continuation is available.");
+  else if (run.status === "cancelled") lines.push("The task is cancelled and no new step will start.");
+  else if (!lines.length && finished.has(run.status)) lines.push("No inspection, applied change, or executed test was recorded for this run.");
+  return Object.freeze({ schemaVersion: "runaai-m1-grounded-run-result/v1", runId: run.runId,
+    status: unsettled ? "unknown" : run.status, quiescent: unsettled ? false : finished.has(run.status) || run.status === "repair-required",
+    answerOrigin: "application-receipts", summary: lines.join("\n") });
 }
 
 function parse(schema, value) { const parsed = schema.safeParse(value); assert(parsed.success, "m1-invalid-plan"); return parsed.data; }

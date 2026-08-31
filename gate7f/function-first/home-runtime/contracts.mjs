@@ -1,6 +1,6 @@
 import {MANIFEST} from '../readiness/manifest.mjs';
 import {NOMICS,LEASE_POLICY,primaryLoad,sha,residentList,checkHardware} from '../readiness/lease-contract.mjs';
-import {isEvidenceResponseFormat} from '../evidence-output.mjs';
+import {isQualifiedEvidenceResponseFormat} from '../evidence-output.mjs';
 
 // The application owns its qualified per-role deadline (answers <=60s, plans <=30s).
 // This outer transport ceiling must not shorten those deadlines, and cannot extend them.
@@ -63,7 +63,7 @@ export function validateRequest(profile,pathname,method,raw){
       &&Object.keys(message).sort().join()==='content,role'&&['system','user','assistant'].includes(message.role)
       &&typeof message.content==='string'),'message-shape');
     demand(!Object.hasOwn(body,'stream')||body.stream===false,'stream-not-qualified');
-    demand(!Object.hasOwn(body,'response_format')||isEvidenceResponseFormat(body.response_format),'response-format-not-qualified');
+    demand(!Object.hasOwn(body,'response_format')||isQualifiedEvidenceResponseFormat(body.response_format),'response-format-not-qualified');
     demand(profile.reasoningEffort===null?!Object.hasOwn(body,'reasoning_effort'):body.reasoning_effort===profile.reasoningEffort,'reasoning-drift');
   }else if(pathname==='/v1/embeddings'){
     demand(Object.keys(body).sort().join()==='input,model','request-field');demand(body.model===NOMICS.key,'unselected-model');

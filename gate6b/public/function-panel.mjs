@@ -66,6 +66,11 @@ export function runEvidenceNotice(value) {
     : "this run has no terminal test result yet";
   return `Application-verified status: ${change}; ${tests}.`;
 }
+export function groundedRunResult(value) {
+  return value?.schemaVersion === "runaai-m1-grounded-run-result/v1"
+    && value.answerOrigin === "application-receipts" && typeof value.summary === "string" && value.summary.trim()
+    ? value.summary : null;
+}
 const publicErrors = new Set(["m1-grant-session-mismatch", "m1-grant-expired", "m1-stale-project",
   "m1-restore-stale", "m1-operation-in-progress", "m1-source-index-unavailable",
   "m1-source-content-mismatch", "m1-authentication-required", "identity-token-invalid"]);
@@ -318,6 +323,8 @@ export async function initializeFunctionPanel({ root = document, request, getCon
     }
     const evidenceNotice = runEvidenceNotice(result.runEvidence);
     if (evidenceNotice) taskView.append(element(root, "p", evidenceNotice));
+    const groundedResult = groundedRunResult(result.runResult);
+    if (groundedResult) taskView.append(element(root, "p", groundedResult, "grounded-run-result"));
     const showData = (title, data, parent = taskView) => {
       const details = element(root, "details"); details.append(element(root, "summary", title),
         element(root, "pre", JSON.stringify(data, null, 2), "execution-output")); parent.append(details);

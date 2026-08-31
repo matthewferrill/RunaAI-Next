@@ -7,7 +7,7 @@ import { digest } from "./contracts.mjs";
 import { PostgresTaskStore } from "./postgres.mjs";
 import { M1TaskService } from "./service.mjs";
 import { createM1TaskWorkflow } from "./workflow.mjs";
-import { M1TaskOrchestrator, runEvidenceProjection } from "./orchestrator.mjs";
+import { M1TaskOrchestrator, runEvidenceProjection, runResultProjection } from "./orchestrator.mjs";
 import { testCipher } from "../../../gate4/fixtures.mjs";
 import { MastraM1Planner } from "../planner.mjs";
 
@@ -30,6 +30,23 @@ test("run evidence is derived from this run's receipts and unsettled proposals o
   const unsettled = { ...state, proposals: [{ proposalId: "proposal-edit", status: "unknown" }] };
   assert.deepEqual(runEvidenceProjection(run, unsettled), { schemaVersion: "runaai-m1-run-evidence/v1", runId: "run-1",
     changeStatus: "unknown", testStatus: "unknown" });
+});
+
+test("grounded run result is derived after execution from exact owned receipts, not planner prose",()=>{
+  const run={runId:"run-1",status:"completed",pendingProposalId:null,plans:[{summary:"Everything is fine."}],actions:[
+    {proposalId:"inspect",receiptId:"inspect-receipt"},{proposalId:"tests",receiptId:"test-receipt"}]};
+  const state={proposals:[{proposalId:"inspect",arguments:{path:"temperature.js"}},{proposalId:"tests",arguments:{suiteId:"temperature-v1"}}],
+    receipts:[{receiptId:"inspect-receipt",proposalId:"inspect",capabilityId:"project.inspect",executionStatus:"observed",
+      output:{type:"file",file:{path:"temperature.js",sha256:"a".repeat(64),content:"exports.c=f=>(f-32)*9/5;"}}},
+    {receiptId:"test-receipt",proposalId:"tests",capabilityId:"project.run-tests",executionStatus:"ran",
+      output:{suiteId:"temperature-v1",passed:false,checks:[{testId:"freezing",errorCode:"mismatch"}]}}],pendingReconciliation:[]};
+  const result=runResultProjection(run,state);
+  assert.equal(result.answerOrigin,"application-receipts");assert.equal(result.quiescent,true);
+  assert.match(result.summary,/temperature\.js/);assert.match(result.summary,/\*9\/5/);
+  assert.match(result.summary,/temperature-v1 failed; 0\/1 fixed checks passed/);
+  assert.doesNotMatch(result.summary,/Everything is fine/);
+  const unknown=runResultProjection(run,{...state,proposals:[...state.proposals,{proposalId:"inspect",status:"unknown"}]});
+  assert.equal(unknown.status,"unknown");assert.equal(unknown.quiescent,false);assert.match(unknown.summary,/unresolved/);
 });
 
 // Deliberately a deterministic executor double; native process proof is project.integration.test.mjs.

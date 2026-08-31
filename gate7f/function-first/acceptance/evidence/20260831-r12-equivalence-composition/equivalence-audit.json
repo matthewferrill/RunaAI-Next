@@ -1,0 +1,140 @@
+{
+  "schemaVersion": "runaai-m1-candidate-equivalence-audit/v1",
+  "candidateId": "qwen36-27b-mtp",
+  "caseBundleSha256": "87f08a861d1b109fa5d3fb64f9dc10aacba023eee80a3ab4762b07b2d987524d",
+  "modelFacingEquivalent": true,
+  "expectedSealDifferencePaths": [
+    "residency.telemetryPolicySha256",
+    "runtime.sourceArchiveSha256",
+    "sourceCommit"
+  ],
+  "observedSealDifferencePaths": [
+    "residency.telemetryPolicySha256",
+    "runtime.sourceArchiveSha256",
+    "sourceCommit"
+  ],
+  "invariantModelFacingView": {
+    "candidate": {
+      "artifactBytes": 17106773120,
+      "artifactSha256": "a7cbd3ecc0e3f9b333edee61ae66bc87ed713c5d49587a8355814722ed329e0f",
+      "candidateId": "qwen36-27b-mtp",
+      "modelId": "qwen3.6-27b-mtp",
+      "requestControls": {
+        "agent": {
+          "reasoningEffort": "none"
+        },
+        "chat": {
+          "reasoningEffort": "none"
+        },
+        "code": {
+          "reasoningEffort": "none"
+        },
+        "research": {
+          "reasoningEffort": "none"
+        },
+        "review": {
+          "reasoningEffort": "none"
+        }
+      }
+    },
+    "caseBundleSha256": "87f08a861d1b109fa5d3fb64f9dc10aacba023eee80a3ab4762b07b2d987524d",
+    "embedding": {
+      "artifactSha256": "d4e388894e09cf3816e8b0896d81d265b55e7a9fff9ab03fe8bf4ef5e11295ac",
+      "baseUrl": "http://127.0.0.1:9770/v1",
+      "modelId": "text-embedding-nomic-embed-text-v1.5"
+    },
+    "evaluatorId": "codex-r12-replacement-sealed-functional-evaluation-20260831",
+    "maximumBatchMs": 4500000,
+    "productionRoutingChanged": false,
+    "providerBaseUrl": "http://127.0.0.1:9770/v1",
+    "qualificationCriteria": {
+      "normalizedSha256": "03cba87eb569b2241b665320477aeea6fbd596311790ff7e2e55968add4a75a4",
+      "path": "gate7f/function-first/M1-S2-R12-COMBINED-BROWSER-PUBLICATION-CRITERIA-2026-08-31.md",
+      "rubricVersion": "2026-08-31.r12-combined-browser-publication",
+      "schemaVersion": "runaai-m1-r12-qualification-criteria/v1",
+      "sha256": "03cba87eb569b2241b665320477aeea6fbd596311790ff7e2e55968add4a75a4"
+    },
+    "reranker": {
+      "artifactSha256": "d9e3e081faff1eefb84019509b2f5558fd74c1a05a2c7db22f74174fcedb5286",
+      "baseUrl": "http://192.168.50.165:8412",
+      "batchSize": 32,
+      "overlapCharacters": 300,
+      "windowCharacters": 2000
+    },
+    "residency": {
+      "effectiveReasoningEvidenceSha256": "44d89022cfebb3383a4844f2cc6ace341af440cdb2c6763b6efa141a44c513ac",
+      "oneLargeModelAtATime": true,
+      "readinessEvidenceSha256": "44d89022cfebb3383a4844f2cc6ace341af440cdb2c6763b6efa141a44c513ac"
+    },
+    "roles": {
+      "agent": {
+        "deadlineMs": 30000,
+        "maximumContextTokens": 32768,
+        "maximumOutputTokens": 1536
+      },
+      "chat": {
+        "deadlineMs": 60000,
+        "maximumContextTokens": 32768,
+        "maximumOutputTokens": 512
+      },
+      "code": {
+        "deadlineMs": 30000,
+        "maximumContextTokens": 32768,
+        "maximumOutputTokens": 1536
+      },
+      "research": {
+        "deadlineMs": 60000,
+        "maximumContextTokens": 32768,
+        "maximumOutputTokens": 512
+      },
+      "review": {
+        "deadlineMs": 60000,
+        "maximumContextTokens": 32768,
+        "maximumOutputTokens": 1024
+      }
+    },
+    "runtime": {
+      "modelRuntimeSha256": "6cbb7ba8dfeefee1ce523a88e0f9d64687cdad59564ee5e7fbff6bb95d00f22f",
+      "modelRuntimeVersion": "LM Studio 0.4.21.0 / llama.cpp Vulkan AVX2 2.28.2",
+      "nodeSha256": "bae898add4643fcf890a83ad8ae56e20dce7e781cab161a53991ceba70c99ffb",
+      "packageLockSha256": "2b443060beac09e89779ab2e4b60a22e7bf89e26880f14d0d4cdc04db9d8328e",
+      "qdrantSha256": "369c562eae3d89333a13abfdb522fa209e3f587c1217a1059d817e80814ea9d4"
+    },
+    "schemaVersion": "runaai-m1-functional-runtime-seal/v8",
+    "suites": {
+      "charge-product-v1": "da7c8f075ddc90bb043b67a6548f5fb2bd1a7f8c3dd5860c1d50c216221bb3ff",
+      "clamp-inclusive-v1": "747baed34cd3b1bcbef6470c1196c217017fc9e216cb1c6182692adff3cc6bca",
+      "difference-v1": "f6dd2f31274680b9fdf3930c8e8f711531feb5502ef86c60869ade5d9d38e61a",
+      "discount-price-v1": "1d7cef0396a6ee1f70b769436a7c9309f995163bb338e8e8abc41cf7c5f89cf8",
+      "distance-v1": "f0b8cba7643397605179917d637f43845a665c560ecea7834fe6b594a588287c",
+      "double-v1": "4674d72eda35079bad9130ca85b98487501fb38135e38cf7050b53a306821232",
+      "half-v1": "c01f682e9be73bc493eb75519f71f94d0ae61039aecd4795636083832a428679",
+      "hours-minutes-v1": "3f5834f42966bd8fa76ac8e8231368001d36cf8cb3b7211eed6565f3937cdfaf",
+      "mean-pair-v1": "e231eac34e51691e01349c8e4b507c97ee513ed5daf8964c81ed25f9f24f4875",
+      "rectangle-area-v1": "d820f2ee8b7981436a7f09e44890dc309601d6ba45471f77d7f4a6323b746507",
+      "remaining-v1": "27078f25b735b5bafb8969058d3bba2c19519a8a69d1537e85c740757a0d9a5c",
+      "rotate-index-v1": "e638271b581501e727d69d404e018724400105e897e6e0cb385cd2db43c0f190",
+      "unique-order-v1": "ec586d05c6509552048aa71e4dec95a1a9f4b47c99b42656ed25498223de83e1"
+    }
+  },
+  "executionWindows": [
+    {
+      "kind": "original",
+      "sourceCommit": "213847149e376d0926683f50beb434d7f725b9ff",
+      "runtimeSealSha256": "386ebd07fd1d16834c2c57aa63c5c1e5ae9f9be21ce1abd880496aa6af055a59",
+      "resultSha256": "8ffb2286760d0776e112fc58040799cc9d89e1de06a704ed9580254460d962a0",
+      "recordedAttempts": 107,
+      "stopCode": "m1-campaign-batch-hard-stop"
+    },
+    {
+      "kind": "timing-completion",
+      "sourceCommit": "9ffa9d8a148b47abfb80f49491bfa63227ccc82c",
+      "runtimeSealSha256": "0afb31fafe28032da3fb4cac4e6a0d13896d9205f03aaecf33a2de7da8dd97c6",
+      "resultSha256": "b17ec6bec331cffd3ff1c3743e1cc2c2d2121dbcf4d82dda3c742fd21363c144",
+      "recordedAttempts": 13,
+      "stopCode": null
+    }
+  ],
+  "compositionReason": "The first window ended at its batch hard stop; the second executed exactly the 13 identities that had not started.",
+  "singleUninterruptedArmClaimed": false
+}

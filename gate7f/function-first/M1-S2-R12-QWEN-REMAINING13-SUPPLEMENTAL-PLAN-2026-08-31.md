@@ -17,10 +17,12 @@ prior result is SHA-256
 107 attempts were recorded, the active `agent-03` repetition 3 was interrupted,
 and the 13 identities below were never started.
 
-This is a supplemental completion run, not a replacement or continuation of
-the immutable R12 arm. Its evidence must not be pooled with the first 107 rows
-to claim a formally complete R12 arm. It may answer the narrower engineering
-question of how Qwen behaves on the 13 previously unobserved attempts.
+This was executed as a supplemental completion run, not as a replacement for
+the immutable R12 result. After completion, the steward clarified that the rows
+should be composed when a machine audit proves the gap was timing-only and all
+model-facing inputs remained identical. The original and supplemental results
+remain immutable; the separate equivalence decision governs their transparent
+composition and does not relabel either execution window.
 
 ## Exact attempt roster
 
@@ -66,10 +68,12 @@ left unexecuted, the result has no runner stop/cleanup error, Home reports zero
 owned model residency and restored GPU power, and Control disposable resources
 are closed. Report model outcomes separately from browser/harness failures.
 
-The supplemental result always carries
+The raw supplemental result retains its originally recorded
 `qualificationCompositionPermitted: false` and
-`productQualificationPassed: false`. Formal R12 eligibility remains governed by
-the original whole-arm criteria; this plan does not relax or rewrite them.
+`productQualificationPassed: false`. The later steward-directed composition is
+recorded separately in
+`M1-S2-R12-QWEN-EQUIVALENCE-COMPOSITION-DECISION-2026-08-31.md`; no raw result is
+rewritten and product qualification remains false pending independent review.
 
 ## Human-window correction record
 
@@ -173,7 +177,8 @@ Review05's unsupported every-user inference from a one-machine sample.
 Evidence is retained in
 `acceptance/evidence/20260831-qwen-r37-supplemental-complete/`.
 
-The result answers the narrow engineering question for the 13 previously
-unobserved identities. It does not repair the immutable R12 denominator or
-permit pooling with the first 107 rows. Formal R12 qualification composition
-and product qualification remain false.
+The result answers the engineering question for the 13 previously unobserved
+identities. The steward subsequently directed an equivalence-audited composition
+with the first 107 rows because the missing rows were caused by the timing cutoff,
+not model-facing drift. The composition preserves both result hashes and execution
+windows; independent review and product qualification remain pending.

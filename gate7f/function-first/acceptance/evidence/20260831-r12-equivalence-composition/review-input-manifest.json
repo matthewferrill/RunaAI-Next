@@ -1,0 +1,47 @@
+{
+  "schemaVersion": "runaai-m1-equivalent-campaign-review-input/v1",
+  "caseBundleSha256": "87f08a861d1b109fa5d3fb64f9dc10aacba023eee80a3ab4762b07b2d987524d",
+  "compositionResultSha256": "1b5d79874576a47dea02a2a74b55db1f5e8c1d2564348677c794a61c2963270f",
+  "compositionAuditSha256": "d08d23641f7c82af9677ccddc769eecc306415d98511b3de255dd8a28b606f3d",
+  "inputs": [
+    {
+      "label": "gemma",
+      "candidateId": "gemma4-26b-a4b",
+      "resultSha256": "ae0984df0edaf0d0ed91ab59d82271027bdc2895ae3e7ed860c21248b71ed447",
+      "runtimeSealSha256": "386ebd07fd1d16834c2c57aa63c5c1e5ae9f9be21ce1abd880496aa6af055a59",
+      "attempts": 120
+    },
+    {
+      "label": "coder",
+      "candidateId": "qwen3-coder-30b-a3b",
+      "resultSha256": "75a53bbe3a6f2fb490d7f6cf484d58be5e594fd8e01b2b7947bbe0dd64e79c19",
+      "runtimeSealSha256": "386ebd07fd1d16834c2c57aa63c5c1e5ae9f9be21ce1abd880496aa6af055a59",
+      "attempts": 120
+    },
+    {
+      "label": "qwen-prior",
+      "candidateId": "qwen36-27b-mtp",
+      "resultSha256": "8ffb2286760d0776e112fc58040799cc9d89e1de06a704ed9580254460d962a0",
+      "runtimeSealSha256": "386ebd07fd1d16834c2c57aa63c5c1e5ae9f9be21ce1abd880496aa6af055a59",
+      "attempts": 107
+    },
+    {
+      "label": "qwen-supplemental",
+      "candidateId": "qwen36-27b-mtp",
+      "resultSha256": "b17ec6bec331cffd3ff1c3743e1cc2c2d2121dbcf4d82dda3c742fd21363c144",
+      "runtimeSealSha256": "0afb31fafe28032da3fb4cac4e6a0d13896d9205f03aaecf33a2de7da8dd97c6",
+      "attempts": 13
+    }
+  ],
+  "rawBindingsSha256": "15ac0bdc1a9d2241bded8f396ec724f01d7df762a8953cf0df031de3e50a8a19",
+  "attempts": 360,
+  "reviewBindingSha256": "e5ac7d00a3049ee8734a3a7592b6f8419cf64786f0f03115cbd8db56d044be85",
+  "blindOrderVersion": "runaai-m1-equivalent-campaign-blind-order/v1",
+  "worksheet": {
+    "path": "artifacts/independent-semantic-r12-equivalence/review-worksheet.json",
+    "bytes": 1185910,
+    "sha256": "9226abf6db677e1f3c3d8f482a4cc2cdb4493a5d1df684c2ef5dc920c1c6f884"
+  },
+  "independentSemanticReviewPending": true,
+  "productQualificationPassed": false
+}

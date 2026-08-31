@@ -15,30 +15,34 @@ are unchanged. M1 is authorized, not complete; its first local wiring result is 
 The steward authorized necessary non-destructive work and commit/push to RunaAI-Next without recurring
 permission requests. Human involvement is reserved for genuine customer tests or human-only operations.
 
-### Current checkpoint: Qwen remaining-13 r34 stopped; seal-position correction prospective
+### Current checkpoint: R12 model execution complete; 360-row independent review input bound
 
-Source `ea0b04d7`, runtime seal `2d2dff8c`, 12/12 fresh controls, Home
-lease `20260829-campaign-qwen36-r34`, and Control stage
-`d059a269cfc54b8bbcef0df0ddc7e8ad` reached Agent05's 24-second combined
-witness-and-ack checkpoint. The corrected directory allowlist admitted the
-supplemental directory, but both sealed witness wrappers still applied a second
-full-campaign-only runtime-seal suffix predicate. Publication failed before
-either one-time endpoint or the acknowledgement file was written. Agent05 was
-recorded failed, Agent06 started, and the harness-invalid arm was stopped; none
-of its partial rows receive qualification credit.
+Qwen remaining-13 r37 used source `9ffa9d8a`, runtime seal `0afb31fa`,
+12/12 fresh controls, Home lease `20260829-campaign-qwen36-r37`, and Control
+stage `9c24e5bc6eed47a2a8c73e34dd7f7805`. All five actual-browser observations
+were accepted, including Agent05 inside its unchanged 24-second truth window.
+All 13 planned identities were recorded, none were unexecuted, the runner stop
+code was null, Control drained, and Home finished with zero model residency,
+restored GPU limits and unchanged production routing.
 
-The exact raw-file manifest and cleanup record are retained under
-`gate7f/function-first/acceptance/evidence/20260831-qwen-r34-supplemental-failed/`.
-Control drained to zero owned processes. Home r34 was explicitly aborted, both
-owned models unloaded, both GPU power limits restored, and the exact scheduled
-task retired. Production routing remained unchanged and no protected data was
-read.
+The steward clarified that these 13 rows should be composed with Qwen's first
+107 when the missing rows were caused by the batch timing cutoff rather than
+model-facing drift. The machine audit binds both immutable results and proves
+the same Qwen artifact and controls, case bundle, evaluator, role limits, model
+runtime, retrieval artifacts and native suites. Only source commit/archive and
+telemetry-policy seal fields differ. The derived 120-row result preserves both
+execution windows and explicitly does not claim one uninterrupted arm. The
+three supplemental model failures remain failures.
 
-The prospective correction now position-binds the runtime-seal prefix in the
-exact Qwen supplemental form while retaining the full-campaign suffix binding.
-The focused wrapper/supplemental suite passes 16/16 and includes a regression
-for both predicates. Next: commit and reseal this complete correction, rerun 12
-controls, and run all 13 exact identities on fresh Home and Control ownership.
+Gemma 120, Qwen3 Coder 120 and equivalence-composed Qwen3.6 120 are now bound
+into one candidate-blind 360-row review input. Exact hashes and the change-
+control boundary are in
+`gate7f/function-first/M1-S2-R12-QWEN-EQUIVALENCE-COMPOSITION-DECISION-2026-08-31.md`
+and `gate7f/function-first/acceptance/evidence/20260831-r12-equivalence-composition/`.
+Independent semantic review, per-role scorecards and route disposition are next.
+Product qualification, production promotion and the customer trial remain
+pending; no additional model inference or browser checkpoint is required for
+the review.
 
 ### Previous checkpoint: Qwen remaining-13 r33 stopped
 

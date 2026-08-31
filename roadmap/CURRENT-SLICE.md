@@ -39,6 +39,17 @@ prospective correction now binds the runtime-seal prefix at its exact position
 in the Qwen supplemental name while retaining the full-campaign suffix rule;
 fresh source, controls, Home, and Control ownership are still required.
 
+Completion update, 2026-08-31: corrected r37 recorded all 13 previously
+unexecuted Qwen identities with all five actual-browser observations accepted,
+no runner stop, complete Control drain, and verified Home cleanup. The steward
+clarified that the 13 rows should be composed with the first 107 when the gap is
+timing-only. A machine audit proved identical model-facing seals and exactly
+three non-model-facing seal differences; the derived result preserves both
+execution windows and all 120 Qwen identities. All 360 three-candidate rows are
+now bound into a candidate-blind review input. Independent semantic review and
+frozen role scorecards are next; no production route or customer trial is yet
+authorized by these runner results.
+
 Read `PRODUCT-ROADMAP.md` first. This slice is the first milestone only; it does not replace, complete
 or retire the rest of the roadmap. All 17 capability families remain tracked in `capabilities.json`.
 The current Git branch continues the existing Gate 7F foundation descended from integration `f092d358`;
@@ -142,7 +153,10 @@ result leaves only Chat and Code qualified and does not support a customer route
 R12 is the next finite correction under its prospectively frozen criteria. The
 steward reaffirmed continuation until completion or genuinely needed human
 testing. Internal module, commit and publication checkpoints are not turn-ending
-gates. The M1-S1 result below is retained history.
+gates. R12 model execution is now complete through the timing-window equivalence
+composition. The next gate is independent semantic review of all 360 bound rows,
+followed by role disposition; the customer trial is exposed only if all five M1
+functions have a qualifying route. The M1-S1 result below is retained history.
 
 M1-S1: role-separated provider contract and compatibility wiring, with current-state/receipt acceptance
 requirements captured for the later project tools. This is first because all three model comparisons and

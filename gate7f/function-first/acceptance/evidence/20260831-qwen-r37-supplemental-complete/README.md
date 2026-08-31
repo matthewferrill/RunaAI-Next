@@ -28,6 +28,9 @@ are not committed. `home-retirement.json` records completed cleanup, zero
 residency, restored power, absent scheduled task, and unchanged production
 routing.
 
-This completed supplemental arm remains non-composable with the immutable
-first 107 R12 rows. `qualificationCompositionPermitted` and
-`productQualificationPassed` remain false.
+This raw supplemental result retains its original non-composition and product-
+qualification flags. The steward later directed a separate equivalence-audited
+composition because the missing rows were timing-only and model-facing sealed
+inputs were identical. That derived evidence is retained under
+`../20260831-r12-equivalence-composition/`; neither raw execution result is
+edited, and product qualification remains false pending independent review.

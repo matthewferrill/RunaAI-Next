@@ -9,7 +9,8 @@ import { enumerateCaseChecks, evaluateAttempt, evaluateControl } from "./asserti
 import { AGENT05_ACK_PUBLICATION_GRACE_MS, AGENT05_IN_FLIGHT_OBSERVATION_MS } from "./browser-checkpoint.mjs";
 import { AGENT05_POST_RECEIPT_HOLD_MS } from "./fault-actions.mjs";
 import { parseCampaignArguments, campaignPlan, qualifiedControlSuite, validateHomeReady, validateLiveHome,
-  verifyExtractedArchive, createCampaignWriter, needsBrowserCheckpoint, createCampaignActionExtensions, executeCandidateAttempts, runModelCampaign,
+  verifyExtractedArchive, createCampaignWriter, needsBrowserCheckpoint, createCampaignActionExtensions, executeCandidateAttempts,
+  executeSupplementalCandidateAttempts, runModelCampaign,
   LIVE_PROBE_READ_TIMEOUT_MS, readLiveLeaseBounded, createCoalescedLeaseReader } from "./run-model-campaign.mjs";
 import { CAMPAIGN_V2_POLICY } from "../readiness/lease-v2-contract.mjs";
 
@@ -277,6 +278,18 @@ test("batchserializes all120attempts without claimingunitmodelacceptance", async
     runAttempt: async slot => { active++; maximumActive = Math.max(maximumActive, active); await new Promise(resolve => setImmediate(resolve)); active--; return observed(slot); } });
   assert.equal(maximumActive, 1); assert.equal(before, 120); assert.equal(result.recordedAttempts, 120); assert.equal(result.notExecuted.length, 0);
   assert.equal(result.productQualificationPassed, false); assert.equal(result.independentSemanticReviewPending, true);
+});
+test("supplemental execution retains an explicit nonqualifying bounded subset", async () => {
+  const full = planFixture(), plan = { ...full, attempts: full.attempts.slice(0, 13),
+    supplemental: true, qualificationCompositionPermitted: false };
+  const writer = memoryWriter();
+  const result = await executeSupplementalCandidateAttempts({ plan, writer, signal: new AbortController().signal,
+    beforeAttempt: async () => {}, runAttempt: async slot => observed(slot) });
+  assert.equal(result.schemaVersion, "runaai-m1-supplemental-candidate-result/v1");
+  assert.equal(result.recordedAttempts, 13); assert.equal(result.notExecuted.length, 0);
+  assert.equal(result.plannedCampaignAttempts, 13); assert.equal(result.plannedCandidateAttempts, 13);
+  assert.equal(result.denominatorChanged, true); assert.equal(result.supplemental, true);
+  assert.equal(result.qualificationCompositionPermitted, false); assert.equal(result.productQualificationPassed, false);
 });
 test("partialstop retains interruptedattempt plus119unexecutedslots", async () => {
   const writer = memoryWriter(), controller = new AbortController();

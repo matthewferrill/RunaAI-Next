@@ -344,8 +344,10 @@ export function createCampaignActionExtensions({ faultActions, checkpoint }) {
 
 /** Serialization is explicit and independently unit tested. Tests may inject a
  * deterministic runAttempt, which is never used by the production CLI. */
-export async function executeCandidateAttempts({ plan, writer, runAttempt, beforeAttempt, signal, announce = () => {} }) {
-  if (plan.attempts.length !== 120 || new Set(plan.attempts.map(value => value.attemptId)).size !== 120) throw fail("m1-campaign-plan-incomplete");
+async function executeAttemptSequence({ plan, writer, runAttempt, beforeAttempt, signal, announce = () => {}, supplemental = false }) {
+  const expectedAttempts = supplemental ? plan.attempts.length : 120;
+  if (expectedAttempts < 1 || expectedAttempts > 120 || plan.attempts.length !== expectedAttempts
+      || new Set(plan.attempts.map(value => value.attemptId)).size !== expectedAttempts) throw fail("m1-campaign-plan-incomplete");
   const records = [], remaining = () => plan.attempts.slice(records.length).map(value => value.attemptId);
   let stopCode = null;
   for (const slot of plan.attempts) {
@@ -367,7 +369,7 @@ export async function executeCandidateAttempts({ plan, writer, runAttempt, befor
     records.push({ ...slot, ...exported, status: observation.status, preliminaryGrade: grade.status,
       passed: grade.passed, providerCalls: observation.provider.calls.length, nativeCalls: observation.native.calls.length });
     announce({ schemaVersion: "runaai-m1-campaign-progress/v1", candidateId: plan.candidateId, completedAttempts: records.length,
-      plannedCandidateAttempts: 120, caseId: slot.caseId, repetition: slot.repetition, status: observation.status,
+      plannedCandidateAttempts: expectedAttempts, caseId: slot.caseId, repetition: slot.repetition, status: observation.status,
       preliminaryGrade: grade.status, independentSemanticReviewPending: true });
     if (observation.productionChanged !== false || observation.protectedDataRead !== false || grade.criticalProductFailures.length
         || observation.provider.unexpectedCalls.some(value => ["m1-capture-model-mismatch", "m1-sealed-wire-setting-mismatch", "m1-capture-route-denied"].includes(value.errorCode))) {
@@ -375,21 +377,47 @@ export async function executeCandidateAttempts({ plan, writer, runAttempt, befor
     }
     if (signal.aborted) { stopCode = safeCode(abortError(signal)); break; }
   }
-  return { schemaVersion: plan.lifecycleVersion === "v2" ? "runaai-m1-candidate-batch-result/v2" : "runaai-m1-candidate-batch-result/v1", candidateId: plan.candidateId,
+  return { schemaVersion: supplemental ? "runaai-m1-supplemental-candidate-result/v1"
+    : plan.lifecycleVersion === "v2" ? "runaai-m1-candidate-batch-result/v2" : "runaai-m1-candidate-batch-result/v1", candidateId: plan.candidateId,
     sourceCommit: plan.sourceCommit, runtimeSealSha256: plan.runtimeSealSha256, caseBundleSha256: CASE_BUNDLE_SHA256,
-    plannedCampaignAttempts: 360, plannedCandidateAttempts: 120, recordedAttempts: records.length, attempts: records,
-    notExecuted: remaining(), stopCode, denominatorChanged: false, productQualificationPassed: false,
+    plannedCampaignAttempts: supplemental ? expectedAttempts : 360, plannedCandidateAttempts: expectedAttempts,
+    recordedAttempts: records.length, attempts: records, notExecuted: remaining(), stopCode,
+    denominatorChanged: supplemental, supplemental, qualificationCompositionPermitted: false, productQualificationPassed: false,
     independentSemanticReviewPending: true, humanTrialRequired: true, productionChanged: false, protectedDataRead: false };
 }
 
-export async function runModelCampaign(args, { checkpoint = null, getLeaseObservation = null, announce = () => {} } = {}) {
+export function executeCandidateAttempts(options) {
+  return executeAttemptSequence({ ...options, supplemental: false });
+}
+
+export function executeSupplementalCandidateAttempts(options) {
+  return executeAttemptSequence({ ...options, supplemental: true });
+}
+
+export async function runModelCampaign(args, { checkpoint = null, getLeaseObservation = null, announce = () => {},
+  supplementalAttemptIds = null, supplementalPriorResult = null } = {}) {
   if (args.mode === "inventory") { const faults = createFaultActions(); try { return { ...inventory([...Object.keys(faults.actions), "browser.reload-and-list"]),
     scoredCliEnabled: true, runtimeSealRequired: true, controlsMustPass: 12, externalHomeLeaseRequired: true,
     qualificationClaim: "Driver availability is not a model or product acceptance result." }; } finally { faults.close(); } }
-  const inputs = await validateCampaignInputs(args), { root, seal, ready, plan, qualification } = inputs;
+  const inputs = await validateCampaignInputs(args), { root, seal, ready, qualification } = inputs;
+  const fullPlan = inputs.plan;
+  const supplemental = supplementalAttemptIds !== null;
+  if (supplemental) {
+    if (!Array.isArray(supplementalAttemptIds) || supplementalAttemptIds.length < 1 || supplementalAttemptIds.length > 120
+        || new Set(supplementalAttemptIds).size !== supplementalAttemptIds.length
+        || !supplementalPriorResult || !HEX.test(supplementalPriorResult.sha256 ?? "")) throw fail("m1-campaign-supplemental-invalid");
+    const available = new Map(fullPlan.attempts.map(value => [value.attemptId, value]));
+    if (supplementalAttemptIds.some(value => !available.has(value))) throw fail("m1-campaign-supplemental-invalid");
+  }
+  const plan = supplemental ? { ...fullPlan, schemaVersion: "runaai-m1-supplemental-candidate-plan/v1",
+    attempts: supplementalAttemptIds.map(value => fullPlan.attempts.find(slot => slot.attemptId === value)),
+    plannedCampaignAttempts: supplementalAttemptIds.length, plannedCandidateAttempts: supplementalAttemptIds.length,
+    supplemental: true, qualificationCompositionPermitted: false, priorResultSha256: supplementalPriorResult.sha256 } : fullPlan;
   const output = path.join(root, "acceptance-evidence"); await mkdir(output, { recursive: true });
   if ((await realpath(output)) !== path.join(await realpath(root), "acceptance-evidence")) throw fail("m1-campaign-output-reparse-invalid");
-  const directory = path.join(output, `campaign-${plan.candidateId}-${plan.runtimeSealSha256.slice(0, 16)}`);
+  const directory = path.join(output, supplemental
+    ? `supplemental-${plan.candidateId}-${plan.runtimeSealSha256.slice(0, 16)}-${supplementalPriorResult.sha256.slice(0, 12)}`
+    : `campaign-${plan.candidateId}-${plan.runtimeSealSha256.slice(0, 16)}`);
   const writer = await createCampaignWriter(directory, plan);
   for (const [name, value] of Object.entries(inputs.inputs)) await writer.write(`${name}.json`, value.bytes);
   await writer.write("archive-proof.json", inputs.archiveProof);
@@ -441,7 +469,8 @@ export async function runModelCampaign(args, { checkpoint = null, getLeaseObserv
       const result = needsBrowserCheckpoint(value) ? await bridge(value) : undefined;
       if (signal.aborted) throw abortError(signal); return result; };
     const beforeAttempt=async slot=>{assertCampaignAttemptWindow(plan);return checkLease(false,slot);};
-    result = await executeCandidateAttempts({ plan, writer, signal, announce, beforeAttempt,
+    const execute = supplemental ? executeSupplementalCandidateAttempts : executeCandidateAttempts;
+    result = await execute({ plan, writer, signal, announce, beforeAttempt,
       runAttempt: async slot => {
         ledger = new ObservationLedger(newObservation(MODEL_CASES.find(value => value.id === slot.caseId), { ...slot, runtimeSealSha256: plan.runtimeSealSha256 }));
         ledger.observation.sourceCommit = plan.sourceCommit;
@@ -494,7 +523,9 @@ export async function runModelCampaign(args, { checkpoint = null, getLeaseObserv
   } catch (error) {
     result = { schemaVersion: v2 ? "runaai-m1-candidate-batch-error/v2" : "runaai-m1-candidate-batch-error/v1", sourceCommit: plan.sourceCommit,
       runtimeSealSha256: plan.runtimeSealSha256, candidateId: plan.candidateId, errorCode: safeCode(error),
-      plannedCampaignAttempts: 360, plannedCandidateAttempts: 120, productQualificationPassed: false,
+       plannedCampaignAttempts: supplemental ? plan.attempts.length : 360,
+       plannedCandidateAttempts: supplemental ? plan.attempts.length : 120, supplemental,
+       qualificationCompositionPermitted: false, productQualificationPassed: false,
       preserveAllStartedMarkersAndExports: true, productionChanged: false, protectedDataRead: false };
   } finally {
     clearTimeout(timer); clearInterval(monitor); process.removeListener("SIGINT", onSignal); process.removeListener("SIGTERM", onSignal);

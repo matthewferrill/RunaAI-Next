@@ -7,6 +7,7 @@ import { MODEL_CASES, CASE_BUNDLE_SHA256 } from "./cases.mjs";
 import { validateRuntimeSeal } from "./runner-contract.mjs";
 import { createR11RuntimeSeal, R11_SEAL_AUTHORITIES } from "./r11-runtime-seal.mjs";
 import { CAMPAIGN_V2_EXTENDED_POLICY } from "../readiness/lease-v2-contract.mjs";
+import { readGitArchiveCommit } from "./source-archive.mjs";
 
 const root = path.resolve(import.meta.dirname, "../../..");
 const args = Object.fromEntries(process.argv.slice(2).reduce((result, value, index, all) => {
@@ -33,8 +34,7 @@ const prior = validateRuntimeSeal(JSON.parse(priorBytes));
 assert.equal(prior.schemaVersion, "runaai-m1-functional-runtime-seal/v6");
 const sourceCommit = execFileSync("git", ["rev-parse", "HEAD"], { cwd: root, encoding: "utf8" }).trim();
 assert.match(sourceCommit, /^[a-f0-9]{40}$/u);
-const archiveCommit = execFileSync("git", ["get-tar-commit-id"], { cwd: root, input: sourceArchiveBytes,
-  encoding: "utf8", maxBuffer: 1_048_576 }).trim();
+const archiveCommit = readGitArchiveCommit({ archiveBytes: sourceArchiveBytes, cwd: root });
 assert.equal(archiveCommit, sourceCommit, "source archive is not the exact committed source");
 const telemetry = JSON.parse(priorTelemetryBytes);
 telemetry.createdAt = new Date().toISOString();

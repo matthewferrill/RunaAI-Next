@@ -1,0 +1,19 @@
+{
+  "schemaVersion": "runa-m1-expired-aborted-task-retirement/v1",
+  "leaseId": "20260829-campaign-qwen36-r36",
+  "sealSha256": "a58c9c87a450d2b75b869aa2a96621acfce18a60dcb5a70c1cf1606f2a26f96a",
+  "abortMarkerSha256": "baadb392f8e0cd87e9b42a8ad8830ad2022dcebd1ed4788388903e88f4ab633a",
+  "endedAt": "2026-08-31T18:37:42.152Z",
+  "completion": "abort",
+  "failure": null,
+  "cleanupVerified": true,
+  "powerRestored": true,
+  "zeroResidencyAndPowerRestored": true,
+  "ambiguousLoad": null,
+  "originalTaskRemoved": true,
+  "taskRetiredAt": "2026-08-31T19:24:29.4425518Z",
+  "taskPresentAtFinalAudit": false,
+  "loadedModelInstancesAtFinalAudit": 0,
+  "productionRoutingChanged": false,
+  "protectedDataIncluded": false
+}

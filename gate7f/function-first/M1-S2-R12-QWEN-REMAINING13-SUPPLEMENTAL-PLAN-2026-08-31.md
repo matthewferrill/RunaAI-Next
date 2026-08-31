@@ -125,3 +125,55 @@ supplemental form and retains the full-campaign suffix binding. Focused tests
 exercise both predicates. A new source commit, archive, runtime seal, 12-control
 run, Home lease, and Control stage remain mandatory before the next 13-attempt
 run.
+
+## r35 stopped run and watcher correction
+
+The next arm used corrected source `9ffa9d8a`, runtime seal `0afb31fa`, 12/12
+fresh controls, Home lease `20260829-campaign-qwen36-r35`, and Control stage
+`45f8f432f89a45f0a5ee7bc3237f0cb5`. Agent04 and Agent05 preparation browser
+checks succeeded. The 24-second Agent05 in-flight witness was missed while the
+operator was polling manually, so the arm was stopped after Agent06 started.
+Its raw-file manifest and verified Home abort are retained in
+`acceptance/evidence/20260831-qwen-r35-supplemental-failed/`.
+
+The prospective operator correction pre-arms a self-hashed Control watcher for
+only the exact Agent05 checkpoint, publishes the live witness and matching
+acknowledgement inside the bounded window, and exits after the bounded drain.
+It does not change a model prompt, expected answer, case, threshold, or grading
+rule.
+
+## r36 prelaunch rejection
+
+Arm r36 used the same source and runtime seal, Home lease
+`20260829-campaign-qwen36-r36`, and Control stage
+`09cd800f5c7a4a8f9b3a3666c73ca9ab`. The corrected watcher was transferred and
+validated, but the runner rejected launch before inference with
+`m1-campaign-launch-window-insufficient` because the remaining lease margin no
+longer met the sealed reserve. No model attempt or campaign directory was
+created. The lease was aborted and cleaned; its subsequently discovered
+expired scheduled-task registration was retired under exact seal and action
+binding. Evidence is retained in
+`acceptance/evidence/20260831-qwen-r36-supplemental-prelaunch-rejected/`.
+
+## r37 completed supplemental result
+
+The fresh r37 arm used Home lease `20260829-campaign-qwen36-r37` and Control
+stage `9c24e5bc6eed47a2a8c73e34dd7f7805`. All five required actual-browser
+observations were accepted. The pre-armed Agent05 watcher published its live
+in-flight witness within the 24-second truth window and exited after the
+bounded drain. All 13 planned identities were recorded, none were unexecuted,
+the runner stop code was null, the stage drained to zero owned processes, and
+Home completed with zero model residency and restored GPU power.
+
+With explicit user authorization, a model-authored supplemental semantic
+assessment produced 10 pass, 3 fail, and 0 inconclusive. It does not claim
+formal evaluator independence. The failures are Agent06's incorrect numeric
+repair, Review04's omitted authentication-versus-path-authorization fact, and
+Review05's unsupported every-user inference from a one-machine sample.
+Evidence is retained in
+`acceptance/evidence/20260831-qwen-r37-supplemental-complete/`.
+
+The result answers the narrow engineering question for the 13 previously
+unobserved identities. It does not repair the immutable R12 denominator or
+permit pooling with the first 107 rows. Formal R12 qualification composition
+and product qualification remain false.

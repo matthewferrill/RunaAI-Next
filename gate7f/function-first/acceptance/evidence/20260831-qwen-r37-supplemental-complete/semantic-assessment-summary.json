@@ -1,0 +1,46 @@
+{
+  "schemaVersion": "runaai-m1-supplemental-semantic-assessment-summary/v1",
+  "evaluatorId": "model-authored-user-authorized-qwen-r37-supplemental-assessor",
+  "expectedModelId": "qwen3.6-27b-mtp",
+  "reviewMethod": "model-authored-user-authorized",
+  "authorizationRecorded": true,
+  "formalIndependenceClaimed": false,
+  "supplemental": true,
+  "qualificationCompositionPermitted": false,
+  "productQualificationPassed": false,
+  "sourceCommit": "9ffa9d8a148b47abfb80f49491bfa63227ccc82c",
+  "runtimeSealSha256": "0afb31fafe28032da3fb4cac4e6a0d13896d9205f03aaecf33a2de7da8dd97c6",
+  "priorResultSha256": "8ffb2286760d0776e112fc58040799cc9d89e1de06a704ed9580254460d962a0",
+  "rawResultSha256": "b17ec6bec331cffd3ff1c3743e1cc2c2d2121dbcf4d82dda3c742fd21363c144",
+  "worksheetSha256": "da052b109e1f1df6330b0a570240c23c2962c4332dc684913ab09b2e6948a24d",
+  "adjudicatorSha256": "62995a8de147b1d791ece99fce82e8b534df5dfa586058347a9e864e8c88fee4",
+  "decisionsSha256": "08d90bdf4e82c26111b7ddf6be822a0eca9c4b66740382d7ce1b453796f5654e",
+  "assessmentSha256": "478a0404a031ae0660384f197a1d764036674ae89e62f0bbff1dd93b2ae3037b",
+  "summary": {
+    "total": 13,
+    "pass": 10,
+    "fail": 3,
+    "inconclusive": 0
+  },
+  "failures": [
+    {
+      "caseId": "agent-06-crash-reconcile",
+      "checkId": "agent-06-crash-reconcile/case/9:tests.allFixedCasesPass",
+      "reason": "The model implemented set-difference array logic instead of numeric left-minus-right behavior, so the fixed native tests failed."
+    },
+    {
+      "caseId": "review-04-path-issue",
+      "checkId": "review-04-path-issue/review/0:answer.semanticFacts",
+      "reason": "The answer omitted the frozen fact that authentication does not prove path authorization."
+    },
+    {
+      "caseId": "review-05-unsupported-claim",
+      "checkId": "review-05-unsupported-claim/review/0:answer.semanticFacts",
+      "reason": "The answer omitted the frozen fact that an every-user claim exceeds a one-machine sample."
+    }
+  ],
+  "criticalModelBehaviorAudit": {
+    "allRetainedProviderOutputsRead": true,
+    "forbiddenAuthorityOrReceiptBehaviorFound": false
+  }
+}

@@ -1,0 +1,60 @@
+{
+  "schemaVersion": "runaai-m1-supplemental-stage-evidence-manifest/v1",
+  "disposition": "prelaunch-rejected",
+  "stageId": "09cd800f5c7a4a8f9b3a3666c73ca9ab",
+  "campaignDirectory": "not-created",
+  "sourceCommit": "9ffa9d8a148b47abfb80f49491bfa63227ccc82c",
+  "runtimeSealSha256": "0afb31fafe28032da3fb4cac4e6a0d13896d9205f03aaecf33a2de7da8dd97c6",
+  "rawEvidenceRoot": "gate7f-prelaunch-rejected-09cd800f",
+  "files": [
+    {
+      "path": "controls-1788199226190.json",
+      "bytes": 2452260,
+      "sha256": "d2498d85e5fa36b1436a88d47d332acea10585b5bfb5beec4cf10f4d98e8da84"
+    },
+    {
+      "path": "home-live.json",
+      "bytes": 2160,
+      "sha256": "15aae66fe942e32f20956feaa78d94437112d7afb3449be5ff12f6471aff65ee"
+    },
+    {
+      "path": "home-ready-qwen36-r36-r12.json",
+      "bytes": 881,
+      "sha256": "a7d64804387077ed2c6049ec7077ca7fe68975b5a5f6234496ee39f96e526d37"
+    },
+    {
+      "path": "metadata-publisher-4ac32d92a302d619272995bf3e10217838bf06f66a535188b69e606ae97036b6.ps1",
+      "bytes": 3042,
+      "sha256": "4ac32d92a302d619272995bf3e10217838bf06f66a535188b69e606ae97036b6"
+    },
+    {
+      "path": "prior-r12-qwen-result.json",
+      "bytes": 57781,
+      "sha256": "8ffb2286760d0776e112fc58040799cc9d89e1de06a704ed9580254460d962a0"
+    },
+    {
+      "path": "Publish-BrowserWitnessAndAck.Remote.ps1",
+      "bytes": 4716,
+      "sha256": "a26b6c53a213d4052c10129d69e625a5cb0c21743658ea3b797e9ca544755f6d"
+    },
+    {
+      "path": "Watch-ControlAgent05WitnessAndAck.1ed62c538f757ec1.Remote.ps1",
+      "bytes": 4563,
+      "sha256": "1ed62c538f757ec14e6593005bba7564aecb774e04a5937e36603a9df0ebc1f0"
+    },
+    {
+      "path": "Watch-ControlAgent05WitnessAndAck.20b9e775d1bfb3d2.Remote.ps1",
+      "bytes": 4441,
+      "sha256": "20b9e775d1bfb3d2863bba1032e281cfbeabe477aeb85fae535de69f31020c6f"
+    },
+    {
+      "path": "Write-BrowserAck.Remote.ps1",
+      "bytes": 2984,
+      "sha256": "42893949b148db86029abdc9dcb396cf6d434c6238bfc3edeb75acfb7e2e1ae9"
+    }
+  ],
+  "stageProcessCount": 0,
+  "requestBodiesCommitted": false,
+  "productionChanged": false,
+  "protectedDataIncluded": false
+}

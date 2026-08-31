@@ -1,0 +1,18 @@
+{
+  "schemaVersion": "runa-m1-completed-lease-retirement/v1",
+  "leaseId": "20260829-campaign-qwen36-r37",
+  "sealSha256": "bdf85a0038c5773b1cfeaa4ba69fc74a66ceeaaf1f143da21a6ecd9763687065",
+  "completionMarkerSha256": "2af1804e7c773e111b4143028123d7396d783f483af7101d2f0d2614ec145fd3",
+  "endedAt": "2026-08-31T19:00:20.582Z",
+  "completion": "completed",
+  "failure": null,
+  "cleanupVerified": true,
+  "powerRestored": true,
+  "zeroResidencyAndPowerRestored": true,
+  "ambiguousLoad": null,
+  "taskPresentAtFinalAudit": false,
+  "loadedModelInstancesAtFinalAudit": 0,
+  "productionRoutingChanged": false,
+  "protectedDataIncluded": false,
+  "inferenceCalledByOperator": false
+}

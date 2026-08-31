@@ -1,0 +1,155 @@
+{
+  "schemaVersion": "runaai-m1-supplemental-stage-evidence-manifest/v1",
+  "disposition": "failed",
+  "stageId": "45f8f432f89a45f0a5ee7bc3237f0cb5",
+  "campaignDirectory": "supplemental-qwen36-27b-mtp-0afb31fafe28032d-8ffb2286760d",
+  "sourceCommit": "9ffa9d8a148b47abfb80f49491bfa63227ccc82c",
+  "runtimeSealSha256": "0afb31fafe28032da3fb4cac4e6a0d13896d9205f03aaecf33a2de7da8dd97c6",
+  "rawEvidenceRoot": "gate7f-failed-45f8f432",
+  "files": [
+    {
+      "path": "controls-1788199226190.json",
+      "bytes": 2452260,
+      "sha256": "d2498d85e5fa36b1436a88d47d332acea10585b5bfb5beec4cf10f4d98e8da84"
+    },
+    {
+      "path": "home-live.json",
+      "bytes": 2671,
+      "sha256": "1e44c07c847badbeead6e51026bafa666dc2dbabd3a56d5dde6f5cd4d3bde6c5"
+    },
+    {
+      "path": "home-ready-qwen36-r35-r12.json",
+      "bytes": 881,
+      "sha256": "f4849a9836fc4b18e87673612d2835256f33c27ea7202399f501a7dbc1add3b6"
+    },
+    {
+      "path": "metadata-publisher-4ac32d92a302d619272995bf3e10217838bf06f66a535188b69e606ae97036b6.ps1",
+      "bytes": 3042,
+      "sha256": "4ac32d92a302d619272995bf3e10217838bf06f66a535188b69e606ae97036b6"
+    },
+    {
+      "path": "prior-r12-qwen-result.json",
+      "bytes": 57781,
+      "sha256": "8ffb2286760d0776e112fc58040799cc9d89e1de06a704ed9580254460d962a0"
+    },
+    {
+      "path": "Publish-BrowserWitnessAndAck.Remote.ps1",
+      "bytes": 4716,
+      "sha256": "a26b6c53a213d4052c10129d69e625a5cb0c21743658ea3b797e9ca544755f6d"
+    },
+    {
+      "path": "supplemental-qwen36-27b-mtp-0afb31fafe28032d-8ffb2286760d/archive-proof.json",
+      "bytes": 141,
+      "sha256": "0bc7c2a4696ab7c38d94252a1ac37d9b1d69c6bed0e5074fca7d0c18af0d7968"
+    },
+    {
+      "path": "supplemental-qwen36-27b-mtp-0afb31fafe28032d-8ffb2286760d/browser-10a091d2-d167-4d94-bfb1-d79b57fd8bd1/browser-ack.json",
+      "bytes": 1154,
+      "sha256": "a7c55ab1e57dc037a3d3e77e910983347197ff34f05d9d15b46d3fb048588e14"
+    },
+    {
+      "path": "supplemental-qwen36-27b-mtp-0afb31fafe28032d-8ffb2286760d/browser-10a091d2-d167-4d94-bfb1-d79b57fd8bd1/consumed.json",
+      "bytes": 95,
+      "sha256": "c93a22d4e3bdadc6e45adba3da9b81e3f3ee363ff6c9a42fa996db3909978625"
+    },
+    {
+      "path": "supplemental-qwen36-27b-mtp-0afb31fafe28032d-8ffb2286760d/browser-10a091d2-d167-4d94-bfb1-d79b57fd8bd1/request.json",
+      "bytes": 1807,
+      "sha256": "e7158e995bae63cee4cfa52268d5d0c4b5efa8902fce05bb9ee368f026e10997"
+    },
+    {
+      "path": "supplemental-qwen36-27b-mtp-0afb31fafe28032d-8ffb2286760d/browser-4067cbe7-ee7b-4157-a114-32ce0f2afbea/request.json",
+      "bytes": 2481,
+      "sha256": "4e33fbbd07315bc539f05af9954456719cd0352750261c2ac4a8c9b332093bf1"
+    },
+    {
+      "path": "supplemental-qwen36-27b-mtp-0afb31fafe28032d-8ffb2286760d/browser-74f72fc6-9b9e-4214-8b6d-89bc64fa5f05/request.json",
+      "bytes": 1816,
+      "sha256": "3a56e0ecdee364faa1fde70b9c030ecec776803430006418ad9e9a1eade7db46"
+    },
+    {
+      "path": "supplemental-qwen36-27b-mtp-0afb31fafe28032d-8ffb2286760d/browser-d99d1861-f4c7-4127-8106-58358917357f/browser-ack.json",
+      "bytes": 1535,
+      "sha256": "c85bda9c4655c3bf477cc61ca05637956cbe2de63bc538bca6c24ba4ab40d699"
+    },
+    {
+      "path": "supplemental-qwen36-27b-mtp-0afb31fafe28032d-8ffb2286760d/browser-d99d1861-f4c7-4127-8106-58358917357f/consumed.json",
+      "bytes": 118,
+      "sha256": "94b247560faf0f1d24c0baceb27891e71fefca1a166136a3a81875a0a8e525e1"
+    },
+    {
+      "path": "supplemental-qwen36-27b-mtp-0afb31fafe28032d-8ffb2286760d/browser-d99d1861-f4c7-4127-8106-58358917357f/request.json",
+      "bytes": 1791,
+      "sha256": "076b04ce191fea695f730cf14d6faedd80dde33de626bd8bfa2b45ac75798ea7"
+    },
+    {
+      "path": "supplemental-qwen36-27b-mtp-0afb31fafe28032d-8ffb2286760d/controls.json",
+      "bytes": 2452260,
+      "sha256": "d2498d85e5fa36b1436a88d47d332acea10585b5bfb5beec4cf10f4d98e8da84"
+    },
+    {
+      "path": "supplemental-qwen36-27b-mtp-0afb31fafe28032d-8ffb2286760d/hardwarePlan.json",
+      "bytes": 7494,
+      "sha256": "3e286b476e2ff1930fa1ae5e1fe1ef5c9dfc8e1d7236e3ba2555bbe6c8b2f888"
+    },
+    {
+      "path": "supplemental-qwen36-27b-mtp-0afb31fafe28032d-8ffb2286760d/homeReady.json",
+      "bytes": 881,
+      "sha256": "f4849a9836fc4b18e87673612d2835256f33c27ea7202399f501a7dbc1add3b6"
+    },
+    {
+      "path": "supplemental-qwen36-27b-mtp-0afb31fafe28032d-8ffb2286760d/plan.json",
+      "bytes": 4361,
+      "sha256": "8df856a2f30d2e239599b635950f2ed1f348de58880fd186e0e67d8e8c178831"
+    },
+    {
+      "path": "supplemental-qwen36-27b-mtp-0afb31fafe28032d-8ffb2286760d/qwen36-27b-mtp--agent-04-revoked-plan--3.json",
+      "bytes": 824052,
+      "sha256": "fdfedb6aa05695947a1d52899349178b49436c548f01fdc0544fde675769bde7"
+    },
+    {
+      "path": "supplemental-qwen36-27b-mtp-0afb31fafe28032d-8ffb2286760d/qwen36-27b-mtp--agent-04-revoked-plan--3.record.json",
+      "bytes": 327,
+      "sha256": "aa26cfa2821a711c81c228e2ad3a6d1fca8543bb72a8e508d1c5bf465de05592"
+    },
+    {
+      "path": "supplemental-qwen36-27b-mtp-0afb31fafe28032d-8ffb2286760d/qwen36-27b-mtp--agent-04-revoked-plan--3.started.json",
+      "bytes": 327,
+      "sha256": "a606f849ae526b83d1c74559097da1e2399f70249f42e606f0252835ced1fe95"
+    },
+    {
+      "path": "supplemental-qwen36-27b-mtp-0afb31fafe28032d-8ffb2286760d/qwen36-27b-mtp--agent-05-cancel-drain--3.json",
+      "bytes": 458557,
+      "sha256": "6e853c9345e4466a20389e752bef7870191d5d71ed06f8539d7125be332ffd1c"
+    },
+    {
+      "path": "supplemental-qwen36-27b-mtp-0afb31fafe28032d-8ffb2286760d/qwen36-27b-mtp--agent-05-cancel-drain--3.record.json",
+      "bytes": 324,
+      "sha256": "29bcbc20864c26d6b738e00d46ace954092c35e09886fd75f6348f1f2f28a00b"
+    },
+    {
+      "path": "supplemental-qwen36-27b-mtp-0afb31fafe28032d-8ffb2286760d/qwen36-27b-mtp--agent-05-cancel-drain--3.started.json",
+      "bytes": 327,
+      "sha256": "719e640d40d2a0135a615911e178d492bc19b01f4250ff16fefa47cd33148fd9"
+    },
+    {
+      "path": "supplemental-qwen36-27b-mtp-0afb31fafe28032d-8ffb2286760d/qwen36-27b-mtp--agent-06-crash-reconcile--3.started.json",
+      "bytes": 333,
+      "sha256": "f20a3c7c34624ad88f115dabc72adaf94b21d74edfce24d2c90435fd78702202"
+    },
+    {
+      "path": "supplemental-qwen36-27b-mtp-0afb31fafe28032d-8ffb2286760d/runtimeSeal.json",
+      "bytes": 4679,
+      "sha256": "0afb31fafe28032da3fb4cac4e6a0d13896d9205f03aaecf33a2de7da8dd97c6"
+    },
+    {
+      "path": "Write-BrowserAck.Remote.ps1",
+      "bytes": 2984,
+      "sha256": "42893949b148db86029abdc9dcb396cf6d434c6238bfc3edeb75acfb7e2e1ae9"
+    }
+  ],
+  "stageProcessCount": 0,
+  "requestBodiesCommitted": false,
+  "productionChanged": false,
+  "protectedDataIncluded": false
+}

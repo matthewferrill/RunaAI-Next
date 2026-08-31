@@ -1,0 +1,10 @@
+{
+  "schemaVersion": "runaai-m1-expired-lease-retirement/v1",
+  "leaseId": "20260829-campaign-qwen36-r33",
+  "taskRemoved": true,
+  "evidenceDirectoryPreserved": true,
+  "zeroResidency": true,
+  "powerRestored": true,
+  "productionRoutingChanged": false,
+  "observedAt": "2026-08-31T16:54:26.2064512Z"
+}

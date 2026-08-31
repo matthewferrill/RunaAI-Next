@@ -1,6 +1,6 @@
 # RunaAI migration status
 
-Status date: 2026-08-30. This is the living migration handoff for RunaAI-Next. Update it in the same
+Status date: 2026-08-31. This is the living migration handoff for RunaAI-Next. Update it in the same
 commit whenever a gate changes repository direction, authority, implementation status, safety
 boundaries, verification state, or the next planned work.
 
@@ -14,6 +14,35 @@ model-role selection; do not repeat the stack bakeoff or silently omit Qwen3.6. 
 are unchanged. M1 is authorized, not complete; its first local wiring result is recorded below.
 The steward authorized necessary non-destructive work and commit/push to RunaAI-Next without recurring
 permission requests. Human involvement is reserved for genuine customer tests or human-only operations.
+
+### Current checkpoint: Qwen remaining-13 r33 stopped; wrapper correction prospective
+
+The first R12 Qwen remaining-13 supplemental run used source `9028d123`, runtime
+seal `64e4614c`, 12/12 controls, Home lease
+`20260829-campaign-qwen36-r33` and Control stage
+`35304669bab045cd97c3df555b9f5521`. It recorded 3/13 attempts and stopped with
+`m1-campaign-attempt-undrained`; ten identities were not executed. The exact
+result and raw-file manifest are retained under
+`gate7f/function-first/acceptance/evidence/20260831-qwen-r33-supplemental-failed/`.
+This failed supplemental arm is not pooled with immutable R12 and provides no
+qualification credit.
+
+The RCA is an operator-wrapper integration defect. The runner correctly uses a
+`supplemental-qwen36-27b-mtp-<runtime>-<prior>` directory, while the owner
+witness and acknowledgement bindings accepted only `campaign-*`. Agent04's
+ordinary acknowledgement was published through a lower-level helper; later
+ordinary and combined checkpoints could not use the normal owner path. The
+prospective correction admits only the exact generated Qwen supplemental shape;
+other candidates, malformed lengths, child paths and traversal remain denied.
+Focused wrapper/supplemental tests pass 16/16. No scored input, expectation,
+threshold, model setting or immutable prior result changed.
+
+The r33 lease expired safely. Live Home verification found zero model residency,
+both GPU limits restored to 260 W, and `cleanupVerified=true`; the exact idle
+scheduled task was retired while its evidence directory remained. Control has
+no stage-owned process. Production routing remained unchanged and no protected
+data was read. Next: commit and reseal the corrected source, rerun 12 controls,
+create fresh Home/Control ownership, and rerun all 13 exact identities.
 
 ### Current checkpoint: R10 complete; prospective R11 correction frozen
 

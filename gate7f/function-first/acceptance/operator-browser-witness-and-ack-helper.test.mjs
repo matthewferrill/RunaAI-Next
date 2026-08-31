@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
+import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 
 import { AGENT05_BOUNDED_DRAIN, AGENT05_BOUNDED_DRAIN_NOTICE } from "./browser-witness.mjs";
@@ -84,4 +85,18 @@ test("the combined owner wrapper parses in Windows PowerShell 5 without executin
       Buffer.from(source, "utf16le").toString("base64")],
     { windowsHide: true, stdio: "pipe", env: { ...process.env,
       PSModulePath: "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\Modules" } });
+});
+
+test("browser witness wrappers admit only full campaigns or the exact Qwen supplemental shape", () => {
+  for (const name of ["Publish-BrowserWitness.Remote.ps1", "Publish-BrowserWitnessAndAck.Remote.ps1"]) {
+    const source = readFileSync(fileURLToPath(new URL(`./${name}`, import.meta.url)), "utf8");
+    const pattern = source.match(/ValidatePattern\('([^']+)'\)\]\[string\]\$CampaignDirectory/u)?.[1];
+    assert.ok(pattern, `${name}: missing campaign-directory validation`);
+    const allowed = new RegExp(pattern, "u");
+    assert.equal(allowed.test(`campaign-qwen36-27b-mtp-${"a".repeat(16)}`), true);
+    assert.equal(allowed.test(`supplemental-qwen36-27b-mtp-${"a".repeat(16)}-${"b".repeat(12)}`), true);
+    assert.equal(allowed.test(`supplemental-gemma4-26b-a4b-${"a".repeat(16)}-${"b".repeat(12)}`), false);
+    assert.equal(allowed.test(`supplemental-qwen36-27b-mtp-${"a".repeat(16)}-${"b".repeat(11)}`), false);
+    assert.equal(allowed.test(`../supplemental-qwen36-27b-mtp-${"a".repeat(16)}-${"b".repeat(12)}`), false);
+  }
 });

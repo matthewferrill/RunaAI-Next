@@ -1,6 +1,6 @@
 [CmdletBinding()]
 param(
-  [Parameter(Mandatory)][ValidatePattern('^campaign-(gemma4-26b-a4b|qwen3-coder-30b-a3b|qwen36-27b-mtp)-[a-f0-9]{16}$')][string]$CampaignDirectory,
+  [Parameter(Mandatory)][ValidatePattern('^(?:campaign-(?:gemma4-26b-a4b|qwen3-coder-30b-a3b|qwen36-27b-mtp)-[a-f0-9]{16}|supplemental-qwen36-27b-mtp-[a-f0-9]{16}-[a-f0-9]{12})$')][string]$CampaignDirectory,
   [Parameter(Mandatory)][ValidatePattern('^[a-f0-9]{40}$')][string]$ExpectedSourceCommit,
   [Parameter(Mandatory)][ValidatePattern('^[a-f0-9]{64}$')][string]$ExpectedRuntimeSeal,
   [Parameter(Mandatory)][ValidatePattern('^[A-Za-z0-9+/=]+$')][string]$WitnessTicketBase64,

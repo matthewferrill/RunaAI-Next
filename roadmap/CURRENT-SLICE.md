@@ -24,6 +24,14 @@ source-pinned owner process without changing the 24-second observation interval,
 25-second native hold or full 360+12 denominator. Role routing stays deterministic and application-owned; a model
 cannot select itself, change authority or inherit a pass from another role.
 
+The first remaining-13 supplemental attempt then stopped after 3/13 rows because
+the owner browser witness/ack wrappers admitted only full `campaign-*`
+directories, not the runner's exact `supplemental-qwen36-27b-mtp-*` directory.
+That failed r33 stage remains evidence and is not pooled with immutable R12. The
+prospective correction changes only that narrow directory binding; a fresh
+source/archive/runtime seal, 12 controls, Home lease and Control stage precede
+the next exact 13-attempt run.
+
 Read `PRODUCT-ROADMAP.md` first. This slice is the first milestone only; it does not replace, complete
 or retire the rest of the roadmap. All 17 capability families remain tracked in `capabilities.json`.
 The current Git branch continues the existing Gate 7F foundation descended from integration `f092d358`;

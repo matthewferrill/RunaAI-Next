@@ -4,7 +4,7 @@ Date: 2026-08-31
 
 Milestone/slice: M1 / M1-S2
 
-Roadmap digest: `320694e72839bfc6c4dbda3ce98c26860abce1a9a383e626ac19cb125abcba53`
+Roadmap digest: `60cbc0c40446a189f7b69e3d2ce4c6da954b19f6c74565b24483ad8a5cc6026e`
 
 Capability IDs: C01, C02, C03, C04, C06, C07, C12, C15, C16
 
@@ -87,3 +87,21 @@ nonces, loopback-only service binding, exact checkpoint/scope/seal matching,
 create-only acknowledgements, late-evidence rejection and disposable cleanup are
 unchanged. This is a harness-operability correction; it does not change a case,
 expected answer, model role, production route or grading rule.
+
+## r33 stopped run and prospective directory-binding correction
+
+The first 15-minute supplemental run on Home lease
+`20260829-campaign-qwen36-r33` and Control stage
+`35304669bab045cd97c3df555b9f5521` recorded 3/13 attempts before stopping with
+`m1-campaign-attempt-undrained`. The exact result and raw-file manifest are in
+`acceptance/evidence/20260831-qwen-r33-supplemental-failed/`. This arm remains
+failed evidence and is not selectively resumed, pooled or regraded.
+
+The RCA confirmed that the runner's generated `supplemental-qwen36-27b-mtp-*`
+directory was outside the `campaign-*` allowlist in the owner witness and
+acknowledgement wrappers. The prospective correction admits only the exact
+Qwen supplemental directory shape and keeps other candidates, malformed names,
+child paths and traversal forms denied. It changes no case, prompt, expected
+answer, threshold, model setting, prior result or production route. A new source
+commit, archive, runtime seal, 12-control run, Home lease and Control stage are
+required before all 13 identities are attempted again.

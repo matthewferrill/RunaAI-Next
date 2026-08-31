@@ -15,7 +15,7 @@ $root=[IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..'))
 if([Security.Principal.WindowsIdentity]::GetCurrent().Name-cne'RUNA-CONTROL\Matthew'-or
    [IO.Path]::GetDirectoryName($root)-cne'C:\AI\RunaAI-Next-Candidate\staging'-or
    [IO.Path]::GetFileName($root)-notmatch'^m1-task-native-[a-f0-9]{32}$'-or
-   ($CampaignDirectory-and$CampaignDirectory-notmatch'^campaign-(gemma4-26b-a4b|qwen3-coder-30b-a3b|qwen36-27b-mtp)-[a-f0-9]{16}$')-or
+   ($CampaignDirectory-and$CampaignDirectory-notmatch'^(?:campaign-(?:gemma4-26b-a4b|qwen3-coder-30b-a3b|qwen36-27b-mtp)-[a-f0-9]{16}|supplemental-qwen36-27b-mtp-[a-f0-9]{16}-[a-f0-9]{12})$')-or
    $CheckpointId-notmatch'^[a-f0-9]{8}-(?:[a-f0-9]{4}-){3}[a-f0-9]{12}$'-or
    $ExpectedRuntimeSeal-notmatch'^[a-f0-9]{64}$'-or
    $Url-notmatch'^http://127\.0\.0\.1:[1-9][0-9]{3,4}/$'-or

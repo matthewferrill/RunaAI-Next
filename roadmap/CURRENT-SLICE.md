@@ -13,12 +13,15 @@ Gemma and Coder qualify only for Chat and Code. No candidate qualifies for
 Research, Agent or Review, so no all-five-function route or customer trial is
 ready. No production route was selected or promoted.
 
-R9 and R10 are immutable evidence. The prospective R11 criteria in
+R9 and R10 are immutable evidence. R11 implemented the prospective criteria in
 `../gate7f/function-first/M1-S2-R11-CORRECTIVE-CRITERIA-2026-08-30.md` correct
 the exact checker-citation, Research-completeness, repair-continuation and actual
 browser-witness mechanics without changing cases, candidates, thresholds or the
-independent evaluator. R11 requires a fresh source/archive/seal and full 360+12
-denominator. Role routing stays deterministic and application-owned; a model
+independent evaluator. Its first diagnostic arm then exposed a separate time-critical
+operator-publication defect; its 120 rows are retained but ineligible. The frozen R12
+criteria bind witness-first publication and its matching acknowledgement into one
+source-pinned owner process without changing the 24-second observation interval,
+25-second native hold or full 360+12 denominator. Role routing stays deterministic and application-owned; a model
 cannot select itself, change authority or inherit a pass from another role.
 
 Read `PRODUCT-ROADMAP.md` first. This slice is the first milestone only; it does not replace, complete
@@ -121,7 +124,7 @@ function to work without erasing passed historical evidence or unrelated roadmap
 Active work remains M1-S2, specified in
 `../gate7f/function-first/M1-S2-FUNCTIONS-AND-GREEN-CRITERIA.md`. The complete R10
 result leaves only Chat and Code qualified and does not support a customer route.
-R11 is the next finite correction under its prospectively frozen criteria. The
+R12 is the next finite correction under its prospectively frozen criteria. The
 steward reaffirmed continuation until completion or genuinely needed human
 testing. Internal module, commit and publication checkpoints are not turn-ending
 gates. The M1-S1 result below is retained history.

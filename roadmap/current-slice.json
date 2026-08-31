@@ -6,11 +6,12 @@
   "state": "in-progress",
   "completionEvidence": [
     "gate7f/function-first/M1-S2-R9-THREE-MODEL-RESULTS-2026-08-30.md",
-    "gate7f/function-first/M1-S2-R10-THREE-MODEL-RESULTS-2026-08-30.md"
+    "gate7f/function-first/M1-S2-R10-THREE-MODEL-RESULTS-2026-08-30.md",
+    "gate7f/function-first/M1-S2-R11-DIAGNOSTIC-CAMPAIGN-RESULTS-2026-08-31.md"
   ],
   "scopeDocument": "roadmap/CURRENT-SLICE.md",
   "capabilityIds": ["C01", "C02", "C03", "C04", "C06", "C07", "C12", "C15", "C16"],
-  "nextWork": "Implement the frozen R11 checker, attribution, two-request repair and actual-browser corrections; freshly seal and rerun the unchanged 360-attempt plus 12-control campaign before any human trial.",
+  "nextWork": "Seal and prove the frozen R12 combined actual-browser witness-and-ack publication correction; then rerun the unchanged 360-attempt plus 12-control campaign before any human trial.",
   "remainingRoadmapRequired": true,
   "completionClaim": "M1 completion is not whole-product completion."
 }

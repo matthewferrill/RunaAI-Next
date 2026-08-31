@@ -94,10 +94,14 @@ For the in-flight checkpoint, click **Refresh task status** in the already-open
 browser before acknowledging. The DOM must show `Task: cancelled`, the exact
 bounded-drain notice, `claimedImmediateKill:false`, and all four true drain facts:
 no new steps, an already-dispatched step may finish, reconciliation may still be
-pending, and its result will be retained. Only the tracked
-`operator-browser-witness-helper.mjs` may serialize the witness, and only the
-tracked `operator-browser-ack-helper.mjs`, invoked through the tracked owner
-wrapper, may serialize the complete acknowledgement. Operator-supplied details cannot replace scope,
+pending, and its result will be retained. The tracked
+`operator-browser-witness-and-ack-helper.mjs`, invoked through its tracked owner
+wrapper, validates the actual browser-derived state once, cross-binds the one-use
+ticket and checkpoint request, publishes the witness first, then publishes and
+fsyncs the exactly matching acknowledgement in the same bounded owner process.
+The separate witness and acknowledgement helpers remain fail-closed primitives;
+they are not separate operator round trips for this time-critical checkpoint.
+Operator-supplied details cannot replace scope,
 checkpoint, cancellation, check or result bindings. A hand-authored or generic
 acknowledgement is invalid even when its Boolean happens to match the expected value.
 

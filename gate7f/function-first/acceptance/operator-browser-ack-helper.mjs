@@ -165,7 +165,7 @@ function decodeJson(value, code) {
   catch { throw fail(code); }
 }
 
-function writeCreateOnly(path, value) {
+export function writeCreateOnly(path, value) {
   const bytes = Buffer.from(JSON.stringify(value, null, 2), "utf8");
   if (bytes.byteLength > 262144) throw fail("browser-ack-helper-output-too-large");
   const handle = openSync(path, "wx", 0o600);
@@ -173,7 +173,7 @@ function writeCreateOnly(path, value) {
   return bytes.byteLength;
 }
 
-export async function publishBrowserObservation(request, value) {
+export async function publishBrowserObservation(request, value, fetchImplementation = fetch) {
   const endpoint = request.observationEndpoint;
   if (endpoint === null || endpoint === undefined) return false;
   if (endpoint.schemaVersion !== "runaai-m1-browser-observation-endpoint/v2"
@@ -187,7 +187,7 @@ export async function publishBrowserObservation(request, value) {
   try { witnessSha256 = browserWitnessSha256(browserWitnessFromAck(value)); }
   catch { throw fail("browser-ack-helper-observation-endpoint-invalid"); }
   let response;
-  try { response = await fetch(endpoint.ackUrl, { method: "POST", redirect: "error",
+  try { response = await fetchImplementation(endpoint.ackUrl, { method: "POST", redirect: "error",
     headers: { "content-type": "application/json" },
     body: JSON.stringify({ checkpointId: request.checkpointId, token: endpoint.ackToken, witnessSha256, ack: value }) }); }
   catch { throw fail("browser-ack-helper-observation-publication-failed"); }

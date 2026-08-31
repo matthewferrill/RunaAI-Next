@@ -1,8 +1,11 @@
 # Qwen R12 remaining-13 supplemental execution plan
 
-Date: 2026-08-31  
-Milestone/slice: M1 / M1-S2  
-Roadmap digest: `320694e72839bfc6c4dbda3ce98c26860abce1a9a383e626ac19cb125abcba53`  
+Date: 2026-08-31
+
+Milestone/slice: M1 / M1-S2
+
+Roadmap digest: `320694e72839bfc6c4dbda3ce98c26860abce1a9a383e626ac19cb125abcba53`
+
 Capability IDs: C01, C02, C03, C04, C06, C07, C12, C15, C16
 
 ## Purpose and evidence boundary

@@ -2,7 +2,7 @@
 
 Date: 2026-09-01
 Parent: `M1-S2-R14-REVIEW-CORRECTIVE-CRITERIA-2026-09-01.md`
-Status: prospective continuity correction; campaign paused after one retained r49 continuation row
+Status: continuity correction active; campaign paused after the r51 watchdog fault at the same unconsumed Agent-06 identity
 
 This addendum changes only test-system failure handling. It does not change model prompts, model-visible cases, request controls, scoring rules, provider settings, candidate artifacts, or the R14 qualification denominator.
 
@@ -50,9 +50,20 @@ The corrected recovery binds 70 historical records. The continuation audit retai
 - Each prior window binds its result, source plan, and runtime seal by SHA-256. The canonical 120-row base plan is separately bound; every retained row must match its full attempt identity tuple and every prior result must publish the exact remaining `notExecuted` suffix.
 - The prepared v2 plan repeats the history-manifest hash, base-plan hash, and both result/plan/seal triples. Final composition requires exactly 51 completed rows (ordinals 70-120), rechecks both prior seals directly against the fresh seal, and emits exactly three disclosed execution windows with `singleUninterruptedArmClaimed:false`.
 - Preparation and composition outputs are create-only and reject direct or junction/reparse escapes from `acceptance-evidence`.
-- Independent implementation review is GO with no P0/P1 blocker. The authoritative r49 source directory was located on the Control host at `C:\AI\RunaAI-Next-Candidate\staging\m1-task-native-41458a2cce3141c1a0bfdd2e1da26738\acceptance-evidence\supplemental-qwen36-27b-mtp-dbb124843ae3e844-b1cacccba81a`; it contains the source plan/seal, the exact Agent-05 start/record/observation triple, and an Agent-06 start/pause pair but no Agent-06 record. Those raw bytes must be recovered and hash-bound before attempt 70.
+- Independent implementation review is GO with no P0/P1 blocker. The authoritative r49 source directory was located on the Control host at `C:\AI\RunaAI-Next-Candidate\staging\m1-task-native-41458a2cce3141c1a0bfdd2e1da26738\acceptance-evidence\supplemental-qwen36-27b-mtp-dbb124843ae3e844-b1cacccba81a`; it contains the source plan/seal, the exact Agent-05 start/record/observation triple, and an Agent-06 start/pause pair but no Agent-06 record. Those exact bytes were recovered to `artifacts/m1-readiness/20260901-r49-authoritative-raw`, hash-verified against the source, and bound into the two-window continuation history used by r50 and r51 before attempt 70.
 - Current resume identity: `qwen36-27b-mtp--agent-06-crash-reconcile--2`.
 - A final equivalence-audited composition must disclose three execution windows and may claim neither a single arm nor a retest-free Agent-06 record.
+
+## R50 and r51 pause accounting
+
+- R50 acquired the fresh lease but the manual build/launch sequence crossed the sealed minimum launch window. It created no campaign evidence directory, started no attempt, made zero provider calls, and was aborted with cleanup and power restoration verified.
+- R51 used a bounded remote build/launch and reached the exact Agent-06 repetition-2 identity. Its start receipt SHA-256 is `7c53009d23b4c5db0f4adc67aff2aecf91bc92cdc4e80be58cbaf9c2686f438e`.
+- The scored crash worker was capped at 600,000 ms while an actual browser checkpoint could remain open for 900,000 ms plus publication/finalization. The worker therefore exited inside a valid checkpoint window. The browser could no longer restore the saved task; final proof and drain then reported `m1-worker-not-connected`.
+- The corrected runner gives that worker the remaining campaign lifetime, bounded by the worker's 3,600,000 ms construction ceiling. This remains below the campaign hard stop and above the complete browser observation/publication window.
+- R51 correctly paused fail-closed with result SHA-256 `675b2d3bf72a3ba969b7a5ff980e43bcf5d54c8e759a0ee06b2c857f5283cfbb`, pause receipt `afa1b4e47c00e76e80a6a86ec3ff390a1a3ec5cb87c070c613d816828006269c`, and full paused observation `f4697ca79b297320fb4c787af641e6bfb43151544b4e3cd5cbbffb12977f435e`.
+- The paused observation contains one provider call and 38 evidence events, but publishes `modelGraded:false` and `attemptConsumed:false`. Its model output is retained for audit only; it is not qualification evidence.
+- Both r50 and r51 lease exports prove abort completion, cleanup verified, power restored, zero final residency, and no production-route change.
+- Model-free verification after the correction: focused worker/browser/runner suite 83/83; complete harness 155/155; hardened 194-file tracked repository run 1,973 tests with 1,895 passed, 78 intentionally skipped, and 0 failed; Gate 7F 28/28; roadmap 15/15.
 
 ## Mandatory no-model gate
 

@@ -11,7 +11,8 @@ import { AGENT05_POST_RECEIPT_HOLD_MS } from "./fault-actions.mjs";
 import { parseCampaignArguments, campaignPlan, qualifiedControlSuite, validateHomeReady, validateLiveHome,
   verifyExtractedArchive, createCampaignWriter, needsBrowserCheckpoint, createCampaignActionExtensions, executeCandidateAttempts,
   executeSupplementalCandidateAttempts, createSupplementalExecutionPlan, runModelCampaign,
-  LIVE_PROBE_READ_TIMEOUT_MS, readLiveLeaseBounded, createCoalescedLeaseReader } from "./run-model-campaign.mjs";
+  LIVE_PROBE_READ_TIMEOUT_MS, readLiveLeaseBounded, createCoalescedLeaseReader,
+  APPLICATION_FAULT_WORKER_MAXIMUM_LIFETIME_MS, applicationFaultWorkerLifetime } from "./run-model-campaign.mjs";
 import { CAMPAIGN_V2_POLICY } from "../readiness/lease-v2-contract.mjs";
 
 // These are deliberately model-free unit fixtures. They test the runner's
@@ -201,6 +202,14 @@ test("browser checkpoints select realpending/cancel/unknown/finalstates only", (
   assert.equal(check("agent-06-crash-reconcile", "unknown"), true);
   assert.equal(check("agent-04-revoked-plan", "after-action", "run.resume-original"), true);
   assert.equal(check("code-08-owned-restore", "after-action", "tests.run-restored"), true);
+});
+test("crash worker watchdog covers the browser window instead of the retired ten-minute cap", () => {
+  assert.equal(APPLICATION_FAULT_WORKER_MAXIMUM_LIFETIME_MS, 3_600_000);
+  assert.equal(applicationFaultWorkerLifetime(4_500_000), 3_600_000);
+  assert.equal(applicationFaultWorkerLifetime(1_800_000), 1_800_000);
+  assert.ok(applicationFaultWorkerLifetime(4_500_000)
+    > 900_000 + AGENT05_ACK_PUBLICATION_GRACE_MS + 30_000);
+  assert.throws(() => applicationFaultWorkerLifetime(999), /m1-worker-lifetime-window-invalid/u);
 });
 test("Agent05 browser observation overlaps one finite post-receipt hold inside the application route", () => {
   const plannerDeadlineMs = sealFixture().roles.agent.deadlineMs, sandboxProcessCeilingMs = 2000, applicationRouteMs = 120000;

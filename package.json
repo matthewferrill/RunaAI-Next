@@ -6,7 +6,7 @@
   "scripts": {
     "verify:roadmap": "node roadmap/read-next-slice.mjs --check && node --test roadmap/roadmap.test.mjs",
     "roadmap:next": "node roadmap/read-next-slice.mjs",
-    "test": "node --test --test-concurrency=4",
+    "test": "node tools/run-tracked-tests.mjs",
     "test:gate1": "node --test gate1/gate1.test.mjs",
     "test:gate2": "node --test gate2/gate2.test.mjs",
     "test:gate3": "node --test gate3/gate3.test.mjs",

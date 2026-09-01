@@ -121,6 +121,15 @@ export function campaignExecutionWindow(plan,ready,{now=Date.now()}={}){
   return Object.freeze({v2,hardStopAt,batchStopAt,maximumMs,stopCode});
 }
 
+// The crash/reconcile child can remain live while an actual browser checkpoint
+// is pending. Keep it bounded by both the campaign window and the worker's
+// construction ceiling, but never impose a shorter, unrelated watchdog.
+export const APPLICATION_FAULT_WORKER_MAXIMUM_LIFETIME_MS = 3_600_000;
+export function applicationFaultWorkerLifetime(maximumMs) {
+  if (!Number.isInteger(maximumMs) || maximumMs < 1000) throw fail("m1-worker-lifetime-window-invalid");
+  return Math.min(APPLICATION_FAULT_WORKER_MAXIMUM_LIFETIME_MS, maximumMs);
+}
+
 export function assertCampaignAttemptWindow(plan,{now=Date.now()}={}){
   if(plan.lifecycleVersion==='v2'&&now>=Date.parse(plan.dispatchStopAt))throw fail("m1-campaign-publication-margin");
   return true;
@@ -558,7 +567,8 @@ export async function runModelCampaign(args, { checkpoint = null, getLeaseObserv
         let host = testbed.host, journey;
         try {
           if (slot.caseId === "agent-06-crash-reconcile") {
-            worker = await startApplicationFaultWorker({ initialization: testbed.workerInit, getLedger: () => ledger, maximumLifetimeMs: Math.min(600000, maximumMs) });
+            worker = await startApplicationFaultWorker({ initialization: testbed.workerInit, getLedger: () => ledger,
+              maximumLifetimeMs: applicationFaultWorkerLifetime(maximumMs) });
             worker.faults = testbed.host.faults; host = worker;
           }
           journey = new FunctionalHttpJourney({ host, item: MODEL_CASES.find(value => value.id === slot.caseId), ledger,

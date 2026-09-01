@@ -191,6 +191,20 @@ test("Agent05 binds the authoritative cancellation time, releases once and intro
   } finally { releaseRun({ status: "cancelled" }); extension.close(); }
 });
 
+test("a restarted child receives a fresh watchdog window", async () => {
+  const observed = ledger();
+  const worker = await startApplicationFaultWorker({ initialization: { lifecycleFixture: true, sessionId: "c".repeat(64) }, getLedger: () => observed,
+    bootstrapModule: new URL("./fault-worker.fixture.mjs", import.meta.url), allowLifecycleFixture: true, maximumLifetimeMs: 1200 });
+  try {
+    await new Promise(resolve => setTimeout(resolve, 700));
+    await worker.worker.crash();
+    const restarted = await worker.worker.restart();
+    await new Promise(resolve => setTimeout(resolve, 700));
+    assert.equal(restarted.generation, 2);
+    assert.equal((await fetch(worker.baseUrl)).status, 200);
+  } finally { await worker.close(); }
+});
+
 test("crash reconciliation resume crosses a retained failed-test boundary only by one explicit continuation", async () => {
   const observed=ledger(),calls=[];
   const first={run:{runId:"run-fixture",taskId:"task-fixture",status:"repair-required",planAttempts:1,pendingProposalId:null}};

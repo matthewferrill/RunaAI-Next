@@ -25,4 +25,3 @@ The fresh candidate-blind reviewer decided 963 semantic checks across 360 attemp
 At least one function has no independently qualified route. Automated product qualification failed and the customer trial remains unavailable.
 
 No production route changed and no protected data was read by this campaign.
-

@@ -29,8 +29,9 @@ stated authentication control does not authorize the requested path. Exact pins 
 R14 is prospectively frozen in
 `gate7f/function-first/M1-S2-R14-REVIEW-CORRECTIVE-CRITERIA-2026-09-01.md`. The only permitted change is
 generic stated-control coverage in the Review answerer and checker; no case answer or candidate branch is
-present. Focused actual-wire and semantic suites pass 81/81. R14 retains all candidates, 40 cases,
-360 attempts, 12 controls, budgets, thresholds and candidate-blind review. The next operations are the
+present. Focused actual-wire and semantic suites pass 81/81; the complete repository suite passes
+1,847/1,925 with 78 intentional environment-dependent skips and zero failures. R14 retains all
+candidates, 40 cases, 360 attempts, 12 controls, budgets, thresholds and candidate-blind review. The next operations are the
 complete deterministic suite, committed source/archive/runtime seal, controls, full campaign and fresh
 independent review. No production route or customer trial is authorized yet.
 

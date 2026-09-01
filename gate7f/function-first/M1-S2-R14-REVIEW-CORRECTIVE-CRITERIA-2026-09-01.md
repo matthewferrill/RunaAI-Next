@@ -1,6 +1,8 @@
 # M1-S2 R14 Review corrective qualification criteria
 
-Status: prospective criteria frozen before R14 inference. No R14 model call has started.
+Status: prospective criteria frozen and deterministic verification complete before R14 inference. No
+R14 model call has started. The focused suite passed 81/81; the complete repository suite passed
+1,847/1,925 with 78 intentional environment-dependent skips and zero failures.
 
 R14 follows the immutable R13 result. R13 qualifies Chat, Research, Code and Agent but leaves Review
 without a route. Qwen3.6 is closest at 21/24 and fails the same security-control completeness point in

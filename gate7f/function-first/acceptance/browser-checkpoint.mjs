@@ -206,7 +206,7 @@ export function createBrowserCheckpoint({ directory, maximumWaitMs = HUMAN_BROWS
     await writeFile(requestPath, JSON.stringify(request, null, 2), { flag: "wx" });
     const witnessPublication = liveObservation ? {
       schemaVersion: "runaai-m1-browser-witness-publication/v1", checkpointId, caseId: request.caseId, stage,
-      baseUrl: request.baseUrl, witnessUrl: observationEndpoint.witnessUrl, witnessPageUrl: observationEndpoint.witnessPageUrl,
+      baseUrl: request.baseUrl, witnessUrl: observationEndpoint.witnessUrl,
       witnessToken: observationEndpoint.witnessToken, witnessExpiresAt: observationEndpoint.witnessExpiresAt
     } : null;
     announce({ checkpointId, requestPath, baseUrl: request.baseUrl, caseId: request.caseId, phase, stage,

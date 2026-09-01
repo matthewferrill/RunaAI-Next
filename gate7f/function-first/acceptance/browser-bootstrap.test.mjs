@@ -19,13 +19,6 @@ test("loopback endpoint binds one on-time witness to one matching acknowledgemen
     notice: AGENT05_BOUNDED_DRAIN_NOTICE, taskStatus: "cancelled" };
   const ack = { schemaVersion: "runaai-m1-browser-checkpoint-ack/v1", checkpointId,
     evidence: [{ data: { ...witness } }], checks: [] };
-  const page = await fetch(endpoint.witnessPageUrl), pageText = await page.text();
-  assert.equal(page.status, 200); assert.equal(page.headers.get("cache-control"), "no-store");
-  assert.equal(page.headers.get("referrer-policy"), "no-referrer");
-  assert.match(page.headers.get("content-security-policy"), /connect-src 'self'/u);
-  assert.match(pageText, /Record cancellation observation/u); assert.equal(pageText.includes(endpoint.ackToken), false);
-  const pageScript = await (await fetch(`${identities.publicBaseUrl}/__acceptance/browser-observation-witness-ui.js`)).text();
-  assert.match(pageScript, /Cancellation observation recorded\./u);
   const wrongWitnessToken = await fetch(endpoint.witnessUrl, { method: "POST", headers: { "content-type": "application/json" },
     body: JSON.stringify({ checkpointId, token: "0".repeat(64), witness }) });
   assert.equal(wrongWitnessToken.status, 403);

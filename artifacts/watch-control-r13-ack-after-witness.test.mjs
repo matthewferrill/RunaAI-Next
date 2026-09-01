@@ -15,6 +15,8 @@ test("watcher arms the exact preparation checkpoint and never uses a global witn
   assert.match(source, /\.IndexOf\(\$ExpectedRuntimeSeal\.Substring\(0,16\),\[StringComparison\]::Ordinal\)-lt0/u);
   assert.doesNotMatch(source, /\.Contains\([^\r\n]+\[StringComparison\]::/u);
   assert.match(source, /domBindingSha256/u); assert.match(source, /status\.domBinding\.witnessedUrl/u);
+  assert.match(source, /consumed\.json/u); assert.match(source, /consumed\.checkpointId-cne\$checkpoint/u);
+  assert.match(source, /consumed\.preparationOnly-eq\$true/u);
   assert.match(source, /\$completed\[\$checkpoint\]=\$true/u);
   assert.doesNotMatch(source, /acknowledgementAccepted-eq\$true\)\{exit 0\}/u);
   assert.doesNotMatch(source, /browserWitnessAccepted/u);

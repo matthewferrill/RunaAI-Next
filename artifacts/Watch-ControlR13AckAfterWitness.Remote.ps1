@@ -119,9 +119,21 @@ while([DateTimeOffset]::UtcNow-lt$discoveryDeadline){
       $boundedPublicationDeadline=[DateTimeOffset]::UtcNow.AddSeconds($PublicationTimeoutSeconds)
       if($boundedPublicationDeadline-gt$publicationDeadline){$boundedPublicationDeadline=$publicationDeadline}
       $publishedAccepted=$false
+      $consumedPath=Join-Path $directory.FullName 'consumed.json'
       while([DateTimeOffset]::UtcNow-lt$boundedPublicationDeadline){
-        $published=Invoke-RestMethod -Uri $statusUrl -Method Get -TimeoutSec 2
-        if($published.acknowledgementAccepted-eq$true){$publishedAccepted=$true;break}
+        if(Test-Path -LiteralPath $consumedPath -PathType Leaf){
+          $consumedItem=Get-Item -LiteralPath $consumedPath
+          if(($consumedItem.Attributes-band[IO.FileAttributes]::ReparsePoint)-or$consumedItem.Length-gt1024){
+            throw 'r13-ack-watcher-consumption-receipt-invalid'
+          }
+          try{$consumed=Get-Content -LiteralPath $consumedPath -Raw|ConvertFrom-Json}catch{throw 'r13-ack-watcher-consumption-receipt-invalid'}
+          $consumedAt=[DateTimeOffset]::MinValue
+          if($consumed.checkpointId-cne$checkpoint-or$consumed.preparationOnly-eq$true-or
+             -not[DateTimeOffset]::TryParse([string]$consumed.consumedAt,[ref]$consumedAt)){
+            throw 'r13-ack-watcher-consumption-receipt-invalid'
+          }
+          $publishedAccepted=$true;break
+        }
         Start-Sleep -Milliseconds 25
       }
       if(-not$publishedAccepted){throw 'r13-ack-watcher-publication-timeout'}

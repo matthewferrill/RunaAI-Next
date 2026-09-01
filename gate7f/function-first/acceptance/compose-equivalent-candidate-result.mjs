@@ -2,6 +2,7 @@ import { createHash } from "node:crypto";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { isDeepStrictEqual } from "node:util";
+import { classifyCampaignFailure } from "./campaign-failure.mjs";
 
 export const COMPOSED_RESULT_SCHEMA_VERSION = "runaai-m1-equivalence-audited-candidate-result/v1";
 export const EQUIVALENCE_AUDIT_SCHEMA_VERSION = "runaai-m1-candidate-equivalence-audit/v1";
@@ -28,7 +29,7 @@ function exactAttemptIds(rows, label) {
   return ids;
 }
 
-function differencePaths(left, right, prefix = "") {
+export function differencePaths(left, right, prefix = "") {
   if (isDeepStrictEqual(left, right)) return [];
   if (left === null || right === null || typeof left !== "object" || typeof right !== "object"
       || Array.isArray(left) || Array.isArray(right)) return [prefix];
@@ -42,7 +43,7 @@ function candidate(seal, candidateId) {
   return matches[0];
 }
 
-function modelFacingView(seal, candidateId) {
+export function modelFacingView(seal, candidateId) {
   return {
     candidate: candidate(seal, candidateId),
     caseBundleSha256: seal.caseBundleSha256,
@@ -69,6 +70,16 @@ function modelFacingView(seal, candidateId) {
     schemaVersion: seal.schemaVersion,
     suites: seal.suites,
   };
+}
+
+export function assertModelFacingSealEquivalence(priorSeal, supplementalSeal, candidateId) {
+  const sealDifferences = differencePaths(priorSeal, supplementalSeal).sort();
+  if (!isDeepStrictEqual(sealDifferences, [...EXPECTED_SEAL_DIFFERENCES]))
+    fail("unexpected-runtime-seal-difference", sealDifferences.join(","));
+  const priorModelFacing = modelFacingView(priorSeal, candidateId);
+  const supplementalModelFacing = modelFacingView(supplementalSeal, candidateId);
+  if (!isDeepStrictEqual(priorModelFacing, supplementalModelFacing)) fail("model-facing-seal-mismatch");
+  return { sealDifferences, modelFacingView: priorModelFacing };
 }
 
 function requireSha(value, label) {
@@ -108,8 +119,12 @@ export function composeEquivalentCandidateResult({
       || supplementalResult.plannedCandidateAttempts !== supplementalIds.length
       || supplementalResult.stopCode !== null || (supplementalResult.notExecuted ?? []).length !== 0)
     fail("supplemental-incomplete");
-  if (!isDeepStrictEqual(missingIds, supplementalIds) || !isDeepStrictEqual(supplementalPlanIds, supplementalIds))
+  if (!isDeepStrictEqual(priorIds, planIds.slice(0, priorIds.length))
+      || !isDeepStrictEqual(missingIds, planIds.slice(priorIds.length))
+      || !isDeepStrictEqual(missingIds, supplementalIds) || !isDeepStrictEqual(supplementalPlanIds, supplementalIds))
     fail("supplemental-identity-mismatch");
+  if (!priorResult.stopCode || classifyCampaignFailure(priorResult.stopCode, { phase: "runner" }).attribution !== "non-model")
+    fail("prior-stop-not-non-model");
   if (priorIds.some(id => supplementalIds.includes(id))) fail("execution-window-overlap");
   if (priorIds.length + supplementalIds.length !== planIds.length) fail("composed-denominator-mismatch");
 
@@ -117,12 +132,8 @@ export function composeEquivalentCandidateResult({
   const attempts = planIds.map(id => rowById.get(id));
   if (attempts.some(row => !row)) fail("composed-attempt-missing");
 
-  const sealDifferences = differencePaths(priorSeal, supplementalSeal).sort();
-  if (!isDeepStrictEqual(sealDifferences, [...EXPECTED_SEAL_DIFFERENCES]))
-    fail("unexpected-runtime-seal-difference", sealDifferences.join(","));
-  const priorModelFacing = modelFacingView(priorSeal, candidateId);
-  const supplementalModelFacing = modelFacingView(supplementalSeal, candidateId);
-  if (!isDeepStrictEqual(priorModelFacing, supplementalModelFacing)) fail("model-facing-seal-mismatch");
+  const { sealDifferences, modelFacingView: priorModelFacing } =
+    assertModelFacingSealEquivalence(priorSeal, supplementalSeal, candidateId);
 
   const executionWindows = [
     {
@@ -132,9 +143,10 @@ export function composeEquivalentCandidateResult({
       resultSha256: bindings.priorResultSha256,
       recordedAttempts: priorIds.length,
       stopCode: priorResult.stopCode,
+      immutablePlanPrefix: true,
     },
     {
-      kind: "timing-completion",
+      kind: "continuation",
       sourceCommit: supplementalResult.sourceCommit,
       runtimeSealSha256: bindings.supplementalRuntimeSealSha256,
       resultSha256: bindings.supplementalResultSha256,
@@ -151,7 +163,7 @@ export function composeEquivalentCandidateResult({
     observedSealDifferencePaths: sealDifferences,
     invariantModelFacingView: priorModelFacing,
     executionWindows,
-    compositionReason: "The first window ended at its batch hard stop; the second executed exactly the 13 identities that had not started.",
+    compositionReason: `The first window ended for a non-model operational reason; the continuation executed exactly the ${supplementalIds.length} identities in the audited resume set.`,
     singleUninterruptedArmClaimed: false,
   };
   const auditSha256 = sha256(Buffer.from(`${JSON.stringify(equivalenceAudit, null, 2)}\n`, "utf8"));

@@ -10,6 +10,7 @@ export const AGENT05_BOUNDED_DRAIN = Object.freeze({
 });
 
 const KEYS = ["boundedDrain", "claimedImmediateKill", "notice", "taskStatus"];
+const DOM_BINDING_KEYS = ["cancellationAt", "experience", "projectId", "taskId", "taskObjective", "witnessedUrl"];
 const plain = value => value && typeof value === "object" && !Array.isArray(value)
   && Object.getPrototypeOf(value) === Object.prototype;
 
@@ -39,4 +40,25 @@ export function browserWitnessFromAck(ack) {
 
 export function browserWitnessSha256(value) {
   return createHash("sha256").update(JSON.stringify(canonicalBrowserWitness(value))).digest("hex");
+}
+
+export function canonicalBrowserDomBinding(value) {
+  if (!plain(value) || !isDeepStrictEqual(Object.keys(value).sort(), DOM_BINDING_KEYS)
+      || ![value.experience, value.projectId, value.taskId, value.taskObjective].every(item => typeof item === "string" && item.length > 0 && item.length <= 4096)
+      || !Number.isFinite(Date.parse(value.cancellationAt))) throw new Error("m1-browser-dom-binding-invalid");
+  let url;
+  try { url = new URL(value.witnessedUrl); } catch { throw new Error("m1-browser-dom-binding-invalid"); }
+  if (url.protocol !== "http:" || !["127.0.0.1", "localhost", "[::1]"].includes(url.hostname)
+      || url.pathname !== "/" || url.username || url.password || url.search || url.hash) throw new Error("m1-browser-dom-binding-invalid");
+  return Object.fromEntries(DOM_BINDING_KEYS.map(key => [key, value[key]]));
+}
+
+export function browserDomBindingFromAck(ack) {
+  const data = ack?.evidence?.length === 1 ? ack.evidence[0]?.data : null;
+  return canonicalBrowserDomBinding({ cancellationAt: data?.cancellationAt, experience: data?.experience,
+    projectId: data?.projectId, taskId: data?.taskId, taskObjective: data?.taskObjective, witnessedUrl: data?.url });
+}
+
+export function browserDomBindingSha256(value) {
+  return createHash("sha256").update(JSON.stringify(canonicalBrowserDomBinding(value))).digest("hex");
 }

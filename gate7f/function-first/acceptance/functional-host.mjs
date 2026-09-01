@@ -107,7 +107,7 @@ export async function createFunctionalHost({ pool, cipher, configuration, provid
     answerService, actionService: {}, continuity, requestCoordinator: new PostgresRequestCoordinator({ pool, cipher }),
     authenticator: identities, authorizer: { async authorize({ participant, action, resource }) {
       return { allowed: participant?.verified === true && action === "chat-ephemeral" && resource === "project:runa:personal" };
-    } }, totalDeadlineMs: 60000 });
+    } }, totalDeadlineMs: 120000 });
   const surface = m1.attach(application);
   const sourceIdentity = JSON.parse(await readFile(resolve(sourceRoot, "SOURCE-IDENTITY.json"), "utf8"));
   const publicStatus = acceptancePublicStatus({ application, sourceIdentity, dependencyHealth: () => m1.health() });

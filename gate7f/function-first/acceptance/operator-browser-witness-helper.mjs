@@ -1,4 +1,4 @@
-import { browserWitnessSha256, canonicalBrowserWitness } from "./browser-witness.mjs";
+import { browserDomBindingSha256, browserWitnessSha256, canonicalBrowserDomBinding, canonicalBrowserWitness } from "./browser-witness.mjs";
 
 const TOKEN = /^[a-f0-9]{64}$/u;
 const CHECKPOINT = /^[a-f0-9]{8}-(?:[a-f0-9]{4}-){3}[a-f0-9]{12}$/u;
@@ -33,33 +33,34 @@ function validateTicket(ticket, now) {
   return { expiresAt, key: `${ticket.checkpointId}\u0000${ticket.witnessToken}` };
 }
 
-export function buildBrowserWitnessPublication(ticket, observed, now = Date.now()) {
+export function buildBrowserWitnessPublication(ticket, observed, observedDomBinding, now = Date.now()) {
   validateTicket(ticket, now);
   // The helper serializes actual browser-derived state. It must never manufacture
   // the expected state from ticket/request metadata merely because a checkpoint exists.
-  let witness;
-  try { witness = canonicalBrowserWitness(observed); }
+  let witness, domBinding;
+  try { witness = canonicalBrowserWitness(observed); domBinding = canonicalBrowserDomBinding(observedDomBinding); }
   catch { throw fail("browser-witness-helper-observation-invalid"); }
   return Object.freeze({
     url: ticket.witnessUrl,
-    body: Object.freeze({ checkpointId: ticket.checkpointId, token: ticket.witnessToken, witness }),
-    witnessSha256: browserWitnessSha256(witness)
+    body: Object.freeze({ checkpointId: ticket.checkpointId, token: ticket.witnessToken, witness, domBinding }),
+    witnessSha256: browserWitnessSha256(witness), domBindingSha256: browserDomBindingSha256(domBinding)
   });
 }
 
-export async function publishBrowserWitness(ticket, observed, fetchImplementation = fetch, now = Date.now()) {
+export async function publishBrowserWitness(ticket, observed, observedDomBinding, fetchImplementation = fetch, now = Date.now()) {
   const { key } = validateTicket(ticket, now);
   // Validate before consuming the ticket so a malformed local observation does not
   // prevent a later real browser observation from using the one permitted publication.
   let publication;
-  try { publication = buildBrowserWitnessPublication(ticket, observed, now); }
+  try { publication = buildBrowserWitnessPublication(ticket, observed, observedDomBinding, now); }
   catch (error) { throw error; }
   if (consumedTickets.has(key)) throw fail("browser-witness-helper-ticket-replayed");
   consumedTickets.add(key);
   let response;
   try {
     response = await fetchImplementation(publication.url, { method: "POST", redirect: "error",
-      headers: { "content-type": "application/json" }, body: JSON.stringify(publication.body) });
+      headers: { "content-type": "application/json", origin: new URL(publication.body.domBinding.witnessedUrl).origin },
+      body: JSON.stringify(publication.body) });
   } catch { throw fail("browser-witness-helper-publication-failed"); }
   if (response.status !== 204) throw fail("browser-witness-helper-publication-failed");
   return publication.witnessSha256;

@@ -1,0 +1,61 @@
+{
+  "schemaVersion": "runaai-m1-non-model-failure-ledger/v1",
+  "asOf": "2026-09-01",
+  "scope": "all retained M1-S2 campaign snapshots invalidated by application, evaluator, capture, lifecycle, operator-publication, timeout, telemetry, or browser-witness faults",
+  "qualificationStatement": "None of the 27 arm dispositions is a valid candidate or model rejection caused primarily by model quality. Individual attempts may still contain legitimate model-quality evidence, including attempts retained by later salvage.",
+  "totals": {
+    "countableSnapshots": 27,
+    "recordedAttempts": 1578,
+    "subsequentlySalvagedAttempts": 139,
+    "currentlyPausedHistoricalRows": 70,
+    "permanentlyDiscardedOrQualificationIneligibleAttempts": 1369,
+    "exactProviderCallsRecoverable": 1766,
+    "additionalEarlyRetainedProviderOrModelOutputs": 138,
+    "uncountedAbortSnapshots": 1
+  },
+  "entries": [
+    { "id": 1, "arm": "first-gemma", "candidateId": "gemma4-26b-a4b", "attempts": 23, "disposition": "discarded", "rootCause": "application-stale-pending-state" },
+    { "id": 2, "arm": "second-gemma-r2", "candidateId": "gemma4-26b-a4b", "attempts": 24, "disposition": "discarded", "rootCause": "capture-policy-misclassified-health-reads" },
+    { "id": 3, "arm": "coder-r3", "candidateId": "qwen3-coder-30b-a3b", "attempts": 23, "disposition": "discarded", "rootCause": "application-evaluator-precondition-misgrade" },
+    { "id": 4, "arm": "coder-r4b", "candidateId": "qwen3-coder-30b-a3b", "attempts": 32, "disposition": "discarded", "rootCause": "stale-preparation-ack-lease-and-publication-race" },
+    { "id": 5, "arm": "gemma-r1", "candidateId": "gemma4-26b-a4b", "attempts": 24, "disposition": "discarded", "rootCause": "application-scope-transition-race" },
+    { "id": 6, "arm": "gemma-r2", "candidateId": "gemma4-26b-a4b", "attempts": 29, "disposition": "discarded", "rootCause": "browser-checkpoint-expiry" },
+    { "id": 7, "arm": "gemma-r4", "candidateId": "gemma4-26b-a4b", "attempts": 29, "disposition": "discarded", "rootCause": "browser-checkpoint-expiry" },
+    { "id": 8, "arm": "gemma-r5", "candidateId": "gemma4-26b-a4b", "attempts": 24, "disposition": "discarded", "rootCause": "operator-relay-publication-delay" },
+    { "id": 9, "arm": "gemma-r6", "candidateId": "gemma4-26b-a4b", "attempts": 120, "providerCalls": 145, "disposition": "qualification-ineligible", "rootCause": "browser-timing-and-windows-ebusy" },
+    { "id": 10, "arm": "gemma-r8", "candidateId": "gemma4-26b-a4b", "attempts": 29, "disposition": "discarded", "rootCause": "browser-truth-window-missed" },
+    { "id": 11, "arm": "coder-r9", "candidateId": "qwen3-coder-30b-a3b", "attempts": 120, "providerCalls": 147, "disposition": "qualification-ineligible", "rootCause": "semantic-evaluator-contract-defect" },
+    { "id": 12, "arm": "gemma-r9", "candidateId": "gemma4-26b-a4b", "attempts": 120, "providerCalls": 147, "disposition": "qualification-ineligible", "rootCause": "semantic-evaluator-contract-defect" },
+    { "id": 13, "arm": "qwen36-r10", "candidateId": "qwen36-27b-mtp", "attempts": 120, "providerCalls": 150, "disposition": "qualification-ineligible", "rootCause": "semantic-evaluator-contract-defect" },
+    { "id": 14, "arm": "gemma-r11", "candidateId": "gemma4-26b-a4b", "attempts": 31, "disposition": "discarded", "rootCause": "browser-observation-delay" },
+    { "id": 15, "arm": "gemma-r12", "candidateId": "gemma4-26b-a4b", "attempts": 29, "disposition": "discarded", "rootCause": "operator-ack-late" },
+    { "id": 16, "arm": "gemma-r31-r7v4", "candidateId": "gemma4-26b-a4b", "attempts": 120, "providerCalls": 147, "disposition": "qualification-ineligible", "rootCause": "combined-observation-publication-release-deadline" },
+    { "id": 17, "arm": "qwen36-r21", "candidateId": "qwen36-27b-mtp", "attempts": 110, "providerCalls": 139, "disposition": "discarded", "rootCause": "publication-batch-ceiling" },
+    { "id": 18, "arm": "qwen36-r23", "candidateId": "qwen36-27b-mtp", "attempts": 5, "providerCalls": 8, "disposition": "discarded", "rootCause": "live-probe-timeout" },
+    { "id": 19, "arm": "qwen36-r24", "candidateId": "qwen36-27b-mtp", "attempts": 110, "providerCalls": 140, "disposition": "discarded", "rootCause": "telemetry-unavailable" },
+    { "id": 20, "arm": "coder-r24-r11", "candidateId": "qwen3-coder-30b-a3b", "attempts": 120, "providerCalls": 201, "disposition": "qualification-ineligible", "rootCause": "split-witness-ack-publication-window" },
+    { "id": 21, "arm": "qwen36-r30-r12", "candidateId": "qwen36-27b-mtp", "attempts": 107, "providerCalls": 173, "disposition": "salvaged-by-equivalence-composition", "rootCause": "batch-hard-stop" },
+    { "id": 22, "arm": "qwen36-r33", "candidateId": "qwen36-27b-mtp", "attempts": 3, "providerCalls": 2, "disposition": "discarded", "rootCause": "directory-allowlist" },
+    { "id": 23, "arm": "qwen36-r34", "candidateId": "qwen36-27b-mtp", "attempts": 2, "disposition": "discarded", "rootCause": "seal-prefix-predicate" },
+    { "id": 24, "arm": "qwen36-r35", "candidateId": "qwen36-27b-mtp", "attempts": 2, "disposition": "discarded", "rootCause": "manual-browser-witness-publication" },
+    { "id": 25, "arm": "gemma-r13-partial", "candidateId": "gemma4-26b-a4b", "attempts": 32, "providerCalls": 41, "disposition": "salvaged-by-same-arm-completion", "rootCause": "home-lease-unavailable" },
+    { "id": 26, "arm": "coder-r46-r14", "candidateId": "qwen3-coder-30b-a3b", "attempts": 120, "providerCalls": 209, "disposition": "discarded", "rootCause": "browser-checkpoint-unobserved" },
+    { "id": 27, "arm": "qwen36-r41-r14", "candidateId": "qwen36-27b-mtp", "attempts": 70, "providerCalls": 117, "disposition": "paused-historical-snapshot", "rootCause": "row-70-m1-browser-checkpoint-aborted-with-retained-worker-and-telemetry-faults" }
+  ],
+  "uncounted": [
+    {
+      "arm": "coder-r12-abort",
+      "reasonExcluded": "The retained abort marker proves an operator termination after an expired browser checkpoint but publishes neither recordedAttempts nor provider-call count."
+    }
+  ],
+  "currentContinuation": {
+    "candidateId": "qwen36-27b-mtp",
+    "historicalRows": 70,
+    "retainedImmutableHarnessValidCompletedPrefixAttempts": 68,
+    "historicalNonModelRowsToDiscard": 2,
+    "exactContinuationAttempts": 52,
+    "resumeAttemptId": "qwen36-27b-mtp--agent-05-cancel-drain--2",
+    "singleUninterruptedArmClaimed": false,
+    "modelFacingEquivalenceRequiredBeforeComposition": true
+  }
+}

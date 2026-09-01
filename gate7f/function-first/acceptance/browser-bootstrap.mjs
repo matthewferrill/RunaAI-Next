@@ -1,6 +1,7 @@
 import { randomBytes, timingSafeEqual } from "node:crypto";
 import { createServer } from "node:http";
-import { browserWitnessFromAck, browserWitnessSha256, canonicalBrowserWitness } from "./browser-witness.mjs";
+import { browserDomBindingFromAck, browserDomBindingSha256, browserWitnessFromAck, browserWitnessSha256,
+  canonicalBrowserDomBinding, canonicalBrowserWitness } from "./browser-witness.mjs";
 
 const submitScript = `const form=document.querySelector('form');form.addEventListener('submit',async event=>{event.preventDefault();const output=document.querySelector('[role=status]'),button=form.querySelector('button');button.disabled=true;output.textContent='Starting synthetic session…';try{const response=await fetch('/__acceptance/session',{method:'POST',credentials:'same-origin',headers:{'content-type':'application/x-www-form-urlencoded'},body:new URLSearchParams(new FormData(form))});if(!response.ok)throw new Error('denied');location.assign('/');}catch{output.textContent='Synthetic session was not started. Check the one-time nonce or request a new test checkpoint.';button.disabled=false;}});`;
 const OBSERVATION_DENIALS = Object.freeze(["method-or-remote", "body-invalid", "checkpoint-unknown",
@@ -27,6 +28,21 @@ export function withSyntheticBootstrap(shippedServer, { identities, getLedger })
       response.writeHead(200, { "content-type": "application/json", "cache-control": "no-store" });
       return response.end(JSON.stringify({ schemaVersion: "runaai-m1-bootstrap-counts/v1", ...counters, privateValuesIncluded: false }));
     }
+    if (request.method === "GET" && url.pathname === "/__acceptance/browser-observation-status") {
+      const remote = request.socket.remoteAddress, checkpointId = url.searchParams.get("checkpointId"), entry = browserObservations.get(checkpointId);
+      if (!["127.0.0.1", "::1", "::ffff:127.0.0.1"].includes(remote) || !entry) {
+        response.writeHead(404, { "content-type": "application/json", "cache-control": "no-store" });
+        return response.end('{"errorCode":"m1-browser-observation-unknown"}');
+      }
+      response.writeHead(200, { "content-type": "application/json", "cache-control": "no-store" });
+      return response.end(JSON.stringify({ schemaVersion: "runaai-m1-browser-observation-status/v1", checkpointId,
+        witnessAccepted: entry.witness !== null, witnessSha256: entry.witnessSha256,
+        domBinding: entry.domBinding, domBindingSha256: entry.domBindingSha256,
+        witnessReceivedAt: Number.isFinite(entry.witnessReceivedAtMs) ? new Date(entry.witnessReceivedAtMs).toISOString() : null,
+        acknowledgementAccepted: entry.ackRaw !== null,
+        acknowledgementReceivedAt: Number.isFinite(entry.receivedAtMs) ? new Date(entry.receivedAtMs).toISOString() : null,
+        privateValuesIncluded: false }));
+    }
     if (request.method === "GET" && url.pathname === "/__acceptance/bootstrap.js") {
       response.writeHead(200, { "content-type": "text/javascript; charset=utf-8", "cache-control": "no-store" }); return response.end(submitScript);
     }
@@ -48,25 +64,44 @@ export function withSyntheticBootstrap(shippedServer, { identities, getLedger })
         if (witnessPhase) {
           if (entry.witness !== null) throw observationDenied("replay");
           if (receivedAtMs > entry.witnessExpiresAtMs) throw observationDenied("expired");
-          try { entry.witness = canonicalBrowserWitness(body.witness); } catch { throw observationDenied("body-invalid"); }
+          let canonicalWitness, canonicalDomBinding;
+          try {
+            canonicalWitness = canonicalBrowserWitness(body.witness);
+            canonicalDomBinding = canonicalBrowserDomBinding(body.domBinding);
+          } catch { throw observationDenied("body-invalid"); }
+          const witnessedOrigin = new URL(canonicalDomBinding.witnessedUrl).origin;
+          if (request.headers.origin !== witnessedOrigin
+              || ["taskId", "projectId", "experience", "taskObjective", "cancellationAt"]
+                .some(key => canonicalDomBinding[key] !== entry.expectedDomBinding[key])) throw observationDenied("binding-invalid");
+          entry.witness = canonicalWitness; entry.domBinding = canonicalDomBinding;
           entry.witnessSha256 = browserWitnessSha256(entry.witness);
+          entry.domBindingSha256 = browserDomBindingSha256(entry.domBinding);
           entry.witnessReceivedAtMs = receivedAtMs; counters.browserWitnessAccepted++;
           getLedger()?.evidence("application", "browser-observation-witness-received", { checkpointId: body.checkpointId,
-            witnessSha256: entry.witnessSha256, receivedAt: new Date(receivedAtMs).toISOString(), loopbackOnly: true,
+            witnessSha256: entry.witnessSha256, domBindingSha256: entry.domBindingSha256,
+            witnessedUrl: entry.domBinding.witnessedUrl, receivedAt: new Date(receivedAtMs).toISOString(), loopbackOnly: true,
             oneTimeWitnessTokenConsumed: true });
         } else {
-          if (entry.ackRaw !== null) throw observationDenied("replay");
           if (receivedAtMs > entry.publishExpiresAtMs) throw observationDenied("expired");
-          let ackWitnessSha256;
-          try { ackWitnessSha256 = browserWitnessSha256(browserWitnessFromAck(body.ack)); }
+          let ackWitnessSha256, ackDomBindingSha256;
+          try {
+            ackWitnessSha256 = browserWitnessSha256(browserWitnessFromAck(body.ack));
+            ackDomBindingSha256 = browserDomBindingSha256(browserDomBindingFromAck(body.ack));
+          }
           catch { throw observationDenied("body-invalid"); }
           if (entry.witness === null || body.witnessSha256 !== entry.witnessSha256
-              || ackWitnessSha256 !== entry.witnessSha256) throw observationDenied("binding-invalid");
+              || body.domBindingSha256 !== entry.domBindingSha256 || ackWitnessSha256 !== entry.witnessSha256
+              || ackDomBindingSha256 !== entry.domBindingSha256) throw observationDenied("binding-invalid");
           const ackRaw = JSON.stringify(body.ack);
           if (Buffer.byteLength(ackRaw) > 262144) throw observationDenied("body-invalid");
+          if (entry.ackRaw !== null) {
+            if (entry.ackRaw === ackRaw) { response.writeHead(204); return response.end(); }
+            throw observationDenied("replay");
+          }
           entry.ackRaw = ackRaw; entry.receivedAtMs = receivedAtMs; counters.browserObservationAccepted++;
           getLedger()?.evidence("application", "browser-observation-received", { checkpointId: body.checkpointId,
-            witnessSha256: entry.witnessSha256, witnessReceivedAt: new Date(entry.witnessReceivedAtMs).toISOString(),
+             witnessSha256: entry.witnessSha256, domBindingSha256: entry.domBindingSha256,
+             witnessedUrl: entry.domBinding.witnessedUrl, witnessReceivedAt: new Date(entry.witnessReceivedAtMs).toISOString(),
             receivedAt: new Date(receivedAtMs).toISOString(), loopbackOnly: true, oneTimeAckTokenConsumed: true });
         }
         response.writeHead(204); return response.end();
@@ -112,14 +147,17 @@ export function withSyntheticBootstrap(shippedServer, { identities, getLedger })
     if (session && (session.principalId !== principalId || (await identities.participant(session.sessionId)).principalId !== principalId)) throw new Error("m1-bootstrap-session-mismatch");
     const nonce = randomBytes(32).toString("hex"); pending.set(nonce, { principalId, sessionId: session?.sessionId ?? null, expiresAt: Date.now() + SYNTHETIC_BOOTSTRAP_TTL_MS });
     return { url: `${identities.publicBaseUrl}/__acceptance/session`, nonce, expiresInSeconds: SYNTHETIC_BOOTSTRAP_TTL_MS / 1000 };
-  }, createBrowserObservation(checkpointId, witnessExpiresAtMs, publishExpiresAtMs) {
+  }, createBrowserObservation(checkpointId, witnessExpiresAtMs, publishExpiresAtMs, expectedDomBinding) {
     if (!/^[a-f0-9]{8}-(?:[a-f0-9]{4}-){3}[a-f0-9]{12}$/.test(checkpointId)
         || !Number.isFinite(witnessExpiresAtMs) || !Number.isFinite(publishExpiresAtMs)
         || witnessExpiresAtMs <= Date.now() || publishExpiresAtMs <= witnessExpiresAtMs
+        || !expectedDomBinding || ["taskId", "projectId", "experience", "taskObjective", "cancellationAt"]
+          .some(key => typeof expectedDomBinding[key] !== "string" || !expectedDomBinding[key])
         || browserObservations.size >= 8) throw new Error("m1-browser-observation-scope-invalid");
     const witnessToken = randomBytes(32).toString("hex"), ackToken = randomBytes(32).toString("hex");
     browserObservations.set(checkpointId, { witnessToken, ackToken, witnessExpiresAtMs, publishExpiresAtMs,
-      witness: null, witnessSha256: null, witnessReceivedAtMs: null, ackRaw: null, receivedAtMs: null });
+      expectedDomBinding: structuredClone(expectedDomBinding), witness: null, witnessSha256: null,
+      domBinding: null, domBindingSha256: null, witnessReceivedAtMs: null, ackRaw: null, receivedAtMs: null });
     return { schemaVersion: "runaai-m1-browser-observation-endpoint/v2",
       witnessUrl: `${identities.publicBaseUrl}/__acceptance/browser-observation-witness`, witnessToken,
       ackUrl: `${identities.publicBaseUrl}/__acceptance/browser-observation-ack`, ackToken,
@@ -127,11 +165,14 @@ export function withSyntheticBootstrap(shippedServer, { identities, getLedger })
   }, readBrowserWitness(checkpointId) {
     const entry = browserObservations.get(checkpointId);
     if (!entry?.witness) throw Object.assign(new Error("not witnessed"), { code: "ENOENT" });
-    return { witness: structuredClone(entry.witness), witnessSha256: entry.witnessSha256, receivedAtMs: entry.witnessReceivedAtMs };
+    return { witness: structuredClone(entry.witness), witnessSha256: entry.witnessSha256,
+      domBinding: structuredClone(entry.domBinding), domBindingSha256: entry.domBindingSha256,
+      receivedAtMs: entry.witnessReceivedAtMs };
   }, readBrowserObservation(checkpointId) {
     const entry = browserObservations.get(checkpointId);
     if (!entry?.ackRaw) throw Object.assign(new Error("not observed"), { code: "ENOENT" });
     return { raw: entry.ackRaw, receivedAtMs: entry.receivedAtMs, witness: structuredClone(entry.witness),
-      witnessSha256: entry.witnessSha256, witnessReceivedAtMs: entry.witnessReceivedAtMs };
+      witnessSha256: entry.witnessSha256, domBinding: structuredClone(entry.domBinding),
+      domBindingSha256: entry.domBindingSha256, witnessReceivedAtMs: entry.witnessReceivedAtMs };
   }, consumeBrowserObservation(checkpointId) { browserObservations.delete(checkpointId); } };
 }

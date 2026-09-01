@@ -23,7 +23,7 @@ test("R12 control is model-free and requires ordered on-time publication, consum
   assert.match(source, /runaai-m1-functional-runtime-seal\/v8/u);
   assert.match(source, /mode: "controls"/u);
   assert.match(source, /ledger\.observation\.provider\.calls\.length !== 0/u);
-  assert.match(source, /publicationAt <= observationDeadline/u);
+  assert.match(source, /publicationAt <= publicationDeadline/u);
   assert.match(source, /witnessAt <= publicationAt/u);
   assert.match(source, /consumed\.checkpointId === ticket\.checkpointId/u);
   assert.match(source, /ledger\.observation\.browserExercised === true/u);

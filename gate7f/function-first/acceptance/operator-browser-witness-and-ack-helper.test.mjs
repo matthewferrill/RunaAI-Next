@@ -22,7 +22,7 @@ const request = { schemaVersion: "runaai-m1-browser-checkpoint/v1", checkpointId
   caseId: "agent-05-cancel-drain", runtimeSealSha256, baseUrl, preparationOnly: false,
   reusePreparedBrowser: true, bootstrap: null, preparationCheckpointId: "aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee",
   cancellationAt: new Date(Date.now() - 1000).toISOString(), scope, projectName: "foxtail-cancel",
-  projectId: scope.projectId, taskId: scope.taskId, experience: scope.experience,
+  projectId: scope.projectId, taskId: scope.taskId, taskObjective: "Inspect exact cancellation", experience: scope.experience,
   checks: [{ checkId, kind: "ui.claimedImmediateKill" }], observationEndpoint: {
     schemaVersion: "runaai-m1-browser-observation-endpoint/v2",
     witnessUrl: ticket.witnessUrl, witnessToken, witnessExpiresAt,
@@ -31,6 +31,8 @@ const details = { observation: "Actual browser displayed bounded drain.", taskSt
   notice: AGENT05_BOUNDED_DRAIN_NOTICE, claimedImmediateKill: false, boundedDrain: AGENT05_BOUNDED_DRAIN };
 const observedWitness = { boundedDrain: AGENT05_BOUNDED_DRAIN, claimedImmediateKill: false,
   notice: AGENT05_BOUNDED_DRAIN_NOTICE, taskStatus: "cancelled" };
+const observedDomBinding = { cancellationAt: request.cancellationAt, experience: request.experience,
+  projectId: request.projectId, taskId: request.taskId, taskObjective: request.taskObjective, witnessedUrl: `${baseUrl}/` };
 
 test("publishes actual-browser witness before its bound acknowledgement", async () => {
   const calls = [];
@@ -39,7 +41,7 @@ test("publishes actual-browser witness before its bound acknowledgement", async 
     return { status: 204 };
   };
   const result = await publishBrowserWitnessAndAck({ ticket, request, url: `${baseUrl}/`, actual: false,
-    details, observedWitness, observedAt: new Date().toISOString(), fetchImplementation });
+    details, observedWitness, observedDomBinding, observedAt: new Date().toISOString(), fetchImplementation });
   assert.equal(result.livePublished, true);
   assert.deepEqual(calls.map(value => value.url), [ticket.witnessUrl, request.observationEndpoint.ackUrl]);
   assert.equal(calls[0].body.checkpointId, checkpointId);
@@ -49,7 +51,7 @@ test("publishes actual-browser witness before its bound acknowledgement", async 
 test("rejects a ticket that is not bound to the checkpoint request before network use", async () => {
   let called = false;
   await assert.rejects(publishBrowserWitnessAndAck({ ticket: { ...ticket, checkpointId: "99999999-2222-4333-8444-555555555555" },
-    request, url: `${baseUrl}/`, actual: false, details, observedWitness, observedAt: new Date().toISOString(),
+    request, url: `${baseUrl}/`, actual: false, details, observedWitness, observedDomBinding, observedAt: new Date().toISOString(),
     fetchImplementation: async () => { called = true; return { status: 204 }; } }),
   /browser-witness-ack-helper-binding-invalid/u);
   assert.equal(called, false);
@@ -58,7 +60,7 @@ test("rejects a ticket that is not bound to the checkpoint request before networ
 test("rejects a non-canonical observation before network use", async () => {
   let called = false;
   await assert.rejects(publishBrowserWitnessAndAck({ ticket, request, url: `${baseUrl}/`, actual: false, details,
-    observedWitness: { ...observedWitness, taskStatus: "completed" }, observedAt: new Date().toISOString(),
+    observedWitness: { ...observedWitness, taskStatus: "completed" }, observedDomBinding, observedAt: new Date().toISOString(),
     fetchImplementation: async () => { called = true; return { status: 204 }; } }),
   /browser-witness-ack-helper-observation-invalid/u);
   assert.equal(called, false);
@@ -71,7 +73,7 @@ test("does not publish an acknowledgement when witness publication fails", async
     observationEndpoint: { ...request.observationEndpoint, witnessToken: isolatedTicket.witnessToken } };
   await assert.rejects(publishBrowserWitnessAndAck({ ticket: isolatedTicket, request: isolatedRequest,
     url: `${baseUrl}/`, actual: false,
-    details, observedWitness, observedAt: new Date().toISOString(), fetchImplementation: async url => {
+    details, observedWitness, observedDomBinding, observedAt: new Date().toISOString(), fetchImplementation: async url => {
       calls.push(url); return { status: 409 };
     } }), /browser-witness-helper-publication-failed/u);
   assert.deepEqual(calls, [isolatedTicket.witnessUrl]);

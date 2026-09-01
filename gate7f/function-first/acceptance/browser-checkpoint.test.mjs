@@ -7,7 +7,8 @@ import path from "node:path";
 import { AGENT05_ACK_PUBLICATION_GRACE_MS, AGENT05_BOUNDED_DRAIN_NOTICE,
   AGENT05_IN_FLIGHT_OBSERVATION_MS, HUMAN_BROWSER_CHECKPOINT_MAXIMUM_MS,
   createBrowserCheckpoint } from "./browser-checkpoint.mjs";
-import { AGENT05_BOUNDED_DRAIN, browserWitnessFromAck, browserWitnessSha256 } from "./browser-witness.mjs";
+import { AGENT05_BOUNDED_DRAIN, browserDomBindingFromAck, browserDomBindingSha256,
+  browserWitnessFromAck, browserWitnessSha256 } from "./browser-witness.mjs";
 import { CONTROL_CASES, MODEL_CASES } from "./cases.mjs";
 import { newObservation, ObservationLedger } from "./runner-contract.mjs";
 
@@ -59,7 +60,8 @@ function inFlightAck(request, overrides = {}) {
   const data = { checkId: descriptor.checkId, actual: false, claimedImmediateKill: false,
     scope: request.scope, url: request.baseUrl + "/", observedAt: new Date().toISOString(),
     projectName: request.projectName, projectId: request.projectId, taskId: request.taskId,
-    experience: request.experience, taskStatus: "cancelled", cancellationAt: request.cancellationAt,
+    experience: request.experience, taskObjective: request.taskObjective,
+    taskStatus: "cancelled", cancellationAt: request.cancellationAt,
     notice: AGENT05_BOUNDED_DRAIN_NOTICE, boundedDrain: { noNewSteps: true,
       alreadyDispatchedMayFinish: true, awaitingReconciliation: true, resultWillBeRetained: true },
     ...dataOverrides };
@@ -70,6 +72,15 @@ function inFlightAck(request, overrides = {}) {
     evidence: [{ id: evidenceId, source: "browser", kind: descriptor.kind, data }],
     checks: [{ checkId: descriptor.checkId, kind: descriptor.kind, actual: false,
       evidenceRefs: [{ id: evidenceId, pointer: "/actual" }] }], ...topLevelOverrides };
+}
+
+function liveEnvelope(request, witness, receivedAtMs, ack = null) {
+  const domBinding = ack ? browserDomBindingFromAck(ack) : {
+    cancellationAt: request.cancellationAt, experience: request.experience, projectId: request.projectId,
+    taskId: request.taskId, taskObjective: request.taskObjective, witnessedUrl: `${request.baseUrl}/`,
+  };
+  return { witness, witnessSha256: browserWitnessSha256(witness), domBinding,
+    domBindingSha256: browserDomBindingSha256(domBinding), receivedAtMs };
 }
 
 function controlFixture() {
@@ -116,10 +127,44 @@ test("cancel browser prep is ungraded and actual in-flight checkpoint reuses the
   assert.equal(client.ledger.observation.checks.length, 1); assert.equal(client.ledger.observation.browserExercised, true);
 });
 
+test("scored preparation requires an exact watcher arm written before the browser acknowledgement", async t => {
+  for (const mode of ["missing", "exact", "wrong-request"]) {
+    const directory = await mkdtemp(path.join(tmpdir(), `m1-browser-arm-${mode}-`));
+    t.after(() => rm(directory, { recursive: true, force: true }));
+    const client = cancelClient();
+    const checkpoint = createBrowserCheckpoint({ directory, maximumWaitMs: 1000, requireWatcherArmed: true,
+      announce(value) { void (async () => {
+        const request = JSON.parse(await readFile(value.requestPath, "utf8"));
+        if (mode !== "missing") await writeFile(path.join(path.dirname(value.requestPath), "watcher-armed.json"), JSON.stringify({
+          schemaVersion: "runaai-m1-browser-watcher-armed/v1", checkpointId: request.checkpointId,
+          caseId: request.caseId, stage: request.stage, runtimeSealSha256: request.runtimeSealSha256,
+          requestSha256: mode === "exact" ? value.requestSha256 : "0".repeat(64),
+          armedAt: new Date(Date.now() - 10).toISOString(), exactCheckpointStatusRequired: true, globalCounterUsed: false,
+        }));
+        await writeFile(request.ackPath, JSON.stringify(preparationAck(request)));
+      })(); } });
+    const pending = checkpoint({ client, phase: "1:run.start", stage: "before-native-dispatch" });
+    if (mode === "exact") assert.equal((await pending).preparationOnly, true);
+    else await assert.rejects(pending, new RegExp(mode === "missing" ? "watcher-not-armed" : "watcher-arm-invalid", "u"));
+  }
+});
+
 test("human browser checkpoints allow fifteen minutes but remain bounded", () => {
   assert.equal(HUMAN_BROWSER_CHECKPOINT_MAXIMUM_MS, 900000);
   assert.doesNotThrow(() => createBrowserCheckpoint({ directory: "unused", maximumWaitMs: 900000 }));
   assert.throws(() => createBrowserCheckpoint({ directory: "unused", maximumWaitMs: 900001 }), /m1-browser-checkpoint-budget-invalid/u);
+});
+
+test("a checkpoint never advertises deadlines beyond the campaign hard stop", async t => {
+  const directory = await mkdtemp(path.join(tmpdir(), "m1-browser-hard-stop-")); t.after(() => rm(directory, { recursive: true, force: true }));
+  const client = cancelClient(), clock = Date.now(), checkpoint = createBrowserCheckpoint({ directory, maximumWaitMs: 1000,
+    now: () => clock, campaignHardStopAt: clock + AGENT05_IN_FLIGHT_OBSERVATION_MS + AGENT05_ACK_PUBLICATION_GRACE_MS + 30_000 - 1,
+    announce(value) { void (async () => { const request = JSON.parse(await readFile(value.requestPath, "utf8"));
+      await writeFile(request.ackPath, JSON.stringify(preparationAck(request, new Date(clock).toISOString()))); })(); } });
+  await checkpoint({ client, phase: "1:run.start", stage: "before-native-dispatch" });
+  const cancelled = cancellation(client, new Date(clock).toISOString());
+  await assert.rejects(checkpoint({ client, phase: "2:user.cancel-after-native-dispatch", stage: "in-flight",
+    cancellationAt: cancelled.cancellationAt }), /campaign-budget-insufficient/u);
 });
 
 test("on-time live witness releases the checkpoint before a matching acknowledgement publication", async t => {
@@ -138,18 +183,19 @@ test("on-time live witness releases the checkpoint before a matching acknowledge
     },
     readBrowserWitness() {
       if (clock - start < 23999) throw Object.assign(new Error("not witnessed"), { code: "ENOENT" });
-      return { witness, witnessSha256: browserWitnessSha256(witness), receivedAtMs: start + 23999 };
+      const value = JSON.parse(readFileSync(requestPath, "utf8"));
+      return liveEnvelope(value, witness, start + 23999);
     },
     readBrowserObservation() {
       if (clock - start < 83999) throw Object.assign(new Error("not published"), { code: "ENOENT" });
       request = JSON.parse(readFileSync(requestPath, "utf8")); requestDeliveredAt = clock;
       const ack = inFlightAck(request, { data: { observedAt: new Date(start + 83999).toISOString() } });
-      return { raw: JSON.stringify(ack), receivedAtMs: start + 83999, witness,
-        witnessSha256: browserWitnessSha256(browserWitnessFromAck(ack)), witnessReceivedAtMs: start + 23999 };
+      return { raw: JSON.stringify(ack), ...liveEnvelope(request, browserWitnessFromAck(ack), start + 83999, ack),
+        witnessReceivedAtMs: start + 23999 };
     },
     consumeBrowserObservation() { consumed = true; }
   });
-  const checkpoint = createBrowserCheckpoint({ directory, maximumWaitMs: 30000, now: () => clock,
+  const checkpoint = createBrowserCheckpoint({ directory, maximumWaitMs: 120000, now: () => clock,
     pause: async ms => { clock += ms; }, async readAck(ackPath) {
       fileReads++;
       const value = JSON.parse(await readFile(path.join(path.dirname(ackPath), "request.json"), "utf8"));
@@ -194,17 +240,17 @@ test("on-time witness cannot authorize acknowledgement publication after the gra
     },
     readBrowserWitness() {
       if (clock - start < 10000) throw Object.assign(new Error("not witnessed"), { code: "ENOENT" });
-      return { witness, witnessSha256: browserWitnessSha256(witness), receivedAtMs: start + 10000 };
+      return liveEnvelope(request, witness, start + 10000);
     },
     readBrowserObservation() {
-      if (clock - start < 84000) throw Object.assign(new Error("not published"), { code: "ENOENT" });
+      if (clock - start < 105000) throw Object.assign(new Error("not published"), { code: "ENOENT" });
       const ack = inFlightAck(request, { data: { observedAt: new Date(start + 10000).toISOString() } });
-      return { raw: JSON.stringify(ack), receivedAtMs: start + 84001, witness,
-        witnessSha256: browserWitnessSha256(witness), witnessReceivedAtMs: start + 10000 };
+      return { raw: JSON.stringify(ack), ...liveEnvelope(request, witness, start + 105001, ack),
+        witnessReceivedAtMs: start + 10000 };
     },
     consumeBrowserObservation() { consumed++; }
   });
-  const checkpoint = createBrowserCheckpoint({ directory, maximumWaitMs: 30000, now: () => clock,
+  const checkpoint = createBrowserCheckpoint({ directory, maximumWaitMs: 120000, now: () => clock,
     pause: async ms => { clock += ms; }, async readAck(ackPath) {
       const value = JSON.parse(await readFile(path.join(path.dirname(ackPath), "request.json"), "utf8"));
       return JSON.stringify(preparationAck(value, new Date(clock).toISOString()));
@@ -260,11 +306,11 @@ test("in-flight cancel cannot bootstrap late or borrow another task/session prep
   await assert.rejects(checkpoint({ client, stage: "in-flight" }), /preparation-required/u); assert.equal(client.bootstrapCalls, 1);
 });
 
-for (const acknowledgementMs of [10000, 20000, 24000]) test(`post-cancel browser evidence at ${acknowledgementMs / 1000}s uses the authoritative timestamp and passes`, async t => {
+for (const acknowledgementMs of [10000, 30000, 44000]) test(`post-cancel browser evidence at ${acknowledgementMs / 1000}s uses the authoritative timestamp and passes`, async t => {
   const directory = await mkdtemp(path.join(tmpdir(), "m1-browser-inflight-late-valid-"));
   t.after(() => rm(directory, { recursive: true, force: true }));
   const client = cancelClient(), start = Date.parse("2026-08-29T14:00:00.000Z"); let clock = start, inFlightRequest;
-  const checkpoint = createBrowserCheckpoint({ directory, maximumWaitMs: 30000, now: () => clock,
+  const checkpoint = createBrowserCheckpoint({ directory, maximumWaitMs: 60000, now: () => clock,
     pause: async ms => { clock += ms; }, async readAck(ackPath) {
       const request = JSON.parse(await readFile(path.join(path.dirname(ackPath), "request.json"), "utf8"));
       if (request.preparationOnly) return JSON.stringify(preparationAck(request, new Date(clock).toISOString()));
@@ -281,11 +327,11 @@ for (const acknowledgementMs of [10000, 20000, 24000]) test(`post-cancel browser
   assert.equal(client.ledger.observation.checks[0].actual, false); assert.equal(client.ledger.observation.browserExercised, true);
 });
 
-test("post-cancel browser evidence beyond twenty-four seconds expires without grading the DOM", async t => {
+test("post-cancel browser evidence beyond forty-five seconds expires without grading the DOM", async t => {
   const directory = await mkdtemp(path.join(tmpdir(), "m1-browser-inflight-expired-"));
   t.after(() => rm(directory, { recursive: true, force: true }));
   const client = cancelClient(), start = Date.parse("2026-08-29T14:30:00.000Z"); let clock = start;
-  const checkpoint = createBrowserCheckpoint({ directory, maximumWaitMs: 30000, now: () => clock,
+  const checkpoint = createBrowserCheckpoint({ directory, maximumWaitMs: 60000, now: () => clock,
     pause: async ms => { clock += ms; }, async readAck(ackPath) {
       const request = JSON.parse(await readFile(path.join(path.dirname(ackPath), "request.json"), "utf8"));
       if (request.preparationOnly) return JSON.stringify(preparationAck(request, new Date(clock).toISOString()));

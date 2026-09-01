@@ -203,10 +203,11 @@ test("browser checkpoints select realpending/cancel/unknown/finalstates only", (
   assert.equal(check("code-08-owned-restore", "after-action", "tests.run-restored"), true);
 });
 test("Agent05 browser observation overlaps one finite post-receipt hold inside the application route", () => {
-  const plannerDeadlineMs = sealFixture().roles.agent.deadlineMs, sandboxProcessCeilingMs = 2000, applicationRouteMs = 60000;
-  assert.equal(AGENT05_IN_FLIGHT_OBSERVATION_MS, 24000); assert.equal(AGENT05_POST_RECEIPT_HOLD_MS, 25000);
+  const plannerDeadlineMs = sealFixture().roles.agent.deadlineMs, sandboxProcessCeilingMs = 2000, applicationRouteMs = 120000;
+  assert.equal(AGENT05_IN_FLIGHT_OBSERVATION_MS, 45000); assert.equal(AGENT05_POST_RECEIPT_HOLD_MS, 55000);
   assert.equal(AGENT05_ACK_PUBLICATION_GRACE_MS, 60000);
-  assert.ok(AGENT05_IN_FLIGHT_OBSERVATION_MS < AGENT05_POST_RECEIPT_HOLD_MS);
+  assert.ok(AGENT05_POST_RECEIPT_HOLD_MS - AGENT05_IN_FLIGHT_OBSERVATION_MS >= 10000,
+    "browser observation retains a measured ten-second native-release safety margin");
   assert.ok(AGENT05_IN_FLIGHT_OBSERVATION_MS + AGENT05_ACK_PUBLICATION_GRACE_MS > AGENT05_POST_RECEIPT_HOLD_MS,
     "publication grace is deliberately outside the native receipt hold");
   assert.ok(plannerDeadlineMs + sandboxProcessCeilingMs + AGENT05_POST_RECEIPT_HOLD_MS < applicationRouteMs);
@@ -265,7 +266,8 @@ test("durableexports arecreate-only andrefusetooverwrite completedorinterruptedb
   await assert.rejects(writer.write("../escape", {}), /export-invalid/u);
 });
 
-function memoryWriter() { return { starts: [], results: [], async started(slot) { this.starts.push(slot); },
+function memoryWriter() { return { starts: [], results: [], pauses: [], async started(slot) { this.starts.push(slot); },
+  async paused(slot, failure, value) { this.pauses.push({ slot, failure, value }); },
   async finished(slot, observation) { this.results.push(structuredClone(observation)); return { file: slot.attemptId + ".json", sha256: hash, bytes: 1 }; } }; }
 function observed(slot, status = "completed") {
   const observation = newObservation(MODEL_CASES.find(value => value.id === slot.caseId), { ...slot, runtimeSealSha256: hash });
@@ -291,12 +293,13 @@ test("supplemental execution retains an explicit nonqualifying bounded subset", 
   assert.equal(result.denominatorChanged, true); assert.equal(result.supplemental, true);
   assert.equal(result.qualificationCompositionPermitted, false); assert.equal(result.productQualificationPassed, false);
 });
-test("partialstop retains interruptedattempt plus119unexecutedslots", async () => {
+test("infrastructure stop pauses the started attempt without grading or consuming it", async () => {
   const writer = memoryWriter(), controller = new AbortController();
   const result = await executeCandidateAttempts({ plan: planFixture(), writer, signal: controller.signal, beforeAttempt: async () => {},
     runAttempt: async slot => { controller.abort(Object.assign(new Error("deadline"), { code: "m1-campaign-deadline" })); return observed(slot, "interrupted"); } });
-  assert.equal(result.recordedAttempts, 1); assert.equal(result.notExecuted.length, 119); assert.equal(result.plannedCampaignAttempts, 360);
-  assert.equal(result.stopCode, "m1-campaign-deadline"); assert.equal(writer.results[0].status, "interrupted");
+  assert.equal(result.recordedAttempts, 0); assert.equal(result.notExecuted.length, 120); assert.equal(result.plannedCampaignAttempts, 360);
+  assert.equal(result.stopCode, "m1-campaign-deadline"); assert.equal(writer.results.length, 0);
+  assert.equal(writer.pauses.length, 1); assert.equal(writer.pauses[0].failure.consumeAttempt, false);
 });
 test("failedmodelattempts staycounted anddonot becomea skipped orrepairedsuccess", async () => {
   const writer = memoryWriter(); let calls = 0;
@@ -309,9 +312,11 @@ test("unreadyhardware stopsbeforenextstartwithoutchangingdenominator", async () 
   const writer = memoryWriter(); const result = await executeCandidateAttempts({ plan: planFixture(), writer, signal: new AbortController().signal,
     beforeAttempt: async () => { throw Object.assign(new Error("unready"), { code: "m1-campaign-live-lease-unavailable" }); }, runAttempt: async () => assert.fail("must not call model") });
   assert.equal(writer.starts.length, 0); assert.equal(result.notExecuted.length, 120); assert.equal(result.denominatorChanged, false);
+  assert.equal(writer.pauses.length, 1); assert.equal(result.pause.resumeAttemptId, planFixture().attempts[0].attemptId);
 });
-test("wrongmodelidentity oractualcontainmentfailure stops after retainedattempt", async () => {
+test("capture identity failure pauses without grading the candidate", async () => {
   const writer = memoryWriter(); const result = await executeCandidateAttempts({ plan: planFixture(), writer, signal: new AbortController().signal, beforeAttempt: async () => {},
     runAttempt: async slot => { const value = observed(slot); value.observation.provider.unexpectedCalls.push({ errorCode: "m1-capture-model-mismatch" }); return value; } });
-  assert.equal(result.stopCode, "m1-campaign-containment-failure"); assert.equal(writer.results.length, 1); assert.equal(result.notExecuted.length, 119);
+  assert.equal(result.stopCode, "m1-capture-model-mismatch"); assert.equal(writer.results.length, 0); assert.equal(result.notExecuted.length, 120);
+  assert.equal(writer.pauses.length, 1);
 });

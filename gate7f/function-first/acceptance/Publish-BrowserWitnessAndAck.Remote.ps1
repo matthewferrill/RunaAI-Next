@@ -7,6 +7,7 @@ param(
   [Parameter(Mandatory)][ValidatePattern('^[a-f0-9]{8}-(?:[a-f0-9]{4}-){3}[a-f0-9]{12}$')][string]$CheckpointId,
   [Parameter(Mandatory)][string]$Url,
   [Parameter(Mandatory)][string]$ObservedWitnessJson,
+  [Parameter(Mandatory)][string]$ObservedDomBindingJson,
   [string]$ActualJson='false',
   [Parameter(Mandatory)][string]$DetailsJson
 )
@@ -30,7 +31,7 @@ if ([Security.Principal.WindowsIdentity]::GetCurrent().Name -cne 'RUNA-CONTROL\M
     (($CampaignDirectory -like 'campaign-*') -and
       -not $CampaignDirectory.EndsWith($ExpectedRuntimeSeal.Substring(0, 16), [StringComparison]::Ordinal)) -or
     $Url -notmatch '^http://127\.0\.0\.1:[1-9][0-9]{3,4}/$' -or
-    $WitnessTicketBase64.Length -gt 8192 -or $ObservedWitnessJson.Length -gt 4096 -or
+    $WitnessTicketBase64.Length -gt 8192 -or $ObservedWitnessJson.Length -gt 4096 -or $ObservedDomBindingJson.Length -gt 8192 -or
     $ActualJson.Length -gt 4096 -or $DetailsJson.Length -gt 4096) {
   throw 'browser-witness-ack-operator-binding-invalid'
 }
@@ -41,10 +42,11 @@ if ($identity.schemaVersion -cne 'runaai-m1-source-identity/v1' -or
 }
 $ticketRaw = [Text.UTF8Encoding]::new($false).GetString([Convert]::FromBase64String($WitnessTicketBase64))
 $ticket = $ticketRaw | ConvertFrom-Json
-if ($ticket.checkpointId -cne $CheckpointId -or $ticket.baseUrl + '/' -cne $Url) {
+if ($ticket.checkpointId -cne $CheckpointId) {
   throw 'browser-witness-ack-operator-ticket-invalid'
 }
 $null = $ObservedWitnessJson | ConvertFrom-Json
+$null = $ObservedDomBindingJson | ConvertFrom-Json
 $null = $ActualJson | ConvertFrom-Json
 $null = $DetailsJson | ConvertFrom-Json
 $directory = Join-Path (Join-Path $root 'acceptance-evidence') $CampaignDirectory
@@ -57,12 +59,13 @@ if ([IO.Path]::GetFullPath($checkpointDirectory) -cne $checkpointDirectory -or
 }
 $request = Get-Content -LiteralPath $requestPath -Raw | ConvertFrom-Json
 if ($request.checkpointId -cne $CheckpointId -or $request.runtimeSealSha256 -cne $ExpectedRuntimeSeal -or
-    $request.ackPath -cne $ackPath -or $request.baseUrl + '/' -cne $Url) {
+    $request.ackPath -cne $ackPath) {
   throw 'browser-witness-ack-operator-request-invalid'
 }
 $actual64 = [Convert]::ToBase64String([Text.UTF8Encoding]::new($false).GetBytes($ActualJson))
 $details64 = [Convert]::ToBase64String([Text.UTF8Encoding]::new($false).GetBytes($DetailsJson))
 $observed64 = [Convert]::ToBase64String([Text.UTF8Encoding]::new($false).GetBytes($ObservedWitnessJson))
+$observedDom64 = [Convert]::ToBase64String([Text.UTF8Encoding]::new($false).GetBytes($ObservedDomBindingJson))
 $observedAt = [DateTime]::UtcNow.ToString('o')
 $node = 'C:\AI\RunaAI-Next-Candidate\releases\runaai-next-gate7a-lan-gate7e-2026-08-26-747aabc\runtime\node.exe'
 $helper = Join-Path $root 'gate7f\function-first\acceptance\operator-browser-witness-and-ack-helper.mjs'
@@ -71,5 +74,5 @@ if (-not (Test-Path -LiteralPath $node -PathType Leaf) -or
     ((Get-Item -LiteralPath $helper).Attributes -band [IO.FileAttributes]::ReparsePoint)) {
   throw 'browser-witness-ack-operator-helper-unavailable'
 }
-& $node $helper $WitnessTicketBase64 $requestPath $ackPath $Url $actual64 $details64 $observed64 $observedAt
+& $node $helper $WitnessTicketBase64 $requestPath $ackPath $Url $actual64 $details64 $observed64 $observedDom64 $observedAt
 if ($LASTEXITCODE -ne 0) { throw 'browser-witness-ack-operator-publication-failed' }

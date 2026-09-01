@@ -10,7 +10,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { AGENT05_BOUNDED_DRAIN_NOTICE } from "./browser-checkpoint.mjs";
-import { browserWitnessFromAck, browserWitnessSha256 } from "./browser-witness.mjs";
+import { browserDomBindingFromAck, browserWitnessFromAck, browserWitnessSha256 } from "./browser-witness.mjs";
 import { buildBrowserAck, publishBrowserObservation } from "./operator-browser-ack-helper.mjs";
 import { buildBrowserWitnessPublication, publishBrowserWitness } from "./operator-browser-witness-helper.mjs";
 
@@ -105,8 +105,9 @@ test("live witness and acknowledgement publications use separate bound one-time 
     caseId: request.caseId, stage: request.stage, baseUrl, witnessUrl: request.observationEndpoint.witnessUrl,
     witnessToken: request.observationEndpoint.witnessToken, witnessExpiresAt: new Date(Date.now() + 60_000).toISOString() };
   const observedWitness = browserWitnessFromAck(ack);
-  const publication = buildBrowserWitnessPublication(witnessPublication, observedWitness);
-  assert.equal(await publishBrowserWitness(witnessPublication, observedWitness), publication.witnessSha256);
+  const observedDomBinding = browserDomBindingFromAck(ack);
+  const publication = buildBrowserWitnessPublication(witnessPublication, observedWitness, observedDomBinding);
+  assert.equal(await publishBrowserWitness(witnessPublication, observedWitness, observedDomBinding), publication.witnessSha256);
   assert.equal(await publishBrowserObservation(request, ack), true);
   assert.equal(calls, 2); assert.equal(received[0].url, "/__acceptance/browser-observation-witness");
   assert.deepEqual(received[0].body, publication.body);
@@ -124,6 +125,8 @@ test("immediate witness ticket is exact, time-bound and locally one-use before f
     caseId: "agent-05-cancel-drain", stage: "in-flight", baseUrl,
     witnessUrl: `${baseUrl}/__acceptance/browser-observation-witness`, witnessToken: "1".repeat(64),
     witnessExpiresAt: expires };
+  const domBinding = { cancellationAt: "2026-08-30T12:00:00.000Z", experience: "code", projectId: "project",
+    taskId: "task", taskObjective: "objective", witnessedUrl: `${baseUrl}/` };
   for (const changed of [
     { ...ticket, checkpointId: "wrong" },
     { ...ticket, witnessUrl: `${baseUrl}/wrong` },
@@ -132,20 +135,20 @@ test("immediate witness ticket is exact, time-bound and locally one-use before f
     { ...ticket, witnessExpiresAt: new Date(Date.now() - 1).toISOString() },
     { ...ticket, extra: true }
   ]) assert.throws(() => buildBrowserWitnessPublication(changed, browserWitnessFromAck({ evidence: [{ data: {
-    boundedDrain, claimedImmediateKill: false, notice: AGENT05_BOUNDED_DRAIN_NOTICE, taskStatus: "cancelled" } }] })),
+    boundedDrain, claimedImmediateKill: false, notice: AGENT05_BOUNDED_DRAIN_NOTICE, taskStatus: "cancelled" } }] }), domBinding),
     /browser-witness-helper-request-invalid/u);
   const observedWitness = { boundedDrain, claimedImmediateKill: false,
     notice: AGENT05_BOUNDED_DRAIN_NOTICE, taskStatus: "cancelled" };
   for (const changed of [undefined, { ...observedWitness, taskStatus: "active" },
     { ...observedWitness, notice: "Expected text copied from request metadata." },
     { ...observedWitness, extra: true }]) {
-    assert.throws(() => buildBrowserWitnessPublication(ticket, changed), /browser-witness-helper-observation-invalid/u);
+    assert.throws(() => buildBrowserWitnessPublication(ticket, changed, domBinding), /browser-witness-helper-observation-invalid/u);
   }
   let fetches = 0;
   const fakeFetch = async () => { fetches++; return { status: 204 }; };
-  await assert.rejects(publishBrowserWitness(ticket, undefined, fakeFetch), /browser-witness-helper-observation-invalid/u);
-  await publishBrowserWitness(ticket, observedWitness, fakeFetch);
-  await assert.rejects(publishBrowserWitness(ticket, observedWitness, fakeFetch), /browser-witness-helper-ticket-replayed/u);
+  await assert.rejects(publishBrowserWitness(ticket, undefined, domBinding, fakeFetch), /browser-witness-helper-observation-invalid/u);
+  await publishBrowserWitness(ticket, observedWitness, domBinding, fakeFetch);
+  await assert.rejects(publishBrowserWitness(ticket, observedWitness, domBinding, fakeFetch), /browser-witness-helper-ticket-replayed/u);
   assert.equal(fetches, 1);
 });
 
@@ -162,8 +165,12 @@ test("the CLI writes one fsynced create-only acknowledgement from base64 inputs"
     { windowsHide: true, stdio: "pipe" });
   const value = JSON.parse(await readFile(outputPath, "utf8"));
   assert.equal(value.evidence[0].data.actual, false);
-  assert.throws(() => execFileSync(process.execPath,
+  assert.doesNotThrow(() => execFileSync(process.execPath,
     [helper, "graded", requestPath, outputPath, `${base.baseUrl}/`, actual, details, observedAt],
+    { windowsHide: true, stdio: "pipe" }), "an exact retry repairs a live-publication/audit-file crash gap");
+  const changedDetails = Buffer.from(JSON.stringify({ observation: "Conflicting observation." }), "utf8").toString("base64");
+  assert.throws(() => execFileSync(process.execPath,
+    [helper, "graded", requestPath, outputPath, `${base.baseUrl}/`, actual, changedDetails, observedAt],
     { windowsHide: true, stdio: "pipe" }));
 });
 

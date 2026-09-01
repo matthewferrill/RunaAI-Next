@@ -165,6 +165,8 @@ export async function initializeFunctionPanel({ root = document, request, getCon
   }
   const catalog = element(root, "div"); catalog.id = "m1-task-list";
   const taskView = element(root, "div"); taskView.id = "m1-task"; taskView.setAttribute("aria-live", "polite");
+  const clearTaskBinding = () => ["taskId", "projectId", "experience", "taskObjective", "taskStatus", "cancellationAt"]
+    .forEach(key => delete taskView.dataset[`m1${key[0].toUpperCase()}${key.slice(1)}`]);
   const reload = element(root, "button", "Reload saved tasks"); reload.type = "button";
   codePanel.append(prepare, workflow, workIntent, element(root, "p", "Code and guided tasks use their configured model roles. Task intent limits what can be proposed; the approval profile separately controls each permitted effect.", "navigation-empty"),
     profile, element(root, "h3", "Saved tasks"), reload, catalog, taskView); host.append(codePanel);
@@ -241,7 +243,7 @@ export async function initializeFunctionPanel({ root = document, request, getCon
   }
   async function refresh() {
     ++epoch; ++viewEpoch; selected = []; sourceAttempt = null; startAttempt = null;
-    profile.value = ""; taskView.replaceChildren(); catalog.replaceChildren(); status.textContent = "";
+    profile.value = ""; clearTaskBinding(); taskView.replaceChildren(); catalog.replaceChildren(); status.textContent = "";
     const token = ticket(), context = token.context;
     codePanel.hidden = context.experience !== "code";
     select.querySelector('option[value="work"]').disabled = context.experience !== "code";
@@ -293,7 +295,7 @@ export async function initializeFunctionPanel({ root = document, request, getCon
     if (!alive(token)) return;
     const target = { ...token, view: ++viewEpoch };
     if (restored) profile.value = "";
-    taskView.replaceChildren(element(root, "p", "Loading saved task…"));
+    clearTaskBinding(); taskView.replaceChildren(element(root, "p", "Loading saved task…"));
     try { renderTask(await readTask(target, taskId, runId), target, { taskId, runId, restored }); }
     catch (error) { if (visible(target)) { taskView.textContent = "Task could not be loaded. No actions were started."; reportError(error, target); } }
   }
@@ -311,7 +313,16 @@ export async function initializeFunctionPanel({ root = document, request, getCon
     if (!visible(token)) return;
     const { taskId, runId, restored } = ids, run = result.run;
     const presentation = taskPresentation(result);
-    taskView.replaceChildren(element(root, "h3", result.task?.objective ?? run?.objective ?? "Saved task"),
+    const objective = result.task?.objective ?? run?.objective ?? "Saved task";
+    clearTaskBinding();
+    taskView.dataset.m1TaskId = taskId;
+    taskView.dataset.m1ProjectId = token.context.projectId;
+    taskView.dataset.m1Experience = token.context.experience;
+    taskView.dataset.m1TaskObjective = objective;
+    taskView.dataset.m1TaskStatus = presentation.status;
+    if (presentation.status === "cancelled" && typeof result.task?.updatedAt === "string")
+      taskView.dataset.m1CancellationAt = result.task.updatedAt;
+    taskView.replaceChildren(element(root, "h3", objective),
       element(root, "p", `Task: ${presentation.status}`));
     if (presentation.notice) taskView.append(element(root, "p", presentation.notice));
     const restoredNotice = restoredWorkspaceNotice(result);

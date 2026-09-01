@@ -25,7 +25,7 @@ test("R13 control binds v9 and reuses only the source-reviewed model-free execut
   assert.match(source, /r13-model-free-browser-publication/u);
   assert.match(executor, /mode: "controls"/u);
   assert.match(executor, /ledger\.observation\.provider\.calls\.length !== 0/u);
-  assert.match(executor, /publicationAt <= observationDeadline/u);
+  assert.match(executor, /publicationAt <= publicationDeadline/u);
   assert.match(executor, /witnessAt <= publicationAt/u);
   assert.match(executor, /consumed\.checkpointId === ticket\.checkpointId/u);
   assert.match(executor, /ledger\.observation\.browserExercised === true/u);

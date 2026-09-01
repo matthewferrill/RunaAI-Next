@@ -83,18 +83,18 @@ test('owned disposable resources and their watchdog accept exactly the sealed75m
   assert.match(watchdog,/duration > 4500000/u);assert.doesNotMatch(watchdog,/duration > 3600000/u);
 });
 
-test('hard-stop interruption retains the started attempt and all119 denominator slots',async()=>{
-  const value=plan(readyAt),controller=new AbortController(),starts=[],finishes=[];
-  const writer={async started(slot){starts.push(slot.attemptId);},async finished(slot){finishes.push(slot.attemptId);return {file:slot.attemptId+'.json',sha256:hash,bytes:1};}};
+test('hard-stop interruption pauses the started attempt and keeps all120 denominator slots',async()=>{
+  const value=plan(readyAt),controller=new AbortController(),starts=[],finishes=[],pauses=[];
+  const writer={async started(slot){starts.push(slot.attemptId);},async paused(slot,failure){pauses.push({slot,failure});},async finished(slot){finishes.push(slot.attemptId);return {file:slot.attemptId+'.json',sha256:hash,bytes:1};}};
   const result=await executeCandidateAttempts({plan:value,writer,signal:controller.signal,beforeAttempt:async()=>{},runAttempt:async slot=>{
     controller.abort(Object.assign(Error('m1-campaign-publication-hard-stop'),{code:'m1-campaign-publication-hard-stop'}));
     const observation=newObservation(MODEL_CASES.find(item=>item.id===slot.caseId),{...slot,runtimeSealSha256:hash});
     observation.sourceCommit=sourceCommit;observation.status='interrupted';
     return {observation,grade:{status:'inconclusive',passed:false,criticalProductFailures:[]},unresolved:[]};
   }});
-  assert.equal(result.schemaVersion,'runaai-m1-candidate-batch-result/v2');assert.equal(result.recordedAttempts,1);
-  assert.equal(result.notExecuted.length,119);assert.equal(result.stopCode,'m1-campaign-publication-hard-stop');
-  assert.equal(starts.length,1);assert.equal(finishes.length,1);assert.equal(result.denominatorChanged,false);
+  assert.equal(result.schemaVersion,'runaai-m1-candidate-batch-result/v2');assert.equal(result.recordedAttempts,0);
+  assert.equal(result.notExecuted.length,120);assert.equal(result.stopCode,'m1-campaign-publication-hard-stop');
+  assert.equal(starts.length,1);assert.equal(finishes.length,0);assert.equal(pauses.length,1);assert.equal(result.denominatorChanged,false);
 });
 
 test('existing v1 READY produces the unchanged v1 plan without R6 fields',()=>{

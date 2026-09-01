@@ -20,7 +20,7 @@ const fixture = () => {
   const supplementalSeal = seal("new", hex("9"), hex("0"));
   return {
     priorResult: { candidateId: "qwen", sourceCommit: "old", runtimeSealSha256: hex("a"), caseBundleSha256: hex("b"),
-      plannedCandidateAttempts: 3, recordedAttempts: 2, attempts: [row("a"), row("b")], notExecuted: ["c"], stopCode: "hard-stop" },
+      plannedCandidateAttempts: 3, recordedAttempts: 2, attempts: [row("a"), row("b")], notExecuted: ["c"], stopCode: "m1-campaign-batch-hard-stop" },
     supplementalResult: { candidateId: "qwen", sourceCommit: "new", runtimeSealSha256: hex("c"), caseBundleSha256: hex("b"),
       plannedCandidateAttempts: 1, recordedAttempts: 1, attempts: [row("c")], notExecuted: [], stopCode: null },
     priorPlan: { candidateId: "qwen", attempts: [row("a"), row("b"), row("c")] },
@@ -50,4 +50,13 @@ test("rejects completion identities that differ from the original missing set", 
   input.supplementalResult.attempts = [row("d")];
   input.supplementalPlan.attempts = [row("d")];
   assert.throws(() => composeEquivalentCandidateResult(input), /supplemental-identity-mismatch/);
+});
+
+test("rejects a non-prefix prior window and a model-attributed stop", () => {
+  const nonPrefix = fixture();
+  nonPrefix.priorResult.attempts = [row("a"), row("c")]; nonPrefix.priorResult.notExecuted = ["b"];
+  nonPrefix.supplementalResult.attempts = [row("b")]; nonPrefix.supplementalPlan.attempts = [row("b")];
+  assert.throws(() => composeEquivalentCandidateResult(nonPrefix), /supplemental-identity-mismatch/u);
+  const modelStop = fixture(); modelStop.priorResult.stopCode = "m1-model-response-invalid";
+  assert.throws(() => composeEquivalentCandidateResult(modelStop), /prior-stop-not-non-model/u);
 });

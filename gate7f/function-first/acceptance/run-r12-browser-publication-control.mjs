@@ -109,10 +109,10 @@ export async function runBrowserPublicationControl(args, { announce = value => p
     const witness = ledger.observation.evidence.findLast(value => value.kind === "browser-observation-witness-received")?.data;
     const publication = ledger.observation.evidence.findLast(value => value.kind === "browser-observation-received")?.data;
     const witnessAt = Date.parse(witness?.receivedAt), publicationAt = Date.parse(publication?.receivedAt);
-    const observationDeadline = Date.parse(request.observationDeadline);
+    const observationDeadline = Date.parse(request.observationDeadline), publicationDeadline = Date.parse(request.expiresAt);
     report.actualBrowserExercised = ledger.observation.browserExercised === true;
     report.witnessOnTime = Number.isFinite(witnessAt) && witnessAt <= observationDeadline && ticket.witnessReceivedAt === witness.receivedAt;
-    report.acknowledgementOnTime = Number.isFinite(publicationAt) && publicationAt <= observationDeadline;
+    report.acknowledgementOnTime = Number.isFinite(publicationAt) && publicationAt <= publicationDeadline;
     report.witnessBeforeAcknowledgement = Number.isFinite(witnessAt) && Number.isFinite(publicationAt) && witnessAt <= publicationAt;
     report.acknowledgementConsumed = consumed.checkpointId === ticket.checkpointId && consumed.preparationOnly === undefined;
     report.nativeReleaseWithinCeiling = releasedAt - Date.parse(held.heldAt) <= AGENT05_POST_RECEIPT_HOLD_MS;

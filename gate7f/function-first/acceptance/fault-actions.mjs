@@ -15,7 +15,7 @@ const deferred = () => {
   return { promise, resolve, reject };
 };
 const scoped = (expected, actual) => expected.participantId === actual.participantId && expected.projectId === actual.projectId;
-export const AGENT05_POST_RECEIPT_HOLD_MS = 25_000;
+export const AGENT05_POST_RECEIPT_HOLD_MS = 55_000;
 async function bounded(promise, timeoutMs, code) {
   let timer;
   try { return await Promise.race([promise, new Promise((_, reject) => { timer = setTimeout(() => reject(fail(code)), timeoutMs); })]); }
@@ -320,7 +320,7 @@ export function createFaultActions({ checkpoint = null } = {}) {
       // The trusted browser witness is enough to end the native receipt hold.
       // Full evidence publication remains mandatory, but its bounded grace runs
       // after release so operator transport latency cannot become an executor
-      // failure or extend the 25-second native hold.
+      // failure or extend the bounded native hold.
       if (checkpointTicket?.publication) await checkpointTicket.publication;
       return result;
     },

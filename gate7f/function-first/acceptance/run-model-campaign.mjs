@@ -13,6 +13,7 @@ import { FunctionalHttpJourney } from "./http-journey.mjs";
 import { AcceptanceFaultController, createFaultActions } from "./fault-actions.mjs";
 import { startApplicationFaultWorker } from "./fault-worker.mjs";
 import { createBrowserCheckpoint } from "./browser-checkpoint.mjs";
+import { classifyCampaignFailure, pauseableObservationFailure } from "./campaign-failure.mjs";
 import { CAMPAIGN_V2_POLICY, campaignV2Policy, campaignV2Windows } from "../readiness/lease-v2-contract.mjs";
 
 const HEX = /^[a-f0-9]{64}$/u;
@@ -303,6 +304,15 @@ export async function createCampaignWriter(directory, plan) {
   return {
     write,
     async started(slot, value) { return write(`${slot.attemptId}.started.json`, value); },
+    async paused(slot, failure, value = {}) {
+      return write(`${slot.attemptId}.pause.json`, {
+        schemaVersion: "runaai-m1-campaign-pause/v1", attemptId: slot.attemptId,
+        candidateId: slot.candidateId, caseId: slot.caseId, repetition: slot.repetition,
+        runtimeSealSha256: plan.runtimeSealSha256, pausedAt: stamp(), failure,
+        resumeAttemptId: slot.attemptId, completedPrefixImmutable: true,
+        attemptConsumed: false, modelGraded: false, ...value,
+      });
+    },
     async finished(slot, observation, grade, unresolved) {
       const evidence = await write(`${slot.attemptId}.json`, { ...observation, grade, unresolved });
       await write(`${slot.attemptId}.record.json`, { attemptId: slot.attemptId, ...evidence, status: observation.status,
@@ -352,11 +362,21 @@ async function executeAttemptSequence({ plan, writer, runAttempt, beforeAttempt,
   let stopCode = null;
   for (const slot of plan.attempts) {
     if (signal.aborted) { stopCode = safeCode(abortError(signal)); break; }
-    try { await beforeAttempt(slot); } catch (error) { stopCode = safeCode(error); break; }
+    try { await beforeAttempt(slot); } catch (error) {
+      const failure = classifyCampaignFailure(error, { phase: "before-attempt" });
+      if (failure.pauseCampaign && writer.paused) await writer.paused(slot, failure, { started: false });
+      stopCode = failure.code; break;
+    }
     await writer.started(slot, { ...slot, runtimeSealSha256: plan.runtimeSealSha256, startedAt: stamp(), finished: false });
     let result;
     try { result = await runAttempt(slot); }
     catch (error) {
+      const failure = classifyCampaignFailure(error, { phase: "runner" });
+      if (failure.pauseCampaign) {
+        if (writer.paused) await writer.paused(slot, failure, { started: true });
+        stopCode = failure.code;
+        break;
+      }
       const observation = newObservation(MODEL_CASES.find(value => value.id === slot.caseId), { ...slot, runtimeSealSha256: plan.runtimeSealSha256 });
       observation.sourceCommit = plan.sourceCommit; observation.status = signal.aborted ? "interrupted" : "failed";
       observation.finishedAt = stamp(); observation.failures.push({ phase: "runner", errorCode: safeCode(error) });
@@ -365,6 +385,19 @@ async function executeAttemptSequence({ plan, writer, runAttempt, beforeAttempt,
     const { observation, grade, unresolved = [] } = result;
     if (observation.caseId !== slot.caseId || observation.candidateId !== slot.candidateId || observation.repetition !== slot.repetition
         || observation.runtimeSealSha256 !== plan.runtimeSealSha256) throw fail("m1-campaign-attempt-binding-invalid");
+    const captureFailure = observation.provider?.unexpectedCalls?.map(value => classifyCampaignFailure(value?.errorCode, { phase: "capture" }))
+      .find(value => value.pauseCampaign) ?? null;
+    const pauseFailure = signal.aborted ? classifyCampaignFailure(abortError(signal), { phase: "runner" })
+      : pauseableObservationFailure(observation) ?? captureFailure;
+    if (pauseFailure) {
+      if (writer.paused) await writer.paused(slot, pauseFailure, { started: true,
+        observationStatus: observation.status, failureCount: observation.failures?.length ?? 0 });
+      stopCode = pauseFailure.code;
+      announce({ schemaVersion: "runaai-m1-campaign-paused/v1", candidateId: plan.candidateId,
+        completedAttempts: records.length, plannedCandidateAttempts: expectedAttempts,
+        resumeAttemptId: slot.attemptId, failure: pauseFailure, modelGraded: false });
+      break;
+    }
     const exported = await writer.finished(slot, observation, grade, unresolved);
     records.push({ ...slot, ...exported, status: observation.status, preliminaryGrade: grade.status,
       passed: grade.passed, providerCalls: observation.provider.calls.length, nativeCalls: observation.native.calls.length });
@@ -382,6 +415,9 @@ async function executeAttemptSequence({ plan, writer, runAttempt, beforeAttempt,
     sourceCommit: plan.sourceCommit, runtimeSealSha256: plan.runtimeSealSha256, caseBundleSha256: CASE_BUNDLE_SHA256,
     plannedCampaignAttempts: supplemental ? expectedAttempts : 360, plannedCandidateAttempts: expectedAttempts,
     recordedAttempts: records.length, attempts: records, notExecuted: remaining(), stopCode,
+    ...(stopCode ? { pause: { schemaVersion: "runaai-m1-campaign-pause-summary/v1",
+      resumeAttemptId: remaining()[0] ?? null, completedPrefixAttempts: records.length,
+      completedPrefixImmutable: true, modelGradedAtPause: false } } : {}),
     denominatorChanged: supplemental, supplemental, qualificationCompositionPermitted: false, productQualificationPassed: false,
     independentSemanticReviewPending: true, humanTrialRequired: true, productionChanged: false, protectedDataRead: false };
 }
@@ -464,7 +500,9 @@ export async function runModelCampaign(args, { checkpoint = null, getLeaseObserv
     testbed = await createFunctionalTestbed({ resources, mode: "scored", seal, candidateId: plan.candidateId,
       getLedger: () => ledger, faults: controllerFaults, taskHooks: controllerFaults.taskHooks });
     if (signal.aborted) throw abortError(signal);
-    const bridge = checkpoint ?? createBrowserCheckpoint({ directory, signal, announce: value => announce({ schemaVersion: "runaai-m1-browser-checkpoint-ready/v1", ...value }) });
+    const bridge = checkpoint ?? createBrowserCheckpoint({ directory, signal, requireWatcherArmed: true,
+      campaignHardStopAt: plan.applicationHardStopAt ?? null,
+      announce: value => announce({ schemaVersion: "runaai-m1-browser-checkpoint-ready/v1", ...value }) });
     const observe = async value => { if (signal.aborted) throw abortError(signal);
       const result = needsBrowserCheckpoint(value) ? await bridge(value) : undefined;
       if (signal.aborted) throw abortError(signal); return result; };

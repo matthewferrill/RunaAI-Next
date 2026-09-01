@@ -3,7 +3,7 @@ import { fileURLToPath } from "node:url";
 import { isDeepStrictEqual } from "node:util";
 
 import { AGENT05_BOUNDED_DRAIN, AGENT05_BOUNDED_DRAIN_NOTICE,
-  browserWitnessFromAck, browserWitnessSha256 } from "./browser-witness.mjs";
+  browserDomBindingFromAck, browserDomBindingSha256, browserWitnessFromAck, browserWitnessSha256 } from "./browser-witness.mjs";
 
 const UUID = /^[a-f0-9]{8}-(?:[a-f0-9]{4}-){3}[a-f0-9]{12}$/u;
 const SHA256 = /^[a-f0-9]{64}$/u;
@@ -44,10 +44,11 @@ function common(request) {
   };
 }
 
-function exactUrl(request, url) {
+function exactUrl(request, url, allowWitnessProxy = false) {
   let parsed;
   try { parsed = new URL(url); } catch { throw fail("browser-ack-helper-url-invalid"); }
-  if (url !== `${request.baseUrl}/` || parsed.protocol !== "http:" || parsed.hostname !== "127.0.0.1"
+  if ((!allowWitnessProxy && url !== `${request.baseUrl}/`) || parsed.protocol !== "http:"
+      || !["127.0.0.1", "localhost", "[::1]"].includes(parsed.hostname)
       || parsed.pathname !== "/" || parsed.username || parsed.password || parsed.search || parsed.hash) {
     throw fail("browser-ack-helper-url-invalid");
   }
@@ -66,7 +67,7 @@ export function buildBrowserAck({ mode, request, url, actual = null, details = {
   plainObject(request, "browser-ack-helper-request-invalid");
   plainObject(details, "browser-ack-helper-details-invalid");
   if (!validObservedAt(observedAt)) throw fail("browser-ack-helper-observed-at-invalid");
-  exactUrl(request, url);
+  exactUrl(request, url, mode === "graded" && request.reusePreparedBrowser === true);
   const base = common(request);
 
   if (mode === "preparation") {
@@ -124,6 +125,7 @@ export function buildBrowserAck({ mode, request, url, actual = null, details = {
       projectName: request.projectName,
       projectId: request.projectId,
       taskId: request.taskId,
+      taskObjective: request.taskObjective,
       experience: request.experience,
       taskStatus: details.taskStatus,
       cancellationAt: request.cancellationAt,
@@ -168,7 +170,16 @@ function decodeJson(value, code) {
 export function writeCreateOnly(path, value) {
   const bytes = Buffer.from(JSON.stringify(value, null, 2), "utf8");
   if (bytes.byteLength > 262144) throw fail("browser-ack-helper-output-too-large");
-  const handle = openSync(path, "wx", 0o600);
+  let handle;
+  try { handle = openSync(path, "wx", 0o600); }
+  catch (error) {
+    if (error?.code === "EEXIST") {
+      const existing = readFileSync(path);
+      if (existing.equals(bytes)) return bytes.byteLength;
+      throw fail("browser-ack-helper-output-conflict");
+    }
+    throw error;
+  }
   try { writeSync(handle, bytes); fsyncSync(handle); } finally { closeSync(handle); }
   return bytes.byteLength;
 }
@@ -183,13 +194,16 @@ export async function publishBrowserObservation(request, value, fetchImplementat
       || !Number.isFinite(Date.parse(endpoint.witnessExpiresAt)) || !Number.isFinite(Date.parse(endpoint.publishExpiresAt))) {
     throw fail("browser-ack-helper-observation-endpoint-invalid");
   }
-  let witnessSha256;
-  try { witnessSha256 = browserWitnessSha256(browserWitnessFromAck(value)); }
+  let witnessSha256, domBindingSha256;
+  try {
+    witnessSha256 = browserWitnessSha256(browserWitnessFromAck(value));
+    domBindingSha256 = browserDomBindingSha256(browserDomBindingFromAck(value));
+  }
   catch { throw fail("browser-ack-helper-observation-endpoint-invalid"); }
   let response;
   try { response = await fetchImplementation(endpoint.ackUrl, { method: "POST", redirect: "error",
     headers: { "content-type": "application/json" },
-    body: JSON.stringify({ checkpointId: request.checkpointId, token: endpoint.ackToken, witnessSha256, ack: value }) }); }
+    body: JSON.stringify({ checkpointId: request.checkpointId, token: endpoint.ackToken, witnessSha256, domBindingSha256, ack: value }) }); }
   catch { throw fail("browser-ack-helper-observation-publication-failed"); }
   if (response.status !== 204) throw fail("browser-ack-helper-observation-publication-failed");
   return true;

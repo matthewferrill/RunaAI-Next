@@ -15,7 +15,27 @@ are unchanged. M1 is authorized, not complete; its first local wiring result is 
 The steward authorized necessary non-destructive work and commit/push to RunaAI-Next without recurring
 permission requests. Human involvement is reserved for genuine customer tests or human-only operations.
 
-### Current checkpoint: R13 complete; R14 Review correction frozen and locally verified
+### Current checkpoint: R14 complete; no Review route; R15 correction must be frozen next
+
+R14 is complete and immutable. The repaired campaign method retained valid prefixes and resumed only
+the first unconsumed Qwen identity. Qwen's exact 68 + 1 + 51 history composes to 120 unique attempts;
+all three candidates now have 120/120 attempts, all 12 model-free controls pass, cleanup is verified,
+and the independent candidate-blind review produced 360 determinate grades with no critical model or
+product failure. Chat, Research, Code and Agent have qualifying routes. Review does not: Gemma is 7/24,
+Coder 20/24 and Qwen3.6 21/24. Product qualification, production routing and the customer trial remain
+unchanged. Exact pins, publication-tool RCA and genuine model defects are in
+`gate7f/function-first/M1-S2-R14-INDEPENDENT-SEMANTIC-RESULTS-2026-09-01.md` and
+`gate7f/function-first/M1-S2-CAMPAIGN-HARNESS-RCA-AND-CONTINUITY-CORRECTION-2026-09-01.md`.
+
+The next bounded operation is to freeze R15 prospectively around the measured generic defects: Review
+must obey the conditional structured-output contract and systematically test every material evidence
+limit or contradiction; Agent read-only summaries must preserve the supplied correction; Agent repair
+planning must implement the requested scalar operation and respond within the existing deadline. R15
+may not branch on candidate identity, inject case answers, lower thresholds, replay a subset, regrade
+R14 or expose the customer trial before a fresh full 360+12 candidate-blind result qualifies all five
+functions.
+
+### Retained checkpoint: R13 complete; R14 Review correction frozen and locally verified
 
 R13 completed 360/360 planned attempts, 12/12 model-free controls, strict Home/Control cleanup and a
 fresh candidate-blind review covering 611 provider outputs and all 963 semantic checks. All 360 attempt
@@ -1017,10 +1037,13 @@ No dependency was changed during the prerequisite disposition. Full evidence is 
 
 ## Next operation
 
-Active continuation is M1-S2. Its committed green criteria are
+Active continuation is M1-S2. R14 is closed with no qualifying Review route. Its committed green criteria are
 `gate7f/function-first/M1-S2-FUNCTIONS-AND-GREEN-CRITERIA.md`: real conversation/context, supplied-source
 research/review, disposable project execution, durable governed tasks and customer integration. Continue
 under standing permission until completion or meaningful human testing; do not stop after internal commits.
+Freeze the R15 corrective contract next from the exact R14 model defects, verify its generic model-neutral
+implementation without models, then run a fresh complete 360+12 campaign and candidate-blind review.
+Do not replay or regrade R14.
 
 The roadmap/retrieval guard and M1-S1 role wiring are implemented, tested and published through `2549413`.
 Retrieve the full roadmap before the next bounded chat/context function slice, alongside the separate

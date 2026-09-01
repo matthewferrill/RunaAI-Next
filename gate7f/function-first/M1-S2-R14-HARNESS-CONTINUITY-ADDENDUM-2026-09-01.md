@@ -2,7 +2,7 @@
 
 Date: 2026-09-01
 Parent: `M1-S2-R14-REVIEW-CORRECTIVE-CRITERIA-2026-09-01.md`
-Status: continuity correction active; campaign paused after the r51 watchdog fault at the same unconsumed Agent-06 identity
+Status: corrected r53 continuation complete; 120-row Qwen history composition verified; 360-row candidate-blind semantic review complete; R14 product qualification false because Review has no qualifying route
 
 This addendum changes only test-system failure handling. It does not change model prompts, model-visible cases, request controls, scoring rules, provider settings, candidate artifacts, or the R14 qualification denominator.
 
@@ -63,7 +63,27 @@ The corrected recovery binds 70 historical records. The continuation audit retai
 - R51 correctly paused fail-closed with result SHA-256 `675b2d3bf72a3ba969b7a5ff980e43bcf5d54c8e759a0ee06b2c857f5283cfbb`, pause receipt `afa1b4e47c00e76e80a6a86ec3ff390a1a3ec5cb87c070c613d816828006269c`, and full paused observation `f4697ca79b297320fb4c787af641e6bfb43151544b4e3cd5cbbffb12977f435e`.
 - The paused observation contains one provider call and 38 evidence events, but publishes `modelGraded:false` and `attemptConsumed:false`. Its model output is retained for audit only; it is not qualification evidence.
 - Both r50 and r51 lease exports prove abort completion, cleanup verified, power restored, zero final residency, and no production-route change.
-- Model-free verification after the correction: focused worker/browser/runner suite 83/83; complete harness 155/155; hardened 194-file tracked repository run 1,973 tests with 1,895 passed, 78 intentionally skipped, and 0 failed; Gate 7F 28/28; roadmap 15/15.
+- Model-free verification after the complete correction and review-publication hardening: complete harness 160/160; hardened 195-file tracked repository run 1,980 tests with 1,902 passed, 78 intentionally skipped, and 0 failed; Gate 7F 28/28; roadmap 15/15.
+
+## R53 completion and review binding
+
+- Fresh source archive SHA-256: `96a92ea655d9215156f3a1614a412b5ff60b8e8f0b9712ca6fdf47c15922e6c5`; `git get-tar-commit-id` returns `cf2065daa7c4e47cc24a63582bea80e36065a4ca`.
+- Runtime seal SHA-256: `4855a990f7a36278eae546d8bfa18f04b507356300784109334a82fcd16bb42a`; frozen criteria SHA-256 remains `565f9b805ef86cfd1bb003e3aeb5e4e6ed063af854dff58a0e5970df15362f5d`.
+- Fresh model-free controls SHA-256: `e1af06f321437a34a30233a26d94c97b8fe91e8dcbd69c31fbdb9ca0c1a651e2`; 12 completed, zero failed, zero model calls, and no production change.
+- Fresh real-browser publication proof SHA-256: `ffd2a2a8ae33d48f1af658fedc493d329aab8214c4836e3c55a8ed719886e323`; actual browser exercised, witness and ACK on time and ordered, native release within its ceiling, zero model calls, and no production change.
+- R53 resumed at the exact unconsumed Agent-06 repetition-2 identity and completed all 51 remaining rows. Final-window result SHA-256: `f580c708d91fb1a73c4546d022a473ef732468452c00aa4451ea9f362768744f`.
+- Canonical three-window composition: 68 r41 + 1 r49 + 51 r53 = 120 unique Qwen identities. Audit SHA-256: `1761e746fbabbd87a46611c03b18b8b85ede6fcf44e6bd3be59cfdb8e55e5b7e`; result SHA-256: `7449e8705bbe45807e5fe0433efca7985cb97d92da1e05a788f0b138cc951489`.
+- Home completion and cleanup are verified: completed lease result, cleanup verified, power restored, owned task retired, zero final residency, and unchanged production routing.
+- Independent negative testing rejected the first multi-window review package before semantic grading because it allowed Gemma/Coder label swaps and Qwen cross-window row movement while preserving the combined identity set. That package is retained as invalid review evidence and is not an adjudication input.
+- The corrected candidate-blind v2 360-row worksheet is bound by input-manifest SHA-256 `1ae0fef79d6d64c0dfc3f4f3dd507b2e82338b1202a42e3d51509c070ce630d0`, worksheet SHA-256 `e31cac23fec2023a2ae319f2ba3aa0e0a20f3ac0f0f1297f399aad6a9b296afa`, and review-binding SHA-256 `9d85efbb77fe49fb8994b6d0fa44014da26095bd1e617e489ba3d98ebf7704c8`.
+- The v2 review preparer binds Gemma/Coder labels to their exact candidates and canonical 120-row order, binds Qwen to exact canonical slices 1-68, 69, and 70-120, and deeply matches the composition audit/result's schema, candidate, case bundle, execution windows, result hashes, and runtime seals before writing the blind worksheet.
+- The expanded model-free harness, including five review-topology attack regressions, passes 160/160.
+- The first corrected decision bundle was rejected because normalized excerpts were not literal substrings of their bound values and critical-policy rationales described absent prohibited behavior ambiguously. The preserved v2 decisions are not qualification evidence.
+- The hardened finalizer then exposed a publication-contract defect: it treated every zero-fact semantic check as a mandatory pass, making 25 legitimate direct citation/counterexample failures impossible to encode. The accepted v3 finalizer now applies fact/verdict consistency only to checks that define expected facts and delegates reason-code and candidate-blind-rationale enforcement to the shared canonical validator. Its 15/15 suite covers explicit zero-fact failures, contradictory zero-fact reason codes and failed-check/failed-fact reason linkage. Independent re-audit is GO with no P0/P1 finding.
+- Accepted independent decisions SHA-256: `ad8a3f81d9ccca0e3c6dbf383695d5d9895b11f7a7f5712a1b1ab8d8da09b600`; campaign grade SHA-256: `97384b19efc004272ec61847149dac8754f518f5e7e5ba10b1d6c5581fcb53f8`; role scorecards SHA-256: `128ae39d36737ce6498dec8ee1980f80b0689892816be7c7099d94eff30d4669`.
+- All 360 rows are determinate. Chat, Research, Code and Agent each have at least one qualifying candidate. Review does not: Gemma is 7/24, Coder 20/24 and Qwen3.6 21/24. Product qualification and customer trial readiness remain false.
+
+No model rerun is authorized or required by semantic review. Any review-tool failure pauses adjudication against these immutable outputs; it cannot consume or change a campaign attempt.
 
 ## Mandatory no-model gate
 

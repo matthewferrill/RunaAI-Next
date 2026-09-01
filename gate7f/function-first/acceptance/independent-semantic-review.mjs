@@ -179,6 +179,43 @@ function validateFact(fact, expectedFact, index, evidenceState, reasonCode, path
   }
 }
 
+// Shared by the canonical campaign validator and any evidence-composition
+// finalizer. Direct semantic assertions intentionally have zero fact rows, so
+// their explicit pass/fail verdict is validated by reason code rather than
+// inferred as a pass from an empty fact list.
+export function validateReadableSemanticDecisionOutcome(decision, hasExpectedFacts, path = "decision") {
+  text(decision.rationale, `${path}/rationale`, 20);
+  if (candidateIdentityAppears(decision.rationale)) reject("candidate-identity-in-review", `${path}/rationale`);
+  if (!Array.isArray(decision.facts)) reject("decision-facts-invalid", `${path}/facts`);
+  for (let index = 0; index < decision.facts.length; index += 1) {
+    const fact = decision.facts[index];
+    text(fact.rationale, `${path}/facts/${index}/rationale`, 20);
+    if (candidateIdentityAppears(fact.rationale)) reject("candidate-identity-in-review", `${path}/facts/${index}/rationale`);
+    if (fact.verdict === "pass" && fact.reasonCode !== "expected-fact-present")
+      reject("decision-reason-invalid", `${path}/facts/${index}/reasonCode`);
+    if (fact.verdict === "fail" && !FAILURE_REASONS.has(fact.reasonCode))
+      reject("decision-reason-invalid", `${path}/facts/${index}/reasonCode`);
+    if (!new Set(["pass", "fail"]).has(fact.verdict)) reject("readable-fact-indeterminate", `${path}/facts/${index}/verdict`);
+  }
+  if (!new Set(["pass", "fail"]).has(decision.verdict)) reject("readable-check-indeterminate", `${path}/verdict`);
+  const failedFacts = decision.facts.filter(fact => fact.verdict === "fail");
+  if (!hasExpectedFacts) {
+    if (decision.verdict === "pass" && decision.reasonCode !== "expected-assertion-satisfied")
+      reject("decision-reason-invalid", `${path}/reasonCode`);
+    if (decision.verdict === "fail" && !FAILURE_REASONS.has(decision.reasonCode))
+      reject("decision-reason-invalid", `${path}/reasonCode`);
+    return true;
+  }
+  const expectedVerdict = failedFacts.length ? "fail" : "pass";
+  if (decision.verdict !== expectedVerdict) reject("decision-check-fact-mismatch", `${path}/verdict`);
+  if (decision.verdict === "pass" && decision.reasonCode !== "expected-assertion-satisfied")
+    reject("decision-reason-invalid", `${path}/reasonCode`);
+  if (decision.verdict === "fail" && (!FAILURE_REASONS.has(decision.reasonCode)
+      || !failedFacts.some(fact => fact.reasonCode === decision.reasonCode)))
+    reject("decision-reason-invalid", `${path}/reasonCode`);
+  return true;
+}
+
 function validateCheckDecision(decision, check, item, observation, providerPointers, path) {
   exactKeys(decision, ["checkId", "verdict", "reasonCode", "rationale", "evidenceState", "bindings", "facts"], path);
   if (decision.checkId !== check.checkId) reject("decision-check-extra", `${path}/checkId`);
@@ -194,19 +231,7 @@ function validateCheckDecision(decision, check, item, observation, providerPoint
   decision.facts.forEach((fact, index) => validateFact(fact, facts[index], index, decision.evidenceState, decision.reasonCode, `${path}/facts/${index}`));
   if (decision.evidenceState === "readable") {
     if (!decision.bindings.length) reject("readable-evidence-unbound", `${path}/bindings`);
-    if (decision.verdict === "uncertain") reject("readable-check-indeterminate", `${path}/verdict`);
-    const failedFacts = decision.facts.filter(fact => fact.verdict === "fail");
-    if (!facts.length) {
-      if (!new Set(["pass", "fail"]).has(decision.verdict)) reject("readable-check-indeterminate", `${path}/verdict`);
-      if (decision.verdict === "pass" && decision.reasonCode !== "expected-assertion-satisfied") reject("decision-reason-invalid", `${path}/reasonCode`);
-      if (decision.verdict === "fail" && !FAILURE_REASONS.has(decision.reasonCode)) reject("decision-reason-invalid", `${path}/reasonCode`);
-    } else {
-      const expectedVerdict = failedFacts.length ? "fail" : "pass";
-      if (decision.verdict !== expectedVerdict) reject("decision-check-fact-mismatch", `${path}/verdict`);
-      if (decision.verdict === "pass" && decision.reasonCode !== "expected-assertion-satisfied") reject("decision-reason-invalid", `${path}/reasonCode`);
-      if (decision.verdict === "fail" && (!FAILURE_REASONS.has(decision.reasonCode)
-          || !failedFacts.some(fact => fact.reasonCode === decision.reasonCode))) reject("decision-reason-invalid", `${path}/reasonCode`);
-    }
+    validateReadableSemanticDecisionOutcome(decision, facts.length > 0, path);
   } else {
     const expectedReason = `evidence-${decision.evidenceState}`;
     if (decision.verdict !== "uncertain" || decision.reasonCode !== expectedReason) reject("uncertain-reason-invalid", path);

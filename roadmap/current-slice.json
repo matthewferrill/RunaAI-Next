@@ -12,11 +12,14 @@
     "gate7f/function-first/M1-S2-R12-INDEPENDENT-SEMANTIC-RESULTS-2026-08-31.md",
     "gate7f/function-first/M1-S2-R13-CORRECTION-IMPLEMENTATION-RESULTS-2026-08-31.md",
     "gate7f/function-first/M1-S2-R13-INDEPENDENT-SEMANTIC-RESULTS-2026-09-01.md",
-    "gate7f/function-first/M1-S2-R14-REVIEW-CORRECTIVE-CRITERIA-2026-09-01.md"
+    "gate7f/function-first/M1-S2-R14-REVIEW-CORRECTIVE-CRITERIA-2026-09-01.md",
+    "gate7f/function-first/M1-S2-CAMPAIGN-HARNESS-RCA-AND-CONTINUITY-CORRECTION-2026-09-01.md",
+    "gate7f/function-first/M1-S2-R14-HARNESS-CONTINUITY-ADDENDUM-2026-09-01.md",
+    "gate7f/function-first/M1-S2-R14-INDEPENDENT-SEMANTIC-RESULTS-2026-09-01.md"
   ],
   "scopeDocument": "roadmap/CURRENT-SLICE.md",
   "capabilityIds": ["C01", "C02", "C03", "C04", "C06", "C07", "C12", "C15", "C16"],
-  "nextWork": "Create the fresh committed R14 source archive and runtime seal, run full 360+12 acceptance and candidate-blind independent review, and expose the bounded customer trial only if all five M1 functions have a qualifying route.",
+  "nextWork": "Freeze a prospective R15 model-neutral correction for the genuine R14 Review evidence-limit and structured-output defects plus the two nonqualifying Agent defects, verify it without models, then run a fresh full 360+12 campaign and candidate-blind review. Do not replay or regrade R14.",
   "remainingRoadmapRequired": true,
   "completionClaim": "M1 completion is not whole-product completion."
 }

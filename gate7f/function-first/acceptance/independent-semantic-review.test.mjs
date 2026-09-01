@@ -242,6 +242,29 @@ test("zero-fact semantic assertions still accept explicit determinate failure", 
   assert.doesNotThrow(() => validateExplicitSemanticDecisions(input(fixture)));
 });
 
+test("zero-fact semantic assertions reject pass/fail reason-code contradictions", () => {
+  let fixture = campaign(), check = semanticDecision(fixture, "research-01-selected-facts", "citations.claimSupport");
+  check.verdict = "pass";
+  check.reasonCode = "expected-fact-absent";
+  assert.throws(() => validateExplicitSemanticDecisions(input(fixture)), { code: "decision-reason-invalid" });
+
+  fixture = campaign(); check = semanticDecision(fixture, "research-01-selected-facts", "citations.claimSupport");
+  check.verdict = "fail";
+  check.reasonCode = "expected-assertion-satisfied";
+  check.rationale = "The complete readable answer has no canonical citation supporting its claim.";
+  assert.throws(() => validateExplicitSemanticDecisions(input(fixture)), { code: "decision-reason-invalid" });
+});
+
+test("fact-backed failures require a matching failed-fact reason", () => {
+  const fixture = campaign(), check = semanticDecision(fixture, "chat-05-useful-summary", "answer.semanticFacts");
+  check.facts[0].verdict = "fail";
+  check.facts[0].reasonCode = "expected-fact-absent";
+  check.facts[0].rationale = "The complete readable answer omits this exact required fact.";
+  check.verdict = "fail";
+  check.reasonCode = "expected-fact-contradicted";
+  assert.throws(() => validateExplicitSemanticDecisions(input(fixture)), { code: "decision-reason-invalid" });
+});
+
 test("every expected fact is decided exactly once with its frozen identity", () => {
   let fixture = campaign(), check = semanticDecision(fixture, "chat-05-useful-summary", "answer.semanticFacts"); check.facts.pop();
   assert.throws(() => validateExplicitSemanticDecisions(input(fixture)), { code: "decision-fact-missing" });

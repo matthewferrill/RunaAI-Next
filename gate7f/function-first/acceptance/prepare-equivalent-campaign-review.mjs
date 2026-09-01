@@ -1,12 +1,14 @@
 import { createHash } from "node:crypto";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { isDeepStrictEqual as same } from "node:util";
 import path from "node:path";
-import { CASE_BUNDLE_SHA256 } from "./cases.mjs";
+import { CASE_BUNDLE_SHA256, MODEL_CASES } from "./cases.mjs";
 import { semanticChecksForCase } from "./independent-semantic-review.mjs";
 
 export const EQUIVALENT_REVIEW_INPUT_SCHEMA_VERSION = "runaai-m1-equivalent-campaign-review-input/v1";
 export const EQUIVALENT_REVIEW_WORKSHEET_SCHEMA_VERSION = "runaai-m1-equivalent-campaign-review-worksheet/v1";
 export const EQUIVALENT_REVIEW_BLIND_ORDER_VERSION = "runaai-m1-equivalent-campaign-blind-order/v1";
+export const EQUIVALENT_REVIEW_TOPOLOGY_VERSION = "runaai-m1-equivalent-campaign-review-topology/v2";
 
 const SHA256 = /^[a-f0-9]{64}$/u;
 const sha256 = value => createHash("sha256").update(value).digest("hex");
@@ -15,6 +17,62 @@ const jsonSha256 = value => sha256(Buffer.from(JSON.stringify(value), "utf8"));
 
 function fail(code, detail = "") {
   throw new Error(`${code}${detail ? `:${detail}` : ""}`);
+}
+
+export function parseEquivalentReviewWindowManifest(value) {
+  if (value?.schemaVersion !== "runaai-m1-equivalent-campaign-review-windows/v1"
+      || value.candidateId !== "qwen36-27b-mtp" || !Array.isArray(value.windows)
+      || value.windows.length !== 3) fail("window-manifest-invalid");
+  const keys = ["index", "label", "directory", "result", "resultSha256", "expectedAttempts"];
+  const labels = new Set();
+  let attempts = 0;
+  value.windows.forEach((window, index) => {
+    if (window === null || typeof window !== "object" || Array.isArray(window)
+        || JSON.stringify(Object.keys(window).sort()) !== JSON.stringify([...keys].sort())
+        || window.index !== index + 1 || typeof window.label !== "string" || !window.label
+        || labels.has(window.label) || typeof window.directory !== "string" || !window.directory
+        || typeof window.result !== "string" || !window.result || !SHA256.test(window.resultSha256 ?? "")
+        || !Number.isInteger(window.expectedAttempts) || window.expectedAttempts < 1) {
+      fail("window-manifest-invalid", String(index + 1));
+    }
+    labels.add(window.label); attempts += window.expectedAttempts;
+  });
+  if (attempts !== 120 || !same(value.windows.map(window => window.expectedAttempts), [68, 1, 51]))
+    fail("window-manifest-attempt-count-invalid", String(attempts));
+  return value.windows.map(window => ({ ...window }));
+}
+
+const canonicalAttemptIds = candidateId => Array.from({ length: 3 }, (_, repetition) => MODEL_CASES.map(item =>
+  `${candidateId}--${item.id}--${repetition + 1}`)).flat();
+
+export function validateEquivalentReviewTopology({ inputs, composed, audit }) {
+  if (!Array.isArray(inputs) || inputs.length !== 5) fail("review-topology-input-count-invalid");
+  const complete = new Map(inputs.filter(input => input.windowIndex === undefined).map(input => [input.label, input]));
+  for (const [label, candidateId] of [["gemma", "gemma4-26b-a4b"], ["coder", "qwen3-coder-30b-a3b"]]) {
+    const input = complete.get(label);
+    if (!input || input.candidateId !== candidateId || input.attemptIds.length !== 120
+        || !same(input.attemptIds, canonicalAttemptIds(candidateId))) fail("review-complete-candidate-boundary-invalid", label);
+  }
+  const qwen = inputs.filter(input => input.windowIndex !== undefined).sort((a, b) => a.windowIndex - b.windowIndex);
+  const canonicalQwen = canonicalAttemptIds("qwen36-27b-mtp"), spans = [[1, 68], [69, 69], [70, 120]];
+  if (qwen.length !== 3 || composed?.schemaVersion !== "runaai-m1-equivalence-audited-candidate-result/v1"
+      || composed.candidateId !== "qwen36-27b-mtp" || composed.caseBundleSha256 !== CASE_BUNDLE_SHA256
+      || composed.recordedAttempts !== 120 || !Array.isArray(composed.attempts) || composed.attempts.length !== 120
+      || !same(composed.attempts.map(row => row.attemptId), canonicalQwen)
+      || audit?.schemaVersion !== "runaai-m1-candidate-history-equivalence-audit/v1"
+      || audit.candidateId !== "qwen36-27b-mtp" || audit.caseBundleSha256 !== CASE_BUNDLE_SHA256
+      || audit.modelFacingEquivalent !== true || audit.completedPrefixImmutable !== true
+      || audit.singleUninterruptedArmClaimed !== false || audit.qualificationCompositionPermitted !== true
+      || audit.independentSemanticReviewPending !== true || !Array.isArray(audit.executionWindows)
+      || !same(audit.executionWindows, composed.executionWindows)) fail("review-composition-boundary-invalid");
+  qwen.forEach((input, index) => {
+    const [startOrdinal, endOrdinal] = spans[index], window = audit.executionWindows[index];
+    if (input.windowIndex !== index + 1 || input.candidateId !== "qwen36-27b-mtp"
+        || !same(input.attemptIds, canonicalQwen.slice(startOrdinal - 1, endOrdinal))
+        || window?.index !== index + 1 || window.startOrdinal !== startOrdinal || window.endOrdinal !== endOrdinal
+        || window.recordedAttempts !== endOrdinal - startOrdinal + 1 || window.resultSha256 !== input.resultSha256
+        || window.runtimeSealSha256 !== input.runtimeSealSha256) fail("review-window-composition-boundary-invalid", String(index + 1));
+  });
 }
 
 function args(argv) {
@@ -97,27 +155,66 @@ function worksheetRow(reviewBindingSha256, packet) {
 export async function prepareEquivalentCampaignReview(argv) {
   const input = args(argv);
   const required = ["gemma-directory", "gemma-result-sha256", "coder-directory", "coder-result-sha256",
-    "qwen-prior-directory", "qwen-prior-result-sha256", "qwen-supplemental-directory",
-    "qwen-supplemental-result-sha256", "composition-directory", "composition-result-sha256",
+    "composition-directory", "composition-result-sha256",
     "composition-audit-sha256", "worksheet-directory", "manifest-path"];
   for (const key of required) if (!input[key]) fail("argument-missing", key);
 
+  const usesWindowManifest = Boolean(input["qwen-window-manifest"] || input["qwen-window-manifest-sha256"]);
+  if (usesWindowManifest && (!input["qwen-window-manifest"] || !input["qwen-window-manifest-sha256"]))
+    fail("argument-missing", "qwen-window-manifest");
+  if (!usesWindowManifest) {
+    for (const key of ["qwen-prior-directory", "qwen-prior-result-sha256",
+      "qwen-supplemental-directory", "qwen-supplemental-result-sha256"])
+      if (!input[key]) fail("argument-missing", key);
+  }
+
   const sources = [
-    { label: "gemma", directory: path.resolve(input["gemma-directory"]), resultSha256: input["gemma-result-sha256"] },
-    { label: "coder", directory: path.resolve(input["coder-directory"]), resultSha256: input["coder-result-sha256"] },
-    { label: "qwen-prior", directory: path.resolve(input["qwen-prior-directory"]), resultSha256: input["qwen-prior-result-sha256"] },
-    { label: "qwen-supplemental", directory: path.resolve(input["qwen-supplemental-directory"]), resultSha256: input["qwen-supplemental-result-sha256"] },
+    { label: "gemma", directory: path.resolve(input["gemma-directory"]), result: "result.json",
+      resultSha256: input["gemma-result-sha256"], expectedAttempts: 120, expectedCandidateId: "gemma4-26b-a4b" },
+    { label: "coder", directory: path.resolve(input["coder-directory"]), result: "result.json",
+      resultSha256: input["coder-result-sha256"], expectedAttempts: 120, expectedCandidateId: "qwen3-coder-30b-a3b" },
   ];
-  const packets = [], inputs = [];
+  let windowManifestSha256 = null;
+  if (usesWindowManifest) {
+    const manifestPath = path.resolve(input["qwen-window-manifest"]);
+    const windowInput = await boundJson(manifestPath, input["qwen-window-manifest-sha256"], "qwen-window-manifest");
+    windowManifestSha256 = input["qwen-window-manifest-sha256"];
+    const base = path.dirname(manifestPath);
+    sources.push(...parseEquivalentReviewWindowManifest(windowInput.value).map(window => ({
+      label: window.label,
+      directory: path.resolve(base, window.directory),
+      result: path.resolve(base, window.result),
+      resultSha256: window.resultSha256,
+      expectedAttempts: window.expectedAttempts,
+      expectedCandidateId: windowInput.value.candidateId,
+      windowIndex: window.index,
+    })));
+  } else {
+    sources.push(
+      { label: "qwen-prior", directory: path.resolve(input["qwen-prior-directory"]), result: "result.json",
+        resultSha256: input["qwen-prior-result-sha256"] },
+      { label: "qwen-supplemental", directory: path.resolve(input["qwen-supplemental-directory"]), result: "result.json",
+        resultSha256: input["qwen-supplemental-result-sha256"] },
+    );
+  }
+  const packets = [], inputs = [], topologyInputs = [];
   for (const source of sources) {
-    const resultInput = await boundJson(path.join(source.directory, "result.json"), source.resultSha256, `${source.label}-result`);
+    const resultPath = path.isAbsolute(source.result) ? source.result : path.join(source.directory, source.result);
+    const resultInput = await boundJson(resultPath, source.resultSha256, `${source.label}-result`);
     const result = resultInput.value;
     if (!SHA256.test(result.runtimeSealSha256 ?? "") || result.caseBundleSha256 !== CASE_BUNDLE_SHA256)
       fail("result-seal-invalid", source.label);
     const sourcePackets = await packetsFromResult(source.directory, result, result.runtimeSealSha256);
+    if ((source.expectedAttempts !== undefined && sourcePackets.length !== source.expectedAttempts)
+        || (source.expectedCandidateId && result.candidateId !== source.expectedCandidateId))
+      fail("window-result-boundary-invalid", source.label);
     packets.push(...sourcePackets);
     inputs.push({ label: source.label, candidateId: result.candidateId, resultSha256: source.resultSha256,
-      runtimeSealSha256: result.runtimeSealSha256, attempts: sourcePackets.length });
+      runtimeSealSha256: result.runtimeSealSha256, attempts: sourcePackets.length,
+      ...(source.windowIndex ? { windowIndex: source.windowIndex } : {}) });
+    topologyInputs.push({ label: source.label, candidateId: result.candidateId, resultSha256: source.resultSha256,
+      runtimeSealSha256: result.runtimeSealSha256, attemptIds: sourcePackets.map(packet => packet.attemptId),
+      ...(source.windowIndex ? { windowIndex: source.windowIndex } : {}) });
   }
   if (packets.length !== 360 || new Set(packets.map(packet => packet.attemptId)).size !== 360) fail("campaign-packet-count-invalid", packets.length);
 
@@ -126,6 +223,7 @@ export async function prepareEquivalentCampaignReview(argv) {
     input["composition-result-sha256"], "composition-result");
   const auditInput = await boundJson(path.join(compositionDirectory, "equivalence-audit.json"),
     input["composition-audit-sha256"], "composition-audit");
+  validateEquivalentReviewTopology({ inputs: topologyInputs, composed: composedInput.value, audit: auditInput.value });
   const qwenPacketIds = packets.filter(packet => packet.observation.candidateId === composedInput.value.candidateId)
     .map(packet => packet.attemptId).sort();
   const composedIds = composedInput.value.attempts.map(row => row.attemptId).sort();
@@ -143,6 +241,8 @@ export async function prepareEquivalentCampaignReview(argv) {
     inputs,
     rawBindingsSha256,
     attempts: 360,
+    ...(windowManifestSha256 ? { windowManifestSha256,
+      topologyValidationVersion: EQUIVALENT_REVIEW_TOPOLOGY_VERSION } : {}),
   };
   const reviewBindingSha256 = jsonSha256(reviewBasis);
   const worksheet = packets.map(packet => worksheetRow(reviewBindingSha256, packet))

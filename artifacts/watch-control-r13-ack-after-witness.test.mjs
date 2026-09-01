@@ -16,7 +16,8 @@ test("watcher arms the exact preparation checkpoint and never uses a global witn
   assert.doesNotMatch(source, /\.Contains\([^\r\n]+\[StringComparison\]::/u);
   assert.match(source, /domBindingSha256/u); assert.match(source, /status\.domBinding\.witnessedUrl/u);
   assert.match(source, /consumed\.json/u); assert.match(source, /consumed\.checkpointId-cne\$checkpoint/u);
-  assert.match(source, /consumed\.preparationOnly-eq\$true/u);
+  assert.match(source, /PSObject\.Properties\['preparationOnly'\]/u);
+  assert.match(source, /preparationProperty\.Value-eq\$true/u);
   assert.match(source, /\$completed\[\$checkpoint\]=\$true/u);
   assert.doesNotMatch(source, /acknowledgementAccepted-eq\$true\)\{exit 0\}/u);
   assert.doesNotMatch(source, /browserWitnessAccepted/u);
@@ -26,6 +27,18 @@ test("watcher arms the exact preparation checkpoint and never uses a global witn
 test("watcher parses in Windows PowerShell 5 without executing", { skip: process.platform !== "win32" }, () => {
   const file = fileURLToPath(new URL("./Watch-ControlR13AckAfterWitness.Remote.ps1", import.meta.url)).replaceAll("'", "''");
   const source = `$errors=$null;[Management.Automation.Language.Parser]::ParseFile('${file}',[ref]$null,[ref]$errors)|Out-Null;if($errors.Count){$errors|ForEach-Object{$_.ToString()};exit 1}`;
+  execFileSync("C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+    ["-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass", "-EncodedCommand", Buffer.from(source, "utf16le").toString("base64")],
+    { windowsHide: true, stdio: "pipe" });
+});
+
+test("watcher accepts an in-flight consumption receipt that omits preparationOnly", { skip: process.platform !== "win32" }, () => {
+  const source = `Set-StrictMode -Version Latest
+$consumed='{ "checkpointId": "exact", "consumedAt": "2026-09-01T00:00:00Z" }'|ConvertFrom-Json
+$preparationProperty=$consumed.PSObject.Properties['preparationOnly']
+$consumedAt=[DateTimeOffset]::MinValue
+if($consumed.checkpointId-cne'exact'-or($null-ne$preparationProperty-and$preparationProperty.Value-eq$true)-or
+   -not[DateTimeOffset]::TryParse([string]$consumed.consumedAt,[ref]$consumedAt)){exit 1}`;
   execFileSync("C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
     ["-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass", "-EncodedCommand", Buffer.from(source, "utf16le").toString("base64")],
     { windowsHide: true, stdio: "pipe" });

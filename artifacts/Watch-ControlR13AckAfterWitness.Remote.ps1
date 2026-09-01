@@ -128,7 +128,8 @@ while([DateTimeOffset]::UtcNow-lt$discoveryDeadline){
           }
           try{$consumed=Get-Content -LiteralPath $consumedPath -Raw|ConvertFrom-Json}catch{throw 'r13-ack-watcher-consumption-receipt-invalid'}
           $consumedAt=[DateTimeOffset]::MinValue
-          if($consumed.checkpointId-cne$checkpoint-or$consumed.preparationOnly-eq$true-or
+          $preparationProperty=$consumed.PSObject.Properties['preparationOnly']
+          if($consumed.checkpointId-cne$checkpoint-or($null-ne$preparationProperty-and$preparationProperty.Value-eq$true)-or
              -not[DateTimeOffset]::TryParse([string]$consumed.consumedAt,[ref]$consumedAt)){
             throw 'r13-ack-watcher-consumption-receipt-invalid'
           }

@@ -43,7 +43,6 @@ export function createWitnessUiProxy({ listenPort, upstreamPort, allowEphemeralL
     }
     const inject = incoming.method === "GET" && url.pathname === "/" && validCapability(url.searchParams.get("checkpointId"), url.searchParams.get("token"));
     const headers = { ...incoming.headers };
-    if (url.pathname !== WITNESS_PATH && typeof headers.origin === "string") headers.origin = `http://127.0.0.1:${upstreamPort}`;
     const forwarded = createRequest({ hostname: "127.0.0.1", port: upstreamPort, method: incoming.method,
       path: inject ? "/" : incoming.url, headers }, response => {
       if (!inject) { outgoing.writeHead(response.statusCode ?? 502, response.headers); return response.pipe(outgoing); }

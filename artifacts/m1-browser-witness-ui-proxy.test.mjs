@@ -34,8 +34,9 @@ test("loopback witness UI proxy serves a visible one-use action and preserves th
   proxy.listen(0, "127.0.0.1"); await once(proxy, "listening");
   t.after(() => Promise.all([new Promise(resolve => proxy.close(resolve)), new Promise(resolve => upstream.close(resolve))]));
   const baseUrl = `http://127.0.0.1:${proxy.address().port}`;
-  assert.equal(await (await fetch(`${baseUrl}/plain`)).text(), "forwarded");
+  assert.equal(await (await fetch(`${baseUrl}/plain`, { headers: { origin: baseUrl } })).text(), "forwarded");
   assert.equal(received[0].host, `127.0.0.1:${proxy.address().port}`);
+  assert.equal(received[0].origin, baseUrl, "the public application Origin must survive the internal relay hop");
 
   const checkpointId = "11111111-2222-4333-8444-555555555555", token = "a".repeat(64);
   const redirect = await fetch(`${baseUrl}/__acceptance/browser-observation-witness-ui?checkpointId=${checkpointId}&token=${token}`, { redirect: "manual" });

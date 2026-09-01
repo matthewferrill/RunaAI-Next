@@ -3,7 +3,19 @@ import assert from "node:assert/strict";
 import { createServer } from "node:http";
 import { once } from "node:events";
 import { createWitnessUiProxy } from "./m1-browser-witness-ui-proxy.mjs";
+import relayModule from "./m1-browser-loopback-command-relay.cjs";
 import { AGENT05_BOUNDED_DRAIN, AGENT05_BOUNDED_DRAIN_NOTICE } from "../gate7f/function-first/acceptance/browser-witness.mjs";
+
+test("loopback relay can keep the browser on the application port while mapping to a distinct remote port", () => {
+  const stage = `m1-task-native-${"a".repeat(32)}`;
+  assert.deepEqual(relayModule.parseArguments(["58337", stage, "loopback", "58335"]), {
+    listenPort: 58337, remotePort: 58335, stage, listenHost: "127.0.0.1"
+  });
+  assert.deepEqual(relayModule.parseArguments(["58335", stage]), {
+    listenPort: 58335, remotePort: 58335, stage, listenHost: "127.0.0.1"
+  });
+  assert.throws(() => relayModule.parseArguments(["58335", stage, "loopback", "58335"]), /relay-port-invalid/u);
+});
 
 test("loopback witness UI proxy serves a visible one-use action and preserves the application origin", async t => {
   const received = [];

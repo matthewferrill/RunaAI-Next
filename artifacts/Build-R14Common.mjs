@@ -51,7 +51,8 @@ await writeFile(telemetryPath, telemetryBytes, { flag: "wx" });
 
 const suites = Object.fromEntries(MODEL_CASES.flatMap(item => (item.setup.suites ?? [])
   .map(suite => [suite.suiteId, sha256(canonicalJson(suite))])));
-const seal = validateRuntimeSeal({ ...structuredClone(prior), sourceCommit, caseBundleSha256: CASE_BUNDLE_SHA256,
+const seal = validateRuntimeSeal({ ...structuredClone(prior), schemaVersion: "runaai-m1-functional-runtime-seal/v10",
+  sourceCommit, caseBundleSha256: CASE_BUNDLE_SHA256,
   runtime: { ...structuredClone(prior.runtime), sourceArchiveSha256: sha256(sourceArchiveBytes),
     packageLockSha256: sha256(packageLockBytes) },
   residency: { ...structuredClone(prior.residency), readinessEvidenceSha256: sha256(readinessBytes),

@@ -16,7 +16,7 @@ $root=[IO.Path]::GetFullPath($ControlOwnedRoot)
 if([Security.Principal.WindowsIdentity]::GetCurrent().Name-cne'RUNA-CONTROL\Matthew'-or
    [IO.Path]::GetDirectoryName($root)-cne'C:\AI\RunaAI-Next-Candidate\staging'-or
    [IO.Path]::GetFileName($root)-notmatch'^m1-task-native-[a-f0-9]{32}$'-or
-   -not$CampaignDirectory.Contains($ExpectedRuntimeSeal.Substring(0,16),[StringComparison]::Ordinal)){
+   $CampaignDirectory.IndexOf($ExpectedRuntimeSeal.Substring(0,16),[StringComparison]::Ordinal)-lt0){
   throw 'r13-ack-watcher-binding-invalid'
 }
 

@@ -12,6 +12,8 @@ test("watcher arms the exact preparation checkpoint and never uses a global witn
   assert.match(source, /operator-browser-ack-helper\.mjs/u);
   assert.match(source, /DiscoveryTimeoutSeconds/u); assert.match(source, /ObservationTimeoutSeconds/u);
   assert.match(source, /PublicationTimeoutSeconds/u);
+  assert.match(source, /\.IndexOf\(\$ExpectedRuntimeSeal\.Substring\(0,16\),\[StringComparison\]::Ordinal\)-lt0/u);
+  assert.doesNotMatch(source, /\.Contains\([^\r\n]+\[StringComparison\]::/u);
   assert.match(source, /domBindingSha256/u); assert.match(source, /status\.domBinding\.witnessedUrl/u);
   assert.match(source, /\$completed\[\$checkpoint\]=\$true/u);
   assert.doesNotMatch(source, /acknowledgementAccepted-eq\$true\)\{exit 0\}/u);

@@ -1,0 +1,38 @@
+{
+  "schemaVersion": "runaai-m1-independent-semantic-r13-input-manifest/v1",
+  "sourceCommit": "d0b8f23db1bcc149764e19936559a8a9df468205",
+  "runtimeSealSha256": "abf15d75fd33df9f4f7b9966e450075d93b6cd18dd275c89afabece76f3bca87",
+  "caseBundleSha256": "87f08a861d1b109fa5d3fb64f9dc10aacba023eee80a3ab4762b07b2d987524d",
+  "candidateBlindOrderVersion": "runaai-m1-candidate-blind-order/v1",
+  "attemptOrderSha256": "01d23230e0d7c806ce869712f688b64bfd25fb9bc0571a2ac62182544137a84e",
+  "controlsSha256": "566be9098046a65f48b206feb84005c5481e8d78fec50173b25f44bbf5183261",
+  "controlsPassed": 12,
+  "inputs": [
+    {
+      "candidateId": "gemma4-26b-a4b",
+      "directory": "artifacts/m1-readiness/20260901-r13-valid-campaigns/campaign-gemma4-26b-a4b-abf15d75fd33df9f",
+      "resultSha256": "9ff72556d987e564ccf773f97743d30ed3dec957e1528ca9ded7094e7467e3fd",
+      "attempts": 120
+    },
+    {
+      "candidateId": "qwen3-coder-30b-a3b",
+      "directory": "artifacts/m1-readiness/20260901-r13-valid-campaigns/campaign-qwen3-coder-30b-a3b-abf15d75fd33df9f",
+      "resultSha256": "72acf8b01c9c56a9fcaa62dfb9e0400e75d0122afd32532819141fd8f799bebb",
+      "attempts": 120
+    },
+    {
+      "candidateId": "qwen36-27b-mtp",
+      "directory": "artifacts/m1-readiness/20260901-r13-valid-campaigns/campaign-qwen36-27b-mtp-abf15d75fd33df9f",
+      "resultSha256": "16dcad14af943bf6a3d4580696c6da3bc7b5b244b59084a59ddd51b3d50f1940",
+      "attempts": 120
+    }
+  ],
+  "worksheet": {
+    "path": "artifacts/independent-semantic-r13/review-worksheet.json",
+    "bytes": 1189838,
+    "sha256": "19b052118236d5dce8238b62e2e449f2ac575c8eb076884e8c11f7f9eec139e0"
+  },
+  "rawBindingsSha256": "516dba9f992dae4700a14fd7438f770761efecf8f1550a6526796f45ed5ef29d",
+  "independentSemanticReviewPending": true,
+  "productQualificationPassed": false
+}

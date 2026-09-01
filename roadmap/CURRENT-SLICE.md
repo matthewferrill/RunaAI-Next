@@ -5,6 +5,16 @@ Milestone: M1
 Slice ID: M1-S2
 Status: in progress, acceptance frozen before implementation; not complete or production-qualified.
 
+R14 correction update, 2026-09-01: R13 is complete and immutable. All 360 attempts and 12/12 controls
+were recorded and independently reviewed candidate-blind with 360 determinate grades. Chat, Research,
+Code and Agent have qualifying routes. Review does not: Qwen3.6 is closest at 21/24 and omitted the
+relevance of one stated authentication control in all three path-boundary repetitions. Exact results
+are in `../gate7f/function-first/M1-S2-R13-INDEPENDENT-SEMANTIC-RESULTS-2026-09-01.md`. R14 is frozen in
+`../gate7f/function-first/M1-S2-R14-REVIEW-CORRECTIVE-CRITERIA-2026-09-01.md`; it strengthens only
+generic stated-control coverage in the Review answerer/checker and keeps the complete 360+12 denominator,
+cases, candidates, thresholds, budgets and independent evaluator unchanged. Its focused deterministic
+proof is green at 81/81. No production route or customer trial is authorized yet.
+
 R13 correction update, 2026-08-31: the exact Agent and Review deficits from the immutable R12 review
 are prospectively frozen and the model-neutral application corrections are implemented. The contract is
 `../gate7f/function-first/M1-S2-R13-AGENT-REVIEW-CORRECTIVE-CRITERIA-2026-08-31.md`. It permits only
@@ -172,12 +182,11 @@ result leaves only Chat and Code qualified and does not support a customer route
 R12 was the next finite correction under its prospectively frozen criteria. The
 steward reaffirmed continuation until completion or genuinely needed human
 testing. Internal module, commit and publication checkpoints are not turn-ending
-gates. R12 model execution and independent review are complete through the timing-window equivalence
-composition. The result does not provide qualifying Agent or Review routes. R13 is now prospectively
-frozen for the exact Agent and Review deficits and requires a fresh full 360+12 qualification plus
-candidate-blind independent review; no subset retry or favorable pooling is allowed. The customer trial
-stays hidden until all five M1 functions have a qualifying route. The M1-S1 result below is retained
-history.
+gates. R12 and R13 model execution and independent review are complete. R13 now provides qualifying
+Chat, Research, Code and Agent routes but no Review route. R14 is prospectively frozen for the single
+generic Review stated-control deficit and requires a fresh full 360+12 qualification plus candidate-
+blind independent review; no subset retry or favorable pooling is allowed. The customer trial stays
+hidden until all five M1 functions have a qualifying route. The M1-S1 result below is retained history.
 
 M1-S1: role-separated provider contract and compatibility wiring, with current-state/receipt acceptance
 requirements captured for the later project tools. This is first because all three model comparisons and

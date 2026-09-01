@@ -1,8 +1,9 @@
 # M1-S2 R13 Agent and Review correction implementation results
 
-Status: implementation and deterministic verification complete; ready to create the fresh committed
-source archive and R13 runtime seal. No R13 model inference has started, no role has been selected, no
-production route has changed and the customer trial remains unavailable.
+Status: implementation and deterministic verification complete. The sealed R13 campaign and independent
+review are also complete; see `M1-S2-R13-INDEPENDENT-SEMANTIC-RESULTS-2026-09-01.md`. R13 qualifies
+Chat, Research, Code and Agent but not Review. No production route changed and the customer trial remains
+unavailable.
 
 ## Implemented Agent corrections
 
@@ -53,11 +54,11 @@ production route has changed and the customer trial remains unavailable.
 - `git diff --check` passed before this result was written and is required again immediately before the
   implementation commit.
 
-## Remaining sealed work
+## Sealed-work disposition
 
-This implementation result does not prove any R13 model quality, Control regression, 12/12 model-free
-controls, Home lifecycle, complete 360-attempt campaign, independent semantic review, role selection,
-production routing, protected-data access or M1 completion. The next step is a fresh committed source
-archive and runtime seal followed by the complete three-candidate campaign and candidate-blind review
-under the unchanged R13 contract. The bounded customer trial becomes available only if those results
-provide qualifying routes for all five functions.
+This implementation result alone did not prove model quality. The later sealed result now records
+360/360 attempts, 12/12 model-free controls, complete Home/Control cleanup and all 963 candidate-blind
+semantic decisions. Review remains below the unchanged threshold: Qwen3.6 is closest at 21/24 after
+omitting one relevant stated security control in all three repetitions of one case. R14 prospectively
+corrects only that generic completeness defect and requires a fresh full campaign. The customer trial
+becomes available only after all five functions have a qualifying route.

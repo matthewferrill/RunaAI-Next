@@ -1,0 +1,324 @@
+{
+  "schemaVersion": "runaai-m1-r13-role-scorecards/v1",
+  "evaluatorId": "independent-semantic-r13-evaluator",
+  "rubricVersion": "2026-08-30.r7-function-contract",
+  "caseBundleSha256": "87f08a861d1b109fa5d3fb64f9dc10aacba023eee80a3ab4762b07b2d987524d",
+  "sourceCommit": "d0b8f23db1bcc149764e19936559a8a9df468205",
+  "runtimeSealSha256": "abf15d75fd33df9f4f7b9966e450075d93b6cd18dd275c89afabece76f3bca87",
+  "reviewDecisionsSha256": "668027857d3fb066570e7552411fa8f2b75045fff2e009037e8c78826705550b",
+  "directDecisionBundleSha256": "1afa551c079e9b677607fd231fe8bbd7801ce398c61f97f5f2cf96b98700edab",
+  "worksheetSha256": "19b052118236d5dce8238b62e2e449f2ac575c8eb076884e8c11f7f9eec139e0",
+  "attempts": 360,
+  "determinateAttempts": 360,
+  "indeterminateAttempts": [],
+  "controls": {
+    "planned": 12,
+    "passed": 12,
+    "allPassed": true,
+    "sha256": "566be9098046a65f48b206feb84005c5481e8d78fec50173b25f44bbf5183261"
+  },
+  "candidates": [
+    {
+      "candidateId": "gemma4-26b-a4b",
+      "displayName": "Gemma 4 26B A4B",
+      "roles": [
+        {
+          "role": "chat",
+          "planned": 24,
+          "recorded": 24,
+          "acceptable": 24,
+          "acceptableRate": 1,
+          "failed": 0,
+          "blocked": 0,
+          "criticalModelFailures": 0,
+          "criticalProductFailures": 0,
+          "threshold": 22,
+          "qualified": true
+        },
+        {
+          "role": "research",
+          "planned": 24,
+          "recorded": 24,
+          "acceptable": 23,
+          "acceptableRate": 0.9583333333333334,
+          "failed": 1,
+          "blocked": 0,
+          "criticalModelFailures": 0,
+          "criticalProductFailures": 0,
+          "threshold": 22,
+          "qualified": true
+        },
+        {
+          "role": "code",
+          "planned": 24,
+          "recorded": 24,
+          "acceptable": 24,
+          "acceptableRate": 1,
+          "failed": 0,
+          "blocked": 0,
+          "criticalModelFailures": 0,
+          "criticalProductFailures": 0,
+          "threshold": 22,
+          "qualified": true
+        },
+        {
+          "role": "agent",
+          "planned": 24,
+          "recorded": 24,
+          "acceptable": 24,
+          "acceptableRate": 1,
+          "failed": 0,
+          "blocked": 0,
+          "criticalModelFailures": 0,
+          "criticalProductFailures": 0,
+          "threshold": 22,
+          "qualified": true
+        },
+        {
+          "role": "review",
+          "planned": 24,
+          "recorded": 24,
+          "acceptable": 7,
+          "acceptableRate": 0.2916666666666667,
+          "failed": 17,
+          "blocked": 0,
+          "criticalModelFailures": 0,
+          "criticalProductFailures": 0,
+          "threshold": 22,
+          "qualified": false
+        }
+      ],
+      "qualifiedAllFive": false
+    },
+    {
+      "candidateId": "qwen3-coder-30b-a3b",
+      "displayName": "Qwen3 Coder 30B-A3B",
+      "roles": [
+        {
+          "role": "chat",
+          "planned": 24,
+          "recorded": 24,
+          "acceptable": 23,
+          "acceptableRate": 0.9583333333333334,
+          "failed": 1,
+          "blocked": 0,
+          "criticalModelFailures": 0,
+          "criticalProductFailures": 0,
+          "threshold": 22,
+          "qualified": true
+        },
+        {
+          "role": "research",
+          "planned": 24,
+          "recorded": 24,
+          "acceptable": 24,
+          "acceptableRate": 1,
+          "failed": 0,
+          "blocked": 0,
+          "criticalModelFailures": 0,
+          "criticalProductFailures": 0,
+          "threshold": 22,
+          "qualified": true
+        },
+        {
+          "role": "code",
+          "planned": 24,
+          "recorded": 24,
+          "acceptable": 24,
+          "acceptableRate": 1,
+          "failed": 0,
+          "blocked": 0,
+          "criticalModelFailures": 0,
+          "criticalProductFailures": 0,
+          "threshold": 22,
+          "qualified": true
+        },
+        {
+          "role": "agent",
+          "planned": 24,
+          "recorded": 24,
+          "acceptable": 21,
+          "acceptableRate": 0.875,
+          "failed": 3,
+          "blocked": 0,
+          "criticalModelFailures": 0,
+          "criticalProductFailures": 0,
+          "threshold": 22,
+          "qualified": false
+        },
+        {
+          "role": "review",
+          "planned": 24,
+          "recorded": 24,
+          "acceptable": 15,
+          "acceptableRate": 0.625,
+          "failed": 9,
+          "blocked": 0,
+          "criticalModelFailures": 0,
+          "criticalProductFailures": 0,
+          "threshold": 22,
+          "qualified": false
+        }
+      ],
+      "qualifiedAllFive": false
+    },
+    {
+      "candidateId": "qwen36-27b-mtp",
+      "displayName": "Qwen3.6 27B MTP",
+      "roles": [
+        {
+          "role": "chat",
+          "planned": 24,
+          "recorded": 24,
+          "acceptable": 18,
+          "acceptableRate": 0.75,
+          "failed": 6,
+          "blocked": 0,
+          "criticalModelFailures": 0,
+          "criticalProductFailures": 0,
+          "threshold": 22,
+          "qualified": false
+        },
+        {
+          "role": "research",
+          "planned": 24,
+          "recorded": 24,
+          "acceptable": 24,
+          "acceptableRate": 1,
+          "failed": 0,
+          "blocked": 0,
+          "criticalModelFailures": 0,
+          "criticalProductFailures": 0,
+          "threshold": 22,
+          "qualified": true
+        },
+        {
+          "role": "code",
+          "planned": 24,
+          "recorded": 24,
+          "acceptable": 24,
+          "acceptableRate": 1,
+          "failed": 0,
+          "blocked": 0,
+          "criticalModelFailures": 0,
+          "criticalProductFailures": 0,
+          "threshold": 22,
+          "qualified": true
+        },
+        {
+          "role": "agent",
+          "planned": 24,
+          "recorded": 24,
+          "acceptable": 21,
+          "acceptableRate": 0.875,
+          "failed": 3,
+          "blocked": 0,
+          "criticalModelFailures": 0,
+          "criticalProductFailures": 0,
+          "threshold": 22,
+          "qualified": false
+        },
+        {
+          "role": "review",
+          "planned": 24,
+          "recorded": 24,
+          "acceptable": 21,
+          "acceptableRate": 0.875,
+          "failed": 3,
+          "blocked": 0,
+          "criticalModelFailures": 0,
+          "criticalProductFailures": 0,
+          "threshold": 22,
+          "qualified": false
+        }
+      ],
+      "qualifiedAllFive": false
+    }
+  ],
+  "roleRoutes": [
+    {
+      "role": "chat",
+      "eligibleCandidates": [
+        {
+          "candidateId": "gemma4-26b-a4b",
+          "acceptable": 24,
+          "failed": 0
+        },
+        {
+          "candidateId": "qwen3-coder-30b-a3b",
+          "acceptable": 23,
+          "failed": 1
+        }
+      ],
+      "qualifyingRouteExists": true,
+      "recommendedCandidateId": "gemma4-26b-a4b"
+    },
+    {
+      "role": "research",
+      "eligibleCandidates": [
+        {
+          "candidateId": "qwen3-coder-30b-a3b",
+          "acceptable": 24,
+          "failed": 0
+        },
+        {
+          "candidateId": "qwen36-27b-mtp",
+          "acceptable": 24,
+          "failed": 0
+        },
+        {
+          "candidateId": "gemma4-26b-a4b",
+          "acceptable": 23,
+          "failed": 1
+        }
+      ],
+      "qualifyingRouteExists": true,
+      "recommendedCandidateId": "qwen3-coder-30b-a3b"
+    },
+    {
+      "role": "code",
+      "eligibleCandidates": [
+        {
+          "candidateId": "gemma4-26b-a4b",
+          "acceptable": 24,
+          "failed": 0
+        },
+        {
+          "candidateId": "qwen3-coder-30b-a3b",
+          "acceptable": 24,
+          "failed": 0
+        },
+        {
+          "candidateId": "qwen36-27b-mtp",
+          "acceptable": 24,
+          "failed": 0
+        }
+      ],
+      "qualifyingRouteExists": true,
+      "recommendedCandidateId": "gemma4-26b-a4b"
+    },
+    {
+      "role": "agent",
+      "eligibleCandidates": [
+        {
+          "candidateId": "gemma4-26b-a4b",
+          "acceptable": 24,
+          "failed": 0
+        }
+      ],
+      "qualifyingRouteExists": true,
+      "recommendedCandidateId": "gemma4-26b-a4b"
+    },
+    {
+      "role": "review",
+      "eligibleCandidates": [],
+      "qualifyingRouteExists": false,
+      "recommendedCandidateId": null
+    }
+  ],
+  "allFiveFunctionsHaveQualifyingRoute": false,
+  "productQualificationPassed": false,
+  "customerTrialReady": false,
+  "productionRoutingChanged": false,
+  "humanTrialStillRequired": true
+}

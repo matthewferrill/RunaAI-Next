@@ -1,0 +1,16 @@
+{
+  "schemaVersion": "runaai-m1-independent-semantic-validator-output/v1",
+  "valid": true,
+  "evaluatorId": "independent-semantic-r13-evaluator",
+  "rubricVersion": "2026-08-30.r7-function-contract",
+  "sourceCommit": "d0b8f23db1bcc149764e19936559a8a9df468205",
+  "runtimeSealSha256": "abf15d75fd33df9f4f7b9966e450075d93b6cd18dd275c89afabece76f3bca87",
+  "caseBundleSha256": "87f08a861d1b109fa5d3fb64f9dc10aacba023eee80a3ab4762b07b2d987524d",
+  "attemptsValidated": 360,
+  "providerOutputsCovered": 611,
+  "rawRecordsBound": 360,
+  "semanticChecksReviewed": 963,
+  "failedChecks": 60,
+  "controlsPassed": 12,
+  "candidateIdentityKnownDuringReview": false
+}

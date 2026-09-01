@@ -1,6 +1,6 @@
 # RunaAI migration status
 
-Status date: 2026-08-31. This is the living migration handoff for RunaAI-Next. Update it in the same
+Status date: 2026-09-01. This is the living migration handoff for RunaAI-Next. Update it in the same
 commit whenever a gate changes repository direction, authority, implementation status, safety
 boundaries, verification state, or the next planned work.
 
@@ -15,20 +15,24 @@ are unchanged. M1 is authorized, not complete; its first local wiring result is 
 The steward authorized necessary non-destructive work and commit/push to RunaAI-Next without recurring
 permission requests. Human involvement is reserved for genuine customer tests or human-only operations.
 
-### Current checkpoint: R13 Agent and Review correction implemented and verified
+### Current checkpoint: R13 complete; R14 Review correction frozen and locally verified
 
-R13 is the next finite correction under
-`gate7f/function-first/M1-S2-R13-AGENT-REVIEW-CORRECTIVE-CRITERIA-2026-08-31.md`. It addresses only the
-R12 Agent failures in grounded final-result reporting, failed-test repair continuation and durable
-journey evidence, plus the Review failures in strict checker transport and generic evidence-completeness
-coverage. It does not embed case answers or change the candidate roster, case bundle, 360+12 denominator,
-22/24 role threshold, independent evaluator, protected-data boundary or production route. No R13 model
-inference has started. The application correction and deterministic proof are complete: the changed-path
-suite passed with zero failures, and the complete repository suite passed 1,841/1,919 with 78 intentional
-environment-dependent skips and zero failures. Exact evidence is in
-`gate7f/function-first/M1-S2-R13-CORRECTION-IMPLEMENTATION-RESULTS-2026-08-31.md`. A fresh committed
-source/runtime seal, full three-candidate qualification and candidate-blind independent review are still
-required before any customer trial.
+R13 completed 360/360 planned attempts, 12/12 model-free controls, strict Home/Control cleanup and a
+fresh candidate-blind review covering 611 provider outputs and all 963 semantic checks. All 360 attempt
+grades are determinate and no critical model/product failure was found. Gemma qualifies for Chat, Code
+and Agent; Coder qualifies for Chat, Research and Code; Qwen3.6 qualifies for Research and Code. Review
+has no route. Qwen3.6 is closest at 21/24 and its only three Review failures are the same omission: it
+identifies path traversal and post-resolution containment but does not explicitly explain that the
+stated authentication control does not authorize the requested path. Exact pins and scores are in
+`gate7f/function-first/M1-S2-R13-INDEPENDENT-SEMANTIC-RESULTS-2026-09-01.md`.
+
+R14 is prospectively frozen in
+`gate7f/function-first/M1-S2-R14-REVIEW-CORRECTIVE-CRITERIA-2026-09-01.md`. The only permitted change is
+generic stated-control coverage in the Review answerer and checker; no case answer or candidate branch is
+present. Focused actual-wire and semantic suites pass 81/81. R14 retains all candidates, 40 cases,
+360 attempts, 12 controls, budgets, thresholds and candidate-blind review. The next operations are the
+complete deterministic suite, committed source/archive/runtime seal, controls, full campaign and fresh
+independent review. No production route or customer trial is authorized yet.
 
 ### Previous checkpoint: R12 independent review complete; no all-five-function route
 

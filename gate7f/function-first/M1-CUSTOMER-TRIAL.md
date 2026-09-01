@@ -1,6 +1,7 @@
 # M1 customer trial — five functions, not full product parity
 
-Prepared 2026-08-28. **Not ready to start yet.** The operator must first complete the matched
+Prepared 2026-08-28; readiness checked 2026-09-01. **Not ready to start yet.** R13 qualifies four of
+five functions but Review remains below threshold. The operator must first complete R14's matched
 three-model qualification, verify the exact deployed application/runtime, and reconcile rollback.
 This document is preparation, not a deployment or a request for another approval.
 

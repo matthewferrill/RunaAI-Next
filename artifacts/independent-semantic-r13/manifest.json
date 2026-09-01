@@ -1,0 +1,73 @@
+{
+  "schemaVersion": "runaai-m1-independent-semantic-r13-manifest/v1",
+  "createdAt": "2026-09-01T06:36:22.414Z",
+  "evaluatorId": "independent-semantic-r13-evaluator",
+  "reviewerIndependence": "author-of-neither-planner-nor-model-adapter",
+  "candidateIdentityKnownDuringReview": false,
+  "sourceCommit": "d0b8f23db1bcc149764e19936559a8a9df468205",
+  "runtimeSealSha256": "abf15d75fd33df9f4f7b9966e450075d93b6cd18dd275c89afabece76f3bca87",
+  "caseBundleSha256": "87f08a861d1b109fa5d3fb64f9dc10aacba023eee80a3ab4762b07b2d987524d",
+  "worksheetSha256": "19b052118236d5dce8238b62e2e449f2ac575c8eb076884e8c11f7f9eec139e0",
+  "reviewDecisionsSha256": "668027857d3fb066570e7552411fa8f2b75045fff2e009037e8c78826705550b",
+  "inputManifestSha256": "8074adec7c243fb9cef009dfb50da0edeae3623fc9594ee415937b9a42843bb2",
+  "controlsSha256": "566be9098046a65f48b206feb84005c5481e8d78fec50173b25f44bbf5183261",
+  "packetInputs": [
+    {
+      "candidateId": "gemma4-26b-a4b",
+      "directory": "artifacts/m1-readiness/20260901-r13-valid-campaigns/campaign-gemma4-26b-a4b-abf15d75fd33df9f",
+      "resultSha256": "9ff72556d987e564ccf773f97743d30ed3dec957e1528ca9ded7094e7467e3fd",
+      "attempts": 120
+    },
+    {
+      "candidateId": "qwen3-coder-30b-a3b",
+      "directory": "artifacts/m1-readiness/20260901-r13-valid-campaigns/campaign-qwen3-coder-30b-a3b-abf15d75fd33df9f",
+      "resultSha256": "72acf8b01c9c56a9fcaa62dfb9e0400e75d0122afd32532819141fd8f799bebb",
+      "attempts": 120
+    },
+    {
+      "candidateId": "qwen36-27b-mtp",
+      "directory": "artifacts/m1-readiness/20260901-r13-valid-campaigns/campaign-qwen36-27b-mtp-abf15d75fd33df9f",
+      "resultSha256": "16dcad14af943bf6a3d4580696c6da3bc7b5b244b59084a59ddd51b3d50f1940",
+      "attempts": 120
+    }
+  ],
+  "validation": {
+    "valid": true,
+    "attempts": 360,
+    "providerOutputsCovered": 611,
+    "semanticChecks": 963,
+    "failedChecks": 60,
+    "rawRecordsBound": 360
+  },
+  "outputs": [
+    {
+      "path": "artifacts/independent-semantic-r13/explicit-semantic-decisions.json",
+      "bytes": 1703525,
+      "sha256": "0f138e44c47fb48fefcacb3ce405844e1faa88afa096ad1fb911d4cf414fe0af"
+    },
+    {
+      "path": "artifacts/independent-semantic-r13/campaign-grade.json",
+      "bytes": 3895514,
+      "sha256": "bf11df2d71214121e2458370b8cbbca936660c1eda486b29b659ead301cb1c55"
+    },
+    {
+      "path": "artifacts/independent-semantic-r13/role-scorecards.json",
+      "bytes": 8609,
+      "sha256": "4c6295af3987c5e1fc5ae9569d0da26c8a44e7baa64936e2e3a7ce0502cc6cdd"
+    },
+    {
+      "path": "artifacts/independent-semantic-r13/validator-output.json",
+      "bytes": 658,
+      "sha256": "928a257ef42fbee4d07ff4eab0460e42e9627d8add33d68c361713142e0b4a8f"
+    },
+    {
+      "path": "artifacts/independent-semantic-r13/report.md",
+      "bytes": 1445,
+      "sha256": "e03a8ffc2e2168ab3b3a5f677a57e537322adf9cd55c413704f87311f96903d1"
+    }
+  ],
+  "productQualificationPassed": false,
+  "customerTrialReady": false,
+  "humanTrialStillRequired": true,
+  "productionRoutingChanged": false
+}

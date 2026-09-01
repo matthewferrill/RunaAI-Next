@@ -1,12 +1,8 @@
 # M1-S2 R14 Review corrective qualification criteria
 
-Status: criteria were frozen before R14 inference and remain unchanged. R14 execution is now paused at
-Qwen Agent-06 repetition 2 after a non-model r51 worker-watchdog fault. The attempt is hash-bound,
-ungraded, unconsumed, and will resume only after the corrected source is resealed, the model-free browser
-preflight passes, and an independent post-fix review reports no P0/P1 blocker. Current repair verification:
-focused worker/browser/runner 83/83, model-free harness 155/155, and the hardened 194-file tracked
-repository run 1,973 tests with 1,895 passed, 78 intentional environment-dependent skips, and zero
-failures; Gate 7F 28/28 and roadmap 15/15 also pass.
+Status: prospective criteria frozen and deterministic verification complete before R14 inference. No
+R14 model call has started. The focused suite passed 81/81; the complete repository suite passed
+1,847/1,925 with 78 intentional environment-dependent skips and zero failures.
 
 R14 follows the immutable R13 result. R13 qualifies Chat, Research, Code and Agent but leaves Review
 without a route. Qwen3.6 is closest at 21/24 and fails the same security-control completeness point in

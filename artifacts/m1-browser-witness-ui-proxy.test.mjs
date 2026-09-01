@@ -50,6 +50,10 @@ test("loopback witness UI proxy serves a visible one-use action and preserves th
   assert.doesNotMatch(pageText, /<iframe/iu); assert.match(pageText, /data-m1-task-id="task-1"/u);
   const script = await (await fetch(`${baseUrl}/__acceptance/browser-observation-witness-ui.js`)).text();
   assert.match(script, /panel\.dataset/u); assert.equal(script.includes("/Task:\\s*cancelled\\b/iu"), true);
+  const submitHandler = script.indexOf("form.addEventListener('submit'");
+  const livePanelLookup = script.indexOf("document.querySelector('#m1-task')");
+  assert.ok(submitHandler >= 0 && livePanelLookup > submitHandler,
+    "the task panel must be resolved when the operator clicks, after the application has rendered it");
   assert.match(script, /data\.m1TaskId/u); assert.match(script, /domBinding/u);
   assert.match(script, /Visible application cancellation state recorded\./u);
   assert.match(script, new RegExp(AGENT05_BOUNDED_DRAIN_NOTICE.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&"), "u"));

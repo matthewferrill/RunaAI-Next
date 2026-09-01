@@ -15,7 +15,9 @@ const args = Object.fromEntries(process.argv.slice(2).reduce((pairs, value, inde
   if (index % 2 === 0) pairs.push([value, values[index + 1]]);
   return pairs;
 }, []));
-assert.deepEqual(Object.keys(args).sort(), ["--output-dir", "--prior-seal", "--prior-telemetry", "--source-archive"].sort());
+assert.deepEqual(Object.keys(args).sort(), ["--output-dir", "--prior-seal", "--prior-seal-sha256",
+  "--prior-telemetry", "--source-archive"].sort());
+assert.match(args["--prior-seal-sha256"], /^[a-f0-9]{64}$/u);
 
 const outputDirectory = await realpath(path.resolve(args["--output-dir"]));
 assert((await stat(outputDirectory)).isDirectory());
@@ -30,10 +32,15 @@ const readinessPath = await realpath(path.join(root,
 const [sourceArchiveBytes, priorSealBytes, priorTelemetryBytes, packageLockBytes, criteriaBytes, readinessBytes]
   = await Promise.all([readFile(sourceArchivePath), readFile(priorSealPath), readFile(priorTelemetryPath),
     readFile(packageLockPath), readFile(criteriaPath), readFile(readinessPath)]);
+assert.equal(sha256(priorSealBytes), args["--prior-seal-sha256"]);
 
 const prior = validateRuntimeSeal(JSON.parse(priorSealBytes));
-assert.equal(prior.schemaVersion, "runaai-m1-functional-runtime-seal/v9");
-assert.equal(prior.sourceCommit, "d0b8f23db1bcc149764e19936559a8a9df468205");
+const allowedPriorSource = {
+  "runaai-m1-functional-runtime-seal/v9": "d0b8f23db1bcc149764e19936559a8a9df468205",
+  "runaai-m1-functional-runtime-seal/v10": "b39734b16ebef7ad8f0b950fbc1b697b04b45120",
+}[prior.schemaVersion];
+assert(allowedPriorSource);
+assert.equal(prior.sourceCommit, allowedPriorSource);
 assert.equal(prior.caseBundleSha256, CASE_BUNDLE_SHA256);
 const sourceCommit = execFileSync("git", ["rev-parse", "HEAD"], { cwd: root, encoding: "utf8" }).trim();
 assert.match(sourceCommit, /^[a-f0-9]{40}$/u);
@@ -42,7 +49,7 @@ assert.equal(readGitArchiveCommit({ archiveBytes: sourceArchiveBytes, cwd: root 
 const telemetry = JSON.parse(priorTelemetryBytes);
 telemetry.createdAt = new Date().toISOString();
 telemetry.sourceCommit = sourceCommit;
-telemetry.classification = "prospective-r14-hardware-only-not-functional-qualification";
+telemetry.classification = "prospective-r14-harness-repair-hardware-only-not-functional-qualification";
 telemetry.inferenceOwnership = "root-functional-driver-and-browser-only";
 telemetry.leaseOwnership = "root";
 const telemetryBytes = Buffer.from(`${JSON.stringify(telemetry, null, 2)}\n`);
@@ -93,7 +100,7 @@ const control = { ...structuredClone(priorControl), runId: randomUUID().replaceA
 await writeFile(path.join(outputDirectory, "CONTROL-REGRESSION-INPUT.json"),
   `${JSON.stringify(control, null, 2)}\n`, { flag: "wx" });
 
-console.log(JSON.stringify({ schemaVersion: "runaai-m1-r14-common-build/v1", sourceCommit,
+console.log(JSON.stringify({ schemaVersion: "runaai-m1-r14-common-build/v2", sourceCommit,
   sourceArchiveSha256: seal.runtime.sourceArchiveSha256, runtimeSealSha256: sha256(sealBytes),
   criteriaSha256: seal.qualificationCriteria.sha256, telemetrySha256: sha256(telemetryBytes),
   extractedFiles: archiveEntries, productionChanged: false, protectedDataIncluded: false,

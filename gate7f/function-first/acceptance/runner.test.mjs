@@ -100,6 +100,21 @@ test("capture drain refuses unfinished requests and close aborts its actual upst
   }
 });
 
+test("downstream cancellation records a stable source-aware code instead of a numeric DOM exception",async()=>{
+  let reached;const started=new Promise(resolve=>{reached=resolve;});
+  const target=await endpoint((q,s)=>{reached();});const l=ledger();
+  const capture=await startCaptureTransport({mode:"scored",targetBaseUrl:target.url,modelId:"pinned",getLedger:()=>l});
+  const controller=new AbortController();
+  const pending=fetch(`${capture.baseUrl}/chat/completions`,{method:"POST",headers:{"content-type":"application/json"},
+    body:JSON.stringify({model:"pinned"}),signal:controller.signal});pending.catch(()=>{});
+  try{await started;controller.abort();await pending.catch(()=>{});await capture.drain({maximumMs:1000});
+    assert.equal(l.observation.provider.unexpectedCalls.length,1);
+    assert.equal(l.observation.provider.unexpectedCalls[0].errorCode,"m1-capture-downstream-disconnected");
+    assert.equal(l.observation.provider.unexpectedCalls[0].abortSource,"downstream");
+    assert.equal(typeof l.observation.provider.unexpectedCalls[0].errorCode,"string");
+  }finally{await capture.close();await target.close();}
+});
+
 test("successful drain waits for final immutable capture evidence",async()=>{
   let reached,release;const started=new Promise(resolve=>{reached=resolve;});
   const target=await endpoint((q,s)=>{release=()=>{s.setHeader("content-type","application/json");s.end('{"model":"pinned","choices":[]}');};reached();});

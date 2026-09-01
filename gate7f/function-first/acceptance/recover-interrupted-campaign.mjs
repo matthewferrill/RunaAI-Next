@@ -63,7 +63,8 @@ export async function recoverInterruptedCampaign(directory) {
   const result = { schemaVersion: "runaai-m1-recovered-interrupted-candidate-result/v1", candidateId: plan.candidateId,
     sourceCommit: plan.sourceCommit, runtimeSealSha256: plan.runtimeSealSha256, caseBundleSha256: plan.caseBundleSha256,
     plannedCampaignAttempts: plan.plannedCampaignAttempts ?? 360, plannedCandidateAttempts: plan.attempts.length,
-    recordedAttempts: attempts.length, attempts, notExecuted, stopCode, denominatorChanged: false, supplemental: false,
+    recordedAttempts: attempts.length, attempts, notExecuted, stopCode,
+    denominatorChanged: plan.supplemental === true, supplemental: plan.supplemental === true,
     qualificationCompositionPermitted: false, productQualificationPassed: false, independentSemanticReviewPending: true,
     humanTrialRequired: true, productionChanged: false, protectedDataRead: false, recoveredFromCreateOnlyArtifacts: true };
   const audit = { schemaVersion: "runaai-m1-interrupted-campaign-recovery-audit/v1", candidateId: plan.candidateId,

@@ -44,6 +44,7 @@ const APPLICATION_INVARIANTS = new Set([
 ]);
 
 const WINDOWS_PUBLICATION = new Set(["EBUSY", "ENOENT", "EPERM"]);
+const MODEL_DEADLINES = new Set(["m1-planning-deadline"]);
 
 function codeOf(errorOrCode) {
   if (typeof errorOrCode === "string") return errorOrCode;
@@ -71,9 +72,36 @@ export function classifyCampaignFailure(errorOrCode, { phase = null } = {}) {
     gradeModel: !pauseCampaign });
 }
 
+function provedModelDeadline(code) {
+  return Object.freeze({ schemaVersion: CAMPAIGN_FAILURE_SCHEMA_VERSION, code, category: CATEGORY.MODEL,
+    attribution: "model", pauseCampaign: false, consumeAttempt: true, gradeModel: true });
+}
+
+function latestDurableRunError(observation, phase) {
+  const evidence = Array.isArray(observation?.evidence) ? observation.evidence : [];
+  for (let index = evidence.length - 1; index >= 0; index--) {
+    const item = evidence[index];
+    if (item?.kind !== "durable-task-state" || item?.phase !== phase) continue;
+    if (typeof item.data?.run?.errorCode === "string") return item.data.run.errorCode;
+  }
+  return null;
+}
+
+export function classifyCapturedProviderFailure(value, observation) {
+  const rawCode = typeof value?.errorCode === "string" ? value.errorCode : value?.errorCode;
+  if (rawCode === "m1-capture-downstream-disconnected") {
+    const applicationError = latestDurableRunError(observation, value?.phase);
+    if (MODEL_DEADLINES.has(applicationError)) return provedModelDeadline(applicationError);
+  }
+  return classifyCampaignFailure(rawCode, { phase: "capture" });
+}
+
 export function pauseableObservationFailure(observation) {
   for (const failure of observation?.failures ?? []) {
-    const classified = classifyCampaignFailure(failure?.errorCode, { phase: failure?.phase });
+    const durableError = latestDurableRunError(observation, failure?.phase);
+    const classified = MODEL_DEADLINES.has(failure?.errorCode) && durableError === failure.errorCode
+      ? provedModelDeadline(failure.errorCode)
+      : classifyCampaignFailure(failure?.errorCode, { phase: failure?.phase });
     if (classified.pauseCampaign) return classified;
   }
   return null;

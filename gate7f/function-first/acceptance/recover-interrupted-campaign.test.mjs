@@ -42,3 +42,34 @@ test("recovers a zero-record pause and rejects any record after a prefix hole", 
   await writeFile(path.join(directory, "b.record.json"), "{}");
   await assert.rejects(recoverInterruptedCampaign(directory), /m1-recovery-record-suffix-invalid/u);
 });
+
+test("recovers the r49 supplemental prefix without relabeling it or consuming Agent06", async t => {
+  const directory = await mkdtemp(path.join(tmpdir(), "m1-recovery-r49-")); t.after(() => rm(directory, { recursive: true, force: true }));
+  const first = { attemptId: "qwen36-27b-mtp--agent-05-cancel-drain--2", candidateId: "qwen36-27b-mtp",
+    caseId: "agent-05-cancel-drain", role: "agent", repetition: 2 };
+  const second = { attemptId: "qwen36-27b-mtp--agent-06-crash-reconcile--2", candidateId: "qwen36-27b-mtp",
+    caseId: "agent-06-crash-reconcile", role: "agent", repetition: 2 };
+  const slots = [first, second, ...Array.from({ length: 50 }, (_, index) => ({
+    attemptId: `qwen36-27b-mtp--remaining-${index + 1}`, candidateId: "qwen36-27b-mtp",
+    caseId: `remaining-${index + 1}`, role: "review", repetition: 2 }))];
+  const plan = { candidateId: first.candidateId, sourceCommit: "a".repeat(40), runtimeSealSha256: "b".repeat(64),
+    caseBundleSha256: "c".repeat(64), plannedCampaignAttempts: 52, plannedCandidateAttempts: 52,
+    supplemental: true, attempts: slots };
+  await writeFile(path.join(directory, "plan.json"), JSON.stringify(plan));
+  const observation = Buffer.from(JSON.stringify({ candidateId: first.candidateId, caseId: first.caseId,
+    repetition: first.repetition, runtimeSealSha256: plan.runtimeSealSha256, caseBundleSha256: plan.caseBundleSha256,
+    productionChanged: false, protectedDataRead: false, provider: { calls: [{}] }, native: { calls: [{}] }, grade: { passed: false } }));
+  await writeFile(path.join(directory, `${first.attemptId}.started.json`), JSON.stringify({ ...first, runtimeSealSha256: plan.runtimeSealSha256 }));
+  await writeFile(path.join(directory, `${first.attemptId}.json`), observation);
+  await writeFile(path.join(directory, `${first.attemptId}.record.json`), JSON.stringify({ attemptId: first.attemptId,
+    file: `${first.attemptId}.json`, sha256: sha256(observation), bytes: observation.byteLength,
+    status: "completed", preliminaryGrade: "inconclusive" }));
+  await writeFile(path.join(directory, `${second.attemptId}.pause.json`), JSON.stringify({ schemaVersion: "runaai-m1-campaign-pause/v1",
+    ...second, runtimeSealSha256: plan.runtimeSealSha256, resumeAttemptId: second.attemptId, completedPrefixImmutable: true,
+    attemptConsumed: false, modelGraded: false, failure: { code: "m1-capture-downstream-disconnected" } }));
+  const value = await recoverInterruptedCampaign(directory);
+  assert.equal(value.result.recordedAttempts, 1); assert.equal(value.result.attempts[0].attemptId, first.attemptId);
+  assert.equal(value.result.notExecuted.length, 51); assert.equal(value.result.notExecuted[0], second.attemptId);
+  assert.equal(value.result.supplemental, true); assert.equal(value.result.denominatorChanged, true);
+  assert.equal(value.result.attempts.some(row => row.attemptId === second.attemptId), false);
+});

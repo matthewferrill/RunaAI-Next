@@ -13,7 +13,7 @@ import { FunctionalHttpJourney } from "./http-journey.mjs";
 import { AcceptanceFaultController, createFaultActions } from "./fault-actions.mjs";
 import { startApplicationFaultWorker } from "./fault-worker.mjs";
 import { createBrowserCheckpoint } from "./browser-checkpoint.mjs";
-import { classifyCampaignFailure, pauseableObservationFailure } from "./campaign-failure.mjs";
+import { classifyCampaignFailure, classifyCapturedProviderFailure, pauseableObservationFailure } from "./campaign-failure.mjs";
 import { CAMPAIGN_V2_POLICY, campaignV2Policy, campaignV2Windows } from "../readiness/lease-v2-contract.mjs";
 
 const HEX = /^[a-f0-9]{64}$/u;
@@ -305,12 +305,19 @@ export async function createCampaignWriter(directory, plan) {
     write,
     async started(slot, value) { return write(`${slot.attemptId}.started.json`, value); },
     async paused(slot, failure, value = {}) {
+      const { observation = null, ...receipt } = value;
+      const pausedObservation = observation ? await write(`${slot.attemptId}.paused-observation.json`, {
+        schemaVersion: "runaai-m1-campaign-paused-observation/v1", attemptId: slot.attemptId,
+        candidateId: slot.candidateId, caseId: slot.caseId, repetition: slot.repetition,
+        runtimeSealSha256: plan.runtimeSealSha256, capturedAt: stamp(), failure,
+        attemptConsumed: false, modelGraded: false, observation,
+      }) : null;
       return write(`${slot.attemptId}.pause.json`, {
         schemaVersion: "runaai-m1-campaign-pause/v1", attemptId: slot.attemptId,
         candidateId: slot.candidateId, caseId: slot.caseId, repetition: slot.repetition,
         runtimeSealSha256: plan.runtimeSealSha256, pausedAt: stamp(), failure,
         resumeAttemptId: slot.attemptId, completedPrefixImmutable: true,
-        attemptConsumed: false, modelGraded: false, ...value,
+        ...receipt, attemptConsumed: false, modelGraded: false, ...(pausedObservation ? { pausedObservation } : {}),
       });
     },
     async finished(slot, observation, grade, unresolved) {
@@ -385,13 +392,13 @@ async function executeAttemptSequence({ plan, writer, runAttempt, beforeAttempt,
     const { observation, grade, unresolved = [] } = result;
     if (observation.caseId !== slot.caseId || observation.candidateId !== slot.candidateId || observation.repetition !== slot.repetition
         || observation.runtimeSealSha256 !== plan.runtimeSealSha256) throw fail("m1-campaign-attempt-binding-invalid");
-    const captureFailure = observation.provider?.unexpectedCalls?.map(value => classifyCampaignFailure(value?.errorCode, { phase: "capture" }))
+    const captureFailure = observation.provider?.unexpectedCalls?.map(value => classifyCapturedProviderFailure(value, observation))
       .find(value => value.pauseCampaign) ?? null;
     const pauseFailure = signal.aborted ? classifyCampaignFailure(abortError(signal), { phase: "runner" })
       : pauseableObservationFailure(observation) ?? captureFailure;
     if (pauseFailure) {
       if (writer.paused) await writer.paused(slot, pauseFailure, { started: true,
-        observationStatus: observation.status, failureCount: observation.failures?.length ?? 0 });
+        observationStatus: observation.status, failureCount: observation.failures?.length ?? 0, observation });
       stopCode = pauseFailure.code;
       announce({ schemaVersion: "runaai-m1-campaign-paused/v1", candidateId: plan.candidateId,
         completedAttempts: records.length, plannedCandidateAttempts: expectedAttempts,
@@ -430,29 +437,62 @@ export function executeSupplementalCandidateAttempts(options) {
   return executeAttemptSequence({ ...options, supplemental: true });
 }
 
+export function createSupplementalExecutionPlan({ fullPlan, supplementalAttemptIds,
+  supplementalPriorResult = null, supplementalPriorHistory = null, suppliedPlan = null }) {
+  if (!Array.isArray(supplementalAttemptIds) || supplementalAttemptIds.length < 1 || supplementalAttemptIds.length > 120
+      || new Set(supplementalAttemptIds).size !== supplementalAttemptIds.length
+      || Boolean(supplementalPriorResult) === Boolean(supplementalPriorHistory)
+      || supplementalPriorResult && !HEX.test(supplementalPriorResult.sha256 ?? "")
+      || supplementalPriorHistory && (supplementalPriorHistory.schemaVersion !== "runaai-m1-campaign-continuation-provenance/v1"
+        || !HEX.test(supplementalPriorHistory.historyManifestSha256 ?? "")
+        || !HEX.test(supplementalPriorHistory.basePlanSha256 ?? "")
+        || supplementalPriorHistory.retainedPrefixAttempts !== 69
+        || supplementalPriorHistory.resumeAttemptId !== "qwen36-27b-mtp--agent-06-crash-reconcile--2"
+        || supplementalPriorHistory.singleUninterruptedArmClaimed !== false
+        || supplementalPriorHistory.priorWindows?.length !== 2
+        || supplementalPriorHistory.priorWindows.some((window, index) => window?.index !== index + 1
+          || window.kind !== ["original", "continuation"][index] || window.retainedAttempts !== [68, 1][index]
+          || window.startOrdinal !== [1, 69][index] || window.endOrdinal !== [68, 69][index]
+          || !HEX.test(window?.resultSha256 ?? "") || !HEX.test(window?.planSha256 ?? "")
+          || !HEX.test(window?.runtimeSealSha256 ?? "")))) throw fail("m1-campaign-supplemental-invalid");
+  const available = new Map(fullPlan?.attempts?.map(value => [value.attemptId, value]) ?? []);
+  if (supplementalAttemptIds.some(value => !available.has(value))) throw fail("m1-campaign-supplemental-invalid");
+  if (supplementalPriorHistory && (fullPlan.candidateId !== "qwen36-27b-mtp"
+      || supplementalAttemptIds.length !== 51
+      || !same(supplementalAttemptIds, fullPlan.attempts.slice(69).map(value => value.attemptId)))) {
+    throw fail("m1-campaign-supplemental-invalid");
+  }
+  const plan = { ...fullPlan,
+    schemaVersion: supplementalPriorHistory ? "runaai-m1-campaign-continuation-plan/v2" : "runaai-m1-supplemental-candidate-plan/v1",
+    attempts: supplementalAttemptIds.map(value => available.get(value)), plannedCampaignAttempts: supplementalAttemptIds.length,
+    plannedCandidateAttempts: supplementalAttemptIds.length, supplemental: true, qualificationCompositionPermitted: false,
+    ...(supplementalPriorHistory ? { continuation: true,
+      historyManifestSha256: supplementalPriorHistory.historyManifestSha256,
+      basePlanSha256: supplementalPriorHistory.basePlanSha256, retainedPrefixAttempts: 69,
+      resumeAttemptId: supplementalPriorHistory.resumeAttemptId, continuationHistory: supplementalPriorHistory }
+      : { priorResultSha256: supplementalPriorResult.sha256 }) };
+  if (suppliedPlan) {
+    const normalizedSupplied = { ...suppliedPlan, createdAt: plan.createdAt };
+    if (!same(normalizedSupplied, plan)) throw fail("m1-campaign-supplemental-plan-invalid");
+  }
+  return plan;
+}
+
 export async function runModelCampaign(args, { checkpoint = null, getLeaseObservation = null, announce = () => {},
-  supplementalAttemptIds = null, supplementalPriorResult = null } = {}) {
+  supplementalAttemptIds = null, supplementalPriorResult = null, supplementalPriorHistory = null,
+  supplementalPlan = null } = {}) {
   if (args.mode === "inventory") { const faults = createFaultActions(); try { return { ...inventory([...Object.keys(faults.actions), "browser.reload-and-list"]),
     scoredCliEnabled: true, runtimeSealRequired: true, controlsMustPass: 12, externalHomeLeaseRequired: true,
     qualificationClaim: "Driver availability is not a model or product acceptance result." }; } finally { faults.close(); } }
   const inputs = await validateCampaignInputs(args), { root, seal, ready, qualification } = inputs;
   const fullPlan = inputs.plan;
   const supplemental = supplementalAttemptIds !== null;
-  if (supplemental) {
-    if (!Array.isArray(supplementalAttemptIds) || supplementalAttemptIds.length < 1 || supplementalAttemptIds.length > 120
-        || new Set(supplementalAttemptIds).size !== supplementalAttemptIds.length
-        || !supplementalPriorResult || !HEX.test(supplementalPriorResult.sha256 ?? "")) throw fail("m1-campaign-supplemental-invalid");
-    const available = new Map(fullPlan.attempts.map(value => [value.attemptId, value]));
-    if (supplementalAttemptIds.some(value => !available.has(value))) throw fail("m1-campaign-supplemental-invalid");
-  }
-  const plan = supplemental ? { ...fullPlan, schemaVersion: "runaai-m1-supplemental-candidate-plan/v1",
-    attempts: supplementalAttemptIds.map(value => fullPlan.attempts.find(slot => slot.attemptId === value)),
-    plannedCampaignAttempts: supplementalAttemptIds.length, plannedCandidateAttempts: supplementalAttemptIds.length,
-    supplemental: true, qualificationCompositionPermitted: false, priorResultSha256: supplementalPriorResult.sha256 } : fullPlan;
+  const plan = supplemental ? createSupplementalExecutionPlan({ fullPlan, supplementalAttemptIds,
+    supplementalPriorResult, supplementalPriorHistory, suppliedPlan: supplementalPlan }) : fullPlan;
   const output = path.join(root, "acceptance-evidence"); await mkdir(output, { recursive: true });
   if ((await realpath(output)) !== path.join(await realpath(root), "acceptance-evidence")) throw fail("m1-campaign-output-reparse-invalid");
   const directory = path.join(output, supplemental
-    ? `supplemental-${plan.candidateId}-${plan.runtimeSealSha256.slice(0, 16)}-${supplementalPriorResult.sha256.slice(0, 12)}`
+    ? `supplemental-${plan.candidateId}-${plan.runtimeSealSha256.slice(0, 16)}-${(supplementalPriorHistory?.historyManifestSha256 ?? supplementalPriorResult.sha256).slice(0, 12)}`
     : `campaign-${plan.candidateId}-${plan.runtimeSealSha256.slice(0, 16)}`);
   const writer = await createCampaignWriter(directory, plan);
   for (const [name, value] of Object.entries(inputs.inputs)) await writer.write(`${name}.json`, value.bytes);

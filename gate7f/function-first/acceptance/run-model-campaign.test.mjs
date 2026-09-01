@@ -10,7 +10,7 @@ import { AGENT05_ACK_PUBLICATION_GRACE_MS, AGENT05_IN_FLIGHT_OBSERVATION_MS } fr
 import { AGENT05_POST_RECEIPT_HOLD_MS } from "./fault-actions.mjs";
 import { parseCampaignArguments, campaignPlan, qualifiedControlSuite, validateHomeReady, validateLiveHome,
   verifyExtractedArchive, createCampaignWriter, needsBrowserCheckpoint, createCampaignActionExtensions, executeCandidateAttempts,
-  executeSupplementalCandidateAttempts, runModelCampaign,
+  executeSupplementalCandidateAttempts, createSupplementalExecutionPlan, runModelCampaign,
   LIVE_PROBE_READ_TIMEOUT_MS, readLiveLeaseBounded, createCoalescedLeaseReader } from "./run-model-campaign.mjs";
 import { CAMPAIGN_V2_POLICY } from "../readiness/lease-v2-contract.mjs";
 
@@ -293,6 +293,43 @@ test("supplemental execution retains an explicit nonqualifying bounded subset", 
   assert.equal(result.denominatorChanged, true); assert.equal(result.supplemental, true);
   assert.equal(result.qualificationCompositionPermitted, false); assert.equal(result.productQualificationPassed, false);
 });
+
+test("history execution reconstructs the exact canonical 51-row plan and rejects every supplied plan drift", () => {
+  const qwen = "qwen36-27b-mtp", attempts = Array.from({ length: ACCEPTANCE_POLICY.repetitionsPerCandidateCase }, (_, index) =>
+    MODEL_CASES.map(item => ({ attemptId: `${qwen}--${item.id}--${index + 1}`, candidateId: qwen,
+      caseId: item.id, role: item.role, repetition: index + 1 }))).flat();
+  const fullPlan = { schemaVersion: "base/v2", createdAt: "current", sourceCommit, runtimeSealSha256: hash,
+    caseBundleSha256: CASE_BUNDLE_SHA256, controlsSha256: "c".repeat(64), readySha256: "d".repeat(64),
+    hardwarePlanSha256: "e".repeat(64), homeLeaseId: "lease", homeLeaseSealSha256: "f".repeat(64),
+    candidateId: qwen, modelId: "sealed-model", roster: [qwen], lifecycleVersion: "v2",
+    dispatchStopAt: "2099-01-01T00:00:00.000Z", applicationHardStopAt: "2099-01-01T01:00:00.000Z",
+    plannedCampaignAttempts: 360, plannedCandidateAttempts: 120, attempts };
+  const priorWindows = [{ index: 1, kind: "original", startOrdinal: 1, endOrdinal: 68, retainedAttempts: 68,
+    resultSha256: "1".repeat(64), planSha256: "2".repeat(64), runtimeSealSha256: "3".repeat(64), sourceCommit },
+  { index: 2, kind: "continuation", startOrdinal: 69, endOrdinal: 69, retainedAttempts: 1,
+    resultSha256: "4".repeat(64), planSha256: "5".repeat(64), runtimeSealSha256: "6".repeat(64), sourceCommit }];
+  const history = { schemaVersion: "runaai-m1-campaign-continuation-provenance/v1",
+    historyManifestSha256: "7".repeat(64), basePlanSha256: "8".repeat(64), retainedPrefixAttempts: 69,
+    resumeAttemptId: attempts[69].attemptId, priorWindows, singleUninterruptedArmClaimed: false };
+  const ids = attempts.slice(69).map(value => value.attemptId);
+  const canonical = createSupplementalExecutionPlan({ fullPlan, supplementalAttemptIds: ids,
+    supplementalPriorHistory: history });
+  assert.equal(canonical.modelId, "sealed-model"); assert.equal(canonical.attempts.length, 51);
+  const supplied = { ...structuredClone(canonical), createdAt: "prepared" };
+  assert.equal(createSupplementalExecutionPlan({ fullPlan, supplementalAttemptIds: ids,
+    supplementalPriorHistory: history, suppliedPlan: supplied }).createdAt, "current");
+  for (const [field, value] of [["modelId", "changed"], ["controlsSha256", "9".repeat(64)],
+    ["dispatchStopAt", "2000-01-01T00:00:00.000Z"]]) {
+    const altered = structuredClone(supplied); altered[field] = value;
+    assert.throws(() => createSupplementalExecutionPlan({ fullPlan, supplementalAttemptIds: ids,
+      supplementalPriorHistory: history, suppliedPlan: altered }), /supplemental-plan-invalid/u);
+  }
+  const alteredHistory = structuredClone(supplied); alteredHistory.continuationHistory.priorWindows[1].resultSha256 = "9".repeat(64);
+  assert.throws(() => createSupplementalExecutionPlan({ fullPlan, supplementalAttemptIds: ids,
+    supplementalPriorHistory: history, suppliedPlan: alteredHistory }), /supplemental-plan-invalid/u);
+  assert.throws(() => createSupplementalExecutionPlan({ fullPlan, supplementalAttemptIds: [ids[0]],
+    supplementalPriorHistory: history }), /supplemental-invalid/u);
+});
 test("infrastructure stop pauses the started attempt without grading or consuming it", async () => {
   const writer = memoryWriter(), controller = new AbortController();
   const result = await executeCandidateAttempts({ plan: planFixture(), writer, signal: controller.signal, beforeAttempt: async () => {},
@@ -319,4 +356,31 @@ test("capture identity failure pauses without grading the candidate", async () =
     runAttempt: async slot => { const value = observed(slot); value.observation.provider.unexpectedCalls.push({ errorCode: "m1-capture-model-mismatch" }); return value; } });
   assert.equal(result.stopCode, "m1-capture-model-mismatch"); assert.equal(writer.results.length, 0); assert.equal(result.notExecuted.length, 120);
   assert.equal(writer.pauses.length, 1);
+  assert.equal(writer.pauses[0].value.observation.provider.unexpectedCalls[0].errorCode, "m1-capture-model-mismatch");
+});
+test("durable pause receipt hash-binds a full ungraded observation without consuming the identity", async t => {
+  const root = await temporary(t), directory = path.join(root, "pause-evidence"), plan = planFixture(), slot = plan.attempts[0];
+  const writer = await createCampaignWriter(directory, plan), observation = observed(slot).observation;
+  observation.provider.unexpectedCalls.push({ errorCode: "m1-capture-model-mismatch" });
+  await writer.paused(slot, { code: "m1-capture-model-mismatch", category: "harness" }, { started: true, observation,
+    attemptConsumed: true, modelGraded: true, pausedObservation: { file: "forged.json", sha256: hash, bytes: 1 } });
+  const receipt = JSON.parse(await readFile(path.join(directory, `${slot.attemptId}.pause.json`), "utf8"));
+  const retained = JSON.parse(await readFile(path.join(directory, receipt.pausedObservation.file), "utf8"));
+  assert.equal(receipt.attemptConsumed, false); assert.equal(receipt.modelGraded, false);
+  assert.equal(retained.attemptConsumed, false); assert.equal(retained.modelGraded, false);
+  assert.equal(retained.observation.provider.unexpectedCalls[0].errorCode, "m1-capture-model-mismatch");
+  assert.equal(sha256(await readFile(path.join(directory, receipt.pausedObservation.file))), receipt.pausedObservation.sha256);
+});
+test("a captured downstream abort with matching durable planner deadline is retained as a model result", async () => {
+  const full = planFixture(), slot = full.attempts.find(value => value.caseId === "agent-06-crash-reconcile" && value.repetition === 2);
+  const plan = { ...full, attempts: [slot], supplemental: true, qualificationCompositionPermitted: false };
+  const writer = memoryWriter();
+  const result = await executeSupplementalCandidateAttempts({ plan, writer, signal: new AbortController().signal, beforeAttempt: async () => {},
+    runAttempt: async current => { const value = observed(current);
+      value.observation.provider.unexpectedCalls.push({ errorCode: "m1-capture-downstream-disconnected", phase: "5:run.resume" });
+      value.observation.evidence.push({ kind: "durable-task-state", phase: "5:run.resume",
+        data: { run: { errorCode: "m1-planning-deadline" } } });
+      return value; } });
+  assert.equal(result.stopCode, null); assert.equal(result.recordedAttempts, 1); assert.equal(result.notExecuted.length, 0);
+  assert.equal(writer.pauses.length, 0); assert.equal(writer.results.length, 1);
 });

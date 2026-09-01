@@ -2,14 +2,14 @@
   "schemaVersion": "runaai-m1-non-model-failure-ledger/v1",
   "asOf": "2026-09-01",
   "scope": "all retained M1-S2 campaign snapshots invalidated by application, evaluator, capture, lifecycle, operator-publication, timeout, telemetry, or browser-witness faults",
-  "qualificationStatement": "None of the 27 arm dispositions is a valid candidate or model rejection caused primarily by model quality. Individual attempts may still contain legitimate model-quality evidence, including attempts retained by later salvage.",
+  "qualificationStatement": "None of the 28 arm dispositions is a valid candidate or model rejection caused primarily by model quality. Individual attempts may still contain legitimate model-quality evidence, including attempts retained by later salvage and the completed r49 Agent-05 row.",
   "totals": {
-    "countableSnapshots": 27,
-    "recordedAttempts": 1578,
+    "countableSnapshots": 28,
+    "recordedAttempts": 1579,
     "subsequentlySalvagedAttempts": 139,
-    "currentlyPausedHistoricalRows": 70,
+    "currentlyPausedHistoricalRows": 71,
     "permanentlyDiscardedOrQualificationIneligibleAttempts": 1369,
-    "exactProviderCallsRecoverable": 1766,
+    "exactProviderCallsRecoverable": 1767,
     "additionalEarlyRetainedProviderOrModelOutputs": 138,
     "uncountedAbortSnapshots": 1
   },
@@ -40,7 +40,8 @@
     { "id": 24, "arm": "qwen36-r35", "candidateId": "qwen36-27b-mtp", "attempts": 2, "disposition": "discarded", "rootCause": "manual-browser-witness-publication" },
     { "id": 25, "arm": "gemma-r13-partial", "candidateId": "gemma4-26b-a4b", "attempts": 32, "providerCalls": 41, "disposition": "salvaged-by-same-arm-completion", "rootCause": "home-lease-unavailable" },
     { "id": 26, "arm": "coder-r46-r14", "candidateId": "qwen3-coder-30b-a3b", "attempts": 120, "providerCalls": 209, "disposition": "discarded", "rootCause": "browser-checkpoint-unobserved" },
-    { "id": 27, "arm": "qwen36-r41-r14", "candidateId": "qwen36-27b-mtp", "attempts": 70, "providerCalls": 117, "disposition": "paused-historical-snapshot", "rootCause": "row-70-m1-browser-checkpoint-aborted-with-retained-worker-and-telemetry-faults" }
+    { "id": 27, "arm": "qwen36-r41-r14", "candidateId": "qwen36-27b-mtp", "attempts": 70, "providerCalls": 117, "disposition": "paused-historical-snapshot", "rootCause": "row-70-m1-browser-checkpoint-aborted-with-retained-worker-and-telemetry-faults" },
+    { "id": 28, "arm": "qwen36-r49-r14-continuation", "candidateId": "qwen36-27b-mtp", "attempts": 1, "providerCalls": 1, "disposition": "one-row-retained-prefix-paused-before-next-record", "rootCause": "numeric-dom-abort-code-erased-planner-deadline-attribution-and-summary-only-pause-lost-full-observation" }
   ],
   "uncounted": [
     {
@@ -51,10 +52,15 @@
   "currentContinuation": {
     "candidateId": "qwen36-27b-mtp",
     "historicalRows": 70,
-    "retainedImmutableHarnessValidCompletedPrefixAttempts": 68,
+    "retainedImmutableHarnessValidCompletedPrefixAttempts": 69,
     "historicalNonModelRowsToDiscard": 2,
-    "exactContinuationAttempts": 52,
-    "resumeAttemptId": "qwen36-27b-mtp--agent-05-cancel-drain--2",
+    "exactContinuationAttempts": 51,
+    "resumeAttemptId": "qwen36-27b-mtp--agent-06-crash-reconcile--2",
+    "executionWindowsAfterCompletion": 3,
+    "requiredPriorWindowSplit": [68, 1],
+    "priorWindowKinds": ["original", "continuation"],
+    "historyBindings": ["basePlanSha256", "twoResultSha256", "twoPlanSha256", "twoRuntimeSealSha256"],
+    "r49Agent06Consumed": false,
     "singleUninterruptedArmClaimed": false,
     "modelFacingEquivalenceRequiredBeforeComposition": true
   }

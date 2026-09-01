@@ -36,7 +36,9 @@ function managedServer(handler) {
   const server = createServer((request, response) => {
     if (closing) { response.writeHead(503); response.end(); return; }
     const controller = new AbortController(), entry = { controller, promise: null };
-    const disconnected = () => { if (!response.writableFinished) controller.abort(); };
+    const disconnected = () => {
+      if (!response.writableFinished && !controller.signal.aborted) controller.abort(fail("m1-capture-downstream-disconnected"));
+    };
     response.once("close", disconnected); request.once("aborted", disconnected);
     active.add(entry);
     entry.promise = Promise.resolve().then(() => handler(request, response, controller.signal))
@@ -58,10 +60,20 @@ function managedServer(handler) {
   return { server, drain, get activeCount() { return active.size; }, close() {
     if (closePromise) return closePromise;
     closing = true;
-    for (const entry of active) entry.controller.abort();
+    for (const entry of active) entry.controller.abort(fail("m1-capture-transport-closing"));
     closePromise = (async () => { await new Promise(resolve => { server.close(resolve); server.closeAllConnections(); }); await drain(); })();
     return closePromise;
   } };
+}
+
+function captureError(error, downstreamSignal) {
+  if (downstreamSignal?.aborted && typeof downstreamSignal.reason?.code === "string") {
+    return { errorCode: downstreamSignal.reason.code, abortSource: "downstream" };
+  }
+  if (typeof error?.code === "string") return { errorCode: error.code, abortSource: null };
+  if (error?.name === "TimeoutError") return { errorCode: "m1-capture-upstream-timeout", abortSource: "capture-deadline" };
+  if (error?.name === "AbortError") return { errorCode: "m1-capture-upstream-aborted", abortSource: "upstream" };
+  return { errorCode: "m1-capture-upstream-failed", abortSource: null };
 }
 
 // Transparent owned capture/denial proxy. It does not synthesize a successful model
@@ -152,7 +164,7 @@ export async function startCaptureTransport({ mode, targetBaseUrl, modelId, kind
       response.writeHead(upstream.status, { "content-type": upstream.headers.get("content-type") ?? "application/json", "content-length": raw.length });
       response.end(raw);
     } catch (error) {
-      item.errorCode = error.code ?? "m1-capture-upstream-failed";
+      Object.assign(item, captureError(error, signal));
       ledger?.observation.provider.unexpectedCalls.push({ ...item, request: body });
       if (!response.destroyed && !response.headersSent) { response.writeHead(503, { "content-type": "application/json" }); response.end(JSON.stringify({ errorCode: item.errorCode })); }
     } finally {

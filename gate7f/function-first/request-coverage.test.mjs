@@ -53,6 +53,11 @@ for(const candidate of MANIFEST.candidates)for(const mode of modes)test(`same co
       "Follow the user's exact requested format and length",'do not add an extra greeting, preface, explanation, or closing outside it',
       'retain the requested subject and material details','explicitly identify that limitation',
       'Answer every distinct clause of the current request', 'Negative evidence matters'])assert.ok(system.includes(required),required);
+    if(mode.role==='review'){
+      assert.match(system,/explicitly assess every stated control/u);
+      assert.match(system,/specific resource or path authorization boundary/u);
+      assert.match(system,/do not omit a control/u);
+    }
     for(const caseLeak of ['catering amount', 'temperature.js', 'eight-second', 'authentication is not path authorization']) {
       assert.equal(system.includes(caseLeak),false,caseLeak);
     }
@@ -68,6 +73,10 @@ for(const candidate of MANIFEST.candidates)for(const mode of modes)test(`same co
       const verification=wire[1],verificationSystem=verification.messages.filter(m=>m.role==='system').map(m=>m.content).join('\n');
       assert.match(verificationSystem,/every explicit clause/u);assert.match(verificationSystem,/relevant negative evidence is not omitted/u);
       assert.match(verificationSystem,/distinguish inspection, documented policy, implementation, measurement, inference, and unknowns/u);
+      if(mode.role==='review'){
+        assert.match(verificationSystem,/reject a candidate that silently skips any stated control/u);
+        assert.match(verificationSystem,/does or does not enforce the specific resource or path boundary/u);
+      }
       for(const caseLeak of ['catering amount','temperature.js','eight-second','authentication is not path authorization'])assert.equal(verificationSystem.includes(caseLeak),false);
       const verificationPayload=JSON.parse(verification.messages.find(m=>m.role==='user').content);
       assert.equal(verificationPayload.schemaVersion,'runa2-evidence-response-verification/v1');

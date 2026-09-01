@@ -5,6 +5,15 @@ Milestone: M1
 Slice ID: M1-S2
 Status: in progress, acceptance frozen before implementation; not complete or production-qualified.
 
+R15 criteria update, 2026-09-01: the prospective model-neutral correction is frozen before
+implementation in
+`../gate7f/function-first/M1-S2-R15-AGENT-REVIEW-CORRECTIVE-CRITERIA-2026-09-01.md`. It addresses only
+R14's genuine Review checker-shape, exhaustive evidence-limit/counterexample reasoning, read-only Agent
+type/formula reasoning and failed-check repair-context defects. Candidates, cases, 360+12 denominator,
+thresholds, authority and existing deadlines remain unchanged. R14 is not replayed, pooled or regraded.
+The next work is deterministic implementation and verification; no R15 model call is authorized until
+the corrected source is committed/resealed and fresh controls plus real-browser proof pass.
+
 R14 completion update, 2026-09-01: R14 is complete and immutable. The corrected method resumed Qwen
 at the first unconsumed identity, recorded the remaining 51 rows, and composed an exact disclosed
 68 + 1 + 51 history. All 360 attempts and 12/12 controls are complete; the candidate-blind review has

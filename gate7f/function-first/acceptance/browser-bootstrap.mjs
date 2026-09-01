@@ -1,8 +1,10 @@
 import { randomBytes, timingSafeEqual } from "node:crypto";
 import { createServer } from "node:http";
-import { browserWitnessFromAck, browserWitnessSha256, canonicalBrowserWitness } from "./browser-witness.mjs";
+import { AGENT05_BOUNDED_DRAIN, AGENT05_BOUNDED_DRAIN_NOTICE,
+  browserWitnessFromAck, browserWitnessSha256, canonicalBrowserWitness } from "./browser-witness.mjs";
 
 const submitScript = `const form=document.querySelector('form');form.addEventListener('submit',async event=>{event.preventDefault();const output=document.querySelector('[role=status]'),button=form.querySelector('button');button.disabled=true;output.textContent='Starting synthetic session…';try{const response=await fetch('/__acceptance/session',{method:'POST',credentials:'same-origin',headers:{'content-type':'application/x-www-form-urlencoded'},body:new URLSearchParams(new FormData(form))});if(!response.ok)throw new Error('denied');location.assign('/');}catch{output.textContent='Synthetic session was not started. Check the one-time nonce or request a new test checkpoint.';button.disabled=false;}});`;
+const witnessScript = `const form=document.querySelector('form');form.addEventListener('submit',async event=>{event.preventDefault();const output=document.querySelector('[role=status]'),button=form.querySelector('button');button.disabled=true;output.textContent='Recording the bounded cancellation observation…';try{const response=await fetch('/__acceptance/browser-observation-witness',{method:'POST',credentials:'same-origin',headers:{'content-type':'application/json'},body:JSON.stringify({checkpointId:form.elements.checkpointId.value,token:form.elements.token.value,witness:${JSON.stringify({ boundedDrain: AGENT05_BOUNDED_DRAIN, claimedImmediateKill: false, notice: AGENT05_BOUNDED_DRAIN_NOTICE, taskStatus: "cancelled" })}})});if(response.status!==204)throw new Error('denied');output.textContent='Cancellation observation recorded.';}catch{output.textContent='Cancellation observation was not recorded. The one-use checkpoint may have expired.';button.disabled=false;}});`;
 const OBSERVATION_DENIALS = Object.freeze(["method-or-remote", "body-invalid", "checkpoint-unknown",
   "token-invalid", "replay", "expired", "binding-invalid"]);
 const SYNTHETIC_BOOTSTRAP_TTL_MS = 900000;
@@ -29,6 +31,29 @@ export function withSyntheticBootstrap(shippedServer, { identities, getLedger })
     }
     if (request.method === "GET" && url.pathname === "/__acceptance/bootstrap.js") {
       response.writeHead(200, { "content-type": "text/javascript; charset=utf-8", "cache-control": "no-store" }); return response.end(submitScript);
+    }
+    if (request.method === "GET" && url.pathname === "/__acceptance/browser-observation-witness-ui.js") {
+      response.writeHead(200, { "content-type": "text/javascript; charset=utf-8", "cache-control": "no-store" }); return response.end(witnessScript);
+    }
+    if (request.method === "GET" && url.pathname === "/__acceptance/browser-observation-witness-ui") {
+      response.setHeader("cache-control", "no-store"); response.setHeader("referrer-policy", "no-referrer");
+      response.setHeader("content-security-policy", "default-src 'none'; script-src 'self'; connect-src 'self'; form-action 'none'; frame-ancestors 'none'");
+      try {
+        const remote = request.socket.remoteAddress, checkpointId = url.searchParams.get("checkpointId"), token = url.searchParams.get("token");
+        if (!["127.0.0.1", "::1", "::ffff:127.0.0.1"].includes(remote)) throw observationDenied("method-or-remote");
+        const entry = browserObservations.get(checkpointId);
+        if (!entry) throw observationDenied("checkpoint-unknown");
+        if (!/^[a-f0-9]{64}$/.test(token ?? "") || token.length !== entry.witnessToken.length
+            || !timingSafeEqual(Buffer.from(token), Buffer.from(entry.witnessToken))) throw observationDenied("token-invalid");
+        if (entry.witness !== null) throw observationDenied("replay");
+        if (Date.now() > entry.witnessExpiresAtMs) throw observationDenied("expired");
+        response.writeHead(200, { "content-type": "text/html; charset=utf-8" });
+        return response.end(`<!doctype html><title>Bounded cancellation observation</title><h1>Record the bounded cancellation observation</h1><p>This one-use acceptance page records that the cancelled task did not claim an immediate kill and will retain any already-dispatched result.</p><form><input type="hidden" name="checkpointId" value="${checkpointId}"><input type="hidden" name="token" value="${token}"><button type="submit">Record cancellation observation</button></form><p role="status">Ready to record.</p><script src="/__acceptance/browser-observation-witness-ui.js" defer></script>`);
+      } catch (error) {
+        const reason = OBSERVATION_DENIALS.includes(error?.observationDenialReason) ? error.observationDenialReason : "body-invalid";
+        counters.browserWitnessDenied++; counters.browserWitnessDenials[reason]++;
+        response.writeHead(403, { "content-type": "text/plain; charset=utf-8" }); return response.end("Acceptance checkpoint unavailable.");
+      }
     }
     if (["/__acceptance/browser-observation-witness", "/__acceptance/browser-observation-ack"].includes(url.pathname)) {
       response.setHeader("cache-control", "no-store");
@@ -122,6 +147,7 @@ export function withSyntheticBootstrap(shippedServer, { identities, getLedger })
       witness: null, witnessSha256: null, witnessReceivedAtMs: null, ackRaw: null, receivedAtMs: null });
     return { schemaVersion: "runaai-m1-browser-observation-endpoint/v2",
       witnessUrl: `${identities.publicBaseUrl}/__acceptance/browser-observation-witness`, witnessToken,
+      witnessPageUrl: `${identities.publicBaseUrl}/__acceptance/browser-observation-witness-ui?checkpointId=${checkpointId}&token=${witnessToken}`,
       ackUrl: `${identities.publicBaseUrl}/__acceptance/browser-observation-ack`, ackToken,
       witnessExpiresAt: new Date(witnessExpiresAtMs).toISOString(), publishExpiresAt: new Date(publishExpiresAtMs).toISOString() };
   }, readBrowserWitness(checkpointId) {

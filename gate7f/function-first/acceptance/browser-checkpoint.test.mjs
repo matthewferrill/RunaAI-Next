@@ -133,6 +133,7 @@ test("on-time live witness releases the checkpoint before a matching acknowledge
     createBrowserObservation(checkpointId, witnessExpiresAtMs, publishExpiresAtMs) {
       return { schemaVersion: "runaai-m1-browser-observation-endpoint/v2",
         witnessUrl: `${client.host.baseUrl}/__acceptance/browser-observation-witness`, witnessToken: "c".repeat(64),
+        witnessPageUrl: `${client.host.baseUrl}/__acceptance/browser-observation-witness-ui?checkpointId=${checkpointId}&token=${"c".repeat(64)}`,
         ackUrl: `${client.host.baseUrl}/__acceptance/browser-observation-ack`, ackToken: "d".repeat(64),
         witnessExpiresAt: new Date(witnessExpiresAtMs).toISOString(), publishExpiresAt: new Date(publishExpiresAtMs).toISOString() };
     },
@@ -165,7 +166,7 @@ test("on-time live witness releases the checkpoint before a matching acknowledge
   await ticket.publication;
   assert.equal(fileReads, 1, "only preparation used the file reader");
   assert.deepEqual(Object.keys(announcedWitness).sort(), ["baseUrl", "caseId", "checkpointId", "schemaVersion",
-    "stage", "witnessExpiresAt", "witnessToken", "witnessUrl"]);
+    "stage", "witnessExpiresAt", "witnessPageUrl", "witnessToken", "witnessUrl"]);
   assert.equal(announcedWitness.checkpointId, request.checkpointId);
   assert.equal(announcedWitness.witnessToken, request.observationEndpoint.witnessToken);
   assert.equal("ackToken" in announcedWitness, false); assert.equal("scope" in announcedWitness, false);
@@ -186,9 +187,10 @@ test("on-time witness cannot authorize acknowledgement publication after the gra
   const witness = { boundedDrain: AGENT05_BOUNDED_DRAIN, claimedImmediateKill: false,
     notice: AGENT05_BOUNDED_DRAIN_NOTICE, taskStatus: "cancelled" };
   Object.assign(client.host, {
-    createBrowserObservation(_checkpointId, witnessExpiresAtMs, publishExpiresAtMs) {
+    createBrowserObservation(checkpointId, witnessExpiresAtMs, publishExpiresAtMs) {
       return { schemaVersion: "runaai-m1-browser-observation-endpoint/v2",
         witnessUrl: `${client.host.baseUrl}/__acceptance/browser-observation-witness`, witnessToken: "c".repeat(64),
+        witnessPageUrl: `${client.host.baseUrl}/__acceptance/browser-observation-witness-ui?checkpointId=${checkpointId}&token=${"c".repeat(64)}`,
         ackUrl: `${client.host.baseUrl}/__acceptance/browser-observation-ack`, ackToken: "d".repeat(64),
         witnessExpiresAt: new Date(witnessExpiresAtMs).toISOString(), publishExpiresAt: new Date(publishExpiresAtMs).toISOString() };
     },
@@ -223,9 +225,10 @@ test("failed live observation consumes its bounded harness slot", async t => {
   t.after(() => rm(directory, { recursive: true, force: true }));
   const client = cancelClient(), start = Date.parse("2026-08-30T12:30:00.000Z"); let clock = start, consumed = 0;
   Object.assign(client.host, {
-    createBrowserObservation(_checkpointId, witnessExpiresAtMs, publishExpiresAtMs) {
+    createBrowserObservation(checkpointId, witnessExpiresAtMs, publishExpiresAtMs) {
       return { schemaVersion: "runaai-m1-browser-observation-endpoint/v2",
         witnessUrl: `${client.host.baseUrl}/__acceptance/browser-observation-witness`, witnessToken: "d".repeat(64),
+        witnessPageUrl: `${client.host.baseUrl}/__acceptance/browser-observation-witness-ui?checkpointId=${checkpointId}&token=${"d".repeat(64)}`,
         ackUrl: `${client.host.baseUrl}/__acceptance/browser-observation-ack`, ackToken: "e".repeat(64),
         witnessExpiresAt: new Date(witnessExpiresAtMs).toISOString(), publishExpiresAt: new Date(publishExpiresAtMs).toISOString() };
     },

@@ -84,7 +84,8 @@ class Adapter {
     await authorize(); assert(!signal.aborted); this.tests++;
     const passed = this.snapshots.get(reference.revisionId).files[0].content === "exports.add=(a,b)=>a+b;";
     return { status: passed ? "passed" : "failed", passed, suiteId, suiteSha256: digest(suiteId),
-      workspaceSha256: reference.workspaceSha256, checks: [{ actual: passed ? 26 : 2, expected: 26, passed }],
+      workspaceSha256: reference.workspaceSha256, checks: [{ testId: "addition", actual: passed ? 26 : 2,
+        expected: 26, errorCode: null, passed }],
       executionReceipt: { status: "executed", syntheticExecutorDouble: true } };
   }
 }

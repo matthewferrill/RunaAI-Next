@@ -15,15 +15,20 @@ are unchanged. M1 is authorized, not complete; its first local wiring result is 
 The steward authorized necessary non-destructive work and commit/push to RunaAI-Next without recurring
 permission requests. Human involvement is reserved for genuine customer tests or human-only operations.
 
-### Current checkpoint: R15 corrective criteria frozen before implementation
+### Current checkpoint: R15 correction implemented and deterministically verified
 
-The prospective R15 contract is frozen in
-`gate7f/function-first/M1-S2-R15-AGENT-REVIEW-CORRECTIVE-CRITERIA-2026-09-01.md`. It permits only a
-simpler unconditional Review checker wire shape with exact acceptance echo, exhaustive generic
-evidence-limit/counterexample verification, type-preserving read-only Agent analysis and bounded exact
-failed-check repair context. It preserves the three candidates, 40 cases, 360 attempts, 12 controls,
-thresholds, authority, deadlines and candidate-blind evaluator. Implementation and deterministic proof
-are next. No R15 inference, source seal, controls, production change or customer trial has started.
+The prospective contract frozen in
+`gate7f/function-first/M1-S2-R15-AGENT-REVIEW-CORRECTIVE-CRITERIA-2026-09-01.md` is implemented and
+recorded in `gate7f/function-first/M1-S2-R15-CORRECTION-IMPLEMENTATION-RESULTS-2026-09-01.md`. The
+unconditional exact-echo Review wire, generic evidence-limit/counterexample protocol, type-preserving
+read-only Agent analysis and bounded exact failed-check projection passed two independent P0/P1 reviews.
+The final complete suite passed 1,915/1,993 with 78 intentional environment-dependent skips and zero
+failures; harness, Gate 7F and roadmap gates passed 160/160, 28/28 and 15/15. No model was invoked.
+
+The next operations are commit/push, a fresh source archive/runtime seal, then fresh model-free controls
+and real-browser proof. No R15 inference, production change or customer trial has started. The three
+candidates, 40 cases, 360 attempts, 12 controls, thresholds, authority, deadlines and candidate-blind
+evaluator remain unchanged.
 
 ### Retained checkpoint: R14 complete; no Review route
 

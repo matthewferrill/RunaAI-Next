@@ -30,7 +30,8 @@ for(const candidate of MANIFEST.candidates)for(const mode of modes)test(`same co
     const answer={answer:'Synthetic upstream text: not a model quality result.',citations:[{sourceId:source.sourceId,sectionId:source.sectionId}]};
     let payload;try{payload=JSON.parse(body.messages.find(message=>message.role==='user')?.content);}catch{}
     const content=payload?.schemaVersion==='runa2-evidence-response-verification/v1'
-      ?JSON.stringify({accepted:true,reason:'Synthetic checker fixture accepted.',correctedAnswer:null,citations:null})
+      ?JSON.stringify({verdict:'accept',reason:'Synthetic checker fixture accepted.',
+        finalAnswer:payload.candidateAnswer,citations:payload.candidateCitations})
       :mode.selected?JSON.stringify(answer):answer.answer;
     res.setHeader('content-type','application/json');res.end(JSON.stringify({id:'fixture',object:'chat.completion',created:1,
       model:candidate.key,choices:[{index:0,message:{role:'assistant',content},finish_reason:'stop'}],
@@ -57,6 +58,8 @@ for(const candidate of MANIFEST.candidates)for(const mode of modes)test(`same co
       assert.match(system,/explicitly assess every stated control/u);
       assert.match(system,/specific resource or path authorization boundary/u);
       assert.match(system,/do not omit a control/u);
+      assert.match(system,/universal, absolute, and comparative claims/u);
+      assert.match(system,/call-site argument order/u);
     }
     for(const caseLeak of ['catering amount', 'temperature.js', 'eight-second', 'authentication is not path authorization']) {
       assert.equal(system.includes(caseLeak),false,caseLeak);
@@ -76,6 +79,8 @@ for(const candidate of MANIFEST.candidates)for(const mode of modes)test(`same co
       if(mode.role==='review'){
         assert.match(verificationSystem,/reject a candidate that silently skips any stated control/u);
         assert.match(verificationSystem,/does or does not enforce the specific resource or path boundary/u);
+        assert.match(verificationSystem,/Test each claim's required population/u);
+        assert.match(verificationSystem,/function parameter order/u);
       }
       for(const caseLeak of ['catering amount','temperature.js','eight-second','authentication is not path authorization'])assert.equal(verificationSystem.includes(caseLeak),false);
       const verificationPayload=JSON.parse(verification.messages.find(m=>m.role==='user').content);

@@ -16,11 +16,12 @@
     "gate7f/function-first/M1-S2-CAMPAIGN-HARNESS-RCA-AND-CONTINUITY-CORRECTION-2026-09-01.md",
     "gate7f/function-first/M1-S2-R14-HARNESS-CONTINUITY-ADDENDUM-2026-09-01.md",
     "gate7f/function-first/M1-S2-R14-INDEPENDENT-SEMANTIC-RESULTS-2026-09-01.md",
-    "gate7f/function-first/M1-S2-R15-AGENT-REVIEW-CORRECTIVE-CRITERIA-2026-09-01.md"
+    "gate7f/function-first/M1-S2-R15-AGENT-REVIEW-CORRECTIVE-CRITERIA-2026-09-01.md",
+    "gate7f/function-first/M1-S2-R15-CORRECTION-IMPLEMENTATION-RESULTS-2026-09-01.md"
   ],
   "scopeDocument": "roadmap/CURRENT-SLICE.md",
   "capabilityIds": ["C01", "C02", "C03", "C04", "C06", "C07", "C12", "C15", "C16"],
-  "nextWork": "Implement and verify the frozen R15 model-neutral Agent and Review correction without models, commit and reseal the exact source, then require fresh controls and real-browser proof before a fresh full 360+12 campaign and candidate-blind review. Do not replay or regrade R14.",
+  "nextWork": "Commit and push the deterministically verified R15 implementation, reseal the exact source, then require fresh controls and real-browser proof before a fresh full 360+12 campaign and candidate-blind review. Do not replay or regrade R14.",
   "remainingRoadmapRequired": true,
   "completionClaim": "M1 completion is not whole-product completion."
 }

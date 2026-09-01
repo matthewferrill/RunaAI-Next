@@ -3,16 +3,19 @@
 Roadmap revision: 2026-08-28.1
 Milestone: M1
 Slice ID: M1-S2
-Status: in progress, acceptance frozen before implementation; not complete or production-qualified.
+Status: in progress, R15 implementation deterministically verified before sealing; not complete or production-qualified.
 
-R15 criteria update, 2026-09-01: the prospective model-neutral correction is frozen before
+R15 implementation update, 2026-09-01: the prospective model-neutral correction was frozen before
 implementation in
 `../gate7f/function-first/M1-S2-R15-AGENT-REVIEW-CORRECTIVE-CRITERIA-2026-09-01.md`. It addresses only
 R14's genuine Review checker-shape, exhaustive evidence-limit/counterexample reasoning, read-only Agent
 type/formula reasoning and failed-check repair-context defects. Candidates, cases, 360+12 denominator,
 thresholds, authority and existing deadlines remain unchanged. R14 is not replayed, pooled or regraded.
-The next work is deterministic implementation and verification; no R15 model call is authorized until
-the corrected source is committed/resealed and fresh controls plus real-browser proof pass.
+The implementation and its two independent P0/P1 reviews are complete with no remaining finding. The
+complete repository suite passes 1,915/1,993 with 78 intentional skips and zero failures; exact results
+and deterministic failure disposition are in
+`../gate7f/function-first/M1-S2-R15-CORRECTION-IMPLEMENTATION-RESULTS-2026-09-01.md`. No R15 model call
+is authorized until the corrected source is committed/resealed and fresh controls plus real-browser proof pass.
 
 R14 completion update, 2026-09-01: R14 is complete and immutable. The corrected method resumed Qwen
 at the first unconsumed identity, recorded the remaining 51 rows, and composed an exact disclosed
@@ -203,12 +206,12 @@ R12 was the next finite correction under its prospectively frozen criteria. The
 steward reaffirmed continuation until completion or genuinely needed human
 testing. Internal module, commit and publication checkpoints are not turn-ending
 gates. R12, R13 and R14 model execution and independent review are complete. R14 provides qualifying
-Chat, Research, Code and Agent routes but no Review route. A prospective R15 contract must address the
-newly measured generic Review evidence-limit/structured-output defects and the two nonqualifying Agent
-defects without candidate branching, case-answer injection, threshold change, subset retry or favorable
-pooling. It requires a fresh full 360+12 qualification plus candidate-blind independent review. The
-customer trial stays hidden until all five M1 functions have a qualifying route. The M1-S1 result below
-is retained history.
+Chat, Research, Code and Agent routes but no Review route. The prospective R15 contract and deterministic
+implementation now address the measured generic Review evidence-limit/structured-output defects and the
+two nonqualifying Agent defects without candidate branching, case-answer injection, threshold change,
+subset retry or favorable pooling. The next gate is commit/reseal, fresh controls and real-browser proof,
+then a fresh full 360+12 qualification plus candidate-blind independent review. The customer trial stays
+hidden until all five M1 functions have a qualifying route. The M1-S1 result below is retained history.
 
 M1-S1: role-separated provider contract and compatibility wiring, with current-state/receipt acceptance
 requirements captured for the later project tools. This is first because all three model comparisons and

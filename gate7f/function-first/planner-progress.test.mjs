@@ -14,7 +14,8 @@ function receipt(patch = {}) {
     beforeRevision: 1, afterRevision: 1, beforeSha256: sha("a"), afterSha256: sha("a"),
     currentAtRecording: true, recordedAt: "2026-08-28T12:00:00.000Z",
     output: { suiteId: "square", suiteSha256: sha("d"), workspaceSha256: sha("a"), status: "failed", passed: false,
-      executionReceipt: { status: "executed" }, checks: [{ actual: 6, expected: 9, passed: false }] }, ...patch };
+      executionReceipt: { status: "executed" }, checks: [{ testId: "positive", actual: 6, expected: 9,
+        errorCode: null, passed: false }] }, ...patch };
 }
 const input = () => ({ objective: "First run the selected suite, then repair any observed defect and retest.",
   snapshot: snapshot(), repair: true, receipts: [receipt()], previousPlans: [] });
@@ -25,14 +26,20 @@ test("progress distinguishes initial planning from a current recorded failure wi
   assert.equal(repair.schemaVersion, "runaai-m1-planner-progress/v1"); assert.equal(repair.phase, "repair");
   assert.equal(repair.observations[0].outcome, "test-failed");
   assert.deepEqual(repair.currentFailedTests, [{ receiptId: "receipt-test", receiptDigest: sha("c"),
-    suiteId: "square", suiteSha256: sha("d"), workspaceSha256: sha("a") }]);
+    suiteId: "square", suiteSha256: sha("d"), workspaceSha256: sha("a"),
+    failedChecks: [{ testId: "positive", expected: 9, actual: 6, errorCode: null }] }]);
   assert.deepEqual(value, original); assert(Object.isFrozen(repair.observations[0].test));
+  assert(Object.isFrozen(repair.currentFailedTests[0].failedChecks));
+  assert(Object.isFrozen(repair.currentFailedTests[0].failedChecks[0].expected));
+  assert(Object.isFrozen(repair.currentFailedTests[0].failedChecks[0].actual));
   assert.throws(() => { repair.currentFailedTests[0].suiteId = "foreign"; }, TypeError);
-  assert(!JSON.stringify(repair).includes('"expected"'), "progress adds no solution or expected-answer content");
+  assert(!JSON.stringify(repair).includes("exports.square"), "progress adds no hidden source correction");
+  assert(!JSON.stringify(repair).includes("capabilityIds"), "progress cannot add authority");
 });
 
 test("a passed result, stale bytes, stale revision or unrecorded current state is not a repair basis", () => {
-  for (const mutate of [value => { value.receipts[0].output.passed = true; value.receipts[0].output.status = "passed"; },
+  for (const mutate of [value => { value.receipts[0].output.passed = true; value.receipts[0].output.status = "passed";
+      value.receipts[0].output.checks[0].actual=9; value.receipts[0].output.checks[0].passed=true; },
     value => { value.snapshot.workspaceSha256 = sha("e"); }, value => { value.snapshot.projectRevision = 2; },
     value => { value.receipts[0].currentAtRecording = false; }]) {
     const value = input(); mutate(value); assert.throws(() => plannerProgress(value), /progress-invalid/);
@@ -64,6 +71,7 @@ test("later success or incomplete execution supersedes a failure on identical se
   const failed = receipt(), later = receipt({ receiptId: "receipt-later", proposalId: "proposal-later", recordedAt: "2026-08-28T12:00:01.000Z" });
   for (const incomplete of [false, true]) {
     later.output.passed = !incomplete; later.output.status = incomplete ? "unavailable" : "passed";
+    later.output.checks = incomplete ? [] : [{ testId: "positive", actual: 9, expected: 9, errorCode: null, passed: true }];
     later.executionStatus = incomplete ? "unavailable" : "ran";
     later.output.executionReceipt.status = incomplete ? "unavailable" : "executed";
     const result = plannerProgress({ snapshot: snapshot(), receipts: [later, failed] });
@@ -72,6 +80,32 @@ test("later success or incomplete execution supersedes a failure on identical se
   }
   later.recordedAt = failed.recordedAt;
   assert.throws(() => plannerProgress({ repair: true, snapshot: snapshot(), receipts: [failed, later] }), /progress-invalid/);
+});
+
+test("bounded executor failures remain non-repair observations instead of becoming malformed receipts", () => {
+  for (const executionStatus of ["timed-out", "output-limited", "failed"]) {
+    const value=input(); value.repair=false; value.receipts[0].executionStatus=executionStatus;
+    value.receipts[0].output={...value.receipts[0].output,status:"failed",passed:false,checks:[],
+      executionReceipt:{status:executionStatus}};
+    const progress=plannerProgress(value);
+    assert.equal(progress.observations[0].outcome,"test-not-completed");
+    assert.deepEqual(progress.currentFailedTests,[]);
+  }
+});
+
+test("execution status maps exactly to the service-produced test status", () => {
+  for (const [executionStatus,status,executionReceipt] of [
+    ["not-run","failed",undefined], ["unavailable","failed",{status:"unavailable"}],
+    ["timed-out","unavailable",{status:"timed-out"}], ["observed","unavailable",{status:"observed"}],
+  ]) {
+    const value=input(); value.repair=false; value.receipts[0].executionStatus=executionStatus;
+    value.receipts[0].output={...value.receipts[0].output,status,passed:false,checks:[],executionReceipt};
+    assert.throws(()=>plannerProgress(value),/progress-invalid/);
+  }
+  const notRun=input(); notRun.repair=false; notRun.receipts[0].executionStatus="not-run";
+  notRun.receipts[0].output={...notRun.receipts[0].output,status:"unavailable",passed:false,checks:[]};
+  delete notRun.receipts[0].output.executionReceipt;
+  assert.equal(plannerProgress(notRun).observations[0].outcome,"test-not-completed");
 });
 
 for (const [label, mutate] of [
@@ -84,6 +118,14 @@ for (const [label, mutate] of [
   ["missing actual execution", value => { delete value.receipts[0].output.executionReceipt; }],
   ["wrong suite workspace", value => { value.receipts[0].output.workspaceSha256 = sha("f"); }],
   ["inconsistent result", value => { value.receipts[0].output.passed = true; }],
+  ["missing failed check id", value => { delete value.receipts[0].output.checks[0].testId; }],
+  ["unsupported failed check error", value => { value.receipts[0].output.checks[0].errorCode = "invented"; }],
+  ["duplicate failed check id", value => { value.receipts[0].output.checks.push(structuredClone(value.receipts[0].output.checks[0])); }],
+  ["failed status with all checks passing", value => { const check=value.receipts[0].output.checks[0]; check.actual=check.expected; check.passed=true; }],
+  ["passed status with a failed check", value => { value.receipts[0].output.status="passed"; value.receipts[0].output.passed=true; }],
+  ["contradictory check flag", value => { value.receipts[0].output.checks[0].passed=true; }],
+  ["oversized failed check value", value => { value.receipts[0].output.checks[0].actual="x".repeat(4001); }],
+  ["oversized failed check list", value => { value.receipts[0].output.checks = Array(17).fill(value.receipts[0].output.checks[0]); }],
   ["duplicate receipt", value => { value.receipts.push(structuredClone(value.receipts[0])); }],
   ["mixed scope", value => { value.receipts.push(receipt({ participantId: "bob", receiptId: "receipt-other", proposalId: "proposal-other" })); }],
   ["oversized receipt list", value => { value.receipts = Array(129).fill(receipt()); }],
@@ -98,6 +140,18 @@ for (const [label, mutate] of [
   assert.throws(() => plannerProgress(value), /progress-invalid/);
   await assert.rejects(planner.plan(value), label === "oversized receipt list" ? /input-limited/ : /progress-invalid/);
   assert.equal(calls, 0);
+});
+
+test("failed-check JSON values are recursively immutable in every projected view", () => {
+  const value=input(), nested={ array: [{ value: 6 }] };
+  value.receipts[0].output.checks[0].actual=nested;
+  value.receipts[0].output.checks[0].expected={ array: [{ value: 9 }] };
+  const progress=plannerProgress(value);
+  const projected=progress.currentFailedTests[0].failedChecks[0];
+  assert(Object.isFrozen(projected.actual)); assert(Object.isFrozen(projected.actual.array));
+  assert(Object.isFrozen(projected.actual.array[0])); assert(Object.isFrozen(projected.expected.array[0]));
+  assert.throws(()=>{projected.actual.array[0].value=9;},TypeError);
+  assert.equal(value.receipts[0].output.checks[0].actual.array[0].value,6);
 });
 
 const candidates = [["gemma-4-26b-a4b-it-qat", "none"], ["qwen3-coder-30b-a3b-instruct", null], ["qwen3.6-27b-mtp", "none"]];
@@ -141,6 +195,9 @@ for (const [modelId, reasoningEffort] of candidates) for (const role of ["code",
       assert.match(body.messages[0].content, /approval pause is not such a branch/);
       assert.match(body.messages[0].content, /use summary to answer the actual question from the supplied current snapshot/);
       assert.match(body.messages[0].content, /Do not say an inspection, change or test already ran unless a supplied application receipt proves it/);
+      assert.match(body.messages[0].content, /Preserve numeric scalar arithmetic and operand order/);
+      assert.match(body.messages[0].content, /failedChecks entry as a trusted bounded observation/);
+      assert.match(body.messages[0].content, /Never substitute array, set, or string operations for numeric scalar parameters/);
       assert.doesNotMatch(body.messages[0].content, /Code01|negative means debt|positive means credit|balance\.js/);
       assert.doesNotMatch(body.messages[0].content, /Code05|unique|Set\(|square|index\.js|115|140|\/no_think/);
       assert.doesNotMatch(body.messages[0].content, /Code07|stock\.js|remaining\(stock|5660a7d38368|Gemma|Qwen/);

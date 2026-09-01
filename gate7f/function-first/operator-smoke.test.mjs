@@ -37,7 +37,8 @@ test("smoke calls actual Mastra answer/planner and auxiliary adapters, records n
       : prompt.schemaVersion === "runaai-m1-plan-protocol-correction/v1"
         ? JSON.stringify({ summary: "Inspect only", steps: [{ capabilityId: "project.inspect", arguments: { path: "echo.js" } }] })
       : prompt.schemaVersion === "runa2-evidence-response-verification/v1"
-        ? JSON.stringify({ accepted: true, reason: "Synthetic smoke response is complete.", correctedAnswer: null, citations: null })
+        ? JSON.stringify({ verdict: "accept", reason: "Synthetic smoke response is complete.",
+          finalAnswer: prompt.candidateAnswer, citations: prompt.candidateCitations })
       : prompt.evidence.length ? JSON.stringify({ answer: "The north room [1].", citations: [{ sourceId: "smoke-note", sectionId: "provided" }] })
       : "Hello, Garden Circle.";
     return json({ id: "synthetic-completion", object: "chat.completion", created: 1, model: value.modelId,

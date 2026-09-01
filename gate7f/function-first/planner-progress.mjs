@@ -1,10 +1,22 @@
 import { z } from "zod";
+import { isDeepStrictEqual } from "node:util";
 import { CAPABILITIES } from "./tasks/contracts.mjs";
 
 const fail = () => Object.assign(new Error("m1-planner-progress-invalid"), { code: "m1-planner-progress-invalid" });
 const id = z.string().min(1).max(160).regex(/^[a-zA-Z0-9][a-zA-Z0-9_.:-]*$/);
 const sha = z.string().regex(/^[a-f0-9]{64}$/);
 const revision = z.number().int().positive();
+const jsonValue = z.lazy(() => z.union([z.null(), z.boolean(), z.number().finite(), z.string(),
+  z.array(jsonValue), z.record(z.string(), jsonValue)]));
+const boundedJsonValue = jsonValue.refine(value => {
+  try { return Buffer.byteLength(JSON.stringify(value), "utf8") <= 4000; }
+  catch { return false; }
+});
+function deepFreeze(value) {
+  if (!value || typeof value !== "object" || Object.isFrozen(value)) return value;
+  for (const child of Object.values(value)) deepFreeze(child);
+  return Object.freeze(value);
+}
 const receiptSchema = z.object({
   schemaVersion: z.literal("runa-m1-task-receipt/v1"), receiptId: id, receiptDigest: sha, proposalId: id,
   participantId: id, projectId: id, environmentId: id, taskId: id,
@@ -26,6 +38,8 @@ const snapshotSchema = z.object({
 const testSchema = z.object({
   suiteId: id, suiteSha256: sha, workspaceSha256: sha,
   status: z.enum(["passed", "failed", "unavailable"]), passed: z.boolean(),
+  checks: z.array(z.object({ testId: id, expected: boundedJsonValue, actual: boundedJsonValue,
+    errorCode: z.enum(["project-test-evaluation-failed"]).nullable(), passed: z.boolean() }).strict()).max(16),
   executionReceipt: z.object({ status: z.enum(["executed", "failed", "timed-out", "output-limited", "unavailable"]) }).passthrough().optional(),
 }).passthrough();
 
@@ -67,12 +81,27 @@ export function plannerProgress(input) {
       const parsed = testSchema.safeParse(receipt.output);
       if (!parsed.success) throw fail();
       const output = parsed.data, ran = receipt.executionStatus === "ran";
+      const checkIds = output.checks.map(check => check.testId);
+      const checksConsistent = output.checks.every(check => check.passed
+        === (check.errorCode === null && isDeepStrictEqual(check.actual, check.expected)));
+      const nonRanStatusConsistent = ["not-run", "unavailable"].includes(receipt.executionStatus)
+        ? output.status === "unavailable"
+        : ["failed", "timed-out", "output-limited"].includes(receipt.executionStatus) && output.status === "failed";
+      const resultConsistent = ran ? output.status === "passed"
+        ? output.passed && output.checks.length > 0 && output.checks.every(check => check.passed)
+        : output.status === "failed" && !output.passed && output.checks.some(check => !check.passed)
+        : !output.passed && output.checks.length === 0 && nonRanStatusConsistent;
       if (output.workspaceSha256 !== receipt.afterSha256
+          || new Set(checkIds).size !== checkIds.length || !checksConsistent || !resultConsistent
           || (ran && (output.executionReceipt?.status !== "executed" || output.status === "unavailable"
             || output.passed !== (output.status === "passed")))
-          || (!ran && (output.passed || output.executionReceipt?.status === "executed"))) throw fail();
+          || (!ran && (output.passed || output.executionReceipt?.status === "executed"
+            || (receipt.executionStatus === "not-run" ? output.executionReceipt !== undefined
+              : output.executionReceipt?.status !== receipt.executionStatus)))) throw fail();
       observed.outcome = ran ? (output.passed ? "test-passed" : "test-failed") : "test-not-completed";
-      observed.test = { suiteId: output.suiteId, suiteSha256: output.suiteSha256, workspaceSha256: output.workspaceSha256 };
+      observed.test = { suiteId: output.suiteId, suiteSha256: output.suiteSha256, workspaceSha256: output.workspaceSha256,
+        failedChecks: output.checks.filter(check => !check.passed).map(check => ({ testId: check.testId,
+          expected: structuredClone(check.expected), actual: structuredClone(check.actual), errorCode: check.errorCode })) };
     }
     return observed;
   });
@@ -90,8 +119,6 @@ export function plannerProgress(input) {
     receiptId: value.receiptId, receiptDigest: value.receiptDigest, ...value.test,
   }));
   if (input.repair === true && currentFailedTests.length === 0) throw fail();
-  return Object.freeze({ schemaVersion: "runaai-m1-planner-progress/v1", phase: input.repair === true ? "repair" : "initial",
-    currentSnapshot: Object.freeze(current), observations: Object.freeze(observations.map(value => Object.freeze({
-      ...value, test: value.test && Object.freeze(value.test),
-    }))), currentFailedTests: Object.freeze(currentFailedTests.map(Object.freeze)) });
+  return deepFreeze({ schemaVersion: "runaai-m1-planner-progress/v1", phase: input.repair === true ? "repair" : "initial",
+    currentSnapshot: current, observations, currentFailedTests });
 }

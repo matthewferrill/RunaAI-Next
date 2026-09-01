@@ -41,6 +41,7 @@ function capturedAnswer(value) {
   try {
     const parsed = JSON.parse(text.replace(/^```(?:json)?\s*/iu, "").replace(/\s*```$/u, ""));
     if (typeof parsed?.answer === "string" && Array.isArray(parsed.citations)) return parsed.answer.trim();
+    if (typeof parsed?.finalAnswer === "string" && ["accept", "correct"].includes(parsed.verdict)) return parsed.finalAnswer.trim();
     if (typeof parsed?.correctedAnswer === "string" && typeof parsed.accepted === "boolean") return parsed.correctedAnswer.trim();
   } catch { /* Plain conversation text is intentionally not JSON. */ }
   return text;

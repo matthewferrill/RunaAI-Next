@@ -8,13 +8,10 @@ export const EVIDENCE_OUTPUT_SCHEMA=freeze({$schema:'http://json-schema.org/draf
 export const EVIDENCE_STRUCTURED_OUTPUT=freeze({schema:EVIDENCE_OUTPUT_SCHEMA,errorStrategy:'error',jsonPromptInjection:false});
 export const EVIDENCE_RESPONSE_FORMAT=freeze({type:'json_schema',json_schema:{schema:EVIDENCE_OUTPUT_SCHEMA,strict:true,name:'response'}});
 export const EVIDENCE_VERIFICATION_SCHEMA=freeze({$schema:'http://json-schema.org/draft-07/schema#',type:'object',
-  additionalProperties:false,properties:{accepted:{type:'boolean'},reason:{type:'string',minLength:1},
-    correctedAnswer:{type:['string','null']},citations:{anyOf:[{type:'null'},
-      {type:'array',items:CITATION_SCHEMA}] }},required:['accepted','reason','correctedAnswer','citations'],allOf:[
-    {if:{properties:{accepted:{const:true}},required:['accepted']},then:{properties:{correctedAnswer:{type:'null'}}}},
-    {if:{properties:{accepted:{const:false}},required:['accepted']},then:{properties:{correctedAnswer:{type:'string',minLength:1},
-      citations:{type:'array',minItems:1,items:CITATION_SCHEMA}}}},
-  ]});
+  additionalProperties:false,properties:{verdict:{type:'string',enum:['accept','correct']},
+    reason:{type:'string',minLength:1},finalAnswer:{type:'string',minLength:1},
+    citations:{type:'array',minItems:1,items:CITATION_SCHEMA}},
+  required:['verdict','reason','finalAnswer','citations']});
 export const EVIDENCE_VERIFICATION_STRUCTURED_OUTPUT=freeze({schema:EVIDENCE_VERIFICATION_SCHEMA,
   errorStrategy:'error',jsonPromptInjection:false});
 export const EVIDENCE_VERIFICATION_RESPONSE_FORMAT=freeze({type:'json_schema',

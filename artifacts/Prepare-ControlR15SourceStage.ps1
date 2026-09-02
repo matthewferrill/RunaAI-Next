@@ -4,9 +4,9 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference='Stop';$ProgressPreference='SilentlyContinue'
 $sshConfig='C:\Users\matth\.ssh\config';$stageName='m1-task-native-'+$StageId
 $remoteRoot='C:\AI\RunaAI-Next-Candidate\staging\'+$stageName;$operatorRoot='C:\AI\RunaAI-Next-Candidate\staging'
-$common=Join-Path $PSScriptRoot 'm1-readiness\20260902-campaign-r15-common-v11'
+$common=Join-Path $PSScriptRoot 'm1-readiness\20260902-campaign-r15-common-v12'
 $transfers=[ordered]@{
-  (Join-Path $common 'source-ecddd36.tar')='source.tar'
+  (Join-Path $common 'source-3898c97.tar')='source.tar'
   (Join-Path $common 'runtime-seal.json')='runtime-seal.json'
   (Join-Path $common 'campaign-hardware-plan.json')='campaign-hardware-plan.json'
   (Join-Path $common 'SOURCE-IDENTITY.json')='SOURCE-IDENTITY.json'
@@ -18,12 +18,12 @@ $transfers=[ordered]@{
 }
 foreach($source in $transfers.Keys){if(-not(Test-Path -LiteralPath $source -PathType Leaf)){throw 'r15-source-local-source-missing'}}
 $commonPins=[ordered]@{
-  (Join-Path $common 'source-ecddd36.tar')='84bd17325c7d4fc971034a994ddb7d5584f25ac4c054d39a791a0985acf7621e'
-  (Join-Path $common 'runtime-seal.json')='48951539bbef9bc6ab43382c207599e4ead398a0facc128acd201f0be3a600ec'
-  (Join-Path $common 'campaign-hardware-plan.json')='d47db8e88da17831b45987b1ad4130f74ddaa249dc28dfbccd936c8f8d8247c1'
-  (Join-Path $common 'SOURCE-TREE-MANIFEST.json')='be280fd7646a323d90d890e8117c213af1fa394a30ef4f9c15d5e54176c60764'
-  (Join-Path $common 'SOURCE-IDENTITY.json')='da19050ad38a5bf5a8835d597f6180b5f853789e659d6fb4867518e1e0996ad2'
-  (Join-Path $common 'CONTROL-REGRESSION-INPUT.json')='fa704fd499da7b646879004edc29aada63f580214e6974ac34c2d563397c9787'
+  (Join-Path $common 'source-3898c97.tar')='8b59995887a1c5349f68f01a284fc097fb799828e8e18db99660241c32d0e2a9'
+  (Join-Path $common 'runtime-seal.json')='561a004d631c41aaf9dac246512cf3364bdebc0ab033a1a4f9777737a67cbf2c'
+  (Join-Path $common 'campaign-hardware-plan.json')='c2dcc78070c4c31df95fa6b77c04091eec93706b3424c10a1226c1f9e16aa16a'
+  (Join-Path $common 'SOURCE-TREE-MANIFEST.json')='03e59bad193fbc3486a8906ea725f7a27a832c0b7a03e56f453bb3308f5298c8'
+  (Join-Path $common 'SOURCE-IDENTITY.json')='86fe3b60471936c5973332867317b4ec0dba314df6c5611243c6cefd9a7ee3e6'
+  (Join-Path $common 'CONTROL-REGRESSION-INPUT.json')='428613f1d033ba8935c4287ae4f84b68bd6077599322e5c84288f0049f16108a'
 }
 foreach($source in $commonPins.Keys){
   if((Get-FileHash -LiteralPath $source -Algorithm SHA256).Hash.ToLowerInvariant()-cne$commonPins[$source]){throw 'r15-source-local-common-pin'}
@@ -47,9 +47,9 @@ if($LASTEXITCODE-ne0){throw 'r15-source-stage-finalize-failed'}
 $finalizationLine=@($finalizationRaw|Where-Object{-not[string]::IsNullOrWhiteSpace($_)})|Select-Object -Last 1
 try{$finalization=$finalizationLine|ConvertFrom-Json}catch{throw 'r15-source-stage-finalize-output'}
 if($finalization.schemaVersion-cne'runaai-m1-r15-source-stage-finalization-result/v1'-or
-   $finalization.receipt.stageId-cne$StageId-or$finalization.receipt.sourceCommit-cne'ecddd363e8ece8dcd7597d89394c12a90596f16c'-or
+   $finalization.receipt.stageId-cne$StageId-or$finalization.receipt.sourceCommit-cne'3898c97c14d4a56d86a8514f72ae4c53ac1abec4'-or
    $finalization.finalizationSha256-notmatch'^[a-f0-9]{64}$'){throw 'r15-source-stage-finalize-result'}
 [ordered]@{schemaVersion='runaai-m1-r15-source-stage-preparation/v2';stageId=$StageId;
-  sourceCommit='ecddd363e8ece8dcd7597d89394c12a90596f16c';runtimeSealSha256='48951539bbef9bc6ab43382c207599e4ead398a0facc128acd201f0be3a600ec';
-  manifestSha256='be280fd7646a323d90d890e8117c213af1fa394a30ef4f9c15d5e54176c60764';
+  sourceCommit='3898c97c14d4a56d86a8514f72ae4c53ac1abec4';runtimeSealSha256='561a004d631c41aaf9dac246512cf3364bdebc0ab033a1a4f9777737a67cbf2c';
+  manifestSha256='03e59bad193fbc3486a8906ea725f7a27a832c0b7a03e56f453bb3308f5298c8';
   finalizationSha256=$finalization.finalizationSha256;verifiedSourceFiles=2464;syntheticStateCopied=$false;productionChanged=$false}|ConvertTo-Json -Compress

@@ -250,3 +250,12 @@ The next-slice decision must retrieve this roadmap and record its own finite acc
 chat/context and real project functions. The Qwen3.6 readiness plan is
 `../gate7f/function-first/QWEN36-READINESS-PLAN-2026-08-28.md`; it can run alongside shared function work.
 Neither the old two-arm runner nor its seals may be widened in place.
+
+Live R15 gate update: inference is still paused. Three fresh create-only stages exposed only method
+defects: stale archive-count publication, transient-root exact-set admission, and a resource watchdog
+whose 15-minute lifetime equaled the permitted 15-minute browser-witness wait. The first two stopped
+before controls; the third completed controls 01-09, timed out at the browser witness, and invoked no
+model. Functional-control resources now live 30 minutes for one 15-minute witness window; the separate
+publication proof lives 45 minutes for its two sequential witness windows. Deterministic tests require
+both resource windows to exceed their complete permitted waits. Commit/reseal and one fresh
+controls/browser pair must pass before the Gemma-first arm begins.

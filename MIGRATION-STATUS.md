@@ -1165,6 +1165,21 @@ weather/web access, attachments, additional project functions, and off-LAN acces
 decisions. The active Control release and its exact Gate 7D rollback predecessor remain unchanged by this
 direction record.
 
+## Live R15 method-gate update (2026-09-01)
+
+Inference remains paused. Three fresh create-only stages exposed only method defects: a stale
+2,439/2,440 archive-count pin, self-rejection of the validator-created `transient` directory, and a
+resource watchdog whose 15-minute lifetime equaled the permitted 15-minute browser-witness wait. The
+first two stopped before controls; the third completed controls 01-09, timed out at the browser witness,
+and then lost its disposable PostgreSQL endpoint before controls 11-12. It reports
+`modelsInvoked:false` and `productionChanged:false`.
+
+The first two bindings are corrected and regression-covered. Functional-control resources now live 30
+minutes against one unchanged 15-minute witness ceiling. The separate publication proof can use two
+sequential witness windows, so its resources live 45 minutes. Deterministic tests require both lifetimes
+to be strictly greater than their complete permitted witness windows. A new source seal and fresh
+controls/browser proof are required before Gemma inference.
+
 Gate 6 remains closed and selected-core production authority remains active at the exact release named
 above. Gate 7A follow-on checks for a second PC, phone, certificate renewal, and separately reviewed
 off-LAN ingress remain independent of the Gate 7C presentation branch. E3, E4/device-vault recovery,

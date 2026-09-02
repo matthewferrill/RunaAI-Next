@@ -8,8 +8,13 @@ import { createOwnedControlResources, fileSha256 } from "./owned-control-resourc
 import { createFunctionalTestbed } from "./functional-testbed.mjs";
 import { FunctionalHttpJourney } from "./http-journey.mjs";
 import { AcceptanceFaultController, AGENT05_POST_RECEIPT_HOLD_MS } from "./fault-actions.mjs";
-import { AGENT05_IN_FLIGHT_OBSERVATION_MS, createBrowserCheckpoint } from "./browser-checkpoint.mjs";
+import { AGENT05_IN_FLIGHT_OBSERVATION_MS, createBrowserCheckpoint,
+  HUMAN_BROWSER_CHECKPOINT_MAXIMUM_MS } from "./browser-checkpoint.mjs";
 import { healthCaptureDiagnostics } from "./capture-transport.mjs";
+
+// This proof has two sequential human checkpoints: preparation and in-flight.
+// Its owned testbed must outlive both complete windows plus setup and cleanup.
+export const BROWSER_PUBLICATION_RESOURCE_MAXIMUM_MS = 2 * HUMAN_BROWSER_CHECKPOINT_MAXIMUM_MS + 900000;
 
 const stamp = () => new Date().toISOString();
 const CAMPAIGN = /^campaign-(gemma4-26b-a4b|qwen3-coder-30b-a3b|qwen36-27b-mtp)-[a-f0-9]{16}$/u;
@@ -70,7 +75,7 @@ export async function runBrowserPublicationControl(args, { announce = value => p
   ledger.observation.sourceCommit = identity.sourceCommit;
   const checkpoints = [];
   try {
-    resources = await createOwnedControlResources({ root, maximumMs: 900000 });
+    resources = await createOwnedControlResources({ root, maximumMs: BROWSER_PUBLICATION_RESOURCE_MAXIMUM_MS });
     if (resources.report.nodeSha256 !== seal.runtime.nodeSha256
         || resources.report.qdrantArtifact.sha256 !== seal.runtime.qdrantSha256
         || await fileSha256(path.join(root, "package-lock.json")) !== seal.runtime.packageLockSha256) {

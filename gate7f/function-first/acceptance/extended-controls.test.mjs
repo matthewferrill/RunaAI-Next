@@ -13,6 +13,14 @@ import { CONTROL_CASES } from "./cases.mjs";
 import { SUPPORTED_CONTROLS, runModelFreeControl } from "./model-free-controls.mjs";
 import { newObservation, ObservationLedger } from "./runner-contract.mjs";
 import { evaluateControl } from "./assertions.mjs";
+import { HUMAN_BROWSER_CHECKPOINT_MAXIMUM_MS } from "./browser-checkpoint.mjs";
+import { CONTROL_RESOURCE_MAXIMUM_MS } from "./control-functional.mjs";
+
+test("model-free control resources outlive the maximum browser checkpoint", () => {
+  assert.equal(HUMAN_BROWSER_CHECKPOINT_MAXIMUM_MS, 900000);
+  assert.equal(CONTROL_RESOURCE_MAXIMUM_MS, 1800000);
+  assert.ok(CONTROL_RESOURCE_MAXIMUM_MS > HUMAN_BROWSER_CHECKPOINT_MAXIMUM_MS);
+});
 
 test("every frozen control has an actual driver; browser proof remains separate", () => {
   assert.deepEqual([...SUPPORTED_CONTROLS].sort(), CONTROL_CASES.map(item => item.id).sort());

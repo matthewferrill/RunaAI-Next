@@ -1,10 +1,7 @@
 # M1-S2 R15 Agent and Review correction implementation results
 
-Status: implementation, deterministic verification, source publication, fresh runtime seal, 12/12
-model-free controls and the real-browser publication preflight completed, but the first scored-stage
-rehearsal exposed an archive/checkout hardware-plan byte-provenance defect before inference. No candidate model was invoked. The
-campaign is paused for a corrected source/seal and repeat model-free gates. R14 remains immutable and is
-not replayed or regraded.
+Status: campaign paused before inference while the corrected method is resealed. No candidate model was
+invoked by the retained R15 method failures. R14 remains immutable and is not replayed or regraded.
 
 ## Implemented Review corrections
 
@@ -138,3 +135,35 @@ whitespace defects. Independent re-review returned GO with no P0/P1 finding afte
 source bindings, create-only outputs, exact-set validation and prelaunch read locks. The campaign remains
 paused before inference until the corrected source is committed/resealed and fresh controls plus
 real-browser proof pass under the new seal.
+
+## Post-publication R15 source-stage RCA
+
+Three create-only source stages are retained as model-free method failures; none is retried and none is
+charged to a candidate:
+
+- `aabeaf4e4c164eb294cee4fa11b97897` stopped in finalization because the validator retained the previous
+  2,439-file archive count after the sealed source grew to 2,440 files. The validator/finalizer count was
+  corrected and a static cross-check was added.
+- `a71e1af4eebc4fc3bb2b71e5eee43386` stopped before controls because create-only validation created the
+  required `transient` root and then classified that same root as an extra directory. The exact-set rule
+  now recognizes only that named dynamic root and the regression asserts the binding.
+- `b2decffb8a0b46fc95e590bbe318e9f0` completed controls 01-09, then retained
+  `m1-browser-checkpoint-unobserved`; controls 11-12 consequently saw the disposable PostgreSQL endpoint
+  closed. The exact cause was an equal 900,000-ms resource watchdog and browser-witness ceiling: a valid
+  witness wait could consume the entire resource lifetime. Cleanup then encountered the already-stopped
+  database before removing `disposable-postgres`, `q`, and `data`, which the final exact-set check correctly
+  rejected. The owned-resource lifetime is now 1,800,000 ms while the witness ceiling remains 900,000 ms;
+  a deterministic test requires the resource lifetime to be strictly greater. The retained run reports
+  nine completed controls, three failed controls, `modelsInvoked:false`, and `productionChanged:false`.
+
+Independent re-review then found the same equal-deadline defect in the separate publication proof, which
+can perform two sequential 900,000-ms human checkpoints. That shared executor now gives its owned testbed
+2,700,000 ms and has an R15-specific strict-greater-than-two-windows regression. The next admissible
+operation is a new commit/archive/seal followed by one fresh 12-control run and one fresh live-browser
+publication proof. Gemma inference remains prohibited until both pass.
+
+The complete deterministic suite passed 2,020 tests with 1,942 passes, 78 intentional skips and zero
+failures after the functional-control correction. The exact final timing/browser suites then passed
+32/32 and 47/47 after the publication-path correction. Independent final re-review returned GO with no
+P0/P1; its unelevated shell could not terminate three synthetic Windows process-tree fixtures, while the
+same focused file passed 29/29 in the required host process-control context.

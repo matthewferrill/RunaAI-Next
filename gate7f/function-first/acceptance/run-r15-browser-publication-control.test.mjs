@@ -2,6 +2,8 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 
+import { HUMAN_BROWSER_CHECKPOINT_MAXIMUM_MS } from "./browser-checkpoint.mjs";
+import { BROWSER_PUBLICATION_RESOURCE_MAXIMUM_MS } from "./run-r12-browser-publication-control.mjs";
 import { parseR15BrowserControlArguments } from "./run-r15-browser-publication-control.mjs";
 
 const commit = "a".repeat(40), suffix = "b".repeat(16);
@@ -31,4 +33,10 @@ test("R15 control binds v11 and reuses only the source-reviewed model-free execu
   assert.match(executor, /ledger\.observation\.browserExercised === true/u);
   assert.match(executor, /AGENT05_POST_RECEIPT_HOLD_MS/u);
   assert.doesNotMatch(executor, /observation\.native\.receipts\.push/u);
+});
+
+test("R15 browser proof resources outlive both permitted human checkpoints", () => {
+  assert.equal(HUMAN_BROWSER_CHECKPOINT_MAXIMUM_MS, 900000);
+  assert.equal(BROWSER_PUBLICATION_RESOURCE_MAXIMUM_MS, 2700000);
+  assert.ok(BROWSER_PUBLICATION_RESOURCE_MAXIMUM_MS > 2 * HUMAN_BROWSER_CHECKPOINT_MAXIMUM_MS);
 });

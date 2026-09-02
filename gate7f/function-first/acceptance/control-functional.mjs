@@ -7,8 +7,13 @@ import { createOwnedControlResources, fileSha256 } from "./owned-control-resourc
 import { createFunctionalTestbed } from "./functional-testbed.mjs";
 import { runModelFreeControl, SUPPORTED_CONTROLS } from "./model-free-controls.mjs";
 import { evaluateControl } from "./assertions.mjs";
-import { createBrowserCheckpoint } from "./browser-checkpoint.mjs";
+import { createBrowserCheckpoint, HUMAN_BROWSER_CHECKPOINT_MAXIMUM_MS } from "./browser-checkpoint.mjs";
 import { healthCaptureDiagnostics } from "./capture-transport.mjs";
+
+// The owned PostgreSQL/Qdrant watchdog must outlive the complete browser
+// checkpoint plus setup, the preceding controls and the successor controls.
+// Equal deadlines can kill the testbed while a still-valid witness is pending.
+export const CONTROL_RESOURCE_MAXIMUM_MS = HUMAN_BROWSER_CHECKPOINT_MAXIMUM_MS + 900000;
 
 export function parseArguments(args) {
   const result = { mode: "inventory" }, seen = new Set();
@@ -44,7 +49,7 @@ export async function runControlFunctional(args, { checkpoint = null } = {}) {
     productionChanged: false, protectedDataRead: false, startedAt: new Date().toISOString() };
   let resources, testbed, ledger = null;
   try {
-    resources = await createOwnedControlResources({ root, maximumMs: 900000 }); report.resources = resources.report;
+    resources = await createOwnedControlResources({ root, maximumMs: CONTROL_RESOURCE_MAXIMUM_MS }); report.resources = resources.report;
     report.controlSeal = { schemaVersion: "runaai-m1-model-free-control-seal/v1", sourceCommit: identity.sourceCommit,
       sourceArchiveSha256: identity.sourceArchiveSha256, caseBundleSha256: CASE_BUNDLE_SHA256,
       nodeSha256: resources.report.nodeSha256, qdrantSha256: resources.report.qdrantArtifact.sha256,

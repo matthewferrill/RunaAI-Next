@@ -171,6 +171,11 @@ test('R15 Control wrapper locks every manifested runtime file before launching a
   const validator=requireText(path.resolve(import.meta.dirname,'../../../artifacts/Validate-ControlR15Stage.Remote.ps1'));
   const finalizer=requireText(path.resolve(import.meta.dirname,'../../../artifacts/Finalize-ControlR15SourceStage.ps1'));
   assert.match(validator,/foreach\(\$entry in @\(\$runtimeManifest\.entries\)\)\{\$lockSpecs\.Add/u);
+  assert.match(validator,/@\(\$manifest\.entries\)\.Count-ne2440/u);
+  assert.match(finalizer,/\$validation\.verifiedSourceFiles-ne2440/u);
+  assert.match(validator,/\$relative-ceq'transient'/u);
+  assert.match(validator,/@\('acceptance-evidence','disposable-postgres','transient','q','data'\)/u);
+  assert.match(validator,/Remove-Item -LiteralPath \$postgresLog -Force[\s\S]*?Assert-ExactStageSet/u);
   assert.match(validator,/\[IO\.FileShare\]::Read/u);assert.match(validator,/r15-stage-runtime-exact-set/u);
   assert.ok(validator.indexOf("$stream=New-Object IO.FileStream($spec.Key")<validator.indexOf("& $node $entry --mode controls"));
   const mutation=/function Test-AllowedExecutionMutation[\s\S]*?Assert-ExactStageSet/u.exec(validator)?.[0];assert.ok(mutation);

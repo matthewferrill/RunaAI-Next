@@ -222,7 +222,7 @@ if($Phase-cne'Finalize'){
   $receipt=Get-Content -LiteralPath $receiptPath -Raw|ConvertFrom-Json
   $receiptKeys=($receipt.PSObject.Properties.Name|Sort-Object)-join','
   $validatorSha256=Get-LowerSha256 $PSCommandPath
-  if($receiptKeys-cne'agentTokens,archiveSha256,browserControlReady,controlRegressionInputSha256,finalized,hardwarePlanSha256,identitySha256,loopbackPipeSha256,manifestSha256,nodeSha256,privateValuesIncluded,productionChanged,runtimeFiles,runtimeManifestSha256,runtimeSecurityEntries,runtimeSecurityNormalized,runtimeSecuritySha256,runtimeSealSha256,schemaVersion,sourceCommit,stageId,syntheticStateCopied,validatorSha256'-or
+  if($receiptKeys-cne'agentTokens,archiveSha256,browserControlReady,controlRegressionInputSha256,finalized,hardwarePlanSha256,identitySha256,loopbackPipeSha256,manifestSha256,nodeSha256,privateValuesIncluded,productionChanged,runtimeFiles,runtimeManifestSha256,runtimeSealSha256,runtimeSecurityEntries,runtimeSecurityNormalized,runtimeSecuritySha256,schemaVersion,sourceCommit,stageId,syntheticStateCopied,validatorSha256'-or
      $receipt.schemaVersion-cne'runaai-m1-r15-source-stage-finalization/v4'-or$receipt.finalized-cne$true-or
      $receipt.stageId-cne$StageId-or$receipt.sourceCommit-cne$sourceCommit-or$receipt.archiveSha256-cne$archiveSha256-or
      $receipt.runtimeSealSha256-cne$runtimeSealSha256-or$receipt.hardwarePlanSha256-cne$hardwarePlanSha256-or

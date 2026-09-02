@@ -349,3 +349,24 @@ includes the inverse failure regression. Focused checks pass 34/34, the complete
 and zero failures. Two independent reviewers returned GO with no P0/P1 findings. The failed stage remains
 evidence and is not reused; the next permitted action is a new exact archive, seal and stage followed by
 the model-free controls and browser witness.
+
+## V11 finalization-key-order RCA
+
+Fresh stage `4b57aec1ddca418dbf20c2df7ddac6da` successfully finalized the exact 2,464-file source
+package, then stopped before its first control with `r15-stage-validation-finalization-schema`. The retained
+receipt is complete and matches every typed value and digest. The defect was the validator's manually
+written sorted property-name literal: it placed `runtimeSealSha256` after `runtimeSecurityEntries`,
+`runtimeSecurityNormalized` and `runtimeSecuritySha256`, while `Sort-Object` correctly places
+`runtimeSealSha256` before the `runtimeSecurity*` fields. The correct receipt was therefore rejected solely
+by the outer key-order assertion. No control result and no model attempt were recorded.
+
+The expected literal now uses the actual sorted order. A new model-free regression extracts the fields from
+the finalizer's real ordered receipt literal, sorts those fields, extracts the validator expectation and
+requires exact equality. This closes the gap left by source-presence tests that did not execute or derive
+the two sides of the contract. Focused checks pass 8/8, the campaign harness passes 197/197, and the full
+suite passes 1,967/2,045 with 78 intentional environment-dependent skips and zero failures when its
+disposable payload directory is writable. The first restricted local run produced five filesystem-denial
+failures in `probes/results/_payloads`; the unchanged suite passed with the required worktree write access,
+so those five are environment-attributed and not campaign or model failures. Two independent reviewers
+returned GO with no P0/P1 findings. The failed stage remains evidence and is not reused; commit/reseal and
+a fresh stage are required before any inference.

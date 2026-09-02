@@ -1,5 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
+import path from "node:path";
 
 import { normalizeR15RuntimeSecurity } from "./normalize-r15-runtime-security.mjs";
 
@@ -47,4 +49,18 @@ for (const [name, mutate] of [
   const result = structuredClone(successful); mutate(result);
   await assert.rejects(normalizeR15RuntimeSecurity({ root,
     executorFactory: () => ({ preflight: async () => result }) }), /r15-runtime-security-normalization-preflight/u);
+});
+
+test("R15 validator key contract follows the actual finalizer receipt keys in sorted order", async () => {
+  const artifacts = path.resolve(import.meta.dirname, "../../../artifacts");
+  const [validator, finalizer] = await Promise.all([
+    readFile(path.join(artifacts, "Validate-ControlR15Stage.Remote.ps1"), "utf8"),
+    readFile(path.join(artifacts, "Finalize-ControlR15SourceStage.ps1"), "utf8")
+  ]);
+  const body = finalizer.match(/\$receipt=\[ordered\]@\{([\s\S]*?)\}\s*\r?\n\$receiptBytes/u)?.[1];
+  assert.ok(body, "finalization receipt literal missing");
+  const actualKeys = [...body.matchAll(/(?:^|;)\s*([A-Za-z][A-Za-z0-9]*)=/gmu)]
+    .map(match => match[1]).sort().join(",");
+  const expectedKeys = validator.match(/\$receiptKeys-cne'([^']+)'/u)?.[1];
+  assert.equal(expectedKeys, actualKeys);
 });

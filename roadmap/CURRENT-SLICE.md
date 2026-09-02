@@ -5,6 +5,17 @@ Milestone: M1
 Slice ID: M1-S2
 Status: in progress, R15 method repair independently approved and packaging before inference; product not qualified.
 
+V11 finalization-key-order update, 2026-09-02: fresh stage `4b57aec1ddca418dbf20c2df7ddac6da`
+finalized all 2,464 source files, then stopped before the first control because the validator's manually
+written sorted property list put `runtimeSealSha256` after the `runtimeSecurity*` fields. Its actual
+`Sort-Object` output puts `runtimeSealSha256` first, so an otherwise exact receipt was rejected. No control
+result or model attempt was recorded. The order is corrected and a regression now derives the actual
+finalizer receipt fields and requires the validator list to match their sorted order. Focused checks pass
+8/8, the campaign harness passes 197/197, and the full suite passes 1,967/2,045 with 78 intentional skips
+and zero failures when its disposable payload directory is writable. Two independent reviewers returned
+GO with no P0/P1 findings. The failed stage is retained and not reused; commit/reseal and a fresh stage
+remain.
+
 V10 method-gate update, 2026-09-02: fresh stage `288236b61f1e4944a0a77d360f704a51` stopped on its
 first model-free normalization preflight, before controls or inference, and has zero matching processes.
 The test double had inverted the actual MXC contract: successful execution returns

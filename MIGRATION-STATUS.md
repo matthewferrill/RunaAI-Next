@@ -17,6 +17,17 @@ permission requests. Human involvement is reserved for genuine customer tests or
 
 ### Current checkpoint: R15 method repair independently approved; packaging before inference
 
+V11 finalization-key-order RCA, 2026-09-02: fresh stage `4b57aec1ddca418dbf20c2df7ddac6da`
+successfully finalized all 2,464 source files, then stopped before its first control because the validator's
+manually written sorted key contract placed `runtimeSealSha256` after the `runtimeSecurity*` fields. The
+validator's own `Sort-Object` output correctly places `runtimeSealSha256` before them, so it rejected the
+otherwise exact retained receipt. No control result or model attempt was recorded. The literal is corrected
+and a regression now derives the actual finalizer receipt fields, sorts them, and compares that result to
+the validator contract. Focused checks pass 8/8, the campaign harness passes 197/197, and the full suite
+passes 1,967/2,045 with 78 intentional environment-dependent skips and zero failures when its disposable
+payload directory is writable. Two independent reviewers returned GO with no P0/P1 findings. The failed
+stage is retained and not reused; inference remains paused for commit/reseal and a fresh method-gate stage.
+
 V10 method-gate update, 2026-09-02: fresh stage `288236b61f1e4944a0a77d360f704a51` stopped on its
 first model-free ACL-normalization preflight. It reached neither controls nor inference and has zero exact
 stage processes. The normalizer fixture incorrectly represented a successful MXC call with a populated

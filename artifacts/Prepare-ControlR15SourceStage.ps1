@@ -4,9 +4,9 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference='Stop';$ProgressPreference='SilentlyContinue'
 $sshConfig='C:\Users\matth\.ssh\config';$stageName='m1-task-native-'+$StageId
 $remoteRoot='C:\AI\RunaAI-Next-Candidate\staging\'+$stageName;$operatorRoot='C:\AI\RunaAI-Next-Candidate\staging'
-$common=Join-Path $PSScriptRoot 'm1-readiness\20260902-campaign-r15-common-v12'
+$common=Join-Path $PSScriptRoot 'm1-readiness\20260902-campaign-r15-common-v13'
 $transfers=[ordered]@{
-  (Join-Path $common 'source-3898c97.tar')='source.tar'
+  (Join-Path $common 'source-c760419.tar')='source.tar'
   (Join-Path $common 'runtime-seal.json')='runtime-seal.json'
   (Join-Path $common 'campaign-hardware-plan.json')='campaign-hardware-plan.json'
   (Join-Path $common 'SOURCE-IDENTITY.json')='SOURCE-IDENTITY.json'
@@ -18,12 +18,12 @@ $transfers=[ordered]@{
 }
 foreach($source in $transfers.Keys){if(-not(Test-Path -LiteralPath $source -PathType Leaf)){throw 'r15-source-local-source-missing'}}
 $commonPins=[ordered]@{
-  (Join-Path $common 'source-3898c97.tar')='8b59995887a1c5349f68f01a284fc097fb799828e8e18db99660241c32d0e2a9'
-  (Join-Path $common 'runtime-seal.json')='561a004d631c41aaf9dac246512cf3364bdebc0ab033a1a4f9777737a67cbf2c'
-  (Join-Path $common 'campaign-hardware-plan.json')='c2dcc78070c4c31df95fa6b77c04091eec93706b3424c10a1226c1f9e16aa16a'
-  (Join-Path $common 'SOURCE-TREE-MANIFEST.json')='03e59bad193fbc3486a8906ea725f7a27a832c0b7a03e56f453bb3308f5298c8'
-  (Join-Path $common 'SOURCE-IDENTITY.json')='86fe3b60471936c5973332867317b4ec0dba314df6c5611243c6cefd9a7ee3e6'
-  (Join-Path $common 'CONTROL-REGRESSION-INPUT.json')='428613f1d033ba8935c4287ae4f84b68bd6077599322e5c84288f0049f16108a'
+  (Join-Path $common 'source-c760419.tar')='171d3dccac2dc6ef56d81738c669de4309f6435287817c88b443b9b857953ae9'
+  (Join-Path $common 'runtime-seal.json')='38838d4c1761ba4102864a72ec6fdb6eacaa9606aae0bf0581e8f87c7975186e'
+  (Join-Path $common 'campaign-hardware-plan.json')='fde62058b663407feb8e7d0c8cf8626ce8129a00757b500810cef666908755aa'
+  (Join-Path $common 'SOURCE-TREE-MANIFEST.json')='b5d4ce42fc4768c35a4951e31a060d7f897d75611ec3ac4e0d71d778da2c6889'
+  (Join-Path $common 'SOURCE-IDENTITY.json')='23ef2694dcf9c95eb9f66db5acf496107ed734fd9623a8113a337ad284823d3b'
+  (Join-Path $common 'CONTROL-REGRESSION-INPUT.json')='4f94c0af2c7a8a68b6d26a50affe836b542c3e5280f57f5dc0a8117dd3f65fdd'
 }
 foreach($source in $commonPins.Keys){
   if((Get-FileHash -LiteralPath $source -Algorithm SHA256).Hash.ToLowerInvariant()-cne$commonPins[$source]){throw 'r15-source-local-common-pin'}
@@ -47,9 +47,9 @@ if($LASTEXITCODE-ne0){throw 'r15-source-stage-finalize-failed'}
 $finalizationLine=@($finalizationRaw|Where-Object{-not[string]::IsNullOrWhiteSpace($_)})|Select-Object -Last 1
 try{$finalization=$finalizationLine|ConvertFrom-Json}catch{throw 'r15-source-stage-finalize-output'}
 if($finalization.schemaVersion-cne'runaai-m1-r15-source-stage-finalization-result/v1'-or
-   $finalization.receipt.stageId-cne$StageId-or$finalization.receipt.sourceCommit-cne'3898c97c14d4a56d86a8514f72ae4c53ac1abec4'-or
+   $finalization.receipt.stageId-cne$StageId-or$finalization.receipt.sourceCommit-cne'c760419885e5ba5729335f272f177ef74931b83a'-or
    $finalization.finalizationSha256-notmatch'^[a-f0-9]{64}$'){throw 'r15-source-stage-finalize-result'}
 [ordered]@{schemaVersion='runaai-m1-r15-source-stage-preparation/v2';stageId=$StageId;
-  sourceCommit='3898c97c14d4a56d86a8514f72ae4c53ac1abec4';runtimeSealSha256='561a004d631c41aaf9dac246512cf3364bdebc0ab033a1a4f9777737a67cbf2c';
-  manifestSha256='03e59bad193fbc3486a8906ea725f7a27a832c0b7a03e56f453bb3308f5298c8';
-  finalizationSha256=$finalization.finalizationSha256;verifiedSourceFiles=2464;syntheticStateCopied=$false;productionChanged=$false}|ConvertTo-Json -Compress
+  sourceCommit='c760419885e5ba5729335f272f177ef74931b83a';runtimeSealSha256='38838d4c1761ba4102864a72ec6fdb6eacaa9606aae0bf0581e8f87c7975186e';
+  manifestSha256='b5d4ce42fc4768c35a4951e31a060d7f897d75611ec3ac4e0d71d778da2c6889';
+  finalizationSha256=$finalization.finalizationSha256;verifiedSourceFiles=2465;syntheticStateCopied=$false;productionChanged=$false}|ConvertTo-Json -Compress

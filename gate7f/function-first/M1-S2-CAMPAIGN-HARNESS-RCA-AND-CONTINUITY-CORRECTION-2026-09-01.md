@@ -33,6 +33,38 @@ The post-campaign blind-review preparer also assumed exactly two Qwen evidence d
 
 ## R15 model-free browser preflight RCA
 
+### V10-V13 post-repair continuity (2026-09-02)
+
+Three later fresh stages failed closed before Gemma inference and are retained rather than reused.
+Stage `288236b61f1e4944a0a77d360f704a51` stopped during its first ACL-normalization preflight because the
+test fixture inverted the executor's successful `startupObservation:null` contract. Stage
+`4b57aec1ddca418dbf20c2df7ddac6da` finalized all 2,464 source files and then stopped before its first
+control because a hand-written expected key order disagreed with PowerShell's actual sorted order. Stage
+`08fdd8ae4cce45dd9cb2ee3e0fb17e91` completed 11 model-free controls and failed the browser-dependent
+control after its 04:17-04:32 EDT URL was displayed to the steward more than three hours after expiry;
+its watcher also treated 26 directory-only content notifications as mutation despite identical final
+hashes, exact sets and runtime security state. These were fixture, operator-publication and watcher
+classification faults, not model results; all three stages have zero Gemma attempts.
+
+The permanent repair requires explicit live browser presence, couples the same-port relay to the exact
+checkpoint lifetime, polls relay and remote-process liveness, independently cleans up both owned process
+trees, inlines the mutation classifier in the externally pinned validator, and permits only exact sealed
+directory `content-changed` noise when byte hashes, exact sets and security state remain unchanged.
+Focused checks passed 76/76, the full tracked suite passed 1,971/2,049 with 78 intentional skips and zero
+failures, and two independent re-reviews returned GO with no P0/P1 findings. The repair is committed as
+`c760419885e5ba5729335f272f177ef74931b83a`. Package `20260902-campaign-r15-common-v13` was built from
+that exact source, verified against 2,465 manifest entries, and has archive SHA-256
+`171d3dccac2dc6ef56d81738c669de4309f6435287817c88b443b9b857953ae9`. Its propagated operator seal,
+fresh 12-control stage and separate live-browser proof remain required before any Gemma request.
+
+The first post-pin full-suite invocation reported 1,970 passes, 78 intentional skips and one failure,
+but its high-volume console transport truncated the failing identity while two independent verifier
+processes were also active. The campaign remained paused. After those processes completed, an isolated
+failure-filtered invocation of the same tracked-only runner passed 1,971/2,049 with the same 78 skips and
+zero failures. Because the first snapshot cannot support exact attribution, it is invalid release evidence,
+not a model or campaign result. Release verification now runs without overlapping verifier processes and
+retains failure-filtered output before seal publication; a nonzero isolated rerun would stop the campaign.
+
 R15 correctly kept candidate inference disabled until both shared controls and a real-browser publication
 preflight passed. Five preflight rounds failed closed and were retained while the method was corrected;
 all five have `modelsInvoked:false` and none consumed a campaign identity. They are not added to the 30

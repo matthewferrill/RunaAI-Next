@@ -15,7 +15,7 @@ are unchanged. M1 is authorized, not complete; its first local wiring result is 
 The steward authorized necessary non-destructive work and commit/push to RunaAI-Next without recurring
 permission requests. Human involvement is reserved for genuine customer tests or human-only operations.
 
-### Current checkpoint: R15 V12 method repair independently approved; commit/reseal before inference
+### Current checkpoint: R15 V13 package built and verified; fresh model-free stage before inference
 
 V12 method-gate update, 2026-09-02: fresh stage `08fdd8ae4cce45dd9cb2ee3e0fb17e91`
 recorded 11 completed model-free controls and one failed browser-dependent control, with
@@ -29,8 +29,13 @@ package pins and stale status publication. The corrections now supervise relay l
 terminate the exact owned process tree, inline the narrow classifier in the externally pinned validator,
 and update the living status. The final focused suite passes 76/76 and the complete tracked suite passes
 1,971/2,049 with 78 intentional skips and zero failures. Two independent re-reviews returned GO with no
-P0/P1 findings. Commit/reseal and a new model-free stage remain mandatory. V12 is retained and is not
-reused; Gemma has zero new scored attempts under the simplified arm.
+P0/P1 findings. The reviewed source repair is committed as
+`c760419885e5ba5729335f272f177ef74931b83a`. Fresh package `20260902-campaign-r15-common-v13`
+was built from that exact commit and independently verified against all 2,465 source-tree entries;
+archive SHA-256 is `171d3dccac2dc6ef56d81738c669de4309f6435287817c88b443b9b857953ae9`.
+Its package and validator hashes are propagated by this operator-seal update. A new model-free stage,
+12 controls and the separate real-browser publication proof remain mandatory before inference. V12 is
+retained and is not reused; Gemma has zero new scored attempts under the simplified arm.
 
 V11 finalization-key-order RCA, 2026-09-02: fresh stage `4b57aec1ddca418dbf20c2df7ddac6da`
 successfully finalized all 2,464 source files, then stopped before its first control because the validator's

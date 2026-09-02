@@ -3,7 +3,22 @@
 Roadmap revision: 2026-08-28.1
 Milestone: M1
 Slice ID: M1-S2
-Status: in progress, R15 campaign paused before inference for watcher-quiescence correction and reseal; product not qualified.
+Status: in progress, R15 campaign paused before inference for runtime-security witness correction and reseal; product not qualified.
+
+V8 method-gate update, 2026-09-02: commit `bf1ec7fdc1aacd1239e6513c29943fb93f4d6342`
+was sealed and stage `635e8cecd7b64b6296d9b23043b52015` completed all 12 inner model-free controls
+with zero failed drivers and no model calls. The outer witness failed closed on 1,910 runtime `Changed`
+notifications despite clean final byte hashes and exact file/directory sets. A bounded one-preflight
+reproduction classified all 314 reproduced notifications as `Security` only; no name, size, write-time or
+attribute event occurred, and idempotent host ACL preparation emitted none. MXC temporarily applies and
+restores runtime access rules as part of process-container startup. The witness now suppresses only those
+runtime `Security` notifications while retaining all root/source/tool security monitoring, runtime
+name/write/size/attribute monitoring and read locks. It also rehashes and re-enumerates the complete runtime
+and compares every file/directory owner/group/DACL before and after execution. Lasting drift still fails
+closed. The focused suite passes 27/27 and the complete tracked suite passes 1,937/2,015 with 78 intentional
+skips and zero failures; independent P0/P1 review returned GO. Commit/reseal, fresh controls and separate
+browser-publication proof still precede the Gemma-only 120-attempt eligibility arm. No v8 candidate identity
+was consumed, and the original three-model comparative R15 is not silently declared complete.
 
 V7 method-gate update, 2026-09-02: source `188048537e4770e3ac7719bff55417bb0994c293` was
 sealed and a fresh stage reached model-free browser control 10. Final independent review found a late-event

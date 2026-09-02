@@ -171,16 +171,20 @@ test('R15 Control wrapper locks every manifested runtime file before launching a
   const validator=requireText(path.resolve(import.meta.dirname,'../../../artifacts/Validate-ControlR15Stage.Remote.ps1'));
   const finalizer=requireText(path.resolve(import.meta.dirname,'../../../artifacts/Finalize-ControlR15SourceStage.ps1'));
   assert.match(validator,/foreach\(\$entry in @\(\$runtimeManifest\.entries\)\)\{\$lockSpecs\.Add/u);
-  assert.match(validator,/@\(\$manifest\.entries\)\.Count-ne2441/u);
-  assert.match(finalizer,/\$validation\.verifiedSourceFiles-ne2441/u);
+  assert.match(validator,/@\(\$manifest\.entries\)\.Count-ne2442/u);
+  assert.match(finalizer,/\$validation\.verifiedSourceFiles-ne2442/u);
   assert.match(validator,/\$relative-ceq'transient'/u);
   assert.match(validator,/@\('acceptance-evidence','disposable-postgres','transient','q','data'\)/u);
   assert.match(validator,/Remove-Item -LiteralPath \$postgresLog -Force[\s\S]*?Assert-ExactStageSet/u);
   assert.match(validator,/\[IO\.FileShare\]::Read/u);assert.match(validator,/r15-stage-runtime-exact-set/u);
-  assert.match(validator,/\$watchSpecs=@\(\[pscustomobject\]@\{Path=\$root;Recursive=\$false\}\)/u);
+  assert.match(validator,/\$watchSpecs=@\(\[pscustomobject\]@\{Path=\$root;Recursive=\$false;TransientRuntimeSecurity=\$false\}\)/u);
   assert.match(validator,/foreach\(\$entry in @\(\$manifest\.entries\)\)[\s\S]*?\$protectedTopLevels\.Add/u);
   assert.match(validator,/@\('acceptance-evidence','disposable-postgres','transient','q','data','node_modules'\)/u);
   assert.match(validator,/Wait-R15WatcherQuiescence[\s\S]*?EnableRaisingEvents=\$false;\$watcher\.Dispose\(\)[\s\S]*?Wait-R15WatcherQuiescence[\s\S]*?Assert-ExactStageSet/u);
+  assert.match(validator,/Get-R15RuntimeSecurityDigest[\s\S]*?\$runtimeSecurityBefore/u);
+  assert.match(validator,/Assert-R15RuntimeDurableState[\s\S]*?r15-stage-runtime-security-drift/u);
+  assert.match(validator,/TransientRuntimeSecurity=\(\$name-ceq'runtime'-or\$name-ceq'sandbox-runtime'\)/u);
+  assert.match(validator,/if\(-not\$spec\.TransientRuntimeSecurity\)\{\$watcher\.NotifyFilter=\$watcher\.NotifyFilter-bor\[IO\.NotifyFilters\]::Security\}/u);
   assert.match(validator,/GetException\(\)/u);assert.match(validator,/\$exception\.GetType\(\)\.FullName/u);
   assert.doesNotMatch(validator,/New-Object IO\.FileSystemWatcher\(\$root\)[\s\S]*?IncludeSubdirectories=\$true/u);
   assert.ok(validator.indexOf("$stream=New-Object IO.FileStream($spec.Key")<validator.indexOf("& $node $entry --mode controls"));
@@ -188,6 +192,38 @@ test('R15 Control wrapper locks every manifested runtime file before launching a
   assert.doesNotMatch(mutation,/['"]runtime['"]|['"]sandbox-runtime['"]/u);
   assert.match(finalizer,/runaai-m1-r15-source-stage-finalization\/v3/u);
   assert.match(finalizer,/runtimeManifestSha256=\$validation\.runtimeManifestSha256/u);
+});
+
+test('R15 runtime security digest detects durable ACL drift and accepts exact restoration', {skip:process.platform!=='win32'}, async()=>{
+  const f=await fixture();try{
+    const scriptPath=path.join(f.root,'runtime-security-regression.ps1');
+    const helperPath=path.resolve(import.meta.dirname,'Get-R15RuntimeSecurityDigest.ps1');
+    const script=String.raw`param([Parameter(Mandatory)][string]$HelperPath,[Parameter(Mandatory)][string]$FixtureRoot)
+$ErrorActionPreference='Stop';. $HelperPath
+$runtime=Join-Path $FixtureRoot 'runtime';$sandbox=Join-Path $FixtureRoot 'sandbox-runtime';$nested=Join-Path $sandbox 'node_modules'
+[void](New-Item -ItemType Directory -Path $runtime);[void](New-Item -ItemType Directory -Path $nested)
+$runtimeFile=Join-Path $runtime 'node.exe';$sandboxFile=Join-Path $nested 'fixture.js'
+[IO.File]::WriteAllText($runtimeFile,'node');[IO.File]::WriteAllText($sandboxFile,'fixture')
+$paths=@('runtime','runtime/node.exe','sandbox-runtime','sandbox-runtime/node_modules','sandbox-runtime/node_modules/fixture.js')
+$before=Get-R15RuntimeSecurityDigest -Root $FixtureRoot -RelativePaths $paths
+$original=[IO.File]::GetAccessControl($sandboxFile)
+$sections=[Security.AccessControl.AccessControlSections]::Access-bor[Security.AccessControl.AccessControlSections]::Owner-bor[Security.AccessControl.AccessControlSections]::Group
+$originalSddl=$original.GetSecurityDescriptorSddlForm($sections)
+$changed=[IO.File]::GetAccessControl($sandboxFile)
+$rule=New-Object Security.AccessControl.FileSystemAccessRule([Security.Principal.WindowsIdentity]::GetCurrent().User,'Write','Allow')
+[void]$changed.AddAccessRule($rule);[IO.File]::SetAccessControl($sandboxFile,$changed)
+$during=Get-R15RuntimeSecurityDigest -Root $FixtureRoot -RelativePaths $paths
+$restored=New-Object Security.AccessControl.FileSecurity;$restored.SetSecurityDescriptorSddlForm($originalSddl,$sections);[IO.File]::SetAccessControl($sandboxFile,$restored)
+$after=Get-R15RuntimeSecurityDigest -Root $FixtureRoot -RelativePaths $paths
+if($before.Sha256-ceq$during.Sha256){throw 'r15-runtime-security-drift-not-detected'}
+if($before.Sha256-cne$after.Sha256){throw 'r15-runtime-security-restoration-not-exact'}
+@{count=$before.Count;driftDetected=$true;restored=$true}|ConvertTo-Json -Compress`;
+    await writeFile(scriptPath,script);
+    const result=spawnSync('powershell.exe',['-NoProfile','-NonInteractive','-ExecutionPolicy','Bypass','-File',scriptPath,
+      '-HelperPath',helperPath,'-FixtureRoot',f.root],{encoding:'utf8',timeout:20000,windowsHide:true});
+    assert.equal(result.status,0,result.stderr||result.stdout);const output=JSON.parse(result.stdout.trim().split(/\r?\n/u).at(-1));
+    assert.deepEqual(output,{restored:true,count:5,driftDetected:true});
+  }finally{await f.close();}
 });
 
 test('R15 watcher quiescence deterministically catches delayed and post-disposal queued events', {skip:process.platform!=='win32'}, async()=>{

@@ -15,7 +15,30 @@ are unchanged. M1 is authorized, not complete; its first local wiring result is 
 The steward authorized necessary non-destructive work and commit/push to RunaAI-Next without recurring
 permission requests. Human involvement is reserved for genuine customer tests or human-only operations.
 
-### Current checkpoint: R15 campaign paused before inference for watcher-quiescence reseal
+### Current checkpoint: R15 campaign paused before inference for runtime-security witness reseal
+
+V8 method-gate update, 2026-09-02: independently approved commit
+`bf1ec7fdc1aacd1239e6513c29943fb93f4d6342` was sealed and fresh stage
+`635e8cecd7b64b6296d9b23043b52015` completed all 12 inner model-free controls with zero failed drivers
+and `modelsInvoked:false`. The outer protected-tree witness then failed closed on 1,910 `Changed` events
+under the sealed QuickJS runtime even though its final byte hashes and exact file/directory sets passed. The
+stage is retained and its exact processes are absent. Bounded no-model reproduction proved the native
+preflight was ready/executed and that all 314 reproduced notifications were `Security` only: 312 beneath
+`sandbox-runtime`, two beneath `runtime`, and zero file-name, directory-name, size, last-write or attribute
+events. The idempotent host ACL preparation itself produced zero runtime events. RCA: MXC deliberately
+applies and restores temporary runtime access rules while establishing the process container, but the
+validator treated those expected transient security notifications as durable file mutation.
+
+The corrected witness omits only `Security` notifications from the two runtime watchers; root, source and
+tool watchers retain them. Runtime watchers still cover names, writes, sizes and attributes, and every
+manifested runtime file remains byte-locked. After watcher quiescence and disposal, the validator rehashes
+every runtime file, rechecks the exact file/directory set, and compares a pre/post owner/group/DACL digest
+for every runtime file and directory before releasing locks. Durable ACL drift fails closed. The behavioral
+ACL drift/restoration regression and all 27 focused checks pass; the complete tracked suite passes
+1,937/2,015 with 78 intentional environment-dependent skips and zero failures. Independent P0/P1 review
+returned GO. A new commit/seal, fresh controls and separate browser-publication proof remain mandatory
+before the steward-directed Gemma-only 120-attempt eligibility arm using R15's already-frozen unconditional
+Review checker shape. No candidate identity has been consumed by v8.
 
 V7 method-gate update, 2026-09-02: independently reviewed source `188048537e4770e3ac7719bff55417bb0994c293`
 was sealed and stage `3cb0e98c307a4bc5b4aafeccfb2da347` reached model-free browser control 10.

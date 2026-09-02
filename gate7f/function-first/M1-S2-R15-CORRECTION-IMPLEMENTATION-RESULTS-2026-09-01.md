@@ -211,3 +211,37 @@ re-review returned GO with no P0/P1 finding. Commit/reseal, fresh 12/12 controls
 publication proof remain required before any Gemma request. The focused host file passes 26/26, the complete
 tracked suite passes 1,936/2,014 with 78 intentional environment-dependent skips and zero failures, and
 roadmap verification passes 15/15.
+
+## V8 runtime-security witness correction
+
+Commit `bf1ec7fdc1aacd1239e6513c29943fb93f4d6342` was rebuilt into the v8 exact source/runtime seal.
+Fresh stage `635e8cecd7b64b6296d9b23043b52015` completed all 12 inner controls with zero failed drivers and
+`modelsInvoked:false`, but the outer validator retained a fail-closed
+`r15-stage-validation-execution-mutation` diagnostic containing 1,910 `Changed` events beneath the sealed
+runtime. Post-run hashes and the exact runtime file/directory set were unchanged, the stage's processes were
+confirmed absent, and no candidate identity was consumed.
+
+Two bounded no-model diagnostics separated the event sources. Re-running the idempotent
+`Stage-OwnedNativeAccess.ps1` step emitted zero runtime events. One successful native QuickJS preflight
+emitted 314 events: 312 beneath `sandbox-runtime` and two beneath `runtime`. Parallel watchers with one
+`NotifyFilter` apiece proved every event was `Security`; file name, directory name, size, last write and
+attributes each remained at zero. MXC's declared process-container fallback temporarily applies and clears
+runtime access rules, so the original combined watcher conflated an expected reversible ACL transition with
+a durable application mutation.
+
+The correction is narrow and fail-closed. Only the `runtime` and `sandbox-runtime` watcher specs omit the
+`Security` filter; the stage root and every immutable source/tool watcher retain it. Runtime watchers still
+observe file/directory names, last writes, sizes and attributes, and every manifested runtime file remains
+open under a `FileShare.Read` byte lock. After both bounded watcher drains and disposal, the validator
+rehashes every runtime file, verifies the exact file and directory sets, and compares a digest of canonical
+owner/group/DACL state for every runtime file and directory against its pre-execution snapshot. Any lasting
+security change throws `r15-stage-runtime-security-drift` before the event verdict is accepted.
+
+The behavioral regression makes a real ACL change in a disposable runtime, proves the digest changes, then
+restores the exact descriptor and proves equality. All 27 focused checks pass. The complete tracked suite
+passes 1,937/2,015 with 78 intentional environment-dependent skips and zero failures. Independent P0/P1
+review returned GO: the omission is restricted to the two runtime watchers, all other protected security
+events remain observed, and complete durable runtime state is verified before locks are released. A new
+commit/seal, fresh 12-control run and separate browser-publication proof remain required before the
+steward-directed Gemma 120-attempt arm. The already-implemented R15 unconditional Review checker shape is
+the simplified contract selected for that arm; it does not use the failed nullable accepted/correction form.

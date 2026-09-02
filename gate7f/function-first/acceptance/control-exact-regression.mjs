@@ -118,12 +118,14 @@ async function isClosed(port){return new Promise(resolve=>{const socket=net.conn
   socket.setTimeout(750,()=>done(false));socket.once('connect',()=>done(false));socket.once('error',error=>done(error.code==='ECONNREFUSED'));});}
 async function missing(filename){try{await lstat(filename);return false;}catch(error){if(error.code==='ENOENT')return true;throw error;}}
 export async function verifyControlRegressionCleanup(root,ports={}){
-  const directories=['disposable-postgres','runtime','sandbox-runtime','transient','q','data'];
+  const directories=['disposable-postgres','transient','q','data'];
   const directoryState=Object.fromEntries(await Promise.all(directories.map(async name=>[name,await missing(path.join(root,name))])));
+  const retainedRuntime={};for(const name of ['runtime','sandbox-runtime']){try{const item=await lstat(path.join(root,name));retainedRuntime[name]=item.isDirectory()&&!item.isSymbolicLink();}catch{retainedRuntime[name]=false;}}
+  try{const item=await lstat(path.join(root,'OWNED-RUNTIME-MANIFEST.json'));retainedRuntime.manifest=item.isFile()&&!item.isSymbolicLink();}catch{retainedRuntime.manifest=false;}
   const portState={};for(const [name,port] of Object.entries(ports))portState[name]=Number.isInteger(port)&&await isClosed(port);
-  const passed=Object.values(directoryState).every(Boolean)&&Object.values(portState).every(Boolean);
+  const passed=Object.values(directoryState).every(Boolean)&&Object.values(retainedRuntime).every(Boolean)&&Object.values(portState).every(Boolean);
   return Object.freeze({schemaVersion:'runaai-m1-control-regression-cleanup/v1',directoriesAbsent:directoryState,portsClosed:portState,
-    sourceAndEvidenceRetained:true,productionChanged:false,protectedDataRead:false,modelsInvoked:false,passed});
+    retainedRuntime,sourceAndEvidenceRetained:true,productionChanged:false,protectedDataRead:false,modelsInvoked:false,passed});
 }
 
 async function writeExclusive(filename,value){const bytes=Buffer.isBuffer(value)?value:Buffer.from(JSON.stringify(value,null,2)+'\n'),handle=await open(filename,'wx');

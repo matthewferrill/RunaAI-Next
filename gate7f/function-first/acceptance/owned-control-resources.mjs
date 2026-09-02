@@ -1,14 +1,14 @@
 import { spawn, spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import { createReadStream } from "node:fs";
-import { copyFile, lstat, mkdir, realpath, rm, stat } from "node:fs/promises";
+import { lstat, mkdir, readFile, readdir, realpath, rm, stat } from "node:fs/promises";
 import { once } from "node:events";
 import net from "node:net";
 import path from "node:path";
 import pg from "pg";
-import { stageSandboxRuntime } from "../../../gate6b/sandbox-runtime.mjs";
 import { MxcJavascriptExecutor } from "../../../gate7e/mxc-javascript-executor.mjs";
 import { assertOwnedStage, fail, QDRANT_PIN } from "./runner-contract.mjs";
+import { validateOwnedRuntime } from "./owned-runtime-stage.mjs";
 
 const pgBin = "C:\\AI\\RunaAI-Next-Candidate\\tools\\postgresql\\pgsql\\bin";
 const pause = ms => new Promise(resolve => setTimeout(resolve, ms));
@@ -43,7 +43,7 @@ export function shouldRetryNativePreflight(preflight, attempt) {
 }
 async function removeOwned(root, name) {
   const target = path.resolve(root, name);
-  if (path.dirname(target) !== root || !["disposable-postgres", "runtime", "sandbox-runtime", "transient", "q", "data"].includes(name)) throw fail("m1-owned-cleanup-invalid");
+  if (path.dirname(target) !== root || !["disposable-postgres", "transient", "q", "data"].includes(name)) throw fail("m1-owned-cleanup-invalid");
   const entry = await lstat(target).catch(error => { if (error.code === "ENOENT") return null; throw error; });
   if (!entry) return;
   if (entry.isSymbolicLink() || await realpath(target) !== target) throw fail("m1-owned-cleanup-reparse");
@@ -59,8 +59,10 @@ export async function createOwnedControlResources({ root: suppliedRoot, maximumM
   if (await realpath(root) !== root || (await lstat(root)).isSymbolicLink()) throw fail("m1-owned-stage-reparse");
   const qdrantExecutable = path.join(root, "tools/qdrant/bin/qdrant.exe");
   if ((await stat(qdrantExecutable)).size !== QDRANT_PIN.bytes || await fileSha256(qdrantExecutable) !== QDRANT_PIN.sha256) throw fail("m1-qdrant-artifact-mismatch");
-  const pgData = path.join(root, "disposable-postgres"), nodeDirectory = path.join(root, "runtime"), transient = path.join(root, "transient");
-  const nodeExecutable = path.join(nodeDirectory, "node.exe"), qRoot = path.join(root, "q"), dataDirectory = path.join(root, "data");
+  const pgData = path.join(root, "disposable-postgres"), transient = path.join(root, "transient");
+  const runtimeRoot = path.join(root, "sandbox-runtime"), runnerPath = path.join(runtimeRoot, "quickjs-child.mjs");
+  const nodeExecutable = path.join(root, "runtime", "node.exe");
+  const qRoot = path.join(root, "q"), dataDirectory = path.join(root, "data");
   let postgresRunning = false, qdrant = null, pool = null, watchdog = null, closed = false;
   const report = { schemaVersion: "runaai-m1-owned-resources/v1", productionChanged: false, protectedDataRead: false,
     qdrantArtifact: QDRANT_PIN, modelResidencyChanged: false, cleanup: null };
@@ -72,19 +74,31 @@ export async function createOwnedControlResources({ root: suppliedRoot, maximumM
     if (!postgresRunning) postgresRunning = spawnSync(path.join(pgBin, "pg_ctl.exe"), ["-D", pgData, "status"], { windowsHide: true, stdio: "ignore", timeout: 5000 }).status === 0;
     if (postgresRunning) run(path.join(pgBin, "pg_ctl.exe"), ["-D", pgData, "stop", "-m", "fast", "-w"], { stdio: "ignore" });
     watchdog?.kill();
-    for (const name of ["disposable-postgres", "runtime", "sandbox-runtime", "transient", "q", "data"]) await removeOwned(root, name);
-    report.cleanup = { stoppedOwnedPostgres: true, stoppedOwnedQdrant: true, removedOwnedRuntimeAndSyntheticData: true,
+    for (const name of ["disposable-postgres", "transient", "q", "data"]) await removeOwned(root, name);
+    report.cleanup = { stoppedOwnedPostgres: true, stoppedOwnedQdrant: true, removedOwnedSyntheticData: true,
+      retainedSealedRuntime: true,
       sourceAndEvidenceRetained: true, productionChanged: false };
     return report.cleanup;
   }
   try {
-    for (const directory of [nodeDirectory, transient, qRoot, dataDirectory]) await mkdir(directory);
-    await copyFile(process.execPath, nodeExecutable);
-    const runtimeRoot = await stageSandboxRuntime({ sourceRoot: root, nodeModulesRoot: path.join(root, "node_modules"), destinationRoot: root });
+    const transientItem = await lstat(transient);
+    if (!transientItem.isDirectory() || transientItem.isSymbolicLink() || await realpath(transient) !== transient
+        || (await readdir(transient)).length !== 0) throw fail("m1-owned-transient-invalid");
+    for (const directory of [qRoot, dataDirectory]) await mkdir(directory);
+    const seal = JSON.parse(await readFile(path.join(root, "runtime-seal.json"), "utf8"));
+    const control = JSON.parse(await readFile(path.join(root, "CONTROL-REGRESSION-INPUT.json"), "utf8"));
+    const sourceTreeManifestSha256 = await fileSha256(path.join(root, "SOURCE-TREE-MANIFEST.json"));
+    const runtimeManifestBytes = await readFile(path.join(root, "OWNED-RUNTIME-MANIFEST.json"));
+    const runtimeManifestSha256 = createHash("sha256").update(runtimeManifestBytes).digest("hex");
+    report.runtimeManifest = await validateOwnedRuntime({ root, expectedManifestSha256: runtimeManifestSha256,
+      expectedSourceCommit: seal.sourceCommit, expectedSourceArchiveSha256: seal.runtime.sourceArchiveSha256,
+      expectedNodeSha256: seal.runtime.nodeSha256, releaseRoot: control.dependencies.releaseRoot,
+      expectedDependencyArtifactDigest: control.dependencies.artifactDigest, expectedSourceTreeManifestSha256: sourceTreeManifestSha256 });
+    report.runtimeManifestSha256 = runtimeManifestSha256;
     report.access = JSON.parse(run("powershell.exe", ["-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass", "-File",
       path.join(root, "gate7f/function-first/tasks/Stage-OwnedNativeAccess.ps1"), "-OwnedRoot", root]).trim());
     report.nodeSha256 = await fileSha256(nodeExecutable);
-    const executor = new MxcJavascriptExecutor({ runtimeRoot, runnerPath: path.join(runtimeRoot, "quickjs-child.mjs"), nodeExecutable, temporaryRoot: transient });
+    const executor = new MxcJavascriptExecutor({ runtimeRoot, runnerPath, nodeExecutable, temporaryRoot: transient });
     const nativePreflightAttempts = [];
     let preflight;
     for (let attempt = 0; attempt < 2; attempt += 1) {
@@ -121,6 +135,6 @@ export async function createOwnedControlResources({ root: suppliedRoot, maximumM
     pool = new pg.Pool({ connectionString: `postgresql://m1_synthetic@127.0.0.1:${pgPort}/postgres`, connectionTimeoutMillis: 2000, max: 12 });
     return { root, executor, pool, qdrantEndpoint: endpoint, dataDirectory, report, close,
       workerResources: { root, postgresPort: pgPort, dataDirectory,
-        native: { runtimeRoot, runnerPath: path.join(runtimeRoot, "quickjs-child.mjs"), nodeExecutable, temporaryRoot: transient } } };
+        native: { runtimeRoot, runnerPath, nodeExecutable, temporaryRoot: transient } } };
   } catch (error) { error.resourceReport = report; await close().catch(cleanup => { report.cleanupError = cleanup.code ?? cleanup.message; }); throw error; }
 }

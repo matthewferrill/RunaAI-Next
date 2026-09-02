@@ -17,6 +17,16 @@ permission requests. Human involvement is reserved for genuine customer tests or
 
 ### Current checkpoint: R15 campaign paused before inference for archive-bound hardware-plan reseal
 
+An additional prelaunch independent review found two compact-runtime containment defects before any model
+request: the exact stage lacked the runtime required by native-access preparation, while a provisional
+fallback widened MXC reads to the entire extracted stage. The correction now prebuilds an exact
+archive/source/node-bound compact runtime, manifests and read-locks every entry before application launch,
+rejects any changed or additional entry, and retains only that sealed runtime through cleanup. Local
+verification is green at 49/49 focused checks, 1,933/2,011 complete-suite checks with 78 intentional skips,
+164/164 campaign-harness checks, 28/28 Gate 7F checks and 15/15 roadmap checks. Independent re-review
+returned GO with no P0/P1 finding. Fresh source/seal/control/browser gates remain; no R15 candidate identity
+or model credit has been consumed.
+
 The prospective contract frozen in
 `gate7f/function-first/M1-S2-R15-AGENT-REVIEW-CORRECTIVE-CRITERIA-2026-09-01.md` is implemented and
 recorded in `gate7f/function-first/M1-S2-R15-CORRECTION-IMPLEMENTATION-RESULTS-2026-09-01.md`. The

@@ -115,3 +115,26 @@ output and stopped-state checks remain enforced. A terminal-present adversarial 
 timestamp directions and record reversal. The watchdog suite passed 12/12 three consecutive times; the
 complete tracked suite passed 2,007 tests with 1,929 passes, 78 intentional skips and zero failures.
 Independent review reported GO with no P0/P1 finding. No model/provider activity occurred.
+
+## Compact-runtime containment correction before inference
+
+The next source-stage review stopped launch before inference with two P1 method findings. The staged
+application did not yet contain the compact Node/QuickJS runtime required by the native-access preflight,
+and the attempted fallback would have granted the sandbox executor read access to the whole extracted
+application stage. Neither finding is attributable to a candidate, and no campaign identity or model
+credit was consumed.
+
+The correction now builds the compact runtime once during create-only finalization, records every runtime
+file's path, size and SHA-256 in an archive/source/node-bound manifest, validates the exact file set before
+each control run, and holds every manifested runtime file open with read-only sharing before application
+Node starts. Runtime and manifest remain immutable evidence; only disposable PostgreSQL, Qdrant, transient
+and synthetic-data directories are removed during cleanup. Changed, missing, additional or reparse-point
+runtime entries fail closed before application execution.
+
+Model-free verification is green: the focused contract/runtime suite passed 49/49; the complete repository
+suite passed 1,933 of 2,011 tests with 78 intentional skips and zero failures; the campaign harness passed
+164/164; Gate 7F passed 28/28; roadmap verification passed 15/15; and `git diff --check` reported no
+whitespace defects. Independent re-review returned GO with no P0/P1 finding after verifying deterministic
+source bindings, create-only outputs, exact-set validation and prelaunch read locks. The campaign remains
+paused before inference until the corrected source is committed/resealed and fresh controls plus
+real-browser proof pass under the new seal.

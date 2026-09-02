@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {spawnSync} from 'node:child_process';
 import {createHash} from 'node:crypto';
-import {mkdtemp,mkdir,readFile,rm,stat,writeFile} from 'node:fs/promises';
+import {lstat,mkdtemp,mkdir,readFile,rm,stat,writeFile} from 'node:fs/promises';
 import {createRequire} from 'node:module';
 import net from 'node:net';
 import {tmpdir} from 'node:os';
@@ -16,6 +16,8 @@ import {ownerSafeEnvironment,ownerSafeEnvironmentForRoot,runBoundedOwnerChild} f
 import {parseOwnerEntryArguments,purgeToOwnerEntryEnvironment} from './control-exact-regression-entry.mjs';
 import {buildInvocation,parseInvocationArguments} from './build-control-exact-regression-invocation.mjs';
 import {shouldRetryNativePreflight} from './owned-control-resources.mjs';
+import {buildOwnedRuntime,validateOwnedRuntime} from './owned-runtime-stage.mjs';
+import {buildArtifactManifest} from '../../../gate6b/artifact.mjs';
 const {parse:parseBootstrap,verifyArchive:verifyBootstrapArchive,verifyRelease:verifyBootstrapRelease}=createRequire(import.meta.url)('./control-exact-regression-bootstrap.cjs');
 
 const hash=letter=>letter.repeat(64);
@@ -112,6 +114,71 @@ test('owned resources record all selected ports before any PostgreSQL or Qdrant 
   assert.ok(assigned<source.indexOf('pgBin, "initdb.exe"'));assert.ok(assigned<source.indexOf('qdrant = spawn'));
 });
 
+test('owned resources use only the compact prebuilt runtime retained beneath the exact stage',()=>{
+  const source=requireText(path.join(import.meta.dirname,'owned-control-resources.mjs'));
+  assert.match(source,/runtimeRoot = path\.join\(root, "sandbox-runtime"\)/u);
+  assert.match(source,/nodeExecutable = path\.join\(root, "runtime", "node\.exe"\)/u);
+  assert.match(source,/new MxcJavascriptExecutor\(\{ runtimeRoot, runnerPath, nodeExecutable, temporaryRoot: transient \}\)/u);
+  assert.match(source,/validateOwnedRuntime/u);assert.doesNotMatch(source,/copyFile|stageSandboxRuntime/u);
+  assert.match(source,/\["disposable-postgres", "transient", "q", "data"\]/u);
+});
+
+test('owned runtime is created once, fully manifested and rejects changed or additional files',async()=>{const f=await fixture();try{
+  const sourceCommit='a'.repeat(40),sourceArchiveSha256='b'.repeat(64),release=path.join(f.root,'release');
+  await mkdir(path.join(release,'runtime'),{recursive:true});await writeFile(path.join(release,'runtime/node.exe'),'pinned-node');
+  await mkdir(path.join(f.root,'gate7e'),{recursive:true});
+  const quickjs=Buffer.from('export const pinned=true;\n');await writeFile(path.join(f.root,'gate7e/quickjs-child.mjs'),quickjs);
+  for(const name of ['quickjs-emscripten','quickjs-emscripten-core','@jitl']){
+    const directory=path.join(release,'node_modules',name);await mkdir(directory,{recursive:true});await writeFile(path.join(directory,'fixture.js'),`export default ${JSON.stringify(name)};\n`);
+  }
+  const artifact=await buildArtifactManifest(release);await writeFile(path.join(release,'artifact-files.json'),`${JSON.stringify(artifact)}\n`);
+  const sourceTree=Buffer.from(`${JSON.stringify({entries:[{path:'gate7e/quickjs-child.mjs',bytes:quickjs.length,sha256:actualSha(quickjs)}]})}\n`);
+  await writeFile(path.join(f.root,'SOURCE-TREE-MANIFEST.json'),sourceTree);
+  const binding={root:f.root,releaseRoot:release,sourceCommit,sourceArchiveSha256,
+    expectedDependencyArtifactDigest:artifact.artifactDigest,expectedSourceTreeManifestSha256:actualSha(sourceTree),
+    expectedNodeSha256:actualSha(Buffer.from('pinned-node'))};
+  const built=await buildOwnedRuntime(binding);
+  assert.equal(built.runtimeFiles,5);assert.match(built.manifestSha256,/^[a-f0-9]{64}$/u);
+  await validateOwnedRuntime({root:f.root,expectedManifestSha256:built.manifestSha256,expectedSourceCommit:sourceCommit,
+    expectedSourceArchiveSha256:sourceArchiveSha256,expectedNodeSha256:built.nodeSha256,releaseRoot:release,
+    expectedDependencyArtifactDigest:artifact.artifactDigest,expectedSourceTreeManifestSha256:actualSha(sourceTree)});
+  const nodeCopy=path.join(f.root,'runtime/node.exe');await writeFile(nodeCopy,'changed-node');
+  await assert.rejects(validateOwnedRuntime({root:f.root,expectedManifestSha256:built.manifestSha256,expectedSourceCommit:sourceCommit,
+    expectedSourceArchiveSha256:sourceArchiveSha256,expectedNodeSha256:built.nodeSha256,releaseRoot:release,
+    expectedDependencyArtifactDigest:artifact.artifactDigest,expectedSourceTreeManifestSha256:actualSha(sourceTree)}),{code:'owned-runtime-file-pin'});
+  await writeFile(nodeCopy,'pinned-node');await writeFile(path.join(f.root,'sandbox-runtime/extra.js'),'extra');
+  await assert.rejects(validateOwnedRuntime({root:f.root,expectedManifestSha256:built.manifestSha256,expectedSourceCommit:sourceCommit,
+    expectedSourceArchiveSha256:sourceArchiveSha256,expectedNodeSha256:built.nodeSha256,releaseRoot:release,
+    expectedDependencyArtifactDigest:artifact.artifactDigest,expectedSourceTreeManifestSha256:actualSha(sourceTree)}),{code:'owned-runtime-exact-set'});
+}finally{await f.close();}});
+
+test('owned runtime rejects a substituted dependency before creating its trusted manifest',async()=>{const f=await fixture();try{
+  const release=path.join(f.root,'release');await mkdir(path.join(release,'runtime'),{recursive:true});
+  const node=Buffer.from('node');await writeFile(path.join(release,'runtime/node.exe'),node);
+  await mkdir(path.join(f.root,'gate7e'),{recursive:true});const runner=Buffer.from('runner');await writeFile(path.join(f.root,'gate7e/quickjs-child.mjs'),runner);
+  for(const name of ['quickjs-emscripten','quickjs-emscripten-core','@jitl']){const directory=path.join(release,'node_modules',name);await mkdir(directory,{recursive:true});await writeFile(path.join(directory,'fixture.js'),'original');}
+  const artifact=await buildArtifactManifest(release);await writeFile(path.join(release,'artifact-files.json'),`${JSON.stringify(artifact)}\n`);
+  const sourceTree=Buffer.from(`${JSON.stringify({entries:[{path:'gate7e/quickjs-child.mjs',bytes:runner.length,sha256:actualSha(runner)}]})}\n`);
+  await writeFile(path.join(f.root,'SOURCE-TREE-MANIFEST.json'),sourceTree);
+  await writeFile(path.join(release,'node_modules/quickjs-emscripten/fixture.js'),'substitute');
+  await assert.rejects(buildOwnedRuntime({root:f.root,releaseRoot:release,sourceCommit:'a'.repeat(40),sourceArchiveSha256:'b'.repeat(64),
+    expectedDependencyArtifactDigest:artifact.artifactDigest,expectedSourceTreeManifestSha256:actualSha(sourceTree),expectedNodeSha256:actualSha(node)}),
+  {code:'owned-runtime-source-file-pin'});
+  await assert.rejects(lstat(path.join(f.root,'OWNED-RUNTIME-MANIFEST.json')),{code:'ENOENT'});
+}finally{await f.close();}});
+
+test('R15 Control wrapper locks every manifested runtime file before launching application code',()=>{
+  const validator=requireText(path.resolve(import.meta.dirname,'../../../artifacts/Validate-ControlR15Stage.Remote.ps1'));
+  const finalizer=requireText(path.resolve(import.meta.dirname,'../../../artifacts/Finalize-ControlR15SourceStage.ps1'));
+  assert.match(validator,/foreach\(\$entry in @\(\$runtimeManifest\.entries\)\)\{\$lockSpecs\.Add/u);
+  assert.match(validator,/\[IO\.FileShare\]::Read/u);assert.match(validator,/r15-stage-runtime-exact-set/u);
+  assert.ok(validator.indexOf("$stream=New-Object IO.FileStream($spec.Key")<validator.indexOf("& $node $entry --mode controls"));
+  const mutation=/function Test-AllowedExecutionMutation[\s\S]*?Assert-ExactStageSet/u.exec(validator)?.[0];assert.ok(mutation);
+  assert.doesNotMatch(mutation,/['"]runtime['"]|['"]sandbox-runtime['"]/u);
+  assert.match(finalizer,/runaai-m1-r15-source-stage-finalization\/v3/u);
+  assert.match(finalizer,/runtimeManifestSha256=\$validation\.runtimeManifestSha256/u);
+});
+
 test('native preflight retries once only for an empty system-stamped start failure',()=>{
   const receipt={status:'unavailable',errorCode:'sandbox-start-failed',exitCode:1,systemStamped:true,
     output:{stdout:'',stderr:'',combinedBytes:0,partialDelivered:false},effects:[]};
@@ -156,13 +223,14 @@ test('bounded capture fails before writing a chunk that crosses its byte ceiling
   assert.equal((await stat(filename)).size,0);
 }finally{await f.close();}});
 
-test('cleanup proof requires every owned directory absent and every recorded port closed',async()=>{const f=await fixture();const server=net.createServer();try{
+test('cleanup proof requires mutable resources absent, sealed runtime retained and every recorded port closed',async()=>{const f=await fixture();const server=net.createServer();try{
   for(const name of ['disposable-postgres','runtime','sandbox-runtime','transient','q','data'])await mkdir(path.join(f.root,name));
+  await writeFile(path.join(f.root,'OWNED-RUNTIME-MANIFEST.json'),'{}\n');
   await new Promise((resolve,reject)=>server.listen(0,'127.0.0.1',resolve).once('error',reject));const port=server.address().port;
   const before=await verifyControlRegressionCleanup(f.root,{postgres:port});assert.equal(before.passed,false);
   await new Promise((resolve,reject)=>server.close(error=>error?reject(error):resolve()));
-  for(const name of ['disposable-postgres','runtime','sandbox-runtime','transient','q','data'])await rm(path.join(f.root,name),{recursive:true});
-  const after=await verifyControlRegressionCleanup(f.root,{postgres:port});assert.equal(after.passed,true);
+  for(const name of ['disposable-postgres','transient','q','data'])await rm(path.join(f.root,name),{recursive:true});
+  const after=await verifyControlRegressionCleanup(f.root,{postgres:port});assert.equal(after.passed,true);assert.deepEqual(after.retainedRuntime,{runtime:true,'sandbox-runtime':true,manifest:true});
 }finally{if(server.listening)await new Promise(resolve=>server.close(resolve));await f.close();}});
 
 test('externally pinned dispatcher uses argument transport and one finite owner-session wait',()=>{

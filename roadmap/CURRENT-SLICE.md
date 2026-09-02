@@ -5,6 +5,17 @@ Milestone: M1
 Slice ID: M1-S2
 Status: in progress, R15 campaign paused before inference for an archive-bound hardware-plan correction and reseal; product not qualified.
 
+R15 containment update, 2026-09-01: independent prelaunch review found that the corrected exact-source
+stage did not yet prebuild the compact native runtime and that the provisional runtime root would grant
+MXC read access to the whole extracted application. Launch remained stopped before inference. The local
+correction now create-once manifests the compact runtime, validates its exact archive/source/node-bound
+file set, locks every entry read-only before application Node, and retains it as immutable evidence while
+cleaning only disposable data/process resources. Focused checks pass 49/49, the complete suite passes
+1,933/2,011 with 78 intentional skips and zero failures, the campaign harness passes 164/164, Gate 7F
+passes 28/28, and roadmap verification passes 15/15. Independent re-review returned GO with no P0/P1
+finding. Commit/reseal, 12 controls and the real-browser proof still precede any Gemma or other candidate
+request.
+
 R15 implementation update, 2026-09-01: the prospective model-neutral correction was frozen before
 implementation in
 `../gate7f/function-first/M1-S2-R15-AGENT-REVIEW-CORRECTIVE-CRITERIA-2026-09-01.md`. It addresses only

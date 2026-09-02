@@ -463,15 +463,17 @@ test("a valid ack returned after the deadline is rejected without parsing or mut
 
 test("operator-visible expiresAt and enforcement use one deadline even when announce consumes time", async t => {
   const directory = await mkdtemp(path.join(tmpdir(), "m1-browser-one-deadline-")); t.after(() => rm(directory, { recursive: true, force: true }));
-  const { ledger, client } = controlFixture(); let clock = 0, requestExpiry = null;
+  const { ledger, client } = controlFixture(); let clock = 0, requestExpiry = null, announcedExpiry = null;
   const checkpoint = createBrowserCheckpoint({ directory, maximumWaitMs: 1000, now: () => clock, pause: async () => {},
-    announce(value) { const request = JSON.parse(readFileSync(value.requestPath, "utf8")); requestExpiry = Date.parse(request.expiresAt); clock = 900; },
+    announce(value) { const request = JSON.parse(readFileSync(value.requestPath, "utf8")); requestExpiry = Date.parse(request.expiresAt);
+      announcedExpiry = Date.parse(value.expiresAt); clock = 900; },
     async readAck(ackPath) {
       const request = JSON.parse(await readFile(path.join(path.dirname(ackPath), "request.json"), "utf8"));
       clock = 1000; return JSON.stringify(gradedAck(request));
     } });
   await assert.rejects(checkpoint({ client, phase: "unknown", stage: "unknown" }), /m1-browser-checkpoint-unobserved/u);
-  assert.equal(requestExpiry, 1000); assert.deepEqual([ledger.observation.evidence.length, ledger.observation.checks.length, ledger.observation.browserExercised], [0, 0, false]);
+  assert.equal(requestExpiry, 1000); assert.equal(announcedExpiry, requestExpiry);
+  assert.deepEqual([ledger.observation.evidence.length, ledger.observation.checks.length, ledger.observation.browserExercised], [0, 0, false]);
 });
 
 test("transient observation followed by malformed JSON fails immediately", async t => {

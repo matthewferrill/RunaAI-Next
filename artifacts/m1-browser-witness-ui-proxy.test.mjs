@@ -20,6 +20,13 @@ test("loopback relay can keep the browser on the application port while mapping 
   assert.throws(() => relayModule.parseArguments(["58335", stage, "loopback", "58335"]), /relay-port-invalid/u);
 });
 
+test("loopback relay exposes bounded cleanup even before accepting a client", () => {
+  const stage = `m1-task-native-${"b".repeat(32)}`;
+  const server = relayModule.createRelay({ listenPort: 58335, remotePort: 58335, stage });
+  assert.equal(typeof server.stopAll, "function");
+  server.stopAll();
+});
+
 test("loopback witness UI proxy serves a visible one-use action and preserves the application origin", async t => {
   const received = [];
   const upstream = createServer(async (request, response) => {

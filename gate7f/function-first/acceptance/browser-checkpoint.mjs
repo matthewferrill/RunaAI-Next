@@ -232,6 +232,7 @@ export function createBrowserCheckpoint({ directory, maximumWaitMs = HUMAN_BROWS
       witnessToken: observationEndpoint.witnessToken, witnessExpiresAt: observationEndpoint.witnessExpiresAt
     } : null;
     announce({ checkpointId, requestPath, requestSha256, baseUrl: request.baseUrl, caseId: request.caseId, phase, stage,
+      expiresAt: request.expiresAt,
       ...(witnessPublication ? { witnessPublication } : {}) });
     let publicationOwnsSlot = false;
     const acceptAck = async (raw, envelope, acceptedAt) => {

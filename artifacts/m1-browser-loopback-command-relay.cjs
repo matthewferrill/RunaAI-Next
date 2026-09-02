@@ -23,8 +23,11 @@ function createRelay({ listenPort, remotePort, stage, listenHost = "127.0.0.1", 
       || !/^m1-task-native-[a-f0-9]{32}$/u.test(stage ?? "")) throw new Error("relay-binding-invalid");
   const remotePipe = `C:\\AI\\RunaAI-Next-Candidate\\staging\\${stage}\\m1-browser-loopback-pipe.cjs`;
   let active = 0;
+  const children = new Set();
+  const clients = new Set();
   const server = net.createServer(client => {
     if (++active > 8) { active--; client.destroy(); return; }
+    clients.add(client);
     const child = spawnProcess("ssh", [
       "-F", "C:\\Users\\matth\\.ssh\\config",
       "-o", "ClearAllForwardings=yes",
@@ -33,15 +36,25 @@ function createRelay({ listenPort, remotePort, stage, listenHost = "127.0.0.1", 
       remotePipe,
       String(remotePort)
     ], { stdio: ["pipe", "pipe", "pipe"], windowsHide: true });
+    children.add(child);
     child.stderr.on("data", chunk => process.stderr.write(chunk));
     client.pipe(child.stdin);
     child.stdout.pipe(client);
     const close = () => { if (!client.destroyed) client.destroy(); };
-    child.once("exit", () => { active--; close(); });
-    child.once("error", () => { active--; close(); });
+    let settled = false;
+    const settle = () => {
+      if (settled) return;
+      settled = true; active--; children.delete(child); clients.delete(client); close();
+    };
+    child.once("exit", settle);
+    child.once("error", settle);
     client.once("error", () => { try { child.kill(); } catch {} });
-    client.once("close", () => { try { child.stdin.end(); } catch {} });
+    client.once("close", () => { clients.delete(client); try { child.stdin.end(); } catch {} });
   });
+  server.stopAll = () => {
+    for (const client of clients) try { client.destroy(); } catch {}
+    for (const child of children) try { child.kill(); } catch {}
+  };
   return server;
 }
 
@@ -53,7 +66,11 @@ if (require.main === module) {
       listenHost: options.listenHost, listenPort: options.listenPort, remotePort: options.remotePort,
       active: true, productionChanged: false }) + "\n");
   });
-  const stop = () => server.close(() => process.exit(0));
+  const stop = () => {
+    server.stopAll();
+    server.close(() => process.exit(0));
+    setTimeout(() => process.exit(1), 5000).unref();
+  };
   process.once("SIGINT", stop);
   process.once("SIGTERM", stop);
 }

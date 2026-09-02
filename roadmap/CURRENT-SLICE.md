@@ -3,7 +3,20 @@
 Roadmap revision: 2026-08-28.1
 Milestone: M1
 Slice ID: M1-S2
-Status: in progress, R15 method repair independently approved and packaging before inference; product not qualified.
+Status: in progress, R15 V12 method repair independently approved and commit/reseal before inference; product not qualified.
+
+V12 method-gate update, 2026-09-02: fresh stage `08fdd8ae4cce45dd9cb2ee3e0fb17e91`
+recorded 11 completed model-free controls and one failed browser-dependent control, with no model calls.
+The browser checkpoint ran from 04:17 to 04:32 EDT, but its displayed URL was attempted around 07:46 EDT.
+That stale handoff is an operator-method failure, not Edge or Gemma. The outer watcher separately rejected
+26 harmless content notifications on four sealed directories while hashes, exact sets and runtime security
+state remained unchanged. Independent review stopped packaging on relay-liveness/expiry supervision, a
+pre-use classifier race, package/hash propagation and stale status. The repair now couples the live relay
+to the exact checkpoint expiry, confirms owned process-tree shutdown, inlines the classifier in the pinned
+validator and updates all living status. The final focused suite passes 76/76 and the complete tracked
+suite passes 1,971/2,049 with 78 intentional skips and zero failures. Two independent re-reviews returned
+GO with no P0/P1 findings. A new commit/seal and fresh model-free stage remain required. V12 is retained
+and not reused; Gemma has zero new scored attempts in the simplified arm.
 
 V11 finalization-key-order update, 2026-09-02: fresh stage `4b57aec1ddca418dbf20c2df7ddac6da`
 finalized all 2,464 source files, then stopped before the first control because the validator's manually

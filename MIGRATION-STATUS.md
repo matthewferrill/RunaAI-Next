@@ -15,7 +15,22 @@ are unchanged. M1 is authorized, not complete; its first local wiring result is 
 The steward authorized necessary non-destructive work and commit/push to RunaAI-Next without recurring
 permission requests. Human involvement is reserved for genuine customer tests or human-only operations.
 
-### Current checkpoint: R15 method repair independently approved; packaging before inference
+### Current checkpoint: R15 V12 method repair independently approved; commit/reseal before inference
+
+V12 method-gate update, 2026-09-02: fresh stage `08fdd8ae4cce45dd9cb2ee3e0fb17e91`
+recorded 11 completed model-free controls and one failed browser-dependent control, with
+`modelsInvoked:false`. Its browser checkpoint existed from `2026-09-02T08:17:44Z` (04:17 EDT) to
+`08:32:44Z` (04:32 EDT); the steward attempted the displayed URL at approximately 07:46 EDT, more
+than three hours after it had correctly expired. The page failure is operator-handoff attribution, not
+Edge or Gemma. The outer watcher also rejected 26 directory-level content notifications even though
+all locked hashes, exact sets and durable runtime security state remained unchanged. Independent review
+then stopped packaging on relay-liveness/expiry supervision, pre-use classifier placement, propagated
+package pins and stale status publication. The corrections now supervise relay liveness and expiry,
+terminate the exact owned process tree, inline the narrow classifier in the externally pinned validator,
+and update the living status. The final focused suite passes 76/76 and the complete tracked suite passes
+1,971/2,049 with 78 intentional skips and zero failures. Two independent re-reviews returned GO with no
+P0/P1 findings. Commit/reseal and a new model-free stage remain mandatory. V12 is retained and is not
+reused; Gemma has zero new scored attempts under the simplified arm.
 
 V11 finalization-key-order RCA, 2026-09-02: fresh stage `4b57aec1ddca418dbf20c2df7ddac6da`
 successfully finalized all 2,464 source files, then stopped before its first control because the validator's

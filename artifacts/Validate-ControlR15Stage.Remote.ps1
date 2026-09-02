@@ -103,7 +103,7 @@ $manifestKeys=($manifest.PSObject.Properties.Name|Sort-Object)-join','
 if($manifestKeys-cne'entries,schemaVersion,sourceArchiveSha256,sourceCommit'-or
    $manifest.schemaVersion-cne'runaai-m1-r15-source-tree-manifest/v1'-or
    $manifest.sourceCommit-cne$sourceCommit-or$manifest.sourceArchiveSha256-cne$archiveSha256-or
-   @($manifest.entries).Count-ne2464){throw 'r15-stage-validation-manifest-schema'}
+   @($manifest.entries).Count-ne2465){throw 'r15-stage-validation-manifest-schema'}
 $seen=New-Object 'System.Collections.Generic.HashSet[string]' ([StringComparer]::Ordinal)
 $expectedDirectories=New-Object 'System.Collections.Generic.HashSet[string]' ([StringComparer]::Ordinal)
 $previous=$null
@@ -160,13 +160,29 @@ function Assert-ExactStageSet {
     }
   }
 }
-function Test-AllowedExecutionMutation([string]$Path){
-  if([string]::IsNullOrWhiteSpace($Path)-or-not$Path.StartsWith(($root.TrimEnd('\')+'\'),[StringComparison]::OrdinalIgnoreCase)){return $false}
-  $relative=$Path.Substring($root.Length).TrimStart('\')
+function Test-R15AllowedExecutionMutation {
+  [CmdletBinding()]
+  param(
+    [Parameter(Mandatory)][string]$Root,
+    [Parameter(Mandatory)][string]$Path,
+    [Parameter(Mandatory)][string]$SourceIdentifier,
+    [Parameter(Mandatory)][Collections.Generic.HashSet[string]]$SealedDirectories
+  )
+  $fullRoot=[IO.Path]::GetFullPath($Root).TrimEnd('\')
+  if([string]::IsNullOrWhiteSpace($Path)-or
+     -not$Path.StartsWith(($fullRoot+'\'),[StringComparison]::OrdinalIgnoreCase)){return $false}
+  $fullPath=[IO.Path]::GetFullPath($Path)
+  $relative=$fullPath.Substring($fullRoot.Length).TrimStart('\')
   foreach($dynamic in @('acceptance-evidence','disposable-postgres','transient','q','data')){
     if($relative-ceq$dynamic-or$relative.StartsWith(($dynamic+'\'),[StringComparison]::OrdinalIgnoreCase)){return $true}
   }
-  $relative-ceq'disposable-postgres.log'
+  if($relative-ceq'disposable-postgres.log'){return $true}
+  # Windows reports LastWrite notifications for an executable's containing
+  # directories even when all sealed bytes, names, attributes and ACLs remain
+  # unchanged. Only that narrowly identified content-notification class is
+  # ignored for a directory that existed in the sealed source/runtime set.
+  $SourceIdentifier.EndsWith('-content-changed',[StringComparison]::Ordinal)-and
+    $SealedDirectories.Contains($fullPath)
 }
 Assert-ExactStageSet
 
@@ -371,6 +387,10 @@ if((($runtimeActualFiles|Sort-Object)-join"`n")-cne(($runtimeSeen|Sort-Object)-j
   throw 'r15-stage-runtime-exact-set'
 }
 $runtimeSecurityPaths=@($runtimeSeen)+@($runtimeExpectedDirectories)
+$sealedDirectories=New-Object 'System.Collections.Generic.HashSet[string]' ([StringComparer]::OrdinalIgnoreCase)
+foreach($relative in @($expectedDirectories)+@($runtimeExpectedDirectories)){
+  $sealedDirectories.Add((Join-Path $root ($relative.Replace('/','\'))))|Out-Null
+}
 . (Join-Path $root 'gate7f\function-first\acceptance\Get-R15RuntimeSecurityDigest.ps1')
 function Assert-R15RuntimeDurableState {
   foreach($entry in @($runtimeManifest.entries)){
@@ -533,18 +553,26 @@ try{
   }
   for($watchIndex=0;$watchIndex-lt$watchSpecs.Count;$watchIndex++){
     $spec=$watchSpecs[$watchIndex]
-    $watcher=New-Object IO.FileSystemWatcher($spec.Path)
-    $watcher.IncludeSubdirectories=$spec.Recursive
-    $watcher.InternalBufferSize=65536
-    $watcher.NotifyFilter=[IO.NotifyFilters]::FileName-bor[IO.NotifyFilters]::DirectoryName-bor[IO.NotifyFilters]::LastWrite-bor[IO.NotifyFilters]::Size-bor[IO.NotifyFilters]::Attributes
-    if(-not$spec.TransientRuntimeSecurity){$watcher.NotifyFilter=$watcher.NotifyFilter-bor[IO.NotifyFilters]::Security}
-    foreach($eventName in @('Changed','Created','Deleted','Renamed','Error')){
-      $sourceId='r15-'+$StageId+'-'+$watchIndex+'-'+$eventName.ToLowerInvariant()
-      Register-ObjectEvent -InputObject $watcher -EventName $eventName -SourceIdentifier $sourceId|Out-Null
-      $sourceIds+=$sourceId
+    $metadataFilter=[IO.NotifyFilters]::Attributes
+    if(-not$spec.TransientRuntimeSecurity){$metadataFilter=$metadataFilter-bor[IO.NotifyFilters]::Security}
+    $filterSpecs=@(
+      [pscustomobject]@{Kind='name';NotifyFilter=[IO.NotifyFilters]::FileName-bor[IO.NotifyFilters]::DirectoryName;Events=@('Created','Deleted','Renamed','Error')},
+      [pscustomobject]@{Kind='content';NotifyFilter=[IO.NotifyFilters]::LastWrite-bor[IO.NotifyFilters]::Size;Events=@('Changed','Error')},
+      [pscustomobject]@{Kind='metadata';NotifyFilter=$metadataFilter;Events=@('Changed','Error')}
+    )
+    foreach($filterSpec in $filterSpecs){
+      $watcher=New-Object IO.FileSystemWatcher($spec.Path)
+      $watcher.IncludeSubdirectories=$spec.Recursive
+      $watcher.InternalBufferSize=65536
+      $watcher.NotifyFilter=$filterSpec.NotifyFilter
+      foreach($eventName in $filterSpec.Events){
+        $sourceId='r15-'+$StageId+'-'+$watchIndex+'-'+$filterSpec.Kind+'-'+$eventName.ToLowerInvariant()
+        Register-ObjectEvent -InputObject $watcher -EventName $eventName -SourceIdentifier $sourceId|Out-Null
+        $sourceIds+=$sourceId
+      }
+      $watchers.Add($watcher)
+      $watcher.EnableRaisingEvents=$true
     }
-    $watchers.Add($watcher)
-    $watcher.EnableRaisingEvents=$true
   }
   Assert-ExactStageSet
   $moduleItem=Get-Item -LiteralPath $modules -Force
@@ -639,11 +667,11 @@ try{
     $changedPaths=@($event.SourceEventArgs.FullPath)
     if($event.SourceEventArgs.PSObject.Properties.Name-contains'OldFullPath'){$changedPaths+=@($event.SourceEventArgs.OldFullPath)}
     foreach($changed in $changedPaths){
-      if(Test-AllowedExecutionMutation $changed){continue}
+      if(Test-R15AllowedExecutionMutation -Root $root -Path $changed -SourceIdentifier $event.SourceIdentifier -SealedDirectories $sealedDirectories){continue}
       $mutationCount++
       if($mutationSamples.Count-lt32){
         $sample=if([string]::IsNullOrWhiteSpace($changed)){'empty-path'}
-          elseif($changed.StartsWith(($root.TrimEnd('\')+'\'),[StringComparison]::OrdinalIgnoreCase)){$changed.Substring($root.Length).TrimStart('\').Replace('\','/')}
+          elseif($changed.StartsWith(($root.TrimEnd('\')+'\'),[StringComparison]::OrdinalIgnoreCase)){($event.SourceIdentifier-split'-'|Select-Object -Last 2)-join'-'+'|'+$changed.Substring($root.Length).TrimStart('\').Replace('\','/')}
           else{'outside-stage'}
         $mutationSamples.Add($sample)|Out-Null
       }

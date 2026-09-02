@@ -370,3 +370,80 @@ failures in `probes/results/_payloads`; the unchanged suite passed with the requ
 so those five are environment-attributed and not campaign or model failures. Two independent reviewers
 returned GO with no P0/P1 findings. The failed stage remains evidence and is not reused; commit/reseal and
 a fresh stage are required before any inference.
+
+## V12 model-free controls and browser-handoff RCA
+
+Fresh stage `08fdd8ae4cce45dd9cb2ee3e0fb17e91` finalized the exact V12 package and began only the
+model-free controls. It recorded eleven completed drivers, one failed browser-dependent driver and
+`modelsInvoked:false`. The browser checkpoint was created at `2026-09-02T08:17:44Z` (04:17 EDT),
+advertised expiry at `08:32:44Z` (04:32 EDT), and the control report closed at `08:33:02Z`. The
+steward's reported access time was approximately 07:46 EDT, more than three hours after the finite
+checkpoint had correctly closed. The displayed URL was therefore stale; Edge did not fail to render a
+live page. The operator method had not coupled the temporary remote listener, local relay, expiry and
+human-presence requirement into one supervised lifecycle, and it allowed an expired action to be
+presented as usable.
+
+Every browser-bearing R15 operator now requires the explicit `BrowserWitnessReady` presence switch
+before it starts the remote phase. Every checkpoint announcement includes the same `expiresAt` used by
+enforcement. A shared operator supervises the SSH command and, as soon as a checkpoint is announced,
+starts the existing bounded same-port loopback relay and emits a typed relay-ready record containing the
+browser URL and expiry. It rejects expired or malformed announcements and tears the relay down with the
+remote phase. This does not automate or weaken the required actual-browser observation; it prevents an
+unattended run or a dead URL from being mistaken for a live witness opportunity.
+
+After the control process ended, the outer mutation watcher also reported 26 events whose only four
+paths were the already-existing sealed directories `runtime`, `sandbox-runtime`, `tools/qdrant` and
+`tools/qdrant/bin`. It reported no watcher overflow or error. The locked file hashes, exact source and
+runtime sets, and post-run runtime security digest all remained unchanged. The watcher had combined
+name, content, attribute and security notification filters, so Windows directory-level `LastWrite`
+notifications caused by executing sealed binaries were indistinguishable from durable mutation. The
+validator consequently rejected harmless directory notification noise even though every durable
+invariant passed.
+
+The corrected watcher uses separate name, content and metadata/security channels. It ignores only a
+`content-changed` notification for a directory that was already declared by the sealed source or runtime
+manifest. A created, deleted or renamed path still fails; a file-content event still fails; an attribute
+or security event still fails; unknown directories still fail; all manifested files remain held by read
+locks; and the exact-set, byte-hash and runtime-security comparisons still run after watcher quiescence.
+The failed V12 stage is retained, is not reused and has zero model attribution. A fresh source commit,
+independent review, reseal and model-free stage are required before the first Gemma request.
+
+The first two independent reviews of this V12 repair returned NO-GO with no P0 and four P1 method
+findings. They correctly rejected an initial relay wrapper that checked expiry only before startup, did
+not monitor relay death or expiry after publication, and did not confirm tree cleanup. They also found
+that the mutation classifier was initially imported from a new unsealed helper before retained source
+locks, that the current V12 package and validator pins necessarily still described the preceding commit,
+and that the living status still presented V11 as current.
+
+The prospective correction does not reuse the stage or invoke a model. The relay wrapper now reads the
+remote stream asynchronously while checking relay liveness and the exact checkpoint expiry every 250 ms,
+rechecks both immediately before publishing a ready URL, and fails closed if either becomes invalid. Its
+cleanup targets the exact operator-owned process tree with `taskkill /T /F`, waits for confirmed exit and
+raises a separate unconfirmed-stop error rather than silently swallowing it; the relay also tracks and
+closes every accepted browser connection and SSH child during graceful shutdown. The production mutation
+classifier is now inlined in the externally hash-pinned validator, eliminating the pre-lock imported-code
+window; the behavioral regression extracts and executes that exact inline implementation. The only new
+source file is the shared browser operator, so the next Git archive is expected to contain 2,465 files.
+Package, validator and wrapper hashes will be calculated and propagated only after that source commit;
+no fresh stage may be prepared from the stale V12 pins. `MIGRATION-STATUS.md`, `roadmap/CURRENT-SLICE.md`
+and `roadmap/current-slice.json` now report V12 and keep inference paused pending the reviewed source
+commit, canonical reseal and a fresh model-free stage.
+
+Post-correction verification is green. The first restricted focused invocation passed 71/75 and produced
+four expected host-permission failures: one disposable ACL mutation could not call `SetAccessControl`, and
+three process-tree regressions could not terminate their exact children through `taskkill`. The unchanged
+permission-correct invocation passed 75/75, so those four records are local sandbox attribution, not a
+campaign or model result. After adding an executed cleanup-failure regression, the final focused suite
+passes 76/76. The complete model-free campaign harness passes 198/198. The final complete tracked
+repository suite passes 1,971/2,049 with 78 intentional environment-dependent skips and zero failures.
+PowerShell parsing reports zero errors for all six changed R15 operators, and roadmap retrieval/validation
+passes. No model endpoint was invoked by any of these checks.
+
+Both final independent re-reviews returned GO with no P0/P1 findings. The browser reviewer verified the
+250 ms liveness/expiry supervision, pre-publication recheck, cleanup-safe relay startup, bounded asynchronous
+`taskkill` pipe handling, and independent relay/remote shutdown attempts. The forced failure-path regression
+proves that a relay cleanup exception cannot skip remote cleanup. The filesystem reviewer verified that the
+inline classifier admits only exact sealed-directory content noise, all name/file/metadata/security/error
+events remain fail-closed, and the sole new archive member produces the expected 2,465-file source package.
+Their GO applies to the exact method-fix commit followed by a fresh canonical reseal; the old V12 package
+remains deliberately ineligible.

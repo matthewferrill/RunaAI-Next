@@ -7,7 +7,8 @@ param(
   [Parameter(Mandatory)][ValidatePattern('^r15-browser-publication-control-[0-9]+\.json$')][string]$BrowserProofName,
   [Parameter(Mandatory)][ValidatePattern('^[a-f0-9]{64}$')][string]$BrowserProofSha256,
   [Parameter(Mandatory)][ValidatePattern('^home-ready-[a-z0-9-]+\.json$')][string]$HomeReadyName,
-  [Parameter(Mandatory)][ValidatePattern('^[a-f0-9]{64}$')][string]$HomeReadySha256
+  [Parameter(Mandatory)][ValidatePattern('^[a-f0-9]{64}$')][string]$HomeReadySha256,
+  [Parameter(Mandatory)][switch]$BrowserWitnessReady
 )
 Set-StrictMode -Version Latest
 $ErrorActionPreference='Stop'
@@ -18,5 +19,5 @@ $validatorSha256='fe088cbf627f64b051e0025061166e7dfbea93ec60ffe1bd9a7e9c489f0298
 if($validatorSha256-notmatch'^[a-f0-9]{64}$'){throw 'r15-gemma-campaign-validator-not-sealed'}
 $remote="Set-StrictMode -Version Latest;`$ErrorActionPreference='Stop';if((Get-FileHash -LiteralPath '$validator' -Algorithm SHA256).Hash.ToLowerInvariant()-cne'$validatorSha256'){throw 'r15-gemma-campaign-validator-pin'};& '$validator' -StageId '$StageId' -Phase Campaign -FinalizationSha256 '$FinalizationSha256' -ControlsName '$ControlsName' -ControlsSha256 '$ControlsSha256' -BrowserProofName '$BrowserProofName' -BrowserProofSha256 '$BrowserProofSha256' -HomeReadyName '$HomeReadyName' -HomeReadySha256 '$HomeReadySha256';exit `$LASTEXITCODE"
 $encoded=[Convert]::ToBase64String([Text.Encoding]::Unicode.GetBytes($remote))
-& ssh.exe -F 'C:\Users\matth\.ssh\config' -o ClearAllForwardings=yes runa-control powershell.exe -NoProfile -NonInteractive -EncodedCommand $encoded
-exit $LASTEXITCODE
+. (Join-Path $PSScriptRoot 'Invoke-R15RemoteWithBrowserRelay.ps1')
+Invoke-R15RemoteWithBrowserRelay -StageId $StageId -EncodedCommand $encoded -BrowserWitnessReady:$BrowserWitnessReady

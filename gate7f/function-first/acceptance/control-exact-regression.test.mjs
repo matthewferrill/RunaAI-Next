@@ -174,9 +174,8 @@ test('R15 Control wrapper locks every manifested runtime file before launching a
   const reviewPrepare=requireText(path.resolve(import.meta.dirname,'../../../artifacts/Prepare-ControlR15GemmaBlindReview.ps1'));
   const reviewFinalize=requireText(path.resolve(import.meta.dirname,'../../../artifacts/Finalize-ControlR15GemmaBlindReview.ps1'));
   assert.match(validator,/foreach\(\$entry in @\(\$runtimeManifest\.entries\)\)\{\$lockSpecs\.Add/u);
-  assert.match(validator,/@\(\$manifest\.entries\)\.Count-ne2464/u);
-  assert.match(finalizer,/\$validation\.verifiedSourceFiles-ne2464/u);
-  assert.match(validator,/\$relative-ceq'transient'/u);
+  assert.match(validator,/@\(\$manifest\.entries\)\.Count-ne2465/u);
+  assert.match(finalizer,/\$validation\.verifiedSourceFiles-ne2465/u);
   assert.match(validator,/@\('acceptance-evidence','disposable-postgres','transient','q','data'\)/u);
   assert.match(validator,/Remove-Item -LiteralPath \$postgresLog -Force[\s\S]*?Assert-ExactStageSet/u);
   assert.match(validator,/\[IO\.FileShare\]::Read/u);assert.match(validator,/r15-stage-runtime-exact-set/u);
@@ -189,12 +188,17 @@ test('R15 Control wrapper locks every manifested runtime file before launching a
   assert.match(validator,/runtimeSecurityBeforeNormalization\.Sha256-cne\$receipt\.runtimeSecuritySha256/u);
   assert.match(validator,/Assert-R15RuntimeDurableState[\s\S]*?r15-stage-runtime-security-drift/u);
   assert.match(validator,/TransientRuntimeSecurity=\(\$name-ceq'runtime'-or\$name-ceq'sandbox-runtime'\)/u);
-  assert.match(validator,/if\(-not\$spec\.TransientRuntimeSecurity\)\{\$watcher\.NotifyFilter=\$watcher\.NotifyFilter-bor\[IO\.NotifyFilters\]::Security\}/u);
+  assert.match(validator,/Kind='name';NotifyFilter=\[IO\.NotifyFilters\]::FileName-bor\[IO\.NotifyFilters\]::DirectoryName/u);
+  assert.match(validator,/Kind='content';NotifyFilter=\[IO\.NotifyFilters\]::LastWrite-bor\[IO\.NotifyFilters\]::Size/u);
+  assert.match(validator,/Kind='metadata';NotifyFilter=\$metadataFilter/u);
+  assert.match(validator,/if\(-not\$spec\.TransientRuntimeSecurity\)\{\$metadataFilter=\$metadataFilter-bor\[IO\.NotifyFilters\]::Security\}/u);
   assert.match(validator,/GetException\(\)/u);assert.match(validator,/\$exception\.GetType\(\)\.FullName/u);
   assert.doesNotMatch(validator,/New-Object IO\.FileSystemWatcher\(\$root\)[\s\S]*?IncludeSubdirectories=\$true/u);
   assert.ok(validator.indexOf("$stream=New-Object IO.FileStream($spec.Key")<validator.indexOf("& $node $entry --mode controls"));
-  const mutation=/function Test-AllowedExecutionMutation[\s\S]*?Assert-ExactStageSet/u.exec(validator)?.[0];assert.ok(mutation);
-  assert.doesNotMatch(mutation,/['"]runtime['"]|['"]sandbox-runtime['"]/u);
+  assert.match(validator,/Test-R15AllowedExecutionMutation -Root \$root -Path \$changed -SourceIdentifier \$event\.SourceIdentifier -SealedDirectories \$sealedDirectories/u);
+  assert.match(validator,/EndsWith\('-content-changed'/u);
+  const mutation=/function Test-R15AllowedExecutionMutation[\s\S]*?\n\}/u.exec(validator)?.[0];assert.ok(mutation);
+  assert.doesNotMatch(mutation,/foreach\(\$dynamic[^}]+runtime|foreach\(\$dynamic[^}]+sandbox-runtime/su);
   assert.match(finalizer,/runaai-m1-r15-source-stage-finalization\/v4/u);
   assert.match(finalizer,/runtimeManifestSha256=\$validation\.runtimeManifestSha256/u);
   assert.match(finalizer,/runtimeSecuritySha256=\$validation\.runtimeSecuritySha256/u);
@@ -220,6 +224,83 @@ test('R15 Control wrapper locks every manifested runtime file before launching a
   assert.match(validator,/run-r15-gemma-eligibility-campaign\.mjs/u);
   assert.match(validator,/r15-stage-campaign-prior-arm-or-attempts/u);
   assert.doesNotMatch(validator,/--candidate-id \$CandidateId/u);
+});
+
+test('R15 execution mutation classifier ignores only sealed-directory content noise', {skip:process.platform!=='win32'}, async()=>{
+  const f=await fixture();try{
+    const scriptPath=path.join(f.root,'mutation-classifier-regression.ps1');
+    const validator=requireText(path.resolve(import.meta.dirname,'../../../artifacts/Validate-ControlR15Stage.Remote.ps1'));
+    const classifier=/function Test-R15AllowedExecutionMutation[\s\S]*?\n\}/u.exec(validator)?.[0];
+    assert.ok(classifier,'production classifier must be extractable for behavioral proof');
+    const script=String.raw`param([Parameter(Mandatory)][string]$FixtureRoot)
+$ErrorActionPreference='Stop'
+${classifier}
+$sealed=New-Object 'System.Collections.Generic.HashSet[string]' ([StringComparer]::OrdinalIgnoreCase)
+$runtime=Join-Path $FixtureRoot 'runtime';$source=Join-Path $FixtureRoot 'tools\qdrant';$file=Join-Path $runtime 'node.exe'
+$sealed.Add($runtime)|Out-Null;$sealed.Add($source)|Out-Null
+[ordered]@{
+  dynamic=(Test-R15AllowedExecutionMutation -Root $FixtureRoot -Path (Join-Path $FixtureRoot 'acceptance-evidence\x.json') -SourceIdentifier 'r15-x-name-created' -SealedDirectories $sealed)
+  sealedDirectoryContent=(Test-R15AllowedExecutionMutation -Root $FixtureRoot -Path $runtime -SourceIdentifier 'r15-x-content-changed' -SealedDirectories $sealed)
+  sealedDirectoryMetadata=(Test-R15AllowedExecutionMutation -Root $FixtureRoot -Path $runtime -SourceIdentifier 'r15-x-metadata-changed' -SealedDirectories $sealed)
+  sealedDirectoryName=(Test-R15AllowedExecutionMutation -Root $FixtureRoot -Path $source -SourceIdentifier 'r15-x-name-renamed' -SealedDirectories $sealed)
+  sealedFileContent=(Test-R15AllowedExecutionMutation -Root $FixtureRoot -Path $file -SourceIdentifier 'r15-x-content-changed' -SealedDirectories $sealed)
+  unknownDirectoryContent=(Test-R15AllowedExecutionMutation -Root $FixtureRoot -Path (Join-Path $FixtureRoot 'unknown') -SourceIdentifier 'r15-x-content-changed' -SealedDirectories $sealed)
+}|ConvertTo-Json -Compress`;
+    await writeFile(scriptPath,script);
+    const result=spawnSync('powershell.exe',['-NoProfile','-NonInteractive','-ExecutionPolicy','Bypass','-File',scriptPath,
+      '-FixtureRoot',f.root],{encoding:'utf8',timeout:10000,windowsHide:true});
+    assert.equal(result.status,0,result.stderr||result.stdout);
+    assert.deepEqual(JSON.parse(result.stdout.trim().split(/\r?\n/u).at(-1)),{
+      dynamic:true,sealedDirectoryContent:true,sealedDirectoryMetadata:false,sealedDirectoryName:false,
+      sealedFileContent:false,unknownDirectoryContent:false
+    });
+  }finally{await f.close();}
+});
+
+test('R15 browser-bearing operators require presence and supervise an expiring same-port relay',()=>{
+  const artifacts=path.resolve(import.meta.dirname,'../../../artifacts');
+  const helper=requireText(path.join(artifacts,'Invoke-R15RemoteWithBrowserRelay.ps1'));
+  for(const name of ['Invoke-ControlR15Controls.ps1','Invoke-ControlR15BrowserProof.ps1','Invoke-ControlR15GemmaEligibilityCampaign.ps1']){
+    const wrapper=requireText(path.join(artifacts,name));
+    assert.match(wrapper,/\[Parameter\(Mandatory\)\]\[switch\]\$BrowserWitnessReady/u);
+    assert.match(wrapper,/Invoke-R15RemoteWithBrowserRelay/u);
+    assert.doesNotMatch(wrapper,/& ssh(?:\.exe)?\b/u);
+  }
+  assert.match(helper,/r15-browser-witness-presence-required/u);
+  assert.match(helper,/runaai-m1-browser-checkpoint-ready\/v1/u);
+  assert.match(helper,/runaai-m1-browser-relay-ready\/v1/u);
+  assert.match(helper,/\$parsedExpiry-le\[DateTimeOffset\]::UtcNow/u);
+  assert.match(helper,/Start-R15BrowserRelay -RemotePort \$uri\.Port/u);
+  assert.match(helper,/relaySupervised=\$true;humanBrowserRequired=\$true/u);
+  assert.match(helper,/ReadLineAsync\(\)/u);
+  assert.match(helper,/relayState\.Process\.HasExited/u);
+  assert.match(helper,/UtcNow-ge\$relayExpiry/u);
+  assert.match(helper,/r15-browser-relay-not-live-before-publication/u);
+  assert.match(helper,/taskkill\.exe/u);
+  assert.match(helper,/Arguments = '\/PID ' \+ \$Process\.Id \+ ' \/T \/F'/u);
+  assert.match(helper,/r15-child-process-tree-stop-unconfirmed/u);
+  assert.match(helper,/Invoke-R15BrowserCleanup -RelayState \$relayState -RemoteProcess \$remote -RemoteStarted \$remoteStarted/u);
+  assert.match(helper,/ClearAllForwardings=yes/u);
+});
+
+test('R15 browser cleanup attempts the remote tree after a relay cleanup failure', {skip:process.platform!=='win32'}, async()=>{
+  const f=await fixture();try{
+    const scriptPath=path.join(f.root,'browser-cleanup-regression.ps1');
+    const helperPath=path.resolve(import.meta.dirname,'../../../artifacts/Invoke-R15RemoteWithBrowserRelay.ps1');
+    const script=String.raw`param([Parameter(Mandatory)][string]$HelperPath)
+$ErrorActionPreference='Stop';. $HelperPath
+$calls=New-Object 'System.Collections.Generic.List[string]'
+$stop={param($owned)$calls.Add([string]$owned)|Out-Null;if($owned-ceq'relay'){throw 'forced-relay-stop-failure'}}
+$failures=@(Invoke-R15BrowserCleanup -RelayState ([pscustomobject]@{Process='relay'}) -RemoteProcess 'remote' -RemoteStarted $true -StopProcess $stop)
+[ordered]@{calls=@($calls);failures=@($failures)}|ConvertTo-Json -Compress`;
+    await writeFile(scriptPath,script);
+    const result=spawnSync('powershell.exe',['-NoProfile','-NonInteractive','-ExecutionPolicy','Bypass','-File',scriptPath,
+      '-HelperPath',helperPath],{encoding:'utf8',timeout:10000,windowsHide:true});
+    assert.equal(result.status,0,result.stderr||result.stdout);
+    assert.deepEqual(JSON.parse(result.stdout.trim().split(/\r?\n/u).at(-1)),{
+      calls:['relay','remote'],failures:['relay: forced-relay-stop-failure']
+    });
+  }finally{await f.close();}
 });
 
 test('R15 runtime security digest detects durable ACL drift and accepts exact restoration', {skip:process.platform!=='win32'}, async()=>{

@@ -81,7 +81,7 @@ foreach($helperName in @('Write-BrowserAck.Remote.ps1','Publish-BrowserWitnessAn
 }
 $validationRaw=& $validator -StageId $StageId -Phase Finalize
 $validation=$validationRaw|Select-Object -Last 1|ConvertFrom-Json
-if($validation.schemaVersion-cne'runaai-m1-r15-stage-validation/v2'-or$validation.verifiedSourceFiles-ne2464-or
+if($validation.schemaVersion-cne'runaai-m1-r15-stage-validation/v2'-or$validation.verifiedSourceFiles-ne2465-or
    $validation.runtimeManifestSha256-notmatch'^[a-f0-9]{64}$'-or$validation.runtimeFiles-lt5-or
    $validation.runtimeSecuritySha256-notmatch'^[a-f0-9]{64}$'-or$validation.runtimeSecurityEntries-lt5-or
    $validation.runtimeSecurityNormalized-cne$true-or$validation.modelsInvoked-cne$false){throw 'r15-source-stage-validation'}

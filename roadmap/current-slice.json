@@ -21,7 +21,7 @@
   ],
   "scopeDocument": "roadmap/CURRENT-SLICE.md",
   "capabilityIds": ["C01", "C02", "C03", "C04", "C06", "C07", "C12", "C15", "C16"],
-  "nextWork": "Commit and freshly reseal the independently approved R15 finalization key-order correction, then use a new stage for 12 model-free controls plus the separate real-browser publication proof before the first of 120 ordered Gemma attempts. Retain failed stages 288236b61f1e4944a0a77d360f704a51 and 4b57aec1ddca418dbf20c2df7ddac6da and do not reuse them. Nomic is embedding-only; do not claim comparative R15, product qualification, production routing or human-trial completion from a one-model arm.",
+  "nextWork": "Commit the independently approved R15 V12 browser-relay, mutation-classifier and status-publication repair; then propagate every source/package/operator hash, freshly reseal, and use a new stage for 12 model-free controls plus the separate real-browser publication proof before the first of 120 ordered Gemma attempts. Retain failed stages 288236b61f1e4944a0a77d360f704a51, 4b57aec1ddca418dbf20c2df7ddac6da and 08fdd8ae4cce45dd9cb2ee3e0fb17e91 and do not reuse them. Gemma has zero new scored attempts in this simplified arm. Nomic is embedding-only; do not claim comparative R15, product qualification, production routing or human-trial completion from a one-model arm.",
   "remainingRoadmapRequired": true,
   "completionClaim": "M1 completion is not whole-product completion."
 }

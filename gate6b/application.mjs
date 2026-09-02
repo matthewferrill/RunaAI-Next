@@ -3,6 +3,7 @@ import { unverifiedParticipant } from "../gate5/identity.mjs";
 import { assertSelectedAuthority } from "./authority.mjs";
 import { assertConversationContext } from "../gate7f/function-first/conversation-context.mjs";
 import { answerLaneAllowed } from "./function-contract.mjs";
+import { validateConversationOperation, validateUserSetting } from "./product-foundation.mjs";
 
 const coded = (code, message) => Object.assign(new Error(message), { code });
 const sha256 = value => createHash("sha256").update(String(value)).digest("hex");
@@ -66,6 +67,7 @@ function credentialPresent(credential) {
 export class SelectedCoreApplication {
   constructor({ mode = "shadow", targetGeneration, cutoverStatus, answerService, actionService,
     authenticator, authorizer, continuity = null, requestCoordinator = null, codeExecution = null,
+    systemStatus = null,
     now = () => new Date(),
     stepUpMaxAgeMs = 5 * 60_000, totalDeadlineMs = 60_000 }) {
     if (!Number.isInteger(totalDeadlineMs) || totalDeadlineMs < 100 || totalDeadlineMs > 120_000) {
@@ -81,6 +83,7 @@ export class SelectedCoreApplication {
     this.continuity = continuity ?? answerService?.continuity ?? null;
     this.requestCoordinator = requestCoordinator;
     this.codeExecution = codeExecution;
+    this.systemStatusService = systemStatus;
     this.now = now;
     this.stepUpMaxAgeMs = stepUpMaxAgeMs;
     this.totalDeadlineMs = totalDeadlineMs;
@@ -162,6 +165,51 @@ export class SelectedCoreApplication {
     const retainedChatId = String(chatId ?? "").trim();
     if (!retainedChatId || retainedChatId.length > 160) throw coded("chat-id-invalid", "A bounded chat id is required.");
     return this.#continuity().readChat(participant.principalId, retainedChatId, this.#experience(experience));
+  }
+
+  async manageConversation({ credential, body }) {
+    await this.authority();
+    const participant = await this.#personalParticipant(credential);
+    const operation = validateConversationOperation(body);
+    const execute = () => this.#continuity().manageConversation(participant.principalId, operation);
+    return this.requestCoordinator ? this.requestCoordinator.runOnce({
+      operation: `conversation-${operation.action}`,
+      requestId: operation.requestId,
+      actorId: participant.principalId,
+      inputDigest: sha256(JSON.stringify(operation)),
+      execute,
+    }) : execute();
+  }
+
+  async settings({ credential, body }) {
+    await this.authority();
+    const participant = await this.#personalParticipant(credential);
+    const action = String(body?.action ?? "read");
+    if (action === "read") {
+      return Object.freeze({ schemaVersion: "runaai-user-settings/v1",
+        values: Object.freeze(await this.#continuity().settingValues(participant.principalId)),
+        privateValuesIncluded: false });
+    }
+    if (action !== "set") throw coded("setting-action-invalid", "That settings action is unavailable.");
+    const requestId = String(body?.requestId ?? "").trim();
+    if (!requestId || requestId.length > 160 || /[\u0000-\u001f\u007f]/u.test(requestId)) {
+      throw coded("request-id-invalid", "A bounded settings request id is required.");
+    }
+    const setting = validateUserSetting(String(body?.key ?? ""), body?.value);
+    const execute = () => this.#continuity().setSetting(participant.principalId, setting.key, setting.value);
+    const result = this.requestCoordinator ? await this.requestCoordinator.runOnce({
+      operation: "setting-set", requestId, actorId: participant.principalId,
+      inputDigest: sha256(JSON.stringify(setting)), execute,
+    }) : await execute();
+    return Object.freeze({ schemaVersion: "runaai-user-setting-updated/v1", ...result,
+      privateValuesIncluded: false });
+  }
+
+  async systemStatus({ credential }) {
+    await this.authority();
+    await this.#personalParticipant(credential);
+    if (!this.systemStatusService) throw coded("system-status-unavailable", "System status is unavailable.");
+    return this.systemStatusService({ client: { connected: true } });
   }
 
   async executeCode({ credential, body }) {

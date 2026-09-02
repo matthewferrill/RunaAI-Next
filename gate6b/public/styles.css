@@ -907,3 +907,48 @@ body.workspace-active .primary-button:hover { filter: brightness(1.07); }
 .answer-evidence p, .answer-evidence li { font-size:inherit; }
 .answer-evidence ol { padding-left:1.3rem; }
 .evidence-warning { color:#795712; }
+
+.workspace-destinations { display: grid; gap: .2rem; padding: .15rem 0 .7rem; border-bottom: 1px solid var(--workspace-edge-low); }
+.workspace-destinations button { display:flex; align-items:center; gap:.65rem; width:100%; border:0; border-radius:.65rem; background:transparent; color:var(--workspace-ink); padding:.62rem .7rem; text-align:left; cursor:pointer; }
+.workspace-destinations button:hover, .workspace-destinations button.selected { background:var(--workspace-selected); }
+.workbar-actions { position:relative; margin-left:auto; }
+.work-actions-menu { top:calc(100% + .35rem); right:0; min-width:10rem; }
+.work-actions-menu button { width:100%; text-align:left; }
+.danger-action { color:#8b2929 !important; }
+.product-view { min-height:0; overflow:auto; padding:1rem clamp(1rem,4vw,3rem) 2rem; }
+.product-view-header { display:flex; align-items:flex-start; justify-content:space-between; gap:1rem; margin-bottom:1.25rem; }
+.product-view h1 { margin:.15rem 0; font-family:Georgia,'Times New Roman',serif; font-size:clamp(1.7rem,3vw,2.4rem); }
+.product-view h2 { margin:1.5rem 0 .7rem; font-size:1rem; }
+.product-card, .setting-row, .system-card, .connection-row, .search-result { border:1px solid var(--workspace-edge-low); border-radius:.85rem; background:rgba(255,255,255,.55); padding:.9rem 1rem; }
+.product-stack { display:grid; gap:.75rem; }
+.setting-row, .connection-row { display:flex; align-items:center; justify-content:space-between; gap:1rem; }
+.setting-row label, .connection-row strong { font-weight:700; }
+.setting-row label, .setting-row small { display:block; }
+.setting-row small { margin-top:.15rem; }
+.setting-row select { min-width:9rem; border:1px solid var(--workspace-field-edge); border-radius:.55rem; background:white; color:var(--workspace-ink); padding:.5rem; }
+.setting-row small, .connection-row small, .product-muted { color:var(--workspace-ink-faint); }
+.system-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:.75rem; }
+.system-card dl { margin:.65rem 0 0; }
+.system-card div { display:flex; justify-content:space-between; gap:.75rem; padding:.25rem 0; }
+.system-card dd { margin:0; max-width:58%; overflow-wrap:anywhere; text-align:right; }
+.system-state { display:inline-flex; border-radius:99rem; padding:.2rem .55rem; background:#e5f0ec; color:#24544e; font-size:.78rem; font-weight:700; }
+.search-form { display:flex; gap:.55rem; margin-bottom:1rem; }
+.search-form input { flex:1; min-width:0; border:1px solid var(--workspace-field-edge); border-radius:.65rem; padding:.7rem .8rem; }
+.search-result { width:100%; text-align:left; color:var(--workspace-ink); cursor:pointer; }
+.product-tabs { display:flex; flex-wrap:wrap; gap:.35rem; margin-bottom:1rem; }
+.product-tabs button { border:1px solid var(--workspace-edge-low); border-radius:99rem; background:rgba(255,255,255,.55); color:var(--workspace-ink); padding:.45rem .7rem; cursor:pointer; }
+.product-tabs button.selected { background:var(--workspace-selected); border-color:var(--workspace-accent); }
+body[data-density="compact"] .message, body[data-density="compact"] .product-card,
+body[data-density="compact"] .setting-row { padding:.55rem .7rem; }
+body[data-text-size="small"] { font-size:14px; }
+body[data-text-size="large"] { font-size:18px; }
+body[data-theme="dark"] { filter:invert(.88) hue-rotate(170deg); }
+body[data-theme="dark"] img, body[data-theme="dark"] video { filter:invert(1) hue-rotate(190deg); }
+body[data-reduced-motion="reduce"] *, body[data-reduced-motion="reduce"] *::before,
+body[data-reduced-motion="reduce"] *::after { scroll-behavior:auto !important; transition:none !important; animation:none !important; }
+
+@media (max-width: 900px) {
+  .system-grid { grid-template-columns:1fr; }
+  .setting-row { align-items:flex-start; flex-direction:column; }
+  .setting-row select { width:100%; }
+}

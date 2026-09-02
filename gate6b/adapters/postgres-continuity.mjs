@@ -5,6 +5,7 @@ import { createConversationContext, parseConversationScope, CONVERSATION_CONTEXT
   from "../../gate7f/function-first/conversation-context.mjs";
 import { isRetryableConversationFailure } from "../../gate7f/function-first/conversation-outcome.mjs";
 import { answerEvidence, readAnswerEvidence } from "../../gate7f/function-first/conversation-evidence.mjs";
+import { defaultUserSettings, validateUserSetting } from "../product-foundation.mjs";
 
 const coded = (code, message) => Object.assign(new Error(message), { code });
 const sha256 = value => createHash("sha256").update(String(value)).digest("hex");
@@ -68,11 +69,37 @@ export class PostgresSelectedContinuityStore {
       );
       CREATE TABLE IF NOT EXISTS runa_core.participant_settings (
         participant_id text NOT NULL, setting_key text NOT NULL,
-        setting_value text NOT NULL CHECK(setting_value IN ('Low','Medium','High')),
+        setting_value text NOT NULL,
         revision bigint NOT NULL DEFAULT 1 CHECK(revision > 0),
         updated_at timestamptz NOT NULL DEFAULT clock_timestamp(),
         PRIMARY KEY(participant_id,setting_key)
       );
+      DO $settings$
+      BEGIN
+        IF EXISTS (
+          SELECT 1 FROM pg_constraint
+          WHERE conrelid='runa_core.participant_settings'::regclass
+            AND conname='participant_settings_setting_value_check'
+            AND pg_get_constraintdef(oid) NOT LIKE '%setting_key%'
+        ) THEN
+          ALTER TABLE runa_core.participant_settings
+            DROP CONSTRAINT participant_settings_setting_value_check;
+        END IF;
+        IF NOT EXISTS (
+          SELECT 1 FROM pg_constraint
+          WHERE conrelid='runa_core.participant_settings'::regclass
+            AND conname='participant_settings_setting_value_check'
+        ) THEN
+          ALTER TABLE runa_core.participant_settings ADD CONSTRAINT participant_settings_setting_value_check CHECK (
+            (setting_key='defaultIntelligenceLevel' AND setting_value IN ('Low','Medium','High')) OR
+            (setting_key='theme' AND setting_value IN ('system','dawn','dark')) OR
+            (setting_key='textSize' AND setting_value IN ('small','medium','large')) OR
+            (setting_key='density' AND setting_value IN ('comfortable','compact')) OR
+            (setting_key='reducedMotion' AND setting_value IN ('system','reduce','allow'))
+          );
+        END IF;
+      END $settings$;
+      ALTER TABLE runa_core.chats ADD COLUMN IF NOT EXISTS deleted_at timestamptz;
     `);
   }
 
@@ -92,7 +119,7 @@ export class PostgresSelectedContinuityStore {
         FROM runa_core.projects WHERE participant_id=$1 AND status='managed'
         ORDER BY updated_at DESC,project_id LIMIT 200`, [participantId]),
       this.pool.query(`SELECT chat_id,project_id,turn_count,updated_at,title_envelope
-        FROM runa_core.chats WHERE participant_id=$1 AND NOT archived
+        FROM runa_core.chats WHERE participant_id=$1 AND NOT archived AND deleted_at IS NULL
         ORDER BY updated_at DESC,chat_id LIMIT 200`, [participantId]),
       this.pool.query(`SELECT turns.chat_id,chats.project_id,array_agg(DISTINCT turns.route ORDER BY turns.route) routes
         FROM runa_core.chat_turns turns JOIN runa_core.chats chats
@@ -158,9 +185,9 @@ export class PostgresSelectedContinuityStore {
 
   async readChat(participantId, chatId, experience) {
     if (!experiences.has(experience)) throw coded("request-experience-invalid", "Chat or Code experience is required.");
-    const row = (await this.pool.query(`SELECT chat_id,project_id,turn_count,archived,updated_at,title_envelope
+    const row = (await this.pool.query(`SELECT chat_id,project_id,turn_count,archived,deleted_at,updated_at,title_envelope
       FROM runa_core.chats WHERE participant_id=$1 AND chat_id=$2`, [participantId, chatId])).rows[0];
-    if (!row || row.archived) throw coded("chat-not-found", "The selected chat was not found.");
+    if (!row || row.archived || row.deleted_at) throw coded("chat-not-found", "The selected chat was not found.");
     const title = this.cipher.decrypt(privateContext("chat", participantId, chatId), row.title_envelope);
     let projectExperience = null;
     if (row.project_id) {
@@ -226,9 +253,9 @@ export class PostgresSelectedContinuityStore {
           throw coded("project-experience-denied", "The selected project belongs to another experience.");
         }
       }
-      const current = (await client.query(`SELECT participant_id,project_id,turn_count,archived,title_envelope FROM runa_core.chats
+      const current = (await client.query(`SELECT participant_id,project_id,turn_count,archived,deleted_at,title_envelope FROM runa_core.chats
         WHERE participant_id=$1 AND chat_id=$2 FOR UPDATE`, [participantId, request.thread.threadId])).rows[0];
-      if (current?.archived) throw coded("chat-scope-denied", "The selected conversation was not found.");
+      if (current?.archived || current?.deleted_at) throw coded("chat-scope-denied", "The selected conversation was not found.");
       if (current && current.project_id !== projectId) throw coded("chat-scope-denied", "The chat belongs to another project scope.");
       if (request.contextRevision !== undefined && request.contextRevision !== (current?.turn_count ?? 0)) {
         throw coded("conversation-revision-conflict", "The conversation changed while this answer was being prepared. Reload the chat before retrying.");
@@ -279,7 +306,7 @@ export class PostgresSelectedContinuityStore {
         throw coded("project-experience-denied", "The selected project belongs to another experience.");
       }
     }
-    const chat = (await this.pool.query(`SELECT chat_id,project_id,turn_count,archived,title_envelope
+    const chat = (await this.pool.query(`SELECT chat_id,project_id,turn_count,archived,deleted_at,title_envelope
       FROM runa_core.chats WHERE participant_id=$1 AND chat_id=$2`, [participantId, threadId])).rows[0];
     if (!chat) {
       const foreign = (await this.pool.query(`SELECT 1 FROM runa_core.chats
@@ -287,7 +314,7 @@ export class PostgresSelectedContinuityStore {
       if (foreign) throw coded("chat-scope-denied", "The selected conversation was not found.");
       return createConversationContext(scope);
     }
-    if (chat.archived || chat.project_id !== projectId) throw coded("chat-scope-denied", "The selected conversation was not found.");
+    if (chat.archived || chat.deleted_at || chat.project_id !== projectId) throw coded("chat-scope-denied", "The selected conversation was not found.");
     const privateChat = this.cipher.decrypt(privateContext("chat", participantId, threadId), chat.title_envelope);
     const routeRows = privateChat.experience ? [] : (await this.pool.query(`SELECT DISTINCT route
       FROM runa_core.chat_turns WHERE participant_id=$1 AND chat_id=$2`, [participantId, threadId])).rows;
@@ -300,6 +327,164 @@ export class PostgresSelectedContinuityStore {
     const turns = rows.map(row => this.cipher.decrypt(privateContext("chat-turn", participantId,
       `turn:${threadId}:${row.turn_ordinal}`), row.content_envelope));
     return createConversationContext(scope, { turns, turnCount: chat.turn_count });
+  }
+
+  async manageConversation(participantId, operation) {
+    if (operation.action === "archived") {
+      const rows = (await this.pool.query(`SELECT chat_id,project_id,turn_count,updated_at,title_envelope
+        FROM runa_core.chats WHERE participant_id=$1 AND archived AND deleted_at IS NULL
+        ORDER BY updated_at DESC,chat_id LIMIT 200`, [participantId])).rows;
+      const results = [];
+      for (const row of rows) {
+        const value = this.cipher.decrypt(privateContext("chat", participantId, row.chat_id), row.title_envelope);
+        const routes = (await this.pool.query(`SELECT DISTINCT route FROM runa_core.chat_turns
+          WHERE participant_id=$1 AND chat_id=$2`, [participantId, row.chat_id])).rows.map(item => item.route);
+        const experience = classifyExperience({ explicit: value.experience, routes });
+        if (experience === operation.experience) results.push({ chatId: row.chat_id, projectId: row.project_id,
+          title: safeTitle(value.title), experience, turnCount: row.turn_count,
+          updatedAt: new Date(row.updated_at).toISOString() });
+      }
+      return Object.freeze({ schemaVersion: "runaai-archived-conversations/v1",
+        experience: operation.experience, results: Object.freeze(results), privateValuesIncluded: false });
+    }
+    if (operation.action === "search") {
+      const catalog = await this.navigation(participantId, operation.experience);
+      const query = operation.query.toLocaleLowerCase();
+      return Object.freeze({ schemaVersion: "runaai-conversation-search/v1", experience: operation.experience,
+        query: operation.query, results: Object.freeze(catalog.chats
+          .filter(chat => chat.title.toLocaleLowerCase().includes(query)).slice(0, 50)),
+        privateValuesIncluded: false });
+    }
+    const retained = await this.#conversationRow(participantId, operation.chatId, operation.experience);
+    if (operation.action === "rename") {
+      if (retained.archived || retained.deletedAt) throw coded("chat-not-found", "The selected chat was not found.");
+      const privateData = { ...retained.privateData, title: operation.title, experience: operation.experience };
+      const envelope = this.cipher.encrypt(privateContext("chat", participantId, operation.chatId), privateData);
+      const updatedAt = this.now().toISOString();
+      const updated = await this.pool.query(`UPDATE runa_core.chats SET title_envelope=$3::jsonb,title_hmac=$4,
+        updated_at=$5 WHERE participant_id=$1 AND chat_id=$2 AND NOT archived AND deleted_at IS NULL`,
+      [participantId, operation.chatId, JSON.stringify(envelope), envelope.contentHmac, updatedAt]);
+      if (updated.rowCount !== 1) throw coded("conversation-revision-conflict", "The conversation changed before rename completed.");
+      return Object.freeze({ action: "renamed", chatId: operation.chatId, title: operation.title, updatedAt });
+    }
+    if (operation.action === "archive") {
+      if (retained.archived || retained.deletedAt) throw coded("chat-not-found", "The selected chat was not found.");
+      const updatedAt = this.now().toISOString();
+      const updated = await this.pool.query(`UPDATE runa_core.chats SET archived=true,updated_at=$3
+        WHERE participant_id=$1 AND chat_id=$2 AND NOT archived AND deleted_at IS NULL`,
+      [participantId, operation.chatId, updatedAt]);
+      if (updated.rowCount !== 1) throw coded("conversation-revision-conflict", "The conversation changed before archive completed.");
+      return Object.freeze({ action: "archived", chatId: operation.chatId, updatedAt });
+    }
+    if (operation.action === "unarchive") {
+      if (retained.deletedAt) throw coded("chat-deleted", "A deleted conversation cannot be restored by unarchive.");
+      if (!retained.archived) throw coded("chat-not-archived", "The selected chat is not archived.");
+      const updatedAt = this.now().toISOString();
+      const updated = await this.pool.query(`UPDATE runa_core.chats SET archived=false,updated_at=$3
+        WHERE participant_id=$1 AND chat_id=$2 AND archived AND deleted_at IS NULL`,
+      [participantId, operation.chatId, updatedAt]);
+      if (updated.rowCount !== 1) throw coded("conversation-revision-conflict", "The conversation changed before restore completed.");
+      return Object.freeze({ action: "unarchived", chatId: operation.chatId, updatedAt });
+    }
+    if (operation.action === "delete") {
+      if (retained.deletedAt) throw coded("chat-not-found", "The selected chat was not found.");
+      const updatedAt = this.now().toISOString();
+      const updated = await this.pool.query(`UPDATE runa_core.chats SET archived=true,deleted_at=$3,updated_at=$3
+        WHERE participant_id=$1 AND chat_id=$2 AND deleted_at IS NULL`, [participantId, operation.chatId, updatedAt]);
+      if (updated.rowCount !== 1) throw coded("conversation-revision-conflict", "The conversation changed before delete completed.");
+      return Object.freeze({ action: "deleted", recovery: "retained-soft-delete", chatId: operation.chatId, updatedAt });
+    }
+    if (operation.action === "branch") {
+      if (retained.archived || retained.deletedAt) throw coded("chat-not-found", "The selected chat was not found.");
+      return this.#branchConversation(participantId, retained, operation);
+    }
+    throw coded("conversation-action-invalid", "That conversation action is unavailable.");
+  }
+
+  async #conversationRow(participantId, chatId, experience) {
+    const row = (await this.pool.query(`SELECT chat_id,project_id,parent_chat_id,branch_from_turn,turn_count,
+      archived,deleted_at,created_at,updated_at,title_envelope FROM runa_core.chats
+      WHERE participant_id=$1 AND chat_id=$2`, [participantId, chatId])).rows[0];
+    if (!row) throw coded("chat-not-found", "The selected chat was not found.");
+    const privateData = this.cipher.decrypt(privateContext("chat", participantId, chatId), row.title_envelope);
+    const routes = (await this.pool.query(`SELECT route FROM runa_core.chat_turns
+      WHERE participant_id=$1 AND chat_id=$2 ORDER BY turn_ordinal`, [participantId, chatId])).rows.map(item => item.route);
+    if (classifyExperience({ explicit: privateData.experience, routes }) !== experience) {
+      throw coded("chat-experience-denied", "The selected chat belongs to another experience.");
+    }
+    return Object.freeze({ chatId, projectId: row.project_id, parentChatId: row.parent_chat_id,
+      branchFromTurn: row.branch_from_turn, turnCount: row.turn_count, archived: row.archived,
+      deletedAt: row.deleted_at ? new Date(row.deleted_at).toISOString() : null,
+      createdAt: new Date(row.created_at).toISOString(), updatedAt: new Date(row.updated_at).toISOString(),
+      privateData });
+  }
+
+  async #branchConversation(participantId, retained, operation) {
+    const branchId = `chat-branch-${sha256(`${participantId}\0${operation.requestId}`).slice(0, 32)}`;
+    const client = await this.pool.connect();
+    try {
+      await client.query("BEGIN");
+      const existing = (await client.query(`SELECT parent_chat_id,branch_from_turn FROM runa_core.chats
+        WHERE participant_id=$1 AND chat_id=$2`, [participantId, branchId])).rows[0];
+      if (existing) {
+        if (existing.parent_chat_id !== retained.chatId || existing.branch_from_turn !== retained.turnCount) {
+          throw coded("request-id-conflict", "The branch request id is bound to another conversation.");
+        }
+        await client.query("COMMIT");
+        return Object.freeze({ action: "branched", chatId: branchId, parentChatId: retained.chatId,
+          branchFromTurn: retained.turnCount, turnCount: retained.turnCount });
+      }
+      const source = (await client.query(`SELECT turn_count,archived,deleted_at FROM runa_core.chats
+        WHERE participant_id=$1 AND chat_id=$2 FOR SHARE`, [participantId, retained.chatId])).rows[0];
+      if (!source || source.archived || source.deleted_at || source.turn_count !== retained.turnCount) {
+        throw coded("conversation-revision-conflict", "The conversation changed before the branch snapshot was secured.");
+      }
+      const now = this.now().toISOString();
+      const privateData = { title: `${safeTitle(retained.privateData.title)} branch`.slice(0, 120),
+        experience: operation.experience };
+      const publicData = { chatId: branchId, projectId: retained.projectId, parentChatId: retained.chatId,
+        branchFromTurn: retained.turnCount, turnCount: retained.turnCount, archived: false, unread: false,
+        createdAt: now, updatedAt: now };
+      const envelope = this.cipher.encrypt(privateContext("chat", participantId, branchId), privateData);
+      await client.query(`INSERT INTO runa_core.chats
+        (chat_id,participant_id,project_id,parent_chat_id,branch_from_turn,turn_count,archived,unread,
+         created_at,updated_at,title_envelope,title_hmac,locator_hmac,source_content_hmac)
+        VALUES($1,$2,$3,$4,$5,$5,false,false,$6,$6,$7::jsonb,$8,$9,$10)`,
+      [branchId, participantId, retained.projectId, retained.chatId, retained.turnCount, now,
+        JSON.stringify(envelope), envelope.contentHmac,
+        this.cipher.digest({ domain: "project-chat", kind: "chat", locator: `chat:${branchId}` }),
+        this.cipher.digest({ domain: "project-chat", kind: "chat", locator: `chat:${branchId}`,
+          publicData, privateData })]);
+      const rows = (await client.query(`SELECT turn_ordinal,occurred_at,route,origin_request_id,content_envelope
+        FROM runa_core.chat_turns WHERE participant_id=$1 AND chat_id=$2 AND turn_ordinal<$3 ORDER BY turn_ordinal`,
+      [participantId, retained.chatId, retained.turnCount])).rows;
+      if (rows.length !== retained.turnCount || rows.some((row, index) => row.turn_ordinal !== index)) {
+        throw coded("conversation-revision-conflict", "The conversation turn sequence changed before branching completed.");
+      }
+      for (const row of rows) {
+        const payload = this.cipher.decrypt(privateContext("chat-turn", participantId,
+          `turn:${retained.chatId}:${row.turn_ordinal}`), row.content_envelope);
+        const turnPublic = { chatId: branchId, turnOrdinal: row.turn_ordinal,
+          occurredAt: new Date(row.occurred_at).toISOString(), route: row.route,
+          originRequestId: row.origin_request_id };
+        const turnEnvelope = this.cipher.encrypt(privateContext("chat-turn", participantId,
+          `turn:${branchId}:${row.turn_ordinal}`), payload);
+        await client.query(`INSERT INTO runa_core.chat_turns
+          (participant_id,chat_id,turn_ordinal,occurred_at,route,origin_request_id,content_envelope,
+           content_hmac,locator_hmac,source_content_hmac) VALUES($1,$2,$3,$4,$5,$6,$7::jsonb,$8,$9,$10)`,
+        [participantId, branchId, row.turn_ordinal, row.occurred_at, row.route, row.origin_request_id,
+          JSON.stringify(turnEnvelope), turnEnvelope.contentHmac,
+          this.cipher.digest({ domain: "project-chat", kind: "chat-turn", locator: `chat-turn:${branchId}:${row.turn_ordinal}` }),
+          this.cipher.digest({ domain: "project-chat", kind: "chat-turn", locator: `chat-turn:${branchId}:${row.turn_ordinal}`,
+            publicData: turnPublic, privateData: payload })]);
+      }
+      await client.query("COMMIT");
+      return Object.freeze({ action: "branched", chatId: branchId, parentChatId: retained.chatId,
+        branchFromTurn: retained.turnCount, turnCount: retained.turnCount });
+    } catch (error) {
+      await client.query("ROLLBACK").catch(() => {});
+      throw error;
+    } finally { client.release(); }
   }
 
   async #insertChat(client, request, projectId) {
@@ -340,9 +525,27 @@ export class PostgresSelectedContinuityStore {
   }
 
   async settingValues(participantId) {
-    const row = (await this.pool.query(`SELECT setting_value FROM runa_core.participant_settings
-      WHERE participant_id=$1 AND setting_key='defaultIntelligenceLevel'`, [participantId])).rows[0];
-    return { defaultIntelligenceLevel: ["Low", "Medium", "High"].includes(row?.setting_value) ? row.setting_value : "Medium" };
+    const rows = (await this.pool.query(`SELECT setting_key,setting_value FROM runa_core.participant_settings
+      WHERE participant_id=$1`, [participantId])).rows;
+    const values = { ...defaultUserSettings() };
+    for (const row of rows) {
+      try {
+        const setting = validateUserSetting(row.setting_key, row.setting_value, { permitGoverned: true });
+        values[setting.key] = setting.value;
+      } catch {}
+    }
+    return values;
+  }
+
+  async setSetting(participantId, key, value) {
+    const setting = validateUserSetting(key, value);
+    const row = (await this.pool.query(`INSERT INTO runa_core.participant_settings
+      (participant_id,setting_key,setting_value,revision,updated_at) VALUES($1,$2,$3,1,clock_timestamp())
+      ON CONFLICT(participant_id,setting_key) DO UPDATE SET setting_value=excluded.setting_value,
+        revision=runa_core.participant_settings.revision+1,updated_at=clock_timestamp()
+      RETURNING revision,updated_at`, [participantId, setting.key, setting.value])).rows[0];
+    return Object.freeze({ key: setting.key, value: setting.value, revision: Number(row.revision),
+      updatedAt: new Date(row.updated_at).toISOString() });
   }
 
   async close() { if (this.ownsPool) await this.pool.end(); }

@@ -4,6 +4,7 @@ import { initializeWorkspaceShell } from "./workspace-shell.mjs";
 import { executionOutput, javascriptSource } from "./code-execution.mjs";
 import { initializeFunctionPanel, appendAnswerEvidence } from "./function-panel.mjs";
 import { FUNCTION_CATALOG, functionNameForContext, functionTarget } from "./function-navigation.mjs";
+import { initializeProductViews } from "./product-views.mjs";
 
 const byId = id => document.getElementById(id);
 const text = (id, value) => { byId(id).textContent = value; };
@@ -26,11 +27,15 @@ const catalogs = Object.fromEntries(experiences.map(experience => [experience, {
 let activeExperience = "chat";
 let activeFunction = "chat";
 let functionPanel = null;
+let productViews = null;
+let activeAnswerController = null;
+let answerStoppedByUser = false;
 
 const menuControls = Object.freeze([
   ["new-chat", "new-work-menu"],
   ["composer-add", "composer-add-menu"],
   ["function-picker", "function-menu"],
+  ["work-actions", "work-actions-menu"],
 ]);
 
 function setMenu(buttonId, menuId, open) {
@@ -192,6 +197,7 @@ function updateWorkbar() {
   const selectedRecord = catalogs[activeExperience].chats.find(item => item.chatId === state.activeChatId);
   text("work-title", selectedRecord?.title ?? `New ${FUNCTION_CATALOG[activeFunction].label.toLowerCase()}`);
   text("work-project", state.projectName ?? "Personal");
+  byId("work-actions").disabled = !state.activeChatId;
 }
 
 function renderNavigation() {
@@ -231,6 +237,7 @@ async function refreshNavigation(experience = activeExperience) {
 }
 
 async function startNew(projectId = "runa:personal", selectedProjectName = null) {
+  productViews?.close();
   const state = activeState();
   state.threadId = `web-${activeExperience}-${crypto.randomUUID()}`;
   state.projectId = projectId;
@@ -257,6 +264,7 @@ async function selectExperience(experience) {
   send.disabled = true;
   try {
     activeExperience = experience;
+    productViews?.close();
     functionPanel?.setMode("conversation");
     projectForm.hidden = true;
     projectName.value = "";
@@ -282,6 +290,7 @@ async function selectExperience(experience) {
 }
 
 async function loadChat(chatId) {
+  productViews?.close();
   const experience = activeExperience;
   text("navigation-status", "Loading…");
   setNavigationDisabled(true);
@@ -319,10 +328,16 @@ async function loadChat(chatId) {
 }
 
 function setNavigationDisabled(disabled) {
-  for (const button of document.querySelectorAll("#left-rail-body button, .composer-tools button")) button.disabled = disabled;
+  for (const control of document.querySelectorAll(
+    "#left-rail-body button, .composer-tools button, .workbar-actions button, " +
+    "#right-rail-body button, #right-rail-body input, #right-rail-body select, #right-rail-body textarea",
+  )) {
+    control.disabled = disabled;
+  }
 }
 
 async function selectFunction(name) {
+  productViews?.close();
   const target = functionTarget(name);
   if (target.experience !== activeExperience) await selectExperience(target.experience);
   if (!functionPanel?.setMode(target.mode)) return;
@@ -366,6 +381,8 @@ async function initialize() {
       functionPanel = await initializeFunctionPanel({ request: workspaceJson,
         getContext: () => ({ experience: activeExperience, projectId: activeState().projectId }),
         onStatus: value => text("chat-status", value), onModeChange: updateFunctionPresentation });
+      productViews = initializeProductViews(document, { request: workspaceJson,
+        experience: () => activeExperience, openChat: loadChat });
       message.focus();
     } else if (session.authenticated) {
       sessionLabel.hidden = false;
@@ -388,6 +405,7 @@ for (const button of document.querySelectorAll(".function-choice[data-function]"
 byId("new-chat").addEventListener("click", () => toggleMenu("new-chat", "new-work-menu"));
 byId("composer-add").addEventListener("click", () => toggleMenu("composer-add", "composer-add-menu"));
 byId("function-picker").addEventListener("click", () => toggleMenu("function-picker", "function-menu"));
+byId("work-actions").addEventListener("click", () => toggleMenu("work-actions", "work-actions-menu"));
 byId("composer-create-project").addEventListener("click", () => {
   closeMenus();
   expandRail("left");
@@ -414,8 +432,49 @@ byId("cancel-project").addEventListener("click", () => {
 });
 
 document.addEventListener("click", event => {
-  if (!event.target.closest?.(".new-work-control, .composer-menu-control")) closeMenus();
+  if (!event.target.closest?.(".new-work-control, .composer-menu-control, .workbar-actions")) closeMenus();
 });
+
+for (const button of document.querySelectorAll("[data-conversation-action]")) {
+  button.addEventListener("click", async () => {
+    closeMenus();
+    const state = activeState();
+    const action = button.dataset.conversationAction;
+    if (!state.activeChatId) { text("chat-status", "Save a conversation before using conversation actions"); return; }
+    if (action === "export") {
+      const record = { schemaVersion: "runaai-conversation-export/v1", title: byId("work-title").textContent,
+        experience: activeExperience, project: state.projectName ?? "Personal", turns: state.history };
+      const href = URL.createObjectURL(new Blob([`${JSON.stringify(record, null, 2)}\n`], { type: "application/json" }));
+      const link = document.createElement("a"); link.href = href; link.download = `${state.activeChatId}.json`;
+      link.click(); URL.revokeObjectURL(href); text("chat-status", "Conversation export prepared"); return;
+    }
+    let title;
+    if (action === "rename") {
+      title = window.prompt("Rename conversation", byId("work-title").textContent)?.replace(/\s+/g, " ").trim();
+      if (!title) return;
+    }
+    if (action === "delete" && !window.confirm("Delete this conversation? It will be retained as a recoverable soft deletion.")) return;
+    setNavigationDisabled(true); send.disabled = true;
+    try {
+      const result = await workspaceJson("/api/selected/conversation/manage", {
+        action, experience: activeExperience, chatId: state.activeChatId, ...(title ? { title } : {}),
+        requestId: `web-conversation-${crypto.randomUUID()}`,
+      });
+      if (action === "branch") {
+        await refreshNavigation(); await loadChat(result.chatId);
+        text("chat-status", "Conversation branch created");
+      } else if (action === "rename") {
+        const record = catalogs[activeExperience].chats.find(item => item.chatId === state.activeChatId);
+        if (record) record.title = result.title;
+        renderNavigation(); text("chat-status", "Conversation renamed");
+      } else {
+        await startNew(state.projectId, state.projectName); await refreshNavigation();
+        text("chat-status", action === "archive" ? "Conversation archived" : "Conversation deleted recoverably");
+      }
+    } catch { text("chat-status", `Conversation could not be ${action}d`); }
+    finally { setNavigationDisabled(false); send.disabled = false; }
+  });
+}
 
 projectForm.addEventListener("submit", async event => {
   event.preventDefault();
@@ -440,8 +499,29 @@ projectForm.addEventListener("submit", async event => {
   }
 });
 
+function stopDisplayingActiveAnswer() {
+  if (!activeAnswerController) return false;
+  answerStoppedByUser = true;
+  send.disabled = true;
+  send.textContent = "Reconciling…";
+  send.setAttribute("aria-label", "Waiting for the server outcome");
+  text("chat-status", "Stopped displaying progress. Successor work stays blocked until the server returns the request outcome.");
+  return true;
+}
+
+send.addEventListener("click", event => {
+  if (activeAnswerController) {
+    event.preventDefault();
+    stopDisplayingActiveAnswer();
+  }
+});
+
 form.addEventListener("submit", async event => {
   event.preventDefault();
+  if (activeAnswerController) {
+    stopDisplayingActiveAnswer();
+    return;
+  }
   const content = message.value.trim();
   if (!content || send.disabled) return;
   if (functionPanel?.workSelected()) {
@@ -458,16 +538,19 @@ form.addEventListener("submit", async event => {
   const submittedExperience = activeExperience;
   const userItem = appendMessage("user", content);
   message.value = "";
-  send.disabled = true;
+  send.textContent = "Stop display";
+  send.setAttribute("aria-label", "Stop displaying progress for this response");
   setNavigationDisabled(true);
   text("chat-status", "Runa is thinking…");
+  let outcomeUnconfirmed = false;
   try {
-    const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), CHAT_DEADLINE_MS);
+    activeAnswerController = new AbortController();
+    answerStoppedByUser = false;
+    const timer = setTimeout(() => activeAnswerController?.abort(), CHAT_DEADLINE_MS);
     let result;
     try {
       const response = await fetch("/api/selected/answer", {
-        method: "POST", headers: { "content-type": "application/json" }, signal: controller.signal,
+        method: "POST", headers: { "content-type": "application/json" }, signal: activeAnswerController.signal,
         body: JSON.stringify({ requestId: `web-${crypto.randomUUID()}`,
           lane: submittedExperience === "code" ? "code" : "general", experience: submittedExperience,
           ...functionSelection,
@@ -480,7 +563,9 @@ form.addEventListener("submit", async event => {
     if (answerNeedsRetry(result)) {
       appendMessage("assistant", result.answer, { evidence: result });
       addRetry(userItem, content);
-      text("chat-status", "Message not completed — retry available");
+      text("chat-status", answerStoppedByUser
+        ? "Stopped request reconciled — no completed answer was retained; retry is available"
+        : "Message not completed — retry available");
       return;
     }
     state.history.push({ role: "user", content: content.slice(0, 8_000) },
@@ -491,9 +576,16 @@ form.addEventListener("submit", async event => {
       codeDraft: submittedExperience === "code" && result.execution?.status === "not-executed",
       state, evidence: result,
     });
-    text("chat-status", state.projectName ? `Ready in ${state.projectName}` : "Ready");
+    text("chat-status", answerStoppedByUser ? "Stopped request reconciled — the server completed and saved the answer"
+      : state.projectName ? `Ready in ${state.projectName}` : "Ready");
     await refreshNavigation(submittedExperience);
   } catch (error) {
+    if (error?.name === "AbortError" || !error?.code) {
+      outcomeUnconfirmed = true;
+      appendMessage("assistant", "This browser did not receive the server outcome. This conversation remains blocked; reload its saved record after service connectivity is restored before starting successor work.");
+      text("chat-status", "Server outcome unconfirmed — successor work is blocked");
+      return;
+    }
     const code = error?.name === "AbortError" ? "chat-request-timeout" : error?.code;
     if (code === "conversation-revision-conflict") {
       const loaded = await loadChat(state.threadId);
@@ -507,9 +599,13 @@ form.addEventListener("submit", async event => {
     addRetry(userItem, content);
     text("chat-status", "Message not completed — retry available");
   } finally {
-    send.disabled = false;
-    setNavigationDisabled(false);
-    message.focus();
+    activeAnswerController = null;
+    answerStoppedByUser = false;
+    send.textContent = "Send";
+    send.setAttribute("aria-label", "Send message");
+    send.disabled = outcomeUnconfirmed;
+    setNavigationDisabled(outcomeUnconfirmed);
+    if (!outcomeUnconfirmed) message.focus();
   }
 });
 

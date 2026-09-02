@@ -133,6 +133,13 @@ off-LAN work in their governed milestones. The exact UX, Settings, connection, s
 contracts are recorded in
 `gate7f/function-first/RUNAAI-PRODUCT-FOUNDATION-AND-UX-BASELINE-2026-09-02.md`.
 
+M1-S2A has now implemented the first rebaseline slice: conversation lifecycle, real low-risk appearance
+settings and truthful Omen/Control/Home status in the single canvas. Deterministic verification and
+independent P0/P1 review are green; actual Control/database/browser acceptance remains a prerequisite to release. Local
+folder and local Git read-only are the next frozen implementation slice, not implied by the visible
+connection rows. Exact results are in
+`gate7f/function-first/M1-S2A-CONVERSATION-SETTINGS-SYSTEM-RESULTS-2026-09-02.md`.
+
 No milestone label authorizes all historical RunaAI modules, public self-signup, automatic learning,
 unrestricted machine/account access, purchases, or unreviewed protected-data migration. The roadmap
 keeps these distinctions visible rather than treating a hold as removal from the product destination.

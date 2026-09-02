@@ -49,8 +49,29 @@ export async function runConversationPostgresProof({ pgBin } = {}) {
     command("initdb.exe", ["-D", data, "-U", "postgres", "--auth-local=trust", "--auth-host=trust", "--encoding=UTF8"]);
     start(); running = true; open();
     await new PostgresGate4aStore({ pool }).initialize();
+    // Reproduce the exact selected-core predecessor before running the additive
+    // migration. This proves existing governed intelligence settings survive
+    // while the new preference values become valid.
+    await pool.query(`CREATE TABLE runa_core.participant_settings (
+      participant_id text NOT NULL, setting_key text NOT NULL,
+      setting_value text NOT NULL CHECK(setting_value IN ('Low','Medium','High')),
+      revision bigint NOT NULL CHECK(revision > 0), updated_at timestamptz NOT NULL DEFAULT clock_timestamp(),
+      PRIMARY KEY(participant_id,setting_key)
+    )`);
+    await pool.query(`INSERT INTO runa_core.participant_settings
+      (participant_id,setting_key,setting_value,revision) VALUES($1,$2,$3,$4)`,
+    ["synthetic-owner", "defaultIntelligenceLevel", "Medium", 7]);
     let continuity = new PostgresSelectedContinuityStore({ pool, cipher });
     await continuity.initialize();
+    await pool.query(`INSERT INTO runa_core.participant_settings
+      (participant_id,setting_key,setting_value,revision) VALUES($1,$2,$3,$4)`,
+    ["synthetic-owner", "theme", "system", 1]);
+    const migratedSettings = (await pool.query(`SELECT setting_key,setting_value,revision::int revision
+      FROM runa_core.participant_settings WHERE participant_id=$1 ORDER BY setting_key`, ["synthetic-owner"])).rows;
+    checks.predecessorSettingsConstraintMigratesWithoutDataLoss = migratedSettings.length === 2
+      && migratedSettings.some(row => row.setting_key === "defaultIntelligenceLevel"
+        && row.setting_value === "Medium" && row.revision === 7)
+      && migratedSettings.some(row => row.setting_key === "theme" && row.setting_value === "system");
     let workspace = new PostgresWorkspaceStore({ pool, cipher });
     await workspace.initialize();
     const own = await continuity.createProject({ participantId: "synthetic-owner", requestId: "own-project",
@@ -154,6 +175,68 @@ export async function runConversationPostgresProof({ pgBin } = {}) {
       && incomplete.contextRevision === 0 && completedRetry.contextRevision === 1
       && completedRetry.continuity.turnRecorded && retryRecord.turnCount === 1;
     checks.completedRetryIsIdempotent = retryAttempts === 2 && retainedRetry.answer === completedRetry.answer;
+    const beforeRename = (await pool.query(`SELECT source_content_hmac FROM runa_core.chats
+      WHERE participant_id=$1 AND chat_id=$2`, ["synthetic-owner", "own-thread"])).rows[0];
+    const renamed = await app.manageConversation({ credential: "synthetic", body: {
+      action: "rename", requestId: "rename-own", experience: "chat", chatId: "own-thread",
+      title: "Renamed synthetic conversation",
+    } });
+    const renamedRecord = await continuity.readChat("synthetic-owner", "own-thread", "chat");
+    const afterRename = (await pool.query(`SELECT source_content_hmac FROM runa_core.chats
+      WHERE participant_id=$1 AND chat_id=$2`, ["synthetic-owner", "own-thread"])).rows[0];
+    checks.renamePersistsAndPreservesSourceProvenance = renamed.action === "renamed"
+      && renamedRecord.title === "Renamed synthetic conversation"
+      && beforeRename.source_content_hmac === afterRename.source_content_hmac;
+    const branchInput = { action: "branch", requestId: "branch-own", experience: "chat", chatId: "own-thread" };
+    const branch = await app.manageConversation({ credential: "synthetic", body: branchInput });
+    const duplicateBranch = await app.manageConversation({ credential: "synthetic", body: branchInput });
+    const branchRecord = await continuity.readChat("synthetic-owner", branch.chatId, "chat");
+    checks.branchCopiesExactSnapshotOnce = branch.action === "branched" && duplicateBranch.chatId === branch.chatId
+      && branchRecord.turnCount === renamedRecord.turnCount && branchRecord.turns.length === renamedRecord.turns.length;
+    const foreignLifecycle = applicationFor("synthetic-other");
+    await assert.rejects(foreignLifecycle.manageConversation({ credential: "synthetic", body: {
+      action: "rename", requestId: "foreign-rename", experience: "chat", chatId: "own-thread", title: "Wrong owner",
+    } }), { code: "chat-not-found" });
+    checks.foreignConversationLifecycleDenied = true;
+    app = applicationFor("synthetic-owner");
+    await app.manageConversation({ credential: "synthetic", body: {
+      action: "archive", requestId: "archive-branch", experience: "chat", chatId: branch.chatId,
+    } });
+    await assert.rejects(continuity.readChat("synthetic-owner", branch.chatId, "chat"), { code: "chat-not-found" });
+    const archived = await app.manageConversation({ credential: "synthetic", body: {
+      action: "archived", requestId: "list-archived", experience: "chat",
+    } });
+    checks.archiveHidesAndLists = archived.results.some(item => item.chatId === branch.chatId);
+    await app.manageConversation({ credential: "synthetic", body: {
+      action: "unarchive", requestId: "unarchive-branch", experience: "chat", chatId: branch.chatId,
+    } });
+    checks.unarchiveRestores = (await continuity.readChat("synthetic-owner", branch.chatId, "chat")).turnCount === branchRecord.turnCount;
+    await app.manageConversation({ credential: "synthetic", body: {
+      action: "delete", requestId: "delete-branch", experience: "chat", chatId: branch.chatId,
+    } });
+    await assert.rejects(continuity.readChat("synthetic-owner", branch.chatId, "chat"), { code: "chat-not-found" });
+    const afterDelete = await app.manageConversation({ credential: "synthetic", body: {
+      action: "archived", requestId: "list-after-delete", experience: "chat",
+    } });
+    checks.softDeleteIsRecoverableButHidden = !afterDelete.results.some(item => item.chatId === branch.chatId)
+      && (await pool.query(`SELECT archived,deleted_at FROM runa_core.chats
+        WHERE participant_id=$1 AND chat_id=$2`, ["synthetic-owner", branch.chatId])).rows[0].archived === true;
+    const defaults = await app.settings({ credential: "synthetic", body: { action: "read" } });
+    const changedSetting = await app.settings({ credential: "synthetic", body: {
+      action: "set", requestId: "theme-dark", key: "theme", value: "dark",
+    } });
+    const duplicateSetting = await app.settings({ credential: "synthetic", body: {
+      action: "set", requestId: "theme-dark", key: "theme", value: "dark",
+    } });
+    const ownerSettings = await app.settings({ credential: "synthetic", body: { action: "read" } });
+    const otherSettings = await foreignLifecycle.settings({ credential: "synthetic", body: { action: "read" } });
+    checks.settingsPersistAndRemainParticipantScoped = defaults.values.theme === "system"
+      && changedSetting.value === "dark" && duplicateSetting.revision === changedSetting.revision
+      && ownerSettings.values.theme === "dark" && otherSettings.values.theme === "system";
+    await assert.rejects(app.settings({ credential: "synthetic", body: {
+      action: "set", requestId: "governed-setting", key: "defaultIntelligenceLevel", value: "High",
+    } }), { code: "setting-approval-required" });
+    checks.governedSettingStillRequiresApproval = true;
     const beforeArchive = providers.chat.calls.length;
     await pool.query("UPDATE runa_core.projects SET status='archived' WHERE participant_id=$1 AND project_id=$2",
       ["synthetic-owner", own.projectId]);

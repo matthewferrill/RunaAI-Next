@@ -253,6 +253,27 @@ export function createCandidateHttpServer({ application, runtimeStatus, readines
           chatId: input.chatId, experience: input.experience,
         }));
       }
+      if (request.method === "POST" && url.pathname === "/api/selected/conversation/manage") {
+        if (request.headers["x-runa-workspace"] !== "1") throw coded("workspace-request-invalid", "The workspace request marker is missing.");
+        return json(response, 200, await application.manageConversation({
+          credential: await selectedCredential(request, browserCeremony, ordinarySessions),
+          body: await body(request, maxRequestBytes),
+        }));
+      }
+      if (request.method === "POST" && url.pathname === "/api/selected/user-settings") {
+        if (request.headers["x-runa-workspace"] !== "1") throw coded("workspace-request-invalid", "The workspace request marker is missing.");
+        return json(response, 200, await application.settings({
+          credential: await selectedCredential(request, browserCeremony, ordinarySessions),
+          body: await body(request, maxRequestBytes),
+        }));
+      }
+      if (request.method === "POST" && url.pathname === "/api/selected/system/status") {
+        if (request.headers["x-runa-workspace"] !== "1") throw coded("workspace-request-invalid", "The workspace request marker is missing.");
+        return json(response, 200, await application.systemStatus({
+          credential: await selectedCredential(request, browserCeremony, ordinarySessions),
+          body: await body(request, maxRequestBytes),
+        }));
+      }
       if (request.method === "POST" && url.pathname === "/api/selected/code/execute") {
         if (request.headers["x-runa-workspace"] !== "1") throw coded("workspace-request-invalid", "The workspace request marker is missing.");
         return json(response, 200, await application.executeCode({

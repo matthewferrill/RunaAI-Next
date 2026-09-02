@@ -17,6 +17,18 @@ permission requests. Human involvement is reserved for genuine customer tests or
 
 ### Current checkpoint: Gemma-primary application implementation active
 
+**M1-S2A checkpoint, 2026-09-02:** the conversation lifecycle, Settings and honest
+Omen/Control/Home status implementation is complete in the working branch and deterministically green.
+The browser UI uses one work canvas and now exposes search, archived records, rename, branch, archive,
+export and recoverable delete. Four low-risk preferences persist per participant; intelligence remains
+governed. Connection rows remain non-executable until their actual slices. Focused/cross-gate/roadmap
+checks pass 12/12, 91/91 and 15/15; the owned predecessor-upgrade PostgreSQL proof passes 25/25. The restricted tracked run reported four permission-only Windows
+ACL/process failures; its exact source file passed 31/31 in the required unrestricted Windows context,
+so no blind full-suite retry or model run occurred. Independent review and the exact actual Control
+publication review returned GO with zero P0/P1 findings; the exact actual Control
+database/browser/release gate remains open. No production route changed. See
+`gate7f/function-first/M1-S2A-CONVERSATION-SETTINGS-SYSTEM-RESULTS-2026-09-02.md`.
+
 **Application slice, 2026-09-02:** model selection is complete and the retired R15 campaign is not being
 resumed. The active clean branch is `codex/m1-gemma-primary`, based on the five-function qualification
 decision. Gemma is the sole primary for Chat, Research, Code, Agent and Review. The immediate work is to

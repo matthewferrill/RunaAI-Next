@@ -3,7 +3,20 @@
 Roadmap revision: 2026-08-28.1
 Milestone: M1
 Slice ID: M1-S2
-Status: Gemma-primary application implementation is active; application release and product remain unqualified.
+Status: M1-S2A product-foundation implementation and independent review are green; actual-system
+acceptance, application release and product qualification remain open.
+
+Product-foundation checkpoint, 2026-09-02: the single-canvas workspace now implements participant-scoped
+conversation search/rename/archive/unarchive/branch/export/soft-delete, persisted low-risk appearance
+settings, and an honest browser/Control/Home system-status view. Local folders, Local Git, GitHub and Web
+research remain visibly unavailable rather than decorative controls. Focused and cross-gate verification
+pass 12/12 and 91/91; roadmap checks pass 15/15; the owned predecessor-upgrade PostgreSQL proof passes
+25/25. A restricted tracked run's four Windows ACL/process
+failures all passed in one exact required-context rerun (31/31), so they are method/environment results,
+not model or application failures. Independent publication review returned GO with zero P0/P1 findings.
+No model call, actual Control database acceptance, Control deployment or
+production routing occurred. Exact evidence and remaining gates are in
+`../gate7f/function-first/M1-S2A-CONVERSATION-SETTINGS-SYSTEM-RESULTS-2026-09-02.md`.
 
 Workspace baseline checkpoint: see
 `gate7f/function-first/M1-S2-WORKSPACE-BASELINE-IMPLEMENTATION-RESULTS-2026-09-02.md` for the accepted

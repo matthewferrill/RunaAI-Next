@@ -29,6 +29,7 @@ import { PostgresOrdinarySessionStore } from "../gate7a/postgres-ordinary-sessio
 import { HarmlessJavascriptExecutionService, MxcJavascriptExecutor } from "../gate7e/mxc-javascript-executor.mjs";
 import { assertConfiguredReleaseModel, createReleaseAnswerProviders } from "./model-role-providers.mjs";
 import { composeM1Functions } from "../gate7f/function-first/composition.mjs";
+import { composeUserSystemStatus } from "./product-foundation.mjs";
 
 const coded = (code, message) => Object.assign(new Error(message), { code });
 
@@ -203,10 +204,15 @@ export async function createProductionComposition({ loadedConfig, releaseRoot })
     throw coded("release-cutover-state-mismatch", "The retained cutover state belongs to another release or authority generation.");
   }
   const cutoverStatus = () => cutoverStore.load();
+  let userSystemStatus = null;
   const application = new SelectedCoreApplication({ mode: config.mode,
     targetGeneration: config.targetGeneration, cutoverStatus, answerService, actionService,
     authenticator, authorizer, continuity, requestCoordinator: new PostgresRequestCoordinator({ pool, cipher: coreCipher }),
     codeExecution,
+    systemStatus: input => {
+      if (!userSystemStatus) throw coded("system-status-unavailable", "System status is unavailable.");
+      return userSystemStatus(input);
+    },
     totalDeadlineMs: config.limits.totalDeadlineMs });
 
   let browserCeremony = null;
@@ -261,6 +267,9 @@ export async function createProductionComposition({ loadedConfig, releaseRoot })
   const readinessStatus = () => composeReadinessStatus({ application, dependencyHealth,
     configuration: safeConfigurationStatus(loadedConfig, telemetryKey), artifact, browserCeremony,
     protectedImportStatus });
+  userSystemStatus = async ({ client }) => composeUserSystemStatus({
+    runtime: await runtimeStatus(), readiness: await readinessStatus(), client,
+  });
 
   return Object.freeze({ application, browserCeremony, ordinarySessions, m1Functions: m1?.attach(application) ?? null,
     runtimeStatus, readinessStatus, dependencyHealth,

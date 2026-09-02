@@ -5,6 +5,13 @@ Milestone: M1
 Slice ID: M1-S2
 Status: in progress, R15 campaign paused before inference for an archive-bound hardware-plan correction and reseal; product not qualified.
 
+V6 method-gate update, 2026-09-01: a fresh sealed stage completed 12/12 model-free controls with no
+model calls, then the whole-stage recursive mutation watcher failed after the post-run exact-set check had
+passed. The retained failure is harness-only. The corrected operator excludes only the already-bounded
+high-churn mutable roots from recursive observation, watches immutable trees separately, disables before
+draining, and retains source/runtime locks plus fail-closed diagnostics. Gemma testing remains paused until
+fresh controls and the separate browser-publication proof pass.
+
 R15 containment update, 2026-09-01: independent prelaunch review found that the corrected exact-source
 stage did not yet prebuild the compact native runtime and that the provisional runtime root would grant
 MXC read access to the whole extracted application. Launch remained stopped before inference. The local

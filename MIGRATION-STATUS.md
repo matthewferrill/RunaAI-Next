@@ -17,6 +17,15 @@ permission requests. Human involvement is reserved for genuine customer tests or
 
 ### Current checkpoint: R15 campaign paused before inference for archive-bound hardware-plan reseal
 
+V6 method-gate update, 2026-09-01: source stage `ce8871e1ad9d48d48d4508a39761af6f`
+completed 12/12 model-free controls with zero failed drivers and no model calls, but its outer whole-stage
+recursive `FileSystemWatcher` failed after a clean post-run exact-set check. The watcher included legitimate
+high-churn disposable database/vector roots and retained their events for the complete run; independent
+review identified buffer pressure as the leading RCA. This is retained as a harness failure, not a model
+failure. The corrected validator now watches only the root boundary and immutable source/runtime trees,
+disables before draining, preserves all byte locks and exact-set checks, and still fails closed with bounded
+exception diagnostics. Inference remains paused pending a fresh 12-control pass and live-browser proof.
+
 An additional prelaunch independent review found two compact-runtime containment defects before any model
 request: the exact stage lacked the runtime required by native-access preparation, while a provisional
 fallback widened MXC reads to the entire extracted stage. The correction now prebuilds an exact

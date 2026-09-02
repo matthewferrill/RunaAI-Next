@@ -167,3 +167,22 @@ failures after the functional-control correction. The exact final timing/browser
 32/32 and 47/47 after the publication-path correction. Independent final re-review returned GO with no
 P0/P1; its unelevated shell could not terminate three synthetic Windows process-tree fixtures, while the
 same focused file passed 29/29 in the required host process-control context.
+
+## V6 protected-tree watcher correction
+
+Fresh source stage `ce8871e1ad9d48d48d4508a39761af6f` completed all 12 model-free controls with zero
+failed drivers and `modelsInvoked:false`. The outer validator then failed only after cleanup and a passing
+post-run exact-set check with `r15-stage-validation-execution-mutation`. The single recursive
+`FileSystemWatcher` covered high-churn disposable PostgreSQL, Qdrant and transient roots, retained events
+for the whole run, and collapsed any buffer error to `watcher-error`. The clean exact-set result and
+independent review identify legitimate mutable-root event pressure as the leading cause, not an application
+or candidate failure. The stage is retained and is not retried.
+
+The corrected validator watches the stage root nonrecursively and each immutable source/runtime top-level
+tree recursively. It deliberately does not recurse into only the already-bounded mutable roots or the
+`node_modules` junction. All existing source/runtime read locks and pre/post exact-set checks remain. Each
+watcher is disabled before its queue is drained to exhaustion, every protected-tree error still fails
+closed, and a failure writes a bounded create-only diagnostic with normalized samples plus exception type
+and HResult. A static regression rejects restoration of the whole-stage recursive watcher and requires the
+disable-before-drain ordering. No Gemma or other model inference may resume until this corrected operator
+passes a fresh 12-control run and the separate live-browser publication proof.

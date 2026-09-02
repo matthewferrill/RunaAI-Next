@@ -177,6 +177,12 @@ test('R15 Control wrapper locks every manifested runtime file before launching a
   assert.match(validator,/@\('acceptance-evidence','disposable-postgres','transient','q','data'\)/u);
   assert.match(validator,/Remove-Item -LiteralPath \$postgresLog -Force[\s\S]*?Assert-ExactStageSet/u);
   assert.match(validator,/\[IO\.FileShare\]::Read/u);assert.match(validator,/r15-stage-runtime-exact-set/u);
+  assert.match(validator,/\$watchSpecs=@\(\[pscustomobject\]@\{Path=\$root;Recursive=\$false\}\)/u);
+  assert.match(validator,/foreach\(\$entry in @\(\$manifest\.entries\)\)[\s\S]*?\$protectedTopLevels\.Add/u);
+  assert.match(validator,/@\('acceptance-evidence','disposable-postgres','transient','q','data','node_modules'\)/u);
+  assert.match(validator,/foreach\(\$watcher in \$watchers\)\{\$watcher\.EnableRaisingEvents=\$false\}[\s\S]*?do\{[\s\S]*?Get-Event[\s\S]*?\}while\(\$batch\.Count-ne0\)/u);
+  assert.match(validator,/GetException\(\)/u);assert.match(validator,/\$exception\.GetType\(\)\.FullName/u);
+  assert.doesNotMatch(validator,/New-Object IO\.FileSystemWatcher\(\$root\)[\s\S]*?IncludeSubdirectories=\$true/u);
   assert.ok(validator.indexOf("$stream=New-Object IO.FileStream($spec.Key")<validator.indexOf("& $node $entry --mode controls"));
   const mutation=/function Test-AllowedExecutionMutation[\s\S]*?Assert-ExactStageSet/u.exec(validator)?.[0];assert.ok(mutation);
   assert.doesNotMatch(mutation,/['"]runtime['"]|['"]sandbox-runtime['"]/u);

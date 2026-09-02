@@ -122,6 +122,34 @@ Fresh package `20260902-campaign-r15-common-v15` binds that exact source, archiv
 The propagated operator harness passes 206/206. This seal commit and a new stage remain mandatory; V14
 cannot be reused or scored.
 
+Fresh V15 stage `b230075b107b439480bfbecd64189e62` then completed 11 of 12 model-free controls and
+failed only control 10 at browser preparation. The repaired relay stayed live and served the application,
+but the relay-ready record published the neutral application root instead of the dedicated
+`/__acceptance/session` bootstrap page. The root truthfully offered ordinary account sign-in, so the
+operator followed that visible path; it cannot consume the synthetic session created for the checkpoint
+and returned `candidate-request-failed`. The checkpoint expired fail-closed. Its terminal control record
+contains 12 attempts, 11 completed drivers, one failed driver, `modelsInvoked:false`,
+`productionChanged:false`, and `protectedDataRead:false`. This is an operator-handoff defect, not a model
+attempt, and V15 remains unscored.
+
+The rejected operator-correction draft resolves the checkpoint's sealed `requestPath`, validates that it is the exact
+stage-owned `browser-<checkpoint>/request.json`, retrieves only the bound bootstrap fields over the owner
+SSH profile, and never prints the one-time nonce. For a new synthetic session it publishes the dedicated
+bootstrap URL, places the nonce on the local clipboard for immediate entry, marks ordinary sign-in
+forbidden, and requires the clipboard to be cleared after paste. An Agent05 in-flight checkpoint instead
+reuses the already prepared browser and never requests a new nonce. Executable regression coverage proves
+the returned handoff contains the dedicated URL but not the secret. The first independent review rejected
+an earlier version for incomplete request-hash, path, expiry and in-flight binding. The revised draft
+passed its five selected browser tests, including the new negative probes, but the next independent review
+found that every cleanup path called `Clear-Clipboard`, a command absent from the actual operator host in
+both Windows PowerShell 5.1.26100.9168 and PowerShell 7.6.4. The full file reported 30/34 passing; its four
+failures were the already-accounted restricted-host ACL/process-tree probes, not model failures. The
+steward imposed and the campaign honored a hard stop on this review NO-GO. The draft must be retained only
+as rejected audit history and reverted from the branch tip. A fresh stage, not a reuse of
+`b230075b107b439480bfbecd64189e62`, must pass all 12 controls and the separate browser-publication proof
+before any Gemma request, but no further correction, test, stage or model call is authorized in this
+stopped campaign state.
+
 | Failed preflight | Root cause | Permanent correction |
 |---|---|---|
 | 1 | The first capability-bearing/separate-port URL was blocked by Brave. Browser setup itself was already enabled. | Use the browser that is live-registered for the task and keep the visible URL neutral on the application origin. |

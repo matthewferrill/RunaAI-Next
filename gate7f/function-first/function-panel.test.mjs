@@ -12,16 +12,18 @@ test("function descriptions distinguish drafts, selected research, review and re
   assert.match(functionDescription("work", "code"), /edit and run its fixed tests/);
   assert.match(functionDescription("work", "code"), /approval profile/);
   assert.match(functionDescription("research", "chat"), /not live web research/);
-  assert.match(functionDescription("review", "code"), /does not edit or execute/);
+  assert.match(functionDescription("review", "chat"), /does not edit or execute/);
   assert.doesNotMatch(functionDescription("work", "chat"), /can plan, inspect, edit/);
 });
 test("research/review requires an explicit bounded source selection", () => {
   for (const mode of ["research", "review"]) {
     assert.throws(() => functionAnswerSelection(mode, [], "chat"), /Select/);
     assert.throws(() => functionAnswerSelection(mode, Array(7).fill({}), "chat"), /Select/);
-    assert.deepEqual(functionAnswerSelection(mode, [{ sourceId: "a", sectionId: "provided", content: "not in payload" }], "code"),
+    assert.deepEqual(functionAnswerSelection(mode, [{ sourceId: "a", sectionId: "provided", content: "not in payload" }], "chat"),
       { lane: mode, workspace: { sources: [{ sourceId: "a", sectionId: "provided" }] } });
   }
+  assert.throws(() => functionAnswerSelection("review", [{ sourceId: "a", sectionId: "provided" }], "code"), /unavailable/);
+  assert.throws(() => functionAnswerSelection("work", [], "chat"), /unavailable/);
 });
 
 test("reload offers only exact server-revalidated approvals, never a remembered grant alone", () => {

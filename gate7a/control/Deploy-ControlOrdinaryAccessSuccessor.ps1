@@ -16,6 +16,9 @@ param(
   [string]$M1PlanSha256,
   [string]$M1GradesSha256,
   [string]$M1RuntimeSealSha256,
+  [string]$M1FocusedReviewGradeSha256,
+  [string]$M1FocusedReviewAnswerSha256,
+  [string]$M1FocusedReviewCheckerSha256,
   [string]$Root='C:\AI\RunaAI-Next-Candidate'
 )
 
@@ -44,11 +47,16 @@ $preparedRelease=$ExpectedUiContract-in@('gate7e-harmless-javascript','gate7f-m1
 $m1Plan=Join-Path $staging 'm1-successor-plan.json'
 $m1Grades=Join-Path $staging 'm1-acceptance-grades.json'
 $m1RuntimeSeal=Join-Path $staging 'm1-runtime-seal.json'
+$m1FocusedReviewGrade=Join-Path $staging 'focused-review-grade.json'
+$m1FocusedReviewAnswer=Join-Path $staging 'focused-review-answer.json'
+$m1FocusedReviewChecker=Join-Path $staging 'focused-review-checker.json'
 if($m1Release){
-  foreach($value in @($M1PlanSha256,$M1GradesSha256,$M1RuntimeSealSha256)){
+  foreach($value in @($M1PlanSha256,$M1GradesSha256,$M1RuntimeSealSha256,$M1FocusedReviewGradeSha256,
+    $M1FocusedReviewAnswerSha256,$M1FocusedReviewCheckerSha256)){
     if($value-notmatch'^[a-f0-9]{64}$'){throw 'm1-deploy-qualification-pin-required'}
   }
-}elseif($M1PlanSha256-or$M1GradesSha256-or$M1RuntimeSealSha256){throw 'm1-deploy-contract-required'}
+}elseif($M1PlanSha256-or$M1GradesSha256-or$M1RuntimeSealSha256-or$M1FocusedReviewGradeSha256-or
+  $M1FocusedReviewAnswerSha256-or$M1FocusedReviewCheckerSha256){throw 'm1-deploy-contract-required'}
 
 function Hash([string]$Path){if(-not(Test-Path -LiteralPath $Path -PathType Leaf)){throw 'gate7a-ordinary-deploy-staged-file-missing'};(Get-FileHash -LiteralPath $Path -Algorithm SHA256).Hash.ToLowerInvariant()}
 function Assert-PreparedReleaseDirectory {
@@ -143,7 +151,9 @@ function Get-Redirect([string]$Path){
 }
 
 $pins=@{$archive=$ArchiveSha256;$stagedConfig=$ConfigSha256;$stagedManifest=$ManifestSha256;$stagedLauncher=$LauncherSha256;$stagedCaddy=$CaddyfileSha256}
-if($m1Release){$pins[$m1Plan]=$M1PlanSha256;$pins[$m1Grades]=$M1GradesSha256;$pins[$m1RuntimeSeal]=$M1RuntimeSealSha256}
+if($m1Release){$pins[$m1Plan]=$M1PlanSha256;$pins[$m1Grades]=$M1GradesSha256;$pins[$m1RuntimeSeal]=$M1RuntimeSealSha256
+  $pins[$m1FocusedReviewGrade]=$M1FocusedReviewGradeSha256;$pins[$m1FocusedReviewAnswer]=$M1FocusedReviewAnswerSha256
+  $pins[$m1FocusedReviewChecker]=$M1FocusedReviewCheckerSha256}
 foreach($entry in $pins.GetEnumerator()){if((Hash $entry.Key)-ne$entry.Value){throw 'gate7a-ordinary-deploy-staged-hash-mismatch'}}
 if((Hash $caddyExe)-ne$expectedCaddyBinarySha256){throw 'gate7a-ordinary-deploy-caddy-binary-drift'}
 if((Run-Caddy validate $stagedCaddy)-ne0){throw 'gate7a-ordinary-deploy-caddy-invalid'}
@@ -201,7 +211,8 @@ if($m1Release){
   if(-not(Test-Path -LiteralPath $m1Verifier -PathType Leaf)){throw 'm1-deploy-verifier-missing'}
   $qualificationOutput=& $m1Node $m1Verifier --prior $config --successor $stagedConfig `
     --plan $m1Plan --grades $m1Grades --runtime-seal $m1RuntimeSeal --expected-source-commit $ExpectedCommit `
-    --expected-plan-sha256 $M1PlanSha256
+    --focused-review-grade $m1FocusedReviewGrade --focused-review-answer $m1FocusedReviewAnswer `
+    --focused-review-checker $m1FocusedReviewChecker --expected-plan-sha256 $M1PlanSha256
   if($LASTEXITCODE-ne0){throw 'm1-deploy-qualification-failed'}
   $qualification=($qualificationOutput-join"`n")|ConvertFrom-Json
   if($qualification.passed-ne$true-or$qualification.privateValuesIncluded-ne$false){throw 'm1-deploy-qualification-invalid'}

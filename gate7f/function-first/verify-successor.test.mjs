@@ -11,11 +11,17 @@ import { parseVerificationArguments, runVerificationCli, verifySuccessorFiles } 
 async function filesFixture() {
   const root = await mkdtemp(join(tmpdir(), "runa-m1-deployment-verifier-"));
   const fixture = qualifiedDeploymentFixture(), input = fixture.inputs();
+  const focusedRoot = new URL("./readiness/evidence/20260902-focused-gemma-review/", import.meta.url);
   const contents = { "prior.json": Buffer.from(JSON.stringify(input.prior)), "successor.json": Buffer.from(JSON.stringify(input.successor)),
-    "plan.json": Buffer.from(JSON.stringify(input.plan)), "grades.json": input.gradesBytes, "runtime-seal.json": input.runtimeSealBytes };
+    "plan.json": Buffer.from(JSON.stringify(input.plan)), "grades.json": input.gradesBytes, "runtime-seal.json": input.runtimeSealBytes,
+    "focused-review-grade.json": Buffer.from(await readFile(new URL("focused-review-grade.json", focusedRoot))),
+    "focused-review-answer.json": Buffer.from(await readFile(new URL("focused-review-20260902-f17e80070418.json", focusedRoot))),
+    "focused-review-checker.json": Buffer.from(await readFile(new URL("focused-review-checker-20260902-cb6e5785b5af.json", focusedRoot))) };
   for (const [name, value] of Object.entries(contents)) await writeFile(join(root, name), value, { flag: "wx" });
   const args = { prior: join(root, "prior.json"), successor: join(root, "successor.json"), plan: join(root, "plan.json"),
     grades: join(root, "grades.json"), "runtime-seal": join(root, "runtime-seal.json"), "expected-source-commit": input.expectedSourceCommit,
+    "focused-review-grade": join(root, "focused-review-grade.json"), "focused-review-answer": join(root, "focused-review-answer.json"),
+    "focused-review-checker": join(root, "focused-review-checker.json"),
     "expected-plan-sha256": sha256(contents["plan.json"]) };
   return { root, args, contents, async close() {
     assert.equal(dirname(resolve(root)), resolve(tmpdir()));

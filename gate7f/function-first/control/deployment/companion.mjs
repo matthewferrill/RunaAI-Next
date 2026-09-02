@@ -1,5 +1,6 @@
 import {sha256} from '../../../../gate4/canonical.mjs';
 import {APPLICATION,demand} from './assembly.mjs';
+import {FOCUSED_REVIEW_EVIDENCE} from '../../gemma-primary-qualification.mjs';
 
 function replaceOnce(text,before,after){
   demand(text.split(before).length===2,'companion-marker-drift');return text.replace(before,()=>after);
@@ -15,11 +16,18 @@ export function createClosedPhaseCompanion({sourceBytes,childBytes,functionsByte
   const change=(before,after)=>{source=replaceOnce(source,before.replaceAll('\n',eol),after.replaceAll('\n',eol));};
   change('param(\n','param(\n  [Parameter(Mandatory)][ValidatePattern(\'^[a-f0-9]{32}$\')][string]$TransitionId,\n'
     +"  [Parameter(Mandatory)][ValidatePattern('^[a-f0-9]{64}$')][string]$HeldCaddySha256,\n"
-    +'  [Parameter(Mandatory)][string]$HeldCaddyETag,\n');
+    +'  [Parameter(Mandatory)][string]$HeldCaddyETag,\n'
+    +"  [Parameter(Mandatory)][ValidatePattern('^[a-f0-9]{64}$')][string]$M1FocusedReviewGradeSha256,\n"
+    +"  [Parameter(Mandatory)][ValidatePattern('^[a-f0-9]{64}$')][string]$M1FocusedReviewAnswerSha256,\n"
+    +"  [Parameter(Mandatory)][ValidatePattern('^[a-f0-9]{64}$')][string]$M1FocusedReviewCheckerSha256,\n");
   change("$changed=$false",`$changed=$false
 if($ExpectedCommit-ne'${APPLICATION.sourceCommit}'-or$M1RuntimeSealSha256-ne'${APPLICATION.runtimeSealSha256}'-or
   $ExpectedUiContract-ne'gate7f-m1-function-first'-or$HeldCaddyETag.Length-lt1-or$HeldCaddyETag.Length-gt256-or
-  $HeldCaddyETag-match'[\\r\\n]'){throw 'm1-closed-companion-boundary-invalid'}`);
+  $HeldCaddyETag-match'[\\r\\n]'-or$M1FocusedReviewGradeSha256-ne'${FOCUSED_REVIEW_EVIDENCE.gradeSha256}'-or
+  $M1FocusedReviewAnswerSha256-ne'${FOCUSED_REVIEW_EVIDENCE.answerSha256}'-or
+  $M1FocusedReviewCheckerSha256-ne'${FOCUSED_REVIEW_EVIDENCE.checkerSha256}'){
+  throw 'm1-closed-companion-boundary-invalid'
+}`);
   const beginning=source.indexOf('function Run-Caddy('),ending=source.indexOf('function JsonFacts(');
   demand(beginning>0&&ending>beginning,'companion-caddy-function');
   const helpers=`$childSource=Join-Path $PSScriptRoot 'Bounded-DeploymentChild.cs'
@@ -36,6 +44,13 @@ if(-not('RunaAI.Next.M1.DeploymentChild'-as[type])){Add-Type -Path $childSource}
   change("      -ContentType 'application/x-www-form-urlencoded' -Body", "      -TimeoutSec 20 -ContentType 'application/x-www-form-urlencoded' -Body");
   change('      -Headers @{Authorization="Bearer $adminToken"}))','      -TimeoutSec 20 -Headers @{Authorization="Bearer $adminToken"}))');
   change('$pins=@{','Assert-ClosedCaddy\n$pins=@{');
+  change("$m1RuntimeSeal=Join-Path $staging 'm1-runtime-seal.json'",
+    "$m1RuntimeSeal=Join-Path $staging 'm1-runtime-seal.json'\n$m1FocusedReviewGrade=Join-Path $staging 'focused-review-grade.json'\n"
+    +"$m1FocusedReviewAnswer=Join-Path $staging 'focused-review-answer.json'\n$m1FocusedReviewChecker=Join-Path $staging 'focused-review-checker.json'");
+  change('if($m1Release){$pins[$m1Plan]=$M1PlanSha256;$pins[$m1Grades]=$M1GradesSha256;$pins[$m1RuntimeSeal]=$M1RuntimeSealSha256}',
+    'if($m1Release){$pins[$m1Plan]=$M1PlanSha256;$pins[$m1Grades]=$M1GradesSha256;$pins[$m1RuntimeSeal]=$M1RuntimeSealSha256\n'
+    +'  $pins[$m1FocusedReviewGrade]=$M1FocusedReviewGradeSha256;$pins[$m1FocusedReviewAnswer]=$M1FocusedReviewAnswerSha256\n'
+    +'  $pins[$m1FocusedReviewChecker]=$M1FocusedReviewCheckerSha256}');
   change('& tar.exe -xzf $archive -C $release\nif($LASTEXITCODE-ne0)',
     "$extraction=Run-BoundedChild (Join-Path $env:SystemRoot 'System32\\tar.exe') @('-xzf',$archive,'-C',$release) 120000 'archive-extract'\nif($extraction.ExitCode-ne0)");
   change('  $qualificationOutput=& $m1Node $m1Verifier --prior $config --successor $stagedConfig `\n'
@@ -43,7 +58,9 @@ if(-not('RunaAI.Next.M1.DeploymentChild'-as[type])){Add-Type -Path $childSource}
     +'    --expected-plan-sha256 $M1PlanSha256\n  if($LASTEXITCODE-ne0)',
     "  $qualificationRun=Run-BoundedChild $m1Node @($m1Verifier,'--prior',$config,'--successor',$stagedConfig,\n"
     +"    '--plan',$m1Plan,'--grades',$m1Grades,'--runtime-seal',$m1RuntimeSeal,'--expected-source-commit',$ExpectedCommit,\n"
-    +"    '--expected-plan-sha256',$M1PlanSha256) 60000 'qualification'\n  $qualificationOutput=$qualificationRun.Stdout\n  if($qualificationRun.ExitCode-ne0)");
+    +"    '--focused-review-grade',$m1FocusedReviewGrade,'--focused-review-answer',$m1FocusedReviewAnswer,\n"
+    +"    '--focused-review-checker',$m1FocusedReviewChecker,'--expected-plan-sha256',$M1PlanSha256) 60000 'qualification'\n"
+    +'  $qualificationOutput=$qualificationRun.Stdout\n  if($qualificationRun.ExitCode-ne0)');
   change('Copy-Item -LiteralPath $stagedCaddy -Destination "$caddy.new"','Assert-ClosedCaddy # outer transaction owns every Caddy publication');
   change('  $changed=$true','  Assert-ClosedCaddy\n  $changed=$true');
   change('  Move-Item -LiteralPath "$caddy.new" -Destination $caddy -Force\n'

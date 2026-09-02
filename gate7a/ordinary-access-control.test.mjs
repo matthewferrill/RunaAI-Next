@@ -82,17 +82,21 @@ test("ordinary successor changes only the application release and restores the e
 
 test("M1 successor binds exact qualification before any application stop and preserves rollback on stop-check failure", () => {
   assert.match(deploy, /gate7f-m1-function-first/);
-  for (const pin of ["M1PlanSha256", "M1GradesSha256", "M1RuntimeSealSha256"]) {
+  for (const pin of ["M1PlanSha256", "M1GradesSha256", "M1RuntimeSealSha256", "M1FocusedReviewGradeSha256",
+    "M1FocusedReviewAnswerSha256", "M1FocusedReviewCheckerSha256"]) {
     assert.match(deploy, new RegExp(`\\$${pin}`));
   }
   assert.match(deploy, /m1-deploy-qualification-pin-required/);
-  assert.match(deploy, /elseif\(\$M1PlanSha256-or\$M1GradesSha256-or\$M1RuntimeSealSha256\)/);
+  assert.match(deploy, /elseif\(\$M1PlanSha256-or\$M1GradesSha256-or\$M1RuntimeSealSha256-or\$M1FocusedReviewGradeSha256-or/);
   assert.match(deploy, /if\(-not\$m1Release\)\{\s+\$preservedCandidate=/);
   const qualification = deploy.indexOf("$qualificationOutput=& $m1Node $m1Verifier");
   const stop = deploy.indexOf("Stop-ScheduledTask -TaskPath $taskPath -TaskName 'Application'");
   assert.ok(qualification > deploy.indexOf("gate7a-ordinary-deploy-artifact-invalid"));
   assert.ok(qualification < stop);
   assert.match(deploy.slice(qualification, stop), /--expected-source-commit \$ExpectedCommit/);
+  assert.match(deploy.slice(qualification, stop), /--focused-review-grade \$m1FocusedReviewGrade/);
+  assert.match(deploy.slice(qualification, stop), /--focused-review-answer \$m1FocusedReviewAnswer/);
+  assert.match(deploy.slice(qualification, stop), /--focused-review-checker \$m1FocusedReviewChecker/);
   assert.match(deploy.slice(qualification, stop), /if\(\$LASTEXITCODE-ne0\)\{throw 'm1-deploy-qualification-failed'\}/);
   assert.match(deploy.slice(qualification, stop), /\$changed=\$true/);
   assert.match(deploy, /\$health.dependencies.qdrant-ne\$true/);

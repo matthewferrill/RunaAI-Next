@@ -1,3 +1,5 @@
+import { functionModeAllowed } from "../function-contract.mjs";
+
 const element = (root, tag, text, className) => {
   const value = root.createElement(tag); if (text) value.textContent = text;
   if (className) value.className = className; return value;
@@ -85,6 +87,7 @@ export function functionDescription(mode, experience) {
 }
 
 export function functionAnswerSelection(mode, sources, experience) {
+  if (!functionModeAllowed(experience, mode)) throw new Error("The selected function is unavailable in this workspace.");
   if (!["research", "review"].includes(mode)) return { lane: experience === "code" ? "code" : "general" };
   if (!Array.isArray(sources) || sources.length < 1 || sources.length > 6) throw new Error("Select one through six source sections first.");
   return { lane: mode, workspace: { sources: sources.map(({ sourceId, sectionId }) => ({ sourceId, sectionId })) } };
@@ -121,31 +124,33 @@ export function appendAnswerEvidence(root, host, evidence) {
 }
 
 export async function initializeFunctionPanel({ root = document, request, getContext, onStatus = () => {},
+  onModeChange = () => {},
   fetchCapabilities = () => fetch("/api/m1/capabilities", { cache: "no-store" }) }) {
-  const unavailable = { refresh() {}, answerSelection: () => ({}), workSelected: () => false, async startWork() { return false; } };
+  const unavailable = { refresh() {}, mode: () => "conversation", setMode: () => false,
+    answerSelection: () => ({}), workSelected: () => false, async startWork() { return false; } };
   const capability = await fetchCapabilities().then(response => response.ok ? response.json() : null).catch(() => null);
   if (!capability?.enabled) return unavailable;
   const host = root.getElementById("right-rail-body"), heading = root.querySelector(".chat-heading");
   if (!host || !heading) return unavailable;
-  const select = element(root, "select"); select.id = "m1-mode"; select.setAttribute("aria-label", "Conversation function");
-  for (const [value, label] of [["conversation","Chat / code draft"],["research","Research selected text"],
-    ["review","Review selected text"],["work","Work in disposable Code project"]]) {
-    const option = element(root, "option", label); option.value = value; select.append(option);
-  }
-  heading.append(select);
+  let mode = "conversation";
+  const sourcePanel = element(root, "section"); sourcePanel.id = "m1-source-panel";
+  const review = element(root, "button", "Review selected sources"); review.type = "button";
   const presentMode = () => {
     const description = root.getElementById("experience-description");
-    if (description) description.textContent = functionDescription(select.value, getContext().experience);
+    if (description) description.textContent = functionDescription(mode, getContext().experience);
+    sourcePanel.hidden = getContext().experience !== "chat" || !["research", "review"].includes(mode);
+    review.textContent = mode === "review" ? "Return to research" : "Review selected sources";
+    onModeChange(mode);
   };
-  select.addEventListener("change", presentMode);
   host.classList.add("function-panel");
-  host.append(element(root, "h2", "Selected sources"), element(root, "p", "Only text you attach and select is supplied. Up to six sections per answer; 8,000 characters each.", "navigation-empty"));
+  sourcePanel.append(element(root, "h2", "Selected sources"), element(root, "p", "Only text you attach and select is supplied. Up to six sections per answer; 8,000 characters each.", "navigation-empty"));
   const list = element(root, "div"), sourceForm = element(root, "form"), label = element(root, "input"), content = element(root, "textarea");
   list.id = "m1-sources";
   label.placeholder = "Section label"; label.maxLength = 120; label.required = true; label.setAttribute("aria-label", "Source section label");
   content.placeholder = "Paste a source section…"; content.maxLength = 8000; content.rows = 5; content.required = true; content.setAttribute("aria-label", "Source section content");
   const attach = element(root, "button", "Attach section"); attach.type = "submit";
-  sourceForm.append(label, content, attach); host.append(list, sourceForm);
+  sourceForm.append(label, content, attach); sourcePanel.append(list, sourceForm, review); host.append(sourcePanel);
+  review.addEventListener("click", () => { mode = mode === "review" ? "research" : "review"; presentMode(); });
   const codePanel = element(root, "section"); codePanel.id = "m1-code-panel";
   codePanel.append(element(root, "h2", "Disposable Code workspace"), element(root, "p", "A small JavaScript exercise, separate from your files and repositories. Runa can inspect, repair, run fixed tests, and propose undoing her recorded changes.", "navigation-empty"));
   const prepare = element(root, "button", "Prepare exercise"); prepare.type = "button";
@@ -246,8 +251,7 @@ export async function initializeFunctionPanel({ root = document, request, getCon
     profile.value = ""; clearTaskBinding(); taskView.replaceChildren(); catalog.replaceChildren(); status.textContent = "";
     const token = ticket(), context = token.context;
     codePanel.hidden = context.experience !== "code";
-    select.querySelector('option[value="work"]').disabled = context.experience !== "code";
-    if (context.experience !== "code" && select.value === "work") select.value = "conversation";
+    if (!functionModeAllowed(context.experience, mode)) mode = "conversation";
     presentMode();
     const managed = !["runa:personal", "runa:ephemeral"].includes(context.projectId);
     sourceForm.hidden = !managed; prepare.disabled = !managed; reload.disabled = !managed;
@@ -281,7 +285,7 @@ export async function initializeFunctionPanel({ root = document, request, getCon
     const token = ticket(); prepare.disabled = true;
     try {
       await call("project.prepare", {}, token); if (!alive(token)) return;
-      select.value = "work"; presentMode(); setStatus("Disposable exercise ready. Choose a profile and describe the change in the message box.", token);
+      mode = "work"; presentMode(); setStatus("Disposable exercise ready. Choose a profile and describe the change in the message box.", token);
     } catch (error) { reportError(error, token); } finally { if (alive(token)) prepare.disabled = false; }
   });
   async function readTask(token, taskId, runId) {
@@ -472,6 +476,10 @@ export async function initializeFunctionPanel({ root = document, request, getCon
     } catch (error) { if (visible(token)) reportError(error, token); await savedTasks(token).catch(() => {}); return false; }
   }
   await refresh();
-  return { refresh, workSelected: () => select.value === "work", startWork,
-    answerSelection: () => functionAnswerSelection(select.value, selected, getContext().experience) };
+  const setMode = nextMode => {
+    if (!functionModeAllowed(getContext().experience, nextMode)) return false;
+    mode = nextMode; presentMode(); return true;
+  };
+  return { refresh, mode: () => mode, setMode, workSelected: () => mode === "work", startWork,
+    answerSelection: () => functionAnswerSelection(mode, selected, getContext().experience) };
 }

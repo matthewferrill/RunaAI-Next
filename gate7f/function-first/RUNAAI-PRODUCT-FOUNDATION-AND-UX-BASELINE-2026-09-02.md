@@ -21,11 +21,8 @@ files, tools, outputs, settings, permissions, connections, task state, and hones
 
 ## Fixed product hierarchy
 
-The permanent primary function row is:
-
-```text
-Chat  |  Code  |  Research
-```
+RunaAI uses one primary work canvas. Chat, Code and Research are task types and contextual capabilities,
+not a permanent row of competing modes across the top of the application.
 
 - **Chat** is the general conversation, writing, planning, explanation, and continuity surface.
 - **Code** is the repository/project work surface. **Agent** is a governed task state inside Code when
@@ -33,9 +30,11 @@ Chat  |  Code  |  Research
 - **Research** is the source-controlled investigation surface. **Review** is contextual to selected
   sources, an artifact, or a code diff; it is not a permanent fifth selector.
 
-This keeps the interface simple without removing any of the five qualified model functions. Function
-routing is application-owned and normally automatic. Model and role selectors remain available only in
-diagnostics or explicitly requested comparison workflows, not in the ordinary end-user layout.
+The user starts the appropriate work from New, from recent work, or from the composer's compact contextual
+control. The application may route automatically when the intent is unambiguous. This keeps the interface
+simple without removing any of the five qualified model functions. Model and role selectors remain
+available only in diagnostics or explicitly requested comparison workflows, not in the ordinary end-user
+layout.
 
 ## Shared application shell
 
@@ -62,9 +61,11 @@ without removing essential actions.
 
 ### Main workspace
 
-- Chat, Code, and Research share one evenly spaced row.
-- The active conversation or task transcript occupies the primary reading area.
-- One unified composer supplies Add, Context, and Tools controls and shows the actual selected scope.
+- One active conversation or task transcript occupies the primary reading area; there is no permanent
+  Chat/Code/Research tab row.
+- One unified composer supplies a simple Add control plus the current contextual task type and authority.
+- The Add control exposes only capabilities that are actually available. As local folders, local Git and
+  connectors are implemented, they join that same menu instead of adding permanent navigation clutter.
 - Stop, retry, continue, and pending states appear only when meaningful to the current operation.
 - A draft is visibly different from an executed action or a verified result.
 
@@ -202,8 +203,8 @@ contract materially changes. The active product work is therefore re-ordered as 
 
 1. **Finish the exact Gemma-primary application seam.** Preserve the Research checker, isolate the
    simplified Review checker, bind the five-role qualification record, and keep comparison models tabled.
-2. **Complete the shell and conversation lifecycle.** Implement the shared navigation, three primary
-   workspaces, project management, conversation operations, errors, recovery, and status.
+2. **Complete the shell and conversation lifecycle.** Implement the shared single-workspace navigation,
+   contextual work entry, project management, conversation operations, errors, recovery, and status.
 3. **Build real Settings and system control.** Persist the defined settings and expose honest
    Omen/Control/Home, model, queue, lease, privacy, memory, approval, and diagnostic state.
 4. **Add real context connections.** Implement uploaded files, authorized local folders, and local Git
@@ -229,7 +230,7 @@ scheduling, parallel agents, voice/media, or remote access.
 The preview and this document establish design direction only. The product is not accepted until the
 exact current release demonstrates, on Omen, Control, and Home:
 
-- all three primary workspaces and both contextual functions route correctly;
+- Chat, Code and Research tasks plus contextual Agent and Review route correctly from the single workspace;
 - settings persist and recover;
 - authorized local-folder and local-Git boundaries hold;
 - Research and Code outputs are inspectable and attributable;

@@ -21,8 +21,8 @@ permission requests. Human involvement is reserved for genuine customer tests or
 resumed. The active clean branch is `codex/m1-gemma-primary`, based on the five-function qualification
 decision. Gemma is the sole primary for Chat, Research, Code, Agent and Review. The immediate work is to
 preserve the qualified Research contract, isolate the simplified Review checker, create byte-bound
-composite deployment admission, expose Chat/Code/Research as the three primary workspaces, and keep Agent
-and Review contextual to the work they govern. Before final customer acceptance, the product-foundation
+composite deployment admission, expose one primary work canvas with contextual Chat/Code/Research entry,
+and keep Agent and Review contextual to the work they govern. Before final customer acceptance, the product-foundation
 rebaseline brings forward the complete shell and conversation lifecycle, real Settings and
 Omen/Control/Home status, authorized local folders and local Git, usable Research/Code/artifact surfaces,
 and governed local changes. Comparison models are documented and tabled. No production route has changed.

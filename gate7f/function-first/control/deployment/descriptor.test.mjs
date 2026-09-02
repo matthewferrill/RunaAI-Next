@@ -9,7 +9,10 @@ test('synthetic packaging plan binds exact source and all supplied bytes without
   assert.equal(d.application.sourceCommit,APPLICATION.sourceCommit);assert.equal(d.activationPermitted,false);
   assert.equal(d.qualification.verified,false);assert.equal(d.home.activated,false);assert.equal(d.home.installationValidated,false);
   assert.deepEqual(d.blockers,UNIMPLEMENTED_BOUNDARIES);assert.equal(fixture.descriptorSha256,hash(d));
-  assert.equal(Object.keys(d.filePins).length,8);assert.equal(Object.keys(d.operatorFiles).length,4);
+  assert.equal(Object.keys(d.filePins).length,11);assert.equal(Object.keys(d.operatorFiles).length,4);
+  assert.equal(d.qualification.focusedReviewGradeSha256,d.filePins['focused-review-grade.json']);
+  assert.equal(d.qualification.focusedReviewAnswerSha256,d.filePins['focused-review-answer.json']);
+  assert.equal(d.qualification.focusedReviewCheckerSha256,d.filePins['focused-review-checker.json']);
 });
 for(const [name,edit] of [
   ['changed identity',v=>{const c=JSON.parse(v.files['candidate.json']);c.gate7a.ordinaryClient.clientId='other';v.files['candidate.json']=bytes(c);}],

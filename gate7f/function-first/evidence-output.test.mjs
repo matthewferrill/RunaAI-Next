@@ -7,7 +7,8 @@ import {fileURLToPath} from 'node:url';
 import {MastraAnswerProvider} from '../../gate1/adapters/mastra-provider.mjs';
 import {EVIDENCE_OUTPUT_SCHEMA,EVIDENCE_RESPONSE_FORMAT,EVIDENCE_VERIFICATION_SCHEMA,
   EVIDENCE_VERIFICATION_STRUCTURED_OUTPUT,EVIDENCE_VERIFICATION_RESPONSE_FORMAT,
-  isEvidenceResponseFormat,isEvidenceVerificationResponseFormat,isEvidenceOutput} from './evidence-output.mjs';
+  REVIEW_VERIFICATION_SCHEMA,REVIEW_VERIFICATION_STRUCTURED_OUTPUT,REVIEW_VERIFICATION_RESPONSE_FORMAT,
+  isEvidenceResponseFormat,isEvidenceVerificationResponseFormat,isReviewVerificationResponseFormat,isEvidenceOutput} from './evidence-output.mjs';
 import {MANIFEST} from './readiness/manifest.mjs';
 import {validateRequest,validateProfile} from './home-runtime/contracts.mjs';
 import {createRuntimeProxy} from './home-runtime/proxy.mjs';
@@ -35,6 +36,10 @@ test('schema is immutable, static and shipped in the pinned native operator pack
   assert.equal(isEvidenceResponseFormat(EVIDENCE_RESPONSE_FORMAT),true);assert.equal(isEvidenceOutput(answer),true);
   assert.equal(Object.isFrozen(EVIDENCE_VERIFICATION_SCHEMA.properties.verdict),true);
   assert.equal(isEvidenceVerificationResponseFormat(EVIDENCE_VERIFICATION_RESPONSE_FORMAT),true);
+  assert.deepEqual(EVIDENCE_VERIFICATION_SCHEMA.properties.verdict.enum,['accept','correct']);
+  assert.equal(Object.isFrozen(REVIEW_VERIFICATION_SCHEMA.properties.verdict),true);
+  assert.deepEqual(REVIEW_VERIFICATION_SCHEMA.properties.verdict.enum,['accept','revise']);
+  assert.equal(isReviewVerificationResponseFormat(REVIEW_VERIFICATION_RESPONSE_FORMAT),true);
   assert.equal(isEvidenceOutput({...answer,authority:'owner'}),false);
   for(const value of [null,[],{answer:'a',citations:[null]},{answer:'a',citations:[{sourceId:1,sectionId:'x'}]},
     {answer:'a',citations:[{sourceId:'',sectionId:'x'}]},{answer:'a',citations:[{sourceId:'x',sectionId:'x',action:'run'}]}])assert.equal(isEvidenceOutput(value),false);
@@ -73,7 +78,7 @@ for(const candidate of MANIFEST.candidates)test(`actual Mastra evidence/plain wi
         assert.equal(value.answer,answer.answer);assert.equal(current.messages.filter(m=>m.role==='user').length,1);
         assert.deepEqual(JSON.parse(current.messages.find(m=>m.role==='user').content).evidence,evidence);
         const verifier=current===wire.at(-1).request?current:wire.at(-1).request;
-        assert.deepEqual(verifier.response_format,EVIDENCE_VERIFICATION_RESPONSE_FORMAT);
+        assert.deepEqual(verifier.response_format,REVIEW_VERIFICATION_RESPONSE_FORMAT);
       }else{assert.equal(current.response_format,undefined);assert.equal(value.answer,'A plain answer.');assert.deepEqual(value.citations,[]);}
     }
     assert.equal(wire.length,5);assert.equal(admitted,5);assert.equal(released,5);
@@ -95,7 +100,7 @@ test('Review checker corrects one incomplete evidence answer and verifies the co
   assert.deepEqual(value.responseCheck,{performed:true,corrected:true,kind:'evidence-review',
     finalAnswerOrigin:'checker-correction',attemptCount:2});assert.equal(generated.length,2);
   assert.equal(generated[0].prompt.schemaVersion,'runa2-evidence-response-verification/v1');
-  assert.deepEqual(generated[0].options.structuredOutput,EVIDENCE_VERIFICATION_STRUCTURED_OUTPUT);
+  assert.deepEqual(generated[0].options.structuredOutput,REVIEW_VERIFICATION_STRUCTURED_OUTPUT);
   assert.equal(JSON.stringify(generated).includes('eight-second'),false);
 });
 
@@ -112,7 +117,7 @@ test('Research checker corrects omitted negative evidence and rechecks once insi
   const calls=[];const agent={async generate(){return {text:JSON.stringify({answer:'The selected note says cobalt.',citations:answer.citations}),
     finishReason:'stop',response:{modelId:'synthetic'}};}};
   const corrected='The selected note says cobalt; no completion date is established.';
-  const replies=[{verdict:'revise',reason:'A relevant unknown was omitted.',
+  const replies=[{verdict:'correct',reason:'A relevant unknown was omitted.',
     finalAnswer:corrected,citations:answer.citations},accepted(corrected)];
   const verifierAgent={async generate(prompt,options){calls.push({prompt:JSON.parse(prompt),options});return {text:JSON.stringify(replies.shift()),
     finishReason:'stop',response:{modelId:'synthetic'}};}};
@@ -125,6 +130,19 @@ test('Research checker corrects omitted negative evidence and rechecks once insi
     finalAnswerOrigin:'checker-correction',attemptCount:2});assert.equal(calls.length,2);
   assert.ok(calls.every(call=>call.prompt.schemaVersion==='runa2-evidence-response-verification/v1'
     &&call.options.modelSettings.maxOutputTokens===512&&call.options.modelSettings.maxRetries===0));
+  assert.ok(calls.every(call=>call.options.structuredOutput===EVIDENCE_VERIFICATION_STRUCTURED_OUTPUT));
+});
+
+test('Research retains exact accepted answer and ordered citations under its qualified checker contract',async()=>{
+  const second={sourceId:'fixture-note-two',sectionId:'two',contentSha256:'b'.repeat(64),content:'Second note.'};
+  const selected=[...evidence,second],citations=selected.map(({sourceId,sectionId})=>({sourceId,sectionId}));
+  const agent={async generate(){return {text:JSON.stringify({answer:'Both notes.',citations}),finishReason:'stop',response:{modelId:'synthetic'}};}};
+  for(const reply of [accepted('Changed.',citations),accepted('Both notes.',[citations[1],citations[0]])]){
+    const verifierAgent={async generate(){return {text:JSON.stringify(reply),finishReason:'stop',response:{modelId:'synthetic'}};}};
+    const provider=new MastraAnswerProvider({baseURL:'http://127.0.0.1:1/v1',modelId:'synthetic',role:'research',agent,verifierAgent});
+    await assert.rejects(provider.answer({request:{lane:'research',message:'Summarize.',history:[]},
+      ground:'record-answers',advisory:null,evidence:selected},options),error=>error.code==='provider-shape-invalid');
+  }
 });
 
 test('accepted evidence checker preserves application-owned answer and citation bytes while validating selected evidence',async()=>{

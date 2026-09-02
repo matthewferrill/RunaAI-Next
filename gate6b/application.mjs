@@ -2,10 +2,11 @@ import { createHash } from "node:crypto";
 import { unverifiedParticipant } from "../gate5/identity.mjs";
 import { assertSelectedAuthority } from "./authority.mjs";
 import { assertConversationContext } from "../gate7f/function-first/conversation-context.mjs";
+import { answerLaneAllowed } from "./function-contract.mjs";
 
 const coded = (code, message) => Object.assign(new Error(message), { code });
 const sha256 = value => createHash("sha256").update(String(value)).digest("hex");
-const lanes = new Set(["general", "research", "guarded", "workspace", "code", "review"]);
+const lanes = new Set(["general", "research", "code", "review"]);
 const experiences = new Set(["chat", "code"]);
 const PERSONAL_SCOPE = "runa:personal";
 const EPHEMERAL_SCOPE = "runa:ephemeral";
@@ -22,12 +23,11 @@ function answerRequest(body, participant, totalDeadlineMs) {
   if (!body || typeof body !== "object" || Array.isArray(body)) throw coded("request-invalid", "A JSON request is required.");
   if (!lanes.has(body.lane)) throw coded("request-lane-invalid", "The requested lane is unavailable.");
   const experience = body.experience ?? (body.lane === "code" ? "code" : "chat");
-  if (!experiences.has(experience) || (!["research", "review"].includes(body.lane)
-      && (experience === "code") !== (body.lane === "code"))) {
+  if (!experiences.has(experience) || !answerLaneAllowed(experience, body.lane)) {
     throw coded("request-experience-invalid", "The requested Chat or Code experience does not match its route.");
   }
   const verified = participant.verified === true;
-  if (!verified && (body.lane === "workspace" || body.workspace)) throw coded("workspace-authentication-required", "Workspace evidence requires a verified participant.");
+  if (!verified && body.workspace) throw coded("workspace-authentication-required", "Workspace evidence requires a verified participant.");
   const projectId = verified ? String(body.projectId ?? PERSONAL_SCOPE) : EPHEMERAL_SCOPE;
   if (!/^[^\u0000-\u001f\u007f]{1,160}$/.test(projectId)) throw coded("request-project-invalid", "A bounded project scope is required.");
   const requestId = String(body.requestId ?? "").trim();
@@ -37,7 +37,7 @@ function answerRequest(body, participant, totalDeadlineMs) {
       && (!Number.isSafeInteger(body.contextRevision) || body.contextRevision < 0)) {
     throw coded("request-revision-invalid", "A nonnegative conversation revision is required.");
   }
-  const workspace = ["workspace", "research", "review"].includes(body.lane) ? (body.workspace ?? null) : null;
+  const workspace = ["research", "review"].includes(body.lane) ? (body.workspace ?? null) : null;
   return {
     schemaVersion: "runa2-answer-request/v2",
     requestId,
@@ -98,12 +98,9 @@ export class SelectedCoreApplication {
     const participant = credentialPresent(credential)
       ? await this.authenticator.authenticate(credential, { requireOnline: false })
       : unverifiedParticipant();
-    const action = body?.lane === "workspace" ? "use-local-workspace-evidence" : "chat-ephemeral";
+    const action = "chat-ephemeral";
     const projectId = participant.verified ? String(body?.projectId ?? PERSONAL_SCOPE) : EPHEMERAL_SCOPE;
-    const personalExperienceLane = body?.experience
-      && ["general", "code", "research", "review"].includes(body?.lane);
-    const authorizationProjectId = personalExperienceLane ? PERSONAL_SCOPE : projectId;
-    const decision = await this.authorizer.authorize({ participant, action, resource: `project:${authorizationProjectId}` });
+    const decision = await this.authorizer.authorize({ participant, action, resource: `project:${PERSONAL_SCOPE}` });
     if (!decision?.allowed) throw coded(decision?.reason ?? "authorization-denied", "The selected read route was denied.");
     const request = answerRequest(body, participant, this.totalDeadlineMs);
     let preparedRequest = request;

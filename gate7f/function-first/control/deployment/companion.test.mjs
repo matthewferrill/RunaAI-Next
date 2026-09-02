@@ -53,6 +53,8 @@ test('companion retains ordinary identity/readiness and removes all Caddy public
 test('bounded wrappers preserve exact argument arrays and packaged node, not PATH node',()=>{
   const text=createClosedPhaseCompanion(inputs()).bytes.toString();
   assert.ok(text.includes("Run-BoundedChild (Join-Path $release 'runtime\\node.exe')"));
+  for(const token of ['--focused-review-grade','--focused-review-answer','--focused-review-checker',
+    'M1FocusedReviewGradeSha256','M1FocusedReviewAnswerSha256','M1FocusedReviewCheckerSha256'])assert.ok(text.includes(token),token);
   for(const token of ['120000','20000','60000','-TimeoutSec 20 -Headers','-TimeoutSec 20 -ContentType'])assert.ok(text.includes(token),token);
 });
 
@@ -64,6 +66,7 @@ $tokens=$null;$errors=$null
 $ast=[Management.Automation.Language.Parser]::ParseInput($s,[ref]$tokens,[ref]$errors)
 @{errors=@($errors|ForEach-Object{$_.Message});parameters=@($ast.ParamBlock.Parameters|ForEach-Object{$_.Name.VariablePath.UserPath})}|ConvertTo-Json -Compress`);
   assert.deepEqual(result.errors,[]);assert.ok(result.parameters.includes('HeldCaddyETag'));assert.ok(result.parameters.includes('TransitionId'));
+  for(const parameter of ['M1FocusedReviewGradeSha256','M1FocusedReviewAnswerSha256','M1FocusedReviewCheckerSha256'])assert.ok(result.parameters.includes(parameter));
   }finally{unlinkSync(path);rmdirSync(directory);}
 });
 

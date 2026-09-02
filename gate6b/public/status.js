@@ -3,6 +3,7 @@ import { CHAT_DEADLINE_MS, answerNeedsRetry, boundedHistory, customerMessageFor,
 import { initializeWorkspaceShell } from "./workspace-shell.mjs";
 import { executionOutput, javascriptSource } from "./code-execution.mjs";
 import { initializeFunctionPanel, appendAnswerEvidence } from "./function-panel.mjs";
+import { FUNCTION_CATALOG, functionNameForContext, functionTarget } from "./function-navigation.mjs";
 
 const byId = id => document.getElementById(id);
 const text = (id, value) => { byId(id).textContent = value; };
@@ -23,13 +24,40 @@ const states = Object.fromEntries(experiences.map(experience => [experience, {
 }]));
 const catalogs = Object.fromEntries(experiences.map(experience => [experience, { projects: [], chats: [] }]));
 let activeExperience = "chat";
+let activeFunction = "chat";
 let functionPanel = null;
+
+const menuControls = Object.freeze([
+  ["new-chat", "new-work-menu"],
+  ["composer-add", "composer-add-menu"],
+  ["function-picker", "function-menu"],
+]);
+
+function setMenu(buttonId, menuId, open) {
+  byId(buttonId).setAttribute("aria-expanded", String(open));
+  byId(menuId).hidden = !open;
+}
+
+function closeMenus(exceptMenuId = null) {
+  for (const [buttonId, menuId] of menuControls) {
+    if (menuId !== exceptMenuId) setMenu(buttonId, menuId, false);
+  }
+}
+
+function toggleMenu(buttonId, menuId) {
+  const open = byId(menuId).hidden;
+  closeMenus(open ? menuId : null);
+  setMenu(buttonId, menuId, open);
+}
+
+function expandRail(side) {
+  const button = byId(`${side}-rail-toggle`);
+  if (button.getAttribute("aria-expanded") !== "true") button.click();
+}
 
 const workspaceHeaders = Object.freeze({ "content-type": "application/json", "x-runa-workspace": "1" });
 const activeState = () => states[activeExperience];
-const greeting = () => activeExperience === "code"
-  ? "Hi. What would you like to design, understand, or draft in code?"
-  : "Hi. What would you like to talk about?";
+const greeting = () => FUNCTION_CATALOG[activeFunction].greeting;
 
 function resetTranscript() {
   transcript.replaceChildren();
@@ -138,21 +166,32 @@ function navigationButton(label, { selected = false, onClick }) {
 
 function updateExperiencePresentation() {
   const code = activeExperience === "code";
-  for (const experience of experiences) {
-    const selected = experience === activeExperience;
-    const tab = byId(`${experience}-tab`);
-    tab.classList.toggle("selected", selected);
-    tab.setAttribute("aria-selected", String(selected));
-    tab.tabIndex = selected ? 0 : -1;
-  }
   text("records-heading", code ? "Code chat records" : "Chat records");
   byId("record-list").setAttribute("aria-label", code ? "Code chat records" : "Chat records");
-  text("experience-eyebrow", code ? "Private code chat" : "Private chat");
-  text("chat-title", code ? "Code with Runa" : "Chat with Runa");
-  text("experience-description", code
-    ? "Discuss, explain, and draft code in a separate private workspace. JavaScript drafts are not run until you choose Run in sandbox. The sandbox cannot access your files, network, or systems."
-    : "Ask questions, brainstorm, draft writing, and work with text you paste here. Runa does not have live web access and cannot change files, settings, or systems from this chat.");
-  message.placeholder = code ? "Ask about or draft code…" : "Type your message…";
+  updateFunctionPresentation(functionPanel?.mode() ?? "conversation");
+}
+
+function updateFunctionPresentation(mode) {
+  activeFunction = functionNameForContext(activeExperience, mode);
+  const selected = FUNCTION_CATALOG[activeFunction];
+  text("experience-eyebrow", selected.eyebrow);
+  text("chat-title", selected.title);
+  text("experience-description", selected.description);
+  text("active-function-label", selected.label);
+  message.placeholder = selected.placeholder;
+  for (const button of document.querySelectorAll(".function-choice[data-function]")) {
+    const active = button.dataset.function === activeFunction;
+    button.classList.toggle("selected", active);
+    button.setAttribute("aria-current", active ? "true" : "false");
+  }
+  updateWorkbar();
+}
+
+function updateWorkbar() {
+  const state = activeState();
+  const selectedRecord = catalogs[activeExperience].chats.find(item => item.chatId === state.activeChatId);
+  text("work-title", selectedRecord?.title ?? `New ${FUNCTION_CATALOG[activeFunction].label.toLowerCase()}`);
+  text("work-project", state.projectName ?? "Personal");
 }
 
 function renderNavigation() {
@@ -175,6 +214,7 @@ function renderNavigation() {
   text("record-empty", state.projectId === "runa:personal"
     ? `No ${activeExperience === "code" ? "code " : ""}chat records yet`
     : "No chat records in this project yet");
+  updateWorkbar();
 }
 
 async function refreshNavigation(experience = activeExperience) {
@@ -217,6 +257,7 @@ async function selectExperience(experience) {
   send.disabled = true;
   try {
     activeExperience = experience;
+    functionPanel?.setMode("conversation");
     projectForm.hidden = true;
     projectName.value = "";
     updateExperiencePresentation();
@@ -278,7 +319,15 @@ async function loadChat(chatId) {
 }
 
 function setNavigationDisabled(disabled) {
-  for (const button of document.querySelectorAll("#left-rail-body button")) button.disabled = disabled;
+  for (const button of document.querySelectorAll("#left-rail-body button, .composer-tools button")) button.disabled = disabled;
+}
+
+async function selectFunction(name) {
+  const target = functionTarget(name);
+  if (target.experience !== activeExperience) await selectExperience(target.experience);
+  if (!functionPanel?.setMode(target.mode)) return;
+  updateFunctionPresentation(target.mode);
+  message.focus();
 }
 
 async function initialize() {
@@ -316,7 +365,7 @@ async function initialize() {
       await refreshNavigation();
       functionPanel = await initializeFunctionPanel({ request: workspaceJson,
         getContext: () => ({ experience: activeExperience, projectId: activeState().projectId }),
-        onStatus: value => text("chat-status", value) });
+        onStatus: value => text("chat-status", value), onModeChange: updateFunctionPresentation });
       message.focus();
     } else if (session.authenticated) {
       sessionLabel.hidden = false;
@@ -329,18 +378,32 @@ async function initialize() {
   }
 }
 
-for (const experience of experiences) {
-  const tab = byId(`${experience}-tab`);
-  tab.addEventListener("click", () => selectExperience(experience));
-  tab.addEventListener("keydown", event => {
-    if (!["ArrowLeft", "ArrowRight"].includes(event.key)) return;
-    event.preventDefault();
-    const next = experience === "chat" ? "code" : "chat";
-    byId(`${next}-tab`).focus();
-    selectExperience(next);
+for (const button of document.querySelectorAll(".function-choice[data-function]")) {
+  button.addEventListener("click", async () => {
+    closeMenus();
+    await selectFunction(button.dataset.function);
+    if (button.dataset.startNew === "true") await startNew();
   });
 }
-byId("new-chat").addEventListener("click", () => startNew());
+byId("new-chat").addEventListener("click", () => toggleMenu("new-chat", "new-work-menu"));
+byId("composer-add").addEventListener("click", () => toggleMenu("composer-add", "composer-add-menu"));
+byId("function-picker").addEventListener("click", () => toggleMenu("function-picker", "function-menu"));
+byId("composer-create-project").addEventListener("click", () => {
+  closeMenus();
+  expandRail("left");
+  projectForm.hidden = false;
+  projectName.focus();
+});
+byId("composer-use-sources").addEventListener("click", async () => {
+  closeMenus();
+  await selectFunction("research");
+  expandRail("right");
+});
+byId("composer-use-code").addEventListener("click", async () => {
+  closeMenus();
+  await selectFunction("code");
+  expandRail("right");
+});
 byId("new-project").addEventListener("click", () => {
   projectForm.hidden = false;
   projectName.focus();
@@ -348,6 +411,10 @@ byId("new-project").addEventListener("click", () => {
 byId("cancel-project").addEventListener("click", () => {
   projectForm.hidden = true;
   projectName.value = "";
+});
+
+document.addEventListener("click", event => {
+  if (!event.target.closest?.(".new-work-control, .composer-menu-control")) closeMenus();
 });
 
 projectForm.addEventListener("submit", async event => {

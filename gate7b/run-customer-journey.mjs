@@ -40,7 +40,7 @@ export async function runCustomerJourney() {
       : `Synthetic conversational reply after ${modelRequest.history.length} prior messages.`,
     citations: evidence.length ? [{ sourceId: evidence[0].sourceId, sectionId: evidence[0].sectionId }] : [],
   });
-  const providers = Object.fromEntries(["chat", "research", "code"].map(role => [role,
+  const providers = Object.fromEntries(["chat", "research", "code", "review"].map(role => [role,
     new ControllableProvider({ role, reply })]));
   const answerService = new Gate2ReadOnlyService({ records, index, providers, continuity,
     workspaceResolver: new MemoryWorkspaceResolver([source]), statusProvider: () => ({
@@ -84,9 +84,9 @@ export async function runCustomerJourney() {
         { role: "assistant", content: result.body.answer });
     }
     const research = await post(request("research", "research", "What does the project record say?"));
-    const guarded = await post(request("guarded", "guarded", "What does the project record say?"));
-    const workspace = await post(request("workspace", "workspace", "Summarize the supplied source.", [],
+    const review = await post(request("review", "review", "Review the supplied source.", [],
       { sources: [{ sourceId: source.sourceId, sectionId: source.sectionId }] }));
+    const code = await post({ ...request("code", "code", "Draft a harmless JavaScript function."), experience: "code" });
     providers.chat.failOnce("provider-transport-failed");
     const failed = await post(request("failed", "general", "Synthetic recoverable message"));
     const recovered = await post(request("recovered", "general", "Synthetic recovered message"));
@@ -101,9 +101,8 @@ export async function runCustomerJourney() {
       boundedHistoryReachedProvider: providers.chat.calls.some(call => call.request.history.length === 10),
       generalRole: general.every(item => item.body.status.modelRole === "chat"),
       researchRole: research.body.status.modelRole === "research" && research.body.citations.length === 1,
-      guardedRole: guarded.body.status.modelRole === "chat" && guarded.body.citations.length === 1,
-      workspaceRole: workspace.body.status.modelRole === "code" && workspace.body.workspace.resolvedSources === 1
-        && workspace.body.workspace.extraReads === 0,
+      reviewRole: review.body.status.modelRole === "review" && review.body.citations.length === 1,
+      codeRole: code.body.status.modelRole === "code" && code.body.execution.status === "not-executed",
       failedTurnNotRecorded: failed.body.completion.reason === "provider-transport-failed"
         && failed.body.continuity.turnRecorded === false,
       nextTurnRecovered: recovered.body.completion.reason === "complete"
@@ -112,7 +111,7 @@ export async function runCustomerJourney() {
     };
     return { schemaVersion: "runa2-gate7b-customer-journey/v1", passed: Object.values(checks).every(Boolean),
       checks, providerCalls: { chat: providers.chat.calls.length, research: providers.research.calls.length,
-        code: providers.code.calls.length }, privateValuesIncluded: false };
+        review: providers.review.calls.length, code: providers.code.calls.length }, privateValuesIncluded: false };
   } finally {
     await new Promise(resolveClose => server.close(resolveClose));
   }

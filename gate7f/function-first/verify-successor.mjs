@@ -6,7 +6,8 @@ import { assertQualifiedM1Successor, M1_EVIDENCE_FILE_LIMITS, parseM1EvidenceByt
 
 const fail = code => Object.assign(new Error(code), { code });
 export function parseVerificationArguments(args) {
-  const keys = ["--prior", "--successor", "--plan", "--grades", "--runtime-seal", "--expected-source-commit", "--expected-plan-sha256"];
+  const keys = ["--prior", "--successor", "--plan", "--grades", "--runtime-seal", "--focused-review-grade",
+    "--focused-review-answer", "--focused-review-checker", "--expected-source-commit", "--expected-plan-sha256"];
   const parsed = {};
   for (let index = 0; index < args.length; index += 2) {
     const key = args[index], value = args[index + 1];
@@ -36,10 +37,14 @@ async function readBounded(filename, limit) {
 /** Reads each exact bounded file once. Does not start a service, mutate a config,
  * connect to a model/database, or display any configuration/private values. */
 export async function verifySuccessorFiles(args) {
-  const [priorBytes, successorBytes, planBytes, gradesBytes, runtimeSealBytes] = await Promise.all([
+  const [priorBytes, successorBytes, planBytes, gradesBytes, runtimeSealBytes, focusedGradeBytes,
+    focusedAnswerBytes, focusedCheckerBytes] = await Promise.all([
     readBounded(args.prior, M1_EVIDENCE_FILE_LIMITS.configuration), readBounded(args.successor, M1_EVIDENCE_FILE_LIMITS.configuration),
     readBounded(args.plan, M1_EVIDENCE_FILE_LIMITS.plan), readBounded(args.grades, M1_EVIDENCE_FILE_LIMITS.grades),
     readBounded(args["runtime-seal"], M1_EVIDENCE_FILE_LIMITS.runtimeSeal),
+    readBounded(args["focused-review-grade"], M1_EVIDENCE_FILE_LIMITS.focusedReview),
+    readBounded(args["focused-review-answer"], M1_EVIDENCE_FILE_LIMITS.focusedReview),
+    readBounded(args["focused-review-checker"], M1_EVIDENCE_FILE_LIMITS.focusedReview),
   ]);
   const plan = parseM1EvidenceBytes(planBytes, { limit: M1_EVIDENCE_FILE_LIMITS.plan,
     expectedSha256: args["expected-plan-sha256"], errorCode: "m1-deploy-plan-byte-mismatch" });
@@ -48,7 +53,9 @@ export async function verifySuccessorFiles(args) {
   const config = bytes => parseM1EvidenceBytes(bytes, { limit: M1_EVIDENCE_FILE_LIMITS.configuration,
     expectedSha256: sha256(bytes), errorCode: "m1-deploy-config-read-failed" });
   return assertQualifiedM1Successor({ prior: config(priorBytes), successor: config(successorBytes), plan,
-    gradesBytes, runtimeSealBytes, expectedSourceCommit: args["expected-source-commit"] });
+    gradesBytes, runtimeSealBytes, focusedReviewEvidence: { gradeBytes: focusedGradeBytes,
+      answerBytes: focusedAnswerBytes, checkerBytes: focusedCheckerBytes },
+    expectedSourceCommit: args["expected-source-commit"] });
 }
 
 export async function runVerificationCli(args, write = text => process.stdout.write(text)) {

@@ -131,12 +131,24 @@ test("unverified general chat is ephemeral and cannot claim a project", async ()
   assert.equal(persisted, false);
 });
 
-test("unverified workspace is denied before an answer service read", async () => {
+test("legacy workspace answer lane is rejected before an answer service read", async () => {
   const { application, calls } = harness();
   await assert.rejects(application.answer({ body: { requestId: "guest-workspace", lane: "workspace",
     threadId: "guest-thread", message: "Read", history: [], workspace: { sources: [{ sourceId: "a", sectionId: "b" }] } } }),
-  error => error.code === "workspace-authentication-required");
+  error => error.code === "request-lane-invalid");
   assert.equal(calls.answers.length, 0);
+});
+
+test("answer route rejects every cross-experience function mismatch", async () => {
+  for (const [experience, lane] of [["code", "research"], ["code", "review"], ["code", "general"],
+    ["chat", "code"], ["chat", "workspace"], ["chat", "guarded"]]) {
+    const { application, calls } = harness();
+    await assert.rejects(application.answer({ credential: "opaque-token", body: {
+      requestId: `mismatch-${experience}-${lane}`, experience, lane, threadId: "thread", message: "No route", history: [],
+    } }), error => error.code === (["workspace", "guarded"].includes(lane)
+      ? "request-lane-invalid" : "request-experience-invalid"));
+    assert.equal(calls.answers.length, 0);
+  }
 });
 
 test("shadow mode denies before authentication or application work", async () => {

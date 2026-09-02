@@ -27,10 +27,10 @@ Status: implementation active; no production route has changed.
    non-null `accept`/`revise` checker to Review so prior Research evidence is not silently invalidated.
 3. Add a fail-closed, byte-bound deployment admission that composes the immutable R13 four-role result
    with the focused Review result. A prose winner label alone cannot authorize a release.
-4. Present Chat, Code and Research as the three primary end-user workspaces. Wire Agent as a governed
-   task state inside Code and Review as contextual work against exact sources, artifacts or diffs. All
-   five qualified model functions remain reachable, but Agent and Review are not permanent top-level
-   selectors.
+4. Present one primary end-user work canvas. Chat, Code and Research are selected through New, recent work
+   or the composer's compact contextual control rather than a permanent top tab row. Wire Agent as a
+   governed task state inside Code and Review as contextual work against exact sources, artifacts or diffs.
+   All five qualified model functions remain reachable without turning them into permanent selectors.
 5. Build and verify the exact candidate release, deploy it first as a reversible shadow release on
    Control, and exercise Gemma on Home through the real application path.
 6. Run one bounded smoke/acceptance journey for Chat, Research, Code draft/sandbox, Review and Agent

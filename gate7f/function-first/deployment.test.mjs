@@ -1,10 +1,18 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import { readFile } from "node:fs/promises";
 import predecessor from "../../gate7a/fixtures/control-predecessor.json" with { type: "json" };
 import { canonicalJson, sha256 } from "../../gate4/canonical.mjs";
 import { CAPABILITY_SET_VERSION, CAPABILITY_SET_DIGEST } from "./tasks/contracts.mjs";
 import { assertM1SuccessorProjection, requireQualifiedRoleSelection, assertQualifiedM1Successor, M1_CANDIDATE_MODELS } from "./deployment.mjs";
 import { qualifiedDeploymentFixture } from "./deployment.fixtures.mjs";
+
+const focusedRoot = new URL("./readiness/evidence/20260902-focused-gemma-review/", import.meta.url);
+const focusedReviewEvidence = async () => ({
+  gradeBytes: Buffer.from(await readFile(new URL("focused-review-grade.json", focusedRoot))),
+  answerBytes: Buffer.from(await readFile(new URL("focused-review-20260902-f17e80070418.json", focusedRoot))),
+  checkerBytes: Buffer.from(await readFile(new URL("focused-review-checker-20260902-cb6e5785b5af.json", focusedRoot))),
+});
 
 const hash = value => sha256(canonicalJson(value));
 function fixture() {
@@ -113,6 +121,20 @@ test("matching settings do not rescue an unqualified selected role or incomplete
   assert.throws(() => assertQualifiedM1Successor(value.inputs()), /m1-deploy-selected-role-unqualified/);
   value.grades.pop();
   assert.throws(() => assertQualifiedM1Successor(value.inputs()), /m1-deploy-grade-ledger-incomplete/);
+});
+
+test("exact focused actual-system Review evidence composes with the qualified four-role campaign", async () => {
+  const value = qualifiedDeploymentFixture();
+  const losses = value.grades.filter(grade => grade.candidateId === "gemma4-26b-a4b" && grade.role === "review").slice(0, 17);
+  for (const grade of losses) {
+    grade.status = "fail"; grade.passed = false; grade.checks[0].status = "fail"; grade.checks[0].passed = false;
+  }
+  assert.throws(() => assertQualifiedM1Successor(value.inputs()), /m1-deploy-selected-role-unqualified/u);
+  const result = assertQualifiedM1Successor({ ...value.inputs(), focusedReviewEvidence: await focusedReviewEvidence() });
+  assert.equal(result.passed, true);
+  assert.equal(result.selectedRolesVerified, 5);
+  assert.equal(result.focusedReviewEvidenceSha256,
+    "e849a9aa1208c4435f6192e8de2e75fd6325f029d3c8dc974a6eeb3da33f8bdf");
 });
 
 test("bare success labels, missing exact checks and erased critical findings cannot qualify", () => {

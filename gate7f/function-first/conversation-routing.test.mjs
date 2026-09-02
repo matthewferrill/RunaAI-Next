@@ -154,24 +154,29 @@ test("a selected missing or injected source does not silently broaden to another
   }
 });
 
-test("the application permits deliberate review in either retained Chat or Code experience", async () => {
-  for (const experience of ["chat", "code"]) {
-    const context = harness({ experience });
-    const result = await context.application.answer({ credential: "synthetic", body: {
-      requestId: `review-${experience}`, threadId: `review-thread-${experience}`, projectId,
-      experience, lane: "review", message: "Review this small supplied statement: two plus two is five.",
-    } });
-    assert.equal(result.model.role, "review");
-    assert.equal(result.completion.reason, "complete");
-    assert.equal(result.execution.status, "not-executed");
-    assert.equal(result.continuity.turnRecorded, true);
-    const followup = await context.application.answer({ credential: "synthetic", body: {
-      requestId: `review-followup-${experience}`, threadId: `review-thread-${experience}`, projectId,
-      experience, lane: "review", message: "Explain the correction.",
-    } });
-    assert.equal(followup.completion.reason, "complete");
-    assert.equal(context.providers.review.calls[1].request.history.length, 2);
-  }
+test("the application keeps deliberate Review contextual to Chat and rejects a cross-experience Code route", async () => {
+  const context = harness({ experience: "chat" });
+  const result = await context.application.answer({ credential: "synthetic", body: {
+    requestId: "review-chat", threadId: "review-thread-chat", projectId,
+    experience: "chat", lane: "review", message: "Review this small supplied statement: two plus two is five.",
+  } });
+  assert.equal(result.model.role, "review");
+  assert.equal(result.completion.reason, "complete");
+  assert.equal(result.execution.status, "not-executed");
+  assert.equal(result.continuity.turnRecorded, true);
+  const followup = await context.application.answer({ credential: "synthetic", body: {
+    requestId: "review-followup-chat", threadId: "review-thread-chat", projectId,
+    experience: "chat", lane: "review", message: "Explain the correction.",
+  } });
+  assert.equal(followup.completion.reason, "complete");
+  assert.equal(context.providers.review.calls[1].request.history.length, 2);
+
+  const codeContext = harness({ experience: "code" });
+  await assert.rejects(codeContext.application.answer({ credential: "synthetic", body: {
+    requestId: "review-code", threadId: "review-thread-code", projectId,
+    experience: "code", lane: "review", message: "Review this statement.",
+  } }), error => error.code === "request-experience-invalid");
+  assert.equal(codeContext.providers.review.calls.length, 0);
 });
 
 test("disabled review is unavailable, not a fallback to another role or a retained fake answer", async () => {

@@ -6,7 +6,7 @@ import { CHAT_DEADLINE_MS, answerNeedsRetry, boundedHistory, customerMessageFor,
   readJsonResponse } from "../gate6b/public/chat-client.mjs";
 import { runCustomerJourney } from "./run-customer-journey.mjs";
 
-test("the complete synthetic customer journey crosses identity, all answer lanes, recovery, continuity, and logout", async () => {
+test("the complete synthetic customer journey crosses identity, current answer lanes, recovery, continuity, and logout", async () => {
   const result = await runCustomerJourney();
   assert.equal(result.passed, true);
   assert.ok(Object.values(result.checks).every(Boolean));
@@ -58,12 +58,13 @@ test("retryable model results are not mistaken for completed conversational turn
 });
 
 test("the customer surface is generic, truthful, retryable, and does not expose unfinished code tooling", async () => {
-  const [html, script] = await Promise.all([
+  const [html, script, functions] = await Promise.all([
     readFile(new URL("../gate6b/public/index.html", import.meta.url), "utf8"),
     readFile(new URL("../gate6b/public/status.js", import.meta.url), "utf8"),
+    readFile(new URL("../gate6b/public/function-navigation.mjs", import.meta.url), "utf8"),
   ]);
   assert.match(html, /Ask questions, brainstorm, draft writing/);
-  assert.match(script, /Discuss, explain, and draft code/);
+  assert.match(functions, /Discuss, explain, and draft code/);
   assert.match(html, /does not have live web access/);
   assert.match(html, /cannot change files, settings, or systems/);
   assert.doesNotMatch(html, /Hi Matthew/);

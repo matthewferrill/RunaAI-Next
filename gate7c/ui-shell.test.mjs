@@ -54,8 +54,8 @@ test("the authenticated page preserves the left rail, central chat, and empty ri
 test("the presentation keeps a fixed workspace, sibling desktop columns, transcript scroll, and visible focus", async () => {
   const styles = await readFile(publicFile("styles.css"), "utf8");
   assert.match(styles, /\.workspace-frame\s*\{[^}]*grid-template-columns:\s*var\(--left-rail-width\) minmax\(0, 1fr\) var\(--right-rail-width\)/s);
-  assert.match(styles, /--left-rail-width:\s*4rem/);
-  assert.match(styles, /--right-rail-width:\s*4rem/);
+  assert.match(styles, /--left-rail-width:\s*3\.75rem/);
+  assert.match(styles, /--right-rail-width:\s*0rem/);
   assert.match(styles, /\.workspace-frame\.left-expanded\s*\{[^}]*--left-rail-width:/s);
   assert.match(styles, /\.workspace-frame\.right-expanded\s*\{[^}]*--right-rail-width:/s);
   assert.match(styles, /\.workspace-frame\s*\{[^}]*height:\s*calc\(100dvh - 4\.5rem\)/s);
@@ -72,7 +72,7 @@ test("the presentation keeps a fixed workspace, sibling desktop columns, transcr
     "status and placeholder text must retain normal-text contrast");
   assert.ok(contrastRatio(cssHexToken(styles, "workspace-field-edge"), "#ffffff") >= 3,
     "the textarea boundary must retain non-text contrast");
-  assert.match(styles, /\.composer textarea\s*\{[^}]*border:\s*1px solid var\(--workspace-field-edge\)/s);
+  assert.match(styles, /\.composer\s*\{[^}]*border:\s*1px solid var\(--workspace-edge-low\)/s);
 });
 
 test("the ordinary-session controller initializes the shell only when active chat is shown", async () => {

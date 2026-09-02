@@ -16,7 +16,7 @@ export const SOURCE_PINS=Object.freeze({
   'home-runtime/tls-proxy.mjs':'1c063e289ad2f1fc5be25c32fc7b39796d0a415943a868f0de5ae977ed0ef7f9',
   'home-runtime/proxy.mjs':'f4c6f6f9fbf092633aaf1b2338ce53ab31e23a9f668545b12e161c3316703a18',
   'home-runtime/contracts.mjs':'5e7fb7916bea7d31bf2c9de940d648f7b362db353a762e33823033b255a073e0',
-  'evidence-output.mjs':'847d4cb9625679c3f3292845f10e7f5e748ea04a652d393c2cbd94712bacf745',
+  'evidence-output.mjs':'d4c09bcbf9289abb78b7d3228a3de6a49bf1a26f492ce73a569e7d0376a0bb19',
   'home-runtime/controller.mjs':'6e05d363c882fd1909d31893c0ab3cfee1eef4bdf148e2c6a177cb07d9957daa',
   'readiness/manifest.mjs':'16f780c577b670a640d84a1c28ebbe11efef53235beb712825db4fd7ec1ef88d',
   'readiness/lease-contract.mjs':'0fe24a0ee7bb7258bb76264bf57a69f602b6fdd9658d9012739cc45c24ed8269',

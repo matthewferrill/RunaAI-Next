@@ -5,12 +5,17 @@ Milestone: M1
 Slice ID: M1-S2
 Status: Gemma-primary application implementation is active; application release and product remain unqualified.
 
+Workspace baseline checkpoint: see
+`gate7f/function-first/M1-S2-WORKSPACE-BASELINE-IMPLEMENTATION-RESULTS-2026-09-02.md` for the accepted
+single-canvas implementation, deterministic verification, and the complete 10-failure RCA from its first
+tracked test run. No failure was attributed to a model and the model campaign remained paused.
+
 Implementation checkpoint, 2026-09-02: model comparison is tabled. The active slice configures Gemma as
 the single primary for Chat, Research, Code, Agent and Review, preserves the previously qualified Research
 checker semantics, isolates the simplified `accept`/`revise` checker to Review, and creates a
-machine-enforced composite qualification record. The accepted UX hierarchy exposes Chat, Code and Research
-as the three primary workspaces; Agent is a governed task state inside Code and Review is contextual to
-selected sources, artifacts or diffs. Deterministic implementation tests cannot qualify the model or
+machine-enforced composite qualification record. The accepted UX hierarchy uses one primary work canvas;
+Chat, Code and Research are contextual task types rather than a permanent top tab row. Agent is a governed
+task state inside Code and Review is contextual to selected sources, artifacts or diffs. Deterministic implementation tests cannot qualify the model or
 actual application. Any actual method failure stops the gate for RCA and correction before retry.
 
 The application is now under a product-foundation rebaseline before final customer acceptance: complete

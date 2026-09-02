@@ -122,9 +122,9 @@ The five-function model qualification completed before enough of the product fou
 those functions useful to an ordinary user. The steward therefore approved a bounded pull-forward before
 final customer acceptance: the shared shell and conversation lifecycle; real Settings; honest
 Omen/Control/Home status and recovery; authorized local folders and local Git read-only first; usable
-Research, Code and artifact work surfaces; and then governed local changes. Chat, Code and Research are
-the three primary workspaces. Agent is contextual task state inside Code and Review is contextual to exact
-sources, artifacts or diffs.
+Research, Code and artifact work surfaces; and then governed local changes. The application uses one
+primary work canvas; Chat, Code and Research are contextual task types rather than permanent top tabs.
+Agent is contextual task state inside Code and Review is contextual to exact sources, artifacts or diffs.
 
 This does not relabel all of C03, C05, C08, C10 or any other later family as M1-complete. It advances only
 the minimum vertical slices required for a credible first product and leaves live web, GitHub publication,

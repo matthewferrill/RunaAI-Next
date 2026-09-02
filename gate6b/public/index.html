@@ -44,19 +44,16 @@
           <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m9 18 6-6-6-6" /></svg>
         </button>
         <div id="left-rail-body" class="workspace-rail-body navigation-rail" aria-hidden="true">
-          <div class="experience-tabs" role="tablist" aria-label="Work area">
-            <button id="chat-tab" class="experience-tab selected" type="button" role="tab" aria-selected="true" aria-controls="conversation-surface" data-experience="chat">
-              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5.5h14v10H9l-4 3v-13Z" /></svg>
-              <span>Chat</span>
-            </button>
-            <button id="code-tab" class="experience-tab" type="button" role="tab" aria-selected="false" aria-controls="conversation-surface" tabindex="-1" data-experience="code">
-              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m8 8-4 4 4 4M16 8l4 4-4 4m-2.5-10-3 12" /></svg>
-              <span>Code</span>
-            </button>
-          </div>
-          <button id="new-chat" class="navigation-action navigation-action-primary" type="button">
+          <div class="new-work-control">
+            <button id="new-chat" class="navigation-action navigation-action-primary" type="button" aria-expanded="false" aria-controls="new-work-menu">
             <span aria-hidden="true">+</span><span>New</span>
-          </button>
+            </button>
+            <div id="new-work-menu" class="workspace-menu" hidden>
+              <button class="function-choice" type="button" data-function="chat" data-start-new="true">Conversation</button>
+              <button class="function-choice" type="button" data-function="research" data-start-new="true">Research from supplied sources</button>
+              <button class="function-choice" type="button" data-function="code" data-start-new="true">Code draft or sandbox</button>
+            </div>
+          </div>
           <section class="navigation-section" aria-labelledby="projects-heading">
             <div class="navigation-section-heading">
               <h2 id="projects-heading">Projects</h2>
@@ -79,7 +76,16 @@
         </div>
       </aside>
       <section class="chat-panel" aria-labelledby="chat-title">
-        <div id="conversation-surface" class="conversation-surface" role="tabpanel" aria-label="Runa conversation">
+        <div class="workspace-workbar">
+          <div class="workbar-context">
+            <span id="work-title">New conversation</span>
+            <span id="work-project" class="workbar-project">Personal</span>
+          </div>
+          <button id="right-rail-toggle" class="rail-toggle" type="button" aria-label="Expand right panel" aria-controls="right-rail-body" aria-expanded="false">
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m9 18 6-6-6-6" /></svg>
+          </button>
+        </div>
+        <div id="conversation-surface" class="conversation-surface" aria-label="Runa conversation">
           <div class="chat-heading">
             <p id="experience-eyebrow" class="eyebrow">Private chat</p>
             <h1 id="chat-title">Chat with Runa</h1>
@@ -90,18 +96,33 @@
           </div>
         </div>
         <form id="chat-form" class="composer">
-          <label for="message">Message Runa</label>
+          <label class="sr-only" for="message">Message Runa</label>
           <textarea id="message" name="message" rows="3" maxlength="4000" placeholder="Type your message…" required></textarea>
           <div class="composer-footer">
-            <span id="chat-status" role="status">Ready</span>
+            <div class="composer-tools">
+              <div class="composer-menu-control">
+                <button id="composer-add" class="composer-tool composer-add" type="button" aria-label="Add available context" aria-expanded="false" aria-controls="composer-add-menu">+</button>
+                <div id="composer-add-menu" class="workspace-menu composer-menu" hidden>
+                  <button id="composer-create-project" type="button">Create a Runa project</button>
+                  <button id="composer-use-sources" type="button">Use supplied source sections</button>
+                  <button id="composer-use-code" type="button">Use disposable Code project</button>
+                </div>
+              </div>
+              <div class="composer-menu-control">
+                <button id="function-picker" class="composer-tool" type="button" aria-expanded="false" aria-controls="function-menu"><span id="active-function-label">Chat</span><span aria-hidden="true">⌄</span></button>
+                <div id="function-menu" class="workspace-menu composer-menu" hidden>
+                  <button class="function-choice selected" type="button" data-function="chat">Chat</button>
+                  <button class="function-choice" type="button" data-function="research">Research</button>
+                  <button class="function-choice" type="button" data-function="code">Code</button>
+                </div>
+              </div>
+              <span id="chat-status" role="status">Ready</span>
+            </div>
             <button id="send" class="primary-button" type="submit">Send</button>
           </div>
         </form>
       </section>
       <aside id="right-rail" class="workspace-rail workspace-rail-right" aria-label="Right workspace panel">
-        <button id="right-rail-toggle" class="rail-toggle" type="button" aria-label="Expand right panel" aria-controls="right-rail-body" aria-expanded="false">
-          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m9 18 6-6-6-6" /></svg>
-        </button>
         <div id="right-rail-body" class="workspace-rail-body" aria-hidden="true"></div>
       </aside>
     </section>

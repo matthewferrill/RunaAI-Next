@@ -154,12 +154,10 @@ test("navigation, project creation, records, and Code answers use personal relat
   assert.equal(calls.answer[0].lane, "code");
   assert.equal(calls.answer[0].experience, "code");
   assert.ok(calls.authorize.every(call => call.resource === "project:runa:personal"));
-  await app.answer({ credential: "opaque", body: { requestId: "workspace-no-personal-bypass",
+  await assert.rejects(app.answer({ credential: "opaque", body: { requestId: "legacy-workspace-denied",
     lane: "workspace", experience: "chat", threadId: "workspace-thread", projectId: "workspace-project",
-    message: "Read the selected section", history: [],
-    workspace: { sources: [{ sourceId: "source", sectionId: "section" }] } } });
-  assert.deepEqual(calls.authorize.at(-1), { participant, action: "use-local-workspace-evidence",
-    resource: "project:workspace-project" });
+    message: "Read the selected section", history: [], workspace: { sources: [{ sourceId: "source", sectionId: "section" }] } } }),
+  error => error.code === "request-lane-invalid");
   await assert.rejects(app.answer({ credential: "opaque", body: { requestId: "mismatch",
     lane: "general", experience: "code", threadId: "thread", message: "Hi", history: [] } }),
   error => error.code === "request-experience-invalid");
@@ -201,7 +199,7 @@ test("private navigation HTTP reads remain POST-only, exact-origin, marked, and 
   assert.equal(calls.length, 1);
 });
 
-test("the authenticated shell contains identity, separate Chat and Code controls, and functional record actions", async () => {
+test("the authenticated shell uses one work canvas with contextual, capability-backed function choices", async () => {
   const [html, script, styles, server, deployer] = await Promise.all([
     readFile(publicFile("index.html"), "utf8"), readFile(publicFile("status.js"), "utf8"),
     readFile(publicFile("styles.css"), "utf8"),
@@ -210,13 +208,21 @@ test("the authenticated shell contains identity, separate Chat and Code controls
   ]);
   assert.match(html, /id="session-avatar"/);
   assert.match(html, /id="session-name"/);
-  assert.match(html, /id="chat-tab"[\s\S]*?>[\s\S]*?Chat/);
-  assert.match(html, /id="code-tab"[\s\S]*?>[\s\S]*?Code/);
+  assert.match(html, /id="new-work-menu"[\s\S]*?data-function="chat"[\s\S]*?data-function="research"[\s\S]*?data-function="code"/);
+  assert.match(html, /id="function-picker"/);
+  assert.match(html, /id="composer-add-menu"[\s\S]*?id="composer-create-project"[\s\S]*?id="composer-use-sources"[\s\S]*?id="composer-use-code"/);
+  assert.match(html, /id="work-title"/);
+  assert.match(html, /id="work-project"/);
+  assert.doesNotMatch(html, /class="experience-tabs"|id="chat-tab"|id="research-tab"|id="code-tab"/);
+  assert.doesNotMatch(html, /data-function="review"|data-function="agent"/);
   assert.match(html, /id="new-chat"/);
   assert.match(html, /id="new-project"/);
   assert.match(html, /id="project-list"/);
   assert.match(html, /id="record-list"/);
   assert.match(script, /const states = Object\.fromEntries\(experiences\.map/);
+  assert.match(script, /\.function-choice\[data-function\]/);
+  assert.match(script, /composer-use-sources[\s\S]*?selectFunction\("research"\)[\s\S]*?expandRail\("right"\)/);
+  assert.match(script, /composer-use-code[\s\S]*?selectFunction\("code"\)[\s\S]*?expandRail\("right"\)/);
   assert.match(script, /lane: submittedExperience === "code" \? "code" : "general"/);
   assert.match(script, /\/api\/selected\/navigation\/query/);
   assert.match(script, /\/api\/selected\/chat\/read/);
@@ -224,7 +230,9 @@ test("the authenticated shell contains identity, separate Chat and Code controls
   assert.match(script, /async function startNew[\s\S]*?setNavigationDisabled\(true\);[\s\S]*?await functionPanel\?\.refresh\(\);[\s\S]*?finally[\s\S]*?setNavigationDisabled\(false\);/);
   assert.match(script, /async function selectExperience[\s\S]*?await refreshNavigation\(experience\);[\s\S]*?setNavigationDisabled\(true\);[\s\S]*?await functionPanel\?\.refresh\(\);[\s\S]*?finally[\s\S]*?setNavigationDisabled\(false\);/);
   assert.doesNotMatch(script, /innerHTML|localStorage|sessionStorage/);
-  assert.match(styles, /\.experience-tabs/);
+  assert.doesNotMatch(styles, /\.experience-tabs/);
+  assert.match(styles, /\.workspace-workbar/);
+  assert.match(styles, /\.composer-menu/);
   assert.match(styles, /\.session-avatar/);
   assert.match(server, /request\.method === "POST" && url\.pathname === "\/api\/selected\/navigation\/query"/);
   assert.match(server, /request\.headers\["x-runa-workspace"\] !== "1"/);

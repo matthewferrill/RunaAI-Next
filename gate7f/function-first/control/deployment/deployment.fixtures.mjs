@@ -31,6 +31,7 @@ export function syntheticAssembly(){
     services:Object.entries(config.services).map(([name,value])=>({name,...value}))},
     {schemaVersion:config.schemaVersion==='runa2-gate6b-release-config/v1'?'runa2-gate6-release/v1':'runa2-gate6-release/v2'});
   const read=value=>readFileSync(new URL(value,import.meta.url));
+  const focused=value=>readFileSync(new URL('../../readiness/evidence/20260902-focused-gemma-review/'+value,import.meta.url));
   const companion=createClosedPhaseCompanion({sourceBytes:read('./fixtures/frozen-9556-deployer.ps1'),
     childBytes:read('./Bounded-DeploymentChild.cs'),functionsBytes:read('./Closed-Phase-Functions.ps1'),aclBytes:read('../../../../gate7e/control/TargetOnlyAcl.cs')});
   const homeProfile={schemaVersion:'runaai-qualified-home-profile/v1',appSourceCommit:APPLICATION.sourceCommit,
@@ -40,6 +41,9 @@ export function syntheticAssembly(){
     files:{'prior-config.json':bytes(prior),'prior-manifest.json':bytes(manifest(prior,priorId,'1'.repeat(40))),
       'candidate.json':bytes(successor),'gate7a-release.json':bytes(manifest(successor,releaseId,APPLICATION.sourceCommit)),
       'artifact-files.json':bytes(artifact),'Run-Application.ps1':Buffer.from(createControlLaunchers(releaseId).application),
-      'm1-successor-plan.json':bytes(plan),'enrollment.json':bytes(enrollment)}};
+      'm1-successor-plan.json':bytes(plan),'enrollment.json':bytes(enrollment),
+      'focused-review-grade.json':focused('focused-review-grade.json'),
+      'focused-review-answer.json':focused('focused-review-20260902-f17e80070418.json'),
+      'focused-review-checker.json':focused('focused-review-checker-20260902-cb6e5785b5af.json')}};
   return {...input,...buildAssemblyDescriptor(input),input};
 }

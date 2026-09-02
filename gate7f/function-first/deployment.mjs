@@ -5,6 +5,7 @@ import { m1FunctionConfigSchema, assertM1Roles } from "./config.mjs";
 import { summarizeCampaign, enumerateCaseChecks, ASSERTION_SCHEMA_VERSION } from "./acceptance/assertions.mjs";
 import { validateRuntimeSeal } from "./acceptance/runner-contract.mjs";
 import { ACCEPTANCE_POLICY, CASE_BUNDLE_SHA256, MODEL_CASES, CONTROL_CASES } from "./acceptance/cases.mjs";
+import { validateFocusedGemmaReviewEvidence } from "./gemma-primary-qualification.mjs";
 
 const hash = value => sha256(canonicalJson(value));
 export const M1_CANDIDATE_MODELS = Object.freeze({
@@ -14,7 +15,7 @@ export const M1_CANDIDATE_MODELS = Object.freeze({
 });
 
 /** Recompute the denominator from retained independent grades, never a supplied winner label. */
-export function requireQualifiedRoleSelection(grades, provider) {
+export function requireQualifiedRoleSelection(grades, provider, supplementalRoles = {}) {
   assertM1Roles(provider);
   const campaign = summarizeCampaign(grades);
   assert.equal(campaign.controls.allPassed, true, "m1-deploy-controls-unqualified");
@@ -26,7 +27,9 @@ export function requireQualifiedRoleSelection(grades, provider) {
   }
   for (const [role, modelId] of Object.entries(provider.models)) {
     const candidate = campaign.candidates.find(item => M1_CANDIDATE_MODELS[item.candidateId] === modelId);
-    assert.equal(candidate?.roles.find(item => item.role === role)?.qualified, true, "m1-deploy-selected-role-unqualified");
+    const supplemental = supplementalRoles[role];
+    assert.equal(candidate?.roles.find(item => item.role === role)?.qualified === true
+      || supplemental?.passed === true && supplemental.modelId === modelId, true, "m1-deploy-selected-role-unqualified");
   }
   return campaign;
 }
@@ -69,7 +72,7 @@ const fail = code => Object.assign(new Error(code), { code });
 const requireThat = (condition, code) => { if (!condition) throw fail(code); };
 const SHA = /^[a-f0-9]{64}$/u;
 export const M1_EVIDENCE_FILE_LIMITS = Object.freeze({ grades: 64 * 1024 * 1024, runtimeSeal: 1024 * 1024,
-  plan: 1024 * 1024, configuration: 1024 * 1024 });
+  focusedReview: 4 * 1024 * 1024, plan: 1024 * 1024, configuration: 1024 * 1024 });
 
 export function parseM1EvidenceBytes(input, { limit, expectedSha256, errorCode }) {
   requireThat(Buffer.isBuffer(input) || input instanceof Uint8Array, "m1-deploy-evidence-bytes-required");
@@ -117,7 +120,8 @@ function assertIndependentGradeLedger(grades, runtimeSealSha256) {
  * tested settings must describe this same successor. This performs no I/O or writes.
  * The caller authenticates the plan digest and verifies the release artifact.
  * Harness grades are trusted evaluator artifacts, not model-supplied summaries. */
-export function assertQualifiedM1Successor({ prior, successor, plan, gradesBytes, runtimeSealBytes, expectedSourceCommit }) {
+export function assertQualifiedM1Successor({ prior, successor, plan, gradesBytes, runtimeSealBytes,
+  focusedReviewEvidence = null, expectedSourceCommit }) {
   requireThat(/^[a-f0-9]{40}$/u.test(expectedSourceCommit ?? ""), "m1-deploy-source-commit-required");
   let projection;
   try { projection = assertM1SuccessorProjection(prior, successor, plan); }
@@ -135,8 +139,11 @@ export function assertQualifiedM1Successor({ prior, successor, plan, gradesBytes
   const frozenSuites = Object.fromEntries(MODEL_CASES.flatMap(item => (item.setup.suites ?? []).map(suite => [suite.suiteId, hash(suite)])));
   requireThat(Object.entries(frozenSuites).every(([id, digest]) => seal.suites[id] === digest), "m1-deploy-suite-contract-drift");
   assertIndependentGradeLedger(grades, plan.runtimeSealSha256);
+  const supplementalRoles = focusedReviewEvidence
+    ? { review: validateFocusedGemmaReviewEvidence(focusedReviewEvidence) }
+    : {};
   let campaign;
-  try { campaign = requireQualifiedRoleSelection(grades, successor.provider); }
+  try { campaign = requireQualifiedRoleSelection(grades, successor.provider, supplementalRoles); }
   catch (error) {
     throw fail(/^m1-deploy-[a-z0-9-]+$/u.test(error?.message ?? "") ? error.message : "m1-deploy-selected-role-unqualified");
   }
@@ -147,7 +154,8 @@ export function assertQualifiedM1Successor({ prior, successor, plan, gradesBytes
     const candidates = seal.candidates.filter(value => value.modelId === modelId && M1_CANDIDATE_MODELS[value.candidateId] === modelId);
     requireThat(candidates.length === 1, "m1-deploy-selected-model-not-sealed");
     const candidate = candidates[0];
-    requireThat(campaign.candidates.find(value => value.candidateId === candidate.candidateId)?.roles.find(value => value.role === role)?.qualified === true,
+    requireThat(campaign.candidates.find(value => value.candidateId === candidate.candidateId)?.roles.find(value => value.role === role)?.qualified === true
+      || supplementalRoles[role]?.passed === true && supplementalRoles[role].modelId === modelId,
       "m1-deploy-selected-role-unqualified");
     // In particular, null means omit the wire field; it is not the string "none".
     requireThat(canonicalJson(successor.functionFirst.requestControls[role]) === canonicalJson(candidate.requestControls[role]),
@@ -168,6 +176,7 @@ export function assertQualifiedM1Successor({ prior, successor, plan, gradesBytes
     sourceCommit: expectedSourceCommit, acceptanceGradesSha256: plan.acceptanceGradesSha256,
     runtimeSealSha256: plan.runtimeSealSha256, priorConfigurationDigest: projection.priorConfigurationDigest,
     successorConfigurationDigest: projection.successorConfigurationDigest, selectedRolesVerified: ACCEPTANCE_POLICY.roles.length,
+    focusedReviewEvidenceSha256: supplementalRoles.review?.checkerSha256 ?? null,
     authorityChanged: false, identityChanged: false, protectedProductDataChanged: false,
     productionChanged: false, humanTrialStillRequired: true, privateValuesIncluded: false });
 }

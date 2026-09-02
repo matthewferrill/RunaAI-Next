@@ -92,7 +92,7 @@ export function createConfigurationProjection({prior,provider,functionFirst,cadd
   assertM1SuccessorProjection(prior,successor,plan);return {successor,plan,qualified:false};
 }
 
-export function qualifyAssemblyProjection({prior,successor,plan,gradesBytes,runtimeSealBytes,homeProfile,enrollment,caddy}){
+export function qualifyAssemblyProjection({prior,successor,plan,gradesBytes,runtimeSealBytes,focusedReviewEvidence,homeProfile,enrollment,caddy}){
   demand(plan.runtimeSealSha256===APPLICATION.runtimeSealSha256&&sha256(runtimeSealBytes)===APPLICATION.runtimeSealSha256,'runtime-seal');
   createConfigurationProjection({prior,provider:successor.provider,functionFirst:successor.functionFirst,
     caddyConfigurationDigest:plan.caddyConfigurationDigest,acceptanceGradesSha256:plan.acceptanceGradesSha256});
@@ -103,5 +103,7 @@ export function qualifyAssemblyProjection({prior,successor,plan,gradesBytes,runt
     &&homeProfile.candidateId===HOME_CANDIDATE[successor.provider.models.chat],'home-profile');
   assertCaddyProjection(caddy,enrollment);
   demand(caddy.caddyConfigurationDigest===plan.caddyConfigurationDigest,'caddy-binding');
-  return assertQualifiedM1Successor({prior,successor,plan,gradesBytes,runtimeSealBytes,expectedSourceCommit:APPLICATION.sourceCommit});
+  demand(focusedReviewEvidence&&typeof focusedReviewEvidence==='object','focused-review-evidence');
+  return assertQualifiedM1Successor({prior,successor,plan,gradesBytes,runtimeSealBytes,focusedReviewEvidence,
+    expectedSourceCommit:APPLICATION.sourceCommit});
 }

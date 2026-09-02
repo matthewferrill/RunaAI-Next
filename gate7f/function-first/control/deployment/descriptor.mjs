@@ -4,6 +4,7 @@ import {createControlLaunchers} from '../../../../gate7a/lan-release.mjs';
 import {releaseModelIdentity} from '../../../../gate6b/model-role-providers.mjs';
 import {sha256,canonicalJson} from '../../../../gate4/canonical.mjs';
 import {assertM1SuccessorProjection} from '../../deployment.mjs';
+import {FOCUSED_REVIEW_EVIDENCE,validateFocusedGemmaReviewEvidence} from '../../gemma-primary-qualification.mjs';
 import {APPLICATION,ROOT,HOME_CANDIDATE,assertCaddyProjection,createConfigurationProjection,demand,hash,validateEnrollment} from './assembly.mjs';
 
 const HASH=/^[a-f0-9]{64}$/u,ID=/^[a-f0-9]{32}$/u;
@@ -25,7 +26,8 @@ export function buildAssemblyDescriptor({transitionId,files,releaseArchiveSha256
   tlsOperatorDescriptorSha256,homeInstallationSha256,homeProfile,now=Date.now()}){
   demand(ID.test(transitionId)&&[releaseArchiveSha256,tlsOperatorDescriptorSha256,homeInstallationSha256].every(value=>HASH.test(value)),'descriptor-pins');
   const expected=['prior-config.json','prior-manifest.json','candidate.json','gate7a-release.json','artifact-files.json',
-    'Run-Application.ps1','m1-successor-plan.json','enrollment.json'];
+    'Run-Application.ps1','m1-successor-plan.json','enrollment.json','focused-review-grade.json',
+    'focused-review-answer.json','focused-review-checker.json'];
   demand(files&&Object.keys(files).sort().join()===expected.sort().join(),'descriptor-files');
   const prior=json(files['prior-config.json']),successor=json(files['candidate.json']),plan=json(files['m1-successor-plan.json']);
   const priorManifest=assertReleaseManifest(json(files['prior-manifest.json']));
@@ -36,6 +38,8 @@ export function buildAssemblyDescriptor({transitionId,files,releaseArchiveSha256
   createConfigurationProjection({prior,provider:successor.provider,functionFirst:successor.functionFirst,
     caddyConfigurationDigest:plan.caddyConfigurationDigest,acceptanceGradesSha256:plan.acceptanceGradesSha256});
   assertM1SuccessorProjection(prior,successor,plan);
+  validateFocusedGemmaReviewEvidence({gradeBytes:files['focused-review-grade.json'],
+    answerBytes:files['focused-review-answer.json'],checkerBytes:files['focused-review-checker.json']});
   demand(successor.gate7a?.enabled===true&&successor.gate7a.ordinaryClient?.clientId==='runaai-next-user'
     &&successor.gate7a.ordinaryClient.redirectUri==='https://runa.bridgebuildersai.com/session/user/callback'
     &&successor.gate7a.ordinaryClient.clientCredentialRef==='file:../secrets/keycloak-ordinary-client','descriptor-ordinary-identity');
@@ -73,7 +77,9 @@ export function buildAssemblyDescriptor({transitionId,files,releaseArchiveSha256
     predecessor:{releaseId:priorManifest.releaseId,commit:priorManifest.commit,artifactDigest:priorManifest.artifactDigest,
       manifestDigest:priorManifest.manifestDigest},
     filePins,qualification:{runtimeSealSha256:APPLICATION.runtimeSealSha256,acceptanceGradesSha256:plan.acceptanceGradesSha256,
-      verified:false},operatorFiles,
+      focusedReviewGradeSha256:FOCUSED_REVIEW_EVIDENCE.gradeSha256,
+      focusedReviewAnswerSha256:FOCUSED_REVIEW_EVIDENCE.answerSha256,
+      focusedReviewCheckerSha256:FOCUSED_REVIEW_EVIDENCE.checkerSha256,verified:false},operatorFiles,
     caddy:{originalSha256:caddy.originalSha256,initialClosedSha256:caddy.initialClosedSha256,fullyClosedSha256:caddy.fullyClosedSha256,
       candidateClosedSha256:caddy.candidateClosedSha256,finalSha256:caddy.finalSha256,
       configurationDigest:caddy.caddyConfigurationDigest,binarySha256:APPLICATION.caddyBinarySha256},
@@ -101,7 +107,10 @@ export function closedCompanionArguments({descriptor,expectedDescriptorSha256,he
     ManifestSha256:descriptor.filePins['gate7a-release.json'],LauncherSha256:descriptor.filePins['Run-Application.ps1'],
     CaddyfileSha256:descriptor.caddy.finalSha256,ExpectedUiContract:'gate7f-m1-function-first',
     M1PlanSha256:descriptor.filePins['m1-successor-plan.json'],M1GradesSha256:descriptor.qualification.acceptanceGradesSha256,
-    M1RuntimeSealSha256:APPLICATION.runtimeSealSha256,Root:ROOT};
+    M1RuntimeSealSha256:APPLICATION.runtimeSealSha256,
+    M1FocusedReviewGradeSha256:descriptor.qualification.focusedReviewGradeSha256,
+    M1FocusedReviewAnswerSha256:descriptor.qualification.focusedReviewAnswerSha256,
+    M1FocusedReviewCheckerSha256:descriptor.qualification.focusedReviewCheckerSha256,Root:ROOT};
   return {arguments:Object.entries(values).flatMap(([key,value])=>['-'+key,value]),executionAuthorized:false,
     blockers:[...UNIMPLEMENTED_BOUNDARIES]};
 }

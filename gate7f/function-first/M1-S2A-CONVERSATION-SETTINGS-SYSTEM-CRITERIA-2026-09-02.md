@@ -21,7 +21,7 @@ device, model, lease or authority health from the page merely loading.
 ## Included behavior
 
 1. Conversation history supports bounded search, rename, archive, unarchive, recoverable delete,
-   branch, export, retry and cancellation of an in-flight browser request. Every mutation is scoped to
+   branch, export, retry and an honest Stop-display control for an in-flight browser request. Every mutation is scoped to
    the authenticated participant and exact Chat or Code experience. Delete is a soft deletion that old
    releases also hide; no turn or receipt is physically removed in this slice.
 2. The left rail exposes Search, Projects, Files and artifacts, Tasks, Connections and Settings inside
@@ -54,9 +54,10 @@ device, model, lease or authority health from the page merely loading.
   another participant's title, project or chat identifier.
 - Settings contain no credential, endpoint, protected profile field or machine path. Credential and
   connection setup remain separate governed work.
-- Browser cancellation means the client stopped waiting. It makes no claim that a provider request was
-  cancelled unless the server returns a trusted cancellation outcome. Successor work remains blocked
-  while an effect outcome is unknown.
+- Stop display hides progress but retains the original client request until its server outcome returns; it
+  makes no claim that the provider request was cancelled. Send, navigation and other work controls remain
+  blocked until that same request returns. If connectivity or the client deadline prevents reconciliation,
+  successor work remains blocked until the saved conversation can be reloaded from authoritative storage.
 - Existing encrypted chat/title envelopes remain authoritative. New preferences use the existing
   participant-settings authority; no browser storage or second settings store is introduced.
 - The source and Control predecessor remain rollbackable. No production routing is changed by local,

@@ -114,7 +114,13 @@ reentry. The focused relay/proxy suite passes 16/16 and the complete campaign ha
 independent re-reviews report GO with no P0/P1 findings. The restricted tracked run passed 1,975 checks,
 skipped 78 and reported five permission-only failures in Windows ACL/process/probe checks; the exact two
 source files pass 32/32 in their required host context, accounting for all 2,058 checks with no unresolved
-failure. Commit/reseal and a new stage remain mandatory; V14 cannot be reused or scored.
+failure. The repair is committed and pushed as `2431ad3ca52d8ec3a87d042c298d2c1de61339da`.
+Fresh package `20260902-campaign-r15-common-v15` binds that exact source, archive
+`85445369814694a15ba42bab2c5d70ea3688c02e5ec4ee14c97b74a353258911`, runtime seal
+`45e2d5bd0086b0da5170596395959fd543ebbff31edee151b41e22986ea2e7da` and independently verified
+2,465-entry manifest `078d41257e39a87d47bf0ac026e7f4065f76abb0a55047456b8d2a6982dc06f9`.
+The propagated operator harness passes 206/206. This seal commit and a new stage remain mandatory; V14
+cannot be reused or scored.
 
 | Failed preflight | Root cause | Permanent correction |
 |---|---|---|

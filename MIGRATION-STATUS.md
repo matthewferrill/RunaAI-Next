@@ -41,8 +41,14 @@ failure, child timeout, settlement wait, fatal/signal ordering and the exact rea
 focused relay/proxy suite passes 16/16, the complete campaign harness passes 206/206, and both independent
 re-reviews report GO with no P0/P1 findings. The restricted tracked run passed 1,975 checks, skipped 78 and
 reported five permission-only failures in Windows ACL/process/probe checks; those exact source files pass
-32/32 in their required host context, accounting for all 2,058 checks with no unresolved failure. Inference
-remains paused pending commit/reseal, another fresh stage, all 12 controls and the separate live-browser proof.
+32/32 in their required host context, accounting for all 2,058 checks with no unresolved failure. The repair
+is committed and pushed as `2431ad3ca52d8ec3a87d042c298d2c1de61339da`. Fresh package
+`20260902-campaign-r15-common-v15` was built from that exact commit; its archive SHA-256 is
+`85445369814694a15ba42bab2c5d70ea3688c02e5ec4ee14c97b74a353258911`, its runtime-seal SHA-256 is
+`45e2d5bd0086b0da5170596395959fd543ebbff31edee151b41e22986ea2e7da`, and its 2,465-entry manifest
+SHA-256 is `078d41257e39a87d47bf0ac026e7f4065f76abb0a55047456b8d2a6982dc06f9`; independent archive
+verification also rejected a tampered file. The propagated operators pass 206/206. Inference remains
+paused pending this seal commit, another fresh stage, all 12 controls and the separate live-browser proof.
 
 V12 method-gate update, 2026-09-02: fresh stage `08fdd8ae4cce45dd9cb2ee3e0fb17e91`
 recorded 11 completed model-free controls and one failed browser-dependent control, with

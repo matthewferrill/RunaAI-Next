@@ -3,7 +3,18 @@
 Roadmap revision: 2026-08-28.1
 Milestone: M1
 Slice ID: M1-S2
-Status: in progress, R15 browser-relay turnover repair before another fresh model-free stage; product not qualified.
+Status: halted at the R15 operator/browser method gate; zero R15 model attempts; product not qualified.
+
+Campaign halt, 2026-09-02: fresh zero-model stage `b230075b107b439480bfbecd64189e62`
+completed 11/12 controls and stopped when the browser reached ordinary sign-in rather than the sealed
+synthetic bootstrap. It records no model invocation, production change or protected-data read. Independent
+review then returned NO-GO on the proposed handoff correction because `Clear-Clipboard` is unavailable on
+the actual PowerShell 5.1 and 7.6.4 host. The selected deterministic checks did not exercise that dependency.
+The rejected draft is preserved by audit commit `ae69d6e416a29e6ccb73bc2ca4fc360cadd4e822` and absent
+from the active tree by revert `7445d0044c549c0ca8710eb5fc8f47a2670f5270`. No further retry is
+permitted until the exact host-real, zero-model dress rehearsal and independent GO specified in
+`../gate7f/function-first/M1-S2-R15-CAMPAIGN-HALT-AND-COST-RCA-2026-09-02.md`. Any failure re-halts the
+campaign before a model lease or new stage. Earlier updates below are retained history, not current progress.
 
 V14 execution update, 2026-09-02: fresh stage `4109cda2788e4311a6f5832d41446dc5`
 reached control 10's live browser checkpoint after finalizing all 2,465 source entries. The first neutral

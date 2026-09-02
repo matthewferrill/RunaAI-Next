@@ -217,3 +217,17 @@ not another replay of R14.
 - The independent post-r51 worker-lifetime code review reported GO with no P0/P1 finding. A later review of the first tracked-only runner found that its plain path inventory did not reject Git symlink mode, parent junctions, or Windows path aliases; that release blocker is corrected and covered by the regressions above. Two final independent re-reviews report GO with no P0/P1 finding. The final staged inventory contains 195 tracked test files and the full-suite totals above. The independent documentation/accounting review verified the 30-snapshot arithmetic and found one stale future-tense r49 recovery sentence; that sentence is corrected to the completed, hash-bound provenance used by r50/r51. Provider-consuming execution remains gated on committing/resealing this exact source and passing the fresh model-free real-browser preflight.
 - The independent final R14 publication audit initially found that the v3 finalizer did not enforce canonical reason codes or candidate-blind rationales. The shared validator now owns those rules, the finalizer invokes it after exact fact binding, adversarial probes reject the gap, and the re-audit reports GO with no P0/P1 finding while preserving byte-identical decisions, grade and scorecard hashes.
 - Final R14 scorecards: Gemma `24/23/24/24/7`, Coder `23/22/24/21/20`, and Qwen3.6 `18/22/24/21/21` across Chat/Research/Code/Agent/Review. Review has no 22/24 route. Product qualification remains false; M1-S2 and all seventeen capability families remain open.
+
+## R15 hard stop and final method-audit addendum (2026-09-02)
+
+R15 remains at zero model attempts. Stage `b230075b107b439480bfbecd64189e62` completed 11/12
+model-free controls and stopped at the browser control with no model invocation, production change or
+protected-data read. The following proposed correction passed five selected deterministic checks but failed
+independent review because its `Clear-Clipboard` dependency does not exist on the actual PowerShell 5.1 or
+7.6.4 host. The hard-stop rule was applied: no correction, retry, fresh stage or model call followed.
+
+The exact rejected draft remains auditable in `ae69d6e416a29e6ccb73bc2ca4fc360cadd4e822` and is
+removed from the active tree by `7445d0044c549c0ca8710eb5fc8f47a2670f5270`. The consolidated RCA,
+steward-reported cost impact, failure-category inventory, valid-evidence boundary and mandatory host-real
+restart contract are in `M1-S2-R15-CAMPAIGN-HALT-AND-COST-RCA-2026-09-02.md`. That newer record governs
+current campaign state. This earlier RCA remains the authority for the 30-snapshot historical accounting.

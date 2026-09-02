@@ -3,7 +3,7 @@
   "roadmapRevision": "2026-08-28.1",
   "milestone": "M1",
   "sliceId": "M1-S2",
-  "state": "in-progress",
+  "state": "authorized-not-complete",
   "completionEvidence": [
     "gate7f/function-first/M1-S2-R9-THREE-MODEL-RESULTS-2026-08-30.md",
     "gate7f/function-first/M1-S2-R10-THREE-MODEL-RESULTS-2026-08-30.md",
@@ -17,11 +17,12 @@
     "gate7f/function-first/M1-S2-R14-HARNESS-CONTINUITY-ADDENDUM-2026-09-01.md",
     "gate7f/function-first/M1-S2-R14-INDEPENDENT-SEMANTIC-RESULTS-2026-09-01.md",
     "gate7f/function-first/M1-S2-R15-AGENT-REVIEW-CORRECTIVE-CRITERIA-2026-09-01.md",
-    "gate7f/function-first/M1-S2-R15-CORRECTION-IMPLEMENTATION-RESULTS-2026-09-01.md"
+    "gate7f/function-first/M1-S2-R15-CORRECTION-IMPLEMENTATION-RESULTS-2026-09-01.md",
+    "gate7f/function-first/M1-S2-R15-CAMPAIGN-HALT-AND-COST-RCA-2026-09-02.md"
   ],
   "scopeDocument": "roadmap/CURRENT-SLICE.md",
   "capabilityIds": ["C01", "C02", "C03", "C04", "C06", "C07", "C12", "C15", "C16"],
-  "nextWork": "Fresh v14 stage 4109cda2788e4311a6f5832d41446dc5 exposed an eight-slot loopback-relay connection-turnover defect at model-free control 10 and is retained with no campaign result, zero remaining owned processes and zero Gemma requests. The completed repair releases a closed browser slot before its per-connection SSH child exits, retains cleanup ownership, imposes a separate 16-child cap, and makes an unconfirmed kill or 10-second exit miss fatal. It also publishes one shared shutdown deferred before cleanup, waits for listener closure and every owned child, and preserves a fatal bounded terminal across reentry and signals. Relay/proxy regressions pass 16/16, the campaign harness passes 206/206, both independent re-reviews report GO, and all 2,058 tracked checks are accounted for with five restricted-context permission failures passing in their required host context. Repair commit 2431ad3ca52d8ec3a87d042c298d2c1de61339da is pushed; fresh package 20260902-campaign-r15-common-v15 binds its verified archive, runtime seal and 2,465-entry source manifest, and its propagated harness passes 206/206. Commit this operator seal, then use another fresh stage for all 12 model-free controls plus the separate real-browser publication proof before the first of 120 ordered Gemma attempts. Retain all failed preflight stages and never reuse or score them. Nomic is embedding-only; do not claim comparative R15, product qualification, production routing or human-trial completion from a one-model arm.",
+  "nextWork": "Campaign halted at the R15 operator/browser method gate. Fresh zero-model stage b230075b107b439480bfbecd64189e62 completed 11 of 12 controls and stopped when the browser reached ordinary sign-in rather than the sealed synthetic bootstrap; it records no model invocation, production change or protected-data read. Independent review rejected the proposed correction because Clear-Clipboard is unavailable on the actual PowerShell 5.1 and 7.6.4 host. The rejected draft is preserved in ae69d6e416a29e6ccb73bc2ca4fc360cadd4e822 and removed from the active tree by 7445d0044c549c0ca8710eb5fc8f47a2670f5270. Do not create another stage or acquire a model lease. First complete the exact host-real zero-model dress rehearsal and independent GO defined in gate7f/function-first/M1-S2-R15-CAMPAIGN-HALT-AND-COST-RCA-2026-09-02.md. Any failure re-halts the campaign before inference. Gemma remains at zero R15 attempts; R14 evidence remains immutable; product qualification, production routing and the customer trial remain false.",
   "remainingRoadmapRequired": true,
   "completionClaim": "M1 completion is not whole-product completion."
 }

@@ -15,7 +15,21 @@ are unchanged. M1 is authorized, not complete; its first local wiring result is 
 The steward authorized necessary non-destructive work and commit/push to RunaAI-Next without recurring
 permission requests. Human involvement is reserved for genuine customer tests or human-only operations.
 
-### Current checkpoint: R15 browser-relay turnover repair before another fresh model-free stage
+### Current checkpoint: R15 campaign halted at the operator/browser method gate
+
+**Campaign halt, 2026-09-02:** R15 model testing is stopped. Fresh model-free stage
+`b230075b107b439480bfbecd64189e62` completed 11/12 controls and failed the browser control after
+navigating to ordinary sign-in instead of the sealed synthetic bootstrap. Its retained record reports
+`modelsInvoked:false`, `productionChanged:false` and `protectedDataRead:false`; Gemma remains at zero
+scored R15 attempts. Independent review then rejected the proposed browser-handoff correction because it
+used `Clear-Clipboard`, which is absent on the actual host in both Windows PowerShell 5.1 and PowerShell
+7.6.4. The selected 5/5 test result was therefore insufficient. The exact rejected draft is preserved in
+`ae69d6e416a29e6ccb73bc2ca4fc360cadd4e822` and removed from the active tree by
+`7445d0044c549c0ca8710eb5fc8f47a2670f5270`. No retry, replacement stage or model call followed.
+The campaign may not resume until the entire operator/browser workflow passes the host-real zero-model
+dress rehearsal and independent review defined in
+`gate7f/function-first/M1-S2-R15-CAMPAIGN-HALT-AND-COST-RCA-2026-09-02.md`. If that gate fails, stop
+again immediately. The prior checkpoint text below is retained as history and is no longer the active step.
 
 V14 execution update, 2026-09-02: fresh stage `4109cda2788e4311a6f5832d41446dc5`
 was finalized from all 2,465 verified source entries and reached control 10's live browser checkpoint.

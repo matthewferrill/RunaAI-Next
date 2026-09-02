@@ -86,6 +86,36 @@ all five have `modelsInvoked:false` and none consumed a campaign identity. They 
 historical fault-invalid campaign snapshots above because they are preflight-only runs with zero model
 attempts.
 
+Fresh V14 stage `4109cda2788e4311a6f5832d41446dc5` exposed a further relay-lifecycle fault at control
+10 before any Gemma request. Its neutral root loaded once, then the ordinary-session navigation and every
+later request received an empty response. The local command relay caps browser connections at eight but
+previously decremented that count only when the connection's SSH child exited. A browser closing or
+abandoning a connection only ended the child's stdin; a stalled SSH child therefore retained its slot,
+and eight such children made the relay destroy all successors. The existing relay coverage tested only
+argument mapping and zero-client cleanup, so it could not reproduce actual browser connection turnover.
+The checkpoint expired fail-closed; the stage is retained, no campaign result was created, and a read-only
+audit confirmed zero remaining stage-owned processes.
+
+The fix separates client-slot release from child-process settlement. A client close or error immediately
+releases its one bounded slot and requests termination of the abandoned SSH child, while the child remains
+in the owned set until an actual exit/error so final cleanup cannot lose it. One independent reviewer
+found that the first revision could still accumulate unbounded children if kill failed or a child never
+exited. The corrected relay now has a separate 16-owned-child hard cap; an unconfirmed kill or a missed
+10-second exit deadline is fatal, closes the relay, requests cleanup of every owned child, and exits the
+CLI nonzero for supervisor attribution. A second review found that signal shutdown could report before all
+owned children settled and that a later fatal condition could be downgraded. The first shutdown correction
+closed admission, made fatal state sticky, and waited for both listener closure and zero owned children. A
+third review then reproduced synchronous failed-kill reentry before the shared promise assignment, which
+could create two shutdown promises and timers. The final state machine publishes one deferred before any
+cleanup side effect, so graceful, fatal and later callers share the same bounded terminal. Regressions fill
+all eight client slots, prove immediate turnover, repeat abandonment to the child cap, force failed kill and
+exit timeout, require child settlement, preserve fatal-over-signal ordering, and replay the exact real-relay
+reentry. The focused relay/proxy suite passes 16/16 and the complete campaign harness passes 206/206. Both
+independent re-reviews report GO with no P0/P1 findings. The restricted tracked run passed 1,975 checks,
+skipped 78 and reported five permission-only failures in Windows ACL/process/probe checks; the exact two
+source files pass 32/32 in their required host context, accounting for all 2,058 checks with no unresolved
+failure. Commit/reseal and a new stage remain mandatory; V14 cannot be reused or scored.
+
 | Failed preflight | Root cause | Permanent correction |
 |---|---|---|
 | 1 | The first capability-bearing/separate-port URL was blocked by Brave. Browser setup itself was already enabled. | Use the browser that is live-registered for the task and keep the visible URL neutral on the application origin. |

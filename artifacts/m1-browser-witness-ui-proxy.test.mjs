@@ -1,10 +1,12 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { createServer } from "node:http";
-import { once } from "node:events";
+import { connect } from "node:net";
+import { EventEmitter, once } from "node:events";
 import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
+import { PassThrough } from "node:stream";
 import { capabilityFromFileValue, createWitnessUiProxy } from "./m1-browser-witness-ui-proxy.mjs";
 import relayModule from "./m1-browser-loopback-command-relay.cjs";
 import { AGENT05_BOUNDED_DRAIN, AGENT05_BOUNDED_DRAIN_NOTICE } from "../gate7f/function-first/acceptance/browser-witness.mjs";
@@ -25,6 +27,177 @@ test("loopback relay exposes bounded cleanup even before accepting a client", ()
   const server = relayModule.createRelay({ listenPort: 58335, remotePort: 58335, stage });
   assert.equal(typeof server.stopAll, "function");
   server.stopAll();
+});
+
+test("loopback relay releases an abandoned browser connection before its SSH child exits", async t => {
+  const stage = `m1-task-native-${"c".repeat(32)}`;
+  const spawned = [];
+  const spawnProcess = () => {
+    const child = new EventEmitter();
+    child.stdin = new PassThrough(); child.stdout = new PassThrough(); child.stderr = new PassThrough();
+    child.killCalls = 0;
+    child.kill = () => { child.killCalls += 1; return true; };
+    spawned.push(child); return child;
+  };
+  const server = relayModule.createRelay({ listenPort: 58335, remotePort: 58335, stage, spawnProcess });
+  server.listen(0, "127.0.0.1"); await once(server, "listening");
+  const sockets = [];
+  t.after(() => {
+    for (const socket of sockets) socket.destroy();
+    server.stopAll(); server.close();
+  });
+  const open = async () => {
+    const socket = connect(server.address().port, "127.0.0.1"); sockets.push(socket); await once(socket, "connect"); return socket;
+  };
+  for (let index = 0; index < 8; index += 1) await open();
+  assert.equal(spawned.length, 8);
+  const rejected = connect(server.address().port, "127.0.0.1"); sockets.push(rejected);
+  const rejectedClose = once(rejected, "close"); await once(rejected, "connect"); await rejectedClose;
+  assert.equal(spawned.length, 8, "the ninth simultaneous connection remains bounded");
+
+  const abandoned = sockets[0], abandonedClose = once(abandoned, "close"); abandoned.destroy(); await abandonedClose;
+  assert.equal(spawned[0].killCalls, 1, "the abandoned per-connection SSH child is terminated");
+  await open();
+  assert.equal(spawned.length, 9, "the released slot admits a successor without waiting for SSH exit");
+  for (const child of spawned) child.emit("exit", 0);
+});
+
+test("loopback relay bounds repeatedly abandoned children that have not exited", async t => {
+  const stage = `m1-task-native-${"d".repeat(32)}`, spawned = [], sockets = [];
+  const spawnProcess = () => {
+    const child = new EventEmitter();
+    child.stdin = new PassThrough(); child.stdout = new PassThrough(); child.stderr = new PassThrough();
+    child.kill = () => true; spawned.push(child); return child;
+  };
+  const server = relayModule.createRelay({ listenPort: 58335, remotePort: 58335, stage, spawnProcess });
+  server.listen(0, "127.0.0.1"); await once(server, "listening");
+  t.after(() => { for (const child of spawned) child.emit("exit", 0); for (const socket of sockets) socket.destroy(); server.stopAll(); server.close(); });
+  for (let index = 0; index < 16; index += 1) {
+    const socket = connect(server.address().port, "127.0.0.1"); sockets.push(socket);
+    const closed = once(socket, "close"); await once(socket, "connect"); socket.destroy(); await closed;
+  }
+  assert.equal(spawned.length, 16);
+  const bounded = connect(server.address().port, "127.0.0.1"), boundedClose = once(bounded, "close");
+  sockets.push(bounded); await once(bounded, "connect"); await boundedClose;
+  assert.equal(spawned.length, 16, "unsettled child ownership has an independent hard cap");
+});
+
+test("loopback relay fails closed when an abandoned SSH child cannot be signalled", async t => {
+  const stage = `m1-task-native-${"e".repeat(32)}`;
+  const child = new EventEmitter();
+  child.stdin = new PassThrough(); child.stdout = new PassThrough(); child.stderr = new PassThrough();
+  child.kill = () => false;
+  const server = relayModule.createRelay({ listenPort: 58335, remotePort: 58335, stage, spawnProcess: () => child });
+  server.listen(0, "127.0.0.1"); await once(server, "listening");
+  t.after(() => { child.emit("exit", 0); server.stopAll(); server.close(); });
+  const fatal = once(server, "relayFatal"), socket = connect(server.address().port, "127.0.0.1");
+  await once(socket, "connect"); socket.destroy();
+  const [error] = await fatal;
+  assert.match(error.message, /relay-child-stop-unconfirmed/u);
+});
+
+test("loopback relay fails closed when a signalled abandoned child misses its exit deadline", async t => {
+  const stage = `m1-task-native-${"f".repeat(32)}`;
+  const child = new EventEmitter();
+  child.stdin = new PassThrough(); child.stdout = new PassThrough(); child.stderr = new PassThrough();
+  child.kill = () => true;
+  const server = relayModule.createRelay({ listenPort: 58335, remotePort: 58335, stage,
+    spawnProcess: () => child, childStopTimeoutMs: 10 });
+  server.listen(0, "127.0.0.1"); await once(server, "listening");
+  t.after(() => { child.emit("exit", 0); server.stopAll(); server.close(); });
+  const fatal = once(server, "relayFatal"), socket = connect(server.address().port, "127.0.0.1");
+  await once(socket, "connect"); socket.destroy();
+  const [error] = await fatal;
+  assert.match(error.message, /relay-child-stop-timeout/u);
+});
+
+test("relay shutdown waits for every owned child before reporting success", async t => {
+  const stage = `m1-task-native-${"1".repeat(32)}`;
+  const child = new EventEmitter();
+  child.stdin = new PassThrough(); child.stdout = new PassThrough(); child.stderr = new PassThrough();
+  child.kill = () => true;
+  const server = relayModule.createRelay({ listenPort: 58335, remotePort: 58335, stage,
+    spawnProcess: () => child, childStopTimeoutMs: 100 });
+  server.listen(0, "127.0.0.1"); await once(server, "listening");
+  t.after(() => { child.emit("exit", 0); server.stopAll(); server.close(); });
+  const socket = connect(server.address().port, "127.0.0.1"); await once(socket, "connect");
+  const shutdown = server.shutdown({ timeoutMs: 100 });
+  let resolved = false; shutdown.then(() => { resolved = true; });
+  await new Promise(resolve => setTimeout(resolve, 10));
+  assert.equal(resolved, false, "server socket closure alone cannot report child cleanup success");
+  child.emit("exit", 0);
+  assert.deepEqual(await shutdown, { exitCode: 0, childrenSettled: true });
+});
+
+test("relay shutdown reports nonzero when owned children miss the bounded settlement deadline", async t => {
+  const stage = `m1-task-native-${"2".repeat(32)}`;
+  const child = new EventEmitter();
+  child.stdin = new PassThrough(); child.stdout = new PassThrough(); child.stderr = new PassThrough();
+  child.kill = () => true;
+  const server = relayModule.createRelay({ listenPort: 58335, remotePort: 58335, stage,
+    spawnProcess: () => child, childStopTimeoutMs: 100 });
+  server.listen(0, "127.0.0.1"); await once(server, "listening");
+  t.after(() => { child.emit("exit", 0); server.stopAll(); server.close(); });
+  const socket = connect(server.address().port, "127.0.0.1"); await once(socket, "connect");
+  assert.deepEqual(await server.shutdown({ timeoutMs: 10 }), { exitCode: 1, childrenSettled: false });
+});
+
+test("real relay reentrant fatal shutdown shares one promise, deadline and CLI terminal", async t => {
+  const stage = `m1-task-native-${"3".repeat(32)}`;
+  const child = new EventEmitter();
+  child.stdin = new PassThrough(); child.stdout = new PassThrough(); child.stderr = new PassThrough();
+  child.kill = () => false;
+  const server = relayModule.createRelay({ listenPort: 58335, remotePort: 58335, stage,
+    spawnProcess: () => child, childStopTimeoutMs: 100 });
+  server.listen(0, "127.0.0.1"); await once(server, "listening");
+  t.after(() => { child.emit("exit", 0); server.stopAll(); server.close(); });
+  const processObject = new EventEmitter(), exits = [], errors = [];
+  processObject.exitCode = 0; processObject.exit = code => { exits.push(code); };
+  processObject.stderr = { write: value => { errors.push(value); } };
+  const handlers = relayModule.installCliShutdownHandlers({ server, processObject, timeoutMs: 25 });
+  let fatalShutdown;
+  server.once("relayFatal", () => { fatalShutdown = server.shutdown({ fatal: true, timeoutMs: 100 }); });
+  const socket = connect(server.address().port, "127.0.0.1"); await once(socket, "connect");
+  const startedAt = Date.now(), completion = handlers.beginShutdown(false);
+  const publishedShutdown = server.shutdown({ timeoutMs: 100 });
+  assert.strictEqual(fatalShutdown, publishedShutdown,
+    "synchronous fail-closed reentry must observe the already-published shutdown promise");
+  assert.strictEqual(completion, handlers.completion,
+    "graceful and reentrant fatal CLI paths must share one terminal completion");
+  assert.equal(await completion, 1);
+  assert.deepEqual(await publishedShutdown, { exitCode: 1, childrenSettled: false });
+  assert.deepEqual(exits, [1]);
+  assert.match(errors.join(""), /relay-child-stop-unconfirmed/u);
+  assert.ok(Date.now() - startedAt < 500, "the initiating CLI deadline remains bounded after fatal reentry");
+});
+
+test("CLI signal shutdown delays exit until settlement and preserves a later fatal outcome", async () => {
+  const makeCli = () => {
+    const processObject = new EventEmitter(), server = new EventEmitter(), exits = [], errors = [];
+    processObject.exitCode = 0; processObject.exit = code => { exits.push(code); };
+    processObject.stderr = { write: value => { errors.push(value); } };
+    let fatal = false, release;
+    const pending = new Promise(resolve => { release = resolve; });
+    server.shutdown = ({ fatal: requestedFatal }) => {
+      if (requestedFatal) fatal = true;
+      return pending.then(() => ({ exitCode: fatal ? 1 : 0, childrenSettled: true }));
+    };
+    const handlers = relayModule.installCliShutdownHandlers({ server, processObject, timeoutMs: 100 });
+    return { processObject, server, exits, errors, handlers, release };
+  };
+
+  const graceful = makeCli();
+  graceful.processObject.emit("SIGTERM");
+  assert.deepEqual(graceful.exits, [], "SIGTERM cannot report success before child settlement");
+  graceful.release(); await graceful.handlers.completion;
+  assert.deepEqual(graceful.exits, [0]);
+
+  const fatal = makeCli();
+  fatal.server.emit("relayFatal", new Error("relay-child-stop-timeout"));
+  fatal.processObject.emit("SIGTERM");
+  fatal.release(); await fatal.handlers.completion;
+  assert.deepEqual(fatal.exits, [1], "a later signal cannot downgrade fatal relay shutdown");
+  assert.match(fatal.errors.join(""), /relay-child-stop-timeout/u);
 });
 
 test("loopback witness UI proxy serves a visible one-use action and preserves the application origin", async t => {

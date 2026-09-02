@@ -15,7 +15,34 @@ are unchanged. M1 is authorized, not complete; its first local wiring result is 
 The steward authorized necessary non-destructive work and commit/push to RunaAI-Next without recurring
 permission requests. Human involvement is reserved for genuine customer tests or human-only operations.
 
-### Current checkpoint: R15 V14 package built and verified; fresh model-free stage before inference
+### Current checkpoint: R15 browser-relay turnover repair before another fresh model-free stage
+
+V14 execution update, 2026-09-02: fresh stage `4109cda2788e4311a6f5832d41446dc5`
+was finalized from all 2,465 verified source entries and reached control 10's live browser checkpoint.
+The first neutral root page loaded, but ordinary sign-in and every later request returned
+`ERR_EMPTY_RESPONSE`. The loopback command relay allowed eight simultaneous browser connections and
+released a slot only after its per-connection SSH child exited; a browser-abandoned connection merely
+ended child stdin, so stalled SSH children kept all eight slots occupied and the relay immediately
+destroyed successor connections. Existing relay tests checked argument parsing and cleanup only, not
+browser-style connection turnover. The checkpoint expired and the stage was retained. A read-only
+post-stop audit found no campaign result and zero stage-owned processes. No Gemma request occurred.
+
+The completed repair releases the bounded browser slot immediately when its client closes or errors,
+terminates that connection's SSH child, and keeps the child owned until its actual exit for final cleanup.
+Independent review correctly rejected the first revision because a failed or stalled kill could accumulate
+unbounded owned children even while client slots turned over. The completed revision therefore adds an
+independent 16-child hard cap, treats an unconfirmed kill or a 10-second exit miss as a fatal relay error,
+and exits the relay nonzero so the supervising operator fails closed. Two later review passes found that
+shutdown could report success before every child settled and that synchronous failed-kill reentry could
+create a second cleanup promise and timer. Shutdown now closes admission, publishes one shared deferred
+before cleanup begins, waits for both listener closure and zero owned children, preserves fatal status, and
+returns nonzero on its bounded settlement deadline. Regressions cover turnover, repeated abandonment, kill
+failure, child timeout, settlement wait, fatal/signal ordering and the exact real-relay reentry race. The
+focused relay/proxy suite passes 16/16, the complete campaign harness passes 206/206, and both independent
+re-reviews report GO with no P0/P1 findings. The restricted tracked run passed 1,975 checks, skipped 78 and
+reported five permission-only failures in Windows ACL/process/probe checks; those exact source files pass
+32/32 in their required host context, accounting for all 2,058 checks with no unresolved failure. Inference
+remains paused pending commit/reseal, another fresh stage, all 12 controls and the separate live-browser proof.
 
 V12 method-gate update, 2026-09-02: fresh stage `08fdd8ae4cce45dd9cb2ee3e0fb17e91`
 recorded 11 completed model-free controls and one failed browser-dependent control, with

@@ -3,7 +3,27 @@
 Roadmap revision: 2026-08-28.1
 Milestone: M1
 Slice ID: M1-S2
-Status: in progress, R15 V14 package built and verified; fresh model-free stage before inference; product not qualified.
+Status: in progress, R15 browser-relay turnover repair before another fresh model-free stage; product not qualified.
+
+V14 execution update, 2026-09-02: fresh stage `4109cda2788e4311a6f5832d41446dc5`
+reached control 10's live browser checkpoint after finalizing all 2,465 source entries. The first neutral
+page loaded, but sign-in and later requests returned `ERR_EMPTY_RESPONSE`. The eight-slot loopback relay
+released a browser slot only when its per-connection SSH child exited; abandoned browser connections
+could therefore leave all slots occupied by stalled children and cause every successor connection to be
+destroyed. Its old tests never exercised browser-style connection turnover. The checkpoint expired,
+the stage was retained, no campaign result exists, cleanup left zero stage-owned processes, and Gemma
+remains at zero new scored attempts. The repair releases a closed/error client slot at once and terminates
+the abandoned child while retaining cleanup ownership until exit. Independent review found that its first
+revision still lacked a bound when kill failed or the child stalled; the completed revision adds a separate
+16-child cap and makes failed kill or a 10-second exit miss fatal to the relay. Later review found and closed
+two shutdown races: premature success/fatal downgrade before child settlement, then duplicate promise/timer
+creation during synchronous failed-kill reentry. Shutdown now publishes one shared deferred before cleanup,
+waits for listener closure plus zero owned children, keeps fatal status sticky and has one bounded terminal.
+Focused relay/proxy tests pass 16/16 and the campaign harness passes 206/206; both independent re-reviews
+report GO with no P0/P1 findings. The restricted tracked run passed 1,975 checks, skipped 78 and exposed five
+permission-only Windows ACL/process/probe failures; their exact two source files pass 32/32 in the required
+host context, accounting for all 2,058 checks with no unresolved failure. Commit/reseal, a fresh 12-control
+stage and separate live-browser proof remain before inference.
 
 V12 method-gate update, 2026-09-02: fresh stage `08fdd8ae4cce45dd9cb2ee3e0fb17e91`
 recorded 11 completed model-free controls and one failed browser-dependent control, with no model calls.

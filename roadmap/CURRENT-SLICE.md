@@ -3,7 +3,20 @@
 Roadmap revision: 2026-08-28.1
 Milestone: M1
 Slice ID: M1-S2
-Status: in progress, R15 campaign paused before inference for an archive-bound hardware-plan correction and reseal; product not qualified.
+Status: in progress, R15 campaign paused before inference for watcher-quiescence correction and reseal; product not qualified.
+
+V7 method-gate update, 2026-09-02: source `188048537e4770e3ac7719bff55417bb0994c293` was
+sealed and a fresh stage reached model-free browser control 10. Final independent review found a late-event
+race: after a fixed delay, the validator could see one empty PowerShell event snapshot and stop draining
+before an asynchronous filesystem callback arrived. The stage was failed closed, its owned services were
+confirmed absent and no model/campaign identity was invoked. The correction drains through a bounded quiet
+interval while watchers are enabled, disables and disposes them, drains through a second bounded quiet
+interval, and repeats exact-set verification while source/runtime locks remain. The shared helper has
+deterministic delayed-event and post-disposal queued-event regressions. Three sequential host runs passed
+and independent final review returned GO with no P0/P1 finding. Commit/reseal, controls and browser proof
+remain mandatory before the steward-directed Gemma-first 120-attempt arm. The complete tracked suite passes
+1,936/2,014 with 78 intentional environment-dependent skips and zero failures; roadmap verification passes
+15/15.
 
 V6 method-gate update, 2026-09-01: a fresh sealed stage completed 12/12 model-free controls with no
 model calls, then the whole-stage recursive mutation watcher failed after the post-run exact-set check had

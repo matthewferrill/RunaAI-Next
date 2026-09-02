@@ -171,8 +171,8 @@ test('R15 Control wrapper locks every manifested runtime file before launching a
   const validator=requireText(path.resolve(import.meta.dirname,'../../../artifacts/Validate-ControlR15Stage.Remote.ps1'));
   const finalizer=requireText(path.resolve(import.meta.dirname,'../../../artifacts/Finalize-ControlR15SourceStage.ps1'));
   assert.match(validator,/foreach\(\$entry in @\(\$runtimeManifest\.entries\)\)\{\$lockSpecs\.Add/u);
-  assert.match(validator,/@\(\$manifest\.entries\)\.Count-ne2440/u);
-  assert.match(finalizer,/\$validation\.verifiedSourceFiles-ne2440/u);
+  assert.match(validator,/@\(\$manifest\.entries\)\.Count-ne2441/u);
+  assert.match(finalizer,/\$validation\.verifiedSourceFiles-ne2441/u);
   assert.match(validator,/\$relative-ceq'transient'/u);
   assert.match(validator,/@\('acceptance-evidence','disposable-postgres','transient','q','data'\)/u);
   assert.match(validator,/Remove-Item -LiteralPath \$postgresLog -Force[\s\S]*?Assert-ExactStageSet/u);
@@ -180,7 +180,7 @@ test('R15 Control wrapper locks every manifested runtime file before launching a
   assert.match(validator,/\$watchSpecs=@\(\[pscustomobject\]@\{Path=\$root;Recursive=\$false\}\)/u);
   assert.match(validator,/foreach\(\$entry in @\(\$manifest\.entries\)\)[\s\S]*?\$protectedTopLevels\.Add/u);
   assert.match(validator,/@\('acceptance-evidence','disposable-postgres','transient','q','data','node_modules'\)/u);
-  assert.match(validator,/foreach\(\$watcher in \$watchers\)\{\$watcher\.EnableRaisingEvents=\$false\}[\s\S]*?do\{[\s\S]*?Get-Event[\s\S]*?\}while\(\$batch\.Count-ne0\)/u);
+  assert.match(validator,/Wait-R15WatcherQuiescence[\s\S]*?EnableRaisingEvents=\$false;\$watcher\.Dispose\(\)[\s\S]*?Wait-R15WatcherQuiescence[\s\S]*?Assert-ExactStageSet/u);
   assert.match(validator,/GetException\(\)/u);assert.match(validator,/\$exception\.GetType\(\)\.FullName/u);
   assert.doesNotMatch(validator,/New-Object IO\.FileSystemWatcher\(\$root\)[\s\S]*?IncludeSubdirectories=\$true/u);
   assert.ok(validator.indexOf("$stream=New-Object IO.FileStream($spec.Key")<validator.indexOf("& $node $entry --mode controls"));
@@ -188,6 +188,67 @@ test('R15 Control wrapper locks every manifested runtime file before launching a
   assert.doesNotMatch(mutation,/['"]runtime['"]|['"]sandbox-runtime['"]/u);
   assert.match(finalizer,/runaai-m1-r15-source-stage-finalization\/v3/u);
   assert.match(finalizer,/runtimeManifestSha256=\$validation\.runtimeManifestSha256/u);
+});
+
+test('R15 watcher quiescence deterministically catches delayed and post-disposal queued events', {skip:process.platform!=='win32'}, async()=>{
+  const f=await fixture();try{
+    const scriptPath=path.join(f.root,'delayed-watcher-regression.ps1');
+    const helperPath=path.resolve(import.meta.dirname,'Wait-R15WatcherQuiescence.ps1');
+    const script=String.raw`param([Parameter(Mandatory)][string]$HelperPath,[Parameter(Mandatory)][string]$FixtureRoot)
+$ErrorActionPreference='Stop'
+. $HelperPath
+$watched1=Join-Path $FixtureRoot 'watched-delayed';$watched2=Join-Path $FixtureRoot 'watched-post-disposal';$control=Join-Path $FixtureRoot 'control'
+[void](New-Item -ItemType Directory -Path $watched1);[void](New-Item -ItemType Directory -Path $watched2);[void](New-Item -ItemType Directory -Path $control)
+$sourceIds1=@();$watcher1=[IO.FileSystemWatcher]::new($watched1);$watcher1.IncludeSubdirectories=$false
+$events1=New-Object 'System.Collections.Generic.List[System.Management.Automation.PSEventArgs]'
+foreach($eventName in @('Changed','Created','Deleted','Renamed','Error')){
+  $sourceId='r15-delayed-regression-'+$eventName.ToLowerInvariant()
+  Register-ObjectEvent -InputObject $watcher1 -EventName $eventName -SourceIdentifier $sourceId|Out-Null
+  $sourceIds1+=$sourceId
+}
+$watcher1.EnableRaisingEvents=$true
+$target1=Join-Path $watched1 'delayed.txt';$ready=Join-Path $control 'ready';$go=Join-Path $control 'go'
+$targetEscaped=$target1.Replace("'","''");$readyEscaped=$ready.Replace("'","''");$goEscaped=$go.Replace("'","''")
+$delayCommand=@'
+[IO.File]::WriteAllText('__READY__','ready');$deadline=[DateTime]::UtcNow.AddSeconds(5);while(-not[IO.File]::Exists('__GO__')){if([DateTime]::UtcNow-ge$deadline){exit 2};[Threading.Thread]::Sleep(5)};Start-Sleep -Milliseconds 75;[IO.File]::WriteAllText('__TARGET__','delayed')
+'@
+$delayCommand=$delayCommand.Replace('__READY__',$readyEscaped).Replace('__GO__',$goEscaped).Replace('__TARGET__',$targetEscaped)
+$encoded=[Convert]::ToBase64String([Text.Encoding]::Unicode.GetBytes($delayCommand))
+$child=Start-Process -FilePath powershell.exe -ArgumentList @('-NoProfile','-NonInteractive','-EncodedCommand',$encoded) -WindowStyle Hidden -PassThru
+$sourceIds2=@();$watcher2=$null
+try{
+  $readyDeadline=[DateTime]::UtcNow.AddSeconds(5);while(-not(Test-Path -LiteralPath $ready -PathType Leaf)){if([DateTime]::UtcNow-ge$readyDeadline){throw 'r15-delayed-regression-not-ready'};Start-Sleep -Milliseconds 10}
+  [IO.File]::WriteAllText($go,'go')
+  Wait-R15WatcherQuiescence -SourceIdentifier $sourceIds1 -Destination $events1 -QuietMilliseconds 1000 -MaximumMilliseconds 5000 -PollMilliseconds 25
+  $watcher1.EnableRaisingEvents=$false;$watcher1.Dispose()
+  Wait-R15WatcherQuiescence -SourceIdentifier $sourceIds1 -Destination $events1 -QuietMilliseconds 500 -MaximumMilliseconds 5000 -PollMilliseconds 25
+  if(-not$child.WaitForExit(5000)-or$child.ExitCode-ne0){throw 'r15-delayed-regression-child'}
+  if($events1.Count-eq0){throw 'r15-delayed-regression-event-missed'}
+
+  $sourceIds2=@();$watcher2=[IO.FileSystemWatcher]::new($watched2);$watcher2.IncludeSubdirectories=$false
+  $events2=New-Object 'System.Collections.Generic.List[System.Management.Automation.PSEventArgs]'
+  foreach($eventName in @('Changed','Created','Deleted','Renamed','Error')){
+    $sourceId='r15-post-disposal-regression-'+$eventName.ToLowerInvariant()
+    Register-ObjectEvent -InputObject $watcher2 -EventName $eventName -SourceIdentifier $sourceId|Out-Null
+    $sourceIds2+=$sourceId
+  }
+  $watcher2.EnableRaisingEvents=$true;$target2=Join-Path $watched2 'queued.txt';[IO.File]::WriteAllText($target2,'queued')
+  $queueDeadline=[DateTime]::UtcNow.AddSeconds(5)
+  while(@(Get-Event|Where-Object{$sourceIds2-contains$_.SourceIdentifier}).Count-eq0){if([DateTime]::UtcNow-ge$queueDeadline){throw 'r15-post-disposal-regression-not-queued'};Start-Sleep -Milliseconds 10}
+  $watcher2.EnableRaisingEvents=$false;$watcher2.Dispose()
+  Wait-R15WatcherQuiescence -SourceIdentifier $sourceIds2 -Destination $events2 -QuietMilliseconds 500 -MaximumMilliseconds 5000 -PollMilliseconds 25
+  if($events2.Count-eq0){throw 'r15-post-disposal-regression-event-missed'}
+  @{delayedObserved=$events1.Count;postDisposalObserved=$events2.Count;targetsExist=((Test-Path -LiteralPath $target1 -PathType Leaf)-and(Test-Path -LiteralPath $target2 -PathType Leaf))}|ConvertTo-Json -Compress
+}finally{
+  foreach($sourceId in @($sourceIds1)+@($sourceIds2)){Unregister-Event -SourceIdentifier $sourceId -ErrorAction SilentlyContinue;Remove-Event -SourceIdentifier $sourceId -ErrorAction SilentlyContinue}
+  $watcher1.Dispose();if($null-ne$watcher2){$watcher2.Dispose()};if(-not$child.HasExited){$child.Kill();$child.WaitForExit()}
+}`;
+    await writeFile(scriptPath,script);
+    const result=spawnSync('powershell.exe',['-NoProfile','-NonInteractive','-ExecutionPolicy','Bypass','-File',scriptPath,
+      '-HelperPath',helperPath,'-FixtureRoot',f.root],{encoding:'utf8',timeout:15000,windowsHide:true});
+    assert.equal(result.status,0,result.stderr||result.stdout);const output=JSON.parse(result.stdout.trim().split(/\r?\n/u).at(-1));
+    assert.equal(output.targetsExist,true);assert.ok(output.delayedObserved>0);assert.ok(output.postDisposalObserved>0);
+  }finally{await f.close();}
 });
 
 test('native preflight retries once only for an empty system-stamped start failure',()=>{

@@ -186,3 +186,28 @@ closed, and a failure writes a bounded create-only diagnostic with normalized sa
 and HResult. A static regression rejects restoration of the whole-stage recursive watcher and requires the
 disable-before-drain ordering. No Gemma or other model inference may resume until this corrected operator
 passes a fresh 12-control run and the separate live-browser publication proof.
+
+## V7 late-event quiescence correction
+
+Source `188048537e4770e3ac7719bff55417bb0994c293` was rebuilt and sealed. Fresh stage
+`3cb0e98c307a4bc5b4aafeccfb2da347` reached model-free browser control 10 before final independent
+review found one remaining P1 in the method. The validator disabled the protected-tree watchers, slept
+for 100 ms and stopped draining on the first empty event snapshot. `FileSystemWatcher` callbacks enter
+PowerShell's event queue asynchronously, so a callback could arrive after that snapshot and be removed
+unread during `finally`. The static ordering test did not reproduce delayed delivery. The operator
+published a fail-closed negative browser acknowledgement and confirmed that the stage's exact Node,
+PostgreSQL and Qdrant processes were absent. The stage is retained, has no qualification credit, and
+invoked no model.
+
+The new tracked `acceptance/Wait-R15WatcherQuiescence.ps1` helper drains events until a bounded quiet
+interval rather than a single empty poll, and fails closed if the maximum drain window expires. The
+validator invokes it while watchers remain enabled, disables and disposes every watcher, invokes it again
+with a longer quiet interval, classifies every ordinary or Error event from both drains, then repeats
+`Assert-ExactStageSet` while all byte locks remain held. The regression uses an out-of-band ready/go
+handshake to write after an initially empty poll, then separately queues an event, disposes its watcher and
+proves that the same shared helper captures it afterward. Both behavioral paths are deterministic and use
+the exact helper imported by the validator. Three sequential host runs passed, and independent final
+re-review returned GO with no P0/P1 finding. Commit/reseal, fresh 12/12 controls and the separate real-browser
+publication proof remain required before any Gemma request. The focused host file passes 26/26, the complete
+tracked suite passes 1,936/2,014 with 78 intentional environment-dependent skips and zero failures, and
+roadmap verification passes 15/15.

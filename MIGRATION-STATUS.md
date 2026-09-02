@@ -1,6 +1,6 @@
 # RunaAI migration status
 
-Status date: 2026-09-01. This is the living migration handoff for RunaAI-Next. Update it in the same
+Status date: 2026-09-02. This is the living migration handoff for RunaAI-Next. Update it in the same
 commit whenever a gate changes repository direction, authority, implementation status, safety
 boundaries, verification state, or the next planned work.
 
@@ -15,7 +15,23 @@ are unchanged. M1 is authorized, not complete; its first local wiring result is 
 The steward authorized necessary non-destructive work and commit/push to RunaAI-Next without recurring
 permission requests. Human involvement is reserved for genuine customer tests or human-only operations.
 
-### Current checkpoint: R15 campaign paused before inference for archive-bound hardware-plan reseal
+### Current checkpoint: R15 campaign paused before inference for watcher-quiescence reseal
+
+V7 method-gate update, 2026-09-02: independently reviewed source `188048537e4770e3ac7719bff55417bb0994c293`
+was sealed and stage `3cb0e98c307a4bc5b4aafeccfb2da347` reached model-free browser control 10.
+Final independent review then found that the validator disabled its watchers and stopped draining on the
+first empty event snapshot after a fixed 100-ms delay. Because PowerShell event delivery is asynchronous,
+a protected-tree event could arrive after that empty snapshot and be removed unread during cleanup. The
+operator published a fail-closed negative acknowledgement, the stage retained no qualification credit,
+and its exact Node/PostgreSQL/Qdrant processes were confirmed absent. No model or campaign identity was
+invoked. The correction now uses the shared `Wait-R15WatcherQuiescence.ps1` barrier: drain to a bounded
+quiet interval while enabled, disable and dispose, drain again to a longer bounded quiet interval, then
+repeat the exact-set assertion while all byte locks remain. Behavioral regressions use a ready/go handshake
+to inject an event after the first empty poll and separately prove that an already queued event is captured
+after watcher disposal. Three sequential host runs passed and independent final review returned GO with no
+P0/P1 finding. The complete tracked suite passes 1,936/2,014 with 78 intentional environment-dependent
+skips and zero failures; roadmap verification passes 15/15. Commit/seal, 12 controls and
+browser-publication proof still precede Gemma inference.
 
 V6 method-gate update, 2026-09-01: source stage `ce8871e1ad9d48d48d4508a39761af6f`
 completed 12/12 model-free controls with zero failed drivers and no model calls, but its outer whole-stage

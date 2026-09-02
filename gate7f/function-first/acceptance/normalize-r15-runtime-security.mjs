@@ -19,10 +19,9 @@ export async function normalizeR15RuntimeSecurity({ root: suppliedRoot, executor
   const observation = result?.startupObservation;
   if (result?.ready !== true || receipt?.status !== "executed" || receipt?.errorCode !== null
       || receipt?.exitCode !== 0 || receipt?.systemStamped !== true
+      || receipt?.output?.stdout !== "runa2-sandbox-ready\n" || receipt?.output?.stderr !== ""
       || !Array.isArray(receipt?.effects) || receipt.effects.length !== 0
-      || observation?.schemaVersion !== "runa2-sandbox-startup-observation/v1"
-      || observation?.processStarted !== true || observation?.exitCode !== 0
-      || observation?.classifiedErrorCode !== null || observation?.privateValuesIncluded !== false) {
+      || observation !== null) {
     throw fail("r15-runtime-security-normalization-preflight");
   }
   return Object.freeze({

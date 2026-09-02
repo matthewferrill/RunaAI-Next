@@ -330,3 +330,22 @@ execution. The complete model-free campaign harness passes 195/195; the complete
 passes 1,965/2,043 with 78 intentional environment-dependent skips and zero failures. Fresh source packaging, reseal, 12
 controls and the separate real-browser proof remain mandatory before the first Gemma request; Gemma has
 incurred zero new scored attempts under this arm.
+
+## V10 startup-observation contract RCA
+
+Fresh stage `288236b61f1e4944a0a77d360f704a51` stopped during its first model-free ACL-normalization
+preflight, before controls or inference. The retained stage has zero matching processes. The normalizer
+unit fixture had modeled a successful MXC launch with a populated `startupObservation`, and the normalizer
+therefore required that shape. The actual `MxcJavascriptExecutor` contract returns
+`startupObservation:null` after a successful typed execution; it creates an observation only when the
+sandbox process starts but fails before producing its typed result. The production preflight succeeded far
+enough to return its real contract, then the incorrect outer assertion rejected it.
+
+The corrected predicate requires the exact ready/executed receipt, null error, zero exit, system stamp,
+expected `runa2-sandbox-ready` stdout, empty stderr, zero effects and a null startup-failure observation.
+Any populated startup observation is rejected. The fixture now mirrors the real executor contract and
+includes the inverse failure regression. Focused checks pass 34/34, the complete model-free harness passes
+196/196, and the full repository suite passes 1,966/2,044 with 78 intentional environment-dependent skips
+and zero failures. Two independent reviewers returned GO with no P0/P1 findings. The failed stage remains
+evidence and is not reused; the next permitted action is a new exact archive, seal and stage followed by
+the model-free controls and browser witness.

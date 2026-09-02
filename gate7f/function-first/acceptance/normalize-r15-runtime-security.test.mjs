@@ -6,14 +6,9 @@ import { normalizeR15RuntimeSecurity } from "./normalize-r15-runtime-security.mj
 const root = "C:\\AI\\RunaAI-Next-Candidate\\staging\\m1-task-native-11111111111111111111111111111111";
 const successful = Object.freeze({
   ready: true,
-  receipt: { status: "executed", errorCode: null, exitCode: 0, systemStamped: true, effects: [] },
-  startupObservation: {
-    schemaVersion: "runa2-sandbox-startup-observation/v1",
-    processStarted: true,
-    exitCode: 0,
-    classifiedErrorCode: null,
-    privateValuesIncluded: false
-  }
+  receipt: { status: "executed", errorCode: null, exitCode: 0, systemStamped: true,
+    output: { stdout: "runa2-sandbox-ready\n", stderr: "" }, effects: [] },
+  startupObservation: null
 });
 
 test("R15 runtime normalization is exactly one no-model process-container preflight", async () => {
@@ -42,8 +37,12 @@ for (const [name, mutate] of [
   ["not ready", value => { value.ready = false; }],
   ["failed receipt", value => { value.receipt.status = "unavailable"; }],
   ["reported effect", value => { value.receipt.effects.push({ kind: "write" }); }],
-  ["nonzero exit", value => { value.startupObservation.exitCode = 1; }],
-  ["private values", value => { value.startupObservation.privateValuesIncluded = true; }]
+  ["nonzero exit", value => { value.receipt.exitCode = 1; }],
+  ["wrong startup output", value => { value.receipt.output.stdout = "not-ready\n"; }],
+  ["startup failure observation", value => { value.startupObservation = {
+    schemaVersion: "runa2-sandbox-startup-observation/v1", processStarted: true,
+    exitCode: 1, classifiedErrorCode: "sandbox-start-failed", privateValuesIncluded: false
+  }; }]
 ]) test(`R15 runtime normalization rejects ${name}`, async () => {
   const result = structuredClone(successful); mutate(result);
   await assert.rejects(normalizeR15RuntimeSecurity({ root,

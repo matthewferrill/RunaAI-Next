@@ -17,6 +17,17 @@ permission requests. Human involvement is reserved for genuine customer tests or
 
 ### Current checkpoint: R15 method repair independently approved; packaging before inference
 
+V10 method-gate update, 2026-09-02: fresh stage `288236b61f1e4944a0a77d360f704a51` stopped on its
+first model-free ACL-normalization preflight. It reached neither controls nor inference and has zero exact
+stage processes. The normalizer fixture incorrectly represented a successful MXC call with a populated
+`startupObservation`; the real executor returns `null` on success and populates that field only for a
+startup failure. The outer predicate therefore rejected the real success contract. The predicate and
+fixture now require the exact typed success receipt plus `startupObservation:null`, and a populated failure
+observation is an explicit negative case. Focused checks pass 34/34, the complete model-free harness
+passes 196/196, and the full repository suite passes 1,966/2,044 with 78 intentional environment-dependent
+skips and zero failures. Two independent reviewers returned GO with no P0/P1 findings. The failed stage is
+retained and not reused; inference remains paused for commit/reseal and a fresh method-gate stage.
+
 Gemma-only arm update, 2026-09-02: the steward selected one fresh 120-attempt Gemma eligibility arm to
 conserve compute. It covers 24 ordered attempts in each of Chat, Research, Code, Agent and Review, with
 Nomic permitted only for embeddings. A pass in all five roles can establish Gemma as the single

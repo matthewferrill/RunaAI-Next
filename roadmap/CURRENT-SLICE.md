@@ -5,6 +5,17 @@ Milestone: M1
 Slice ID: M1-S2
 Status: in progress, R15 method repair independently approved and packaging before inference; product not qualified.
 
+V10 method-gate update, 2026-09-02: fresh stage `288236b61f1e4944a0a77d360f704a51` stopped on its
+first model-free normalization preflight, before controls or inference, and has zero matching processes.
+The test double had inverted the actual MXC contract: successful execution returns
+`startupObservation:null`; a populated observation records startup failure. The real success was therefore
+rejected by the outer assertion. The corrected normalizer now requires the complete exact receipt and null
+failure observation, while the regression rejects any populated failure observation. Focused checks pass
+34/34, the complete model-free harness passes 196/196, and the full repository suite passes 1,966/2,044
+with 78 intentional environment-dependent skips and zero failures. Two independent reviewers returned GO
+with no P0/P1 findings. The stage is retained and not reused. Commit/reseal and a fresh stage remain before
+Gemma.
+
 Gemma-only eligibility update, 2026-09-02: the steward selected one fresh 120-attempt Gemma arm to
 conserve compute. It contains 24 ordered attempts per M1 role and permits Nomic only for embeddings. The
 simplified unconditional Review contract and completion/review publication chain pass 195/195 model-free

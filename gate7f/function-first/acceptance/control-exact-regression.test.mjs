@@ -271,13 +271,7 @@ test('R15 browser-bearing operators require presence and supervise an expiring s
   assert.match(helper,/runaai-m1-browser-relay-ready\/v1/u);
   assert.match(helper,/\$parsedExpiry-le\[DateTimeOffset\]::UtcNow/u);
   assert.match(helper,/Start-R15BrowserRelay -RemotePort \$uri\.Port/u);
-  assert.match(helper,/Set-R15BrowserBootstrapHandoff -StageId \$StageId -Checkpoint \$checkpoint/u);
-  assert.match(helper,/ordinarySignInForbidden=\$true;relaySupervised=\$true;humanBrowserRequired=\$true/u);
-  assert.match(helper,/NonceCopiedToClipboard/u);
-  assert.match(helper,/clipboardAutoClearSeconds/u);
-  assert.match(helper,/if\(\$null-eq\$checkpoint\)\{Write-Output \$line;continue\}/u);
-  assert.doesNotMatch(helper,/if\(\$null-eq\$line\)\{break\}\s*Write-Output \$line/u);
-  assert.doesNotMatch(helper,/Write-Output \$request\.bootstrap\.nonce/u);
+  assert.match(helper,/relaySupervised=\$true;humanBrowserRequired=\$true/u);
   assert.match(helper,/ReadLineAsync\(\)/u);
   assert.match(helper,/relayState\.Process\.HasExited/u);
   assert.match(helper,/UtcNow-ge\$relayExpiry/u);
@@ -287,84 +281,6 @@ test('R15 browser-bearing operators require presence and supervise an expiring s
   assert.match(helper,/r15-child-process-tree-stop-unconfirmed/u);
   assert.match(helper,/Invoke-R15BrowserCleanup -RelayState \$relayState -RemoteProcess \$remote -RemoteStarted \$remoteStarted/u);
   assert.match(helper,/ClearAllForwardings=yes/u);
-});
-
-test('R15 browser handoff binds in-flight reuse to preparation from the same operator invocation', {skip:process.platform!=='win32'}, async()=>{
-  const f=await fixture();try{
-    const scriptPath=path.join(f.root,'browser-bootstrap-inflight-regression.ps1');
-    const helperPath=path.resolve(import.meta.dirname,'../../../artifacts/Invoke-R15RemoteWithBrowserRelay.ps1');
-    const script=String.raw`param([Parameter(Mandatory)][string]$HelperPath)
-$ErrorActionPreference='Stop';. $HelperPath
-$stage='a'.PadLeft(32,'a');$prep='11111111-2222-3333-4444-555555555555';$flight='66666666-7777-8888-9999-aaaaaaaaaaaa';$future=[DateTimeOffset]::UtcNow.AddMinutes(5).ToString('yyyy-MM-ddTHH:mm:ss.fffZ');$secret='b'.PadLeft(64,'b');$scope=[pscustomobject]@{principalId=('m1-test-'+'1'.PadLeft(24,'1'));projectId='project';taskId='task';experience='code';sessionSha256='e'.PadLeft(64,'e')};$prepared=@{}
-function New-Checkpoint([string]$id,[string]$stageName,[string]$hash){[pscustomobject]@{checkpointId=$id;requestSha256=$hash;stage=$stageName;baseUrl='http://127.0.0.1:54321';expiresAt=$future;requestPath="C:\AI\RunaAI-Next-Candidate\staging\m1-task-native-$stage\acceptance-evidence\campaign-gemma4-26b-a4b-1234567890abcdef\browser-$id\request.json"}}
-$prepHash='c'.PadLeft(64,'c');$prepRequest=[pscustomobject]@{schemaVersion='runaai-m1-browser-checkpoint/v1';checkpointId=$prep;requestSha256=$prepHash;stage='before-native-dispatch';baseUrl='http://127.0.0.1:54321';expiresAt=$future;preparationOnly=$true;reusePreparedBrowser=$false;preparationCheckpointId=$null;scope=$scope;cancellationAt=$null;bootstrap=[pscustomobject]@{url='http://127.0.0.1:54321/__acceptance/session';nonce=$secret;expiresInSeconds=900}}
-$write={param($value)};$prepResult=Set-R15BrowserBootstrapHandoff -StageId $stage -Checkpoint (New-Checkpoint $prep 'before-native-dispatch' $prepHash) -ReadRequest {param($path)$prepRequest} -WriteClipboard $write -PreparedScopes $prepared
-$flightHash='d'.PadLeft(64,'d');$flightRequest=[pscustomobject]@{schemaVersion='runaai-m1-browser-checkpoint/v1';checkpointId=$flight;requestSha256=$flightHash;stage='in-flight';baseUrl='http://127.0.0.1:54321';expiresAt=$future;preparationOnly=$false;reusePreparedBrowser=$true;preparationCheckpointId=$prep;scope=$scope;cancellationAt=[DateTimeOffset]::UtcNow.ToString('yyyy-MM-ddTHH:mm:ss.fffZ');bootstrap=$null}
-$flightResult=Set-R15BrowserBootstrapHandoff -StageId $stage -Checkpoint (New-Checkpoint $flight 'in-flight' $flightHash) -ReadRequest {param($path)$flightRequest} -WriteClipboard $write -PreparedScopes $prepared
-[ordered]@{prepared=$prepResult.PreparationCheckpoint;preparedCount=$prepared.Count;reuse=$flightResult.ReusePreparedBrowser;url=$flightResult.BrowserUrl;nonceCopied=$flightResult.NonceCopiedToClipboard}|ConvertTo-Json -Compress`;
-    await writeFile(scriptPath,script);
-    const result=spawnSync('powershell.exe',['-NoProfile','-NonInteractive','-ExecutionPolicy','Bypass','-File',scriptPath,
-      '-HelperPath',helperPath],{encoding:'utf8',timeout:10000,windowsHide:true});
-    assert.equal(result.status,0,result.stderr||result.stdout);
-    assert.deepEqual(JSON.parse(result.stdout.trim().split(/\r?\n/u).at(-1)),{
-      prepared:true,preparedCount:1,reuse:true,url:'http://127.0.0.1:54321/',nonceCopied:false
-    });
-  }finally{await f.close();}
-});
-
-test('R15 browser handoff selects the synthetic entry page and never returns its one-time nonce', {skip:process.platform!=='win32'}, async()=>{
-  const f=await fixture();try{
-    const scriptPath=path.join(f.root,'browser-bootstrap-handoff-regression.ps1');
-    const helperPath=path.resolve(import.meta.dirname,'../../../artifacts/Invoke-R15RemoteWithBrowserRelay.ps1');
-    const script=String.raw`param([Parameter(Mandatory)][string]$HelperPath)
-$ErrorActionPreference='Stop';. $HelperPath
-$stage='a'.PadLeft(32,'a');$id='11111111-2222-3333-4444-555555555555';$expires=[DateTimeOffset]::UtcNow.AddMinutes(5).ToString('yyyy-MM-ddTHH:mm:ss.fffZ');$requestHash='c'.PadLeft(64,'c')
-$checkpoint=[pscustomobject]@{checkpointId=$id;requestSha256=$requestHash;stage='during';baseUrl='http://127.0.0.1:54321';expiresAt=$expires;requestPath="C:\AI\RunaAI-Next-Candidate\staging\m1-task-native-$stage\acceptance-evidence\browser-$id\request.json"}
-$secret='b'.PadLeft(64,'b');$captured=$null
-$read={param($path)[pscustomobject]@{schemaVersion='runaai-m1-browser-checkpoint/v1';checkpointId=$id;requestSha256=$requestHash;stage='during';baseUrl='http://127.0.0.1:54321';expiresAt=$expires;preparationOnly=$false;reusePreparedBrowser=$false;preparationCheckpointId=$null;scope=$null;cancellationAt=$null;bootstrap=[pscustomobject]@{url='http://127.0.0.1:54321/__acceptance/session';nonce=$secret;expiresInSeconds=900}}}
-$write={param($value)$script:captured=$value}
-$handoff=Set-R15BrowserBootstrapHandoff -StageId $stage -Checkpoint $checkpoint -ReadRequest $read -WriteClipboard $write
-if($captured-cne$secret){throw 'fixture-clipboard-mismatch'}
-$json=$handoff|ConvertTo-Json -Compress
-if($json.Contains($secret)){throw 'fixture-secret-returned'}
-$handoff|ConvertTo-Json -Compress`;
-    await writeFile(scriptPath,script);
-    const result=spawnSync('powershell.exe',['-NoProfile','-NonInteractive','-ExecutionPolicy','Bypass','-File',scriptPath,
-      '-HelperPath',helperPath],{encoding:'utf8',timeout:10000,windowsHide:true});
-    assert.equal(result.status,0,result.stderr||result.stdout);
-    assert.deepEqual(JSON.parse(result.stdout.trim().split(/\r?\n/u).at(-1)),{
-      BrowserUrl:'http://127.0.0.1:54321/__acceptance/session',SyntheticBootstrapRequired:true,
-      NonceCopiedToClipboard:true,ReusePreparedBrowser:false,PreparationCheckpoint:false
-    });
-  }finally{await f.close();}
-});
-
-test('R15 browser handoff rejects path, hash, expiry, TTL and in-flight binding drift', {skip:process.platform!=='win32'}, async()=>{
-  const f=await fixture();try{
-    const scriptPath=path.join(f.root,'browser-bootstrap-negative-regression.ps1');
-    const helperPath=path.resolve(import.meta.dirname,'../../../artifacts/Invoke-R15RemoteWithBrowserRelay.ps1');
-    const script=String.raw`param([Parameter(Mandatory)][string]$HelperPath)
-$ErrorActionPreference='Stop';. $HelperPath
-$stage='a'.PadLeft(32,'a');$id='11111111-2222-3333-4444-555555555555';$hash='c'.PadLeft(64,'c');$secret='b'.PadLeft(64,'b');$future=[DateTimeOffset]::UtcNow.AddMinutes(5).ToString('yyyy-MM-ddTHH:mm:ss.fffZ')
-function New-Checkpoint{$path="C:\AI\RunaAI-Next-Candidate\staging\m1-task-native-$stage\acceptance-evidence\browser-$id\request.json";[pscustomobject]@{checkpointId=$id;requestSha256=$hash;stage='during';baseUrl='http://127.0.0.1:54321';expiresAt=$future;requestPath=$path}}
-function New-Request{[pscustomobject]@{schemaVersion='runaai-m1-browser-checkpoint/v1';checkpointId=$id;requestSha256=$hash;stage='during';baseUrl='http://127.0.0.1:54321';expiresAt=$future;preparationOnly=$false;reusePreparedBrowser=$false;preparationCheckpointId=$null;scope=$null;cancellationAt=$null;bootstrap=[pscustomobject]@{url='http://127.0.0.1:54321/__acceptance/session';nonce=$secret;expiresInSeconds=900}}}
-$failures=New-Object 'System.Collections.Generic.List[string]';$write={param($value)}
-function Expect-Rejection([string]$name,[object]$checkpoint,[object]$request){try{[void](Set-R15BrowserBootstrapHandoff -StageId $stage -Checkpoint $checkpoint -ReadRequest {param($path)$request} -WriteClipboard $write);throw 'accepted'}catch{if($_.Exception.Message-ceq'accepted'){throw "$name accepted"};$failures.Add($name)|Out-Null}}
-$checkpoint=New-Checkpoint;$checkpoint.requestPath=$checkpoint.requestPath.Replace('\browser-','\nested\browser-');Expect-Rejection 'nested-path' $checkpoint (New-Request)
-$checkpoint=New-Checkpoint;$request=New-Request;$request.requestSha256='d'.PadLeft(64,'d');Expect-Rejection 'hash' $checkpoint $request
-$checkpoint=New-Checkpoint;$request=New-Request;$request.expiresAt=[DateTimeOffset]::UtcNow.AddSeconds(-1).ToString('yyyy-MM-ddTHH:mm:ss.fffZ');$checkpoint.expiresAt=$request.expiresAt;Expect-Rejection 'expired' $checkpoint $request
-$checkpoint=New-Checkpoint;$request=New-Request;$request.bootstrap.expiresInSeconds='900';Expect-Rejection 'ttl-type' $checkpoint $request
-$checkpoint=New-Checkpoint;$checkpoint.stage='in-flight';$request=New-Request;$request.stage='in-flight';$request.bootstrap=$null;$request.reusePreparedBrowser=$false;Expect-Rejection 'inflight-reuse' $checkpoint $request
-$checkpoint=New-Checkpoint;$checkpoint.stage='in-flight';$request=New-Request;$request.stage='in-flight';Expect-Rejection 'inflight-bootstrap' $checkpoint $request
-[ordered]@{rejected=$failures.Count;names=@($failures)}|ConvertTo-Json -Compress`;
-    await writeFile(scriptPath,script);
-    const result=spawnSync('powershell.exe',['-NoProfile','-NonInteractive','-ExecutionPolicy','Bypass','-File',scriptPath,
-      '-HelperPath',helperPath],{encoding:'utf8',timeout:10000,windowsHide:true});
-    assert.equal(result.status,0,result.stderr||result.stdout);
-    assert.deepEqual(JSON.parse(result.stdout.trim().split(/\r?\n/u).at(-1)),{
-      rejected:6,names:['nested-path','hash','expired','ttl-type','inflight-reuse','inflight-bootstrap']
-    });
-  }finally{await f.close();}
 });
 
 test('R15 relay normalizes PowerShell 5 string and PowerShell 7 UTC DateTime JSON expiry values',()=>{

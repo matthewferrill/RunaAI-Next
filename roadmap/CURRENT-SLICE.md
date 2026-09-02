@@ -382,14 +382,3 @@ model. Functional-control resources now live 30 minutes for one 15-minute witnes
 publication proof lives 45 minutes for its two sequential witness windows. Deterministic tests require
 both resource windows to exceed their complete permitted waits. Commit/reseal and one fresh
 controls/browser pair must pass before the Gemma-first arm begins.
-
-Latest R15 operator update: V15 stage `b230075b107b439480bfbecd64189e62` reached all 12 model-free
-controls; 11 completed and only the browser-dependent control failed. The repaired relay was healthy, but
-its handoff incorrectly directed the operator to the ordinary application root instead of the sealed
-synthetic-session bootstrap. The retained stage has zero model calls and no production or protected-data
-effect. A proposed wrapper correction added exact path/hash/expiry binding, the dedicated bootstrap route,
-same-invocation Agent05 reuse and bounded clipboard cleanup. Its selected browser tests passed 5/5, but
-independent review returned NO-GO because `Clear-Clipboard` does not exist on the actual Windows PowerShell
-5.1 or PowerShell 7.6.4 operator host. The steward's hard-stop condition is active: no further correction,
-test stage or model call will run in this campaign. The rejected draft is audit history only and must not
-remain active at the branch tip. R15 has zero Gemma attempts.

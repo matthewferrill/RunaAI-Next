@@ -1336,15 +1336,6 @@ sequential witness windows, so its resources live 45 minutes. Deterministic test
 to be strictly greater than their complete permitted witness windows. A new source seal and fresh
 controls/browser proof are required before Gemma inference.
 
-V15 stage `b230075b107b439480bfbecd64189e62` completed 11/12 model-free controls and failed only its
-browser-dependent control because the local operator handoff published the ordinary root rather than the
-sealed synthetic-session bootstrap page. The result records zero model calls, zero production change and
-zero protected-data read. A proposed wrapper correction was rejected by independent review after its
-selected browser tests passed: the promised cleanup calls `Clear-Clipboard`, which is unavailable on both
-Windows PowerShell 5.1.26100.9168 and PowerShell 7.6.4 on the actual operator host. The steward's hard stop
-is active. The rejected draft is retained only in Git audit history and reverted from the active branch
-tip; no new stage or model call is permitted. Gemma has zero R15 attempts.
-
 Gate 6 remains closed and selected-core production authority remains active at the exact release named
 above. Gate 7A follow-on checks for a second PC, phone, certificate renewal, and separately reviewed
 off-LAN ingress remain independent of the Gate 7C presentation branch. E3, E4/device-vault recovery,

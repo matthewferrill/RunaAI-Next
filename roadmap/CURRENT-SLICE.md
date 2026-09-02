@@ -3,7 +3,7 @@
 Roadmap revision: 2026-08-28.1
 Milestone: M1
 Slice ID: M1-S2
-Status: in progress, R15 implementation deterministically verified before sealing; not complete or production-qualified.
+Status: in progress, R15 sealed with 12/12 controls and real-browser preflight passed; model campaign not started and product not qualified.
 
 R15 implementation update, 2026-09-01: the prospective model-neutral correction was frozen before
 implementation in
@@ -12,10 +12,14 @@ R14's genuine Review checker-shape, exhaustive evidence-limit/counterexample rea
 type/formula reasoning and failed-check repair-context defects. Candidates, cases, 360+12 denominator,
 thresholds, authority and existing deadlines remain unchanged. R14 is not replayed, pooled or regraded.
 The implementation and its two independent P0/P1 reviews are complete with no remaining finding. The
-complete repository suite passes 1,915/1,993 with 78 intentional skips and zero failures; exact results
+complete repository suite passes 1,919/1,997 with 78 intentional skips and zero failures; exact results
 and deterministic failure disposition are in
-`../gate7f/function-first/M1-S2-R15-CORRECTION-IMPLEMENTATION-RESULTS-2026-09-01.md`. No R15 model call
-is authorized until the corrected source is committed/resealed and fresh controls plus real-browser proof pass.
+`../gate7f/function-first/M1-S2-R15-CORRECTION-IMPLEMENTATION-RESULTS-2026-09-01.md`. Source
+`2e81d94b3f362c6d8d2d04bbf6a486a091228af7` is committed, pushed and resealed. Fresh controls passed
+12/12 and a real Brave model-free proof passed all witness/publication/native-release assertions after
+five retained method-only failures were corrected. No candidate call was made by those preflights. The
+next operation is the fresh full 360-attempt campaign and candidate-blind review, with pause-and-resume
+at the first unconsumed identity for any non-model failure.
 
 R14 completion update, 2026-09-01: R14 is complete and immutable. The corrected method resumed Qwen
 at the first unconsumed identity, recorded the remaining 51 rows, and composed an exact disclosed

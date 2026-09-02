@@ -31,6 +31,32 @@ Four additional method defects were found after the r51 pause. Each failed close
 
 The post-campaign blind-review preparer also assumed exactly two Qwen evidence directories. R14's disclosed history has three execution windows, so that preparer could not truthfully bind the final 360-row worksheet. Its first multi-window revision still allowed complete Gemma/Coder inputs to be label-swapped and checked the Qwen windows only by counts plus their combined identity set. Independent negative testing rejected that package before semantic grading. The v2 post-run review tool binds Gemma and Coder to their exact candidate IDs and canonical 120-row order, binds Qwen to exact canonical ordinal slices 1-68, 69, and 70-120, and deeply matches audit/result schema, candidate, case bundle, execution windows, result hashes, and runtime seals. This change analyzes preserved evidence only and cannot alter model-facing inputs or campaign outputs.
 
+## R15 model-free browser preflight RCA
+
+R15 correctly kept candidate inference disabled until both shared controls and a real-browser publication
+preflight passed. Five preflight rounds failed closed and were retained while the method was corrected;
+all five have `modelsInvoked:false` and none consumed a campaign identity. They are not added to the 30
+historical fault-invalid campaign snapshots above because they are preflight-only runs with zero model
+attempts.
+
+| Failed preflight | Root cause | Permanent correction |
+|---|---|---|
+| 1 | The first capability-bearing/separate-port URL was blocked by Brave. Browser setup itself was already enabled. | Use the browser that is live-registered for the task and keep the visible URL neutral on the application origin. |
+| 2 | A separate visible proxy origin was also blocked. | Use one same-origin loopback proxy on the application port and a distinct hidden SSH-forward port. |
+| 3 | Swapping to that proxy after cancellation consumed the short witness window. | Start the pass-through proxy and loopback tunnel before preparation is acknowledged. |
+| 4 | The proxy rewrote compressed HTML and was started after cancellation, producing invalid content and another missed window. | Force upstream `Accept-Encoding: identity`, strip stale content-encoding headers, and prestart before the timed checkpoint. |
+| 5 | The prestarted proxy worked, but reloading the application reset the code-task UI to Chat; reopening the task consumed the window. | Inject an inert witness control before the capability exists, load the sealed capability lazily, and activate it without reload or origin change. |
+
+The first corrected fresh proof then exposed a final operator-publication hazard before execution: the old
+combined helper would have published the browser witness a second time. The browser now publishes the
+only witness. The operator wrapper validates the browser-derived observation and publishes only the
+matching acknowledgement. Independent review then found and removed one unused legacy token-in-query
+compatibility path; query capabilities now fail closed and only a server-side sealed capability can
+activate the neutral root page. The final fresh stage `df4cfda48eed4061927d1475e770ca16` passed all six live assertions;
+the witness arrived before its 45-second observation deadline, the acknowledgement arrived before its
+separate publication deadline, native release occurred inside its ceiling, no protected data was read,
+and production was unchanged. This is the required green method gate before any R15 model call.
+
 ## Corrected campaign behavior
 
 1. Run the complete model-free harness gate.

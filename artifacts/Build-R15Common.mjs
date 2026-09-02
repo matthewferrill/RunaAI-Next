@@ -37,7 +37,7 @@ assert.equal(sha256(priorSealBytes), args["--prior-seal-sha256"]);
 
 const prior = validateRuntimeSeal(JSON.parse(priorSealBytes));
 assert.equal(prior.schemaVersion, "runaai-m1-functional-runtime-seal/v11");
-assert.equal(prior.sourceCommit, "8830702386b6a904a42fe097ec1b02615bf30249");
+assert.equal(prior.sourceCommit, "6c9207d6fa3249b53f66b6a55b40bc25f348f18b");
 assert.equal(prior.caseBundleSha256, CASE_BUNDLE_SHA256);
 const sourceCommit = execFileSync("git", ["rev-parse", "HEAD"], { cwd: root, encoding: "utf8" }).trim();
 assert.match(sourceCommit, /^[a-f0-9]{40}$/u);

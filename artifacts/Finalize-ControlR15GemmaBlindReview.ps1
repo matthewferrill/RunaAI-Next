@@ -28,7 +28,7 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference='Stop'
 $root='C:\AI\RunaAI-Next-Candidate\staging\m1-task-native-'+$StageId
 $validator=Join-Path $root 'Validate-Stage.ps1'
-$validatorSha256='296eb09952f33b97c53063c07cf393c4d9587aed5b48007548527c1d3162cf08'
+$validatorSha256='91af979b6c9124531b5ebf8378af2c64a90ee3cd886d79a0a5303bccc4d5e9d5'
 if($validatorSha256-notmatch'^[a-f0-9]{64}$'){throw 'r15-gemma-review-finalize-validator-not-sealed'}
 $arguments=@('-StageId',$StageId,'-Phase','ReviewFinalize','-FinalizationSha256',$FinalizationSha256,
   '-ControlsName',$ControlsName,'-ControlsSha256',$ControlsSha256,'-BrowserProofName',$BrowserProofName,

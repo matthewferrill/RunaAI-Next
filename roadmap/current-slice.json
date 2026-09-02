@@ -21,7 +21,7 @@
   ],
   "scopeDocument": "roadmap/CURRENT-SLICE.md",
   "capabilityIds": ["C01", "C02", "C03", "C04", "C06", "C07", "C12", "C15", "C16"],
-  "nextWork": "Run the fresh full 360-attempt R15 three-candidate campaign from the sealed source, pausing and resuming at the first unconsumed identity for any non-model failure, then perform a fresh candidate-blind review. Do not replay or regrade R14.",
+  "nextWork": "Bind the R15 hardware plan and all three lease packages to extracted Git-archive bytes, commit and rebuild the exact source archive/runtime seal, then repeat 12 controls and the real-browser proof before starting the fresh 360-attempt campaign. No model identity has been consumed; do not replay or regrade R14.",
   "remainingRoadmapRequired": true,
   "completionClaim": "M1 completion is not whole-product completion."
 }

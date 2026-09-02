@@ -120,6 +120,29 @@ test('argument hash is unambiguous with quotes, unicode, empty and escaped separ
   assert.match(argvDigest(['λ',"a'b",'1:x']),/^[a-f0-9]{64}$/u);
 });
 
+test('durable terminal ordering ignores Windows process-time granularity but rejects record reversal',async()=>{
+  const f=await fixture('success');try{
+    const run=await f.launch();assert.equal((await run.completion).exitCode,0);
+    const supervisor=JSON.parse(await readFile(path.join(f.directory,'supervisor.json'),'utf8'));
+    const startedPath=path.join(f.directory,'started.json'),started=JSON.parse(await readFile(startedPath,'utf8'));
+    started.processStartedAt=new Date(Date.parse(supervisor.recordedAt)-1).toISOString();
+    assert(Date.parse(started.processStartedAt)>=Date.parse(f.prepared.request.createdAt));
+    await writeFile(startedPath,JSON.stringify(started));
+    const terminalPath=path.join(f.directory,'terminal.json'),terminal=JSON.parse(await readFile(terminalPath,'utf8'));
+    terminal.startedSha256=digest(await readFile(startedPath));terminal.result.ProcessStartedAt=started.processStartedAt;
+    await writeFile(terminalPath,JSON.stringify(terminal));
+    assert.equal((await f.observation()).status,'terminal');
+    started.processStartedAt=new Date(Date.parse(started.recordedAt)+1).toISOString();
+    await writeFile(startedPath,JSON.stringify(started));
+    terminal.startedSha256=digest(await readFile(startedPath));terminal.result.ProcessStartedAt=started.processStartedAt;
+    await writeFile(terminalPath,JSON.stringify(terminal));
+    assert.equal((await f.observation()).status,'terminal');
+    started.recordedAt=new Date(Date.parse(supervisor.recordedAt)-1).toISOString();
+    await writeFile(startedPath,JSON.stringify(started));
+    await assert.rejects(f.observation(),/m1-watchdog-started-binding/u);
+  }finally{await f.close();}
+});
+
 test('launching controller really exits; independent watchdog retains deadline and stops its tree',async t=>{
   const f=await fixture('tree',{maximumMs:5000});try{
     const driver=path.join(f.base,'controller.mjs'),options={...f.options};delete options.assertOwnerPrivate;

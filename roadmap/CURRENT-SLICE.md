@@ -3,7 +3,7 @@
 Roadmap revision: 2026-08-28.1
 Milestone: M1
 Slice ID: M1-S2
-Status: in progress, R15 sealed with 12/12 controls and real-browser preflight passed; model campaign not started and product not qualified.
+Status: in progress, R15 campaign paused before inference for an archive-bound hardware-plan correction and reseal; product not qualified.
 
 R15 implementation update, 2026-09-01: the prospective model-neutral correction was frozen before
 implementation in
@@ -11,8 +11,9 @@ implementation in
 R14's genuine Review checker-shape, exhaustive evidence-limit/counterexample reasoning, read-only Agent
 type/formula reasoning and failed-check repair-context defects. Candidates, cases, 360+12 denominator,
 thresholds, authority and existing deadlines remain unchanged. R14 is not replayed, pooled or regraded.
-The implementation and its two independent P0/P1 reviews are complete with no remaining finding. The
-complete repository suite passes 1,919/1,997 with 78 intentional skips and zero failures; exact results
+The implementation and its two independent P0/P1 reviews are complete with no remaining finding. After the
+archive-binding and watchdog-timestamp corrections, the complete tracked repository suite passes 1,929 of
+2,007 tests with 78 intentional skips and zero failures; exact results
 and deterministic failure disposition are in
 `../gate7f/function-first/M1-S2-R15-CORRECTION-IMPLEMENTATION-RESULTS-2026-09-01.md`. Source
 `2e81d94b3f362c6d8d2d04bbf6a486a091228af7` is committed, pushed and resealed. Fresh controls passed
@@ -20,6 +21,16 @@ and deterministic failure disposition are in
 five retained method-only failures were corrected. No candidate call was made by those preflights. The
 next operation is the fresh full 360-attempt campaign and candidate-blind review, with pause-and-resume
 at the first unconsumed identity for any non-model failure.
+
+R15 prelaunch update, 2026-09-01: the first scored-stage rehearsal stopped before a Home lease, provider
+call or consumed campaign identity because the create-before-load lease builder rejected eight
+source/operator byte hashes. The files had not changed; the plan had hashed CRLF-normalized Windows
+checkout bytes while the lease consumed LF bytes from the sealed Git archive. The campaign is paused. The
+common builder correction now extracts and hashes the supplied archive, independently verifies every plan
+pin against that extraction, and binds the resulting plan hash into the new seal. The related Windows
+watchdog correction uses OS process time only for exact identity and durable records for event ordering;
+its terminal-present regression and independent P0/P1 review are green. Fresh lease packages for all three
+candidates, 12 controls and the real-browser proof must pass before the 360-attempt campaign starts.
 
 R14 completion update, 2026-09-01: R14 is complete and immutable. The corrected method resumed Qwen
 at the first unconsumed identity, recorded the remaining 51 rows, and composed an exact disclosed

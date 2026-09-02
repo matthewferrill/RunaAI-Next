@@ -130,7 +130,8 @@ export async function inspectWatchdog({directory,requestSha256,assertOwnerPrivat
     &&started.intentSha256===hashes['intent.json']&&started.supervisorSha256===hashes['supervisor.json']
     &&started.createdSuspended===true&&started.atomicJobAssigned===true&&Number.isInteger(started.processId)&&started.processId>0
     &&started.processId!==supervisor.processId&&started.processId!==host.processId
-    &&Date.parse(started.processStartedAt)>=Date.parse(supervisor.recordedAt)&&Date.parse(started.processStartedAt)<=Date.parse(started.recordedAt),'started-binding');
+    &&Number.isFinite(Date.parse(started.processStartedAt))
+    &&Date.parse(started.recordedAt)>=Date.parse(supervisor.recordedAt),'started-binding');
   if(!terminal)return {...common,status:'needs-reconciliation',terminalRetained:false,records};
   demand(started&&exact(terminal,'schemaVersion,operationId,intentSha256,supervisorSha256,startedSha256,outcome,result,recordedAt,admissionOpened,automaticReplayPermitted,automaticRollbackPermitted')
     &&terminal.schemaVersion==='runaai-m1-watchdog-terminal/v1'&&terminal.operationId===request.operationId
@@ -143,7 +144,7 @@ export async function inspectWatchdog({directory,requestSha256,assertOwnerPrivat
     &&['Resumed','StopConfirmed','TimedOut','OutputLimited','OutputComplete'].every(key=>typeof result[key]==='boolean')
     &&['StdoutBytes','StderrBytes'].every(key=>Number.isInteger(result[key])&&result[key]>=0&&result[key]<=request.maximumBytes+4096)
     &&Number.isInteger(result.ActiveProcesses)&&result.ActiveProcesses>=0&&typeof result.Stdout==='string'&&Buffer.byteLength(result.Stdout)<=request.maximumBytes
-    &&Date.parse(result.StartedAt)>=Date.parse(supervisor.recordedAt)&&Date.parse(result.StartedAt)<=Date.parse(started.processStartedAt)
+    &&Date.parse(result.StartedAt)>=Date.parse(supervisor.recordedAt)&&Date.parse(result.StartedAt)<=Date.parse(started.recordedAt)
     &&Date.parse(started.recordedAt)<=Date.parse(result.FinishedAt)&&Date.parse(result.FinishedAt)<=Date.parse(terminal.recordedAt)
     &&Date.parse(terminal.recordedAt)<=Date.parse(request.deadline)+WATCHDOG_LIMITS.cleanupMs,'result-binding');
   const complete=result.Resumed===true&&result.StopConfirmed===true&&result.OutputComplete===true&&result.ActiveProcesses===0

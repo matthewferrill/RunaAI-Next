@@ -1,14 +1,16 @@
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
 import { randomUUID } from "node:crypto";
-import { readFile, realpath, stat, writeFile } from "node:fs/promises";
+import { mkdtemp, readFile, realpath, rm, stat, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
 import path from "node:path";
 
 import { canonicalJson, sha256 } from "../gate4/canonical.mjs";
 import { CASE_BUNDLE_SHA256, MODEL_CASES } from "../gate7f/function-first/acceptance/cases.mjs";
 import { normalizedRuntimeSealBytes } from "../gate7f/function-first/acceptance/r7-runtime-seal.mjs";
 import { validateRuntimeSeal } from "../gate7f/function-first/acceptance/runner-contract.mjs";
-import { readGitArchiveCommit } from "../gate7f/function-first/acceptance/source-archive.mjs";
+import { assertCanonicalGitArchive, extractVerifiedArchiveBytes,
+  readGitArchiveCommit } from "../gate7f/function-first/acceptance/source-archive.mjs";
 
 const root = path.resolve(import.meta.dirname, "..");
 const args = Object.fromEntries(process.argv.slice(2).reduce((pairs, value, index, values) => {
@@ -16,21 +18,20 @@ const args = Object.fromEntries(process.argv.slice(2).reduce((pairs, value, inde
   return pairs;
 }, []));
 assert.deepEqual(Object.keys(args).sort(), ["--output-dir", "--prior-seal", "--prior-seal-sha256",
-  "--prior-telemetry", "--source-archive"].sort());
+  "--source-archive"].sort());
 assert.match(args["--prior-seal-sha256"], /^[a-f0-9]{64}$/u);
 
 const outputDirectory = await realpath(path.resolve(args["--output-dir"]));
 assert((await stat(outputDirectory)).isDirectory());
 const sourceArchivePath = await realpath(path.resolve(args["--source-archive"]));
 const priorSealPath = await realpath(path.resolve(args["--prior-seal"]));
-const priorTelemetryPath = await realpath(path.resolve(args["--prior-telemetry"]));
 const packageLockPath = await realpath(path.join(root, "package-lock.json"));
 const criteriaRelativePath = "gate7f/function-first/M1-S2-R15-AGENT-REVIEW-CORRECTIVE-CRITERIA-2026-09-01.md";
 const criteriaPath = await realpath(path.join(root, criteriaRelativePath));
 const readinessPath = await realpath(path.join(root,
   "gate7f/function-first/readiness/evidence/20260828-functional-prerequisites.json"));
-const [sourceArchiveBytes, priorSealBytes, priorTelemetryBytes, packageLockBytes, criteriaBytes, readinessBytes]
-  = await Promise.all([readFile(sourceArchivePath), readFile(priorSealPath), readFile(priorTelemetryPath),
+const [sourceArchiveBytes, priorSealBytes, packageLockBytes, criteriaBytes, readinessBytes]
+  = await Promise.all([readFile(sourceArchivePath), readFile(priorSealPath),
     readFile(packageLockPath), readFile(criteriaPath), readFile(readinessPath)]);
 assert.equal(sha256(priorSealBytes), args["--prior-seal-sha256"]);
 
@@ -41,16 +42,39 @@ assert.equal(prior.caseBundleSha256, CASE_BUNDLE_SHA256);
 const sourceCommit = execFileSync("git", ["rev-parse", "HEAD"], { cwd: root, encoding: "utf8" }).trim();
 assert.match(sourceCommit, /^[a-f0-9]{40}$/u);
 assert.equal(readGitArchiveCommit({ archiveBytes: sourceArchiveBytes, cwd: root }), sourceCommit);
+assertCanonicalGitArchive({ archiveBytes: sourceArchiveBytes, commit: sourceCommit, cwd: root });
 
-const telemetry = JSON.parse(priorTelemetryBytes);
-telemetry.createdAt = new Date().toISOString();
-telemetry.sourceCommit = sourceCommit;
-telemetry.classification = "prospective-r15-hardware-only-not-functional-qualification";
-telemetry.inferenceOwnership = "root-functional-driver-and-browser-only";
-telemetry.leaseOwnership = "root";
-const telemetryBytes = Buffer.from(`${JSON.stringify(telemetry, null, 2)}\n`);
 const telemetryPath = path.join(outputDirectory, "campaign-hardware-plan.json");
-await writeFile(telemetryPath, telemetryBytes, { flag: "wx" });
+const extractedRoot = await mkdtemp(path.join(tmpdir(), "runa-r15-source-"));
+let telemetryBytes, telemetry;
+try {
+  extractVerifiedArchiveBytes({ archiveBytes: sourceArchiveBytes, target: extractedRoot });
+  const hardwareBuilderPath = await realpath(path.join(extractedRoot,
+    "gate7f/function-first/readiness/build-campaign-hardware-v2.mjs"));
+  execFileSync(process.execPath, [hardwareBuilderPath, telemetryPath,
+    "prospective-r15-hardware-only-not-functional-qualification", sourceCommit], {
+    cwd: extractedRoot, stdio: "pipe",
+  });
+  telemetryBytes = await readFile(telemetryPath); telemetry = JSON.parse(telemetryBytes);
+  for (const [name, expected] of Object.entries(telemetry.sourceFiles)) {
+    const filename = name === "gguf-metadata.mjs"
+      ? path.join(extractedRoot, "gate7f/evaluation/home", name)
+      : path.join(extractedRoot, "gate7f/function-first/readiness", name);
+    assert.equal(sha256(await readFile(filename)), expected, name);
+  }
+  for (const [name, expected] of Object.entries(telemetry.operatorFiles)) {
+    assert.equal(sha256(await readFile(path.join(extractedRoot,
+      "gate7f/function-first/readiness", name))), expected, name);
+  }
+} finally {
+  await rm(extractedRoot, { recursive: true, force: true });
+}
+assert.equal(telemetry.sourceCommit, sourceCommit);
+assert.equal(telemetry.classification, "prospective-r15-hardware-only-not-functional-qualification");
+assert.equal(telemetry.createdBeforeLoads, true);
+assert.equal(telemetry.inferenceOwnership, "root-functional-driver-and-browser-only");
+assert.equal(telemetry.productionRoutingChanged, false);
+assert.equal(telemetry.protectedDataIncluded, false);
 
 const suites = Object.fromEntries(MODEL_CASES.flatMap(item => (item.setup.suites ?? [])
   .map(suite => [suite.suiteId, sha256(canonicalJson(suite))])));
@@ -88,7 +112,9 @@ await writeFile(path.join(outputDirectory, "SOURCE-IDENTITY.json"), `${JSON.stri
 
 const priorControl = JSON.parse(await readFile(path.join(import.meta.dirname,
   "m1-readiness/20260831-campaign-r13-common-v1/CONTROL-REGRESSION-INPUT.json")));
-const archiveEntries = execFileSync("tar", ["-tf", sourceArchivePath], { encoding: "utf8", maxBuffer: 8_000_000 })
+const archiveEntries = execFileSync("tar", ["-tf", "-"], {
+  input: sourceArchiveBytes, encoding: "utf8", maxBuffer: 8_000_000,
+})
   .split(/\r?\n/u).filter(entry => entry && !entry.endsWith("/")).length;
 const control = { ...structuredClone(priorControl), runId: randomUUID().replaceAll("-", ""),
   source: { ...structuredClone(priorControl.source), commit: sourceCommit,

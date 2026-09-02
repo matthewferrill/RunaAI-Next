@@ -1,9 +1,10 @@
 # M1-S2 R15 Agent and Review correction implementation results
 
 Status: implementation, deterministic verification, source publication, fresh runtime seal, 12/12
-model-free controls and the real-browser publication preflight are complete. No candidate model was
-invoked. The next gate is the full fresh R15 campaign. R14 remains immutable and is not replayed or
-regraded.
+model-free controls and the real-browser publication preflight completed, but the first scored-stage
+rehearsal exposed an archive/checkout hardware-plan byte-provenance defect before inference. No candidate model was invoked. The
+campaign is paused for a corrected source/seal and repeat model-free gates. R14 remains immutable and is
+not replayed or regraded.
 
 ## Implemented Review corrections
 
@@ -91,3 +92,26 @@ repair budget and candidate-blind evaluator are unchanged. This result proves ap
 method readiness only; it does not qualify a model or product route. Run the full fresh campaign and then
 the candidate-blind review. Any method failure pauses the campaign, preserves the completed prefix, and is
 corrected before inference resumes from the first unconsumed identity.
+
+The create-before-load Home lease builder is an additional hard gate. Its first R15 package build rejected
+the sealed hardware plan with `lease-v2-campaign-source-drift`: eight of ten historical
+`sourceFiles`/`operatorFiles` hashes differed. No pinned file changed between the prior seal and R15. The
+plan was produced from CRLF-normalized Windows checkout bytes, while the lease package consumed the LF
+entries in the sealed Git archive; three source files and all five operator files therefore differed. This
+happened before a Home upload, model load, provider call or consumed identity. The correction makes the R15
+common builder extract the supplied archive, execute the archived canonical builder inside that extraction,
+verify every plan pin against extracted bytes, and bind the plan hash into the runtime seal. Direct checkout
+building rejects staged, unstaged and line-ending byte drift. The pre-correction campaign launch wrappers
+remain absent until fresh source, seal, controls and browser pins exist. A new commit/archive/seal, successful
+model-free package builds for all three candidates, repeat 12-control gate and real-browser gate are required
+before the campaign can start.
+
+The corrective full-suite gate also found an intermittent Windows watchdog timestamp-verification defect.
+The observer had treated `Process.StartTime` as causal ordering evidence even though its precision can place
+it about one millisecond before or after the fsynced UTC records. It now uses that timestamp only as exact,
+parseable process identity metadata and proves sequence from the durable supervisor, helper-start, started,
+finished and terminal records. Exact PID/hash binding, suspended creation, atomic job assignment, deadline,
+output and stopped-state checks remain enforced. A terminal-present adversarial regression covers both
+timestamp directions and record reversal. The watchdog suite passed 12/12 three consecutive times; the
+complete tracked suite passed 2,007 tests with 1,929 passes, 78 intentional skips and zero failures.
+Independent review reported GO with no P0/P1 finding. No model/provider activity occurred.

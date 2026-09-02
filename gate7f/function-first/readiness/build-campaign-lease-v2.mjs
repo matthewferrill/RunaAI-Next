@@ -3,12 +3,29 @@ import {execFileSync} from 'node:child_process';
 import path from 'node:path';
 import {MANIFEST} from './manifest.mjs';
 import {sha,assert,NOMICS,campaignV2Policy,campaignV2Profile} from './lease-v2-contract.mjs';
+import {assertGitPathsMatchCommit} from './exact-source-binding.mjs';
 
 const here=import.meta.dirname,root=path.resolve(here,'../../..');
 const candidate=MANIFEST.candidates.find(value=>value.id===process.argv[2]),leaseId=process.argv[3];
 assert(candidate&&new RegExp(`^20260829-campaign-${candidate.id}-r[1-9][0-9]*$`).test(leaseId),'v2-builder-arguments');
 const campaignBytes=readFileSync(process.argv[4]),plan=JSON.parse(campaignBytes);
-const sourceCommit=execFileSync('git',['rev-parse','HEAD'],{cwd:root,encoding:'utf8'}).trim();
+const sourceNames=['home-campaign-lease-v2.mjs','lease-v2-contract.mjs','lease-contract.mjs','Run-HomeCampaignLeaseV2.ps1'];
+const operatorNames=['Invoke-HomeCampaignLeaseV2.ps1','Write-HomeCampaignCompletionV2.ps1','complete-campaign-v2.mjs',
+  'build-campaign-hardware-v2.mjs','build-campaign-lease-v2.mjs','exact-source-binding.mjs'];
+const archiveSourceCommit=process.argv[5]??null;
+let sourceCommit;
+if(archiveSourceCommit){
+  assert(/^[a-f0-9]{40}$/.test(archiveSourceCommit)&&!existsSync(path.join(root,'.git')),'v2-campaign-archive-source');
+  sourceCommit=archiveSourceCommit;
+}else{
+  sourceCommit=execFileSync('git',['rev-parse','HEAD'],{cwd:root,encoding:'utf8'}).trim();
+  const relativePaths=[...sourceNames.map(name=>path.join('gate7f/function-first/readiness',name)),
+    'gate7f/evaluation/home/gguf-metadata.mjs',
+    ...operatorNames.map(name=>path.join('gate7f/function-first/readiness',name))];
+  assertGitPathsMatchCommit({root,sourceCommit,relativePaths});
+}
+if(plan.classification==='prospective-r15-hardware-only-not-functional-qualification')
+  assert(archiveSourceCommit,'v2-r15-archive-source-required');
 assert(plan.schemaVersion==='runa-m1-campaign-hardware-plan/v2'&&plan.sourceCommit===sourceCommit,'v2-campaign-plan');
 const policy=campaignV2Policy(plan.policy);
 const profile=campaignV2Profile(policy);
@@ -16,12 +33,10 @@ const target=path.join(root,'artifacts/m1-readiness',leaseId);assert(!existsSync
 const config={schemaVersion:'runa-m1-campaign-lease/v2',leaseId,candidate,auxiliary:NOMICS,policy,
   profile,campaignHardwarePlanSha256:sha(campaignBytes),homeRoot:'C:\\Users\\codex-audit\\AppData\\Local\\RunaM1Readiness\\'+leaseId,
   createdBeforeInference:true,inferenceOwner:'root-actual-application-adapters',lifecycleOwner:'roadmap_review'};
-const sourceNames=['home-campaign-lease-v2.mjs','lease-v2-contract.mjs','lease-contract.mjs','Run-HomeCampaignLeaseV2.ps1'];
 const files=Object.fromEntries(sourceNames.map(name=>[name,readFileSync(path.join(here,name))]));
 files['gguf-metadata.mjs']=readFileSync(path.join(root,'gate7f/evaluation/home/gguf-metadata.mjs'));
 for(const [name,bytes] of Object.entries(files))assert(sha(bytes)===plan.sourceFiles[name],'v2-campaign-source-drift');
-for(const name of ['Invoke-HomeCampaignLeaseV2.ps1','Write-HomeCampaignCompletionV2.ps1','complete-campaign-v2.mjs',
-  'build-campaign-hardware-v2.mjs','build-campaign-lease-v2.mjs']){
+for(const name of operatorNames){
   assert(sha(readFileSync(path.join(here,name)))===plan.operatorFiles[name],'v2-campaign-operator-drift');
 }
 assert(JSON.stringify(plan.candidates.find(value=>value.id===candidate.id)?.artifact)===JSON.stringify(candidate),'v2-campaign-profile-drift');

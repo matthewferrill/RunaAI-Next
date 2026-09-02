@@ -1,11 +1,12 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {mkdtemp,readFile,rm} from 'node:fs/promises';
+import {copyFile,mkdir,mkdtemp,readFile,rm,writeFile} from 'node:fs/promises';
 import {execFileSync,spawnSync} from 'node:child_process';
 import {tmpdir} from 'node:os';
 import path from 'node:path';
-import {CAMPAIGN_V2_POLICY,CAMPAIGN_V2_EXTENDED_POLICY,policyForV2Lease,validateCampaignV2Policy,
+import {sha,CAMPAIGN_V2_POLICY,CAMPAIGN_V2_EXTENDED_POLICY,policyForV2Lease,validateCampaignV2Policy,
   validateCampaignV2ExtendedPolicy,validV2Completion,validV2BatchResult,campaignV2Windows,campaignV2Profile} from './lease-v2-contract.mjs';
+import {assertGitPathsMatchCommit} from './exact-source-binding.mjs';
 
 const config=()=>({schemaVersion:'runa-m1-campaign-lease/v2',leaseId:'20260829-campaign-qwen36-r1',profile:'campaign-v2',policy:CAMPAIGN_V2_POLICY});
 test('v2 exact70/82/86 policy preserves full60minute batch and arithmetic',()=>{
@@ -24,6 +25,42 @@ test('extended profile is exact85/97/101 and preserves the full75minute measured
   assert.equal(policy.supervisorDeadlineMs,101*60000);assert.equal(policy.taskDeadlineMs,101*60000);
   assert.equal(validateCampaignV2ExtendedPolicy(policy),policy);assert.throws(()=>validateCampaignV2Policy(policy));
   assert.equal(campaignV2Profile(JSON.parse(JSON.stringify(policy))),'campaign-v2-extended');
+});
+test('R15 hardware plan is rebuilt from exact archive bytes, never checkout-normalized bytes',async t=>{
+  const root=path.resolve(import.meta.dirname,'../../..'),directory=await mkdtemp(path.join(tmpdir(),'m1-r15-hardware-plan-'));
+  t.after(async()=>rm(directory,{recursive:true,force:true}));
+  const archive=path.join(directory,'source.tar'),sourceRoot=path.join(directory,'source');
+  execFileSync('git',['archive','--format=tar','-o',archive,'HEAD'],{cwd:root});
+  await mkdir(sourceRoot);
+  execFileSync('tar',['-xf',archive,'-C',sourceRoot]);
+  const sourceCommit=execFileSync('git',['rev-parse','HEAD'],{cwd:root,encoding:'utf8'}).trim();
+  for(const name of ['build-campaign-hardware-v2.mjs','exact-source-binding.mjs'])
+    await copyFile(path.join(import.meta.dirname,name),path.join(sourceRoot,'gate7f/function-first/readiness',name));
+  const target=path.join(directory,'campaign-hardware-plan.json'),builder=path.join(sourceRoot,'gate7f/function-first/readiness/build-campaign-hardware-v2.mjs');
+  execFileSync(process.execPath,[builder,target,'prospective-r15-hardware-only-not-functional-qualification',sourceCommit],{cwd:sourceRoot,encoding:'utf8'});
+  const plan=JSON.parse(await readFile(target,'utf8'));
+  assert.equal(plan.sourceCommit,sourceCommit);
+  assert.equal(plan.classification,'prospective-r15-hardware-only-not-functional-qualification');
+  assert.deepEqual(plan.policy,CAMPAIGN_V2_EXTENDED_POLICY);
+  for(const [name,expected] of Object.entries(plan.sourceFiles)){
+    const filename=name==='gguf-metadata.mjs'?path.join(sourceRoot,'gate7f/evaluation/home',name):path.join(sourceRoot,'gate7f/function-first/readiness',name);
+    assert.equal(sha(await readFile(filename)),expected,name);
+  }
+  for(const [name,expected] of Object.entries(plan.operatorFiles))assert.equal(sha(await readFile(path.join(sourceRoot,'gate7f/function-first/readiness',name))),expected,name);
+});
+test('exact commit binding rejects unstaged CRLF transport and staged source drift',async t=>{
+  const directory=await mkdtemp(path.join(tmpdir(),'m1-source-binding-'));t.after(async()=>rm(directory,{recursive:true,force:true}));
+  execFileSync('git',['init','-q'],{cwd:directory});
+  await writeFile(path.join(directory,'source.txt'),'alpha\n');
+  execFileSync('git',['add','source.txt'],{cwd:directory});
+  execFileSync('git',['-c','user.name=Runa Test','-c','user.email=runa@example.invalid','commit','-q','-m','fixture'],{cwd:directory});
+  const sourceCommit=execFileSync('git',['rev-parse','HEAD'],{cwd:directory,encoding:'utf8'}).trim();
+  assert.equal(assertGitPathsMatchCommit({root:directory,sourceCommit,relativePaths:['source.txt']}),sourceCommit);
+  await writeFile(path.join(directory,'source.txt'),'alpha\r\n');
+  assert.throws(()=>assertGitPathsMatchCommit({root:directory,sourceCommit,relativePaths:['source.txt']}),/v2-campaign-source-drift/u);
+  await writeFile(path.join(directory,'source.txt'),'changed\n');execFileSync('git',['add','source.txt'],{cwd:directory});
+  await writeFile(path.join(directory,'source.txt'),'alpha\n');
+  assert.throws(()=>assertGitPathsMatchCommit({root:directory,sourceCommit,relativePaths:['source.txt']}),/v2-campaign-source-drift/u);
 });
 test('v2 rejects v1 schema, old policy and every changed margin or ceiling',()=>{
   assert.throws(()=>policyForV2Lease({...config(),schemaVersion:'runa-m1-campaign-lease/v1'}));

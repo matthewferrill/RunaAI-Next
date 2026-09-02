@@ -1,5 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
+import path from "node:path";
 
 import { ACCEPTANCE_POLICY, CASE_BUNDLE_SHA256 } from "./cases.mjs";
 import { expectedRuntimeSealSuites } from "./r7-runtime-seal.mjs";
@@ -48,4 +50,21 @@ test("R15 rejects R14 labels and every changed prospective criteria binding", ()
     value => { value.qualificationCriteria.rubricVersion = "2026-09-01.r14-review-stated-control"; }]) {
     const value = seal(); mutate(value); assert.throws(() => validateRuntimeSeal(value));
   }
+});
+
+test("R15 common builder regenerates hardware source pins instead of copying prior telemetry", async () => {
+  const source = await readFile(path.resolve(import.meta.dirname, "../../../artifacts/Build-R15Common.mjs"), "utf8");
+  assert.match(source, /build-campaign-hardware-v2\.mjs/u);
+  assert.match(source, /prospective-r15-hardware-only-not-functional-qualification/u);
+  assert.match(source, /mkdtemp/u);
+  assert.match(source, /extractVerifiedArchiveBytes/u);
+  assert.match(source, /archiveBytes: sourceArchiveBytes/u);
+  assert.doesNotMatch(source, /\["-xf", sourceArchivePath/u);
+  assert.doesNotMatch(source, /\["-tf", sourceArchivePath/u);
+  assert.match(source, /input: sourceArchiveBytes/u);
+  assert.match(source, /assertCanonicalGitArchive/u);
+  assert.match(source, /telemetry\.sourceFiles/u);
+  assert.match(source, /telemetry\.operatorFiles/u);
+  assert.doesNotMatch(source, /priorTelemetry|--prior-telemetry/u);
+  assert.match(source, /telemetry\.sourceCommit, sourceCommit/u);
 });

@@ -69,6 +69,31 @@ and production was unchanged. This is the required green method gate before any 
 8. When source or runtime seals differ, compose windows only after a machine comparison proves the model-facing view, cases, prompts, provider settings, and evaluator contract are identical. Never claim one uninterrupted arm.
 9. Resume at the exact cursor. Never restart a valid prefix merely because the harness stopped later.
 
+R15 added one more prelaunch enforcement point to this sequence. The first Home lease-package build failed
+with `lease-v2-campaign-source-drift` before upload or inference because the plan hashed CRLF-normalized
+Windows checkout bytes while the lease package used LF entries from the sealed Git archive. None of the ten
+pinned files had changed between the prior seal and R15, but line-ending transport made three source hashes
+and all five operator hashes differ. The lease builder correctly failed closed. The permanent correction is
+to extract the supplied archive, execute its canonical R15-aware builder inside that extraction, verify every
+generated pin against the extracted files, bind the plan hash into the runtime seal, and reject any direct
+checkout whose staged, unstaged or line-ending bytes differ from the named commit. Pre-correction launch
+wrappers stay disabled until fresh gates provide replacement pins. This event contains zero attempts,
+zero provider calls and zero model loads; it is a method-publication failure and does not alter the 30
+historical fault-invalid campaign snapshot count.
+
+The corrective repository gate then exposed a separate intermittent watchdog-verification defect before
+reseal. Windows `Process.StartTime` and the fsynced UTC journal records have different precision and can
+legitimately appear about one millisecond on either side of each other. The observer incorrectly used that
+OS identity timestamp as causal ordering evidence, so a valid stopped process could fail
+`m1-watchdog-started-binding` or later `m1-watchdog-result-binding`. The correction keeps the process start
+timestamp parseable and exact across `started.json` and the terminal result, but proves causality only from
+the durable record chain: supervisor record, helper start, started record, finish and terminal record. PID
+separation, hashes, suspended creation, atomic job assignment, deadline, output and stopped-state bindings
+remain unchanged. The terminal-present regression covers both timestamp directions and durable-record
+reversal. It passed 12/12 three consecutive times; the complete tracked suite passed 2,007 tests with 1,929
+passes, 78 intentional skips and zero failures, and independent review reported GO with no P0/P1 finding.
+No provider call, model load or campaign identity was involved.
+
 ## Current R14 Qwen continuity
 
 The stopped r41 directory contains 70 historical rows. Rows 1-68 are an immutable harness-valid completed prefix; that phrase does not independently assert that every row semantically passed. Historical rows 69-70 are non-model rows and are not qualification evidence. The first corrected continuation began with 52 identities. Its r49 window recorded `qwen36-27b-mtp--agent-05-cancel-drain--2` as completed with one provider call and one native call. The next Agent-06 journey exposed the numeric abort-classification and pause-observation retention defects described above; the old runner did not export a full attempt record, so that event is not qualification evidence and the identity remains unconsumed. The immutable harness-valid prefix is now 69 and the remaining exact continuation contains 51 identities beginning at `qwen36-27b-mtp--agent-06-crash-reconcile--2`.
@@ -100,6 +125,10 @@ not another replay of R14.
 - The complete repository run initially reported six failures. Two were stale R13/R14 static assertions that still encoded the removed shared publication/observation deadline and are now corrected and included in this gate. The other four were sandbox permission failures: the 21-test Windows process-tree suite and 27-check probe-instrument suite both passed in an authorized non-sandboxed rerun. None was attributed to a model.
 - A later default `node --test` discovery run executed untracked retained artifact copies, including an old metadata-publication stress fixture, and reported a transient sharing timeout from that non-source evidence tree. `npm test` now enumerates only Git-tracked `*.test.mjs` files, rejects duplicate/escaping/symlink inventory entries, and therefore cannot turn retained artifacts into an accidental release gate. Environment-dependent tracked tests still require their authorized writable/process environment; they are not model tests.
 - The final corrected tracked-only repository run enumerated 195 source test files and completed 1,980 tests: 1,902 passed, 78 intentionally skipped, 0 failed. Its regressions prove exclusion of untracked artifacts, rejection of Git symlink mode, rejection of a parent-junction escape, rejection of Windows case-fold aliases, fail-closed child-process outcome propagation, review-package topology binding, and semantic-publication consistency.
+- After the R15 archive-binding and watchdog-timestamp corrections, the complete tracked suite completed
+  2,007 tests: 1,929 passed, 78 intentionally skipped and zero failed. The watchdog suite passed 12/12 in
+  three consecutive runs, including a terminal-present exact-hash regression for both directions of Windows
+  process-time granularity. Independent review reported GO with no P0/P1 finding.
 - The frozen R14 qualification-criteria bytes remain identical to the prior sealed source (`565f9b805ef86cfd1bb003e3aeb5e4e6ed063af854dff58a0e5970df15362f5d`). Current campaign status and post-freeze test counts live in this RCA and the continuity addendum, not in that model-facing criteria file, so the exact continuation can satisfy seal equivalence.
 - Independent historical audit: ledger totals above and the retained M1-S2 result/RCA documents.
 - The independent post-r51 worker-lifetime code review reported GO with no P0/P1 finding. A later review of the first tracked-only runner found that its plain path inventory did not reject Git symlink mode, parent junctions, or Windows path aliases; that release blocker is corrected and covered by the regressions above. Two final independent re-reviews report GO with no P0/P1 finding. The final staged inventory contains 195 tracked test files and the full-suite totals above. The independent documentation/accounting review verified the 30-snapshot arithmetic and found one stale future-tense r49 recovery sentence; that sentence is corrected to the completed, hash-bound provenance used by r50/r51. Provider-consuming execution remains gated on committing/resealing this exact source and passing the fresh model-free real-browser preflight.

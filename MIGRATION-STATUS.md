@@ -15,17 +15,19 @@ are unchanged. M1 is authorized, not complete; its first local wiring result is 
 The steward authorized necessary non-destructive work and commit/push to RunaAI-Next without recurring
 permission requests. Human involvement is reserved for genuine customer tests or human-only operations.
 
-### Current checkpoint: R15 sealed; controls and real-browser preflight passed
+### Current checkpoint: R15 campaign paused before inference for archive-bound hardware-plan reseal
 
 The prospective contract frozen in
 `gate7f/function-first/M1-S2-R15-AGENT-REVIEW-CORRECTIVE-CRITERIA-2026-09-01.md` is implemented and
 recorded in `gate7f/function-first/M1-S2-R15-CORRECTION-IMPLEMENTATION-RESULTS-2026-09-01.md`. The
 unconditional exact-echo Review wire, generic evidence-limit/counterexample protocol, type-preserving
 read-only Agent analysis and bounded exact failed-check projection passed two independent P0/P1 reviews.
-After the R15 browser-control wrapper was included, the final complete suite passed 1,919/1,997 with 78
-intentional environment-dependent skips and zero failures. The committed source is
-`2e81d94b3f362c6d8d2d04bbf6a486a091228af7`; the fresh runtime-seal SHA-256 is
-`89adf8bdcfa2dc4db0c07dd96b4b2c80953d2a5188c18f9cd14f77602493e93d`.
+The corrected archive binding and Windows watchdog timestamp policy now pass the complete tracked suite:
+2,007 tests, 1,929 passed, 78 intentional environment-dependent skips and zero failures. The watchdog's
+terminal-present timing regression passed 12/12 three consecutive times, and independent review reported
+GO with no P0/P1 finding. The prior `2e81d94b3f362c6d8d2d04bbf6a486a091228af7` source and
+`89adf8bdcfa2dc4db0c07dd96b4b2c80953d2a5188c18f9cd14f77602493e93d` runtime seal are retained history,
+not valid R15 launch inputs; a new commit/archive/seal is still required.
 
 Fresh model-free controls completed 12/12 with zero failed drivers. After five retained preflight-method
 failures with zero model calls, the corrected same-origin Brave flow passed actual-browser exercise,
@@ -33,6 +35,17 @@ on-time witness, on-time acknowledgement, witness-before-acknowledgement, acknow
 and native release. It did not read protected data or change production. No R15 inference or customer
 trial has started. The next gate is the full fresh 360-attempt, three-candidate campaign followed by a
 fresh candidate-blind review; any non-model method failure pauses at the first unconsumed identity.
+
+The first scored-stage rehearsal then stopped before a Home lease or provider call. The create-before-load
+Home lease builder proved that the R15 hardware plan had hashed Windows checkout bytes while the lease
+package consumed the sealed Git-archive bytes. CRLF checkout normalization made 8 of the 10 historical
+source/operator pins differ from their LF archive entries even though those files had not changed between
+the prior seal and the R15 source. This is an archive/checkout provenance defect, not a candidate failure,
+and no campaign identity was consumed. The campaign is paused while the common builder is changed to extract
+the supplied archive, execute its own canonical hardware builder inside that extraction, independently
+verify every generated source/operator hash against the extraction, and bind the plan hash into the runtime
+seal. The deterministic correction and independent review are green. A new commit/archive/seal, all three
+model-free lease packages, 12 controls and the real-browser proof must pass before inference.
 
 ### Retained checkpoint: R14 complete; no Review route
 

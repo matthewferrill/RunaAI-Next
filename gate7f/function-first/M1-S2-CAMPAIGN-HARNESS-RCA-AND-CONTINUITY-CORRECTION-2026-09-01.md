@@ -71,8 +71,14 @@ PowerShell 7 `ConvertFrom-Json` automatically converted its ISO-8601 `Z` expiry 
 `System.DateTime`; the wrapper's string-only type check therefore failed before relay publication. The
 stage stopped before any model lease or Gemma request. The correction accepts only UTC `DateTime`,
 zero-offset `DateTimeOffset`, or a parseable `Z`-terminated string, normalizes the value to one UTC
-`DateTimeOffset`, and regression-tests both PowerShell 5 and 7 conversions. V13 is retained and a
-new source seal and stage are required.
+`DateTimeOffset`, and regression-tests both PowerShell 5 and 7 conversions. The focused suite passes
+31/31, the campaign harness passes 198/198, and the isolated tracked suite passes 1,972/2,050 with 78
+intentional skips and zero failures. Two independent re-reviews returned GO with no P0/P1 findings.
+The repair is committed as `4369bcdbf03200cb6334261a5f2820eede1e0602`; package
+`20260902-campaign-r15-common-v14` was built from that exact commit and independently verified against all
+2,465 source entries, with archive SHA-256
+`1f3af4d849ffd17f0ff67a8f62c71239cb8978e38a9da04647a274b7822afa6a`. V13 remains retained; its
+replacement operator seal and fresh stage remain required before inference.
 
 R15 correctly kept candidate inference disabled until both shared controls and a real-browser publication
 preflight passed. Five preflight rounds failed closed and were retained while the method was corrected;

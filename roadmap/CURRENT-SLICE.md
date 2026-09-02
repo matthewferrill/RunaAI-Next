@@ -3,7 +3,7 @@
 Roadmap revision: 2026-08-28.1
 Milestone: M1
 Slice ID: M1-S2
-Status: in progress, R15 V13 retained on checkpoint-parser failure; repair/reseal before inference; product not qualified.
+Status: in progress, R15 V14 package built and verified; fresh model-free stage before inference; product not qualified.
 
 V12 method-gate update, 2026-09-02: fresh stage `08fdd8ae4cce45dd9cb2ee3e0fb17e91`
 recorded 11 completed model-free controls and one failed browser-dependent control, with no model calls.
@@ -26,8 +26,13 @@ V13 execution update, 2026-09-02: fresh stage `9fa6b29e728f4d41ae15580f4f57b421`
 2,465 verified source entries, then stopped at its first browser checkpoint before relay publication or
 inference. PowerShell 7 converted the valid ISO UTC expiry string into `System.DateTime`, but the
 local operator required a string. The repaired parser accepts only an exact UTC/zero-offset value and is
-covered by an actual PowerShell 5/7 `ConvertFrom-Json` coercion regression. V13 is retained and not reused; reseal plus
-a new model-free stage are required, and Gemma remains at zero attempts.
+covered by an actual PowerShell 5/7 `ConvertFrom-Json` coercion regression. Focused checks pass 31/31,
+the campaign harness passes 198/198, and the isolated tracked suite passes 1,972/2,050 with 78 intentional
+skips and zero failures. Two independent re-reviews returned GO with no P0/P1 findings. The repair is
+committed as `4369bcdbf03200cb6334261a5f2820eede1e0602`; package
+`20260902-campaign-r15-common-v14` was built and verified against all 2,465 source entries, then pinned
+into the operators by this seal update. V13 is retained and not reused; a new model-free stage is required,
+and Gemma remains at zero attempts.
 
 V11 finalization-key-order update, 2026-09-02: fresh stage `4b57aec1ddca418dbf20c2df7ddac6da`
 finalized all 2,464 source files, then stopped before the first control because the validator's manually

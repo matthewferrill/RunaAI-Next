@@ -15,7 +15,7 @@ are unchanged. M1 is authorized, not complete; its first local wiring result is 
 The steward authorized necessary non-destructive work and commit/push to RunaAI-Next without recurring
 permission requests. Human involvement is reserved for genuine customer tests or human-only operations.
 
-### Current checkpoint: R15 V13 retained on checkpoint-parser failure; repair/reseal before inference
+### Current checkpoint: R15 V14 package built and verified; fresh model-free stage before inference
 
 V12 method-gate update, 2026-09-02: fresh stage `08fdd8ae4cce45dd9cb2ee3e0fb17e91`
 recorded 11 completed model-free controls and one failed browser-dependent control, with
@@ -44,7 +44,14 @@ It reached its first live browser checkpoint, then the local relay wrapper rejec
 `System.DateTime`, while the wrapper required a string. The stage stopped before relay publication,
 before any model lease and with zero Gemma attempts. The parser now accepts only UTC `DateTime`,
 zero-offset `DateTimeOffset`, or a `Z`-terminated parseable string and normalizes it to one UTC instant;
-an actual PowerShell 5/7 JSON-coercion regression is required before a new seal and stage.
+the actual PowerShell 5/7 JSON-coercion regression passes. Focused checks pass 31/31, the campaign
+harness passes 198/198, and the isolated tracked suite passes 1,972/2,050 with 78 intentional skips and
+zero failures. Two independent re-reviews returned GO with no P0/P1 findings. The correction is committed
+as `4369bcdbf03200cb6334261a5f2820eede1e0602`; fresh package
+`20260902-campaign-r15-common-v14` was built from that exact commit and verified against all 2,465
+source entries. Its archive SHA-256 is
+`1f3af4d849ffd17f0ff67a8f62c71239cb8978e38a9da04647a274b7822afa6a`. Package and validator pins are
+propagated by this operator-seal update. A new model-free stage remains required before inference.
 
 V11 finalization-key-order RCA, 2026-09-02: fresh stage `4b57aec1ddca418dbf20c2df7ddac6da`
 successfully finalized all 2,464 source files, then stopped before its first control because the validator's

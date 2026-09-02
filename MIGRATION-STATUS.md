@@ -1383,3 +1383,21 @@ statistical reliability or whole-product qualification. Exact evidence, limitati
 are indexed in `gate7f/function-first/M1-S2-GEMMA-FOCUSED-REVIEW-RESULTS-2026-09-02.md`.
 A separate static review of the frozen evidence and application contract returned `GO` with no P0/P1
 commit blocker and performed no model, browser, mock or test campaign.
+
+## Five-function model selection complete (2026-09-02)
+
+R13 remains immutable actual-system qualification evidence for Gemma Chat 24/24, Research 23/24, Code
+24/24 and Agent 24/24. It recorded exclusive Home model leases, required actual application/browser
+checkpoints, 12/12 shared controls, complete candidate-blind semantic review, zero final model residency,
+restored GPU limits, unchanged production routing and no protected-data read. The later R15 method failures
+do not retroactively invalidate those completed passes.
+
+The focused Review result closes the remaining model-role gap. Gemma may therefore be selected as the
+single model candidate for all five bounded M1 functions; no model pool and no further LLM qualification
+campaign are required on the current artifact, settings and contracts. Coder remains an optional stronger
+Research alternative by score, not a requirement.
+
+This completes model-function selection only. The exact current application build still requires its
+actual Omen-Control-Home acceptance journey, followed by the separate production-routing and customer-trial
+gates. Another model-scoring campaign is justified only after a material model artifact, inference-setting,
+role-prompt, checker-semantic or frozen functional-contract change, or a specific actual production defect.

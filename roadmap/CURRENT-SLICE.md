@@ -3,7 +3,7 @@
 Roadmap revision: 2026-08-28.1
 Milestone: M1
 Slice ID: M1-S2
-Status: focused Gemma Review model/contract qualification passed; Agent and product remain unqualified.
+Status: all five bounded model roles have qualifying routes; application release and product remain unqualified.
 
 Focused actual-system Review result, 2026-09-02: the failed 120-attempt/browser R15 method remains retired
 and is not resumed. A reduced Omen -> Control -> Home method used the eight frozen Review scenarios once
@@ -19,6 +19,15 @@ statistical reliability or the product. Evidence and all actual-run RCAs are ind
 `../gate7f/function-first/M1-S2-GEMMA-FOCUSED-REVIEW-RESULTS-2026-09-02.md`. A separate static review of
 the frozen evidence and contract returned `GO` with no P0/P1 commit blocker; it ran no model, browser,
 mock or test campaign.
+
+Five-function disposition, 2026-09-02: R13 remains immutable valid actual-system evidence for Gemma Chat
+24/24, Research 23/24, Code 24/24 and Agent 24/24. R13 used exclusive Home leases, the required actual
+application/browser checkpoints, 12/12 controls, candidate-blind semantic review and exact cleanup. The
+later R15 method failures do not erase those completed results. Combined with the focused Review pass,
+Gemma now has a qualifying route for all five bounded M1 model functions. No further LLM qualification
+campaign is required unless a material model, inference-setting, prompt, checker-semantic or frozen-contract
+change occurs. The remaining work is exact-current-application acceptance, production routing and the
+customer trial, not another model campaign.
 
 The historical halt text below is retained as evidence of the retired method, not current progress.
 

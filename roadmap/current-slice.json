@@ -20,11 +20,12 @@
     "gate7f/function-first/M1-S2-R15-CORRECTION-IMPLEMENTATION-RESULTS-2026-09-01.md",
     "gate7f/function-first/M1-S2-R15-CAMPAIGN-HALT-AND-COST-RCA-2026-09-02.md",
     "gate7f/function-first/M1-S2-GEMMA-FOCUSED-REVIEW-RESULTS-2026-09-02.md",
-    "gate7f/function-first/M1-S2-GEMMA-FOCUSED-REVIEW-INDEPENDENT-REVIEW-2026-09-02.md"
+    "gate7f/function-first/M1-S2-GEMMA-FOCUSED-REVIEW-INDEPENDENT-REVIEW-2026-09-02.md",
+    "gate7f/function-first/M1-S2-FIVE-FUNCTION-MODEL-QUALIFICATION-DECISION-2026-09-02.md"
   ],
   "scopeDocument": "roadmap/CURRENT-SLICE.md",
   "capabilityIds": ["C01", "C02", "C03", "C04", "C06", "C07", "C12", "C15", "C16"],
-  "nextWork": "The retired R15 browser campaign remains halted and must not be replayed. The reduced actual Omen-Control-Home qualification selected Gemma as the single candidate for the bounded Review model role: 8 of 8 semantic answers and 8 of 8 final unconditional accept-or-revise checker decisions passed, with exact cleanup. Review does not require model pooling. The separate Agent role, actual application/browser journey, production routing and product qualification remain open. Continue with the same reduced failure policy for Agent: one real-system readiness gate, no mock qualification, stop ungraded on infrastructure failure, and preserve a full actual-run RCA before any corrected resume.",
+  "nextWork": "Model-function selection is complete. Immutable R13 actual-system evidence qualifies Gemma for Chat 24/24, Research 23/24, Code 24/24 and Agent 24/24; the focused 2026-09-02 actual-system result qualifies Gemma for bounded Review with 8 of 8 semantic answers and 8 of 8 final accept-or-revise checker decisions. The later retired R15 method failures do not erase completed R13 evidence. Do not start another LLM qualification campaign unless the model artifact, inference settings, role prompt, checker semantics or frozen functional contract materially changes. Next reconcile and seal the exact current application, run the actual Omen-Control-Home application acceptance journey, then use the separate production-routing and customer-trial gates. No mock qualification evidence is permitted.",
   "remainingRoadmapRequired": true,
   "completionClaim": "M1 completion is not whole-product completion."
 }

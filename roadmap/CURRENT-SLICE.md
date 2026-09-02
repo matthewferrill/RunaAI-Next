@@ -3,7 +3,24 @@
 Roadmap revision: 2026-08-28.1
 Milestone: M1
 Slice ID: M1-S2
-Status: all five bounded model roles have qualifying routes; application release and product remain unqualified.
+Status: Gemma-primary application implementation is active; application release and product remain unqualified.
+
+Implementation checkpoint, 2026-09-02: model comparison is tabled. The active slice configures Gemma as
+the single primary for Chat, Research, Code, Agent and Review, preserves the previously qualified Research
+checker semantics, isolates the simplified `accept`/`revise` checker to Review, and creates a
+machine-enforced composite qualification record. The accepted UX hierarchy exposes Chat, Code and Research
+as the three primary workspaces; Agent is a governed task state inside Code and Review is contextual to
+selected sources, artifacts or diffs. Deterministic implementation tests cannot qualify the model or
+actual application. Any actual method failure stops the gate for RCA and correction before retry.
+
+The application is now under a product-foundation rebaseline before final customer acceptance: complete
+the shell and conversation lifecycle, real Settings and Omen/Control/Home status, authorized local-folder
+and local-Git connections, Research/Code/artifact work surfaces and governed local changes, then run the
+bounded actual-system journeys. No new LLM campaign is part of that work unless a qualified model contract
+materially changes. See
+`../gate7f/function-first/M1-S2-GEMMA-PRIMARY-APPLICATION-SLICE-2026-09-02.md`,
+`../gate7f/function-first/RUNAAI-PRODUCT-FOUNDATION-AND-UX-BASELINE-2026-09-02.md` and
+`../gate7f/function-first/M1-S2-DEFERRED-ADVERSARIAL-MODEL-DESIGN-2026-09-02.md`.
 
 Focused actual-system Review result, 2026-09-02: the failed 120-attempt/browser R15 method remains retired
 and is not resumed. A reduced Omen -> Control -> Home method used the eight frozen Review scenarios once

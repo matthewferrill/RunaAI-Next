@@ -116,6 +116,23 @@ remain unfinished. Record the required subset so partial families do not create 
    customer tests, recovery, isolation and truthful modality claims. Do not require all of M4 before an
    independently safe phone UI improvement; record the actual prerequisite edges.
 
+### Product-foundation rebaseline — 2026-09-02
+
+The five-function model qualification completed before enough of the product foundation existed to make
+those functions useful to an ordinary user. The steward therefore approved a bounded pull-forward before
+final customer acceptance: the shared shell and conversation lifecycle; real Settings; honest
+Omen/Control/Home status and recovery; authorized local folders and local Git read-only first; usable
+Research, Code and artifact work surfaces; and then governed local changes. Chat, Code and Research are
+the three primary workspaces. Agent is contextual task state inside Code and Review is contextual to exact
+sources, artifacts or diffs.
+
+This does not relabel all of C03, C05, C08, C10 or any other later family as M1-complete. It advances only
+the minimum vertical slices required for a credible first product and leaves live web, GitHub publication,
+cloud connectors, richer artifact formats, skills, automation, parallel agents, voice/media, mobile and
+off-LAN work in their governed milestones. The exact UX, Settings, connection, system-state and acceptance
+contracts are recorded in
+`gate7f/function-first/RUNAAI-PRODUCT-FOUNDATION-AND-UX-BASELINE-2026-09-02.md`.
+
 No milestone label authorizes all historical RunaAI modules, public self-signup, automatic learning,
 unrestricted machine/account access, purchases, or unreviewed protected-data migration. The roadmap
 keeps these distinctions visible rather than treating a hold as removal from the product destination.
@@ -180,6 +197,8 @@ blocker is needed. Never request secrets in chat. Avoid destructive operations o
 - `MIGRATION-STATUS.md`, `gate7f/README.md`, `gate6b/composition.mjs`, `gate7e/contracts.mjs`:
   current source/release boundaries; verify live state before changing hosts.
 - `gate7f/GATE7F-QUALIFICATION-RESULTS-2026-08-27.md`: preserved two-model results and limitations.
+- `gate7f/function-first/RUNAAI-PRODUCT-FOUNDATION-AND-UX-BASELINE-2026-09-02.md`: approved product shell,
+  Settings, connections, work-surface and actual-system direction before final customer acceptance.
 - Official capability references reviewed 2026-08-28: [Claude Code](https://code.claude.com/docs/en/how-claude-code-works),
   [extensibility](https://code.claude.com/docs/en/features-overview),
   [file creation](https://support.claude.com/en/articles/12111783-create-and-edit-files-with-claude),

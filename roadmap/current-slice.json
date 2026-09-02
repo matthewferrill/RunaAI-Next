@@ -3,7 +3,7 @@
   "roadmapRevision": "2026-08-28.1",
   "milestone": "M1",
   "sliceId": "M1-S2",
-  "state": "authorized-not-complete",
+  "state": "in-progress",
   "completionEvidence": [
     "gate7f/function-first/M1-S2-R9-THREE-MODEL-RESULTS-2026-08-30.md",
     "gate7f/function-first/M1-S2-R10-THREE-MODEL-RESULTS-2026-08-30.md",
@@ -21,11 +21,14 @@
     "gate7f/function-first/M1-S2-R15-CAMPAIGN-HALT-AND-COST-RCA-2026-09-02.md",
     "gate7f/function-first/M1-S2-GEMMA-FOCUSED-REVIEW-RESULTS-2026-09-02.md",
     "gate7f/function-first/M1-S2-GEMMA-FOCUSED-REVIEW-INDEPENDENT-REVIEW-2026-09-02.md",
-    "gate7f/function-first/M1-S2-FIVE-FUNCTION-MODEL-QUALIFICATION-DECISION-2026-09-02.md"
+    "gate7f/function-first/M1-S2-FIVE-FUNCTION-MODEL-QUALIFICATION-DECISION-2026-09-02.md",
+    "gate7f/function-first/M1-S2-GEMMA-PRIMARY-APPLICATION-SLICE-2026-09-02.md",
+    "gate7f/function-first/M1-S2-DEFERRED-ADVERSARIAL-MODEL-DESIGN-2026-09-02.md",
+    "gate7f/function-first/RUNAAI-PRODUCT-FOUNDATION-AND-UX-BASELINE-2026-09-02.md"
   ],
   "scopeDocument": "roadmap/CURRENT-SLICE.md",
   "capabilityIds": ["C01", "C02", "C03", "C04", "C06", "C07", "C12", "C15", "C16"],
-  "nextWork": "Model-function selection is complete. Immutable R13 actual-system evidence qualifies Gemma for Chat 24/24, Research 23/24, Code 24/24 and Agent 24/24; the focused 2026-09-02 actual-system result qualifies Gemma for bounded Review with 8 of 8 semantic answers and 8 of 8 final accept-or-revise checker decisions. The later retired R15 method failures do not erase completed R13 evidence. Do not start another LLM qualification campaign unless the model artifact, inference settings, role prompt, checker semantics or frozen functional contract materially changes. Next reconcile and seal the exact current application, run the actual Omen-Control-Home application acceptance journey, then use the separate production-routing and customer-trial gates. No mock qualification evidence is permitted.",
+  "nextWork": "Gemma-primary application implementation is active on codex/m1-gemma-primary. Preserve the qualified Research contract, isolate the simplified accept-or-revise checker to Review and add machine-enforced composite qualification. Use Chat, Code and Research as the three primary workspaces; keep Agent inside governed Code tasks and Review contextual to exact sources, artifacts or diffs. Before final customer acceptance, implement the product-foundation baseline: complete shell and conversation lifecycle, real Settings and Omen-Control-Home status, authorized local-folder and local-Git connections, Research-Code-artifact work surfaces and governed local changes. Then run bounded actual-system journeys. Comparison models remain tabled. Do not start another LLM qualification campaign unless a material qualified contract changes. Any actual method failure stops the acceptance gate for RCA and correction before retry; no mock qualification evidence is permitted.",
   "remainingRoadmapRequired": true,
   "completionClaim": "M1 completion is not whole-product completion."
 }

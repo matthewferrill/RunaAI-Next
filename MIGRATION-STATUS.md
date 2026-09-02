@@ -15,7 +15,25 @@ are unchanged. M1 is authorized, not complete; its first local wiring result is 
 The steward authorized necessary non-destructive work and commit/push to RunaAI-Next without recurring
 permission requests. Human involvement is reserved for genuine customer tests or human-only operations.
 
-### Current checkpoint: R15 campaign halted at the operator/browser method gate
+### Current checkpoint: Gemma-primary application implementation active
+
+**Application slice, 2026-09-02:** model selection is complete and the retired R15 campaign is not being
+resumed. The active clean branch is `codex/m1-gemma-primary`, based on the five-function qualification
+decision. Gemma is the sole primary for Chat, Research, Code, Agent and Review. The immediate work is to
+preserve the qualified Research contract, isolate the simplified Review checker, create byte-bound
+composite deployment admission, expose Chat/Code/Research as the three primary workspaces, and keep Agent
+and Review contextual to the work they govern. Before final customer acceptance, the product-foundation
+rebaseline brings forward the complete shell and conversation lifecycle, real Settings and
+Omen/Control/Home status, authorized local folders and local Git, usable Research/Code/artifact surfaces,
+and governed local changes. Comparison models are documented and tabled. No production route has changed.
+Any actual-system method failure stops acceptance for a retained RCA and corrected design before retry;
+it is not scored against Gemma. The detailed records are
+`gate7f/function-first/M1-S2-GEMMA-PRIMARY-APPLICATION-SLICE-2026-09-02.md` and
+`gate7f/function-first/RUNAAI-PRODUCT-FOUNDATION-AND-UX-BASELINE-2026-09-02.md`.
+
+The historical R15 checkpoint below is retained as failure evidence and is no longer the active step.
+
+### Historical checkpoint: R15 campaign halted at the operator/browser method gate
 
 **Campaign halt, 2026-09-02:** R15 model testing is stopped. Fresh model-free stage
 `b230075b107b439480bfbecd64189e62` completed 11/12 controls and failed the browser control after

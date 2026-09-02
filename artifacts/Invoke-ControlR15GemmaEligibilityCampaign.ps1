@@ -14,7 +14,7 @@ $ErrorActionPreference='Stop'
 $root='C:\AI\RunaAI-Next-Candidate\staging\m1-task-native-'+$StageId
 $validator=Join-Path $root 'Validate-Stage.ps1'
 # Replaced with the exact staged validator digest when the fresh common bundle is sealed.
-$validatorSha256='__R15_VALIDATOR_SHA256__'
+$validatorSha256='296eb09952f33b97c53063c07cf393c4d9587aed5b48007548527c1d3162cf08'
 if($validatorSha256-notmatch'^[a-f0-9]{64}$'){throw 'r15-gemma-campaign-validator-not-sealed'}
 $remote="Set-StrictMode -Version Latest;`$ErrorActionPreference='Stop';if((Get-FileHash -LiteralPath '$validator' -Algorithm SHA256).Hash.ToLowerInvariant()-cne'$validatorSha256'){throw 'r15-gemma-campaign-validator-pin'};& '$validator' -StageId '$StageId' -Phase Campaign -FinalizationSha256 '$FinalizationSha256' -ControlsName '$ControlsName' -ControlsSha256 '$ControlsSha256' -BrowserProofName '$BrowserProofName' -BrowserProofSha256 '$BrowserProofSha256' -HomeReadyName '$HomeReadyName' -HomeReadySha256 '$HomeReadySha256';exit `$LASTEXITCODE"
 $encoded=[Convert]::ToBase64String([Text.Encoding]::Unicode.GetBytes($remote))

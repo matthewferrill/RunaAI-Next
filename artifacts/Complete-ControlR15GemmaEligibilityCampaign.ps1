@@ -19,7 +19,7 @@ $root='C:\AI\RunaAI-Next-Candidate\staging\m1-task-native-'+$StageId
 $campaign='acceptance-evidence/campaign-gemma4-26b-a4b-'+$RuntimeSealPrefix
 $validator=Join-Path $root 'Validate-Stage.ps1'
 # Replaced with the exact staged validator digest when the fresh common bundle is sealed.
-$validatorSha256='__R15_VALIDATOR_SHA256__'
+$validatorSha256='296eb09952f33b97c53063c07cf393c4d9587aed5b48007548527c1d3162cf08'
 if($validatorSha256-notmatch'^[a-f0-9]{64}$'){throw 'r15-gemma-completion-validator-not-sealed'}
 $remote="Set-StrictMode -Version Latest;`$ErrorActionPreference='Stop';if((Get-FileHash -LiteralPath '$validator' -Algorithm SHA256).Hash.ToLowerInvariant()-cne'$validatorSha256'){throw 'r15-gemma-completion-validator-pin'};& '$validator' -StageId '$StageId' -Phase Completion -FinalizationSha256 '$FinalizationSha256' -ExpectedLeaseId '$LeaseId' -ExpectedLeaseSeal '$ExpectedLeaseSeal' -EligibilityManifestFileSha256 '$EligibilityManifestFileSha256' -EligibilityManifestSha256 '$EligibilityManifestSha256' -BatchResultSha256 '$BatchResultSha256' -EligibilityValidationSha256 '$EligibilityValidationSha256';exit `$LASTEXITCODE"
 $encoded=[Convert]::ToBase64String([Text.Encoding]::Unicode.GetBytes($remote))

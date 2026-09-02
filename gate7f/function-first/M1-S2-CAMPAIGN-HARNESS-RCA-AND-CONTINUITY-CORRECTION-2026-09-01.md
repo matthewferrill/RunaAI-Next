@@ -65,6 +65,15 @@ zero failures. Because the first snapshot cannot support exact attribution, it i
 not a model or campaign result. Release verification now runs without overlapping verifier processes and
 retains failure-filtered output before seal publication; a nonzero isolated rerun would stop the campaign.
 
+Fresh V13 stage `9fa6b29e728f4d41ae15580f4f57b421` then finalized all 2,465 verified files and reached
+its first live browser checkpoint. The local relay wrapper rejected the valid announcement because
+PowerShell 7 `ConvertFrom-Json` automatically converted its ISO-8601 `Z` expiry string into a UTC
+`System.DateTime`; the wrapper's string-only type check therefore failed before relay publication. The
+stage stopped before any model lease or Gemma request. The correction accepts only UTC `DateTime`,
+zero-offset `DateTimeOffset`, or a parseable `Z`-terminated string, normalizes the value to one UTC
+`DateTimeOffset`, and regression-tests both PowerShell 5 and 7 conversions. V13 is retained and a
+new source seal and stage are required.
+
 R15 correctly kept candidate inference disabled until both shared controls and a real-browser publication
 preflight passed. Five preflight rounds failed closed and were retained while the method was corrected;
 all five have `modelsInvoked:false` and none consumed a campaign identity. They are not added to the 30

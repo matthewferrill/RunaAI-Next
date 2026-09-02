@@ -21,7 +21,7 @@
   ],
   "scopeDocument": "roadmap/CURRENT-SLICE.md",
   "capabilityIds": ["C01", "C02", "C03", "C04", "C06", "C07", "C12", "C15", "C16"],
-  "nextWork": "Source repair c760419885e5ba5729335f272f177ef74931b83a is committed and fresh package 20260902-campaign-r15-common-v13 is built, source-tree verified and pinned by the operator-seal update. Commit and publish that seal, then use a new stage for 12 model-free controls plus the separate real-browser publication proof before the first of 120 ordered Gemma attempts. Retain failed stages 288236b61f1e4944a0a77d360f704a51, 4b57aec1ddca418dbf20c2df7ddac6da and 08fdd8ae4cce45dd9cb2ee3e0fb17e91 and do not reuse them. Gemma has zero new scored attempts in this simplified arm. Nomic is embedding-only; do not claim comparative R15, product qualification, production routing or human-trial completion from a one-model arm.",
+  "nextWork": "Retain V13 stage 9fa6b29e728f4d41ae15580f4f57b421 after its PowerShell 7 checkpoint-expiry coercion failure; verify and independently review the PowerShell 5/7 UTC parser correction, commit and freshly reseal it, then use a new stage for 12 model-free controls plus the separate real-browser publication proof before the first of 120 ordered Gemma attempts. Retain prior failed stages 288236b61f1e4944a0a77d360f704a51, 4b57aec1ddca418dbf20c2df7ddac6da and 08fdd8ae4cce45dd9cb2ee3e0fb17e91 as well, and do not reuse any failed stage. Gemma has zero new scored attempts in this simplified arm. Nomic is embedding-only; do not claim comparative R15, product qualification, production routing or human-trial completion from a one-model arm.",
   "remainingRoadmapRequired": true,
   "completionClaim": "M1 completion is not whole-product completion."
 }

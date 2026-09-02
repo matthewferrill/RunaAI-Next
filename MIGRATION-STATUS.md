@@ -15,7 +15,7 @@ are unchanged. M1 is authorized, not complete; its first local wiring result is 
 The steward authorized necessary non-destructive work and commit/push to RunaAI-Next without recurring
 permission requests. Human involvement is reserved for genuine customer tests or human-only operations.
 
-### Current checkpoint: R15 V13 package built and verified; fresh model-free stage before inference
+### Current checkpoint: R15 V13 retained on checkpoint-parser failure; repair/reseal before inference
 
 V12 method-gate update, 2026-09-02: fresh stage `08fdd8ae4cce45dd9cb2ee3e0fb17e91`
 recorded 11 completed model-free controls and one failed browser-dependent control, with
@@ -36,6 +36,15 @@ archive SHA-256 is `171d3dccac2dc6ef56d81738c669de4309f6435287817c88b443b9b85795
 Its package and validator hashes are propagated by this operator-seal update. A new model-free stage,
 12 controls and the separate real-browser publication proof remain mandatory before inference. V12 is
 retained and is not reused; Gemma has zero new scored attempts under the simplified arm.
+
+V13 execution update, 2026-09-02: fresh stage `9fa6b29e728f4d41ae15580f4f57b421` was created and
+finalized from all 2,465 verified source entries with no copied synthetic state or production change.
+It reached its first live browser checkpoint, then the local relay wrapper rejected the valid UTC
+`expiresAt` because PowerShell 7 `ConvertFrom-Json` materializes an ISO-8601 `Z` value as
+`System.DateTime`, while the wrapper required a string. The stage stopped before relay publication,
+before any model lease and with zero Gemma attempts. The parser now accepts only UTC `DateTime`,
+zero-offset `DateTimeOffset`, or a `Z`-terminated parseable string and normalizes it to one UTC instant;
+an actual PowerShell 5/7 JSON-coercion regression is required before a new seal and stage.
 
 V11 finalization-key-order RCA, 2026-09-02: fresh stage `4b57aec1ddca418dbf20c2df7ddac6da`
 successfully finalized all 2,464 source files, then stopped before its first control because the validator's

@@ -110,6 +110,23 @@ function Start-R15BrowserRelay {
   }
 }
 
+function ConvertTo-R15CheckpointExpiry {
+  param([Parameter(Mandatory)][object]$Value)
+  $parsed=[DateTimeOffset]::MinValue
+  if($Value-is[DateTime]){
+    $date=[DateTime]$Value
+    if($date.Kind-ne[DateTimeKind]::Utc){throw 'r15-browser-checkpoint-expiry-invalid'}
+    $parsed=[DateTimeOffset]$date
+  }elseif($Value-is[DateTimeOffset]){
+    $parsed=[DateTimeOffset]$Value
+  }elseif($Value-is[string]){
+    if($Value-notmatch'Z$'-or-not[DateTimeOffset]::TryParse($Value,[Globalization.CultureInfo]::InvariantCulture,
+       [Globalization.DateTimeStyles]::RoundtripKind,[ref]$parsed)){throw 'r15-browser-checkpoint-expiry-invalid'}
+  }else{throw 'r15-browser-checkpoint-expiry-invalid'}
+  if($parsed.Offset-ne[TimeSpan]::Zero){throw 'r15-browser-checkpoint-expiry-invalid'}
+  $parsed.ToUniversalTime()
+}
+
 function Invoke-R15RemoteWithBrowserRelay {
   [CmdletBinding()]
   param(
@@ -153,9 +170,10 @@ function Invoke-R15RemoteWithBrowserRelay {
       $checkpoint=$null
       try{$candidate=$line|ConvertFrom-Json;if($candidate.schemaVersion-ceq'runaai-m1-browser-checkpoint-ready/v1'){$checkpoint=$candidate}}catch{}
       if($null-eq$checkpoint){continue}
-      $parsedExpiry=[DateTimeOffset]::MinValue
+      try{$parsedExpiry=ConvertTo-R15CheckpointExpiry -Value $checkpoint.expiresAt}catch{
+        throw 'r15-browser-checkpoint-announcement-invalid'
+      }
       if($checkpoint.checkpointId-notmatch'^[a-f0-9]{8}-(?:[a-f0-9]{4}-){3}[a-f0-9]{12}$'-or
-         $checkpoint.expiresAt-isnot[string]-or-not[DateTimeOffset]::TryParse($checkpoint.expiresAt,[ref]$parsedExpiry)-or
          $parsedExpiry-le[DateTimeOffset]::UtcNow){
         throw 'r15-browser-checkpoint-announcement-invalid'
       }
@@ -171,7 +189,7 @@ function Invoke-R15RemoteWithBrowserRelay {
         throw 'r15-browser-relay-not-live-before-publication'
       }
       [ordered]@{schemaVersion='runaai-m1-browser-relay-ready/v1';checkpointId=$checkpoint.checkpointId;
-        browserUrl=('http://127.0.0.1:'+$uri.Port+'/');expiresAt=$checkpoint.expiresAt;
+        browserUrl=('http://127.0.0.1:'+$uri.Port+'/');expiresAt=$parsedExpiry.ToString('O');
         relaySupervised=$true;humanBrowserRequired=$true;productionChanged=$false}|ConvertTo-Json -Compress|Write-Output
     }
     $remote.WaitForExit()

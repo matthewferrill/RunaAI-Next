@@ -283,6 +283,31 @@ test('R15 browser-bearing operators require presence and supervise an expiring s
   assert.match(helper,/ClearAllForwardings=yes/u);
 });
 
+test('R15 relay normalizes PowerShell 5 string and PowerShell 7 UTC DateTime JSON expiry values',()=>{
+  const helperPath=path.resolve(import.meta.dirname,'../../../artifacts/Invoke-R15RemoteWithBrowserRelay.ps1');
+  const quoted=helperPath.replaceAll("'","''");
+  const script=`. '${quoted}'\n`+
+    `$checkpoint='{"expiresAt":"2026-09-02T13:13:42.354Z"}'|ConvertFrom-Json\n`+
+    `$expiry=ConvertTo-R15CheckpointExpiry -Value $checkpoint.expiresAt\n`+
+    `$invalid=@(`+
+      `[DateTime]::SpecifyKind([DateTime]'2026-09-02T13:13:42.354',[DateTimeKind]::Local),`+
+      `[DateTime]::SpecifyKind([DateTime]'2026-09-02T13:13:42.354',[DateTimeKind]::Unspecified),`+
+      `[DateTimeOffset]::new(2026,9,2,13,13,42,[TimeSpan]::FromHours(1)),`+
+      `'2026-09-02T13:13:42.354+00:00','malformed',1)\n`+
+    `$rejected=0;foreach($bad in $invalid){$accepted=$false;try{[void](ConvertTo-R15CheckpointExpiry -Value $bad);$accepted=$true}catch{if($_.Exception.Message-cne'r15-browser-checkpoint-expiry-invalid'){throw}};if($accepted){throw 'invalid-expiry-accepted'};$rejected++}\n`+
+    `[ordered]@{inputType=$checkpoint.expiresAt.GetType().FullName;expiry=$expiry.ToString('O');`+
+      `utcTicks=$expiry.UtcDateTime.Ticks.ToString();invalidRejected=$rejected}|ConvertTo-Json -Compress`;
+  const encoded=Buffer.from(script,'utf16le').toString('base64');
+  for(const [executable,inputType] of [['powershell.exe','System.String'],['pwsh.exe','System.DateTime']]){
+    const result=spawnSync(executable,['-NoProfile','-NonInteractive','-ExecutionPolicy','Bypass','-EncodedCommand',encoded],
+      {encoding:'utf8',timeout:10000,windowsHide:true});
+    assert.equal(result.status,0,`${executable}: ${result.stderr||result.stdout}`);
+    assert.deepEqual(JSON.parse(result.stdout.trim().split(/\r?\n/u).at(-1)),{
+      inputType,expiry:'2026-09-02T13:13:42.3540000+00:00',utcTicks:'639239516223540000',invalidRejected:6
+    });
+  }
+});
+
 test('R15 browser cleanup attempts the remote tree after a relay cleanup failure', {skip:process.platform!=='win32'}, async()=>{
   const f=await fixture();try{
     const scriptPath=path.join(f.root,'browser-cleanup-regression.ps1');

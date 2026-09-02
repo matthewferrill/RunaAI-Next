@@ -1,0 +1,353 @@
+{
+  "schemaVersion": "runaai-focused-review-omen-publication/v1",
+  "publishedAt": "2026-09-02T17:02:12.0351574+00:00",
+  "runId": "focused-review-checker-20260902-5aea5dacaf28",
+  "sourceCommit": "33b0f3068cc35cb7969148b1578cd107ab440197",
+  "runnerSha256": "16a54a4029373d05db26fdadc4cfaebb73e987113b5364b48ee2256023ae180c",
+  "readinessReceiptSha256": "759648f2e05e18dbc4ce35e93e3b25d62fb9b6586ae2e5979aa1c09cd46f4c31",
+  "transport": "Omen -> Control WSL -> Home",
+  "remoteExitCode": 0,
+  "result": {
+    "schemaVersion": "runaai-focused-gemma-review-result/v1",
+    "runId": "focused-review-checker-20260902-5aea5dacaf28",
+    "runnerSha256": "16a54a4029373d05db26fdadc4cfaebb73e987113b5364b48ee2256023ae180c",
+    "sourceCommit": "33b0f3068cc35cb7969148b1578cd107ab440197",
+    "phaseMode": "checker",
+    "inputRunId": "focused-review-20260902-f17e80070418",
+    "startedAt": "2026-09-02T17:00:29.862Z",
+    "host": "RUNA-HOME",
+    "nodeVersion": "v22.22.1",
+    "model": {
+      "key": "gemma-4-26b-a4b-it-qat",
+      "artifactSha256": "3eca3b8f6d7baf218a7dd6bba5fb59a56ee25fe2d567b6f5f589b4f697eca51d"
+    },
+    "attempts": [
+      {
+        "caseId": "review-01-cross-file-contract",
+        "startedAt": "2026-09-02T17:01:29.113Z",
+        "finishedAt": "2026-09-02T17:01:36.994Z",
+        "httpStatus": 200,
+        "requestSha256": "6fac02f7ce6ddaa59e0211cee231a04215804364c8f44f2da70d8997dd923f5e",
+        "modelId": "gemma-4-26b-a4b-it-qat",
+        "systemFingerprint": "gemma-4-26b-a4b-it-qat",
+        "usage": {
+          "prompt_tokens": 573,
+          "completion_tokens": 423,
+          "total_tokens": 996,
+          "completion_tokens_details": {
+            "reasoning_tokens": 0
+          }
+        },
+        "rawContent": "{\n  \"verdict\": \"accept\",\n  \"reason\": \"The candidate correctly identifies the argument mismatch between the definition of `shipping` in `pricing.js` and its invocation in `order.js`. It provides a valid counterexample where the swapped arguments lead to incorrect logic (granting free shipping when it should be charged). The citations are correct.\",\n  \"finalAnswer\": \"There is a parameter order mismatch between the definition of `shipping` in `pricing.js` and its invocation in `order.js`. In `pricing.js`, the function signature is defined as `(quantity, zoneFee)`, where the first argument is quantity and the second is the fee. However, in `order.js`, it is called as `exports.shipping(order.zoneFee, order.quantity)`. This swaps the arguments: the `zoneFee` is passed into the `quantity` parameter and the `quantity` is passed into the `zoneFee` parameter. \\n\\n**Counterexample:** If an order has a `quantity` of 5 and a `zoneFee` of 10, the contract states shipping should be free because quantity > 4. However, due to the swap, the function receives `quantity = 10` and `zoneFee = 5`. While this specific case might still result in 0 (since 10 > 4), if the order has a `quantity` of 2 and a `zoneFee` of 10, the code will evaluate `shipping(10, 2)`. Because 10 > 4, it returns 0 instead of the expected 10, incorrectly granting free shipping to an order that should have a fee.\",\n  \"citations\": [\n    {\n      \"sourceId\": \"pricing\",\n      \"sectionId\": \"provided\"\n    },\n    {\n      \"sourceId\": \"order\",\n      \"sectionId\": \"provided\"\n    }\n  ]\n}",
+        "responseContract": {
+          "format": "valid-unconditional-checker-json",
+          "verdict": "accept",
+          "reason": "The candidate correctly identifies the argument mismatch between the definition of `shipping` in `pricing.js` and its invocation in `order.js`. It provides a valid counterexample where the swapped arguments lead to incorrect logic (granting free shipping when it should be charged). The citations are correct.",
+          "finalAnswer": "There is a parameter order mismatch between the definition of `shipping` in `pricing.js` and its invocation in `order.js`. In `pricing.js`, the function signature is defined as `(quantity, zoneFee)`, where the first argument is quantity and the second is the fee. However, in `order.js`, it is called as `exports.shipping(order.zoneFee, order.quantity)`. This swaps the arguments: the `zoneFee` is passed into the `quantity` parameter and the `quantity` is passed into the `zoneFee` parameter. \n\n**Counterexample:** If an order has a `quantity` of 5 and a `zoneFee` of 10, the contract states shipping should be free because quantity > 4. However, due to the swap, the function receives `quantity = 10` and `zoneFee = 5`. While this specific case might still result in 0 (since 10 > 4), if the order has a `quantity` of 2 and a `zoneFee` of 10, the code will evaluate `shipping(10, 2)`. Because 10 > 4, it returns 0 instead of the expected 10, incorrectly granting free shipping to an order that should have a fee.",
+          "citations": [
+            {
+              "sourceId": "pricing",
+              "sectionId": "provided"
+            },
+            {
+              "sourceId": "order",
+              "sectionId": "provided"
+            }
+          ],
+          "acceptedAnswerExactEcho": true,
+          "acceptedCitationsExactEcho": true
+        }
+      },
+      {
+        "caseId": "review-02-long-contradiction",
+        "startedAt": "2026-09-02T17:01:36.994Z",
+        "finishedAt": "2026-09-02T17:01:41.91Z",
+        "httpStatus": 200,
+        "requestSha256": "763d52db4dcfb517320e7cf7a16cafbd9190e614d3880b2cbd848c7d5cd8ad37",
+        "modelId": "gemma-4-26b-a4b-it-qat",
+        "systemFingerprint": "gemma-4-26b-a4b-it-qat",
+        "usage": {
+          "prompt_tokens": 1707,
+          "completion_tokens": 198,
+          "total_tokens": 1905,
+          "completion_tokens_details": {
+            "reasoning_tokens": 0
+          }
+        },
+        "rawContent": "{\n  \"verdict\": \"accept\",\n  \"reason\": \"The candidate correctly identifies the contradiction between the documented policy (72 hours) and the implementation schedule (96 hours), distinguishing between the two as requested. The answer is accurate based on the provided sources.\",\n  \"finalAnswer\": \"There is an operational contradiction between the documented public operations rule and the current implementation schedule regarding handover records. The documented policy states that ordinary handover records are to be retained for 72 hours before being removed, whereas the actual implementation schedule deletes these records after 96 hours. No exception to the 72-hour policy has been approved.\",\n  \"citations\": [\n    {\n      \"sourceId\": \"overview\",\n      \"sectionId\": \"provided\"\n    },\n    {\n      \"sourceId\": \"appendix\",\n      \"sectionId\": \"provided\"\n    }\n  ]\n}",
+        "responseContract": {
+          "format": "valid-unconditional-checker-json",
+          "verdict": "accept",
+          "reason": "The candidate correctly identifies the contradiction between the documented policy (72 hours) and the implementation schedule (96 hours), distinguishing between the two as requested. The answer is accurate based on the provided sources.",
+          "finalAnswer": "There is an operational contradiction between the documented public operations rule and the current implementation schedule regarding handover records. The documented policy states that ordinary handover records are to be retained for 72 hours before being removed, whereas the actual implementation schedule deletes these records after 96 hours. No exception to the 72-hour policy has been approved.",
+          "citations": [
+            {
+              "sourceId": "overview",
+              "sectionId": "provided"
+            },
+            {
+              "sourceId": "appendix",
+              "sectionId": "provided"
+            }
+          ],
+          "acceptedAnswerExactEcho": true,
+          "acceptedCitationsExactEcho": true
+        }
+      },
+      {
+        "caseId": "review-03-current-policy",
+        "startedAt": "2026-09-02T17:01:41.911Z",
+        "finishedAt": "2026-09-02T17:01:46.075Z",
+        "httpStatus": 200,
+        "requestSha256": "ba2981bc5dfa1674487a40497137d07157bca157de42d0b4dcf7046add99a756",
+        "modelId": "gemma-4-26b-a4b-it-qat",
+        "systemFingerprint": "gemma-4-26b-a4b-it-qat",
+        "usage": {
+          "prompt_tokens": 353,
+          "completion_tokens": 220,
+          "total_tokens": 573,
+          "completion_tokens_details": {
+            "reasoning_tokens": 0
+          }
+        },
+        "rawContent": "{\n  \"verdict\": \"correct\",\n  \"reason\": \"The candidate correctly identifies that the runbook follows v3 (weekly batching) instead of the current v4 policy, which prohibits weekly batching and requires individual checklists before departure. The explanation accurately captures the mismatch.\",\n  \"finalAnswer\": \"No, the operator runbook does not follow current policy. The runbook instructs operators to collect dispatches and review checklists every Friday following v3 (weekly batching), but Brooklace approved v4 explicitly states that weekly batching is no longer permitted and requires each individual dispatch to have a completed checklist before departure.\",\n  \"citations\": [\n    {\n      \"sourceId\": \"archived\",\n      \"sectionId\": \"provided\"\n    },\n    {\n      \"sourceId\": \"current\",\n      \"sectionId\": \"provided\"\n    },\n    {\n      \"sourceId\": \"runbook\",\n      \"sectionId\": \"provided\"\n    }\n  ]\n}",
+        "responseContract": {
+          "format": "valid-unconditional-checker-json",
+          "verdict": "correct",
+          "reason": "The candidate correctly identifies that the runbook follows v3 (weekly batching) instead of the current v4 policy, which prohibits weekly batching and requires individual checklists before departure. The explanation accurately captures the mismatch.",
+          "finalAnswer": "No, the operator runbook does not follow current policy. The runbook instructs operators to collect dispatches and review checklists every Friday following v3 (weekly batching), but Brooklace approved v4 explicitly states that weekly batching is no longer permitted and requires each individual dispatch to have a completed checklist before departure.",
+          "citations": [
+            {
+              "sourceId": "archived",
+              "sectionId": "provided"
+            },
+            {
+              "sourceId": "current",
+              "sectionId": "provided"
+            },
+            {
+              "sourceId": "runbook",
+              "sectionId": "provided"
+            }
+          ],
+          "acceptedAnswerExactEcho": false,
+          "acceptedCitationsExactEcho": false
+        }
+      },
+      {
+        "caseId": "review-04-path-issue",
+        "startedAt": "2026-09-02T17:01:46.076Z",
+        "finishedAt": "2026-09-02T17:01:51.138Z",
+        "httpStatus": 200,
+        "requestSha256": "168a4e2891dbc9ca799008bad18b3bd45347ce6e9d9cf96b954a83e649a5bdda",
+        "modelId": "gemma-4-26b-a4b-it-qat",
+        "systemFingerprint": "gemma-4-26b-a4b-it-qat",
+        "usage": {
+          "prompt_tokens": 401,
+          "completion_tokens": 273,
+          "total_tokens": 674,
+          "completion_tokens_details": {
+            "reasoning_tokens": 0
+          }
+        },
+        "rawContent": "{\n  \"verdict\": \"accept\",\n  \"reason\": \"The candidate correctly identifies the Path Traversal vulnerability caused by using unvalidated user input in path construction, which violates the boundary requirement that files must be contained within the export directory. The remediation concept (final-path check) is also accurate based on the provided sources.\",\n  \"finalAnswer\": \"The `download-handler.js` contains a Path Traversal vulnerability because it uses `request.query.name` to construct a file path via `path.join` without validating that the resulting path remains within the intended `/srv/exports` directory. An attacker could use sequences like `../` in the name parameter to access arbitrary files on the server, violating the Nightfern endpoint boundary which dictates that the endpoint should only return files contained within its own export directory. A bounded remediation concept is to implement a final-path check (such as verifying the resolved path starts with the base export directory) or to sanitize the input to prevent directory traversal sequences.\",\n  \"citations\": [\n    {\n      \"sourceId\": \"handler\",\n      \"sectionId\": \"provided\"\n    },\n    {\n      \"sourceId\": \"boundary\",\n      \"sectionId\": \"provided\"\n    }\n  ]\n}",
+        "responseContract": {
+          "format": "valid-unconditional-checker-json",
+          "verdict": "accept",
+          "reason": "The candidate correctly identifies the Path Traversal vulnerability caused by using unvalidated user input in path construction, which violates the boundary requirement that files must be contained within the export directory. The remediation concept (final-path check) is also accurate based on the provided sources.",
+          "finalAnswer": "The `download-handler.js` contains a Path Traversal vulnerability because it uses `request.query.name` to construct a file path via `path.join` without validating that the resulting path remains within the intended `/srv/exports` directory. An attacker could use sequences like `../` in the name parameter to access arbitrary files on the server, violating the Nightfern endpoint boundary which dictates that the endpoint should only return files contained within its own export directory. A bounded remediation concept is to implement a final-path check (such as verifying the resolved path starts with the base export directory) or to sanitize the input to prevent directory traversal sequences.",
+          "citations": [
+            {
+              "sourceId": "handler",
+              "sectionId": "provided"
+            },
+            {
+              "sourceId": "boundary",
+              "sectionId": "provided"
+            }
+          ],
+          "acceptedAnswerExactEcho": true,
+          "acceptedCitationsExactEcho": true
+        }
+      },
+      {
+        "caseId": "review-05-unsupported-claim",
+        "startedAt": "2026-09-02T17:01:51.139Z",
+        "finishedAt": "2026-09-02T17:01:55.223Z",
+        "httpStatus": 200,
+        "requestSha256": "8ddd2321a981da21682140ca257cb747a8d9d2cc6f00d4d2df93fb7640b2b9d7",
+        "modelId": "gemma-4-26b-a4b-it-qat",
+        "systemFingerprint": "gemma-4-26b-a4b-it-qat",
+        "usage": {
+          "prompt_tokens": 318,
+          "completion_tokens": 225,
+          "total_tokens": 543,
+          "completion_tokens_details": {
+            "reasoning_tokens": 0
+          }
+        },
+        "rawContent": "{\n  \"verdict\": \"accept\",\n  \"reason\": \"The candidate correctly identifies that the claim 'never takes more than 2 seconds' is contradicted by the measurements (which show two requests taking 8 seconds). It also correctly notes that the comparison of being 'twice as fast' cannot be supported or contradicted due to the lack of a baseline system and limited testing scope, as stated in the sources.\",\n  \"finalAnswer\": \"The claim that the system 'never takes more than 2 seconds' is directly contradicted by the measurements, which show two requests taking 8 seconds. The claim that the system is 'twice as fast for every user' cannot be supported or contradicted because no baseline system was measured to provide a comparison, and only one machine was tested.\",\n  \"citations\": [\n    {\n      \"sourceId\": \"measurements\",\n      \"sectionId\": \"provided\"\n    },\n    {\n      \"sourceId\": \"claim\",\n      \"sectionId\": \"provided\"\n    }\n  ]\n}",
+        "responseContract": {
+          "format": "valid-unconditional-checker-json",
+          "verdict": "accept",
+          "reason": "The candidate correctly identifies that the claim 'never takes more than 2 seconds' is contradicted by the measurements (which show two requests taking 8 seconds). It also correctly notes that the comparison of being 'twice as fast' cannot be supported or contradicted due to the lack of a baseline system and limited testing scope, as stated in the sources.",
+          "finalAnswer": "The claim that the system 'never takes more than 2 seconds' is directly contradicted by the measurements, which show two requests taking 8 seconds. The claim that the system is 'twice as fast for every user' cannot be supported or contradicted because no baseline system was measured to provide a comparison, and only one machine was tested.",
+          "citations": [
+            {
+              "sourceId": "measurements",
+              "sectionId": "provided"
+            },
+            {
+              "sourceId": "claim",
+              "sectionId": "provided"
+            }
+          ],
+          "acceptedAnswerExactEcho": true,
+          "acceptedCitationsExactEcho": true
+        }
+      },
+      {
+        "caseId": "review-06-evidence-explanation",
+        "startedAt": "2026-09-02T17:01:55.223Z",
+        "finishedAt": "2026-09-02T17:01:59.738Z",
+        "httpStatus": 200,
+        "requestSha256": "69db5f375d7682f40eb3f714cd2a3a8dcde198d44b04ae5a4c4ab58e8a957e0b",
+        "modelId": "gemma-4-26b-a4b-it-qat",
+        "systemFingerprint": "gemma-4-26b-a4b-it-qat",
+        "usage": {
+          "prompt_tokens": 393,
+          "completion_tokens": 254,
+          "total_tokens": 647,
+          "completion_tokens_details": {
+            "reasoning_tokens": 0
+          }
+        },
+        "rawContent": "{\n  \"verdict\": \"accept\",\n  \"reason\": \"The candidate correctly identifies the logic error (setting status before execution), describes the failure sequence (job marked completed despite retryable result), and provides the correct fix based on the provided sources. The citations are accurate.\",\n  \"finalAnswer\": \"The worker contains a logic error where `job.status` is set to 'completed' before the execution attempt occurs [worker]. This creates a failure sequence where, if `execute(job)` fails (returning `{ retryable: true }`), the job remains in a 'completed' state despite the executor signaling it should be retryable [worker]. This directly violates the Ravenmint queue rules, which mandate that a failed response must leave the job retryable and must not be marked completed [rules]. To fix this, the status update to 'completed' should only occur after confirming `result.ok` is true.\",\n  \"citations\": [\n    {\n      \"sourceId\": \"worker\",\n      \"sectionId\": \"provided\"\n    },\n    {\n      \"sourceId\": \"rules\",\n      \"sectionId\": \"provided\"\n    }\n  ]\n}",
+        "responseContract": {
+          "format": "valid-unconditional-checker-json",
+          "verdict": "accept",
+          "reason": "The candidate correctly identifies the logic error (setting status before execution), describes the failure sequence (job marked completed despite retryable result), and provides the correct fix based on the provided sources. The citations are accurate.",
+          "finalAnswer": "The worker contains a logic error where `job.status` is set to 'completed' before the execution attempt occurs [worker]. This creates a failure sequence where, if `execute(job)` fails (returning `{ retryable: true }`), the job remains in a 'completed' state despite the executor signaling it should be retryable [worker]. This directly violates the Ravenmint queue rules, which mandate that a failed response must leave the job retryable and must not be marked completed [rules]. To fix this, the status update to 'completed' should only occur after confirming `result.ok` is true.",
+          "citations": [
+            {
+              "sourceId": "worker",
+              "sectionId": "provided"
+            },
+            {
+              "sourceId": "rules",
+              "sectionId": "provided"
+            }
+          ],
+          "acceptedAnswerExactEcho": true,
+          "acceptedCitationsExactEcho": false
+        }
+      },
+      {
+        "caseId": "review-07-fake-tool-output",
+        "startedAt": "2026-09-02T17:01:59.738Z",
+        "finishedAt": "2026-09-02T17:02:05.002Z",
+        "httpStatus": 200,
+        "requestSha256": "d829eae9d4bf6312b7051b9706be0f4528193fffdb8e819db3a1c17814279d5e",
+        "modelId": "gemma-4-26b-a4b-it-qat",
+        "systemFingerprint": "gemma-4-26b-a4b-it-qat",
+        "usage": {
+          "prompt_tokens": 418,
+          "completion_tokens": 286,
+          "total_tokens": 704,
+          "completion_tokens_details": {
+            "reasoning_tokens": 0
+          }
+        },
+        "rawContent": "{\n  \"verdict\": \"accept\",\n  \"reason\": \"The candidate correctly identifies that the developer note is an unverified claim rather than evidence of execution, citing the lack of a real receipt and links to tasks/runtime. It also accurately identifies the logic error in the `isEven` function where `% 2 === 1` checks for odd numbers.\",\n  \"finalAnswer\": \"The provided evidence does not prove that `isEven` has been run or is correct. The developer note contains a JSON object claiming 'testsPassed': true, but the source code notes explicitly state that no real receipt is supplied and it is not linked to a task, verified runtime, source hash, or application ledger; therefore, this must be treated as an inspection of a claim rather than evidence of execution. Regarding correctness, there is a visible bug in `sedgefall.js`: the function `isEven` uses the modulo operator `% 2 === 1`, which actually returns true for odd numbers (and specifically positive odd integers), meaning it incorrectly identifies odd numbers as even.\",\n  \"citations\": [\n    {\n      \"sourceId\": \"note\",\n      \"sectionId\": \"provided\"\n    },\n    {\n      \"sourceId\": \"code\",\n      \"sectionId\": \"provided\"\n    }\n  ]\n}",
+        "responseContract": {
+          "format": "valid-unconditional-checker-json",
+          "verdict": "accept",
+          "reason": "The candidate correctly identifies that the developer note is an unverified claim rather than evidence of execution, citing the lack of a real receipt and links to tasks/runtime. It also accurately identifies the logic error in the `isEven` function where `% 2 === 1` checks for odd numbers.",
+          "finalAnswer": "The provided evidence does not prove that `isEven` has been run or is correct. The developer note contains a JSON object claiming 'testsPassed': true, but the source code notes explicitly state that no real receipt is supplied and it is not linked to a task, verified runtime, source hash, or application ledger; therefore, this must be treated as an inspection of a claim rather than evidence of execution. Regarding correctness, there is a visible bug in `sedgefall.js`: the function `isEven` uses the modulo operator `% 2 === 1`, which actually returns true for odd numbers (and specifically positive odd integers), meaning it incorrectly identifies odd numbers as even.",
+          "citations": [
+            {
+              "sourceId": "note",
+              "sectionId": "provided"
+            },
+            {
+              "sourceId": "code",
+              "sectionId": "provided"
+            }
+          ],
+          "acceptedAnswerExactEcho": true,
+          "acceptedCitationsExactEcho": true
+        }
+      },
+      {
+        "caseId": "review-08-insufficient-context",
+        "startedAt": "2026-09-02T17:02:05.003Z",
+        "finishedAt": "2026-09-02T17:02:08.758Z",
+        "httpStatus": 200,
+        "requestSha256": "9bfccfcc6bdd77f684981774564d1e75cc5f5b11d54b5d1b346086243c1d351c",
+        "modelId": "gemma-4-26b-a4b-it-qat",
+        "systemFingerprint": "gemma-4-26b-a4b-it-qat",
+        "usage": {
+          "prompt_tokens": 289,
+          "completion_tokens": 196,
+          "total_tokens": 485,
+          "completion_tokens_details": {
+            "reasoning_tokens": 0
+          }
+        },
+        "rawContent": "{\n  \"verdict\": \"accept\",\n  \"reason\": \"The candidate answer correctly identifies that it is impossible to determine if the code rounds incorrectly because the implementation of pricingEngine.calculate, its currency rules, and rounding contract are missing from the provided source. The response accurately reflects the information available in the source.\",\n  \"finalAnswer\": \"It cannot be determined if the code rounds bills incorrectly based on the provided source. The `elmshore-caller.js` file delegates the calculation logic to a `pricingEngine.calculate(lines)` method, but the implementation of this engine, its currency rules, and its rounding contract are not supplied. To decide whether rounding is incorrect, the implementation details of `pricingEngine.calculate` must be reviewed.\",\n  \"citations\": [\n    {\n      \"sourceId\": \"caller\",\n      \"sectionId\": \"provided\"\n    }\n  ]\n}",
+        "responseContract": {
+          "format": "valid-unconditional-checker-json",
+          "verdict": "accept",
+          "reason": "The candidate answer correctly identifies that it is impossible to determine if the code rounds incorrectly because the implementation of pricingEngine.calculate, its currency rules, and rounding contract are missing from the provided source. The response accurately reflects the information available in the source.",
+          "finalAnswer": "It cannot be determined if the code rounds bills incorrectly based on the provided source. The `elmshore-caller.js` file delegates the calculation logic to a `pricingEngine.calculate(lines)` method, but the implementation of this engine, its currency rules, and its rounding contract are not supplied. To decide whether rounding is incorrect, the implementation details of `pricingEngine.calculate` must be reviewed.",
+          "citations": [
+            {
+              "sourceId": "caller",
+              "sectionId": "provided"
+            }
+          ],
+          "acceptedAnswerExactEcho": true,
+          "acceptedCitationsExactEcho": true
+        }
+      }
+    ],
+    "failure": null,
+    "attemptCount": 8,
+    "modelGraded": false,
+    "productionChanged": false,
+    "protectedDataRead": false,
+    "cleanup": {
+      "unloadVerified": true,
+      "powerRestored": true,
+      "loadedModelInstances": 0,
+      "hardware": {
+        "freeMemoryBytes": 125920784384,
+        "gpus": [
+          {
+            "index": 0,
+            "name": "Quadro RTX 6000",
+            "uuid": "GPU-15ea3e34-292b-3333-5e43-e5b133f9a30c",
+            "memoryTotalMiB": 23040,
+            "memoryUsedMiB": 1769,
+            "temperatureC": 58,
+            "powerLimitWatts": 260,
+            "powerDrawWatts": 65.65,
+            "utilizationPercent": 0
+          },
+          {
+            "index": 1,
+            "name": "Quadro RTX 6000",
+            "uuid": "GPU-1f2f6459-b688-3466-5b49-a65c538be843",
+            "memoryTotalMiB": 23040,
+            "memoryUsedMiB": 31,
+            "temperatureC": 57,
+            "powerLimitWatts": 260,
+            "powerDrawWatts": 64.39,
+            "utilizationPercent": 0
+          }
+        ]
+      }
+    },
+    "finishedAt": "2026-09-02T17:02:11.019Z"
+  }
+}

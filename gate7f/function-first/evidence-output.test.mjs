@@ -84,7 +84,7 @@ test('Review checker corrects one incomplete evidence answer and verifies the co
   const generated=[];const agent={async generate(){return {text:JSON.stringify({answer:'It says cobalt.',citations:answer.citations}),
     finishReason:'stop',response:{modelId:'synthetic'}};}};
   const corrected='The note says cobalt; no completion date is established.';
-  const replies=[{verdict:'correct',reason:'The requested unknown was omitted.',
+  const replies=[{verdict:'revise',reason:'The requested unknown was omitted.',
     finalAnswer:corrected,citations:answer.citations},accepted(corrected)];
   const verifierAgent={async generate(prompt,options){generated.push({prompt:JSON.parse(prompt),options});return {text:JSON.stringify(replies.shift()),
     finishReason:'stop',response:{modelId:'synthetic'}};}};
@@ -112,7 +112,7 @@ test('Research checker corrects omitted negative evidence and rechecks once insi
   const calls=[];const agent={async generate(){return {text:JSON.stringify({answer:'The selected note says cobalt.',citations:answer.citations}),
     finishReason:'stop',response:{modelId:'synthetic'}};}};
   const corrected='The selected note says cobalt; no completion date is established.';
-  const replies=[{verdict:'correct',reason:'A relevant unknown was omitted.',
+  const replies=[{verdict:'revise',reason:'A relevant unknown was omitted.',
     finalAnswer:corrected,citations:answer.citations},accepted(corrected)];
   const verifierAgent={async generate(prompt,options){calls.push({prompt:JSON.parse(prompt),options});return {text:JSON.stringify(replies.shift()),
     finishReason:'stop',response:{modelId:'synthetic'}};}};
@@ -127,28 +127,24 @@ test('Research checker corrects omitted negative evidence and rechecks once insi
     &&call.options.modelSettings.maxOutputTokens===512&&call.options.modelSettings.maxRetries===0));
 });
 
-test('accepted evidence checker requires exact answer and ordered citation echoes and rejects every change',async()=>{
+test('accepted evidence checker preserves application-owned answer and citation bytes while validating selected evidence',async()=>{
   const second={sourceId:'fixture-note-two',sectionId:'two',contentSha256:'b'.repeat(64),content:'The second selected note is retained.'};
   const selected=[...evidence,second],citations=selected.map(({sourceId,sectionId})=>({sourceId,sectionId}));
   const finalAnswer='Both selected notes are cited.';
   const agent={async generate(){return {text:JSON.stringify({answer:finalAnswer,citations}),finishReason:'stop',response:{modelId:'synthetic'}};}};
-  const verifierAgent={async generate(){return {text:JSON.stringify(accepted(finalAnswer,structuredClone(citations))),finishReason:'stop',response:{modelId:'synthetic'}};}};
+  const verifierAgent={async generate(){return {text:JSON.stringify(accepted('Ignored checker echo.',[citations[1],citations[0]])),finishReason:'stop',response:{modelId:'synthetic'}};}};
   const provider=new MastraAnswerProvider({baseURL:'http://127.0.0.1:1/v1',modelId:'synthetic',role:'review',agent,verifierAgent});
   const value=await provider.answer({request:{lane:'review',message:'Review both notes.',history:[]},ground:'record-answers',advisory:null,evidence:selected},options);
   assert.deepEqual(value.citations,citations);assert.equal(value.answer,finalAnswer);
   assert.deepEqual(value.responseCheck,{performed:true,corrected:false,kind:'evidence-review',finalAnswerOrigin:'primary',attemptCount:1});
-  const changed=[citations.slice(0,1),[citations[1],citations[0]],[citations[0],citations[0]],
+  const changed=[[citations[0],citations[0]],
     [...citations,{sourceId:'foreign',sectionId:'one'}],[{...citations[0],sectionId:'changed'},citations[1]]];
   for(const acceptedCitations of changed){
     const changedVerifier={async generate(){return {text:JSON.stringify(accepted(finalAnswer,acceptedCitations)),finishReason:'stop',response:{modelId:'synthetic'}};}};
     const changedProvider=new MastraAnswerProvider({baseURL:'http://127.0.0.1:1/v1',modelId:'synthetic',role:'review',agent,verifierAgent:changedVerifier});
     await assert.rejects(changedProvider.answer({request:{lane:'review',message:'Review both notes.',history:[]},
-      ground:'record-answers',advisory:null,evidence:selected},options),error=>['provider-shape-invalid','provider-response-invalid'].includes(error.code));
+      ground:'record-answers',advisory:null,evidence:selected},options),error=>error.code==='provider-response-invalid');
   }
-  const changedAnswerVerifier={async generate(){return {text:JSON.stringify(accepted('Changed accepted bytes.',citations)),finishReason:'stop',response:{modelId:'synthetic'}};}};
-  const changedAnswerProvider=new MastraAnswerProvider({baseURL:'http://127.0.0.1:1/v1',modelId:'synthetic',role:'review',agent,verifierAgent:changedAnswerVerifier});
-  await assert.rejects(changedAnswerProvider.answer({request:{lane:'review',message:'Review both notes.',history:[]},
-    ground:'record-answers',advisory:null,evidence:selected},options),error=>error.code==='provider-shape-invalid');
 });
 
 test('Review checker cannot accept missing or unselected citations even when its model says accepted',async()=>{
@@ -161,26 +157,29 @@ test('Review checker cannot accept missing or unselected citations even when its
   }
 });
 
-test('a corrected evidence answer permits only one correction and requires an exact acceptance echo',async()=>{
+test('a revised evidence answer permits only one revision and preserves the first revision on acceptance',async()=>{
   const corrected='The selected note says cobalt; no date is established.';
   const agent={async generate(){return {text:JSON.stringify(answer),finishReason:'stop',response:{modelId:'synthetic'}};}};
-  for(const second of [
-    {verdict:'correct',reason:'Still incomplete.',finalAnswer:'A second correction.',citations:answer.citations},
-    accepted('Changed during acceptance.',answer.citations),
-  ]){
-    const replies=[{verdict:'correct',reason:'The date limit was omitted.',finalAnswer:corrected,citations:answer.citations},second];
-    const verifierAgent={async generate(){return {text:JSON.stringify(replies.shift()),finishReason:'stop',response:{modelId:'synthetic'}};}};
-    const provider=new MastraAnswerProvider({baseURL:'http://127.0.0.1:1/v1',modelId:'synthetic',role:'review',agent,verifierAgent});
-    await assert.rejects(provider.answer({request:{lane:'review',message:'Review the note.',history:[]},
-      ground:'record-answers',advisory:null,evidence},options),error=>error.code==='provider-response-invalid');
-  }
+  const rejectedReplies=[{verdict:'revise',reason:'The date limit was omitted.',finalAnswer:corrected,citations:answer.citations},
+    {verdict:'revise',reason:'Still incomplete.',finalAnswer:'A second revision.',citations:answer.citations}];
+  const rejectedVerifier={async generate(){return {text:JSON.stringify(rejectedReplies.shift()),finishReason:'stop',response:{modelId:'synthetic'}};}};
+  const rejectedProvider=new MastraAnswerProvider({baseURL:'http://127.0.0.1:1/v1',modelId:'synthetic',role:'review',agent,verifierAgent:rejectedVerifier});
+  await assert.rejects(rejectedProvider.answer({request:{lane:'review',message:'Review the note.',history:[]},
+    ground:'record-answers',advisory:null,evidence},options),error=>error.code==='provider-response-invalid');
+  const acceptedReplies=[{verdict:'revise',reason:'The date limit was omitted.',finalAnswer:corrected,citations:answer.citations},
+    accepted('Ignored second-check echo.',answer.citations)];
+  const acceptedVerifier={async generate(){return {text:JSON.stringify(acceptedReplies.shift()),finishReason:'stop',response:{modelId:'synthetic'}};}};
+  const acceptedProvider=new MastraAnswerProvider({baseURL:'http://127.0.0.1:1/v1',modelId:'synthetic',role:'review',agent,verifierAgent:acceptedVerifier});
+  const value=await acceptedProvider.answer({request:{lane:'review',message:'Review the note.',history:[]},
+    ground:'record-answers',advisory:null,evidence},options);
+  assert.equal(value.answer,corrected);assert.deepEqual(value.citations,answer.citations);
 });
 
-test('checker output rejects silent answer normalization and classifies missing correction evidence accurately',async()=>{
+test('checker output rejects missing revision evidence and the ambiguous legacy correct verdict',async()=>{
   const agent={async generate(){return {text:JSON.stringify(answer),finishReason:'stop',response:{modelId:'synthetic'}};}};
   for(const reply of [
-    {verdict:'accept',reason:'Accepted.',finalAnswer:` ${answer.answer}`,citations:answer.citations},
-    {verdict:'correct',reason:'Correction.',finalAnswer:'Corrected answer.',citations:[]},
+    {verdict:'revise',reason:'Revision.',finalAnswer:'Revised answer.',citations:[]},
+    {verdict:'correct',reason:'Ambiguous legacy verdict.',finalAnswer:answer.answer,citations:answer.citations},
   ]){
     const verifierAgent={async generate(){return {text:JSON.stringify(reply),finishReason:'stop',response:{modelId:'synthetic'}};}};
     const provider=new MastraAnswerProvider({baseURL:'http://127.0.0.1:1/v1',modelId:'synthetic',role:'review',agent,verifierAgent});

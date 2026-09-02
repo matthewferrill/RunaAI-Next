@@ -18,11 +18,13 @@
     "gate7f/function-first/M1-S2-R14-INDEPENDENT-SEMANTIC-RESULTS-2026-09-01.md",
     "gate7f/function-first/M1-S2-R15-AGENT-REVIEW-CORRECTIVE-CRITERIA-2026-09-01.md",
     "gate7f/function-first/M1-S2-R15-CORRECTION-IMPLEMENTATION-RESULTS-2026-09-01.md",
-    "gate7f/function-first/M1-S2-R15-CAMPAIGN-HALT-AND-COST-RCA-2026-09-02.md"
+    "gate7f/function-first/M1-S2-R15-CAMPAIGN-HALT-AND-COST-RCA-2026-09-02.md",
+    "gate7f/function-first/M1-S2-GEMMA-FOCUSED-REVIEW-RESULTS-2026-09-02.md",
+    "gate7f/function-first/M1-S2-GEMMA-FOCUSED-REVIEW-INDEPENDENT-REVIEW-2026-09-02.md"
   ],
   "scopeDocument": "roadmap/CURRENT-SLICE.md",
   "capabilityIds": ["C01", "C02", "C03", "C04", "C06", "C07", "C12", "C15", "C16"],
-  "nextWork": "Campaign halted at the R15 operator/browser method gate. Fresh zero-model stage b230075b107b439480bfbecd64189e62 completed 11 of 12 controls and stopped when the browser reached ordinary sign-in rather than the sealed synthetic bootstrap; it records no model invocation, production change or protected-data read. Independent review rejected the proposed correction because Clear-Clipboard is unavailable on the actual PowerShell 5.1 and 7.6.4 host. The rejected draft is preserved in ae69d6e416a29e6ccb73bc2ca4fc360cadd4e822 and removed from the active tree by 7445d0044c549c0ca8710eb5fc8f47a2670f5270. Do not create another stage or acquire a model lease. First complete the exact host-real zero-model dress rehearsal and independent GO defined in gate7f/function-first/M1-S2-R15-CAMPAIGN-HALT-AND-COST-RCA-2026-09-02.md. Any failure re-halts the campaign before inference. Gemma remains at zero R15 attempts; R14 evidence remains immutable; product qualification, production routing and the customer trial remain false.",
+  "nextWork": "The retired R15 browser campaign remains halted and must not be replayed. The reduced actual Omen-Control-Home qualification selected Gemma as the single candidate for the bounded Review model role: 8 of 8 semantic answers and 8 of 8 final unconditional accept-or-revise checker decisions passed, with exact cleanup. Review does not require model pooling. The separate Agent role, actual application/browser journey, production routing and product qualification remain open. Continue with the same reduced failure policy for Agent: one real-system readiness gate, no mock qualification, stop ungraded on infrastructure failure, and preserve a full actual-run RCA before any corrected resume.",
   "remainingRoadmapRequired": true,
   "completionClaim": "M1 completion is not whole-product completion."
 }

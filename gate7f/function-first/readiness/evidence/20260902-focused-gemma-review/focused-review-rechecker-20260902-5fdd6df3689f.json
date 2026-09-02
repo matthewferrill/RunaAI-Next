@@ -1,0 +1,105 @@
+{
+  "schemaVersion": "runaai-focused-review-omen-publication/v1",
+  "publishedAt": "2026-09-02T17:05:50.4670747+00:00",
+  "runId": "focused-review-rechecker-20260902-5fdd6df3689f",
+  "sourceCommit": "33b0f3068cc35cb7969148b1578cd107ab440197",
+  "runnerSha256": "c23a6b392317a3b7acf347be340b27ada5c77d3dc15c6605253107ead9785f1e",
+  "readinessReceiptSha256": "4c35b9dfbf3d764e1f6ccc50e4250cbec624aeb58dffcd65e5040a7bd851aeef",
+  "transport": "Omen -> Control WSL -> Home",
+  "remoteExitCode": 0,
+  "result": {
+    "schemaVersion": "runaai-focused-gemma-review-result/v1",
+    "runId": "focused-review-rechecker-20260902-5fdd6df3689f",
+    "runnerSha256": "c23a6b392317a3b7acf347be340b27ada5c77d3dc15c6605253107ead9785f1e",
+    "sourceCommit": "33b0f3068cc35cb7969148b1578cd107ab440197",
+    "phaseMode": "rechecker",
+    "inputRunId": null,
+    "startedAt": "2026-09-02T17:04:44.414Z",
+    "host": "RUNA-HOME",
+    "nodeVersion": "v22.22.1",
+    "model": {
+      "key": "gemma-4-26b-a4b-it-qat",
+      "artifactSha256": "3eca3b8f6d7baf218a7dd6bba5fb59a56ee25fe2d567b6f5f589b4f697eca51d"
+    },
+    "attempts": [
+      {
+        "caseId": "review-03-current-policy",
+        "startedAt": "2026-09-02T17:05:43.087Z",
+        "finishedAt": "2026-09-02T17:05:47.358Z",
+        "httpStatus": 200,
+        "requestSha256": "ba2981bc5dfa1674487a40497137d07157bca157de42d0b4dcf7046add99a756",
+        "modelId": "gemma-4-26b-a4b-it-qat",
+        "systemFingerprint": "gemma-4-26b-a4b-it-qat",
+        "usage": {
+          "prompt_tokens": 353,
+          "completion_tokens": 220,
+          "total_tokens": 573,
+          "completion_tokens_details": {
+            "reasoning_tokens": 0
+          }
+        },
+        "rawContent": "{\n  \"verdict\": \"correct\",\n  \"reason\": \"The candidate correctly identifies that the runbook follows v3 (weekly batching) instead of the current v4 policy, which prohibits weekly batching and requires individual checklists before departure. The explanation accurately captures the mismatch.\",\n  \"finalAnswer\": \"No, the operator runbook does not follow current policy. The runbook instructs operators to collect dispatches and review checklists every Friday following v3 (weekly batching), but Brooklace approved v4 explicitly states that weekly batching is no longer permitted and requires each individual dispatch to have a completed checklist before departure.\",\n  \"citations\": [\n    {\n      \"sourceId\": \"archived\",\n      \"sectionId\": \"provided\"\n    },\n    {\n      \"sourceId\": \"current\",\n      \"sectionId\": \"provided\"\n    },\n    {\n      \"sourceId\": \"runbook\",\n      \"sectionId\": \"provided\"\n    }\n  ]\n}",
+        "responseContract": {
+          "format": "valid-unconditional-checker-json",
+          "verdict": "correct",
+          "reason": "The candidate correctly identifies that the runbook follows v3 (weekly batching) instead of the current v4 policy, which prohibits weekly batching and requires individual checklists before departure. The explanation accurately captures the mismatch.",
+          "finalAnswer": "No, the operator runbook does not follow current policy. The runbook instructs operators to collect dispatches and review checklists every Friday following v3 (weekly batching), but Brooklace approved v4 explicitly states that weekly batching is no longer permitted and requires each individual dispatch to have a completed checklist before departure.",
+          "citations": [
+            {
+              "sourceId": "archived",
+              "sectionId": "provided"
+            },
+            {
+              "sourceId": "current",
+              "sectionId": "provided"
+            },
+            {
+              "sourceId": "runbook",
+              "sectionId": "provided"
+            }
+          ],
+          "acceptedAnswerExactEcho": false,
+          "acceptedCitationsExactEcho": false
+        }
+      }
+    ],
+    "failure": null,
+    "attemptCount": 1,
+    "modelGraded": false,
+    "productionChanged": false,
+    "protectedDataRead": false,
+    "cleanup": {
+      "unloadVerified": true,
+      "powerRestored": true,
+      "loadedModelInstances": 0,
+      "hardware": {
+        "freeMemoryBytes": 125903486976,
+        "gpus": [
+          {
+            "index": 0,
+            "name": "Quadro RTX 6000",
+            "uuid": "GPU-15ea3e34-292b-3333-5e43-e5b133f9a30c",
+            "memoryTotalMiB": 23040,
+            "memoryUsedMiB": 1769,
+            "temperatureC": 50,
+            "powerLimitWatts": 260,
+            "powerDrawWatts": 64.57,
+            "utilizationPercent": 0
+          },
+          {
+            "index": 1,
+            "name": "Quadro RTX 6000",
+            "uuid": "GPU-1f2f6459-b688-3466-5b49-a65c538be843",
+            "memoryTotalMiB": 23040,
+            "memoryUsedMiB": 31,
+            "temperatureC": 47,
+            "powerLimitWatts": 260,
+            "powerDrawWatts": 62.85,
+            "utilizationPercent": 0
+          }
+        ]
+      }
+    },
+    "finishedAt": "2026-09-02T17:05:49.452Z"
+  }
+}

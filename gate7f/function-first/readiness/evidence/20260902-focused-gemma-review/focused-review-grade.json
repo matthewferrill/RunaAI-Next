@@ -1,0 +1,28 @@
+{
+  "schemaVersion": "runaai-focused-review-grade/v1",
+  "date": "2026-09-02",
+  "candidate": "gemma4-26b-a4b",
+  "modelId": "gemma-4-26b-a4b-it-qat",
+  "role": "review",
+  "sourceCommit": "33b0f3068cc35cb7969148b1578cd107ab440197",
+  "answerRunId": "focused-review-20260902-f17e80070418",
+  "checkerRunId": "focused-review-checker-20260902-cb6e5785b5af",
+  "caseCount": 8,
+  "semanticAnswersPassed": 8,
+  "checkerContractsPassed": 8,
+  "checkerSemanticPassed": 8,
+  "nullableFieldsObserved": 0,
+  "modelFailures": 0,
+  "methodFailuresInFinalRun": 0,
+  "cleanupVerified": true,
+  "productionChanged": false,
+  "protectedDataRead": false,
+  "decision": "qualified-for-bounded-review-model-role",
+  "limitations": [
+    "not-agent-role-qualified",
+    "not-browser-or-ui-qualified",
+    "not-production-routing",
+    "not-statistical-reliability",
+    "not-whole-product-qualified"
+  ]
+}

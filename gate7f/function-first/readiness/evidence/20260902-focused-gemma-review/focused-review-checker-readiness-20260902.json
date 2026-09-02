@@ -1,0 +1,49 @@
+{
+  "schemaVersion": "runaai-focused-review-readiness/v1",
+  "collectedAt": "2026-09-02T16:59:53.1571294+00:00",
+  "passed": true,
+  "systems": {
+    "omen": {
+      "host": "DESKTOP-OMEN",
+      "identity": "DESKTOP-OMEN\\matth",
+      "os": "Microsoft Windows NT 10.0.26200.0",
+      "ps": "7.6.4",
+      "node": "v22.22.0"
+    },
+    "control": {
+      "host": "RUNA-CONTROL",
+      "identity": "RUNA-CONTROL\\codex-audit",
+      "os": "Microsoft Windows NT 10.0.26200.0",
+      "ps": "5.1.26100.9168",
+      "node": "v24.19.0",
+      "cpu": "Intel(R) Core(TM) i5-8500T CPU @ 2.10GHz",
+      "logical": 6,
+      "memory": 16966090752,
+      "stagingRootPresent": true
+    },
+    "home": {
+      "host": "RUNA-HOME",
+      "identity": "RUNA-HOME\\codex-audit",
+      "os": "Microsoft Windows NT 10.0.19045.0",
+      "ps": "5.1.19041.6456",
+      "node": "v22.22.1",
+      "cpu": "Intel(R) Xeon(R) CPU E5-2699 v3 @ 2.30GHz",
+      "logical": 36,
+      "memory": 137353744384,
+      "registryAvailable": true,
+      "loadedModelInstances": 0,
+      "gpus": [
+        "0, Quadro RTX 6000, GPU-15ea3e34-292b-3333-5e43-e5b133f9a30c, 23040, 1769, 43, 260.00",
+        "1, Quadro RTX 6000, GPU-1f2f6459-b688-3466-5b49-a65c538be843, 23040, 31, 37, 260.00"
+      ],
+      "modelPresent": true
+    }
+  },
+  "transport": {
+    "omenToControlWindows": "live",
+    "omenToControlWslToHome": "live"
+  },
+  "modelsInvoked": false,
+  "productionChanged": false,
+  "privateValuesIncluded": false
+}

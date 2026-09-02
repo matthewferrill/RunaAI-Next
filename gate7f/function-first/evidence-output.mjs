@@ -8,7 +8,7 @@ export const EVIDENCE_OUTPUT_SCHEMA=freeze({$schema:'http://json-schema.org/draf
 export const EVIDENCE_STRUCTURED_OUTPUT=freeze({schema:EVIDENCE_OUTPUT_SCHEMA,errorStrategy:'error',jsonPromptInjection:false});
 export const EVIDENCE_RESPONSE_FORMAT=freeze({type:'json_schema',json_schema:{schema:EVIDENCE_OUTPUT_SCHEMA,strict:true,name:'response'}});
 export const EVIDENCE_VERIFICATION_SCHEMA=freeze({$schema:'http://json-schema.org/draft-07/schema#',type:'object',
-  additionalProperties:false,properties:{verdict:{type:'string',enum:['accept','correct']},
+  additionalProperties:false,properties:{verdict:{type:'string',enum:['accept','revise']},
     reason:{type:'string',minLength:1},finalAnswer:{type:'string',minLength:1},
     citations:{type:'array',minItems:1,items:CITATION_SCHEMA}},
   required:['verdict','reason','finalAnswer','citations']});

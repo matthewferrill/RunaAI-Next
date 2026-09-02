@@ -1355,3 +1355,31 @@ above. Gate 7A follow-on checks for a second PC, phone, certificate renewal, and
 off-LAN ingress remain independent of the Gate 7C presentation branch. E3, E4/device-vault recovery,
 the separate approved-knowledge vector index, Qwen3.6 deliberate review, the existing live BGE
 endpoint, and broader legacy capabilities also remain separately deferred.
+
+## Focused actual-system Gemma Review qualification (2026-09-02)
+
+The 120-attempt R15/browser method remains retired after its documented operator failures. It was not
+restarted. The steward-approved reduced method tested the eight frozen Review scenarios through the
+actual Omen -> Control -> Home transport and actual Home Gemma runtime, once each, with no mock evidence
+used for qualification.
+
+Gemma returned 8/8 semantically correct Review answers. The first actual checker run proved the R15
+unconditional four-field schema removed the nullable-output failure, while exposing two remaining
+application-contract technicalities: `correct` was interpreted as "the candidate is correct," and an
+accepted selected-citation set could be rejected solely for order. The final application contract uses
+the unambiguous actions `accept` and `revise`. On accept, the application retains the original answer and
+citations; checker echo text cannot mutate accepted output. A revision remains limited to one recheck and
+every citation remains validated against unique selected evidence.
+
+The final actual checker run `focused-review-checker-20260902-cb6e5785b5af` passed all eight scenarios:
+8/8 HTTP 200, 8/8 expected model identity, 8/8 valid closed non-null objects, 8/8 `accept`, and zero
+foreign citations, semantic errors, infrastructure errors or lifecycle errors. Every actual model run
+unloaded its exact owned instance, verified zero final residency and restored both Home GPUs to 260 W.
+Production routing and protected data were untouched.
+
+Gemma is selected as the single candidate for the bounded Review model role under this corrected
+contract. This is not Agent qualification, application/browser acceptance, production promotion,
+statistical reliability or whole-product qualification. Exact evidence, limitations and all method RCAs
+are indexed in `gate7f/function-first/M1-S2-GEMMA-FOCUSED-REVIEW-RESULTS-2026-09-02.md`.
+A separate static review of the frozen evidence and application contract returned `GO` with no P0/P1
+commit blocker and performed no model, browser, mock or test campaign.

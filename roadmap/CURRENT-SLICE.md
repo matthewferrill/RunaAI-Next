@@ -3,7 +3,24 @@
 Roadmap revision: 2026-08-28.1
 Milestone: M1
 Slice ID: M1-S2
-Status: halted at the R15 operator/browser method gate; zero R15 model attempts; product not qualified.
+Status: focused Gemma Review model/contract qualification passed; Agent and product remain unqualified.
+
+Focused actual-system Review result, 2026-09-02: the failed 120-attempt/browser R15 method remains retired
+and is not resumed. A reduced Omen -> Control -> Home method used the eight frozen Review scenarios once
+each. Gemma produced 8/8 semantically correct Review answers. After actual evidence exposed ambiguity in
+the checker token `correct` and a non-semantic ordered-citation echo requirement, the application checker
+was reduced to an unconditional non-null `accept`/`revise` contract: accepted output remains
+application-owned; revisions retain the one-recheck limit; all citations must remain unique selected
+evidence. The final actual checker run returned 8/8 valid `accept` decisions with zero nullable fields,
+foreign citations, model errors, infrastructure errors or cleanup errors. Home finished with zero loaded
+models and both GPUs restored to 260 W. Gemma is therefore the selected single candidate for this bounded
+Review role; no Review model pool is needed. This does not qualify Agent, browser/UI, production routing,
+statistical reliability or the product. Evidence and all actual-run RCAs are indexed in
+`../gate7f/function-first/M1-S2-GEMMA-FOCUSED-REVIEW-RESULTS-2026-09-02.md`. A separate static review of
+the frozen evidence and contract returned `GO` with no P0/P1 commit blocker; it ran no model, browser,
+mock or test campaign.
+
+The historical halt text below is retained as evidence of the retired method, not current progress.
 
 Campaign halt, 2026-09-02: fresh zero-model stage `b230075b107b439480bfbecd64189e62`
 completed 11/12 controls and stopped when the browser reached ordinary sign-in rather than the sealed

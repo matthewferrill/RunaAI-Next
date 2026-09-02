@@ -51,19 +51,13 @@ function parseReviewVerification(text) {
     && Object.keys(citation).sort().join() === "sectionId,sourceId"
     && typeof citation.sourceId === "string" && citation.sourceId
     && typeof citation.sectionId === "string" && citation.sectionId);
-  if (!exact || !["accept", "correct"].includes(parsed.verdict)
+  if (!exact || !["accept", "revise"].includes(parsed.verdict)
       || typeof parsed.reason !== "string" || !parsed.reason.trim()
       || typeof parsed.finalAnswer !== "string" || !parsed.finalAnswer.trim()
       || parsed.finalAnswer !== parsed.finalAnswer.trim() || !citationsValid) {
     throw providerError("provider-shape-invalid", "provider returned an invalid review verification result");
   }
   return { verdict: parsed.verdict, finalAnswer: parsed.finalAnswer, citations: structuredClone(citations) };
-}
-
-function exactCitationEcho(actual, expected) {
-  return Array.isArray(actual) && Array.isArray(expected) && actual.length === expected.length
-    && actual.every((citation, index) => citation.sourceId === expected[index]?.sourceId
-      && citation.sectionId === expected[index]?.sectionId);
 }
 
 export class MastraAnswerProvider {
@@ -130,9 +124,9 @@ export class MastraAnswerProvider {
         "For a security review, reject a candidate that silently skips any stated control. Require the final answer to say whether each control does or does not enforce the specific resource or path boundary, even when the candidate correctly identifies another defect and remediation.",
         "A citation label alone is not support. Verify that each material conclusion follows from the cited evidence and that relevant negative evidence is not omitted.",
         "Reject unsupported execution claims and distinguish inspection, documented policy, implementation, measurement, inference, and unknowns.",
-        "Return exactly one JSON object with verdict, reason, finalAnswer, and citations. verdict is either accept or correct.",
-        "If complete, verdict is accept and finalAnswer plus citations must exactly repeat candidateAnswer and candidateCitations.",
-        "If incomplete, verdict is correct; finalAnswer is a direct complete corrected answer and citations contains only sourceId and sectionId pairs from supplied evidence.",
+        "Return exactly one JSON object with verdict, reason, finalAnswer, and citations. verdict is either accept or revise.",
+        "If complete, verdict is accept. The application preserves candidateAnswer and candidateCitations; finalAnswer and citations remain required but cannot change accepted output.",
+        "If incomplete, verdict is revise; finalAnswer is a direct complete replacement and citations contains only sourceId and sectionId pairs from supplied evidence.",
         "Do not mention the rejected draft or describe hidden reasoning. Do not add requirements that are absent from currentRequest and evidence.",
       ].join(" "),
     }) : null;
@@ -261,9 +255,7 @@ export class MastraAnswerProvider {
     };
     const first = await verify(candidateAnswer, candidateCitations);
     if (first.verdict === "accept") {
-      if (first.finalAnswer !== candidateAnswer || !exactCitationEcho(first.citations, candidateCitations)) {
-        throw providerError("provider-shape-invalid", "provider evidence checker changed accepted answer or citations");
-      }
+      if (!selectedCitations(first.citations)) throw providerError("provider-response-invalid", "accepted evidence check lacks selected evidence");
       if (!selectedCitations(candidateCitations)) throw providerError("provider-response-invalid", "accepted evidence response lacks selected evidence");
       return { answer: candidateAnswer, citations: candidateCitations, performed: true, corrected: false,
         kind: `evidence-${this.role}`, finalAnswerOrigin: "primary", attemptCount: 1 };
@@ -275,8 +267,7 @@ export class MastraAnswerProvider {
       throw providerError("provider-output-limited", "provider review correction exceeded the byte ceiling");
     }
     const second = await verify(first.finalAnswer, first.citations);
-    if (second.verdict !== "accept" || second.finalAnswer !== first.finalAnswer
-        || !exactCitationEcho(second.citations, first.citations)) {
+    if (second.verdict !== "accept" || !selectedCitations(second.citations)) {
       throw providerError("provider-response-invalid", "provider could not verify the corrected evidence response");
     }
     return { answer: first.finalAnswer, citations: first.citations, performed: true, corrected: true,

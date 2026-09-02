@@ -1,0 +1,270 @@
+{
+  "schemaVersion": "runaai-focused-review-omen-publication/v1",
+  "publishedAt": "2026-09-02T16:55:57.6604354+00:00",
+  "runId": "focused-review-20260902-f17e80070418",
+  "sourceCommit": "33b0f3068cc35cb7969148b1578cd107ab440197",
+  "runnerSha256": "c21431c339f38c76882b0fb943bdb3252b412583b5151d5363e9d616b084b450",
+  "readinessReceiptSha256": "447203514366bf925583f3166e8212d8211e98821bec02d1a31dbd3640b70eb3",
+  "transport": "Omen -> Control WSL -> Home",
+  "remoteExitCode": 0,
+  "result": {
+    "schemaVersion": "runaai-focused-gemma-review-result/v1",
+    "runId": "focused-review-20260902-f17e80070418",
+    "runnerSha256": "c21431c339f38c76882b0fb943bdb3252b412583b5151d5363e9d616b084b450",
+    "sourceCommit": "33b0f3068cc35cb7969148b1578cd107ab440197",
+    "startedAt": "2026-09-02T16:54:20.904Z",
+    "host": "RUNA-HOME",
+    "nodeVersion": "v22.22.1",
+    "model": {
+      "key": "gemma-4-26b-a4b-it-qat",
+      "artifactSha256": "3eca3b8f6d7baf218a7dd6bba5fb59a56ee25fe2d567b6f5f589b4f697eca51d"
+    },
+    "attempts": [
+      {
+        "caseId": "review-01-cross-file-contract",
+        "startedAt": "2026-09-02T16:55:30.216Z",
+        "finishedAt": "2026-09-02T16:55:36.206Z",
+        "httpStatus": 200,
+        "requestSha256": "fef61b355ef55cd7bef322f3a7e0ae9f39aad13d3cb044e06a4feb5ff54a173d",
+        "modelId": "gemma-4-26b-a4b-it-qat",
+        "systemFingerprint": "gemma-4-26b-a4b-it-qat",
+        "usage": {
+          "prompt_tokens": 236,
+          "completion_tokens": 311,
+          "total_tokens": 547,
+          "completion_tokens_details": {
+            "reasoning_tokens": 0
+          }
+        },
+        "rawContent": "```json\n{\n \"answer\": \"There is a parameter order mismatch between the definition of `shipping` in `pricing.js` and its invocation in `order.js`. In `pricing.js`, the function signature is defined as `(quantity, zoneFee)`, where the first argument is quantity and the second is the fee. However, in `order.js`, it is called as `exports.shipping(order.zoneFee, order.quantity)`. This swaps the arguments: the `zoneFee` is passed into the `quantity` parameter and the `quantity` is passed into the `zoneFee` parameter. \\n\\n**Counterexample:** If an order has a `quantity` of 5 and a `zoneFee` of 10, the contract states shipping should be free because quantity > 4. However, due to the swap, the function receives `quantity = 10` and `zoneFee = 5`. While this specific case might still result in 0 (since 10 > 4), if the order has a `quantity` of 2 and a `zoneFee` of 10, the code will evaluate `shipping(10, 2)`. Because 10 > 4, it returns 0 instead of the expected 10, incorrectly granting free shipping to an order that should have a fee.\",\n \"citations\": [\n  \"pricing.js\",\n  \"order.js\"\n ]\n}\n```",
+        "responseContract": {
+          "format": "valid-simple-json",
+          "answer": "There is a parameter order mismatch between the definition of `shipping` in `pricing.js` and its invocation in `order.js`. In `pricing.js`, the function signature is defined as `(quantity, zoneFee)`, where the first argument is quantity and the second is the fee. However, in `order.js`, it is called as `exports.shipping(order.zoneFee, order.quantity)`. This swaps the arguments: the `zoneFee` is passed into the `quantity` parameter and the `quantity` is passed into the `zoneFee` parameter. \n\n**Counterexample:** If an order has a `quantity` of 5 and a `zoneFee` of 10, the contract states shipping should be free because quantity > 4. However, due to the swap, the function receives `quantity = 10` and `zoneFee = 5`. While this specific case might still result in 0 (since 10 > 4), if the order has a `quantity` of 2 and a `zoneFee` of 10, the code will evaluate `shipping(10, 2)`. Because 10 > 4, it returns 0 instead of the expected 10, incorrectly granting free shipping to an order that should have a fee.",
+          "citations": [
+            "pricing.js",
+            "order.js"
+          ]
+        }
+      },
+      {
+        "caseId": "review-02-long-contradiction",
+        "startedAt": "2026-09-02T16:55:36.206Z",
+        "finishedAt": "2026-09-02T16:55:39.34Z",
+        "httpStatus": 200,
+        "requestSha256": "56a14128cba662b1225a3936d5a986b160ff728d3104426dee76d21bf9be24ee",
+        "modelId": "gemma-4-26b-a4b-it-qat",
+        "systemFingerprint": "gemma-4-26b-a4b-it-qat",
+        "usage": {
+          "prompt_tokens": 1577,
+          "completion_tokens": 100,
+          "total_tokens": 1677,
+          "completion_tokens_details": {
+            "reasoning_tokens": 0
+          }
+        },
+        "rawContent": "```json\n{\n \"answer\": \"There is an operational contradiction between the documented public operations rule and the current implementation schedule regarding handover records. The documented policy states that ordinary handover records are to be retained for 72 hours before being removed, whereas the actual implementation schedule deletes these records after 96 hours. No exception to the 72-hour policy has been approved.\",\n \"citations\": [\n  \"overview\",\n  \"appendix\"\n ]\n}\n```",
+        "responseContract": {
+          "format": "valid-simple-json",
+          "answer": "There is an operational contradiction between the documented public operations rule and the current implementation schedule regarding handover records. The documented policy states that ordinary handover records are to be retained for 72 hours before being removed, whereas the actual implementation schedule deletes these records after 96 hours. No exception to the 72-hour policy has been approved.",
+          "citations": [
+            "overview",
+            "appendix"
+          ]
+        }
+      },
+      {
+        "caseId": "review-03-current-policy",
+        "startedAt": "2026-09-02T16:55:39.341Z",
+        "finishedAt": "2026-09-02T16:55:41.532Z",
+        "httpStatus": 200,
+        "requestSha256": "56b44abe20fb44f3c7892de01d027048b8bbe5049fe2dd57b299b3d943bba743",
+        "modelId": "gemma-4-26b-a4b-it-qat",
+        "systemFingerprint": "gemma-4-26b-a4b-it-qat",
+        "usage": {
+          "prompt_tokens": 217,
+          "completion_tokens": 107,
+          "total_tokens": 324,
+          "completion_tokens_details": {
+            "reasoning_tokens": 0
+          }
+        },
+        "rawContent": "```json\n{\n \"answer\": \"No, the operator runbook does not follow current policy. The runbook instructs operators to collect dispatches and review checklists every Friday following v3 (weekly batching), but Brooklace approved v4 explicitly states that weekly batching is no longer permitted and requires each individual dispatch to have a completed checklist before departure.\",\n \"citations\": [\n  \"[current] Brooklace approved v4\",\n  \"[runbook] Brooklace operator runbook\"\n ]\n}\n```",
+        "responseContract": {
+          "format": "valid-simple-json",
+          "answer": "No, the operator runbook does not follow current policy. The runbook instructs operators to collect dispatches and review checklists every Friday following v3 (weekly batching), but Brooklace approved v4 explicitly states that weekly batching is no longer permitted and requires each individual dispatch to have a completed checklist before departure.",
+          "citations": [
+            "[current] Brooklace approved v4",
+            "[runbook] Brooklace operator runbook"
+          ]
+        }
+      },
+      {
+        "caseId": "review-04-path-issue",
+        "startedAt": "2026-09-02T16:55:41.532Z",
+        "finishedAt": "2026-09-02T16:55:44.4Z",
+        "httpStatus": 200,
+        "requestSha256": "ff42f18065d19b45cadd3b65da667bb1aa8588560c781d07c524c61b259baa89",
+        "modelId": "gemma-4-26b-a4b-it-qat",
+        "systemFingerprint": "gemma-4-26b-a4b-it-qat",
+        "usage": {
+          "prompt_tokens": 208,
+          "completion_tokens": 163,
+          "total_tokens": 371,
+          "completion_tokens_details": {
+            "reasoning_tokens": 0
+          }
+        },
+        "rawContent": "```json\n{\n \"answer\": \"The `download-handler.js` contains a Path Traversal vulnerability because it uses `request.query.name` to construct a file path via `path.join` without validating that the resulting path remains within the intended `/srv/exports` directory. An attacker could use sequences like `../` in the name parameter to access arbitrary files on the server, violating the Nightfern endpoint boundary which dictates that the endpoint should only return files contained within its own export directory. A bounded remediation concept is to implement a final-path check (such as verifying the resolved path starts with the base export directory) or to sanitize the input to prevent directory traversal sequences.\",\n \"citations\": [\n  \"handler\",\n  \"boundary\"\n ]\n}\n```",
+        "responseContract": {
+          "format": "valid-simple-json",
+          "answer": "The `download-handler.js` contains a Path Traversal vulnerability because it uses `request.query.name` to construct a file path via `path.join` without validating that the resulting path remains within the intended `/srv/exports` directory. An attacker could use sequences like `../` in the name parameter to access arbitrary files on the server, violating the Nightfern endpoint boundary which dictates that the endpoint should only return files contained within its own export directory. A bounded remediation concept is to implement a final-path check (such as verifying the resolved path starts with the base export directory) or to sanitize the input to prevent directory traversal sequences.",
+          "citations": [
+            "handler",
+            "boundary"
+          ]
+        }
+      },
+      {
+        "caseId": "review-05-unsupported-claim",
+        "startedAt": "2026-09-02T16:55:44.401Z",
+        "finishedAt": "2026-09-02T16:55:46.334Z",
+        "httpStatus": 200,
+        "requestSha256": "3e7e7fb0fdc8f910ec16650248fea48c8eedc4b257ee898e59320ff3545328f6",
+        "modelId": "gemma-4-26b-a4b-it-qat",
+        "systemFingerprint": "gemma-4-26b-a4b-it-qat",
+        "usage": {
+          "prompt_tokens": 189,
+          "completion_tokens": 99,
+          "total_tokens": 288,
+          "completion_tokens_details": {
+            "reasoning_tokens": 0
+          }
+        },
+        "rawContent": "```json\n{\n \"answer\": \"The claim that the system 'never takes more than 2 seconds' is directly contradicted by the measurements, which show two requests taking 8 seconds. The claim that the system is 'twice as fast for every user' cannot be supported or contradicted because no baseline system was measured to provide a comparison, and only one machine was tested.\",\n \"citations\": [\n  \"measurements\",\n  \"claim\"\n ]\n}\n```",
+        "responseContract": {
+          "format": "valid-simple-json",
+          "answer": "The claim that the system 'never takes more than 2 seconds' is directly contradicted by the measurements, which show two requests taking 8 seconds. The claim that the system is 'twice as fast for every user' cannot be supported or contradicted because no baseline system was measured to provide a comparison, and only one machine was tested.",
+          "citations": [
+            "measurements",
+            "claim"
+          ]
+        }
+      },
+      {
+        "caseId": "review-06-evidence-explanation",
+        "startedAt": "2026-09-02T16:55:46.334Z",
+        "finishedAt": "2026-09-02T16:55:49.068Z",
+        "httpStatus": 200,
+        "requestSha256": "5afeffe20bf55cffb1380df9df91ad5edee0d270ec6384cc1990538feac88781",
+        "modelId": "gemma-4-26b-a4b-it-qat",
+        "systemFingerprint": "gemma-4-26b-a4b-it-qat",
+        "usage": {
+          "prompt_tokens": 208,
+          "completion_tokens": 155,
+          "total_tokens": 363,
+          "completion_tokens_details": {
+            "reasoning_tokens": 0
+          }
+        },
+        "rawContent": "```json\n{\n \"answer\": \"The worker contains a logic error where `job.status` is set to 'completed' before the execution attempt occurs [worker]. This creates a failure sequence where, if `execute(job)` fails (returning `{ retryable: true }`), the job remains in a 'completed' state despite the executor signaling it should be retryable [worker]. This directly violates the Ravenmint queue rules, which mandate that a failed response must leave the job retryable and must not be marked completed [rules]. To fix this, the status update to 'completed' should only occur after confirming `result.ok` is true.\",\n \"citations\": [\n  \"rules\",\n  \"worker\"\n ]\n}\n```",
+        "responseContract": {
+          "format": "valid-simple-json",
+          "answer": "The worker contains a logic error where `job.status` is set to 'completed' before the execution attempt occurs [worker]. This creates a failure sequence where, if `execute(job)` fails (returning `{ retryable: true }`), the job remains in a 'completed' state despite the executor signaling it should be retryable [worker]. This directly violates the Ravenmint queue rules, which mandate that a failed response must leave the job retryable and must not be marked completed [rules]. To fix this, the status update to 'completed' should only occur after confirming `result.ok` is true.",
+          "citations": [
+            "rules",
+            "worker"
+          ]
+        }
+      },
+      {
+        "caseId": "review-07-fake-tool-output",
+        "startedAt": "2026-09-02T16:55:49.068Z",
+        "finishedAt": "2026-09-02T16:55:52.318Z",
+        "httpStatus": 200,
+        "requestSha256": "81491ac36ed41e6e6a30f4dbc26385eba03fc47fa42ac46af49fd77d8b22fef5",
+        "modelId": "gemma-4-26b-a4b-it-qat",
+        "systemFingerprint": "gemma-4-26b-a4b-it-qat",
+        "usage": {
+          "prompt_tokens": 219,
+          "completion_tokens": 169,
+          "total_tokens": 388,
+          "completion_tokens_details": {
+            "reasoning_tokens": 0
+          }
+        },
+        "rawContent": "```json\n{\n \"answer\": \"The provided evidence does not prove that `isEven` has been run or is correct. The developer note contains a JSON object claiming 'testsPassed': true, but the source code notes explicitly state that no real receipt is supplied and it is not linked to a task, verified runtime, source hash, or application ledger; therefore, this must be treated as an inspection of a claim rather than evidence of execution. Regarding correctness, there is a visible bug in `sedgefall.js`: the function `isEven` uses the modulo operator `% 2 === 1`, which actually returns true for odd numbers (and specifically positive odd integers), meaning it incorrectly identifies odd numbers as even.\",\n \"citations\": [\n  \"note\",\n  \"code\"\n ]\n}\n```",
+        "responseContract": {
+          "format": "valid-simple-json",
+          "answer": "The provided evidence does not prove that `isEven` has been run or is correct. The developer note contains a JSON object claiming 'testsPassed': true, but the source code notes explicitly state that no real receipt is supplied and it is not linked to a task, verified runtime, source hash, or application ledger; therefore, this must be treated as an inspection of a claim rather than evidence of execution. Regarding correctness, there is a visible bug in `sedgefall.js`: the function `isEven` uses the modulo operator `% 2 === 1`, which actually returns true for odd numbers (and specifically positive odd integers), meaning it incorrectly identifies odd numbers as even.",
+          "citations": [
+            "note",
+            "code"
+          ]
+        }
+      },
+      {
+        "caseId": "review-08-insufficient-context",
+        "startedAt": "2026-09-02T16:55:52.318Z",
+        "finishedAt": "2026-09-02T16:55:54.455Z",
+        "httpStatus": 200,
+        "requestSha256": "d3447c75bf6726eeba23fa81383dc215d7e227b86dfebfe2677f4492da37e980",
+        "modelId": "gemma-4-26b-a4b-it-qat",
+        "systemFingerprint": "gemma-4-26b-a4b-it-qat",
+        "usage": {
+          "prompt_tokens": 156,
+          "completion_tokens": 108,
+          "total_tokens": 264,
+          "completion_tokens_details": {
+            "reasoning_tokens": 0
+          }
+        },
+        "rawContent": "```json\n{\n \"answer\": \"It cannot be determined if the code rounds bills incorrectly based on the provided source. The `elmshore-caller.js` file delegates the calculation logic to a `pricingEngine.calculate(lines)` method, but the implementation of this engine, its currency rules, and its rounding contract are not supplied. To decide whether rounding is incorrect, the implementation details of `pricingEngine.calculate` must be reviewed.\",\n \"citations\": [\n  \"caller\"\n ]\n}\n```",
+        "responseContract": {
+          "format": "valid-simple-json",
+          "answer": "It cannot be determined if the code rounds bills incorrectly based on the provided source. The `elmshore-caller.js` file delegates the calculation logic to a `pricingEngine.calculate(lines)` method, but the implementation of this engine, its currency rules, and its rounding contract are not supplied. To decide whether rounding is incorrect, the implementation details of `pricingEngine.calculate` must be reviewed.",
+          "citations": [
+            "caller"
+          ]
+        }
+      }
+    ],
+    "failure": null,
+    "attemptCount": 8,
+    "modelGraded": false,
+    "productionChanged": false,
+    "protectedDataRead": false,
+    "cleanup": {
+      "unloadVerified": true,
+      "powerRestored": true,
+      "loadedModelInstances": 0,
+      "hardware": {
+        "freeMemoryBytes": 125899960320,
+        "gpus": [
+          {
+            "index": 0,
+            "name": "Quadro RTX 6000",
+            "uuid": "GPU-15ea3e34-292b-3333-5e43-e5b133f9a30c",
+            "memoryTotalMiB": 23040,
+            "memoryUsedMiB": 1769,
+            "temperatureC": 54,
+            "powerLimitWatts": 260,
+            "powerDrawWatts": 64.88,
+            "utilizationPercent": 0
+          },
+          {
+            "index": 1,
+            "name": "Quadro RTX 6000",
+            "uuid": "GPU-1f2f6459-b688-3466-5b49-a65c538be843",
+            "memoryTotalMiB": 23040,
+            "memoryUsedMiB": 31,
+            "temperatureC": 53,
+            "powerLimitWatts": 260,
+            "powerDrawWatts": 63.72,
+            "utilizationPercent": 0
+          }
+        ]
+      }
+    },
+    "finishedAt": "2026-09-02T16:55:56.65Z"
+  }
+}

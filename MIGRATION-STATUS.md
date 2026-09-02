@@ -15,7 +15,23 @@ are unchanged. M1 is authorized, not complete; its first local wiring result is 
 The steward authorized necessary non-destructive work and commit/push to RunaAI-Next without recurring
 permission requests. Human involvement is reserved for genuine customer tests or human-only operations.
 
-### Current checkpoint: R15 campaign paused before inference for runtime-security witness reseal
+### Current checkpoint: R15 method repair independently approved; packaging before inference
+
+Gemma-only arm update, 2026-09-02: the steward selected one fresh 120-attempt Gemma eligibility arm to
+conserve compute. It covers 24 ordered attempts in each of Chat, Research, Code, Agent and Review, with
+Nomic permitted only for embeddings. A pass in all five roles can establish Gemma as the single
+generation/reasoning candidate for this bounded M1 route. It cannot retroactively complete the original
+three-candidate R15 comparison, qualify the product, authorize production routing or replace the bounded
+human trial.
+
+The simplified Review contract and full completion/review publication chain now pass 195/195 model-free
+harness checks. Two independent final reviews returned GO with no remaining P0/P1 blocker after verifying
+BigInt Windows file identity, current-path reopen/hash checks, same-inode durable-overwrite rejection,
+linked-root/output-ancestor rejection, visible-worksheet-only decisions, canonical completion verification,
+retained operator locks and one atomic final-grade publication. The complete tracked suite passes
+1,965/2,043 with 78 intentional environment-dependent skips and zero failures. No Gemma request has occurred. The active
+step is exact source packaging and fresh resealing; 12 controls and the separate real-browser proof must
+still pass before the arm can begin.
 
 V8 method-gate update, 2026-09-02: independently approved commit
 `bf1ec7fdc1aacd1239e6513c29943fb93f4d6342` was sealed and fresh stage
@@ -91,8 +107,9 @@ Fresh model-free controls completed 12/12 with zero failed drivers. After five r
 failures with zero model calls, the corrected same-origin Brave flow passed actual-browser exercise,
 on-time witness, on-time acknowledgement, witness-before-acknowledgement, acknowledgement consumption
 and native release. It did not read protected data or change production. No R15 inference or customer
-trial has started. The next gate is the full fresh 360-attempt, three-candidate campaign followed by a
-fresh candidate-blind review; any non-model method failure pauses at the first unconsumed identity.
+trial has started. This historical checkpoint was superseded by the 2026-09-02 steward-selected Gemma-only
+eligibility arm described above; it remains evidence for the model-free method but does not make the
+three-candidate R15 comparison complete.
 
 The first scored-stage rehearsal then stopped before a Home lease or provider call. The create-before-load
 Home lease builder proved that the R15 hardware plan had hashed Windows checkout bytes while the lease

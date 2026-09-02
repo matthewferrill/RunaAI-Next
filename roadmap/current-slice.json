@@ -21,7 +21,7 @@
   ],
   "scopeDocument": "roadmap/CURRENT-SLICE.md",
   "capabilityIds": ["C01", "C02", "C03", "C04", "C06", "C07", "C12", "C15", "C16"],
-  "nextWork": "Commit the independently approved R15 runtime-security witness correction and rebuild the exact source archive/runtime seal, then pass 12 controls and the real-browser publication proof before the steward-directed Gemma-only 120-attempt eligibility arm using the frozen unconditional Review checker contract. No model identity has been consumed by the retained method-gate stages; do not replay or regrade R14, and do not claim the original three-model comparative R15 complete from a one-model arm.",
+  "nextWork": "Package and freshly reseal the independently approved simplified R15 Gemma eligibility method, then pass 12 model-free controls and the separate real-browser publication proof before the first of 120 ordered Gemma attempts. Nomic is embedding-only. No model identity has been consumed by the retained method-gate stages; do not replay or regrade R14, and do not claim comparative R15, product qualification, production routing or human-trial completion from a one-model arm.",
   "remainingRoadmapRequired": true,
   "completionClaim": "M1 completion is not whole-product completion."
 }

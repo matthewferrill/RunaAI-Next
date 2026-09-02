@@ -3,7 +3,18 @@
 Roadmap revision: 2026-08-28.1
 Milestone: M1
 Slice ID: M1-S2
-Status: in progress, R15 campaign paused before inference for runtime-security witness correction and reseal; product not qualified.
+Status: in progress, R15 method repair independently approved and packaging before inference; product not qualified.
+
+Gemma-only eligibility update, 2026-09-02: the steward selected one fresh 120-attempt Gemma arm to
+conserve compute. It contains 24 ordered attempts per M1 role and permits Nomic only for embeddings. The
+simplified unconditional Review contract and completion/review publication chain pass 195/195 model-free
+harness checks. Two final independent reviews returned GO with no P0/P1 blocker after adversarially
+checking Windows path identity, durable publication, linked ancestors, visible-review evidence, canonical
+Home completion and retained operator locks. The complete tracked suite passes 1,965/2,043 with 78
+intentional environment-dependent skips and zero failures. No candidate call has occurred. Exact packaging/reseal, 12
+controls and the separate real-browser proof remain before inference. A five-role Gemma pass would support
+one generation/reasoning model for this bounded route, not comparative R15 completion, product
+qualification, production routing or customer-trial acceptance.
 
 V8 method-gate update, 2026-09-02: commit `bf1ec7fdc1aacd1239e6513c29943fb93f4d6342`
 was sealed and stage `635e8cecd7b64b6296d9b23043b52015` completed all 12 inner model-free controls

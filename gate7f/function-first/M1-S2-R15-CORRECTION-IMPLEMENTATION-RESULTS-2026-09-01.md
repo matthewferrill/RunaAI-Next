@@ -245,3 +245,88 @@ events remain observed, and complete durable runtime state is verified before lo
 commit/seal, fresh 12-control run and separate browser-publication proof remain required before the
 steward-directed Gemma 120-attempt arm. The already-implemented R15 unconditional Review checker shape is
 the simplified contract selected for that arm; it does not use the failed nullable accepted/correction form.
+
+## V9 Windows ACL normalization RCA
+
+Fresh v9 stage `e4678a024f624ebab6340cd989c59556` completed all 12 model-free controls with zero
+failed drivers and `modelsInvoked:false`. The separate real-browser checkpoint also visibly proved the
+unknown execution receipt and mandatory reconciliation state. The outer validator then stopped with
+`r15-stage-runtime-security-drift`. It correctly prevented inference; the stage is retained and is not
+reused.
+
+A fresh diagnostic stage and two model-free QuickJS preflights isolated the cause. The first Windows MXC
+process-container launch caused one-time automatic ACL inheritance normalization across all 159 sealed
+runtime files and directories. The security digest changed once; the second identical preflight produced
+the same digest. Runtime bytes, paths, execution results and effect counts were unchanged. The defect was
+therefore the timing of the security baseline, not a model response and not a reason to weaken the
+post-run drift check.
+
+Finalization now grants the stage-owned access, performs one model-free native preflight, records the
+normalized owner/group/DACL digest, performs a second preflight and requires byte-for-byte digest
+idempotence before sealing. Every later phase requires the preflight to leave that baseline unchanged,
+then retains the existing read locks, exact byte/set validation and post-run durable security comparison.
+Any non-idempotence or later ACL drift remains a hard stop before candidate use.
+
+## Steward-selected Gemma-only eligibility arm
+
+The compute-conserving prospective arm fixes Gemma as the only scored and generative candidate. Nomic is
+allowed only as the already-sealed retrieval embedding model; it is explicitly neither scored nor
+generative. The immutable manifest contains the exact 120-row order, 24 attempts for each of Chat,
+Research, Code, Agent and Review, fresh controls, live-browser proof, source/runtime/hardware/criteria
+hashes and the exact Home lease. It is created after Home readiness but before any scored attempt, and the
+launch validator rejects any pre-existing Gemma campaign directory.
+
+The R15 Campaign phase has no operator-selectable candidate. It hardcodes `gemma4-26b-a4b`, locks the
+controls, browser proof, Home-ready receipt and eligibility manifest, and validates the complete 120-row
+result before the Home completion publisher may report `completed`. Duplicate, missing, reordered,
+wrong-candidate, wrong-role, wrong-repetition, stopped, cleanup-failed or supplemental results fail closed.
+
+Independent semantic review is candidate-local rather than routed through the old 360-row comparative
+summarizer. A random 256-bit HMAC key blinds all 120 attempt identities. The reviewer receives only the
+identity-free worksheet; any candidate/model identity in its schema or retained provider output stops
+preparation. Finalization requires 24 determinate rows per role, at least 22 passes, no more than two
+failures, zero critical model failures and zero critical product failures. Even a five-role pass is only
+`candidateEligibleAllFiveRoles:true`: comparative evaluation, full R15 completion, product qualification,
+customer-trial readiness, recommendation and production routing all remain false, and a human trial is
+still required.
+
+This is sufficient to answer the narrower operational question: if Gemma passes all five roles under this
+fresh arm, one candidate can cover all five functions. It does not rewrite R14, pool historical rows, or
+claim that the originally planned three-model R15 comparison was completed.
+
+### Pre-launch independent-review stop and correction
+
+Two independent pre-launch reviews stopped the first implementation before commit, reseal or inference.
+The candidate contract itself was accepted, but the reviewers found publication-chain defects: durable
+result bytes were hashed separately from the object being validated; the Home completion wrapper did not
+bind the canonical arm, source tree or runtime prefix; reviewer-private identity mappings were initially
+placed beside the worksheet; the worksheet omitted the delivered application answer and other evidence
+needed to distinguish a primary response from a corrected response; and the final eligibility record did
+not revalidate controls, browser proof, Home readiness, completion and final cleanup from pinned bytes.
+These were harness defects. They are not Gemma failures and no model was called while they were open.
+
+The corrected implementation uses contained, non-reparse, retained read handles and verifies their bytes
+again before publication. Launch binds the current source archive and source-tree manifest. Home completion
+binds the arm file digest, canonical arm digest, durable batch digest, completion-validation digest, runtime
+seal and prefix, source tree and exact lease before it can publish `completed`. It then waits for the
+supervisor's terminal zero-residency/power-restoration result, records state before cleanup, retires the
+owned task and records the final Home state. Candidate identity/HMAC mapping is retained only under
+`operator-review-binding`; the evaluator receives only `candidate-blind-review/review-worksheet.json`.
+That worksheet now carries every provider response, the answer actually delivered by the application,
+completion/citation metadata, plan summaries and selected source bytes. The evaluator identity is fixed by
+contract rather than operator-selected.
+
+Final grading now reopens and pins the complete arm, result, completion, runtime, controls, browser, Home
+and review chain. It computes the post-arm provenance object and digest in memory, validates the complete
+grade, and then performs one create-only durable publication of the candidate eligibility grade containing
+both. Invalid decisions therefore cannot leave an orphan provenance artifact that appears usable later.
+
+Two final independent reviews returned GO with no remaining P0/P1 blocker. They reproduced 200 exact-path
+replacement attacks across ten fresh processes with zero accepted substitutions, rejected a deterministic
+same-inode/same-size overwrite after `fsync`, verified linked-root and linked-output-ancestor rejection,
+confirmed that hidden worksheet pointers cannot influence a decision, and checked that Completion,
+ReviewPrepare and ReviewFinalize retain source, runtime, validator, Node and evidence locks throughout
+execution. The complete model-free campaign harness passes 195/195; the complete tracked repository suite
+passes 1,965/2,043 with 78 intentional environment-dependent skips and zero failures. Fresh source packaging, reseal, 12
+controls and the separate real-browser proof remain mandatory before the first Gemma request; Gemma has
+incurred zero new scored attempts under this arm.

@@ -170,9 +170,12 @@ test('owned runtime rejects a substituted dependency before creating its trusted
 test('R15 Control wrapper locks every manifested runtime file before launching application code',()=>{
   const validator=requireText(path.resolve(import.meta.dirname,'../../../artifacts/Validate-ControlR15Stage.Remote.ps1'));
   const finalizer=requireText(path.resolve(import.meta.dirname,'../../../artifacts/Finalize-ControlR15SourceStage.ps1'));
+  const completion=requireText(path.resolve(import.meta.dirname,'../../../artifacts/Complete-ControlR15GemmaEligibilityCampaign.ps1'));
+  const reviewPrepare=requireText(path.resolve(import.meta.dirname,'../../../artifacts/Prepare-ControlR15GemmaBlindReview.ps1'));
+  const reviewFinalize=requireText(path.resolve(import.meta.dirname,'../../../artifacts/Finalize-ControlR15GemmaBlindReview.ps1'));
   assert.match(validator,/foreach\(\$entry in @\(\$runtimeManifest\.entries\)\)\{\$lockSpecs\.Add/u);
-  assert.match(validator,/@\(\$manifest\.entries\)\.Count-ne2442/u);
-  assert.match(finalizer,/\$validation\.verifiedSourceFiles-ne2442/u);
+  assert.match(validator,/@\(\$manifest\.entries\)\.Count-ne2464/u);
+  assert.match(finalizer,/\$validation\.verifiedSourceFiles-ne2464/u);
   assert.match(validator,/\$relative-ceq'transient'/u);
   assert.match(validator,/@\('acceptance-evidence','disposable-postgres','transient','q','data'\)/u);
   assert.match(validator,/Remove-Item -LiteralPath \$postgresLog -Force[\s\S]*?Assert-ExactStageSet/u);
@@ -182,6 +185,8 @@ test('R15 Control wrapper locks every manifested runtime file before launching a
   assert.match(validator,/@\('acceptance-evidence','disposable-postgres','transient','q','data','node_modules'\)/u);
   assert.match(validator,/Wait-R15WatcherQuiescence[\s\S]*?EnableRaisingEvents=\$false;\$watcher\.Dispose\(\)[\s\S]*?Wait-R15WatcherQuiescence[\s\S]*?Assert-ExactStageSet/u);
   assert.match(validator,/Get-R15RuntimeSecurityDigest[\s\S]*?\$runtimeSecurityBefore/u);
+  assert.match(validator,/Invoke-R15RuntimeSecurityNormalization[\s\S]*?r15-stage-runtime-security-normalization-not-idempotent/u);
+  assert.match(validator,/runtimeSecurityBeforeNormalization\.Sha256-cne\$receipt\.runtimeSecuritySha256/u);
   assert.match(validator,/Assert-R15RuntimeDurableState[\s\S]*?r15-stage-runtime-security-drift/u);
   assert.match(validator,/TransientRuntimeSecurity=\(\$name-ceq'runtime'-or\$name-ceq'sandbox-runtime'\)/u);
   assert.match(validator,/if\(-not\$spec\.TransientRuntimeSecurity\)\{\$watcher\.NotifyFilter=\$watcher\.NotifyFilter-bor\[IO\.NotifyFilters\]::Security\}/u);
@@ -190,8 +195,31 @@ test('R15 Control wrapper locks every manifested runtime file before launching a
   assert.ok(validator.indexOf("$stream=New-Object IO.FileStream($spec.Key")<validator.indexOf("& $node $entry --mode controls"));
   const mutation=/function Test-AllowedExecutionMutation[\s\S]*?Assert-ExactStageSet/u.exec(validator)?.[0];assert.ok(mutation);
   assert.doesNotMatch(mutation,/['"]runtime['"]|['"]sandbox-runtime['"]/u);
-  assert.match(finalizer,/runaai-m1-r15-source-stage-finalization\/v3/u);
+  assert.match(finalizer,/runaai-m1-r15-source-stage-finalization\/v4/u);
   assert.match(finalizer,/runtimeManifestSha256=\$validation\.runtimeManifestSha256/u);
+  assert.match(finalizer,/runtimeSecuritySha256=\$validation\.runtimeSecuritySha256/u);
+  assert.match(validator,/ValidateSet\('Finalize','Controls','Browser','Campaign','Completion','ReviewPrepare','ReviewFinalize'\)/u);
+  assert.match(validator,/if\(\$Phase-ceq'Campaign'\)[\s\S]*?prepare-r15-gemma-eligibility-arm\.mjs/u);
+  assert.match(validator,/--candidate-id gemma4-26b-a4b/u);
+  assert.doesNotMatch(completion,/CompletionVerifierSha256/u);
+  assert.match(completion,/r15-gemma-completion-validator-pin/u);
+  assert.match(completion,/-Phase Completion/u);
+  assert.match(validator,/verify-r15-gemma-home-completion\.mjs/u);
+  assert.match(validator,/foreach\(\$entry in @\(\$manifest\.entries\)\)\{\$lockSpecs\.Add/u);
+  assert.match(validator,/prepare-r15-gemma-blind-review\.mjs/u);
+  assert.match(validator,/finalize-r15-gemma-blind-review\.mjs/u);
+  assert.match(reviewPrepare,/r15-gemma-review-prepare-validator-pin/u);
+  assert.match(reviewPrepare,/-Phase ReviewPrepare/u);
+  assert.match(reviewFinalize,/r15-gemma-review-finalize-validator-pin/u);
+  assert.match(reviewFinalize,/'-Phase','ReviewFinalize'/u);
+  assert.match(completion,/verify-completed-campaign-v2\.mjs/u);
+  assert.match(completion,/\$status\.taskState-cne'Ready'/u);
+  assert.match(completion,/\$status\.taskExit-ne0/u);
+  assert.match(completion,/\$status\.result\.ambiguousLoad-ne\$null/u);
+  assert.match(completion,/home-completion-verification\.json/u);
+  assert.match(validator,/run-r15-gemma-eligibility-campaign\.mjs/u);
+  assert.match(validator,/r15-stage-campaign-prior-arm-or-attempts/u);
+  assert.doesNotMatch(validator,/--candidate-id \$CandidateId/u);
 });
 
 test('R15 runtime security digest detects durable ACL drift and accepts exact restoration', {skip:process.platform!=='win32'}, async()=>{

@@ -96,7 +96,7 @@ function expectedFacts(check) {
   return [];
 }
 
-function candidateIdentityAppears(value) {
+export function candidateIdentityAppears(value) {
   const normalized = value.toLocaleLowerCase("en-US");
   return ACCEPTANCE_POLICY.roster.some(candidate => normalized.includes(candidate.candidateId.toLocaleLowerCase("en-US"))
     || normalized.includes(candidate.displayName.toLocaleLowerCase("en-US")));
@@ -120,7 +120,7 @@ export function semanticChecksForCase(caseId) {
   return enumerateCaseChecks(caseId).filter(requiresIndependentSemanticDecision);
 }
 
-function validatePacket(packet, attemptId, runtimeSealSha256, path) {
+export function validateSemanticPacket(packet, attemptId, runtimeSealSha256, path) {
   record(packet, path);
   if (packet.attemptId !== attemptId) reject("packet-attempt-id-mismatch", `${path}/attemptId`);
   const rawBytes = bytes(packet.rawBytes), recordBytes = bytes(packet.recordBytes);
@@ -247,7 +247,7 @@ function expectedProviderOutputs(observation) {
   }]);
 }
 
-function validateAttemptDecision(decision, reviewed, blindId, path) {
+export function validateSemanticAttemptDecision(decision, reviewed, blindId, path) {
   exactKeys(decision, ["blindId", "rawSha256", "recordSha256", "providerOutputs", "checks"], path);
   if (decision.blindId !== blindId) reject("blind-order-mismatch", `${path}/blindId`);
   if (decision.rawSha256 !== reviewed.rawSha256) reject("raw-hash-mismatch", `${path}/rawSha256`);
@@ -303,15 +303,15 @@ export function validateExplicitSemanticDecisions({ bundle, packets, runtimeSeal
     const decision = bundle.attempts[index], at = `bundle/attempts/${index}`;
     if (blindIds.has(decision?.blindId)) reject("decision-attempt-duplicate", `${at}/blindId`);
     blindIds.add(decision?.blindId);
-    const reviewed = validatePacket(packetMap.get(entry.attemptId), entry.attemptId, runtimeSealSha256, `packets/${entry.attemptId}`);
-    return validateAttemptDecision(decision, reviewed, entry.blindId, at);
+    const reviewed = validateSemanticPacket(packetMap.get(entry.attemptId), entry.attemptId, runtimeSealSha256, `packets/${entry.attemptId}`);
+    return validateSemanticAttemptDecision(decision, reviewed, entry.blindId, at);
   });
   return Object.freeze({ schemaVersion: "runaai-m1-explicit-semantic-validation/v1", valid: true,
     evaluatorId, rubricVersion, runtimeSealSha256, caseBundleSha256: CASE_BUNDLE_SHA256,
     attempts, providerOutputsCovered: attempts.reduce((count, attempt) => count + attempt.providerOutputsCovered, 0) });
 }
 
-function materialize(attempt, evaluatorId) {
+export function materializeSemanticAttempt(attempt, evaluatorId) {
   const observation = structuredClone(attempt.observation);
   for (let index = 0; index < attempt.checks.length; index += 1) {
     const descriptor = attempt.checks[index], decision = attempt.decision.checks[index];
@@ -343,7 +343,7 @@ export function gradeExplicitSemanticCampaign(input = {}) {
   for (const candidateId of candidateIds) text(expectedModelIds[candidateId], `options/expectedModelIds/${candidateId}`);
   for (const key of Object.keys(expectedModelIds)) if (!candidateIds.includes(key)) reject("expected-model-extra", `options/expectedModelIds/${key}`);
   const attempts = validated.attempts.map(attempt => {
-    const observation = materialize(attempt, validated.evaluatorId);
+    const observation = materializeSemanticAttempt(attempt, validated.evaluatorId);
     return { attemptId: attempt.packet.attemptId, blindId: attempt.blindId, rawSha256: attempt.rawSha256,
       recordSha256: attempt.recordSha256, grade: evaluateAttempt(attempt.caseId, observation, {
         runtimeSealSha256: validated.runtimeSealSha256, evaluatorId: validated.evaluatorId,

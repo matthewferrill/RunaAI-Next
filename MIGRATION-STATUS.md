@@ -138,6 +138,17 @@ owned-root removal before success. The focused suite passes 17/17, roadmap verif
 syntax/diff checks are green, and independent exact-byte re-review returned GO with P0=0/P1=0. The reviewed
 bytes remain unexecuted and must be source-committed before one diagnostic resume. No model/network or
 acceptance work is included. Acceptance remains paused.
+Commit `c46c7e1` sealed those reviewed bytes. The one diagnostic attempted at most one contained local status
+operation and stopped at `finish-category-witness` with `diagnostic-lifecycle-invalid`; whether the MXC wrapper
+or Git process started or completed is unknowable from retained evidence. It did not run any successor.
+Read-only cleanup verification found zero owned roots and zero matching helpers after excluding the probe
+itself. The retained public error omitted the exact lifecycle failures and aggregate values, so the failed gate
+cannot be determined from sealed evidence. This is a diagnostic-publication failure, not a model result. The
+correction emits only allowlisted failure codes and typed counts/booleans from the existing aggregate, with
+unknown observer codes collapsed to `unknown`; focused regressions cover independent gates and rejection of
+private fields. Focused checks pass 19/19, roadmap checks pass 15/15, syntax/diff checks are green, and fresh
+exact-byte review returned GO with P0=0/P1=0. Revised bytes remain unexecuted and require a new source commit
+before one diagnostic resume. Acceptance remains paused.
 
 **Application slice, 2026-09-02:** model selection is complete and the retired R15 campaign is not being
 resumed. The active clean branch is `codex/m1-gemma-primary`, based on the five-function qualification

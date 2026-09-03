@@ -108,6 +108,15 @@ success on verified root removal. The focused suite passes 17/17, roadmap verifi
 syntax/diff checks are green, and independent exact-byte re-review returned GO with P0=0/P1=0. The reviewed
 bytes remain unexecuted and must be source-committed before one diagnostic resume. No
 model/network/acceptance work is included. Acceptance remains paused.
+Commit `c46c7e1` sealed the reviewed method. Its one diagnostic attempted at most one contained local status
+operation and stopped at `finish-category-witness` with `diagnostic-lifecycle-invalid`; whether the MXC wrapper
+or Git process started or completed is unknowable from retained evidence. No successor ran. Cleanup
+verification found zero roots/helpers. Because the public error omitted the exact lifecycle failures and aggregates, the
+failed gate is unknowable from retained evidence. This diagnostic-publication defect now has an allowlisted
+failure-code plus typed count/boolean contract with private/unknown values excluded. Focused checks pass
+19/19, roadmap checks pass 15/15, syntax/diff checks are green, and fresh exact-byte review returned GO with
+P0=0/P1=0. Revised bytes remain unexecuted and require a source commit before one diagnostic resume.
+Acceptance remains paused.
 No browser, HTTPS, model or production work has run.
 
 Workspace baseline checkpoint: see

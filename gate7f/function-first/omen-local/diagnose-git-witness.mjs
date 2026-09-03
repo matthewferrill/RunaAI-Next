@@ -11,6 +11,55 @@ import { OmenRootStore, WindowsNativeBridge } from "./native-bridge.mjs";
 import { loadOmenReleasePins } from "./release-pins.mjs";
 
 const coded = code => Object.assign(new Error(code), { code });
+const OBSERVER_CODES = new Set([null, "unknown", "omen-git-source-changed",
+  "omen-git-terminal-exit-missed", "omen-git-witness-close-missed", "omen-git-process-error",
+  "omen-git-timeout", "omen-git-output-limited", "omen-git-process-failed",
+  "omen-root-identity-changed", "omen-git-manifest-changed"]);
+const LIFECYCLE_CODES = new Set(["contained-child-count-invalid", "contained-child-exit-invalid",
+  "category-watcher-exit-invalid", "native-guard-release-missing",
+  "native-guard-survivor-or-unknown", "repository-tree-changed", "repository-security-changed",
+  "category-watcher-error"]);
+
+export function evaluateLifecycle(aggregate) {
+  const failures = [];
+  if (aggregate.containedChildren !== 1) failures.push("contained-child-count-invalid");
+  if (aggregate.containedExitCode !== 0) failures.push("contained-child-exit-invalid");
+  if (aggregate.watcherExitCode !== 0) failures.push("category-watcher-exit-invalid");
+  if (!aggregate.nativeGuardReleased) failures.push("native-guard-release-missing");
+  if (aggregate.nativeGuardSurvived !== false) failures.push("native-guard-survivor-or-unknown");
+  if (!aggregate.treeEqual) failures.push("repository-tree-changed");
+  if (!aggregate.securityEqual) failures.push("repository-security-changed");
+  if (aggregate.watcherErrors !== 0) failures.push("category-watcher-error");
+  return failures;
+}
+
+export function publicLifecycleAggregate(aggregate) {
+  const integerOrNull = value => Number.isSafeInteger(value) ? value : null;
+  return Object.freeze({
+    observerCode: OBSERVER_CODES.has(aggregate?.observerCode) ? aggregate.observerCode : "unknown",
+    containedExitCode: integerOrNull(aggregate?.containedExitCode),
+    containedChildren: integerOrNull(aggregate?.containedChildren),
+    nameEvents: integerOrNull(aggregate?.nameEvents),
+    contentEvents: integerOrNull(aggregate?.contentEvents),
+    metadataEvents: integerOrNull(aggregate?.metadataEvents),
+    securityEvents: integerOrNull(aggregate?.securityEvents),
+    watcherErrors: integerOrNull(aggregate?.watcherErrors),
+    treeEqual: aggregate?.treeEqual === true,
+    securityEqual: aggregate?.securityEqual === true,
+    securityEntries: integerOrNull(aggregate?.securityEntries),
+    nativeGuardReleased: aggregate?.nativeGuardReleased === true,
+    nativeGuardSurvived: typeof aggregate?.nativeGuardSurvived === "boolean"
+      ? aggregate.nativeGuardSurvived : null,
+    watcherExitCode: integerOrNull(aggregate?.watcherExitCode),
+    ownedFixtureRemoved: aggregate?.ownedFixtureRemoved === true,
+  });
+}
+
+export function publicLifecycleFailures(value) {
+  if (!Array.isArray(value) || value.length < 1 || value.length > LIFECYCLE_CODES.size
+      || new Set(value).size !== value.length || !value.every(code => LIFECYCLE_CODES.has(code))) return null;
+  return [...value];
+}
 async function treeDigest(root) {
   const hash = createHash("sha256");
   async function visit(path) {
@@ -220,11 +269,11 @@ export async function diagnoseGitWitness({ userProfilePath = homedir() } = {}) {
     aggregate.securityEntries = witness.securityEntries;
     aggregate.watcherExitCode = await bounded(classifier.exit, 5_000, "diagnostic-watcher-exit-timeout");
     classifier = null;
-    if (aggregate.containedChildren !== 1 || aggregate.containedExitCode !== 0
-        || aggregate.watcherExitCode !== 0 || !aggregate.nativeGuardReleased
-        || aggregate.nativeGuardSurvived !== false || !aggregate.treeEqual
-        || !aggregate.securityEqual || aggregate.watcherErrors !== 0) {
-      throw coded("diagnostic-lifecycle-invalid");
+    const lifecycleFailures = evaluateLifecycle(aggregate);
+    if (lifecycleFailures.length > 0) {
+      const error = coded("diagnostic-lifecycle-invalid");
+      Object.assign(error, { lifecycleFailures, lifecycleAggregate: aggregate });
+      throw error;
     }
   } catch (error) {
     error.stage ??= stage;
@@ -261,8 +310,13 @@ export async function diagnoseGitWitness({ userProfilePath = homedir() } = {}) {
 
 if (process.argv[1] && resolve(process.argv[1]) === resolve(import.meta.filename)) {
   diagnoseGitWitness().then(result => process.stdout.write(`${JSON.stringify(result)}\n`), error => {
+    const lifecycleAggregate = error?.code === "diagnostic-lifecycle-invalid"
+      ? publicLifecycleAggregate(error.lifecycleAggregate) : null;
     process.stderr.write(`${JSON.stringify({ schemaVersion: "runaai-m1-omen-git-witness-diagnostic-error/v1",
       errorCode: error?.code ?? "diagnostic-failed", stage: error?.stage ?? "unknown",
+      lifecycleFailures: error?.code === "diagnostic-lifecycle-invalid"
+        ? publicLifecycleFailures(error.lifecycleFailures) : null,
+      lifecycleAggregate,
       privateValuesIncluded: false })}\n`);
     process.exitCode = 1;
   });

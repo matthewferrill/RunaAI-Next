@@ -169,3 +169,27 @@ now requires `ownedFixtureRemoved=true`. Focused source assertions cover both cl
 post-cleanup success gate. The focused suite passes 17/17, roadmap verification passes 15/15, Node
 syntax/diff checks are green, and independent exact-byte re-review returned GO with P0=0/P1=0. The reviewed
 bytes remain unexecuted and must be source-committed before the one diagnostic resume.
+
+## Fourth sealed diagnostic stop and publication RCA
+
+Commit `c46c7e1` sealed the narrowed and independently approved method. Its one execution reached
+`finish-category-witness`, which proves only that the single observer attempt returned or threw and the runner
+proceeded to witness finalization. It attempted at most one contained local status operation; whether the MXC
+wrapper or Git process started or completed is unknowable from retained evidence. It stopped with
+`diagnostic-lifecycle-invalid` and no successor ran. Read-only
+postchecks found zero disposable diagnostic roots and zero matching helper processes after excluding the
+inspection process itself. No model, browser, network or production surface was called.
+
+The immediate lifecycle condition is unknowable from the retained error because the CLI published only the
+generic error and stage even though the runner held exact aggregate values in memory. The root cause is a
+publication-contract gap: internal validation became more specific while the public failure schema and tests
+still collapsed all lifecycle gates into one code. This is a diagnostic/harness failure, not a model or Git
+result, and it blocks any retry.
+
+The correction evaluates every narrowed gate into fixed allowlisted codes and publishes a fixed aggregate
+containing only observer code, integer counts/exit codes, booleans and nulls. Unknown observer codes collapse
+to `unknown`; paths, PIDs, command lines, raw events and exception messages cannot cross the boundary. Focused
+regressions require independent gate identification, exact useful values, private-field exclusion and unknown
+code collapse. Focused checks pass 19/19, roadmap checks pass 15/15, syntax/diff checks are green, and fresh
+exact-byte review returned GO with P0=0/P1=0. The revised bytes remain unexecuted and require a source commit;
+only then may one diagnostic resume. Git acceptance remains paused.

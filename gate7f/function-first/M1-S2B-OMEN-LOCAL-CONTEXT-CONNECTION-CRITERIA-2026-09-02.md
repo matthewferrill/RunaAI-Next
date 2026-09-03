@@ -58,6 +58,15 @@ root removal before success. The focused suite passes 17/17, roadmap verificatio
 syntax/diff checks are green, and independent exact-byte re-review returned GO with P0=0/P1=0. The reviewed
 bytes remain non-executable until source-committed; only then may one diagnostic resume. No
 model/network/acceptance work is included. Acceptance stays paused.
+Commit `c46c7e1` sealed those reviewed bytes. The one diagnostic attempted at most one contained local status
+operation and stopped at `finish-category-witness` with `diagnostic-lifecycle-invalid`; whether the MXC wrapper
+or Git process started or completed is unknowable from retained evidence. No successor ran. Read-only
+cleanup found zero roots/helpers. The public error omitted the exact failed lifecycle gates and aggregate
+values, making the immediate condition unknowable from retained evidence. The correction publishes only
+allowlisted failure codes and typed aggregate counts/booleans, collapses unknown observer codes, and excludes
+all private values. Focused checks pass 19/19, roadmap checks pass 15/15, syntax/diff checks are green, and
+fresh exact-byte review returned GO with P0=0/P1=0. Revised bytes remain non-executable until source-committed;
+only then may one diagnostic resume. Acceptance stays paused.
 
 ## Slice selection record
 

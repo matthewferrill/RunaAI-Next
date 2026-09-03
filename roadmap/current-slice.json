@@ -42,11 +42,12 @@
     "gate7f/function-first/M1-S2B1-TLS-BROKER-PREFLIGHT-2026-09-03.md",
     "gate7f/function-first/M1-S2B1-PUBLICATION-PRIMITIVE-PREFLIGHT-2026-09-03.md",
     "gate7f/function-first/M1-S2-CONTEXTUAL-REVIEW-WORKFLOW-2026-09-03.md",
+    "gate7f/function-first/M1-S2-SUPPLIED-SOURCE-RESEARCH-WORKFLOW-2026-09-03.md",
     "gate7f/function-first/M1-S2-DEVICE-INSTALL-READINESS-PREFLIGHT-2026-09-03.md"
   ],
   "scopeDocument": "roadmap/CURRENT-SLICE.md",
   "capabilityIds": ["C01", "C02", "C03", "C04", "C06", "C07", "C08", "C12", "C15", "C16"],
-  "nextWork": "M1-S2B1 criteria, package gate, public-Git core, PostgreSQL authority, candidate-only service/surface binding, binary network policy, bounded authenticated Git stream session, local TLS broker, deterministic publication primitive, contextual Review, and deterministic device/install readiness are complete locally. Supplied-source Research has bounded corrections pending independent re-review. No public Control fetch, native publication, ready workspace, installer, browser operation, production change or model call is claimed. Seal Research, resolve the Control-worker handle contract, compose the specialized worker/publication host, and run one real Control/browser journey. Home remains model-only, Omen is not the primary worker, and comparison-model testing remains tabled.",
+  "nextWork": "M1-S2B1 criteria, package gate, public-Git core, PostgreSQL authority, candidate-only service/surface binding, binary network policy, bounded authenticated Git stream session, local TLS broker, deterministic publication primitive, contextual Review, supplied-source Research, and deterministic device/install readiness are complete locally. No public Control fetch, native publication, ready workspace, installer, browser operation, production change or model call is claimed. Correct and independently freeze the Control-worker handle contract, review the PostgreSQL lifecycle lane, compose the specialized worker/publication host, and run one real Control/browser journey while independent Agent, connection and artifact lanes advance at stable interfaces. Home remains model-only, Omen is not the primary worker, and comparison-model testing remains tabled.",
   "remainingRoadmapRequired": true,
   "completionClaim": "M1 completion is not whole-product completion."
 }

@@ -1,7 +1,8 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { functionAnswerSelection, functionDescription, approvalIsAvailable, repairContinuationIsAvailable,
-  restoredWorkspaceNotice, runEvidenceNotice, groundedRunResult, taskPresentation } from "../../gate6b/public/function-panel.mjs";
+import { functionAnswerSelection, functionDescription, researchPlanSteps, researchResultPresentation,
+  approvalIsAvailable, repairContinuationIsAvailable, restoredWorkspaceNotice, runEvidenceNotice,
+  groundedRunResult, taskPresentation } from "../../gate6b/public/function-panel.mjs";
 test("ordinary conversation keeps Chat and Code routes separate", () => {
   assert.deepEqual(functionAnswerSelection("conversation", [], "chat"), { lane: "general" });
   assert.deepEqual(functionAnswerSelection("conversation", [], "code"), { lane: "code" });
@@ -19,11 +20,36 @@ test("research/review requires an explicit bounded source selection", () => {
   for (const mode of ["research", "review"]) {
     assert.throws(() => functionAnswerSelection(mode, [], "chat"), /Select/);
     assert.throws(() => functionAnswerSelection(mode, Array(7).fill({}), "chat"), /Select/);
-    assert.deepEqual(functionAnswerSelection(mode, [{ sourceId: "a", sectionId: "provided", content: "not in payload" }], "chat"),
-      { lane: mode, workspace: { sources: [{ sourceId: "a", sectionId: "provided" }] } });
+    const digest = "a".repeat(64);
+    const selected = functionAnswerSelection(mode,
+      [{ sourceId: "a", sectionId: "provided", contentSha256: digest, content: "not in payload" }], "chat", "Check claim\nFind gaps");
+    assert.deepEqual(selected.workspace, { sources: [{ sourceId: "a", sectionId: "provided",
+      ...(mode === "research" ? { contentSha256: digest } : {}) }] });
+    assert.equal(selected.lane, mode);
+    if (mode === "research") assert.deepEqual(selected.researchPlan, { steps: ["Check claim", "Find gaps"] });
+    else assert.equal("researchPlan" in selected, false);
   }
   assert.throws(() => functionAnswerSelection("review", [{ sourceId: "a", sectionId: "provided" }], "code"), /unavailable/);
   assert.throws(() => functionAnswerSelection("work", [], "chat"), /unavailable/);
+});
+
+test("editable Research plans and server-owned report presentation stay bounded and explicit", () => {
+  assert.deepEqual(researchPlanSteps(" Check claim \n\nFind missing evidence"), ["Check claim", "Find missing evidence"]);
+  assert.throws(() => researchPlanSteps("\n"), /one through eight/);
+  assert.throws(() => researchPlanSteps(Array(9).fill("step").join("\n")), /one through eight/);
+  const digest = "a".repeat(64);
+  const shown = researchResultPresentation({ researchWorkflow: { sourceEnvelope: "supplied-source-only",
+    limitation: "Supplied sources only.", plan: { steps: [{ stepId: "research-step-1", text: "Check claim", status: "submitted" }] },
+    progress: { status: "report-ready", selectedSources: 1, resolvedSources: 1, passesPlanned: 2, passesRun: 2,
+      passagesRead: 1, degraded: false, truncated: false, omissionCount: 0, unansweredCount: 0 },
+    sources: [{ sourceId: "source-one", sectionId: "provided", contentSha256: digest }],
+    conflict: { status: "not-structured", message: "Inspect the report." }, missingEvidence: [],
+    report: { status: "attributable", checker: { kind: "evidence-research", performed: true, corrected: false,
+      attemptCount: 1, finalAnswerOrigin: "primary" }, citationOrdinals: [1] } } });
+  assert.equal(shown.attributable, true);
+  assert.deepEqual(shown.steps.map(step => step.text), ["Check claim"]);
+  assert.deepEqual(shown.citationOrdinals, [1]);
+  assert.equal(researchResultPresentation({ answer: "model-only claim" }), null);
 });
 
 test("reload offers only exact server-revalidated approvals, never a remembered grant alone", () => {

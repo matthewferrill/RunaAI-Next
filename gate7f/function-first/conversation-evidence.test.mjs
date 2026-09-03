@@ -69,7 +69,9 @@ test("actual Gate2 answer stamps complete trusted metadata before any turn store
     const result = await service.answer({ schemaVersion: "runa2-answer-request/v2", requestId: `stamp-${lane}`, lane,
       experience: ["code", "workspace"].includes(lane) ? "code" : "chat", participant: { principalId: "synthetic-member", verified: true },
       project: { projectId: "synthetic-project" }, thread: { threadId: `stamp-${lane}` }, message: "What marker does this project record specify?",
-      history: [], contextRevision: 0, workspace: ["research", "workspace", "review"].includes(lane) ? { sources: [locator] } : null,
+      history: [], contextRevision: 0, workspace: ["research", "workspace", "review"].includes(lane)
+        ? { sources: [{ ...locator, ...(lane === "research" ? { contentSha256: selected.contentSha256 } : {}) }] } : null,
+      ...(lane === "research" ? { researchPlan: { steps: ["Answer from the selected source"] } } : {}),
       budgets: { deadlineMs: 1000, maximumPasses: 2, maximumPassages: 6, maximumEvidenceCharacters: 8000 } });
     assert.ok(stored, lane); assert.equal(parseGate2AnswerResponse(stored).execution.status, "not-executed", lane);
     assert.ok(answerEvidence(stored), lane); assert.deepEqual(answerEvidence(stored), answerEvidence(result), lane);

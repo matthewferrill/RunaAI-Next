@@ -86,11 +86,51 @@ export function functionDescription(mode, experience) {
     : "Ask questions, brainstorm, draft writing, and work with text you paste here. Ordinary chat does not browse the live web or perform actions. Select Research or Review to work with explicitly supplied project sources.";
 }
 
-export function functionAnswerSelection(mode, sources, experience) {
+const defaultResearchPlan = "Confirm the key claims\nCompare the selected sources for conflicts\nIdentify missing evidence\nPrepare a cited report";
+
+export function researchPlanSteps(value = defaultResearchPlan) {
+  const steps = String(value).split(/\r?\n/).map(step => step.trim()).filter(Boolean);
+  if (steps.length < 1 || steps.length > 8 || steps.some(step => step.length > 240)) {
+    throw new Error("Use one through eight research plan steps, one per line and up to 240 characters each.");
+  }
+  return steps;
+}
+
+export function functionAnswerSelection(mode, sources, experience, plan = defaultResearchPlan) {
   if (!functionModeAllowed(experience, mode)) throw new Error("The selected function is unavailable in this workspace.");
   if (!["research", "review"].includes(mode)) return { lane: experience === "code" ? "code" : "general" };
   if (!Array.isArray(sources) || sources.length < 1 || sources.length > 6) throw new Error("Select one through six source sections first.");
-  return { lane: mode, workspace: { sources: sources.map(({ sourceId, sectionId }) => ({ sourceId, sectionId })) } };
+  const selectedSources = sources.map(({ sourceId, sectionId, contentSha256 }) => {
+    const locator = { sourceId, sectionId };
+    if (mode === "research") {
+      if (!/^[a-f0-9]{64}$/.test(contentSha256 ?? "")) throw new Error("Refresh and reselect every Research source revision.");
+      locator.contentSha256 = contentSha256;
+    }
+    return locator;
+  });
+  const result = { lane: mode, workspace: { sources: selectedSources } };
+  if (mode === "research") result.researchPlan = { steps: researchPlanSteps(plan) };
+  return result;
+}
+
+export function researchResultPresentation(evidence) {
+  const value = evidence?.researchWorkflow;
+  if (!value || value.sourceEnvelope !== "supplied-source-only") return null;
+  const sources = Array.isArray(value.sources) ? value.sources.filter(source =>
+    typeof source?.sourceId === "string" && typeof source?.sectionId === "string"
+      && /^[a-f0-9]{64}$/.test(source?.contentSha256 ?? "")) : [];
+  const steps = Array.isArray(value.plan?.steps) ? value.plan.steps.filter(step =>
+    typeof step?.text === "string" && step.text.length > 0 && step.status === "submitted") : [];
+  const missingEvidence = Array.isArray(value.missingEvidence) ? value.missingEvidence : [];
+  const attributable = value.progress?.status === "report-ready" && value.report?.status === "attributable"
+    && value.report?.checker?.kind === "evidence-research" && value.report?.checker?.performed === true
+    && value.progress.resolvedSources === value.progress.selectedSources
+    && value.progress.passesRun === value.progress.passesPlanned && value.progress.degraded === false
+    && value.progress.truncated === false && value.progress.omissionCount === 0
+    && value.progress.unansweredCount === 0 && missingEvidence.length === 0;
+  return { attributable, limitation: value.limitation, progress: value.progress, sources, steps,
+    conflict: value.conflict, missingEvidence,
+    citationOrdinals: attributable && Array.isArray(value.report?.citationOrdinals) ? value.report.citationOrdinals : [] };
 }
 
 export function reviewResultPresentation(evidence) {
@@ -124,6 +164,29 @@ export function appendAnswerEvidence(root, host, evidence) {
     host.append(details); return details;
   }
   const reviewResult = reviewResultPresentation(evidence);
+  const researchResult = researchResultPresentation(evidence);
+  if (researchResult) {
+    const researchSection = element(root, "section", null, "research-result");
+    researchSection.append(element(root, "h3", "Research report"),
+      element(root, "p", researchResult.limitation, "research-limitation"),
+      element(root, "p", researchResult.attributable
+        ? `Report ready · ${researchResult.progress.passagesRead} passages read · citations ${researchResult.citationOrdinals.join(", ")}.`
+        : "Research stopped incomplete. The displayed answer is not an attributable final report.", "research-progress"));
+    const planList = element(root, "ol");
+    for (const step of researchResult.steps) planList.append(element(root, "li", step.text));
+    if (planList.childElementCount) researchSection.append(element(root, "h4", "Submitted plan"), planList);
+    const sourceList = element(root, "ul");
+    for (const source of researchResult.sources) sourceList.append(element(root, "li",
+      `${source.sourceId} / ${source.sectionId} · SHA-256 ${source.contentSha256}`));
+    if (sourceList.childElementCount) researchSection.append(element(root, "h4", "Selected source revisions"), sourceList);
+    researchSection.append(element(root, "p", `Conflict handling: ${researchResult.conflict?.message ?? "Not available."}`));
+    if (researchResult.missingEvidence.length) {
+      const missing = element(root, "ul");
+      for (const item of researchResult.missingEvidence) missing.append(element(root, "li", item));
+      researchSection.append(element(root, "h4", "Missing or limited evidence"), missing);
+    }
+    details.append(researchSection);
+  }
   if (reviewResult) {
     const reviewSection = element(root, "section", null, "review-result");
     reviewSection.append(element(root, "h3", "Review result"), element(root, "p", reviewResult.summary));
@@ -172,10 +235,17 @@ export async function initializeFunctionPanel({ root = document, request, getCon
   let mode = "conversation";
   const sourcePanel = element(root, "section"); sourcePanel.id = "m1-source-panel";
   const review = element(root, "button", "Review selected context"); review.type = "button";
+  const researchPlanPanel = element(root, "section", null, "research-plan");
+  const researchPlan = element(root, "textarea"); researchPlan.value = defaultResearchPlan;
+  researchPlan.rows = 5; researchPlan.maxLength = 2000; researchPlan.setAttribute("aria-label", "Editable research plan");
+  researchPlanPanel.append(element(root, "h3", "Research plan"),
+    element(root, "p", "Edit one bounded investigation step per line. The plan is retained with the cited report; it does not authorize broader retrieval.", "navigation-empty"),
+    researchPlan);
   const presentMode = () => {
     const description = root.getElementById("experience-description");
     if (description) description.textContent = functionDescription(mode, getContext().experience);
     sourcePanel.hidden = getContext().experience !== "chat" || !["research", "review"].includes(mode);
+    researchPlanPanel.hidden = mode !== "research";
     review.textContent = mode === "review" ? "Return to research" : "Review selected context";
     onModeChange(mode);
   };
@@ -191,7 +261,8 @@ export async function initializeFunctionPanel({ root = document, request, getCon
   label.placeholder = "Section label"; label.maxLength = 120; label.required = true; label.setAttribute("aria-label", "Source section label");
   content.placeholder = "Paste a source section…"; content.maxLength = 8000; content.rows = 5; content.required = true; content.setAttribute("aria-label", "Source section content");
   const attach = element(root, "button", "Attach section"); attach.type = "submit";
-  sourceForm.append(contextType, label, content, attach); sourcePanel.append(list, sourceForm, review); host.append(sourcePanel);
+  sourceForm.append(contextType, label, content, attach);
+  sourcePanel.append(researchPlanPanel, list, sourceForm, review); host.append(sourcePanel);
   review.addEventListener("click", () => { mode = mode === "review" ? "research" : "review"; presentMode(); });
   const codePanel = element(root, "section"); codePanel.id = "m1-code-panel";
   codePanel.append(element(root, "h2", "Disposable Code workspace"), element(root, "p", "A small JavaScript exercise, separate from your files and repositories. Runa can inspect, repair, run fixed tests, and propose undoing her recorded changes.", "navigation-empty"));
@@ -525,5 +596,5 @@ export async function initializeFunctionPanel({ root = document, request, getCon
     mode = nextMode; presentMode(); return true;
   };
   return { refresh, mode: () => mode, setMode, workSelected: () => mode === "work", startWork,
-    answerSelection: () => functionAnswerSelection(mode, selected, getContext().experience) };
+    answerSelection: () => functionAnswerSelection(mode, selected, getContext().experience, researchPlan.value) };
 }

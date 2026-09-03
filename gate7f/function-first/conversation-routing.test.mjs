@@ -107,7 +107,9 @@ test("explicit Research uses the selected index while Review supplies exact sele
   for (const lane of ["research", "review"]) {
     const context = harness({ sources: [chosen, excluded], selectedIndex: true });
     const result = await context.service.answer(request(`selected-${lane}`, "Summarize the evidence", {
-      lane, workspace: { sources: [locator(chosen)] },
+      lane, workspace: { sources: [{ ...locator(chosen), ...(lane === "research"
+        ? { contentSha256: chosen.contentSha256 } : {}) }] },
+      ...(lane === "research" ? { researchPlan: { steps: ["Summarize the selected evidence"] } } : {}),
     }));
     assert.equal(result.model.role, lane);
     assert.equal(result.completion.reason, "complete");
@@ -135,7 +137,8 @@ test("Research selected-index scope and hash failures never reach an answer prov
     const context = harness({ sources: [chosen], selectedIndex: true });
     context.index.searchSelected = async () => ({ references: [reference(bad)], degraded: false, unavailable: [] });
     const result = await context.service.answer(request(`scope-${bad.sourceId}`, "Review this", {
-      lane: "research", workspace: { sources: [locator(chosen)] },
+      lane: "research", workspace: { sources: [{ ...locator(chosen), contentSha256: chosen.contentSha256 }] },
+      researchPlan: { steps: ["Review the selected evidence"] },
     }));
     assert.equal(result.completion.reason, "dependency-unavailable");
     assert.ok(result.retrieval.unavailable.includes("selected-source-scope-mismatch"));

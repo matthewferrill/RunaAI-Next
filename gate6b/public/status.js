@@ -541,7 +541,9 @@ form.addEventListener("submit", async event => {
   send.textContent = "Stop display";
   send.setAttribute("aria-label", "Stop displaying progress for this response");
   setNavigationDisabled(true);
-  text("chat-status", "Runa is thinking…");
+  text("chat-status", functionSelection.lane === "research"
+    ? "Research: reading the selected supplied sources and checking the cited report…"
+    : "Runa is thinking…");
   let outcomeUnconfirmed = false;
   try {
     activeAnswerController = new AbortController();

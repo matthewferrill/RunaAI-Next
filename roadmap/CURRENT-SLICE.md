@@ -523,6 +523,15 @@ P0=0/P1=0 with 89/89 bounded tests. This is deterministic application evidence o
 route or actual-system acceptance ran. Record:
 `../gate7f/function-first/M1-S2-CONTEXTUAL-REVIEW-WORKFLOW-2026-09-03.md`.
 
+Supplied-source Research implementation checkpoint, 2026-09-03: a submitted one-to-eight-step plan and exact
+project/source/section/content-digest selections are mandatory; the complete ordered active set is revalidated through
+the immediate provider boundary and any missing, revoked, stale, foreign, partial or changed selection makes zero
+provider calls. Report-ready requires complete, attributable, non-degraded evidence. Two review stops corrected the
+initial authority/completeness gaps and removed production approved-knowledge advisory material from this explicitly
+selected-source-only lane. Focused checks pass 17/17, the builder affected set passes 90/90 and independent re-review
+passes 68/68 at P0=0/P1=0. No actual provider/model, Qdrant, PostgreSQL, browser, web or production acceptance ran.
+Record: `../gate7f/function-first/M1-S2-SUPPLIED-SOURCE-RESEARCH-WORKFLOW-2026-09-03.md`.
+
 Device/install-readiness checkpoint, 2026-09-03: the deterministic evaluator distinguishes browser-only, one-time
 snapshot, optional non-executing persistent bridge and separately deferred local execution. Production evaluation is
 bound to the frozen manifest digest, exact signer publisher and authoritative, current enrollment certificate.

@@ -906,6 +906,11 @@ body.workspace-active .primary-button:hover { filter: brightness(1.07); }
 .answer-evidence { margin-top:.6rem; font-size:.8rem; line-height:1.5; overflow-wrap:anywhere; }
 .answer-evidence p, .answer-evidence li { font-size:inherit; }
 .answer-evidence ol { padding-left:1.3rem; }
+.research-plan { margin-bottom:.85rem; padding:.75rem; border:1px solid var(--workspace-edge-low); border-radius:.7rem; background:#fff; }
+.research-plan h3, .research-result h3, .research-result h4 { margin:.2rem 0 .45rem; }
+.research-plan textarea { width:100%; resize:vertical; }
+.research-result { margin:.65rem 0; padding:.75rem; border-left:.2rem solid var(--workspace-accent); background:var(--workspace-accent-soft); }
+.research-limitation, .research-progress { font-weight:600; }
 .evidence-warning { color:#795712; }
 .review-result { margin:.65rem 0; padding:.65rem .75rem; border:1px solid var(--workspace-edge-low); border-radius:.65rem; background:var(--workspace-accent-soft); }
 .review-result h3 { margin:0 0 .35rem; font-size:.95rem; }

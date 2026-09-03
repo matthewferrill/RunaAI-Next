@@ -24,8 +24,41 @@ const reviewSchema = z.object({ status: z.enum(["accepted-primary", "accepted-re
     attemptCount: z.number().int().min(1).max(2), finalAnswerOrigin: z.enum(["primary", "checker-correction"]) }).strict().nullable(),
   findings: z.array(z.object({ findingId: id, severity: z.literal("unclassified"),
     citationOrdinals: z.array(z.number().int().positive()).max(24) }).strict()).max(1) }).strict();
+const researchWorkflowSchema = z.object({ sourceEnvelope: z.literal("supplied-source-only"),
+  limitation: z.string().min(1).max(400),
+  plan: z.object({ steps: z.array(z.object({ stepId: id, text: z.string().min(1).max(240),
+    status: z.literal("submitted") }).strict()).min(1).max(8) }).strict(),
+  progress: z.object({ status: z.enum(["report-ready", "incomplete"]),
+    selectedSources: z.number().int().min(1).max(6), resolvedSources: z.number().int().nonnegative().max(6),
+    passesPlanned: count, passesRun: count, passagesRead: count, degraded: z.boolean(), truncated: z.boolean(),
+    omissionCount: count, unansweredCount: count }).strict(),
+  sources: z.array(z.object({ sourceId: id, sectionId: id,
+    contentSha256: z.string().regex(/^[a-f0-9]{64}$/) }).strict()).max(6),
+  conflict: z.object({ status: z.literal("not-structured"), message: z.string().min(1).max(400) }).strict(),
+  missingEvidence: z.array(z.string().min(1).max(400)).max(24),
+  report: z.object({ status: z.enum(["attributable", "incomplete"]), checker: z.object({
+    kind: z.literal("evidence-research"), performed: z.literal(true), corrected: z.boolean(),
+    attemptCount: z.number().int().min(1).max(2),
+    finalAnswerOrigin: z.enum(["primary", "checker-correction"]) }).strict().nullable(),
+    citationOrdinals: z.array(z.number().int().positive()).max(24) }).strict() }).strict()
+  .superRefine((value, context) => {
+    const reportReady = value.progress.status === "report-ready";
+    const attributable = value.report.status === "attributable";
+    if (reportReady !== attributable) {
+      context.addIssue({ code: z.ZodIssueCode.custom, path: ["report", "status"],
+        message: "Research progress and report status must agree." });
+    }
+    if (attributable && (!value.sources.length || value.sources.length !== value.progress.selectedSources
+        || value.progress.resolvedSources !== value.progress.selectedSources
+        || value.progress.passesRun !== value.progress.passesPlanned || value.progress.degraded
+        || value.progress.truncated || value.progress.omissionCount !== 0 || value.progress.unansweredCount !== 0
+        || value.missingEvidence.length !== 0 || !value.report.checker || !value.report.citationOrdinals.length)) {
+      context.addIssue({ code: z.ZodIssueCode.custom, path: ["report"],
+        message: "An attributable Research report requires complete, non-degraded selected evidence and citations." });
+    }
+  });
 const evidenceV2Schema = z.object({ schemaVersion: z.literal("runaai-answer-evidence/v2"), ...evidenceFields,
-  review: reviewSchema.nullable() }).strict();
+  review: reviewSchema.nullable(), researchWorkflow: researchWorkflowSchema.nullable().optional() }).strict();
 const evidenceSchema = z.union([evidenceV2Schema, evidenceV1Schema]);
 
 // Persist application-produced metadata only, never model labels, duplicate source text,
@@ -39,6 +72,7 @@ export function answerEvidence(response) {
   const result = evidenceSchema.safeParse({ schemaVersion: "runaai-answer-evidence/v2",
     citations: response.citations, ground: response.ground, retrieval: response.retrieval,
     workspace: response.workspace, review,
+    ...(response.researchWorkflow ? { researchWorkflow: response.researchWorkflow } : {}),
     completion: response.completion, execution: { status: "not-executed" } });
   return result.success ? result.data : null;
 }

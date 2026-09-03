@@ -9,6 +9,10 @@ const historyTurn = z.object({
 const sourceLocator = z.object({
   sourceId: boundedId,
   sectionId: boundedId,
+  contentSha256: z.string().regex(/^[a-f0-9]{64}$/).optional(),
+}).strict();
+const researchPlan = z.object({
+  steps: z.array(z.string().trim().min(1).max(240)).min(1).max(8),
 }).strict();
 
 export const Gate2AnswerRequestSchema = z.object({
@@ -23,6 +27,7 @@ export const Gate2AnswerRequestSchema = z.object({
   history: z.array(historyTurn).max(24),
   contextRevision: z.number().int().nonnegative().optional(),
   workspace: z.nullable(z.object({ sources: z.array(sourceLocator).min(1).max(6) }).strict()).default(null),
+  researchPlan: researchPlan.nullable().default(null),
   budgets: z.object({
     deadlineMs: z.number().int().min(100).max(120_000),
     maximumPasses: z.number().int().min(1).max(12),
@@ -37,6 +42,21 @@ export const Gate2AnswerRequestSchema = z.object({
   if (!["workspace", "research", "review"].includes(request.lane) && request.workspace) {
     context.addIssue({ code: z.ZodIssueCode.custom, path: ["workspace"],
       message: "Explicit sources belong only to workspace, research, or review." });
+  }
+  if (request.lane !== "research" && request.researchPlan) {
+    context.addIssue({ code: z.ZodIssueCode.custom, path: ["researchPlan"],
+      message: "A research plan belongs only to the research lane." });
+  }
+  if (request.lane === "research" && request.workspace) {
+    if (!request.researchPlan) {
+      context.addIssue({ code: z.ZodIssueCode.custom, path: ["researchPlan"],
+        message: "Supplied-source Research requires one through eight submitted plan steps." });
+    }
+    request.workspace.sources.forEach((source, index) => {
+      if (!source.contentSha256) context.addIssue({ code: z.ZodIssueCode.custom,
+        path: ["workspace", "sources", index, "contentSha256"],
+        message: "Supplied-source Research requires the exact selected source revision." });
+    });
   }
 });
 
@@ -81,6 +101,41 @@ const reviewResult = z.object({
     citationOrdinals: z.array(z.number().int().positive()).max(24),
   }).strict()).max(1),
 }).strict();
+const researchWorkflow = z.object({
+  sourceEnvelope: z.literal("supplied-source-only"),
+  limitation: z.string().min(1).max(400),
+  plan: z.object({ steps: z.array(z.object({ stepId: boundedId, text: z.string().min(1).max(240),
+    status: z.literal("submitted") }).strict()).min(1).max(8) }).strict(),
+  progress: z.object({ status: z.enum(["report-ready", "incomplete"]),
+    selectedSources: z.number().int().min(1).max(6), resolvedSources: z.number().int().nonnegative().max(6),
+    passesPlanned: z.number().int().nonnegative(), passesRun: z.number().int().nonnegative(),
+    passagesRead: z.number().int().nonnegative(), degraded: z.boolean(), truncated: z.boolean(),
+    omissionCount: z.number().int().nonnegative(), unansweredCount: z.number().int().nonnegative() }).strict(),
+  sources: z.array(z.object({ sourceId: boundedId, sectionId: boundedId,
+    contentSha256: z.string().regex(/^[a-f0-9]{64}$/) }).strict()).max(6),
+  conflict: z.object({ status: z.literal("not-structured"), message: z.string().min(1).max(400) }).strict(),
+  missingEvidence: z.array(z.string().min(1).max(400)).max(24),
+  report: z.object({ status: z.enum(["attributable", "incomplete"]),
+    checker: z.object({ kind: z.literal("evidence-research"), performed: z.literal(true),
+      corrected: z.boolean(), attemptCount: z.number().int().min(1).max(2),
+      finalAnswerOrigin: z.enum(["primary", "checker-correction"]) }).strict().nullable(),
+    citationOrdinals: z.array(z.number().int().positive()).max(24) }).strict(),
+}).strict().superRefine((value, context) => {
+  const reportReady = value.progress.status === "report-ready";
+  const attributable = value.report.status === "attributable";
+  if (reportReady !== attributable) {
+    context.addIssue({ code: z.ZodIssueCode.custom, path: ["report", "status"],
+      message: "Research progress and report status must agree." });
+  }
+  if (attributable && (!value.sources.length || value.sources.length !== value.progress.selectedSources
+      || value.progress.resolvedSources !== value.progress.selectedSources
+      || value.progress.passesRun !== value.progress.passesPlanned || value.progress.degraded
+      || value.progress.truncated || value.progress.omissionCount !== 0 || value.progress.unansweredCount !== 0
+      || value.missingEvidence.length !== 0 || !value.report.checker || !value.report.citationOrdinals.length)) {
+    context.addIssue({ code: z.ZodIssueCode.custom, path: ["report"],
+      message: "An attributable Research report requires complete, non-degraded selected evidence and citations." });
+  }
+});
 
 export const Gate2AnswerResponseSchema = z.object({
   schemaVersion: z.literal("runa2-answer-response/v2"),
@@ -107,6 +162,7 @@ export const Gate2AnswerResponseSchema = z.object({
     extraReads: z.literal(0), citationStatus: z.enum(["not-applicable", "recognized", "missing", "contains-unknown"]),
   }).strict()),
   review: reviewResult.nullable().default(null),
+  researchWorkflow: researchWorkflow.nullable().default(null),
   citations: z.array(citation),
   model: z.object({ role: z.string(), provider: z.string(), modelId: z.string() }).strict(),
   completion: z.object({ reason: z.string(), timedOut: z.boolean(), outputLimited: z.boolean() }).strict(),

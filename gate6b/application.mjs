@@ -39,6 +39,7 @@ function answerRequest(body, participant, totalDeadlineMs) {
     throw coded("request-revision-invalid", "A nonnegative conversation revision is required.");
   }
   const workspace = ["research", "review"].includes(body.lane) ? (body.workspace ?? null) : null;
+  const researchPlan = body.lane === "research" ? (body.researchPlan ?? null) : null;
   return {
     schemaVersion: "runa2-answer-request/v2",
     requestId,
@@ -51,6 +52,7 @@ function answerRequest(body, participant, totalDeadlineMs) {
     history: Array.isArray(body.history) ? body.history : [],
     ...(verified && body.contextRevision !== undefined ? { contextRevision: body.contextRevision } : {}),
     workspace,
+    researchPlan,
     budgets: {
       deadlineMs: finiteInt(body.budgets?.deadlineMs, totalDeadlineMs, 100, totalDeadlineMs),
       maximumPasses: finiteInt(body.budgets?.maximumPasses, 8, 1, 12),

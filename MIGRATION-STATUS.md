@@ -555,6 +555,16 @@ paired with truncated inputs. The corrected bytes received independent PASS at P
 No model, browser runtime, network, production route or actual-system acceptance occurred. Record:
 `gate7f/function-first/M1-S2-CONTEXTUAL-REVIEW-WORKFLOW-2026-09-03.md`.
 
+**Supplied-source Research workflow, 2026-09-03:** Research now requires a one-to-eight-step submitted plan and
+exact project/source/section/content-digest selections, revalidates the complete ordered active set immediately at
+the provider boundary, and produces no provider call on any missing, revoked, stale, foreign, partial or changed
+selection. Report readiness fails on every explicit incomplete/degraded signal. Two independent review stops corrected
+four authority/completeness gaps and one production approved-knowledge widening; explicit Research now receives only
+the selected evidence and null advisory context. Focused checks pass 17/17, the builder's affected set passes 90/90,
+and independent re-review passes 68/68 at P0=0/P1=0. No model/provider, Qdrant, PostgreSQL, browser, web, production or
+customer acceptance ran. Record:
+`gate7f/function-first/M1-S2-SUPPLIED-SOURCE-RESEARCH-WORKFLOW-2026-09-03.md`.
+
 **Device/install-readiness preflight, 2026-09-03:** four customer modes now have a frozen, digest-bound readiness
 contract: browser-only, one-time folder snapshot, optional non-executing persistent bridge, and separately deferred
 fully local execution. Independent review stopped and corrected arbitrary manifest injection, unbound signer identity,

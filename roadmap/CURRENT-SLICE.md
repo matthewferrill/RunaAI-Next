@@ -157,6 +157,23 @@ Commit `ac10286` sealed the reviewed tree. The single gated actual Windows witne
 static-junction non-traversal, completion-boundary replacement detection, UI pre-bind cancellation and owned
 fixture removal. It invoked no Git/MXC, model, browser, network or production surface. The one corrected actual
 Omen Git proof is now admitted; any actual failure stops the slice again for RCA.
+Documentation commit `495571d` sealed that result. The one admitted proof stopped on its first contained
+`status`: Git initialized and exited 128 with 67 bounded stderr bytes and retained SHA-256
+`be29fcd5bc1ca2b48bf12070ba2149e0e33c02730419a50a5cfbeae997c6a5d2`. No successor Git verb or network test
+arm ran; the disposable root was removed and a separate postcheck found zero matching helpers. The prior
+loader and false-mutation faults are corrected, but the public error has no safe Git-fatal category, so the
+exact cause is unknowable. Acceptance is paused for the documented allowlisted classifier, deterministic
+tests, independent review, commit and exactly one single-status diagnostic before any functional fix/proof.
+The first review of the diagnostic design stopped before implementation at P0=0/P1=2 because classifier
+signatures/ambiguity and diagnostic success/failure lifecycle schemas were incomplete. No diagnostic ran. The
+RCA now freezes ordered case-sensitive whole-buffer signatures with every malformed, near or multi-category
+match forced to `unknown`; exact completed/error key sets and null rules; shared first-status fixture bytes;
+pre-fixture pins; terminal wrapper/witness/guard plus fixture-disposition evidence; and one-operation/no-successor
+proof. Revised design bytes require fresh independent review before implementation.
+The next review reduced the design stop to P0=0/P1=1 because the safe-directory advice block remained an
+undefined token. The RCA now gives three literal LF-framed grammars with exact blank line, one-tab indentation,
+quoted byte-identical private path reuse and `unknown` for every deviation. No diagnostic ran; fresh design GO
+remains required before implementation.
 
 Workspace baseline checkpoint: see
 `gate7f/function-first/M1-S2-WORKSPACE-BASELINE-IMPLEMENTATION-RESULTS-2026-09-02.md` for the accepted

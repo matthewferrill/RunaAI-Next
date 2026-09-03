@@ -194,6 +194,24 @@ Commit `ac10286` sealed that reviewed tree. Its single gated actual Windows witn
 static-junction non-traversal, completion-boundary replacement detection, clean UI pre-bind cancellation and
 owned-fixture removal. The record reports no model or production change; it ran no Git/MXC, network or browser
 operation. One corrected actual Omen Git proof is now admitted. Any actual failure stops again for RCA.
+Documentation commit `495571d` sealed the preflight record. The one admitted proof then stopped on its first
+`contained-git-status`: Git now initialized but exited 128; the observer retained 67 stderr bytes and SHA-256
+`be29fcd5bc1ca2b48bf12070ba2149e0e33c02730419a50a5cfbeae997c6a5d2`. No successor Git verb or network test
+arm ran; cleanup removed the root and a read-only postcheck found zero matching sidecar/MXC/Git helpers. This
+confirms the prior loader and false-mutation defects are corrected, but the current privacy-safe error lacks a
+fatal-category field, so the Git cause is unknowable from sealed evidence. Acceptance is stopped. The RCA now
+freezes one bounded allowlisted stderr classifier and one single-status diagnostic after deterministic tests,
+independent review and commit; no full proof retry is permitted before the resulting functional RCA/fix.
+The first review of that diagnostic design stopped at P0=0/P1=2: category matching and ambiguity behavior were
+not exact, and success/fatal/harness-failure lifecycle records were not fully frozen. No diagnostic ran. The RCA
+now defines ordered case-sensitive whole-buffer signatures with malformed/near/multiple matches forced to
+`unknown`, exact completed/error schemas and null rules, one shared first-status fixture, pre-fixture pin checks,
+terminal wrapper/witness/guard evidence, safe fixture retention/removal and explicit one-operation/no-successor
+evidence. Revised design bytes await fresh independent review before implementation.
+The next review reduced the design stop to P0=0/P1=1: the dubious-ownership advice block was named but not
+literal. The RCA now freezes three complete LF-framed variants, exact blank line and tab indentation, quoted
+byte-identical private path reuse, and `unknown` for every deviation. No diagnostic has run; revised design
+still requires fresh GO before implementation.
 
 **Application slice, 2026-09-02:** model selection is complete and the retired R15 campaign is not being
 resumed. The active clean branch is `codex/m1-gemma-primary`, based on the five-function qualification

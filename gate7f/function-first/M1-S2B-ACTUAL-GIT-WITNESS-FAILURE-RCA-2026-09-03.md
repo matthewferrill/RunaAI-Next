@@ -405,3 +405,106 @@ owned disposable fixture was removed. Its public record states `productionChange
 preflight admits the one corrected actual Omen Git proof; any failure in that proof stops the campaign again.
 
 Git acceptance remains paused. The model campaign remains closed and unaffected.
+
+## Corrected actual proof stop: Git exit 128
+
+Documentation commit `495571d` sealed the green preflight result. The one admitted corrected actual Omen Git
+proof then stopped on its first `contained-git-status` operation. The production observer returned
+`omen-git-process-failed`; the pinned Git target exited 128 with 67 stderr bytes and retained stderr SHA-256
+`be29fcd5bc1ca2b48bf12070ba2149e0e33c02730419a50a5cfbeae997c6a5d2`. No successor Git verb or network
+test arm ran. The proof's cleanup removed the disposable root, and a separate read-only postcheck found zero
+matching repository/UI sidecars, MXC wrappers or Git helpers. No model, browser or production surface ran.
+
+This result closes two prior hypotheses: `ui.allowWindows:true` allowed the pinned Git image to initialize, so
+the earlier `STATUS_DLL_INIT_FAILED` startup fault is corrected; and the typed repository witness did not
+misclassify MXC's security-only DACL notifications as source mutation. The new failure occurs inside Git after
+startup. Exit 128 is a generic Git fatal status and the current aggregate retains neither a safe fatal category
+nor redacted text. The exact underlying Git complaint therefore cannot be identified from sealed evidence.
+That is a diagnostic-publication gap in the proof method, not evidence that Git functionality or a model is
+wrong. Guessing from the exit code, blindly rerunning the same proof, or exposing raw stderr is prohibited.
+
+### Correction design before one diagnostic resume
+
+- Keep the exact committed process, repository witness, UI witness, native guard, fixed argv, no-environment,
+  no-write and deny-network boundaries unchanged. Do not rerun the multi-operation actual proof.
+- Add one pure bounded Git-fatal classifier at the observer's private stderr boundary. Input is 1..262,144
+  bytes, strict UTF-8, with CRLF changed to LF; bare CR, NUL, non-tab C0/DEL controls, a missing/excess final
+  LF, more than 16 lines or a line over 8,192 code units returns `unknown`. Matching is case-sensitive and
+  each signature is anchored to the complete normalized buffer. Evaluate the following table in order, but
+  collect matches rather than accepting the first: exactly one matching category returns that category;
+  zero or multiple categories returns `unknown`. Multiple signatures inside one category count as one match.
+  No substring/near-match, localized text or decoder failure is classified.
+
+  | Order | Category | Complete-buffer signatures |
+  |---:|---|---|
+  | 1 | `dubious-ownership` | exactly one of the three literal grammars below; every instance of `<path>` in one buffer must be the same captured nonempty private string |
+  | 2 | `repository-not-found` | one LF-terminated fatal line beginning exactly `fatal: not a git repository: `, `fatal: not a git repository (or any of the parent directories): `, or `fatal: not a git repository (or any parent up to mount point ` |
+  | 3 | `working-directory` | one LF-terminated fatal line beginning exactly `fatal: Unable to read current working directory`, `fatal: cannot chdir to `, or `fatal: cannot come back to cwd` |
+  | 4 | `configuration` | one LF-terminated fatal line beginning exactly `fatal: unable to read config file `, `fatal: bad config line `, or exactly `fatal: error processing config file(s)` plus optional colon detail |
+  | 5 | `index-or-object-read` | one LF-terminated fatal line beginning exactly `fatal: index file corrupt`, `fatal: unable to read index file`, `fatal: failed to read object`, `fatal: bad object`, `fatal: invalid object`, or `fatal: object ` and ending with ` cannot be read` |
+  | 6 | `option-or-usage` | either one LF-terminated line beginning exactly `fatal: unknown option`, `fatal: invalid option`, or `error: unknown option`, or `unknown option: <text>` followed by LF and a `usage: git <text>` block whose every remaining line is printable/tab text and LF-terminated |
+  | 7 | `permission-denied` | one LF-terminated `fatal: ` line containing exactly one of `Permission denied`, `Access is denied`, or `Operation not permitted`, excluding all prefixes assigned to rows 1..6 |
+
+  `<non-LF text>` means one or more permitted non-LF input characters and is never retained. Patterns may
+  inspect private paths internally, but no matched text, capture, path, filename or command crosses the error.
+  The three complete `dubious-ownership` grammars are frozen as follows; each displayed line ends LF, the
+  displayed empty line is required, and `TAB` is exactly one U+0009 byte (spaces are not interchangeable):
+
+  1. `fatal: detected dubious ownership in repository at '<path>'`
+  2. `fatal: detected dubious ownership in repository at '<path>'` then
+     `To add an exception for this directory, call:` then an empty line then
+     `<U+0009>git config --global --add safe.directory '<path>'`
+  3. `fatal: detected dubious ownership in repository at '<path>'` then
+     `'<path>' is on a file system that does not record ownership` then
+     `To add an exception for this directory, call:` then an empty line then
+     `<U+0009>git config --global --add safe.directory '<path>'`
+
+  `<path>` contains one or more permitted non-LF characters other than U+0027 single quote. The first capture
+  is compared byte-for-byte with every later `<path>` occurrence, including slash direction and case. There
+  is no leading/trailing whitespace on any line except the one required `TAB`; there is exactly one terminal
+  LF after the last line and no additional line. Any quote variation, missing/repeated line, space indentation,
+  path mismatch, extra advice or other deviation returns `unknown`.
+- Preserve `stderrBytes` and `stderrSha256`. For nonzero Git exit, attach only `failureKind` from that fixed
+  enum to the internal `omen-git-process-failed` error. Extend the actual diagnostic/public error schema to
+  require that exact enum and continue excluding raw stderr and exception messages. Unknown text must remain
+  `unknown`; classifier failure itself must fail closed as `unknown`.
+- Add positive fixtures for every signature family and adversarial fixtures containing private paths, credentials,
+  control bytes, malformed UTF-8 and near-miss text. Prove serialized public errors contain only the fixed
+  category, byte count, digest, stage and existing booleans/nulls.
+- Refactor one shared fixture builder so the diagnostic and full proof use identical bytes and lifecycle through
+  the first `status`: same pinned native/Git/MXC/sidecar/policy checks before `mkdtemp`; same two-commit repository,
+  inert submodule marker, remotes, working-tree change, DPAPI root confirmation, observer and native guard. The
+  diagnostic invokes exactly one `status` and no successor. It starts no later network operation; any listeners
+  required by the shared fixture are closed during cleanup.
+- A completed diagnostic publishes exactly one object with keys `schemaVersion`, `outcome`, `operation`,
+  `operationCount`, `successorStarted`, `exitCode`, `failureKind`, `stderrBytes`, `stderrSha256`,
+  `repositoryUnchanged`, `wrapperTerminal`, `witnessesTerminal`, `guardReleased`, `fixtureRemoved`,
+  `privateValuesIncluded`, `productionChanged` and `modelCalled`. Schema is
+  `runaai-m1-omen-git-fatal-diagnostic/v1`; operation is `status`, operationCount is 1,
+  successorStarted/privateValuesIncluded/productionChanged/modelCalled are false, and all five cleanup/state
+  booleans are true. For `outcome:"git-fatal"`, exitCode is integer 1..4,294,967,295, failureKind is the enum,
+  stderrBytes is 1..262,144 and stderrSha256 is lowercase 64-hex. For `outcome:"status-succeeded"`, exitCode is
+  0, failureKind is null, stderrBytes is 0 and stderrSha256 is SHA-256 of empty bytes. Successful status with
+  stderr, any other key/value/null combination or nonterminal cleanup is not a completed diagnostic.
+- A harness/instrumentation failure publishes exactly `schemaVersion`, `errorCode`, `stage`, `exitCode`,
+  `failureKind`, `stderrBytes`, `stderrSha256`, `wrapperTerminal`, `witnessesTerminal`, `guardReleased`,
+  `fixtureDisposition`, `operationCount`, `successorStarted` and `privateValuesIncluded`. Schema is
+  `runaai-m1-omen-git-fatal-diagnostic-error/v1`; errorCode and stage are fixed allowlists; exit/category/bytes/
+  digest are all null unless a validated nonzero Git terminal was observed, in which case all four are non-null
+  and satisfy the completed-fatal bounds; cleanup flags are booleans; fixtureDisposition is `removed` only when
+  wrapper/witness/guard terminal proof is true and deletion succeeds, otherwise `retained`; operationCount is
+  0 or 1, successorStarted/privateValuesIncluded are false. No path, PID, text or exception crosses this record.
+- After deterministic tests, independent exact-byte review and a source commit, run exactly one disposable
+  single-status diagnostic. Stop after that operation whether it succeeds or fails. Use a completed fatal result
+  only to finish the Git RCA and design the real functional correction; an error-schema result stops again.
+  No full proof retry is permitted from this diagnostic alone.
+
+The first review of this diagnostic design returned NO-GO at P0=0/P1=2 because the category names lacked exact
+matching/ambiguity rules and the one-status success/failure/cleanup publication contract was incomplete. The
+ordered whole-buffer signatures, strict `unknown` behavior, exact shared fixture/lifecycle and schemas above
+close those design gaps. These revised design bytes require fresh independent review before implementation.
+That re-review remained NO-GO at P0=0/P1=1 because the optional safe-directory advice block was still named
+rather than defined. The three literal grammars above now freeze its lines, blank line, one-tab indentation,
+same-path rule, quoting and terminal LF; every deviation returns `unknown`. No diagnostic has run.
+
+Git acceptance is paused at this new stop. The model campaign remains closed and unaffected.

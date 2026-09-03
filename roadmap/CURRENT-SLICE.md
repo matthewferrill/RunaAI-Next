@@ -117,7 +117,24 @@ failure-code plus typed count/boolean contract with private/unknown values exclu
 19/19, roadmap checks pass 15/15, syntax/diff checks are green, and fresh exact-byte review returned GO with
 P0=0/P1=0. Revised bytes remain unexecuted and require a source commit before one diagnostic resume.
 Acceptance remains paused.
-No browser, HTTPS, model or production work has run.
+Commit `b2e0ff0` sealed it. The one resume stopped with exact evidence: the sole MXC wrapper exited
+`0xC0000142` (`STATUS_DLL_INIT_FAILED`), the observer reported `omen-git-source-changed`, but the classifier saw
+only 84 security notifications with zero name/content/metadata/error events and equal final tree/security.
+Guard, watcher, wrapper and owned-root cleanup completed; a read-only postcheck found zero roots/helpers. The
+application therefore has two actual-system defects, not a model failure: broad watching mistakes MXC's
+temporary DACL activity for source mutation, and the sandboxed Git target failed loader initialization under
+the frozen no-environment/no-write/UI-blocked policy. Read-only PE inspection plus installed SDK guidance makes
+UI blocking the bounded leading hypothesis, pending one corrected final-configuration proof. Independent
+review stopped the first correction design before implementation at P0=0/P1=3 because its explicit environment
+was incompatible with actual Omen MXC behavior and frozen criteria, its runtime surface was too broad, and its
+watcher abort/cleanup ordering was incomplete. The replacement preserves omitted `process.env`, no writable
+paths and direct fixed `git.exe`; sets `ui.allowWindows:true`, an explicit Win32 UI/window-creation capability,
+while retaining ProcessContainer isolation and clipboard/input/system-control/settings/IME/network denials;
+and freezes a pinned one-use typed witness with immediate prohibited-event latching,
+child termination before parsing/publication, bounded drain through guard release, strict aggregate-only
+schemas and fail-closed cleanup. Acceptance remains paused for corrected design review, implementation,
+preflight, independent exact-byte review and commit before exactly one further proof. No browser, HTTPS, model
+or production work has run.
 
 Workspace baseline checkpoint: see
 `gate7f/function-first/M1-S2-WORKSPACE-BASELINE-IMPLEMENTATION-RESULTS-2026-09-02.md` for the accepted

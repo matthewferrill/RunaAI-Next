@@ -67,6 +67,21 @@ allowlisted failure codes and typed aggregate counts/booleans, collapses unknown
 all private values. Focused checks pass 19/19, roadmap checks pass 15/15, syntax/diff checks are green, and
 fresh exact-byte review returned GO with P0=0/P1=0. Revised bytes remain non-executable until source-committed;
 only then may one diagnostic resume. Acceptance stays paused.
+Commit `b2e0ff0` sealed it. The one resume stopped with exact aggregate evidence: its one MXC wrapper exited
+`0xC0000142` (`STATUS_DLL_INIT_FAILED`), while `omen-git-source-changed` corresponded to 84 security-only
+notifications, zero name/content/metadata/errors and equal final tree/security. Guard release, child close,
+watcher close and root cleanup passed; read-only postcheck found zero roots/helpers. This is an application
+observer/runtime-policy failure, not a model result. Read-only PE inspection shows the pinned Git executable
+imports `USER32.dll`; installed MXC SDK guidance says some Windows command-line programs cannot start while UI
+is blocked. That supports, but does not yet prove, a bounded UI-policy cause. Independent review stopped the
+first proposed environment/temp correction at P0=0/P1=3 before implementation because it contradicted the
+frozen no-environment contract and actual Omen MXC behavior, broadened the runtime surface, and did not fully
+order watcher abort/cleanup. The corrected design preserves omitted `process.env`, no writable paths and the
+fixed direct `git.exe` command; amends only `ui.allowWindows:true` while retaining container UI isolation,
+clipboard `none`, input injection false, desktop-system control false, system settings `none`, IME false and
+deny-all networking; and replaces the untyped witness with a pinned one-use typed sidecar using a bounded
+stdin-only root/operation binding. Acceptance remains paused for corrected design review, implementation,
+focused preflight, independent exact-byte review and source commit before exactly one further actual proof.
 
 ## Slice selection record
 
@@ -232,18 +247,40 @@ because actual Omen MXC 0.8.0 rejects every non-empty custom environment before 
 fixed Git command-line controls above replace the required safety effects without adding a launcher or
 shell. The generated policy is normalized only for the per-operation container id, selected-root path and
 fixed command line, then compared with an independently committed policy-template SHA-256 before spawn.
+The amended policy sets `ui.allowWindows:true`, which permits Win32 UI/window creation; it does not merely
+permit invisible loader initialization. The generated ProcessContainer must still read back UI isolation
+`container`, desktop-system control false, system settings `none`, IME false, clipboard `none` and input
+injection false. Those exact values and the `allowWindows` capability increase are part of the release and
+policy-template pins.
 The actual Omen startup proof freezes both that template and each exact manifest. MXC enforces the 15-second process timeout;
 the companion also bounds captured output and treats a missed terminal exit as failure. This slice does
 not claim a ProcessContainer child-count or memory ceiling because MXC 0.8.0 exposes neither control.
 Security instead depends on the fixed Git verbs and flags, closed executable-extension points, read-only
 root/runtime grants and deny-all network containment. A pinned native guard holds both the validated root
 and `.git` directory without delete sharing from final pre-spawn validation until Git terminates and its
-result is revalidated; root or `.git` rename/replacement must fail during that window. A recursive Windows
-mutation witness starts before the final manifest and must remain error-free and event-free through
-result completion, so config, packed-ref, attribute or worktree mutation—including restore—is denied. Actual acceptance
+result is revalidated; root or `.git` rename/replacement must fail during that window. A recursive typed Windows
+mutation witness starts before the final manifest and remains armed through child close, MXC teardown and
+native-guard release. Name, content or metadata notification, watcher error, invalid/oversized protocol data,
+early close, timeout or unequal final owner/group/DACL state fails closed. Security notifications alone are
+permitted only when the complete final owner/group/DACL digest exactly equals the initial digest. The parent
+must validate the final witness result after guard release before it parses or publishes any Git output, so
+config, packed-ref, attribute or worktree mutation—including restore—is denied. Actual acceptance
 inventories executable path and SHA-256 during both a deliberately long successful operation and a
 proof-only blocking `git hash-object --stdin` operation that must be terminated by the same 15-second MXC
-policy. Neither MXC nor Git may survive completion or timeout. Release acceptance also starts two fresh
+policy. Neither MXC nor Git may survive completion or timeout. Because `allowWindows:true` permits visible
+windows, the one corrected actual proof must also arm a pinned UI-event witness before spawn and retain it
+through terminal cleanup. A dedicated message-loop thread binds out-of-context object-create/show WinEvent
+hooks to the current session's captured input desktop before spawn, then buffers events until the exact MXC
+wrapper PID is bound. It performs immediate and final top-level-window enumeration on that same desktop. It
+must reject any input-desktop window attributable to the exact PID+MXC image or pinned Git image, and fail
+closed on PID reuse/mismatch, unresolved owner, desktop/hook/enumeration/message-loop error, event overflow,
+invalid protocol or missed drain/exit. The witness does not claim to observe the isolated container desktop;
+the exact `processContainer.ui.isolation=container` readback proves assignment away from the input desktop.
+The strict schemas, one-use framing, 10,000-event cap and 10,000/5,000/2,000-ms ready-or-result/drain/exit bounds
+are frozen in the fifth-diagnostic RCA. Exact policy readback must separately prove clipboard/input injection/
+desktop-system control/system settings/IME remain denied. This proves no interactive-input-desktop exposure,
+not zero window creation in the isolated container, and does not satisfy the separate exhaustive descendant-
+accounting blocker. Release acceptance also starts two fresh
 actual companion processes, labeled first-run and post-restart. Each uses the same pinned containment
 template for proof-only `git ls-remote` attempts to an owned loopback listener, an owned LAN listener and a
 fixed public HTTPS target. Both owned listeners must receive zero connections and every contained attempt

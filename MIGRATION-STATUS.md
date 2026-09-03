@@ -149,6 +149,26 @@ unknown observer codes collapsed to `unknown`; focused regressions cover indepen
 private fields. Focused checks pass 19/19, roadmap checks pass 15/15, syntax/diff checks are green, and fresh
 exact-byte review returned GO with P0=0/P1=0. Revised bytes remain unexecuted and require a new source commit
 before one diagnostic resume. Acceptance remains paused.
+Commit `b2e0ff0` sealed that publication correction. The one resumed diagnostic produced complete evidence
+and stopped without a successor: one MXC wrapper closed with Windows status `3221225794`
+(`0xC0000142`, `STATUS_DLL_INIT_FAILED`), while the observer returned `omen-git-source-changed`. The independent
+classifier saw name/content/metadata/errors `0/0/0/0`, security notifications `84`, unchanged repository tree
+and final security descriptor, successful guard release, zero guard survivor, watcher exit 0 and verified
+root removal. Read-only postcheck found zero roots/helpers. This proves two non-model defects: the observer
+conflates temporary MXC DACL notifications with source mutation, and the sandboxed Git target did not
+initialize under the frozen no-environment/no-write policy. Read-only PE inspection shows that the pinned Git
+executable imports `USER32.dll`; together with the installed MXC SDK warning that some Windows command-line
+programs cannot start while UI is blocked, this makes UI blocking the bounded leading hypothesis, not yet a
+proven cause. Independent review stopped the first correction design at P0=0/P1=3 before implementation: its
+explicit environment contradicted the actual Omen MXC rejection and frozen criteria, its runtime surface was
+too broad, and its watcher abort/cleanup ordering was incomplete. The replacement design preserves omitted
+`process.env`, zero writable paths and the fixed direct `git.exe` invocation; changes only
+`ui.allowWindows:true`, which permits Win32 UI/window creation, while retaining container isolation and no
+clipboard/input/system-control/settings/IME or network access; and specifies a pinned, one-use, stdin-bound
+typed witness that latches and aborts on the
+first prohibited event before any output parsing or publication. Acceptance remains paused for corrected
+design review, implementation, preflight, independent exact-byte review and source commit before exactly one
+further disposable proof. No retry/model/network/browser/production work is authorized before those gates.
 
 **Application slice, 2026-09-02:** model selection is complete and the retired R15 campaign is not being
 resumed. The active clean branch is `codex/m1-gemma-primary`, based on the five-function qualification

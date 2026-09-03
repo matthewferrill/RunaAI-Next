@@ -190,6 +190,19 @@ commit and then the one admitted diagnostic remain mandatory.
 Fresh current-byte review returned GO with P0=0/P1=0 and independently reproduced 33/33 focused checks,
 15/15 roadmap checks, four syntax checks and a clean diff check. No actual operation ran. These exact bytes may
 now be committed before the single admitted diagnostic; acceptance remains paused.
+Commit `69f3284` sealed the reviewed diagnostic. Its one actual status returned a completed, cleanup-green
+`working-directory` fatal category with the same exit 128 and 67-byte hash, unchanged repository and no
+successor/model/production action. This proves the fixed `working-directory` family, but not the private path,
+exact message or failing cwd transition. Dual selected-root inner/outer cwd coupling is the bounded leading
+adapter hypothesis. The frozen correction uses
+the already-admitted pinned Git installation root for both cwd values and explicit `--git-dir=<root>\\.git` plus
+`--work-tree=<root>` argv binding, without widening filesystem, environment, UI or network authority. It requires
+an updated `<GIT_INSTALL_ROOT>` policy pin, pre-spawn inner/outer cwd assertions, deterministic five-verb
+disposable-repository equivalence, unchanged-byte proof and timeout/network binding gates before fresh review and
+commit. The first design review returned P0=0/P1=3 and caused these corrections. Only then may one corrected
+single-status confirmation test the hypothesis. No correction or retry has run; acceptance remains paused.
+Fresh corrected-design review returned GO with P0=0/P1=0. Roadmap checks pass 15/15 and the diff check is clean.
+A doc-only design commit precedes implementation; no actual retry or model/production action has run.
 
 Workspace baseline checkpoint: see
 `gate7f/function-first/M1-S2-WORKSPACE-BASELINE-IMPLEMENTATION-RESULTS-2026-09-02.md` for the accepted

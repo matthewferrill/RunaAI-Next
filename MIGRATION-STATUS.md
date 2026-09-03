@@ -230,6 +230,23 @@ before source commit or the single diagnostic; acceptance remains paused.
 Fresh current-byte review returned GO with P0=0/P1=0 and independently reproduced focused checks 33/33,
 roadmap checks 15/15, four syntax checks and a clean diff check. No actual operation ran. A source commit is now
 the only remaining gate before the single admitted diagnostic; acceptance and model testing remain paused.
+Commit `69f3284` sealed those bytes. The single diagnostic then completed and stopped after exactly one status:
+Git exit 128, `failureKind:working-directory`, the same 67-byte stderr hash, unchanged repository, terminal
+wrapper/two witnesses/native guard and removed fixture. No successor, private value, model or production action
+occurred. This conclusively attributes the failure only to the fixed `working-directory` family; the private
+message/path and whether outer, contained or later Git cwd transition failed remain unknown. Dual selected-root
+cwd coupling is the bounded leading adapter hypothesis. The frozen correction moves both cwd values to the
+already-admitted pinned Git installation root and explicitly binds every
+Git command with `--git-dir=<root>\\.git` plus `--work-tree=<root>`, retaining all existing read-only, identity,
+extension, environment, witness and network closures. No extra profile/parent/drive/write grant is allowed.
+The policy normalizer/pin must change to `<GIT_INSTALL_ROOT>` and pre-spawn checks must bind both inner and outer
+cwd values. Deterministic disposable-repository equivalence must cover all five spawned public verbs, unchanged
+bytes, and timeout/network explicit binding before independent review and commit. Only then may one corrected
+single-status confirmation test the hypothesis; any failure stops again. The first design review returned
+P0=0/P1=3 and prompted these corrections. No correction or retry has run. Acceptance and models remain paused.
+Fresh corrected-design review returned GO with P0=0/P1=0 and confirmed all three omissions closed. Roadmap
+checks pass 15/15 and the diff check is clean. A doc-only design commit now precedes implementation; no actual
+retry, model, browser, network or production action has run.
 
 **Application slice, 2026-09-02:** model selection is complete and the retired R15 campaign is not being
 resumed. The active clean branch is `codex/m1-gemma-primary`, based on the five-function qualification

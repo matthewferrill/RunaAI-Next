@@ -535,3 +535,66 @@ finding closed. No actual operation ran during review. These exact bytes may now
 single admitted diagnostic.
 
 Git acceptance is paused at this new stop. The model campaign remains closed and unaffected.
+
+## Completed Git-fatal diagnostic and cwd RCA
+
+Source commit `69f3284` sealed the independently reviewed diagnostic. Its single actual Omen execution completed
+with schema `runaai-m1-omen-git-fatal-diagnostic/v1` and stopped without a successor. It observed exactly one
+`status`, exit 128, `failureKind:"working-directory"`, 67 stderr bytes and the same retained SHA-256
+`be29fcd5bc1ca2b48bf12070ba2149e0e33c02730419a50a5cfbeae997c6a5d2`. Repository bytes were unchanged; the
+MXC wrapper, both typed witnesses and native guard were terminal; the owned fixture was removed. The record
+reports no private value, production change or model call.
+
+This conclusively resolves the previous unknown only to the fixed `working-directory` family. The record does
+not expose which private path, which of the three bounded messages, or whether the outer MXC cwd, contained
+process cwd or a later Git cwd transition failed. The application currently sets both `config.process.cwd` and
+the outer MXC executor working directory to the selected root. That dual selected-root coupling is the bounded
+leading, testable adapter cause—not yet a proven mechanism. The repository is already explicitly present in
+`readonlyPaths`, so adding the same path again is not a correction; the installed SDK also states that cwd itself
+does not grant filesystem access. The correction below tests removal of that unnecessary coupling while keeping
+repository authority explicit. A completed corrected status is required to confirm the hypothesis. The result is
+not a Git-content, model, browser or production failure.
+
+### Frozen cwd-decoupling correction
+
+- Keep the selected repository and pinned Git installation as the only read-only filesystem grants. Keep zero
+  writable paths, omitted child environment, direct pinned `git.exe`, deny-all network and the reviewed UI/
+  repository witnesses unchanged.
+- Set both the contained `config.process.cwd` and the outer MXC executor cwd to the pinned Git installation root,
+  which is already an admitted read-only runtime path. Do not add a user-profile, temporary-parent, drive-root or
+  writable cwd grant.
+- Bind repository semantics explicitly in the fixed Git argv before every command with exactly
+  `--git-dir=<selected-root>\\.git` and `--work-tree=<selected-root>`, followed by the existing fixed `-c`
+  closures including `safe.directory=<selected-root>`. Do not use `-C`, ambient discovery or a shell. Native root/
+  `.git` identity, executable-extension rejection and command/policy digests remain mandatory before spawn.
+- Apply the same runtime cwd to the timeout and network-proof children; their repository target remains explicit.
+  Remote/network tests remain unstarted during the affected status confirmation.
+- Before normalization, require `config.process.cwd` to equal the resolved pinned Git installation root. Normalize
+  that field as `<GIT_INSTALL_ROOT>` rather than `<SELECTED_ROOT>`, update the policy-template release pin, and
+  reverify it before fixture creation and before every spawn. Require the actual outer MXC cwd to equal the same
+  pinned root and bind that role into the proof manifest/pre-spawn assertions so a regression to selected-root or
+  another cwd cannot pass the old digest.
+- Add a deterministic disposable-repository equivalence test that invokes and parses `status`, `log`, `diffstat`,
+  `branches` and `show` from the decoupled runtime cwd, compares their structured results with the existing
+  selected repository semantics, and proves repository bytes unchanged. Also source-gate the timeout `hash-object`
+  and network `ls-remote` children to the same explicit `--git-dir`/`--work-tree` binding and both inner/outer
+  pinned-root cwd values. Prove exact argv order, selected-root read policy, no `-C`/ambient discovery, updated
+  policy pin and all prior lifecycle/privacy regressions. Obtain fresh independent exact-byte GO and a source
+  commit before any actual execution.
+- After those gates, run exactly one corrected disposable single-status confirmation using the existing diagnostic
+  contract. Stop on any error or fatal category. Only a completed `status-succeeded` record may admit a fresh
+  independently documented full Git proof; it does not itself complete Git acceptance.
+
+No cwd correction has been implemented or executed. Git acceptance remains paused at this design-review gate.
+
+The first cwd-design review returned NO-GO with P0=0/P1=3 because the mechanism was stated more certainly than
+the category evidence supports, cwd normalization would have hidden the security-relevant change from the
+release pin, and the new explicit repository prefix lacked deterministic semantic coverage for every later verb
+and child. The narrowed attribution, `<GIT_INSTALL_ROOT>` policy pin/pre-spawn outer-cwd assertion, five-verb
+equivalence proof and timeout/network source gates above close those design omissions. No implementation or
+actual operation has run; fresh design review remains mandatory.
+
+Fresh corrected-design review returned GO with P0=0/P1=0, independently confirming the narrowed attribution,
+visible `<GIT_INSTALL_ROOT>` pin, explicit inner/outer cwd assertions, five-verb equivalence and timeout/network
+coverage. Roadmap checks pass 15/15 and the diff check is clean. No implementation or actual operation ran.
+These exact design bytes may now be sealed before implementation.

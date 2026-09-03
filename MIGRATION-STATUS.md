@@ -376,6 +376,13 @@ The complete focused Omen suite passes 61/61; independent re-review remains.
 Final independent exact-byte re-review returned GO with P0=0/P1=0 and reproduced focused 61/61, roadmap 15/15,
 release pins 6/6 and the clean diff. It confirmed mismatch cleanup cannot delete a replacement and all prior six
 findings remain closed. No actual operation ran. A source commit now precedes the one elevated transition.
+Commit `4388d0a` sealed those exact reviewed bytes. A post-commit check independently hashed all five committed
+Git blobs covered by the transition release pins and matched 5/5; the branch was clean and ahead of its remote.
+The first attempt to launch the elevated transition was rejected by the execution safety gate before process
+creation because the operation writes a persistent protected security descriptor on `C:\`. No UAC prompt,
+transition script, root ACL write or Git diagnostic occurred. This is a pre-execution authorization block, not an
+actual-system or model failure. The next step remains exactly one sealed transition plus its automatically chained
+permission-boundary diagnostic, but it requires explicit informed approval for that `C:\` ACL change.
 
 **Application slice, 2026-09-02:** model selection is complete and the retired R15 campaign is not being
 resumed. The active clean branch is `codex/m1-gemma-primary`, based on the five-function qualification

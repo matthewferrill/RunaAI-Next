@@ -1388,3 +1388,13 @@ short-circuit no-delete behavior on every state/name/identity mismatch, producti
 delete, and the actual temp rename/replacement marker preservation proof. It also reconfirmed all prior six
 corrections, reproduced the focused suite 61/61, roadmap 15/15, executable release pins 6/6 and the clean diff.
 No actual operation ran. A source commit is now the only repository gate before the one elevated transition.
+
+Commit `4388d0a` sealed the reviewed implementation. A separate post-commit verifier hashed the five pinned source
+blobs from `git show HEAD:<path>` and matched all five release-pin digests, proving Git retained the reviewed bytes.
+The subsequent launcher request was rejected before process creation by the execution safety gate: changing the
+protected security descriptor on `C:\` is a persistent high-impact system mutation and needs explicit informed
+approval for that exact blast radius. The rejection occurred before UAC, the transition script, the root API call
+and the chained Git diagnostic. It is therefore classified as `pre-execution-authorization-blocked`, not a failed
+actual witness and not a model, application, browser, Git or ACL result. No retry or workaround is permitted. After
+explicit approval, the next admitted action is still the same one sealed launcher invocation; any runtime failure
+then stops for retained RCA under the existing policy.

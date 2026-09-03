@@ -317,7 +317,11 @@ That adversarial proof now passes: mismatch was detected, the replacement marker
 production cleanup helper, and final harness cleanup succeeded. The complete focused Omen suite passes 61/61;
 fresh re-review remains before commit.
 Final independent exact-byte re-review returned GO with P0=0/P1=0 and reproduced focused 61/61, roadmap 15/15,
-pins 6/6 and the clean diff. A source commit is now the remaining gate before the one elevated transition.
+pins 6/6 and the clean diff. Commit `4388d0a` sealed those bytes, and a post-commit Git-blob check matched all five
+transition source pins. The first launcher invocation was blocked before process creation because its persistent
+protected `C:\` security-descriptor write requires explicit informed approval. No UAC, root ACL mutation or Git
+diagnostic occurred; this is an authorization checkpoint, not an acceptance failure. Exactly one sealed elevated
+transition and its automatically chained permission-boundary diagnostic remain next.
 
 Workspace baseline checkpoint: see
 `gate7f/function-first/M1-S2-WORKSPACE-BASELINE-IMPLEMENTATION-RESULTS-2026-09-02.md` for the accepted

@@ -1,6 +1,6 @@
 import { createHash, randomUUID } from "node:crypto";
 import { readFile } from "node:fs/promises";
-import { isAbsolute, resolve } from "node:path";
+import { isAbsolute, join, resolve } from "node:path";
 import { TextDecoder } from "node:util";
 import { createConfigFromPolicy, getPlatformSupport, spawnSandboxFromConfig } from "@microsoft/mxc-sdk";
 import { canonicalJson, LOCAL_CONTEXT_SCHEMAS } from "../local-context-contract.mjs";
@@ -36,19 +36,20 @@ function supportFor(sdk) {
 function fixedArguments(operation, input = {}, selectedRoot) {
   if (!isAbsolute(selectedRoot ?? "")) throw coded("omen-git-operation-invalid");
   const shared = ["--no-optional-locks", "--no-replace-objects", "--no-lazy-fetch", "--no-pager",
+    `--git-dir=${join(resolve(selectedRoot), ".git")}`, `--work-tree=${resolve(selectedRoot)}`,
     "-c", "core.hooksPath=NUL", "-c", "credential.helper=", "-c", "credential.interactive=false",
     "-c", "core.askPass=", "-c", "core.fsmonitor=false", "-c", "diff.external=",
-    "-c", "core.attributesFile=NUL", "-c", "core.excludesFile=NUL", "-c", "interactive.diffFilter=",
+    "-c", "core.attributesFile=NUL", "-c", "core.excludesFile=", "-c", "interactive.diffFilter=",
     "-c", "protocol.allow=never", "-c", "maintenance.auto=false", "-c", "gc.auto=0",
     "-c", "fetch.writeCommitGraph=false", "-c", "core.untrackedCache=false",
-    "-c", "core.preloadIndex=false", "-c", `safe.directory=${resolve(selectedRoot)}`];
+    "-c", "core.preloadIndex=false", "-c", "core.safecrlf=false", "-c", `safe.directory=${resolve(selectedRoot)}`];
   const specific = {
     status: ["status", "--porcelain=v2", "-z", "--branch", "--untracked-files=normal", "--ignore-submodules=all"],
     log: ["log", "-z", "--format=%H%x00%ct%x00%s", "-n", "40"],
     diffstat: ["diff", "--numstat", "-z", "--no-ext-diff", "--no-textconv", "--ignore-submodules=all", "--", "."],
     branches: ["for-each-ref", "--count=500", "--format=%(refname:short)%00%(objectname)%00", "refs/heads/"],
     show: ["show", "--no-ext-diff", "--no-textconv", "--ignore-submodules=all",
-      "--format=%H%x00%ct%x00%s%x00", "--numstat", "-z", input.commit],
+      "--format=%H%x00%ct%x00%s", "--numstat", "-z", input.commit],
   }[operation];
   if (!specific || (operation === "show" && !COMMIT.test(input.commit ?? ""))) throw coded("omen-git-operation-invalid");
   return [...shared, ...specific];
@@ -228,26 +229,47 @@ function validateNumstat(fields, start = 0) {
   }
 }
 
-function policyTemplateDigest(config) {
+function policyTemplateDigest(config, expectedSelectedRoot, expectedGitInstallRoot) {
+  const selectedRoot = resolve(expectedSelectedRoot ?? ""), gitInstallRoot = resolve(expectedGitInstallRoot ?? "");
+  const readonlyPaths = config?.filesystem?.readonlyPaths;
+  if (!isAbsolute(expectedSelectedRoot ?? "") || !isAbsolute(expectedGitInstallRoot ?? "")
+      || selectedRoot === gitInstallRoot || !isAbsolute(config?.process?.cwd ?? "")
+      || config.process.cwd !== gitInstallRoot
+      || !Array.isArray(readonlyPaths) || readonlyPaths.length !== 2
+      || readonlyPaths[0] !== selectedRoot || readonlyPaths[1] !== gitInstallRoot
+      || new Set(readonlyPaths.map(value => resolve(value))).size !== 2
+      || !Array.isArray(config?.filesystem?.readwritePaths) || config.filesystem.readwritePaths.length !== 0
+      || !Array.isArray(config?.filesystem?.deniedPaths) || config.filesystem.deniedPaths.length !== 0) {
+    throw coded("omen-git-policy-cwd-invalid");
+  }
   const normalized = JSON.parse(JSON.stringify(config));
   normalized.containerId = "<CONTAINER_ID>";
   normalized.process.commandLine = "<COMMAND_LINE>";
-  normalized.process.cwd = "<SELECTED_ROOT>";
+  normalized.process.cwd = "<GIT_INSTALL_ROOT>";
   normalized.filesystem.readonlyPaths = ["<SELECTED_ROOT>", "<GIT_INSTALL_ROOT>"];
   return createHash("sha256").update(canonicalJson(normalized)).digest("hex");
 }
 
 function createContainedGitConfig(sdk, { root, gitInstallRoot, gitPath, args, containerId }) {
+  const selectedRoot = resolve(root), runtimeRoot = resolve(gitInstallRoot);
   const config = sdk.createConfigFromPolicy({ version: "0.8.0-alpha",
-    filesystem: { readonlyPaths: [root, gitInstallRoot], readwritePaths: [], deniedPaths: [],
+    filesystem: { readonlyPaths: [selectedRoot, runtimeRoot], readwritePaths: [], deniedPaths: [],
       clearPolicyOnExit: true },
     network: { egress: { default: "deny" }, ingress: { default: "deny", hostLoopback: "deny" } },
     ui: { allowWindows: true, clipboard: "none", allowInputInjection: false }, timeoutMs: TIMEOUT_MS,
   }, "process", containerId);
   config.fallback = { allowDaclMutation: true };
   config.process.commandLine = [quote(gitPath), ...args.map(quote)].join(" ");
-  config.process.cwd = root;
+  config.process.cwd = runtimeRoot;
   return config;
+}
+
+function spawnSandboxWithPinnedCwd(spawn, config, options, expectedGitInstallRoot,
+  invalidCode = "omen-git-runtime-cwd-invalid") {
+  const runtimeRoot = resolve(expectedGitInstallRoot ?? "");
+  if (typeof spawn !== "function" || !isAbsolute(expectedGitInstallRoot ?? "")
+      || config?.process?.cwd !== runtimeRoot) throw coded(invalidCode);
+  return spawn(config, options, runtimeRoot);
 }
 
 function structuredResult(operation, stdoutBytes) {
@@ -395,8 +417,9 @@ export class OmenGitObserver {
       repositoryWitnessSha256: release.repositoryWitnessSha256,
       uiWitnessPath: this.uiWitnessPath, uiWitnessSha256: release.uiWitnessSha256,
       rootId, network: "deny-all",
-      filesystem: "read-only-selected-root-and-git-runtime", stdin: "closed",
-      customEnvironment: "omitted", executableExtensionPoints: "closed", timeoutMs: TIMEOUT_MS,
+       filesystem: "read-only-selected-root-and-git-runtime", stdin: "closed",
+       runtimeWorkingDirectory: "pinned-git-install-root",
+       customEnvironment: "omitted", executableExtensionPoints: "closed", timeoutMs: TIMEOUT_MS,
       ui: "windows-allowed-container-isolated-no-clipboard-input-system-control-settings-ime" };
     return Object.freeze({ ...manifest,
       releaseDigest: createHash("sha256").update(canonicalJson(manifest)).digest("hex"), localRoot: root,
@@ -483,7 +506,8 @@ export class OmenGitObserver {
           gitInstallRoot: this.gitInstallRoot, gitPath: this.gitPath, args,
           containerId: `runa-omen-git-${randomUUID()}` });
         const exactConfig = JSON.parse(JSON.stringify(config));
-        const actualPolicyTemplateSha256 = policyTemplateDigest(exactConfig);
+        const actualPolicyTemplateSha256 = policyTemplateDigest(exactConfig, manifest.localRoot.path,
+          this.gitInstallRoot);
         if (actualPolicyTemplateSha256 !== this.expectedPolicyTemplateSha256) {
           throw coded("omen-git-policy-template-digest-mismatch");
         }
@@ -500,8 +524,8 @@ export class OmenGitObserver {
         await bounded(uiWitness.ready, 10_000, "omen-git-ui-witness-ready-timeout");
         await Promise.resolve();
         if (witnessFailure) throw witnessFailure;
-        const child = this.sdk.spawnSandboxFromConfig(config,
-          { usePty: false, executablePath: this.mxcExecutorPath }, manifest.localRoot.path);
+        const child = spawnSandboxWithPinnedCwd(this.sdk.spawnSandboxFromConfig, config,
+          { usePty: false, executablePath: this.mxcExecutorPath }, this.gitInstallRoot);
         child.stdin?.on("error", () => {}); child.stdin?.end();
         let stdout = Buffer.alloc(0), stderr = Buffer.alloc(0), stopReason = null, stopChild;
         let actuallyClosed = false, resolveClose;
@@ -618,4 +642,4 @@ export class OmenGitObserver {
 }
 
 export { createContainedGitConfig, fixedArguments, inspectRepositoryConfig, policyTemplateDigest,
-  sanitizeRemoteUrl, structuredResult };
+  sanitizeRemoteUrl, spawnSandboxWithPinnedCwd, structuredResult };

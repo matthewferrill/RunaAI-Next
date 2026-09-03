@@ -16,7 +16,7 @@
   "mxcVersion": "0.8.0",
   "mxcExecutorRelativePath": "node_modules/@microsoft/mxc-sdk/bin/x64/wxc-exec.exe",
   "mxcExecutorSha256": "6049c64723af1173c3739dc6cd6b2f33f6c021bb2832c4216233cba7f71aee9a",
-  "policyTemplateSha256": "aadd3371cf626bf7bf09a6c019a6c52efaaf08df4054e9457966c638491ecf40",
+  "policyTemplateSha256": "8682225c5cfaf71445f2e3e7969fef580ed7130a55a5ea63b2e2c4ada2c85e9b",
   "processMonitorRelativePath": "gate7f/function-first/omen-local/Observe-RunaProcessTree.ps1",
   "processMonitorSha256": "4ba2417a07cd79dfeace117ef0392d62ab13d47068760e9dfa4b26b2e0ade4c5",
   "repositoryWitnessRelativePath": "gate7f/function-first/omen-local/Watch-RunaRepository.ps1",

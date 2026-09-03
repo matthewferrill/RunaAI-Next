@@ -83,6 +83,23 @@ deny-all networking; and replaces the untyped witness with a pinned one-use type
 stdin-only root/operation binding. Acceptance remains paused for corrected design review, implementation,
 focused preflight, independent exact-byte review and source commit before exactly one further actual proof.
 
+Subsequent diagnostic/correction chronology is retained in
+`M1-S2B-ACTUAL-GIT-WITNESS-FAILURE-RCA-2026-09-03.md`. The latest sealed single-status diagnostic at `69f3284`
+completed with one exit-128 `working-directory` category, unchanged repository, terminal wrapper/witness/guard
+resources, removed fixture and no successor, network, browser, model or production action. It proves only that
+bounded fatal family, not the private message/path or exact failing cwd transition. The reviewed correction
+design at `e3434f9` decouples both runtime cwd values from the selected repository and binds the repository by
+explicit Git arguments. Its implementation remains unexecuted. Deterministic native equivalence found and
+corrected the superseded `core.excludesFile=NUL`, duplicate `show` terminator and ambient safe-CRLF warning
+before an actual retry. The first implementation review stopped at P0=0/P1=3; those code/test findings are
+closed. Re-review then stopped at P0=0/P1=1 because this normative contract still contained the historical
+argv/cwd values. The amendment below supersedes those values. Focused checks pass 35/35, roadmap checks pass
+15/15, changed JavaScript parses and the diff check is clean. Fresh exact-byte review and a source commit remain
+mandatory before the sole permitted corrected single-status diagnostic; acceptance remains paused.
+Fresh exact-byte re-review returned GO with P0=0/P1=0 and independently reproduced 35/35 focused checks,
+15/15 roadmap checks and a clean diff check. No actual operation ran. A source commit is now the sole remaining
+gate before that single-status diagnostic.
+
 ## Slice selection record
 
 - Selection date and source commit: 2026-09-02 / `4851818`.
@@ -220,13 +237,21 @@ credential-free host/repository display before leaving Omen.
 `.git` must be a real in-root directory; `.git` indirection files, linked worktrees, submodule traversal,
 object alternates, replace objects, promisor/partial-clone lazy fetch and repository config includes are
 refused. Repository config is parsed first and refused if it names an executable
-helper/filter/fsmonitor/external diff, include or outside-root object store. The pinned Git command prefix
-is exactly `--no-optional-locks --no-replace-objects --no-lazy-fetch --no-pager`, followed by literal
-`-c` pairs for `core.hooksPath=NUL`, `credential.helper=`, `credential.interactive=false`, `core.askPass=`,
-`core.fsmonitor=false`, `diff.external=`, `core.attributesFile=NUL`, `core.excludesFile=NUL`,
+helper/filter/fsmonitor/external diff, include or outside-root object store. After the sealed
+`working-directory` diagnostic, the original selected-root-cwd prefix and `core.excludesFile=NUL` value are
+historical and superseded. The amended pinned Git command prefix is exactly
+`--no-optional-locks --no-replace-objects --no-lazy-fetch --no-pager`, then
+`--git-dir=<selected-root>\.git --work-tree=<selected-root>`, then literal `-c` pairs for
+`core.hooksPath=NUL`, `credential.helper=`, `credential.interactive=false`, `core.askPass=`,
+`core.fsmonitor=false`, `diff.external=`, `core.attributesFile=NUL`, `core.excludesFile=`,
 `interactive.diffFilter=`, `protocol.allow=never`, `maintenance.auto=false`, `gc.auto=0`,
-`fetch.writeCommitGraph=false`, `core.untrackedCache=false`, `core.preloadIndex=false` and the exact
-`safe.directory=<selected-root>` value. Diff/show additionally require `--no-ext-diff --no-textconv`.
+`fetch.writeCommitGraph=false`, `core.untrackedCache=false`, `core.preloadIndex=false`,
+`core.safecrlf=false` and the exact `safe.directory=<selected-root>` value. No `-C`, ambient repository
+discovery or shell is permitted. The empty excludes value disables an ambient global excludes path; the
+safe-CRLF value suppresses warning publication without changing configured autocrlf conversion semantics.
+Diff/show additionally require `--no-ext-diff --no-textconv`. Show uses exactly
+`--format=%H%x00%ct%x00%s --numstat -z`; it has no trailing `%x00` because `-z` supplies the sole record
+terminator.
 System/global config may be parsed by Git because MXC cannot accept the environment variables that would
 replace it. The exact Git-for-Windows system config and system attributes bytes are therefore release-pinned;
 global attributes are disabled; and any repository `.gitattributes` or `.git/info/attributes` file is refused
@@ -240,13 +265,21 @@ formats; invalid UTF-8, unexpected fields, control characters, excessive paths o
 closed rather than reaching the UI.
 
 The new `runa-omen-git-readonly/v1` containment manifest pins MXC `0.8.0`, the generated policy bytes, the
-absolute `git.exe` path/hash, release runtime files and the exact read-only selected-root grant. Its
+absolute `git.exe` path/hash, release runtime files and exactly two canonical read-only grants in frozen order:
+the selected root followed by the pinned Git installation root. It has no read-write or explicit denied path.
+Before normalization, missing, extra, reordered, duplicate or aliased read-only entries and any nonempty
+read-write/denied list fail closed. Its
 AppContainer declares neither `internetClient` nor `privateNetworkClientServer`, receives no writable
 path, inherited handle, stdin, custom/inherited environment or credential. `process.env` is omitted
 because actual Omen MXC 0.8.0 rejects every non-empty custom environment before `CreateProcessW`; the
 fixed Git command-line controls above replace the required safety effects without adding a launcher or
-shell. The generated policy is normalized only for the per-operation container id, selected-root path and
-fixed command line, then compared with an independently committed policy-template SHA-256 before spawn.
+shell. Both contained `config.process.cwd` and the outer MXC executor cwd are exactly the resolved pinned Git
+installation root, never the selected repository, a profile/temp/drive root or a writable path. Repository
+semantics come only from the explicit `--git-dir`/`--work-tree` arguments above. The generated policy is
+normalized only for the per-operation container id, fixed command line, exact selected-root/Git-runtime path
+roles and the already-validated `<GIT_INSTALL_ROOT>` cwd, then compared with an independently committed
+policy-template SHA-256 before spawn. A captured spawn boundary revalidates the inner cwd and supplies the same
+pinned outer cwd for observer, timeout and network children.
 The amended policy sets `ui.allowWindows:true`, which permits Win32 UI/window creation; it does not merely
 permit invisible loader initialization. The generated ProcessContainer must still read back UI isolation
 `container`, desktop-system control false, system settings `none`, IME false, clipboard `none` and input

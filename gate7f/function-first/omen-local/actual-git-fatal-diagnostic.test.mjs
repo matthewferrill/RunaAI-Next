@@ -7,7 +7,8 @@ test("fatal diagnostic shares pre-status fixture and branches before every succe
   const proof = await readFile(resolve(import.meta.dirname, "actual-git-proof.mjs"), "utf8");
   const entry = await readFile(resolve(import.meta.dirname, "actual-git-fatal-diagnostic.mjs"), "utf8");
   assert.ok(proof.indexOf("await loadOmenReleasePins()") < proof.indexOf("await mkdtemp("));
-  assert.ok(proof.indexOf("policyTemplateDigest(policyProbe)") < proof.indexOf("await mkdtemp("));
+  assert.ok(proof.indexOf("policyTemplateDigest(policyProbe, policyProbeRoot, pins.gitInstallRoot)")
+    < proof.indexOf("await mkdtemp("));
   const start = proof.indexOf("if (fatalDiagnostic) {");
   const stop = proof.indexOf("} else {\n    const status = await unchanged", start);
   assert.ok(start > 0 && stop > start);

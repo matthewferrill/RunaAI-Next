@@ -247,6 +247,31 @@ P0=0/P1=3 and prompted these corrections. No correction or retry has run. Accept
 Fresh corrected-design review returned GO with P0=0/P1=0 and confirmed all three omissions closed. Roadmap
 checks pass 15/15 and the diff check is clean. A doc-only design commit now precedes implementation; no actual
 retry, model, browser, network or production action has run.
+Commit `e3434f9` sealed that reviewed design. The cwd decoupling, explicit `--git-dir`/`--work-tree` binding,
+`<GIT_INSTALL_ROOT>` policy pin, pre-spawn inner/outer cwd checks and timeout/network source gates are now
+implemented but unexecuted. A native disposable-repository equivalence gate found and corrected two additional
+preflight command defects before any actual retry: Windows Git rejects `core.excludesFile=NUL`, so the closed
+override is now empty, and `show` combined a trailing `%x00` with `-z`, producing a duplicate empty field. The
+five public verbs now parse identically from selected-root and decoupled cwd with an unchanged repository tree.
+Omen checks pass 35/35 and roadmap checks pass 15/15. Independent exact-byte implementation review and a source
+commit still precede exactly one corrected single-status diagnostic. Acceptance and models remain paused.
+The first implementation review stopped at P0=0/P1=3: policy normalization could mask selected-root authority
+drift, the native gate did not authenticate its Git inputs/prove zero stderr and the empty excludes override, and
+outer-cwd source regexes could false-pass. The correction now validates exact canonical read-only/write/deny
+authority before normalization, hashes Git/system config/system attributes before fixture creation, proves a
+controlled ambient ignore is defeated by `core.excludesFile=`, requires zero stderr, and routes all three child
+paths through a captured pinned-cwd spawn boundary with exact call-site checks. The zero-stderr gate additionally
+found an ambient `diffstat` line-ending warning; `core.safecrlf=false` suppresses that warning without changing
+autocrlf conversion semantics. Omen checks again pass 35/35, roadmap checks pass 15/15, all changed JavaScript
+parses and the diff check is clean. No actual operation ran; fresh re-review is the remaining pre-commit gate.
+The second implementation review confirmed the code findings closed but stopped at P0=0/P1=1 because the
+normative M1-S2B criteria still contradicted the amended argv/cwd contract. The criteria now mark the old values
+historical and freeze explicit repository binding, pinned inner/outer cwd, exact path authority, empty excludes,
+safe-CRLF warning closure and the corrected show terminator. No actual operation ran; deterministic checks and
+fresh exact-byte review must repeat before commit.
+Fresh exact-byte re-review returned GO with P0=0/P1=0 and reproduced focused checks 35/35, roadmap checks 15/15
+and a clean diff check. No actual operation ran. A source commit is now the remaining gate before the one
+single-status diagnostic.
 
 **Application slice, 2026-09-02:** model selection is complete and the retired R15 campaign is not being
 resumed. The active clean branch is `codex/m1-gemma-primary`, based on the five-function qualification

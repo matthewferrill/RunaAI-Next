@@ -32,7 +32,8 @@ test("Git witness diagnostic is aggregate-only and limited to one status operati
   assert.match(runner, /publicLifecycleAggregate\(error\.lifecycleAggregate\)/u);
   assert.match(runner, /diagnostic-watcher-terminal-missed/u);
   assert.doesNotMatch(runner, /processMonitor|process-audit|Observe-RunaProcessTree/u);
-  assert.ok(runner.indexOf("policyTemplateDigest(templateConfig)") < runner.indexOf("await mkdtemp("));
+  assert.ok(runner.indexOf("policyTemplateDigest(templateConfig, templateRoot, pins.gitInstallRoot)")
+    < runner.indexOf("await mkdtemp("));
   assert.match(classifier, /NotifyFilters\]::FileName/u);
   assert.match(classifier, /NotifyFilters\]::LastWrite/u);
   assert.match(classifier, /NotifyFilters\]::Attributes/u);

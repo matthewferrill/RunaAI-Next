@@ -2,14 +2,14 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { EventEmitter } from "node:events";
 import { createHash } from "node:crypto";
-import { mkdtemp, rm, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { createConfigFromPolicy } from "@microsoft/mxc-sdk";
 import { classifyGitFatal, fixedArguments, inspectRepositoryConfig, OmenGitObserver, sanitizeRemoteUrl,
   structuredResult } from "./git-observer.mjs";
 
-const POLICY_TEMPLATE_SHA256 = "aadd3371cf626bf7bf09a6c019a6c52efaaf08df4054e9457966c638491ecf40";
+const POLICY_TEMPLATE_SHA256 = "8682225c5cfaf71445f2e3e7969fef580ed7130a55a5ea63b2e2c4ada2c85e9b";
 
 function deferred() { let resolve; const promise = new Promise(done => { resolve = done; }); return { promise, resolve }; }
 function witnessFactories({ repositoryNameEvents = () => 0 } = {}) {
@@ -65,23 +65,25 @@ async function lifecycleHarness(t, { repositoryFactory, uiFactory, createPolicy 
   spawnFactory = () => new FakeChild("# branch.head main\0"), terminalGraceMs = 20 } = {}) {
   const directory = await mkdtemp(join(tmpdir(), "runa-git-lifecycle-unit-"));
   t.after(() => rm(directory, { recursive: true, force: true }));
-  const gitPath = join(directory, "git.exe"), mxcPath = join(directory, "wxc-exec.exe");
-  const repositoryWitnessPath = join(directory, "repository.ps1"), uiWitnessPath = join(directory, "ui.ps1");
+  const selectedRoot = join(directory, "repository"), runtimeRoot = join(directory, "git-runtime");
+  await Promise.all([mkdir(selectedRoot), mkdir(runtimeRoot)]);
+  const gitPath = join(runtimeRoot, "git.exe"), mxcPath = join(runtimeRoot, "wxc-exec.exe");
+  const repositoryWitnessPath = join(runtimeRoot, "repository.ps1"), uiWitnessPath = join(runtimeRoot, "ui.ps1");
   await Promise.all([writeFile(gitPath, "git"), writeFile(mxcPath, "mxc"),
     writeFile(repositoryWitnessPath, "repository"), writeFile(uiWitnessPath, "ui")]);
   const digest = value => createHash("sha256").update(value).digest("hex");
   const gitSha = digest("git"), mxcSha = digest("mxc"), repositorySha = digest("repository"), uiSha = digest("ui");
-  const rootStore = { localRootForGit: async () => ({ rootId: "root-1", path: directory,
-    gitFinalPath: join(directory, ".git"), volumeId: "00000001", fileId: "0000000000000001" }) };
+  const rootStore = { localRootForGit: async () => ({ rootId: "root-1", path: selectedRoot,
+    gitFinalPath: join(selectedRoot, ".git"), volumeId: "00000001", fileId: "0000000000000001" }) };
   const nativeBridge = { verifyRelease: async () => ({ scriptSha256: "a".repeat(64),
     powershellPath: gitPath, powershellSha256: gitSha }),
-  holdGit: async () => ({ rootFinalPath: directory, gitFinalPath: join(directory, ".git"), release: async () => {} }),
+  holdGit: async () => ({ rootFinalPath: selectedRoot, gitFinalPath: join(selectedRoot, ".git"), release: async () => {} }),
   safeRead: async (_root, path) => {
     if (path === ".git\\config") return Buffer.from("[core]\nrepositoryformatversion = 0");
     throw Object.assign(new Error("missing"), { code: "native-open-denied" });
   } };
   return new OmenGitObserver({ rootStore, nativeBridge, gitPath, expectedGitSha256: gitSha,
-    gitInstallRoot: directory, mxcExecutorPath: mxcPath, expectedMxcSha256: mxcSha,
+    gitInstallRoot: runtimeRoot, mxcExecutorPath: mxcPath, expectedMxcSha256: mxcSha,
     expectedNativeScriptSha256: "a".repeat(64), expectedPowerShellSha256: gitSha,
     gitSystemConfigPath: repositoryWitnessPath, expectedGitSystemConfigSha256: repositorySha,
     gitSystemAttributesPath: uiWitnessPath, expectedGitSystemAttributesSha256: uiSha,
@@ -184,8 +186,11 @@ test("fixed Git argv exactly closes environment-replacement and executable exten
   const args = fixedArguments("diffstat", {}, root);
   assert.deepEqual(args.slice(0, 4),
     ["--no-optional-locks", "--no-replace-objects", "--no-lazy-fetch", "--no-pager"]);
+  assert.deepEqual(args.slice(4, 6), [`--git-dir=${join(resolve(root), ".git")}`,
+    `--work-tree=${resolve(root)}`]);
+  assert.equal(args.includes("-C"), false);
   const pairs = new Map();
-  for (let index = 4; index < args.indexOf("diff"); index += 2) {
+  for (let index = 6; index < args.indexOf("diff"); index += 2) {
     assert.equal(args[index], "-c");
     const [key, ...value] = args[index + 1].split("=");
     pairs.set(key, value.join("="));
@@ -193,10 +198,10 @@ test("fixed Git argv exactly closes environment-replacement and executable exten
   assert.deepEqual(Object.fromEntries(pairs), {
     "core.hooksPath": "NUL", "credential.helper": "", "credential.interactive": "false",
     "core.askPass": "", "core.fsmonitor": "false", "diff.external": "",
-    "core.attributesFile": "NUL", "core.excludesFile": "NUL", "interactive.diffFilter": "",
+    "core.attributesFile": "NUL", "core.excludesFile": "", "interactive.diffFilter": "",
     "protocol.allow": "never", "maintenance.auto": "false", "gc.auto": "0",
     "fetch.writeCommitGraph": "false", "core.untrackedCache": "false",
-    "core.preloadIndex": "false", "safe.directory": resolve(root),
+    "core.preloadIndex": "false", "core.safecrlf": "false", "safe.directory": resolve(root),
   });
   assert.deepEqual(args.slice(args.indexOf("diff")),
     ["diff", "--numstat", "-z", "--no-ext-diff", "--no-textconv", "--ignore-submodules=all", "--", "."]);
@@ -205,12 +210,14 @@ test("fixed Git argv exactly closes environment-replacement and executable exten
 test("observer authors a fixed deny-all MXC request and parses NUL output", async t => {
   const directory = await mkdtemp(join(tmpdir(), "runa-git-observer-unit-"));
   t.after(() => rm(directory, { recursive: true, force: true }));
-  const gitPath = join(directory, "git.exe"); await writeFile(gitPath, "synthetic pinned executable");
-  const mxcPath = join(directory, "wxc-exec.exe"); await writeFile(mxcPath, "synthetic mxc executable");
+  const selectedRoot = join(directory, "repository"), runtimeRoot = join(directory, "git-runtime");
+  await Promise.all([mkdir(selectedRoot), mkdir(runtimeRoot)]);
+  const gitPath = join(runtimeRoot, "git.exe"); await writeFile(gitPath, "synthetic pinned executable");
+  const mxcPath = join(runtimeRoot, "wxc-exec.exe"); await writeFile(mxcPath, "synthetic mxc executable");
   const expectedGitSha256 = createHash("sha256").update("synthetic pinned executable").digest("hex");
   const expectedMxcSha256 = createHash("sha256").update("synthetic mxc executable").digest("hex");
   const expectedNativeScriptSha256 = "a".repeat(64);
-  const systemConfig = join(directory, "system-gitconfig"), systemAttributes = join(directory, "system-gitattributes");
+  const systemConfig = join(runtimeRoot, "system-gitconfig"), systemAttributes = join(runtimeRoot, "system-gitattributes");
   await writeFile(systemConfig, "system config"); await writeFile(systemAttributes, "system attributes");
   const systemConfigSha = createHash("sha256").update("system config").digest("hex");
   const systemAttributesSha = createHash("sha256").update("system attributes").digest("hex");
@@ -220,7 +227,9 @@ test("observer authors a fixed deny-all MXC request and parses NUL output", asyn
       isolationTier: "appcontainer-dacl", isolationWarnings: ["AppContainer + DACL tier selected: unit"] }),
     createConfigFromPolicy: (value, kind, id) => { policy = value;
       return generated = createConfigFromPolicy(value, kind, id); },
-    spawnSandboxFromConfig: value => { spawnCount += 1; assert.equal(value, generated);
+    spawnSandboxFromConfig: (value, _options, workingDirectory) => { spawnCount += 1;
+      assert.equal(value, generated); assert.equal(resolve(value.process.cwd), resolve(runtimeRoot));
+      assert.equal(resolve(workingDirectory), resolve(runtimeRoot));
       const child = new FakeChild("# branch.head main\0? notes.txt\0");
       if (mutateAfterChildClose) {
         mutateAfterChildClose = false;
@@ -231,19 +240,19 @@ test("observer authors a fixed deny-all MXC request and parses NUL output", asyn
       }
       return child; },
   };
-  const rootStore = { localRootForGit: async () => ({ rootId: "root-1", path: directory,
-    gitFinalPath: join(directory, ".git"), displayName: "fixture", volumeId: "00000001",
+  const rootStore = { localRootForGit: async () => ({ rootId: "root-1", path: selectedRoot,
+    gitFinalPath: join(selectedRoot, ".git"), displayName: "fixture", volumeId: "00000001",
     fileId: "0000000000000001", privateValuesIncluded: true }) };
   const nativeBridge = { verifyRelease: async () => ({ scriptSha256: expectedNativeScriptSha256,
     powershellPath: gitPath, powershellSha256: expectedGitSha256 }),
-  holdGit: async () => ({ rootFinalPath: directory, gitFinalPath: join(directory, ".git"), release: async () => {} }),
+  holdGit: async () => ({ rootFinalPath: selectedRoot, gitFinalPath: join(selectedRoot, ".git"), release: async () => {} }),
   safeRead: async (_root, path) => {
     if (path === ".git\\config") return Buffer.from("[core]\nrepositoryformatversion = 0\n"
       + "[remote \"origin\"]\nurl = https://person:secret@example.test/org/repo.git");
     throw Object.assign(new Error("missing"), { code: "native-open-denied" });
   } };
   const observer = new OmenGitObserver({ rootStore, nativeBridge, gitPath, expectedGitSha256,
-    gitInstallRoot: directory, mxcExecutorPath: mxcPath, expectedMxcSha256,
+    gitInstallRoot: runtimeRoot, mxcExecutorPath: mxcPath, expectedMxcSha256,
     expectedNativeScriptSha256, expectedPowerShellSha256: expectedGitSha256,
     gitSystemConfigPath: systemConfig, expectedGitSystemConfigSha256: systemConfigSha,
     gitSystemAttributesPath: systemAttributes, expectedGitSystemAttributesSha256: systemAttributesSha,
@@ -282,12 +291,14 @@ test("observer authors a fixed deny-all MXC request and parses NUL output", asyn
 test("Git output decoding rejects malformed UTF-8 instead of replacing bytes", async () => {
   const directory = await mkdtemp(join(tmpdir(), "runa-git-utf8-unit-"));
   try {
-    const gitPath = join(directory, "git.exe"); await writeFile(gitPath, "synthetic pinned executable");
-    const mxcPath = join(directory, "wxc-exec.exe"); await writeFile(mxcPath, "synthetic mxc executable");
+    const selectedRoot = join(directory, "repository"), runtimeRoot = join(directory, "git-runtime");
+    await Promise.all([mkdir(selectedRoot), mkdir(runtimeRoot)]);
+    const gitPath = join(runtimeRoot, "git.exe"); await writeFile(gitPath, "synthetic pinned executable");
+    const mxcPath = join(runtimeRoot, "wxc-exec.exe"); await writeFile(mxcPath, "synthetic mxc executable");
     const expectedGitSha256 = createHash("sha256").update("synthetic pinned executable").digest("hex");
     const expectedMxcSha256 = createHash("sha256").update("synthetic mxc executable").digest("hex");
     const expectedNativeScriptSha256 = "a".repeat(64);
-    const systemConfig = join(directory, "system-gitconfig"), systemAttributes = join(directory, "system-gitattributes");
+    const systemConfig = join(runtimeRoot, "system-gitconfig"), systemAttributes = join(runtimeRoot, "system-gitattributes");
     await writeFile(systemConfig, "system config"); await writeFile(systemAttributes, "system attributes");
     const systemConfigSha = createHash("sha256").update("system config").digest("hex");
     const systemAttributesSha = createHash("sha256").update("system attributes").digest("hex");
@@ -297,17 +308,17 @@ test("Git output decoding rejects malformed UTF-8 instead of replacing bytes", a
       createConfigFromPolicy,
       spawnSandboxFromConfig: () => new FakeChild(Buffer.from([0xc3, 0x28])),
     };
-    const rootStore = { localRootForGit: async () => ({ rootId: "root-1", path: directory,
-      gitFinalPath: join(directory, ".git") }) };
+    const rootStore = { localRootForGit: async () => ({ rootId: "root-1", path: selectedRoot,
+      gitFinalPath: join(selectedRoot, ".git") }) };
     const nativeBridge = { verifyRelease: async () => ({ scriptSha256: expectedNativeScriptSha256,
       powershellPath: gitPath, powershellSha256: expectedGitSha256 }),
-    holdGit: async () => ({ rootFinalPath: directory, gitFinalPath: join(directory, ".git"), release: async () => {} }),
+    holdGit: async () => ({ rootFinalPath: selectedRoot, gitFinalPath: join(selectedRoot, ".git"), release: async () => {} }),
     safeRead: async (_root, path) => {
       if (path === ".git\\config") return Buffer.from("[core]\nrepositoryformatversion = 0");
       throw Object.assign(new Error("missing"), { code: "native-open-denied" });
     } };
     const observer = new OmenGitObserver({ rootStore, nativeBridge, gitPath, expectedGitSha256,
-      gitInstallRoot: directory, mxcExecutorPath: mxcPath, expectedMxcSha256,
+      gitInstallRoot: runtimeRoot, mxcExecutorPath: mxcPath, expectedMxcSha256,
       expectedNativeScriptSha256, expectedPowerShellSha256: expectedGitSha256,
       gitSystemConfigPath: systemConfig, expectedGitSystemConfigSha256: systemConfigSha,
       gitSystemAttributesPath: systemAttributes, expectedGitSystemAttributesSha256: systemAttributesSha,
@@ -320,26 +331,28 @@ test("Git output decoding rejects malformed UTF-8 instead of replacing bytes", a
 test("output termination is bounded and raw stderr never crosses the diagnostic contract", async t => {
   const directory = await mkdtemp(join(tmpdir(), "runa-git-terminal-unit-"));
   t.after(() => rm(directory, { recursive: true, force: true }));
-  const gitPath = join(directory, "git.exe"), mxcPath = join(directory, "wxc-exec.exe");
+  const selectedRoot = join(directory, "repository"), runtimeRoot = join(directory, "git-runtime");
+  await Promise.all([mkdir(selectedRoot), mkdir(runtimeRoot)]);
+  const gitPath = join(runtimeRoot, "git.exe"), mxcPath = join(runtimeRoot, "wxc-exec.exe");
   await writeFile(gitPath, "synthetic pinned executable"); await writeFile(mxcPath, "synthetic mxc executable");
   const gitSha = createHash("sha256").update("synthetic pinned executable").digest("hex");
   const mxcSha = createHash("sha256").update("synthetic mxc executable").digest("hex");
   const nativeSha = "a".repeat(64);
-  const systemConfig = join(directory, "system-gitconfig"), systemAttributes = join(directory, "system-gitattributes");
+  const systemConfig = join(runtimeRoot, "system-gitconfig"), systemAttributes = join(runtimeRoot, "system-gitattributes");
   await writeFile(systemConfig, "system config"); await writeFile(systemAttributes, "system attributes");
   const systemConfigSha = createHash("sha256").update("system config").digest("hex");
   const systemAttributesSha = createHash("sha256").update("system attributes").digest("hex");
-  const rootStore = { localRootForGit: async () => ({ rootId: "root-1", path: directory,
-    gitFinalPath: join(directory, ".git") }) };
+  const rootStore = { localRootForGit: async () => ({ rootId: "root-1", path: selectedRoot,
+    gitFinalPath: join(selectedRoot, ".git") }) };
   const nativeBridge = { verifyRelease: async () => ({ scriptSha256: nativeSha, powershellPath: gitPath,
     powershellSha256: gitSha }),
-    holdGit: async () => ({ rootFinalPath: directory, gitFinalPath: join(directory, ".git"), release: async () => {} }),
+    holdGit: async () => ({ rootFinalPath: selectedRoot, gitFinalPath: join(selectedRoot, ".git"), release: async () => {} }),
     safeRead: async (_root, path) => {
       if (path === ".git\\config") return Buffer.from("[core]\nrepositoryformatversion = 0");
       throw Object.assign(new Error("missing"), { code: "native-open-denied" });
     } };
   const makeObserver = childFactory => new OmenGitObserver({ rootStore, nativeBridge, gitPath,
-    expectedGitSha256: gitSha, gitInstallRoot: directory, mxcExecutorPath: mxcPath,
+    expectedGitSha256: gitSha, gitInstallRoot: runtimeRoot, mxcExecutorPath: mxcPath,
     expectedMxcSha256: mxcSha, expectedNativeScriptSha256: nativeSha,
     expectedPowerShellSha256: gitSha, gitSystemConfigPath: systemConfig,
     expectedGitSystemConfigSha256: systemConfigSha, gitSystemAttributesPath: systemAttributes,

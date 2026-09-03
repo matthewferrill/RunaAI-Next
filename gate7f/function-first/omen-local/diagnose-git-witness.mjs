@@ -173,7 +173,7 @@ export async function diagnoseGitWitness({ userProfilePath = homedir() } = {}) {
     root: templateRoot, gitInstallRoot: resolve(pins.gitInstallRoot), gitPath: resolve(pins.gitPath),
     args: fixedArguments("status", {}, templateRoot), containerId: "runa-omen-policy-template-verification",
   });
-  if (policyTemplateDigest(templateConfig) !== pins.policyTemplateSha256) {
+  if (policyTemplateDigest(templateConfig, templateRoot, pins.gitInstallRoot) !== pins.policyTemplateSha256) {
     throw coded("diagnostic-policy-template-pin-mismatch");
   }
 

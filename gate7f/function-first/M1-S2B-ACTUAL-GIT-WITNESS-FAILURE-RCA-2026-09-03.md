@@ -598,3 +598,53 @@ Fresh corrected-design review returned GO with P0=0/P1=0, independently confirmi
 visible `<GIT_INSTALL_ROOT>` pin, explicit inner/outer cwd assertions, five-verb equivalence and timeout/network
 coverage. Roadmap checks pass 15/15 and the diff check is clean. No implementation or actual operation ran.
 These exact design bytes may now be sealed before implementation.
+
+### Cwd-decoupling implementation checkpoint
+
+Commit `e3434f9` sealed the reviewed design. The correction is now implemented but has not been used for an
+actual MXC/Git operation. Every contained Git command explicitly supplies `--git-dir=<selected-root>\.git` and
+`--work-tree=<selected-root>` without `-C`; both the contained process and outer MXC wrapper use the pinned Git
+installation root as cwd. The policy template rejects any other inner cwd, normalizes the admitted value as
+`<GIT_INSTALL_ROOT>`, and is repinned. The status-timeout and network-proof children carry the same explicit
+repository prefix and inner/outer cwd assertions.
+
+The new native disposable-repository equivalence gate found two additional deterministic command-contract
+defects before an actual retry. First, current Windows Git rejects `core.excludesFile=NUL`; using the empty
+command-line value disables the ambient global excludes file without introducing a path. Second, the `show`
+format ended with `%x00` while `-z` supplied the record terminator, producing a duplicate empty field that the
+strict parser correctly rejected. The fixed command uses `core.excludesFile=` and removes the redundant final
+`%x00`. These are preflight command-construction defects, not actual-system failures and not model failures.
+
+The corrected equivalence test executes and parses `status`, `log`, `diffstat`, `branches` and `show` from both
+the selected-repository baseline and the decoupled pinned-runtime cwd, requires identical structured fields and
+an unchanged complete repository tree digest, and rejects regression to the selected-root policy cwd. All Omen
+tests pass 35/35 and roadmap verification passes 15/15; syntax and diff checks remain required with independent
+exact-byte review before a source commit. Git acceptance remains paused. Exactly one corrected single-status
+diagnostic is the only actual operation permitted after those gates; no network, browser, model or production
+action is included.
+
+The first implementation review returned NO-GO with P0=0/P1=3 before execution. The normalizer validated cwd
+but could mask missing, extra or reordered read-only paths; the equivalence gate did not authenticate the native
+Git/config/attributes bytes, require zero stderr or prove the empty excludes override against an ambient source;
+and loose source regexes could match a non-spawn occurrence of the pinned cwd. The correction validates the exact
+canonical two-entry read-only list and empty write/deny lists before normalization, rejects missing/extra/
+reordered/aliased/duplicate authority, and makes the proof checks exact. The native gate now hashes Git, system
+config and system attributes before fixture creation; requires zero stderr for setup and all five baseline/
+decoupled operations; and proves a controlled global ignore hides an untracked sentinel until
+`core.excludesFile=` exposes it. A captured `spawnSandboxWithPinnedCwd` boundary supplies the outer cwd and
+rejects selected/other inner cwd values, while exact call-site assertions bind observer, timeout and network
+children to that boundary. The zero-stderr gate also exposed an ambient line-ending warning on `diffstat`;
+`core.safecrlf=false` now suppresses only that warning while retaining the configured autocrlf semantics. No
+actual operation ran. Focused Omen checks pass 35/35, roadmap checks pass 15/15, all changed JavaScript parses
+and the diff check is clean. Fresh independent re-review remains mandatory before a source commit.
+
+The second implementation review confirmed all three code/test findings closed but returned NO-GO at P0=0/
+P1=1 because the normative M1-S2B criteria still froze the historical selected-root cwd command contract,
+`core.excludesFile=NUL`, and no explicit repository arguments or safe-CRLF closure. No actual operation ran.
+The criteria now mark those values superseded by this retained diagnostic, freeze both cwd values to the pinned
+Git installation root, require the exact ordered two-path read authority, and publish the exact amended argument
+order including `--git-dir`, `--work-tree`, empty excludes, `core.safecrlf=false` and the single-terminator show
+format. Fresh deterministic checks and independent exact-byte review remain mandatory.
+Fresh exact-byte re-review returned GO with P0=0/P1=0, independently reproducing 35/35 focused checks, 15/15
+roadmap checks and a clean diff check. No actual operation ran. These bytes may now be source-committed before
+the sole corrected single-status diagnostic.

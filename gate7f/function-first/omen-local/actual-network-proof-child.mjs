@@ -3,7 +3,8 @@ import { existsSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { createConfigFromPolicy, getPlatformSupport, spawnSandboxFromConfig } from "@microsoft/mxc-sdk";
-import { createContainedGitConfig, fixedArguments, policyTemplateDigest } from "./git-observer.mjs";
+import { createContainedGitConfig, fixedArguments, policyTemplateDigest,
+  spawnSandboxWithPinnedCwd } from "./git-observer.mjs";
 import { loadOmenReleasePins } from "./release-pins.mjs";
 
 const coded = code => Object.assign(new Error(code), { code });
@@ -41,9 +42,13 @@ async function run(payload) {
       gitInstallRoot: pins.gitInstallRoot, gitPath: pins.gitPath,
       args: [...prefix, "ls-remote", "--exit-code", payload.urls[index]],
       containerId: `runa-network-${payload.phase}-${index}` });
-    if (policyTemplateDigest(config) !== pins.policyTemplateSha256) throw coded("omen-network-policy-drift");
-    const child = spawnSandboxFromConfig(config, { usePty: false, executablePath: pins.mxcExecutorPath },
-      payload.repository);
+    if (policyTemplateDigest(config, payload.repository, pins.gitInstallRoot) !== pins.policyTemplateSha256) {
+      throw coded("omen-network-policy-drift");
+    }
+    if (resolve(config.process.cwd) !== resolve(pins.gitInstallRoot)) throw coded("omen-network-runtime-cwd-invalid");
+    const child = spawnSandboxWithPinnedCwd(spawnSandboxFromConfig, config,
+      { usePty: false, executablePath: pins.mxcExecutorPath }, pins.gitInstallRoot,
+      "omen-network-runtime-cwd-invalid");
     child.stdin?.on("error", () => {}); child.stdin?.end();
     let stdout = Buffer.alloc(0), stderr = Buffer.alloc(0);
     child.stdout?.on("data", chunk => { stdout = Buffer.concat([stdout, Buffer.from(chunk)]); });

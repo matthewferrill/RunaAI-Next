@@ -8,7 +8,8 @@ import { createServer } from "node:net";
 import { once } from "node:events";
 import { createConfigFromPolicy, getPlatformSupport, spawnSandboxFromConfig } from "@microsoft/mxc-sdk";
 import { canonicalJson } from "../local-context-contract.mjs";
-import { createContainedGitConfig, fixedArguments, OmenGitObserver, policyTemplateDigest } from "./git-observer.mjs";
+import { createContainedGitConfig, fixedArguments, OmenGitObserver, policyTemplateDigest,
+  spawnSandboxWithPinnedCwd } from "./git-observer.mjs";
 import { completedGitFatalDiagnostic, EMPTY_SHA256, failedGitFatalDiagnostic }
   from "./git-fatal-diagnostic-contract.mjs";
 import { OmenRootStore, WindowsNativeBridge } from "./native-bridge.mjs";
@@ -104,7 +105,7 @@ export async function runActualOmenGitProof({ userProfilePath = homedir(), fatal
   const policyProbe = createContainedGitConfig({ createConfigFromPolicy }, { root: policyProbeRoot,
     gitInstallRoot: resolve(pins.gitInstallRoot), gitPath: resolve(pins.gitPath),
     args: fixedArguments("status", {}, policyProbeRoot), containerId: "runa-omen-git-policy-digest-probe" });
-  if (policyTemplateDigest(policyProbe) !== pins.policyTemplateSha256) {
+  if (policyTemplateDigest(policyProbe, policyProbeRoot, pins.gitInstallRoot) !== pins.policyTemplateSha256) {
     throw Object.assign(new Error("omen-git-policy-template-digest-mismatch"),
       { code: "omen-git-policy-template-digest-mismatch" });
   }
@@ -172,6 +173,10 @@ export async function runActualOmenGitProof({ userProfilePath = homedir(), fatal
       lateMutationApplied = false, lateMutationError = null;
     const sdk = { createConfigFromPolicy, getPlatformSupport,
       spawnSandboxFromConfig: (config, options, cwd) => {
+        if (resolve(config?.process?.cwd ?? "") !== resolve(pins.gitInstallRoot)
+            || resolve(cwd ?? "") !== resolve(pins.gitInstallRoot)) {
+          throw Object.assign(new Error("omen-git-runtime-cwd-invalid"), { code: "omen-git-runtime-cwd-invalid" });
+        }
         capturedPolicies.push({ config: JSON.parse(JSON.stringify(config)), options: { ...options }, cwd });
         const child = spawnSandboxFromConfig(config, options, cwd);
         let resolveTerminal;
@@ -286,8 +291,9 @@ export async function runActualOmenGitProof({ userProfilePath = homedir(), fatal
        repositoryWitnessSha256: pins.repositoryWitnessSha256,
        uiWitnessPath: resolve(pins.uiWitnessPath), uiWitnessSha256: pins.uiWitnessSha256,
        rootId: candidate.rootId, network: "deny-all",
-      filesystem: "read-only-selected-root-and-git-runtime", stdin: "closed",
-      customEnvironment: "omitted", executableExtensionPoints: "closed", timeoutMs: 15_000,
+       filesystem: "read-only-selected-root-and-git-runtime", stdin: "closed",
+       runtimeWorkingDirectory: "pinned-git-install-root",
+       customEnvironment: "omitted", executableExtensionPoints: "closed", timeoutMs: 15_000,
       ui: "windows-allowed-container-isolated-no-clipboard-input-system-control-settings-ime" };
     const expectedReleaseDigest = createHash("sha256").update(canonicalJson(expectedReleaseManifest)).digest("hex");
     checks.exactMxcManifest = containedResults.every(result =>
@@ -297,12 +303,16 @@ export async function runActualOmenGitProof({ userProfilePath = homedir(), fatal
       && capturedPolicies.length === containedResults.length
       && capturedPolicies.every((capture, index) => {
         const config = capture.config;
-        return capture.options.executablePath === pins.mxcExecutorPath && capture.cwd === repository
-          && Object.hasOwn(config.process, "env") === false && config.process.cwd === repository
+        return capture.options.executablePath === pins.mxcExecutorPath
+          && resolve(capture.cwd) === resolve(pins.gitInstallRoot)
+          && Object.hasOwn(config.process, "env") === false
+          && resolve(config.process.cwd) === resolve(pins.gitInstallRoot)
           && config.process.commandLine.startsWith(`"${pins.gitPath}"`)
-          && config.filesystem.readonlyPaths.includes(repository)
-          && config.filesystem.readonlyPaths.includes(pins.gitInstallRoot)
+          && config.filesystem.readonlyPaths.length === 2
+          && config.filesystem.readonlyPaths[0] === resolve(repository)
+          && config.filesystem.readonlyPaths[1] === resolve(pins.gitInstallRoot)
           && config.filesystem.readwritePaths.length === 0
+          && config.filesystem.deniedPaths.length === 0
           && config.network.egress.default === "deny" && config.network.ingress.default === "deny"
           && config.network.ingress.hostLoopback === "deny"
            && containedResults[index].isolation.policyDigest
@@ -384,12 +394,16 @@ export async function runActualOmenGitProof({ userProfilePath = homedir(), fatal
     const timeoutConfig = createContainedGitConfig({ createConfigFromPolicy }, { root: repository,
       gitInstallRoot: pins.gitInstallRoot, gitPath: pins.gitPath, args: [...prefix, "hash-object", "--stdin"],
       containerId: "runa-omen-git-timeout-proof" });
-    if (policyTemplateDigest(timeoutConfig) !== pins.policyTemplateSha256) {
+    if (policyTemplateDigest(timeoutConfig, repository, pins.gitInstallRoot) !== pins.policyTemplateSha256) {
       throw Object.assign(new Error("omen-timeout-policy-drift"), { code: "omen-timeout-policy-drift" });
     }
     const timeoutStarted = Date.now();
-    const timeoutChild = spawnSandboxFromConfig(timeoutConfig,
-      { usePty: false, executablePath: pins.mxcExecutorPath }, repository);
+    if (resolve(timeoutConfig.process.cwd) !== resolve(pins.gitInstallRoot)) {
+      throw Object.assign(new Error("omen-timeout-runtime-cwd-invalid"), { code: "omen-timeout-runtime-cwd-invalid" });
+    }
+    const timeoutChild = spawnSandboxWithPinnedCwd(spawnSandboxFromConfig, timeoutConfig,
+      { usePty: false, executablePath: pins.mxcExecutorPath }, pins.gitInstallRoot,
+      "omen-timeout-runtime-cwd-invalid");
     writeFileSync(timeoutRootPid, String(timeoutChild.pid), { flag: "wx" });
     const timeoutExitCode = await waitForExit(timeoutChild, 19_000), timeoutElapsedMs = Date.now() - timeoutStarted;
     try { timeoutChild.stdin?.end(); } catch {}

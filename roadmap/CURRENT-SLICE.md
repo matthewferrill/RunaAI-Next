@@ -203,6 +203,29 @@ commit. The first design review returned P0=0/P1=3 and caused these corrections.
 single-status confirmation test the hypothesis. No correction or retry has run; acceptance remains paused.
 Fresh corrected-design review returned GO with P0=0/P1=0. Roadmap checks pass 15/15 and the diff check is clean.
 A doc-only design commit precedes implementation; no actual retry or model/production action has run.
+Commit `e3434f9` sealed the design. The cwd decoupling, explicit repository arguments, updated policy pin and
+timeout/network source gates are implemented but have not run through MXC. Native five-verb equivalence also
+found and corrected two command-contract defects before actual execution: `core.excludesFile=NUL` is invalid in
+current Windows Git and `show` had a duplicate NUL terminator. With an empty excludes override and one `show`
+terminator, Omen checks pass 35/35, all five structured results match their selected-root baselines and repository
+bytes remain unchanged; roadmap checks pass 15/15. Fresh implementation review and a source commit still gate
+the sole permitted corrected single-status diagnostic. Acceptance and models remain paused.
+The first implementation review returned P0=0/P1=3 without execution. It found that normalization could hide
+read-authority drift, the native gate did not authenticate inputs/prove zero stderr and the empty excludes
+override, and loose source regexes could false-pass outer cwd. The corrected gate validates exact canonical
+read-only/write/deny authority, hashes the three Git inputs before fixture creation, proves a controlled global
+ignore is defeated, requires zero stderr and uses a captured pinned-cwd spawn boundary plus exact observer/
+timeout/network call sites. That stderr gate also found and closed an ambient `diffstat` line-ending warning with
+`core.safecrlf=false`, preserving autocrlf semantics. Omen checks pass 35/35, roadmap checks pass 15/15, all
+changed JavaScript parses and the diff check is clean. No actual operation ran; fresh re-review is the remaining
+pre-commit gate.
+The second review confirmed the code findings closed but stopped at P0=0/P1=1 because the normative M1-S2B
+criteria still froze the superseded argv/cwd contract. The criteria now publish the exact explicit repository,
+pinned inner/outer cwd, path-authority, excludes, safe-CRLF and show-delimiter amendment. No actual operation
+ran; deterministic checks and fresh exact-byte review must repeat before commit.
+Fresh exact-byte re-review returned GO with P0=0/P1=0 and reproduced 35/35 focused checks, 15/15 roadmap checks
+and a clean diff check. No actual operation ran. A source commit is now the remaining gate before the one
+single-status diagnostic.
 
 Workspace baseline checkpoint: see
 `gate7f/function-first/M1-S2-WORKSPACE-BASELINE-IMPLEMENTATION-RESULTS-2026-09-02.md` for the accepted

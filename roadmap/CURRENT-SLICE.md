@@ -106,6 +106,12 @@ This approves only the separately gated Git-library package review; package inst
 blocked. Review:
 `../gate7f/function-first/M1-S2B1-FOURTH-SEALED-CRITERIA-INDEPENDENT-REVIEW-2026-09-03.md`.
 
+The uninstalled `isomorphic-git@1.41.0` package record is now prepared: registry integrity matches, 36 unpacked files
+bind to an exact manifest, 55 registry-resolved packages bind to an exact closure, no install scripts are present, the
+time-bound npm advisory result is zero, and only the ESM core with Runa's broker is runtime-admitted. Package checks
+pass 3/3 and roadmap checks 15/15. Source commit and independent package-review GO still gate installation. Review:
+`../gate7f/function-first/M1-S2B1-ISOMORPHIC-GIT-PACKAGE-REVIEW-2026-09-03.md`.
+
 M1-S2B implementation checkpoint, 2026-09-02: the authority foundation and actual PostgreSQL lifecycle
 are green. The prior Omen DPAPI/handle-based file proof was 14/14, but shared native/helper bytes have since
 changed and that evidence is historical until one affected-scope rerun. The first actual

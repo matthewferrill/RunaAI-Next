@@ -6,7 +6,7 @@ import {
   CAPABILITY_SET_DIGEST, CAPABILITY_SET_VERSION, MATERIALIZATION_POLICY_DIGEST, MATERIALIZATION_POLICY_ID,
   NETWORK_POLICY_DIGEST, NETWORK_POLICY_ID, admitGitOpenRequest, admitMaterializationReceipt, admitMaterializationRequest, admitPipeFrame,
   admitUploadManifest, admitWorkspaceCancelRequest, admitWorkspaceManifest, bindingDigestFor, canonicalSha256, canonicalStringify,
-  controlPipeFrameSchema, fileSetDigest,
+  controlPipeFrameSchema, fileSetDigest, parseCanonicalWire,
   gitStreamFrameSchema, materializationReceiptSchema, sourceSelectionSchema, uploadManifestSchema,
   validateGitStreamTranscript, workspaceManifestSchema
 } from "./materialization-contracts.mjs";
@@ -27,7 +27,15 @@ test("all three frozen policy artifacts have their exact canonical digests", () 
   assert.deepEqual(capability.operations.participant, ["source.connect-public-git", "source.connect-folder-snapshot", "workspace.materialize", "workspace.list-files", "workspace.read-text", "workspace.cancel", "source.disconnect"]);
   assert.deepEqual(capability.effects, ["source-record-create", "upload-session-create", "workspace-materialize", "workspace-cancel", "workspace-cleanup", "source-disconnect"]);
   assert.equal(canonicalSha256(readJson("./m1-s2b1-network-policy.json")), NETWORK_POLICY_DIGEST);
-  assert.equal(canonicalSha256(readJson("./m1-s2b1-materialization-policy.json")), MATERIALIZATION_POLICY_DIGEST);
+  const materializationPolicy = readJson("./m1-s2b1-materialization-policy.json");
+  assert.equal(canonicalSha256(materializationPolicy), MATERIALIZATION_POLICY_DIGEST);
+  assert.deepEqual({ deadline: materializationPolicy.materializationDeadlineMs,
+    cleanup: materializationPolicy.cleanupReconciliationDeadlineMs,
+    perSourceProject: materializationPolicy.maximumInFlightPerSourceProject,
+    perParticipant: materializationPolicy.maximumInFlightPerParticipant,
+    pathProfile: materializationPolicy.pathCharacterProfile },
+  { deadline: 120000, cleanup: 30000, perSourceProject: 1, perParticipant: 2,
+    pathProfile: "printable-ascii-v1" });
 });
 
 const request = () => ({ schemaVersion: "runa-workspace-materialization-request/v1", requestId: "request_0001",
@@ -65,6 +73,11 @@ test("source selection enforces literal policies and rejects normalized IDN or e
   for (const repositoryHttpsUrl of ["http://example.com/fixture.git", "https://éxample.com/fixture.git", "https://xn--xample-9ua.com/fixture.git", "https://example.com/%66ixture.git", "https://example.com/a/../fixture.git"]) {
     assert.equal(sourceSelectionSchema.safeParse({ ...base, repositoryHttpsUrl }).success, false, repositoryHttpsUrl);
   }
+  const invalidUtf8 = Buffer.from(canonicalStringify(base));
+  invalidUtf8[invalidUtf8.indexOf(Buffer.from("Public fixture"))] = 0xff;
+  assert.throws(() => parseCanonicalWire(sourceSelectionSchema, invalidUtf8), /non-canonical-wire/u);
+  assert.equal(sourceSelectionSchema.safeParse({ ...base, lifecycle: "disconnected", cleanupState: "pending" }).success, true);
+  assert.equal(sourceSelectionSchema.safeParse({ ...base, lifecycle: "disconnected", cleanupState: "indeterminate" }).success, false);
 });
 
 const manifest = () => {
@@ -100,6 +113,17 @@ test("ready receipt rejects indeterminate network, absent versions/digests and l
   for (const patch of [{ networkState: "indeterminate" }, { nativeVersion: null }, { stagingManifestDigest: null }, { limitCode: "time" }]) {
     assert.equal(materializationReceiptSchema.safeParse({ ...receipt(), ...patch }).success, false, JSON.stringify(patch));
   }
+  assert.equal(materializationReceiptSchema.safeParse({ ...receipt(), sourceKind: "browser-folder-snapshot",
+    networkState: "not-required", nativeVersion: "c".repeat(40) }).success, false);
+  assert.equal(materializationReceiptSchema.safeParse({ ...receipt(), outcome: "failed", errorCode: "made-up-error",
+    publicationState: "staging", databaseState: "terminal-recorded", retryableAfterReconciliation: true,
+    effects: [] }).success, false);
+  const timedOut = { ...receipt(), sourceKind: "browser-folder-snapshot", outcome: "timed-out", nativeVersion: null,
+    finalManifestDigest: null, networkState: "not-required", publicationState: "staging",
+    databaseState: "terminal-recorded", cleanupState: "complete", durationMs: 120000, limitCode: "time",
+    errorCode: "materialization-timeout", retryableAfterReconciliation: true, effects: [] };
+  assert.equal(materializationReceiptSchema.safeParse(timedOut).success, true);
+  assert.equal(materializationReceiptSchema.safeParse({ ...timedOut, retryableAfterReconciliation: false }).success, false);
 });
 
 test("browser manifest has server-computed digest and rejects overlaps, duplicates and chunk mismatch", () => {
@@ -110,27 +134,48 @@ test("browser manifest has server-computed digest and rejects overlaps, duplicat
   assert.equal(uploadManifestSchema.safeParse({ ...value, excludedPaths: ["secret.key", "secret.key"] }).success, false);
   assert.equal(uploadManifestSchema.safeParse({ ...value, excludedPaths: ["a.txt"] }).success, false);
   assert.equal(uploadManifestSchema.safeParse({ ...value, entries: [{ ...value.entries[0], chunks: 2 }] }).success, false);
+  assert.equal(uploadManifestSchema.safeParse({ ...value, entries: [{ ...value.entries[0], path: "COM¹.txt" }] }).success, false);
+  assert.equal(uploadManifestSchema.safeParse({ ...value, entries: [{ ...value.entries[0], path: "Résumé.txt" }] }).success, false);
 });
 
-const frame = (direction, sequence, requestOrdinal, frameType, payloadBytes = 0) => ({
-  schemaVersion: "runa-materialization-pipe-frame/v2", channelId: "channel_0001", sequence,
-  requestId: "request_0001", nonce: d, payloadSha256: createHash("sha256").update(Buffer.alloc(payloadBytes)).digest("hex"),
-  payloadBytes, hmacSha256: d, direction, requestOrdinal, frameType
-});
+const streamKey = Buffer.alloc(32, 3);
+const streamExpectation = { channelId: "channel_0001", requestId: "request_0001", nonce: d,
+  repositoryPath: "/org/fixture.git" };
+const streamRecord = (direction, sequence, requestOrdinal, frameType, payload = Buffer.alloc(0), patch = {}) => {
+  const bytes = Buffer.isBuffer(payload) ? payload : Buffer.from(payload);
+  const base = { schemaVersion: "runa-materialization-pipe-frame/v2", channelId: "channel_0001", sequence,
+    requestId: "request_0001", nonce: d, payloadSha256: createHash("sha256").update(bytes).digest("hex"),
+    payloadBytes: bytes.length, direction, requestOrdinal, frameType, ...patch };
+  const hmacSha256 = createHmac("sha256", streamKey).update(canonicalStringify(base)).update(bytes).digest("hex");
+  return { rawHeader: canonicalStringify({ ...base, hmacSha256 }), payload: bytes };
+};
 
 test("stream schema and transcript permit bounded multi-frame two-request Git exchange only", () => {
-  const frames = [
-    frame("materializer-to-broker", 1, 0, "open-request"), frame("materializer-to-broker", 2, 0, "end-request"),
-    frame("broker-to-materializer", 1, 0, "open-response"), frame("broker-to-materializer", 2, 0, "response-body", 10),
-    frame("broker-to-materializer", 3, 0, "end-response"), frame("materializer-to-broker", 3, 1, "open-request"),
-    frame("materializer-to-broker", 4, 1, "request-body", 10), frame("materializer-to-broker", 5, 1, "end-request"),
-    frame("broker-to-materializer", 4, 1, "open-response"), frame("broker-to-materializer", 5, 1, "end-response"),
-    frame("broker-to-materializer", 6, 1, "terminal")
+  const request0 = canonicalStringify({ schemaVersion: "runa-public-git-http-request/v1", requestOrdinal: 0,
+    method: "GET", pathAndQuery: "/org/fixture.git/info/refs?service=git-upload-pack",
+    accept: "application/x-git-upload-pack-advertisement", contentType: null, contentLength: 0 });
+  const request1 = canonicalStringify({ schemaVersion: "runa-public-git-http-request/v1", requestOrdinal: 1,
+    method: "POST", pathAndQuery: "/org/fixture.git/git-upload-pack",
+    accept: "application/x-git-upload-pack-result", contentType: "application/x-git-upload-pack-request", contentLength: 10 });
+  const response0 = canonicalStringify({ schemaVersion: "runa-public-git-http-response/v1", requestOrdinal: 0,
+    status: 200, contentType: "application/x-git-upload-pack-advertisement", contentLength: 10, headerBytes: 120 });
+  const response1 = canonicalStringify({ schemaVersion: "runa-public-git-http-response/v1", requestOrdinal: 1,
+    status: 200, contentType: "application/x-git-upload-pack-result", contentLength: 0, headerBytes: 120 });
+  const records = [
+    streamRecord("materializer-to-broker", 1, 0, "open-request", request0), streamRecord("materializer-to-broker", 2, 0, "end-request"),
+    streamRecord("broker-to-materializer", 1, 0, "open-response", response0), streamRecord("broker-to-materializer", 2, 0, "response-body", Buffer.alloc(10)),
+    streamRecord("broker-to-materializer", 3, 0, "end-response"), streamRecord("materializer-to-broker", 3, 1, "open-request", request1),
+    streamRecord("materializer-to-broker", 4, 1, "request-body", Buffer.alloc(10)), streamRecord("materializer-to-broker", 5, 1, "end-request"),
+    streamRecord("broker-to-materializer", 4, 1, "open-response", response1), streamRecord("broker-to-materializer", 5, 1, "end-response"),
+    streamRecord("broker-to-materializer", 6, 1, "terminal")
   ];
-  for (const item of frames) assert.equal(gitStreamFrameSchema.safeParse(item).success, true);
-  assert.deepEqual(validateGitStreamTranscript(frames), { requestBytes: 10, responseBytes: 10, terminal: true });
-  assert.throws(() => validateGitStreamTranscript(frames.slice(0, -1)), /pipe-terminal-pattern-invalid/u);
-  assert.equal(gitStreamFrameSchema.safeParse({ ...frames[0], direction: "broker-to-materializer" }).success, false);
+  for (const item of records) assert.equal(gitStreamFrameSchema.safeParse(JSON.parse(item.rawHeader)).success, true);
+  assert.deepEqual(validateGitStreamTranscript(records, streamExpectation, streamKey), { requestBytes: 10, responseBytes: 10, terminal: true });
+  assert.throws(() => validateGitStreamTranscript(records.slice(0, -1), streamExpectation, streamKey), /pipe-terminal-pattern-invalid/u);
+  assert.throws(() => validateGitStreamTranscript([streamRecord("materializer-to-broker", 1, 0, "open-request", request0,
+    { channelId: "channel_0002" }), ...records.slice(1)], streamExpectation, streamKey), /pipe-channel-binding-invalid/u);
+  assert.throws(() => validateGitStreamTranscript([streamRecord("materializer-to-broker", 1, 0, "open-request", Buffer.alloc(1_048_576)),
+    ...records.slice(1)], streamExpectation, streamKey));
 });
 
 test("Git request heads admit only the two sealed smart HTTP shapes", () => {

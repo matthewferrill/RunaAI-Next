@@ -6,7 +6,7 @@ export const CAPABILITY_SET_DIGEST = "001ff34d840293fb7de17a76b518b29bf68755b5f2
 export const NETWORK_POLICY_ID = "m1-s2b1-public-git-network-v1";
 export const NETWORK_POLICY_DIGEST = "f898215b4a02d2f76c5686f0fec27f6fcf081c5beed4fdbdb4b84d8148914e3f";
 export const MATERIALIZATION_POLICY_ID = "m1-s2b1-materialization-limits-v1";
-export const MATERIALIZATION_POLICY_DIGEST = "8c53b2213f5a090101106064f30e2055762898127578a86f89aa7b3c6ed6ef72";
+export const MATERIALIZATION_POLICY_DIGEST = "62580f8ba8ba08c8dae7aaa27b3da904e7dfb426e3721b754e7499d79c3ff5cb";
 
 const MAX_FRAME_BYTES = 1_048_576;
 const MAX_GIT_REQUEST_BYTES = 2_097_152;
@@ -19,10 +19,10 @@ const utc = z.string().regex(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/u).r
 }, "invalid canonical UTC instant");
 const count = z.number().int().min(0).max(Number.MAX_SAFE_INTEGER);
 const positiveCount = z.number().int().min(1).max(Number.MAX_SAFE_INTEGER);
-const reservedWindowsName = /^(?:con|prn|aux|nul|com[1-9]|lpt[1-9])(?:\..*)?$/iu;
+const reservedWindowsName = /^(?:con|prn|aux|nul|com[1-9¹²³]|lpt[1-9¹²³])(?:\..*)?$/iu;
 
 const relativePath = z.string().min(1).max(1024).refine(value => {
-  if (Buffer.byteLength(value, "utf8") > 1024 || value.includes("\\") || value.startsWith("/") || value.endsWith("/")) return false;
+  if (!/^[\x20-\x7e]+$/u.test(value) || Buffer.byteLength(value, "utf8") > 1024 || value.includes("\\") || value.startsWith("/") || value.endsWith("/")) return false;
   const segments = value.split("/");
   return value === value.normalize("NFC") && segments.length <= 64 && segments.every(segment =>
     segment.length > 0 && segment !== "." && segment !== ".." && Buffer.byteLength(segment, "utf8") <= 255 &&
@@ -31,7 +31,7 @@ const relativePath = z.string().min(1).max(1024).refine(value => {
   );
 }, "invalid normalized relative path");
 
-const windowsPathKey = value => value.normalize("NFC").toLocaleLowerCase("en-US");
+const windowsPathKey = value => value.toLowerCase();
 const canonicalGitUrl = z.string().min(1).max(2048).refine(value => {
   if (!/^[\x20-\x7e]+$/u.test(value) || value.includes("%") || value.includes("?") || value.includes("#") || value.includes("@")) return false;
   const match = /^https:\/\/([a-z0-9](?:[a-z0-9.-]{0,251}[a-z0-9])?)(?::443)?((?:\/[A-Za-z0-9._~!$&'()+,;=:-]+)+\.git)$/u.exec(value);
@@ -70,6 +70,8 @@ export const sourceSelectionSchema = z.discriminatedUnion("sourceKind", [
   if (Date.parse(value.updatedAt) < Date.parse(value.createdAt)) context.addIssue({ code: "custom", message: "updatedAt precedes createdAt" });
   if (["disconnected", "expired", "revoked", "failed", "unknown"].includes(value.lifecycle) && value.cleanupState === "not-required") context.addIssue({ code: "custom", message: "terminal source requires cleanup disposition" });
   if (value.lifecycle === "unknown" && value.cleanupState !== "indeterminate") context.addIssue({ code: "custom", message: "unknown source requires indeterminate cleanup" });
+  if (["disconnected", "expired", "failed"].includes(value.lifecycle) && !["pending", "complete"].includes(value.cleanupState)) context.addIssue({ code: "custom", message: "determinate terminal source requires pending or complete cleanup" });
+  if (value.lifecycle === "revoked" && !["pending", "complete", "indeterminate"].includes(value.cleanupState)) context.addIssue({ code: "custom", message: "revoked source cleanup disposition invalid" });
   if (["known", "configured", "connected", "tested", "enabled"].includes(value.lifecycle) && value.cleanupState !== "not-required") context.addIssue({ code: "custom", message: "active source cannot have cleanup state" });
 });
 
@@ -121,6 +123,10 @@ export const workspaceManifestSchema = z.object({
 
 const optionalDigest = digest.nullable();
 const recordedEffect = z.enum(["workspace-materialize", "workspace-cancel", "workspace-cleanup"]);
+const materializationErrorCode = z.enum(["source-rejected", "capability-denied", "binding-mismatch",
+  "limit-files", "limit-total-bytes", "limit-file-bytes", "limit-path", "limit-output",
+  "limit-concurrency", "process-failed", "network-denied", "network-failed", "publication-failed",
+  "database-failed", "materialization-timeout", "cancellation-accepted", "cleanup-failed", "state-indeterminate"]);
 export const materializationReceiptSchema = z.object({
   schemaVersion: z.literal("runa-workspace-materialization-receipt/v1"), requestId: id, sourceId: id,
   sourceKind: z.enum(["git-public-https", "browser-folder-snapshot"]), workspaceId: id.nullable(), taskId: id,
@@ -135,19 +141,34 @@ export const materializationReceiptSchema = z.object({
   databaseState: z.enum(["intent-recorded", "ready-recorded", "terminal-recorded", "indeterminate"]), cleanupState,
   filesObserved: count.max(2000), bytesObserved: count.max(67_108_864), durationMs: count.max(150_000),
   limitCode: z.enum(["none", "files", "total-bytes", "file-bytes", "path", "time", "output", "concurrency"]),
-  errorCode: z.string().regex(/^[a-z0-9][a-z0-9-]{0,127}$/u).nullable(), retryableAfterReconciliation: z.boolean(),
+  errorCode: materializationErrorCode.nullable(), retryableAfterReconciliation: z.boolean(),
   workerReleaseSha256: digest, startedAt: utc, finishedAt: utc, credentialsPresent: z.literal(false),
   privateValuesIncluded: z.literal(false), modelInvoked: z.literal(false), effects: z.array(recordedEffect).max(3)
 }).strict().superRefine((value, context) => {
   if (Date.parse(value.finishedAt) < Date.parse(value.startedAt)) context.addIssue({ code: "custom", message: "finishedAt precedes startedAt" });
   if (value.outcome === "ready") {
     const readyNetwork = value.sourceKind === "git-public-https" ? value.networkState === "bounded-complete" : value.networkState === "not-required";
-    if (!readyNetwork || value.workspaceId === null || value.nativeVersion === null || value.stagingManifestDigest === null || value.finalManifestDigest === null || value.publicationState !== "published-acknowledged" || value.databaseState !== "ready-recorded" || value.cleanupState !== "complete" || value.processState !== "stopped" || value.limitCode !== "none" || value.errorCode !== null || value.retryableAfterReconciliation || value.effects.length !== 1 || value.effects[0] !== "workspace-materialize") context.addIssue({ code: "custom", message: "ready receipt invariants failed" });
+    const readyNativeVersion = value.nativeVersion !== null && (value.sourceKind === "git-public-https"
+      ? [40, 64].includes(value.nativeVersion.length) : value.nativeVersion.length === 64);
+    if (!readyNetwork || !readyNativeVersion || value.workspaceId === null || value.stagingManifestDigest === null || value.finalManifestDigest === null || value.publicationState !== "published-acknowledged" || value.databaseState !== "ready-recorded" || value.cleanupState !== "complete" || value.processState !== "stopped" || value.limitCode !== "none" || value.errorCode !== null || value.retryableAfterReconciliation || value.effects.length !== 1 || value.effects[0] !== "workspace-materialize") context.addIssue({ code: "custom", message: "ready receipt invariants failed" });
   } else if (value.outcome === "unknown") {
     if (value.errorCode === null || value.retryableAfterReconciliation || (value.processState !== "stop-unconfirmed" && value.publicationState !== "indeterminate" && value.databaseState !== "indeterminate" && value.cleanupState !== "indeterminate")) context.addIssue({ code: "custom", message: "unknown requires an indeterminate state, error, and no retry" });
   } else if (value.outcome === "cleanup-pending") {
-    if (value.errorCode === null || value.retryableAfterReconciliation || value.cleanupState !== "pending") context.addIssue({ code: "custom", message: "cleanup-pending requires pending cleanup, error, and no retry" });
+    if (value.errorCode !== "cleanup-failed" || value.retryableAfterReconciliation || value.cleanupState !== "pending") context.addIssue({ code: "custom", message: "cleanup-pending requires pending cleanup, exact error, and no retry" });
   } else if (value.errorCode === null || !["not-started", "staging"].includes(value.publicationState) || value.databaseState !== "terminal-recorded" || !["not-started", "stopped"].includes(value.processState) || !["not-required", "complete"].includes(value.cleanupState)) context.addIssue({ code: "custom", message: "determinate non-ready outcome invariants failed" });
+  const expectedRetryable = ["failed", "timed-out", "cancelled"].includes(value.outcome);
+  if (value.retryableAfterReconciliation !== expectedRetryable) context.addIssue({ code: "custom", message: "retryability/outcome mismatch" });
+  if (value.outcome === "timed-out" && value.errorCode !== "materialization-timeout") context.addIssue({ code: "custom", message: "timed-out outcome requires exact error" });
+  if (value.outcome === "cancelled" && value.errorCode !== "cancellation-accepted") context.addIssue({ code: "custom", message: "cancelled outcome requires exact error" });
+  if (value.outcome === "unknown" && value.errorCode !== "state-indeterminate") context.addIssue({ code: "custom", message: "unknown outcome requires exact error" });
+  if (value.outcome === "rejected" && !["source-rejected", "capability-denied", "binding-mismatch", "limit-files", "limit-total-bytes", "limit-file-bytes", "limit-path", "limit-output", "limit-concurrency"].includes(value.errorCode)) context.addIssue({ code: "custom", message: "rejected outcome error mismatch" });
+  if (value.outcome === "failed" && !["process-failed", "network-denied", "network-failed", "publication-failed", "database-failed"].includes(value.errorCode)) context.addIssue({ code: "custom", message: "failed outcome error mismatch" });
+  const limitErrors = { files: "limit-files", "total-bytes": "limit-total-bytes", "file-bytes": "limit-file-bytes",
+    path: "limit-path", time: "materialization-timeout", output: "limit-output", concurrency: "limit-concurrency" };
+  if (value.limitCode !== "none" && value.errorCode !== limitErrors[value.limitCode]) context.addIssue({ code: "custom", message: "limit/error mismatch" });
+  if (Object.values(limitErrors).includes(value.errorCode) && value.limitCode === "none") context.addIssue({ code: "custom", message: "limit error requires limit code" });
+  if (value.outcome === "timed-out" && value.limitCode !== "time") context.addIssue({ code: "custom", message: "timed-out outcome requires time limit" });
+  if (value.outcome === "cancelled" && value.limitCode !== "none") context.addIssue({ code: "custom", message: "cancelled outcome cannot claim limit" });
   if (value.processState === "stop-unconfirmed" && value.outcome !== "unknown") context.addIssue({ code: "custom", message: "unconfirmed stop requires unknown outcome" });
   if (new Set(value.effects).size !== value.effects.length || (value.outcome === "cancelled" && value.effects[0] !== "workspace-cancel") || (value.outcome !== "cancelled" && value.effects.includes("workspace-cancel")) || (value.outcome !== "ready" && value.effects.includes("workspace-materialize"))) context.addIssue({ code: "custom", message: "receipt effects/outcome mismatch" });
 });
@@ -221,8 +242,9 @@ export const uploadManifestDigest = manifest => canonicalSha256(manifest);
 
 export function parseCanonicalWire(schema, raw, maximumBytes = 1_048_576) {
   const bytes = Buffer.isBuffer(raw) ? raw : Buffer.from(raw, "utf8");
-  if (bytes.length === 0 || bytes.length > maximumBytes || bytes[0] === 0xef || bytes.includes(0)) throw new Error("non-canonical-wire");
+  if (bytes.length === 0 || bytes.length > maximumBytes || (bytes[0] === 0xef && bytes[1] === 0xbb && bytes[2] === 0xbf) || bytes.includes(0)) throw new Error("non-canonical-wire");
   const text = bytes.toString("utf8");
+  if (!Buffer.from(text, "utf8").equals(bytes)) throw new Error("non-canonical-wire");
   const value = JSON.parse(text);
   if (canonicalStringify(value) !== text) throw new Error("non-canonical-wire");
   return schema.parse(value);
@@ -278,17 +300,42 @@ export function admitPipeFrame(schema, rawHeader, payload, key) {
   return frame;
 }
 
-export function validateGitStreamTranscript(frames) {
+const gitStreamExpectationSchema = z.object({ channelId: id, requestId: id,
+  nonce: z.string().regex(/^[a-f0-9]{64}$/u), repositoryPath: z.string().regex(/^\/(?:[A-Za-z0-9._~!$&'()+,;=:-]+\/)*[A-Za-z0-9._~!$&'()+,;=:-]+\.git$/u) }).strict();
+
+export function validateGitStreamTranscript(records, expectation, key) {
+  const expected = gitStreamExpectationSchema.parse(expectation);
+  if (!Buffer.isBuffer(key) || key.length !== 32) throw new Error("pipe-key-invalid");
   const next = { "materializer-to-broker": 1, "broker-to-materializer": 1 };
   let requestBytes = 0, responseBytes = 0;
+  const requestHeads = new Map(), responseHeads = new Map(), requestBodyBytes = [0, 0], responseBodyBytes = [0, 0];
   const required = [
     "0:materializer-to-broker:open-request", "0:materializer-to-broker:end-request", "0:broker-to-materializer:open-response", "0:broker-to-materializer:end-response",
     "1:materializer-to-broker:open-request", "1:materializer-to-broker:end-request", "1:broker-to-materializer:open-response", "1:broker-to-materializer:end-response", "1:broker-to-materializer:terminal"
   ];
   let cursor = 0;
-  for (const frame of frames) {
-    gitStreamFrameSchema.parse(frame);
+  for (const record of records) {
+    if (record === null || typeof record !== "object" || Array.isArray(record)
+      || Object.keys(record).sort().join(",") !== "payload,rawHeader") throw new Error("pipe-record-shape-invalid");
+    if (!Buffer.isBuffer(record.payload)) throw new Error("pipe-payload-type-invalid");
+    const payload = record.payload;
+    const frame = admitPipeFrame(gitStreamFrameSchema, record.rawHeader, payload, key);
+    if (frame.channelId !== expected.channelId || frame.requestId !== expected.requestId || frame.nonce !== expected.nonce) throw new Error("pipe-channel-binding-invalid");
     if (frame.sequence !== next[frame.direction]++) throw new Error("pipe-sequence-invalid");
+    if (["end-request", "end-response", "terminal"].includes(frame.frameType) && frame.payloadBytes !== 0) throw new Error("pipe-empty-frame-has-payload");
+    if (["request-body", "response-body"].includes(frame.frameType) && frame.payloadBytes === 0) throw new Error("pipe-body-frame-empty");
+    if (frame.frameType === "open-request") {
+      const head = admitGitOpenRequest(payload, expected.repositoryPath);
+      if (head.requestOrdinal !== frame.requestOrdinal || requestHeads.has(frame.requestOrdinal)) throw new Error("pipe-request-head-mismatch");
+      requestHeads.set(frame.requestOrdinal, head);
+    }
+    if (frame.frameType === "open-response") {
+      const head = admitGitOpenResponse(payload);
+      if (head.requestOrdinal !== frame.requestOrdinal || responseHeads.has(frame.requestOrdinal)) throw new Error("pipe-response-head-mismatch");
+      responseHeads.set(frame.requestOrdinal, head);
+    }
+    if (frame.frameType === "request-body") requestBodyBytes[frame.requestOrdinal] += frame.payloadBytes;
+    if (frame.frameType === "response-body") responseBodyBytes[frame.requestOrdinal] += frame.payloadBytes;
     requestBytes += frame.frameType === "request-body" ? frame.payloadBytes : 0;
     responseBytes += frame.frameType === "response-body" ? frame.payloadBytes : 0;
     const item = `${frame.requestOrdinal}:${frame.direction}:${frame.frameType}`;
@@ -298,6 +345,9 @@ export function validateGitStreamTranscript(frames) {
   }
   if (requestBytes > MAX_GIT_REQUEST_BYTES || responseBytes > MAX_GIT_RESPONSE_BYTES) throw new Error("pipe-aggregate-limit");
   if (cursor !== required.length) throw new Error("pipe-terminal-pattern-invalid");
+  if (requestHeads.size !== 2 || responseHeads.size !== 2 || requestBodyBytes[0] !== 0
+    || requestHeads.get(1).contentLength !== requestBodyBytes[1]
+    || [...responseHeads].some(([ordinal, head]) => head.contentLength !== null && head.contentLength !== responseBodyBytes[ordinal])) throw new Error("pipe-head-body-length-mismatch");
   return Object.freeze({ requestBytes, responseBytes, terminal: true });
 }
 

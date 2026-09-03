@@ -453,8 +453,21 @@ operation Job. Its focused checks and fresh independent review remain pending. R
 Second-correction preflight is now green at 10/10 focused contract checks and 15/15 roadmap checks with a clean diff.
 The first focused run stopped at 7/8 because its assertion used operation spelling `workspace.cancel` where the frozen
 effect is `workspace-cancel`; the artifact was correct, the one test expectation was corrected, and only that focused
-suite was rerun once; the later closed cancel-contract check expanded the final suite to nine. No live or model operation occurred. Source commit and fresh independent review remain the next
-gates.
+suite was rerun once; later cancel and exact Git-head checks expanded the final suite to ten. No live or model operation
+occurred.
+
+Commit `083c558` sealed that correction and received a normal independent review: NO-GO at P0=0/P1=5. The reviewer
+reproduced 10/10 focused and 15/15 roadmap checks, then proved that the Git transcript admitted changing channel
+identity/non-body payloads, malformed UTF-8 and Windows superscript device aliases could pass, receipt/source/error/
+retry invariants were incomplete, four numeric limits existed only in prose, and upload expiry occurred before a
+materialization existed. No implementation or actual/model operation followed. The third prospective correction binds
+and authenticates exact Git transcript bytes/heads, requires strict UTF-8 and a first-proof printable-ASCII path
+profile, closes lifecycle/native-version/error/retry rules, moves all limits into the hashed policy, and replaces the
+timeout drill with suspension of the real materializer after durable staging. Review:
+`gate7f/function-first/M1-S2B1-SECOND-SEALED-CRITERIA-INDEPENDENT-REVIEW-2026-09-03.md`. Focused verification,
+source commit and another independent P0/P1 review remain mandatory. Third-correction preflight now passes 10/10
+focused contract checks and 15/15 roadmap checks with a clean diff; these deterministic results earn no actual-system
+credit.
 
 **Application slice, 2026-09-02:** model selection is complete and the retired R15 campaign is not being
 resumed. The active clean branch is `codex/m1-gemma-primary`, based on the five-function qualification

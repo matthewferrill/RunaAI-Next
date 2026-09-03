@@ -1,15 +1,16 @@
 # M1-S2B1 server-workspace materialization criteria — 2026-09-03
 
-Status: second corrected prospective criteria; fresh independent design review required before implementation
+Status: third corrected prospective criteria; fresh independent design review required before implementation
 
 Roadmap revision/digest retrieved before selection: `2026-08-28.1` / `6a8380d9e9e2f3eb07b7e51c77cda174c5541c0abbb07875dd5537627560cfd1`
 
 Milestone/capability scope: M1-S2B1; bounded C03/C06/C08/C15/C16 subsets
 
-The initial draft review and sealed corrected-criteria review each returned NO-GO at P0=0/P1=7. The latter reviewed
-exact commit `ec0b885` and is retained in `M1-S2B1-SEALED-CRITERIA-INDEPENDENT-REVIEW-2026-09-03.md`. No dependency,
-implementation or actual operation followed either review. This second correction earns no acceptance credit until a
-fresh review returns P0=0/P1=0.
+The initial draft review and first sealed corrected-criteria review each returned NO-GO at P0=0/P1=7. The next review
+of exact commit `083c558` returned NO-GO at P0=0/P1=5 and is retained in
+`M1-S2B1-SECOND-SEALED-CRITERIA-INDEPENDENT-REVIEW-2026-09-03.md`. No dependency, implementation or actual
+operation followed any review. This third correction earns no acceptance credit until a fresh review returns
+P0=0/P1=0.
 
 ## Outcome and reason this is next
 
@@ -106,6 +107,12 @@ Coordinator control IPC and Git streaming IPC are separate:
   bodies are at most 2 MiB and response bodies at most 96 MiB, with at most 128 frames in either direction. A broker
   terminal frame after response 1 and then EOF is mandatory. Missing, duplicate, reordered, post-terminal,
   wrong-direction or over-limit frames are fatal.
+- Every Git frame is admitted from the canonical raw header plus exact payload bytes through
+  `validateGitStreamTranscript`; it recomputes the payload digest/HMAC and requires one constant authority-issued
+  `channelId`, materialization `requestId` and 256-bit nonce for the entire transcript. Open-request payloads must parse
+  as the exact 16 KiB-bounded request-head schema and open-response payloads as the exact 32 KiB-bounded response-head
+  schema. Head-declared content lengths must equal accumulated body bytes. Body frames must be nonempty; end and
+  terminal frames must have empty payloads. No self-declared identity or non-body payload escapes accounting.
 - Control generates one additional random 256-bit Git-stream HMAC key and sends the same key once through each
   child's separate authenticated control bootstrap. The coordinator never receives that key. Both workers zeroize it
   after the terminal/EOF boundary, and neither may persist or log it.
@@ -157,7 +164,7 @@ mutation or remote publication. Requests with any other capability version/diges
 intent.
 
 The materialization/inspection policy is `server-workspace/m1-s2b1-materialization-policy.json`, canonical-JSON
-SHA-256 `8c53b2213f5a090101106064f30e2055762898127578a86f89aa7b3c6ed6ef72`. The public network policy is
+SHA-256 `62580f8ba8ba08c8dae7aaa27b3da904e7dfb426e3721b754e7499d79c3ff5cb`. The public network policy is
 `server-workspace/m1-s2b1-network-policy.json`, canonical-JSON SHA-256
 `f898215b4a02d2f76c5686f0fec27f6fcf081c5beed4fdbdb4b84d8148914e3f`. These artifacts freeze all numeric limits,
 secret-pattern exclusions, text extension classification, denied IPv4/IPv6 CIDRs, metadata addresses, redirects,
@@ -167,8 +174,9 @@ criteria/review; it cannot silently widen an existing capability.
 The executable strict schemas and cross-field invariants are in
 `server-workspace/materialization-contracts.mjs`; their deterministic contract tests are
 `server-workspace/materialization-contracts.test.mjs`. These checks are a criteria freeze and receive no
-actual-system acceptance credit. Admission functions compare raw bytes with their canonical serialization before
-schema parsing, which rejects whitespace variants, duplicate keys, BOM/NUL and noncanonical encodings. They require
+actual-system acceptance credit. Admission functions require strict UTF-8 byte-for-byte decode/re-encode identity,
+then compare raw bytes with their canonical serialization before schema parsing; this rejects malformed UTF-8,
+replacement decoding, whitespace variants, duplicate keys, BOM/NUL and noncanonical encodings. They require
 real round-trippable millisecond UTC instants; compare capability/policy/binding digests to authority values; recompute
 file-set/upload/payload digests and HMACs; and reject unknown keys or duplicate/unordered/colliding paths. Client/model
 input never supplies participant, project, environment, capability version, workspace path, worker identity or
@@ -255,6 +263,13 @@ lifecycle. There is no transition out of `revoked`. Reconnect from `disconnected
 replacement of an `unknown` record creates a new revision/source instance only after reconciliation; it never
 reactivates stale authority.
 
+`disconnected`, `expired` and determinate `failed` admit only cleanup `pending|complete`; `revoked` admits
+`pending|complete|indeterminate`; `unknown` requires `indeterminate`; active states require `not-required`.
+Receipt `errorCode` is the closed enum in the executable contract. `ready`, `rejected`, `unknown` and
+`cleanup-pending` are not retryable under the same reconciled authority; determinate `failed`, `timed-out` and
+`cancelled` are retryable only after reconciliation. A ready Git receipt has a 40- or 64-hex commit identity; a ready
+folder snapshot has exactly a 64-hex content-snapshot SHA-256.
+
 | Workspace predecessor | Operation/event | Workspace successor |
 |---|---|---|
 | `absent` | PostgreSQL intent/outbox commit | `intent-recorded` |
@@ -278,6 +293,8 @@ summary and cannot override them.
 
 - Maximum 2,000 regular files, 64 MiB total materialized bytes and 4 MiB per file.
 - Maximum normalized relative path: 1,024 UTF-8 bytes, 64 segments, 255 UTF-8 bytes per segment.
+- First-proof path character profile is printable ASCII only (`0x20`-`0x7e`); every non-ASCII path is rejected before
+  identity comparison. This deliberately closes Windows Unicode/case ambiguity for M1-S2B1.
 - File-tree response: 2,000 entries; individual text read: 256 KiB; combined response: 512 KiB.
 - Git resolution/fetch/materialization: 120 seconds; folder upload: 120 seconds; cleanup/reconciliation: 30 seconds.
 - One in-flight materialization per source/project and two per participant; excess returns bounded busy status.
@@ -328,8 +345,9 @@ credential helper, prompt, hook, external protocol, file protocol, filter, LFS, 
 Git object storage and materialized content use separate roots; neither is `.git` or inside the other. The
 materializer fetches the configured ref without tags, resolves one commit, verifies the sealed expected commit,
 walks objects without checkout/archive extraction, and rejects symlink, gitlink/submodule, device or unsupported
-object types. Every output path rejects `.git` case/Unicode variants, NTFS ADS including `::$INDEX_ALLOCATION`,
-reserved/device names, trailing dot/space aliases, absolute/traversal paths, duplicate/case/normalization collisions,
+object types. Every output path uses the frozen printable-ASCII profile and rejects `.git` case variants, NTFS ADS
+including `::$INDEX_ALLOCATION`, reserved/device names including `COM¹`/`COM²`/`COM³` and `LPT¹`/`LPT²`/`LPT³`,
+trailing dot/space aliases, absolute/traversal paths, duplicate/case collisions,
 reparse points and existing destinations. Files are opened create-new beneath the held staging identity and their
 bytes and aggregate manifest are SHA-256 checked. The separate Git object root is removed before `ready`.
 
@@ -506,9 +524,13 @@ These are external actions against ordinary candidate paths, not alternate imple
 - **Cancel:** call the same authenticated participant cancel endpoint after the durable `staging` state is observed;
   the closed `workspace.cancel` capability carries the original binding/idempotency key and does not signal a process
   directly.
-- **Timeout:** create an ordinary browser-folder upload session, upload its first declared chunk, then send no
-  successor request until the frozen 120-second server expiry. The ordinary expiry/cleanup/reconciliation path must
-  produce the timed-out receipt. No second network endpoint, mock response or private destination is introduced.
+- **Timeout:** completely upload and finalize the ordinary browser-folder fixture, then submit the ordinary bound
+  materialization request. After durable `staging` and the first actual staged file are observed, the external Control
+  acceptance owner uses its existing process handle to suspend the real materializer process; it does not alter a row,
+  payload, deadline or application response. The real coordinator's frozen 120-second absolute deadline must
+  terminate the exact operation Job, publish the `materialization-timeout` receipt, remove/retain the real staging
+  state according to reconciliation, and permit retry only after reconciliation. This is an OS-level fault against
+  the production worker path—not a mock worker, response, endpoint or shortened test deadline.
 - **Broker loss after publication:** an external Control test owner watches the protected durable state until
   `published-pending-db`, then terminates the exact operation Job defined in the process topology. No source byte,
   endpoint result or

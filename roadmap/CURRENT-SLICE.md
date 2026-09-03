@@ -80,8 +80,15 @@ fresh independent P0/P1 review still gate implementation. Review:
 Second-correction preflight passes 10/10 focused contract checks and 15/15 roadmap checks with a clean diff. The first
 focused run stopped at 7/8 only because one assertion confused operation spelling `workspace.cancel` with effect
 spelling `workspace-cancel`; the artifact was unchanged, that expectation was corrected and the affected suite passed
-once. The later cancel-contract check expanded the final suite to nine. No actual operation or model ran. Source
-commit and fresh independent review remain mandatory.
+once. Later cancel and exact Git-head checks expanded the final suite to ten. No actual operation or model ran.
+
+Commit `083c558` received the required review and stopped at P0=0/P1=5. Adversarial probes showed incomplete
+Git-channel/head/payload binding, malformed UTF-8 and Windows path aliases, incomplete receipt/source/error/retry
+invariants, four prose-only numeric limits and a timeout drill that preceded materialization. No implementation or
+actual/model operation followed. The third correction closes only those findings and still requires focused checks,
+source commit and fresh independent GO. Its preflight now passes 10/10 focused and 15/15 roadmap checks with a clean
+diff; these deterministic results earn no actual-system credit. Review:
+`../gate7f/function-first/M1-S2B1-SECOND-SEALED-CRITERIA-INDEPENDENT-REVIEW-2026-09-03.md`.
 
 M1-S2B implementation checkpoint, 2026-09-02: the authority foundation and actual PostgreSQL lifecycle
 are green. The prior Omen DPAPI/handle-based file proof was 14/14, but shared native/helper bytes have since

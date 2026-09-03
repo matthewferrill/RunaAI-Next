@@ -523,6 +523,14 @@ on any denied member, covers every frozen CIDR boundary, and returns no address 
 no DNS/network operation and earns no actual acceptance. The next implementation gate is the real TLS connector and
 broker child. Record: `gate7f/function-first/M1-S2B1-NETWORK-POLICY-PREFLIGHT-2026-09-03.md`.
 
+**M1-S2B1 Git stream-session preflight, 2026-09-03:** the bounded incremental decoder and authenticated
+two-direction session now pass 15/15 focused checks and independent review. Two explicit review stops corrected
+eight defects even though the earlier focused suites were green, including atomic fail-closed reuse, private-key
+zeroization, directional EOF, bounded chunk-independent decoding and malformed input before the guard. No socket,
+TLS, HTTP, Git fetch, Control worker/publication, browser action, production change or model call occurred. The next
+gate remains the separately reviewed real TLS connector/broker child. Record:
+`gate7f/function-first/M1-S2B1-GIT-STREAM-PREFLIGHT-2026-09-03.md`.
+
 **Application slice, 2026-09-02:** model selection is complete and the retired R15 campaign is not being
 resumed. The active clean branch is `codex/m1-gemma-primary`, based on the five-function qualification
 decision. Gemma is the sole primary for Chat, Research, Code, Agent and Review. The immediate work is to

@@ -137,6 +137,14 @@ closing shared-policy-mutation and full-CIDR-boundary findings. It opens no sock
 credit. Record: `../gate7f/function-first/M1-S2B1-NETWORK-POLICY-PREFLIGHT-2026-09-03.md`. Next implement and
 review the real TLS connector/broker child without widening into workspace publication or UI.
 
+The bounded authenticated Git stream-session prerequisite now passes 15/15 focused checks and independent review.
+Two review stops corrected eight issues despite initially green focused suites: ordinal binding, atomic session
+failure, private-key zeroization, directional EOF, chunk-independent bounded decoding, missing adversarial
+transitions, pre-guard malformed-envelope handling, and literal frame-ceiling coverage for both directions. It opens
+no socket and earns no actual-system credit. Record:
+`../gate7f/function-first/M1-S2B1-GIT-STREAM-PREFLIGHT-2026-09-03.md`. Next remains the real TLS connector/broker
+child, separately reviewed before any Control worker, workspace publication or UI integration.
+
 M1-S2B implementation checkpoint, 2026-09-02: the authority foundation and actual PostgreSQL lifecycle
 are green. The prior Omen DPAPI/handle-based file proof was 14/14, but shared native/helper bytes have since
 changed and that evidence is historical until one affected-scope rerun. The first actual

@@ -381,8 +381,47 @@ Git blobs covered by the transition release pins and matched 5/5; the branch was
 The first attempt to launch the elevated transition was rejected by the execution safety gate before process
 creation because the operation writes a persistent protected security descriptor on `C:\`. No UAC prompt,
 transition script, root ACL write or Git diagnostic occurred. This is a pre-execution authorization block, not an
-actual-system or model failure. The next step remains exactly one sealed transition plus its automatically chained
-permission-boundary diagnostic, but it requires explicit informed approval for that `C:\` ACL change.
+actual-system or model failure. At that checkpoint, the next proposed step was one sealed transition plus its
+automatically chained permission-boundary diagnostic, subject to explicit informed approval. The 2026-09-03
+server-managed-workspace decision below superseded that sequence; the transition is no longer next and must not run
+on the primary Code path.
+
+**Omen isolation-alternative assessment, 2026-09-03:** a read-only host and contract comparison found that
+Runa can avoid the `C:\` root DACL only through a new or not-yet-available backend, not a ready configuration
+switch. A Runa-owned dedicated low-privilege worker is feasible but needs its own identity, broker, per-root ACL,
+firewall, lifecycle, UI/process containment and actual-system acceptance design; Codex's two enabled sandbox
+accounts prove only that Omen supports the pattern and must not be reused. Restricted-token-only execution is
+weaker than the frozen read/network boundary. WSL2 has no installed distribution and firmware virtualization is
+disabled; it also changes path, Git, identity and witness contracts. Windows Sandbox is unavailable on the current
+Home/firmware configuration. MXC BaseContainer is the preferred future no-root-DACL path but requires build 26600+
+and its feature, while Omen is build 26200; AppContainer+BFS is disabled in shipping MXC because of its documented
+host-deadlock risk. Therefore the sealed AppContainer+DACL transition remains the only ready equivalent path for
+the then-selected Omen-local design and still required explicit informed approval. No system or acceptance operation
+ran. Full comparison:
+`gate7f/function-first/M1-S2B-OMEN-ISOLATION-ALTERNATIVES-ASSESSMENT-2026-09-03.md`.
+
+**Server-managed workspace correction, 2026-09-03:** the steward clarified and approved that normal Code starts
+from a connected remote Git repository materialized into a Control-orchestrated isolated server workspace. The
+browser PC is not the default execution host, Home remains model-only, and the Omen transition is removed from the
+primary critical path. A one-time local folder snapshot is browser-mediated; a persistent local-folder bridge is
+optional non-executing file/delta transport with approved hash-guarded writeback; fully local execution is deferred.
+Control's accepted Gate 7E sandbox is reusable foundation, but repository credentials, clone/fetch containment,
+multi-file execution, Git effects, worker lifecycle and actual browser acceptance remain unproved. The historical
+Omen bytes/reviews are preserved and must not be executed or relabelled. No system, Git, browser, model or production
+operation ran. Accepted architecture:
+`gate7f/function-first/M1-S2B-SERVER-MANAGED-WORKSPACE-ARCHITECTURE-2026-09-03.md`.
+The materialization boundary is source-neutral. The first proof is exact allowlisted public HTTPS Git plus one
+non-Git snapshot. A common Git architecture may later serve GitHub/GitLab/Bitbucket/Azure Repos/self-hosted/SSH
+only after separate authentication and endpoint acceptance. Perforce, Subversion, TFVC, Mercurial,
+cloud/file/archive and remote-folder sources retain native versions and writeback through later adapters.
+Work-management connections remain context, not workspace authority. This avoids speculative provider
+implementation. Register: `gate7f/function-first/M1-S2B-PROJECT-SOURCE-ADAPTER-REGISTER-2026-09-03.md`.
+
+Independent architecture review returned GO for publication with P0=0/P1=0 after closing SSRF/redirect/DNS,
+non-expanding capability-version, cross-workspace isolation, stale historical sequencing, Gate 7E scope-inheritance
+and first-transport overbreadth findings. Implementation and actual-system acceptance remain blocked on the listed
+criteria. Review:
+`gate7f/function-first/M1-S2B-SERVER-MANAGED-WORKSPACE-INDEPENDENT-REVIEW-2026-09-03.md`.
 
 **Application slice, 2026-09-02:** model selection is complete and the retired R15 campaign is not being
 resumed. The active clean branch is `codex/m1-gemma-primary`, based on the five-function qualification

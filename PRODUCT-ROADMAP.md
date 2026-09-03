@@ -121,7 +121,7 @@ remain unfinished. Record the required subset so partial families do not create 
 The five-function model qualification completed before enough of the product foundation existed to make
 those functions useful to an ordinary user. The steward therefore approved a bounded pull-forward before
 final customer acceptance: the shared shell and conversation lifecycle; real Settings; honest
-Omen/Control/Home status and recovery; authorized local folders and local Git read-only first; usable
+Omen/Control/Home status and recovery; authorized server-managed Git read-only first; usable
 Research, Code and artifact work surfaces; and then governed local changes. The application uses one
 primary work canvas; Chat, Code and Research are contextual task types rather than permanent top tabs.
 Agent is contextual task state inside Code and Review is contextual to exact sources, artifacts or diffs.
@@ -135,9 +135,14 @@ contracts are recorded in
 
 M1-S2A has now implemented the first rebaseline slice: conversation lifecycle, real low-risk appearance
 settings and truthful Omen/Control/Home status in the single canvas. Deterministic verification and
-independent P0/P1 review are green; actual Control/database/browser acceptance remains a prerequisite to release. Local
-folder and local Git read-only are the next frozen implementation slice after independent criteria GO,
-not implied by the visible
+independent P0/P1 review are green; actual Control/database/browser acceptance remains a prerequisite to release.
+The 2026-09-03 steward correction makes a connected remote Git repository materialized into a
+Control-orchestrated isolated server workspace the primary Code path. The browser PC is not the execution host,
+Home remains model-only, and the Omen-local worker/ACL transition is deferred. One-time local snapshots need no
+installed worker; a persistent local-folder bridge is optional non-executing transport. The worker uses a
+source-neutral adapter boundary so later Perforce, Subversion, TFVC, cloud/file and remote-folder sources keep
+their native semantics. Git plus one non-Git snapshot are the next frozen implementation scope after independent
+criteria GO, not implied by the visible
 connection rows. Exact results are in
 `gate7f/function-first/M1-S2A-CONVERSATION-SETTINGS-SYSTEM-RESULTS-2026-09-02.md`.
 

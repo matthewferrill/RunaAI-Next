@@ -3,9 +3,10 @@
 Roadmap revision: 2026-08-28.1
 Milestone: M1
 Slice ID: M1-S2
-Status: M1-S2A product-foundation implementation and independent review are green. M1-S2B Omen local
-folder and local-Git read-only criteria are frozen after independent GO with P0=0/P1=0; implementation,
-actual-system acceptance, application release and product qualification remain open.
+Status: M1-S2A product-foundation implementation and independent review are green. On 2026-09-03 the steward
+replaced the Omen-local primary Code path with Control-orchestrated server-managed Git workspaces. M1-S2B
+server-worker criteria, implementation, actual-system acceptance, application release and product qualification
+remain open. The Omen transition is historical/deferred and must not run on the primary path.
 
 Product-foundation checkpoint, 2026-09-02: the single-canvas workspace now implements participant-scoped
 conversation search/rename/archive/unarchive/branch/export/soft-delete, persisted low-risk appearance
@@ -26,6 +27,29 @@ authorization, lifecycle and revocation. Browser-relayed results require signed 
 automatic indexing, write, Git mutation, remote operation or production route is included. The original
 criteria were published in `3c1dc57`, after which implementation began. Only the Git layer is now paused
 pending independent review and publication of the actual-startup amendment.
+
+Architecture correction, 2026-09-03: the prior paragraph and its later retained failure/review history no longer
+select the active implementation. The browser is only the interface; Control orchestrates an isolated worker that
+clones or materializes the project in a server-managed workspace, and Home remains model-only. Remote Git is the
+primary Code connection. A one-time local folder snapshot needs no installed worker; a persistent local-folder
+bridge is optional, non-elevated file/delta transport with hash-guarded approved writeback and no command/Git
+surface. Fully local execution is deferred. Control's accepted Gate 7E sandbox is reusable foundation but does not
+prove repository or multi-file execution. Exact corrected topology, contracts, security gates, implementation order
+and exclusions are in
+`../gate7f/function-first/M1-S2B-SERVER-MANAGED-WORKSPACE-ARCHITECTURE-2026-09-03.md`.
+The worker boundary is source-neutral rather than Git-branded. The first proof accepts only exact allowlisted public
+HTTPS Git plus one non-Git snapshot. The common Git architecture can later support GitHub, GitLab, Bitbucket,
+Azure Repos Git, self-hosted and SSH endpoints only after their separate authentication/endpoint acceptance;
+Perforce, Subversion, TFVC, Mercurial, cloud drives and remote folders retain distinct native semantics behind later
+adapters. Work-management connectors remain context only and remote development environments remain execution
+backends. This proves the interface without implementing speculative providers. The
+adapter register is
+`../gate7f/function-first/M1-S2B-PROJECT-SOURCE-ADAPTER-REGISTER-2026-09-03.md`.
+
+Independent architecture review returned GO for publication with P0=0/P1=0. It closed the initial Git-ingress
+SSRF/redirect/DNS boundary, capability-version, cross-workspace isolation, historical sequencing, Gate 7E
+scope-inheritance and first-transport overbreadth findings. This is not implementation or actual-system acceptance.
+Review: `../gate7f/function-first/M1-S2B-SERVER-MANAGED-WORKSPACE-INDEPENDENT-REVIEW-2026-09-03.md`.
 
 M1-S2B implementation checkpoint, 2026-09-02: the authority foundation and actual PostgreSQL lifecycle
 are green. The prior Omen DPAPI/handle-based file proof was 14/14, but shared native/helper bytes have since
@@ -320,8 +344,21 @@ Final independent exact-byte re-review returned GO with P0=0/P1=0 and reproduced
 pins 6/6 and the clean diff. Commit `4388d0a` sealed those bytes, and a post-commit Git-blob check matched all five
 transition source pins. The first launcher invocation was blocked before process creation because its persistent
 protected `C:\` security-descriptor write requires explicit informed approval. No UAC, root ACL mutation or Git
-diagnostic occurred; this is an authorization checkpoint, not an acceptance failure. Exactly one sealed elevated
-transition and its automatically chained permission-boundary diagnostic remain next.
+diagnostic occurred; this is an authorization checkpoint, not an acceptance failure. At that historical checkpoint,
+one sealed elevated transition and its automatically chained permission-boundary diagnostic were proposed next.
+The 2026-09-03 server-managed-workspace decision superseded that sequence; they must not run on the primary path.
+
+Historical read-only alternative assessment, 2026-09-03: a Codex-style Runa-owned low-privilege Windows worker is
+technically feasible and can avoid changing the `C:\` root DACL, but it is a new privileged broker/account/
+firewall/lifecycle backend rather than a drop-in. WSL2 is not runnable on current Omen because no distribution is
+installed and firmware virtualization is disabled; it would also require a new Windows/D:/Git/identity/witness
+contract. Windows Sandbox is not viable on the current Home/firmware configuration. The closest future replacement,
+MXC BaseContainer, requires build 26600+ and its OS feature; current build 26200 selects only
+`appcontainer-dacl`. AppContainer+BFS is disabled in shipping MXC. The sealed root-DACL transition therefore
+was the only ready contract-equivalent path for the then-selected Omen-local design. The later steward decision
+removed that design from the primary Code path, so the transition is no longer next and must not run. No system
+change or acceptance operation ran. See
+`../gate7f/function-first/M1-S2B-OMEN-ISOLATION-ALTERNATIVES-ASSESSMENT-2026-09-03.md`.
 
 Workspace baseline checkpoint: see
 `gate7f/function-first/M1-S2-WORKSPACE-BASELINE-IMPLEMENTATION-RESULTS-2026-09-02.md` for the accepted

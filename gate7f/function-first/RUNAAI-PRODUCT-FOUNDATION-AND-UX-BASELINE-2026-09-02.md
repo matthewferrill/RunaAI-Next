@@ -10,7 +10,7 @@ RunaAI release.
 
 ## Product statement
 
-RunaAI is a local-first, governed AI workspace for conversations, research, software work, projects,
+RunaAI is a private, governed AI workspace for conversations, research, software work, projects,
 sources, tools, outputs, and durable tasks. It should feel like one coherent application rather than five
 model selectors. Models generate or reason inside the application; RunaAI owns identity, context,
 authorization, tool access, evidence, execution, recovery, and presentation.
@@ -93,14 +93,18 @@ knowledge remain visibly distinct; temporary/incognito conversation is a first-c
 
 ### Code
 
-Code begins with an explicitly selected local folder or repository. The customer-facing work surface must
+Code begins with an explicitly selected repository or project source. A connected remote Git repository is
+materialized into a Control-orchestrated isolated server workspace by default; the browser device is not the
+execution host. A local folder can be uploaded once or connected through an optional non-executing per-user bridge.
+Fully local/private execution is a distinct optional mode rather than a prerequisite for Code. The customer-facing work surface must
 show the file tree or working set, current branch/status, proposed diff, test/terminal output, errors, and
 rendered preview where relevant. Read-only inspection is separate from a governed Agent task. Writes,
 tests, local commits, GitHub publication, CI, and deployment are distinct capabilities and approval scopes.
 
-The initial connection order is local folder, then local Git read-only inspection, then governed project
-changes/tests, then local commits. GitHub connection and publication remain later, separately granted
-effects. Until a real authorized project is attached, the product must say Code Chat or Sandbox rather
+The initial connection order is remote Git read-only materialization and inspection, then governed project
+changes/tests, then local-to-workspace commits. Remote publication remains a later, separately granted effect.
+One-time local snapshots follow without installing a worker; persistent local-folder sync and fully local execution
+remain optional, separately accepted capabilities. Until a real authorized project is attached, the product must say Code Chat or Sandbox rather
 than implying a full coding agent.
 
 ### Research
@@ -155,9 +159,12 @@ The first connection manager must support these rows even when some are not yet 
 
 | Connection | Initial behavior | Later behavior |
 |---|---|---|
-| Local folders | User-selected authorized roots; visible read/write scope; remove/revoke | More parsers, indexing, visual inputs |
-| Local Git | Repository selection, branch/status/diff, changed-file inspection | Governed commits and worktrees |
-| GitHub | Not connected until authenticated; account and scopes visible | Issues, pull requests, review, CI, publication |
+| Git provider/workspace | Repository selection; server-side clone/materialization; branch/status/diff; read scope distinct from write | Governed commits, retained worktrees, push, issues, pull requests, review and CI |
+| Local snapshot | User-selected bounded one-time upload; no persistent access or local execution | More parsers, indexing and visual inputs |
+| Local folder bridge | Optional selected-root file/delta transport and approved hash-guarded writeback; no commands or Git | Persistent sync after separate acceptance |
+| Fully local execution | Not enabled; never implied by adding a folder | Separately installed and qualified private worker mode |
+| Non-Git project sources | Adapter slots for Perforce, Subversion, TFVC, Mercurial, remote folders and governed cloud/file snapshots; native version terms preserved | Implement only from customer demand and source-specific acceptance |
+| Work and data context | Issues, cloud documents, artifacts and governed data exports are context sources, not implicit project files or execution authority | Source-specific actions after separate scope and writeback approval |
 | Web research | Provider not configured until explicitly selected | Search, cited retrieval, retained source record |
 
 Every connector follows the lifecycle `known -> configured -> connected -> tested -> enabled ->

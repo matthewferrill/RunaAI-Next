@@ -1,5 +1,12 @@
 # M1-S2B Omen local-folder and local-Git read-only criteria — 2026-09-02
 
+Supersession notice, 2026-09-03: the steward approved server-managed Git workspaces as Runa's primary Code
+architecture. This Omen-local execution design is no longer the active M1-S2B path, and its sealed `C:\` transition
+must not run. Preserve this record and its implementation/reviews as historical evidence for a possible future
+fully local/private execution mode. The replacement decision is
+`M1-S2B-SERVER-MANAGED-WORKSPACE-ARCHITECTURE-2026-09-03.md`. An optional local-folder bridge may transfer
+versioned files and approved patches but does not execute code or Git and does not inherit this host prerequisite.
+
 Status: the first startup amendment is published in `44ead36`. Later exact-byte implementation reviews
 stopped actual execution at P0=0/P1=8, P0=0/P1=5 and two successive P0=0/P1=2 reviews. The latest enabled-drain
 and late-event proof corrections became independently green and were committed in `11fa6c1`. The affected

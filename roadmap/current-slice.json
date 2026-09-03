@@ -24,11 +24,14 @@
     "gate7f/function-first/M1-S2-FIVE-FUNCTION-MODEL-QUALIFICATION-DECISION-2026-09-02.md",
     "gate7f/function-first/M1-S2-GEMMA-PRIMARY-APPLICATION-SLICE-2026-09-02.md",
     "gate7f/function-first/M1-S2-DEFERRED-ADVERSARIAL-MODEL-DESIGN-2026-09-02.md",
-    "gate7f/function-first/RUNAAI-PRODUCT-FOUNDATION-AND-UX-BASELINE-2026-09-02.md"
+    "gate7f/function-first/RUNAAI-PRODUCT-FOUNDATION-AND-UX-BASELINE-2026-09-02.md",
+    "gate7f/function-first/M1-S2B-SERVER-MANAGED-WORKSPACE-ARCHITECTURE-2026-09-03.md",
+    "gate7f/function-first/M1-S2B-PROJECT-SOURCE-ADAPTER-REGISTER-2026-09-03.md",
+    "gate7f/function-first/M1-S2B-SERVER-MANAGED-WORKSPACE-INDEPENDENT-REVIEW-2026-09-03.md"
   ],
   "scopeDocument": "roadmap/CURRENT-SLICE.md",
-  "capabilityIds": ["C01", "C02", "C03", "C04", "C06", "C07", "C12", "C15", "C16"],
-  "nextWork": "Gemma-primary application implementation is active on codex/m1-gemma-primary. Preserve the qualified Research contract, isolate the simplified accept-or-revise checker to Review and add machine-enforced composite qualification. Use one primary work canvas; enter Chat, Code and Research through New, recent work or the composer's contextual control rather than a permanent top tab row. Keep Agent inside governed Code tasks and Review contextual to exact sources, artifacts or diffs. Before final customer acceptance, implement the product-foundation baseline: complete shell and conversation lifecycle, real Settings and Omen-Control-Home status, authorized local-folder and local-Git connections, Research-Code-artifact work surfaces and governed local changes. Then run bounded actual-system journeys. Comparison models remain tabled. Do not start another LLM qualification campaign unless a material qualified contract changes. Any actual method failure stops the acceptance gate for RCA and correction before retry; no mock qualification evidence is permitted.",
+  "capabilityIds": ["C01", "C02", "C03", "C04", "C06", "C07", "C08", "C12", "C15", "C16"],
+  "nextWork": "Gemma-primary application implementation is active on codex/m1-gemma-primary. Preserve the qualified Research and Review contracts and the single primary work canvas. The active M1-S2B correction makes connected remote Git the primary Code source and materializes it in a Control-orchestrated isolated server workspace; Home remains model-only and the browser PC is not the execution host. Reuse the accepted Gate 7E Control sandbox foundation, but freeze and independently review source-neutral materialization, server-derived authority binding, a new non-expanding capability-set version, credential brokering, SSRF/redirect/DNS defenses, cross-workspace isolation, clone/fetch, multi-file execution, receipts, cleanup, commit and push before implementation. Prove Git plus one non-Git snapshot without implementing speculative providers. One-time local snapshots need no installed worker; a persistent local-folder bridge is optional non-executing transport, and fully local execution plus the Omen ACL transition are deferred. Then implement Research-Code-artifact surfaces and bounded actual-system journeys. Comparison models remain tabled. Do not start another LLM qualification campaign unless a material qualified contract changes. Any actual method failure stops the acceptance gate for RCA and correction before retry; no mock qualification evidence is permitted.",
   "remainingRoadmapRequired": true,
   "completionClaim": "M1 completion is not whole-product completion."
 }

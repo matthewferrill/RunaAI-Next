@@ -1,13 +1,15 @@
 # M1-S2B Omen local-folder and local-Git read-only criteria — 2026-09-02
 
-Status: frozen criteria amended after the first actual Omen Git startup RCA; independent re-review is GO
-with P0=0/P1=0. The Git layer remains paused until this exact amendment is committed.
+Status: the first startup amendment is published in `44ead36`. Later exact-byte implementation reviews
+stopped actual execution at P0=0/P1=8, P0=0/P1=5 and two successive P0=0/P1=2 reviews. The latest enabled-drain
+and late-event proof corrections are deterministic-green. Fresh exact-byte independent review returned
+GO with P0=0/P1=0; the source commit remains mandatory before actual execution.
 
 ## Slice selection record
 
 - Selection date and source commit: 2026-09-02 / `4851818`.
 - Roadmap revision and SHA-256: `2026-08-28.1` /
-  `1c5fb61fb304ce1e03a3c499d8698991962e7ad3ebc84d1c87e09fda23623b70`.
+  `0b58eeda9563a03da4b896a0357796a0cfe1beda89a93fc36da3ee088f2470f8`.
 - Milestone and capability subsets: M1 product-foundation pull-forward; C02 project context, C03 explicit
   local text files, C06 repository orientation, C08 local Git observation, C15 usable connection/file
   surfaces, and C16 the exact Omen ordinary-user seat.
@@ -95,7 +97,7 @@ requests; 15-second operation deadline; 512 KiB response body; 1,024 consumed ca
 for five minutes; and ten seconds permitted clock skew. Preview is limited to depth 8, 2,000 files, 1,000
 directories, 20 secret-name warnings, five seconds and 64 KiB. Tree view is depth 4, 500 entries, five
 seconds and 128 KiB. One text read accepts a 256 KiB regular file but returns at most 64 KiB/400 lines.
-Git returns at most 40 commits, 500 changed paths and 256 KiB within ten seconds. Crossing a ceiling
+Git returns at most 40 commits, 500 changed paths and 256 KiB within 15 seconds. Crossing a ceiling
 returns a typed truncated/denied result and never silently widens it.
 
 ## Included customer behavior
@@ -130,8 +132,8 @@ case/8.3 aliases, changed reparse targets and any regular file with more than on
 The actual race proof replaces a permitted entry between selection and open and requires denial; a
 pre-open `realpath` check alone is not acceptance.
 
-The companion invokes one manifest-pinned absolute `git.exe` by SHA-256 with argument arrays, a minimal
-environment and a closed operation table. Reachable
+The companion invokes one manifest-pinned absolute `git.exe` by SHA-256 with argument arrays, no custom or
+inherited environment and a closed operation table. Reachable
 operations are only status, log, diffstat, branches, sanitized remotes and show-one-commit. Commit ids are
 plain hexadecimal. Git runs with optional locks, prompts, pagers, credential helpers, maintenance,
 filesystem monitors, external diffs and text conversion disabled. Remote URLs are reduced to a
@@ -148,9 +150,11 @@ is exactly `--no-optional-locks --no-replace-objects --no-lazy-fetch --no-pager`
 `fetch.writeCommitGraph=false`, `core.untrackedCache=false`, `core.preloadIndex=false` and the exact
 `safe.directory=<selected-root>` value. Diff/show additionally require `--no-ext-diff --no-textconv`.
 System/global config may be parsed by Git because MXC cannot accept the environment variables that would
-replace it, but these exact later command-line values override every executable, prompting, network,
-conversion, maintenance and optional-write surface reachable by the closed read-only verbs. Repository
-attributes may select a diff driver but `--no-ext-diff --no-textconv` prevents it from running.
+replace it. The exact Git-for-Windows system config and system attributes bytes are therefore release-pinned;
+global attributes are disabled; and any repository `.gitattributes` or `.git/info/attributes` file is refused
+before Git starts. This prevents a repository attribute from selecting the system/global LFS clean/process
+filter. The exact later command-line values override every remaining executable, prompting, network,
+conversion, maintenance and optional-write surface reachable by the closed read-only verbs.
 Remote-capable verbs remain unreachable, so no credential or terminal prompt path exists. The child runs only in the new
 manifest-bound `runa-omen-git-readonly/v1` network-denied Windows containment profile.
 Status/log/branches/diff/show use NUL-delimited machine
@@ -163,15 +167,24 @@ AppContainer declares neither `internetClient` nor `privateNetworkClientServer`,
 path, inherited handle, stdin, custom/inherited environment or credential. `process.env` is omitted
 because actual Omen MXC 0.8.0 rejects every non-empty custom environment before `CreateProcessW`; the
 fixed Git command-line controls above replace the required safety effects without adding a launcher or
-shell. The actual Omen startup proof freezes that manifest. MXC enforces the 15-second process timeout;
+shell. The generated policy is normalized only for the per-operation container id, selected-root path and
+fixed command line, then compared with an independently committed policy-template SHA-256 before spawn.
+The actual Omen startup proof freezes both that template and each exact manifest. MXC enforces the 15-second process timeout;
 the companion also bounds captured output and treats a missed terminal exit as failure. This slice does
 not claim a ProcessContainer child-count or memory ceiling because MXC 0.8.0 exposes neither control.
 Security instead depends on the fixed Git verbs and flags, closed executable-extension points, read-only
-root/runtime grants and deny-all network containment. Actual acceptance must inventory the MXC process
-tree during a deliberately long bounded operation and fail if an executable other than the pinned MXC
-executor and pinned Git workload appears, or if either remains after completion or timeout. Release
-acceptance also requires first-run and post-restart proof on actual Omen that public, LAN and loopback
-probe listeners receive zero connections. An MXC warning, unsupported tier, policy drift, required broad ACL
+root/runtime grants and deny-all network containment. A pinned native guard holds both the validated root
+and `.git` directory without delete sharing from final pre-spawn validation until Git terminates and its
+result is revalidated; root or `.git` rename/replacement must fail during that window. A recursive Windows
+mutation witness starts before the final manifest and must remain error-free and event-free through
+result completion, so config, packed-ref, attribute or worktree mutation—including restore—is denied. Actual acceptance
+inventories executable path and SHA-256 during both a deliberately long successful operation and a
+proof-only blocking `git hash-object --stdin` operation that must be terminated by the same 15-second MXC
+policy. Neither MXC nor Git may survive completion or timeout. Release acceptance also starts two fresh
+actual companion processes, labeled first-run and post-restart. Each uses the same pinned containment
+template for proof-only `git ls-remote` attempts to an owned loopback listener, an owned LAN listener and a
+fixed public HTTPS target. Both owned listeners must receive zero connections and every contained attempt
+must fail; no application route exposes either proof-only verb. An MXC warning, unsupported tier, policy drift, required broad ACL
 change or inability to start pinned Git is a stopped actual-system failure; the design may not silently
 reuse Gate 7E or run Git outside this profile.
 
@@ -280,7 +293,9 @@ Acceptance evidence is layered; a mock cannot substitute for the named system:
    certificate/private-key path, and the pinned installed Git executable; confirms process and
    port cleanup; proves no bytes changed and no unowned path was read; and exercises hostile `.git` files,
    linked worktrees, alternates, replacement objects, partial-clone configuration, external helpers,
-   malformed/control-character output and a network-denied promisor access.
+   case and available 8.3 aliases, empty files, a file-entry replacement race, malformed/control-character
+   output and a network-denied promisor access. Shared native/helper byte changes make any older native-file
+   proof historical until one affected-scope rerun passes.
 4. The actual Omen Edge page performs once: companion discovery, native folder selection, preview,
    confirm, project binding, connection test, file-tree/read, Git status/log/diffstat, reload/reconnect,
    lost-browser completion suppression, disconnect and revoke. It also proves browser-profile key

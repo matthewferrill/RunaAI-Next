@@ -30,3 +30,6 @@ gate7f/function-first/home-runtime/evidence/20260829-owner-command-status-r1/** 
 # The Control dispatcher is hashed from the checkout and from the Git archive.
 # Force one byte representation on Windows so those exact pins are identical.
 gate7f/function-first/acceptance/Invoke-ControlExactRegression.ps1 text eol=lf
+# Omen native release pins hash committed PowerShell bytes. Keep checkout bytes stable on Windows.
+gate7f/function-first/omen-local/Invoke-RunaOmenNative.ps1 text eol=lf
+gate7f/function-first/omen-local/Observe-RunaProcessTree.ps1 text eol=lf

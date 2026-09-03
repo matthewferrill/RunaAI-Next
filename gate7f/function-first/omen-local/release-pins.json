@@ -1,0 +1,22 @@
+{
+  "schemaVersion": "runa-omen-local-release-pins/v1",
+  "platform": "win32-x64-omen",
+  "nativeScriptRelativePath": "gate7f/function-first/omen-local/Invoke-RunaOmenNative.ps1",
+  "nativeScriptSha256": "dbd93cba8376490eed43dc905e5536f7c6ce4f44f031d09cc80a3296daef407d",
+  "powershellPath": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+  "powershellSha256": "7600ffe12da441fe89d035b13801e8e91d064bc544a27b19a5cf49f6ab8b18f5",
+  "gitPath": "C:\\Program Files\\Git\\mingw64\\bin\\git.exe",
+  "gitInstallRoot": "C:\\Program Files\\Git",
+  "gitSha256": "cab4c4eea1d869cf9f7be73868dc9a90ad2df1b1b673e5f8c8714a576c25ea96",
+  "gitSystemConfigPath": "C:\\Program Files\\Git\\etc\\gitconfig",
+  "gitSystemConfigSha256": "a97f90f09d00f693a76e14358b4c33fcadf7d79d2cde0d6d403c4a29a93d690e",
+  "gitSystemAttributesPath": "C:\\Program Files\\Git\\etc\\gitattributes",
+  "gitSystemAttributesSha256": "a952eb8d7f2edeb08eac68b36ebd5d888bce3541aa458a9e38af337a4f1fe110",
+  "mxcPackage": "@microsoft/mxc-sdk",
+  "mxcVersion": "0.8.0",
+  "mxcExecutorRelativePath": "node_modules/@microsoft/mxc-sdk/bin/x64/wxc-exec.exe",
+  "mxcExecutorSha256": "6049c64723af1173c3739dc6cd6b2f33f6c021bb2832c4216233cba7f71aee9a",
+  "policyTemplateSha256": "7d7eb3da575a5fcf1566081395b0b27c8ba7d9d8c9531785bdd313cdbde10f27",
+  "processMonitorRelativePath": "gate7f/function-first/omen-local/Observe-RunaProcessTree.ps1",
+  "processMonitorSha256": "23b208f915cb42b0c291d3faed602ddbd60dac376f1520b65864322f1ffa41d2"
+}

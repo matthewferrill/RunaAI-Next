@@ -40,11 +40,26 @@ began. Only the Git layer is now paused pending independent review and publicati
 amendment.
 
 **M1-S2B actual checkpoint, 2026-09-02:** Control authority contracts pass 5/5 focused and 9/9 actual
-PostgreSQL checks. Omen local files pass 14/14 actual DPAPI/Windows-handle checks after documented method
-and fixture RCAs. The first actual Git/MXC run stopped before Git startup on MXC custom-environment error
-`0x800700CB`. The no-environment, fixed-command-line amendment has independent GO with P0=0/P1=0; Git
-remains paused until the exact amendment is committed. Models, browser/HTTPS acceptance and production
-remain untouched.
+PostgreSQL checks. The prior Omen local-file proof passed 14/14 actual DPAPI/Windows-handle checks, but
+shared native/helper bytes have since changed, so it is historical until one affected-scope rerun. The
+first actual Git/MXC run stopped before Git startup on MXC custom-environment error
+`0x800700CB`. The no-environment, fixed-command-line amendment has independent GO with P0=0/P1=0 and was
+published in `44ead36`. The corrected implementation passes 8/8 focused checks and awaits exact-byte
+independent review plus a source commit before one affected-scope actual retry. That review stopped the
+prospective bytes at P0=0/P1=7 before actual execution; the findings and finite correction plan are in
+`gate7f/function-first/M1-S2B-GIT-IMPLEMENTATION-REVIEW-STOP-2026-09-02.md`. All seven corrections and the
+expanded actual-proof source then passed 13 focused checks, but a second exact-byte review stopped the
+prospective bytes at P0=0/P1=8; a third review stopped the next bytes at P0=0/P1=5; and a fourth review
+stopped at P0=0/P1=2 because watcher close did not prove final event drainage and the actual proof lacked
+a mutate-and-restore watcher arm. The watcher now waits for bounded close/drain and rechecks its final
+state; the actual proof requires the byte-neutral mutation to be detected. Both corrections and the amended
+proof passed 13 focused checks, but a fifth review correctly found that watcher `close` was not an event
+drain and the proof mutation ran before contained-child completion, again P0=0/P1=2. The latest correction
+keeps the watcher enabled through a 250-millisecond quiet/drain barrier and fires the proof mutation after
+successful child close; the amended proof and 13 focused checks are green. Fresh
+independent review returned GO with P0=0/P1=0. A source commit remains mandatory before any actual retry.
+Models, browser/HTTPS
+acceptance and production remain untouched.
 
 **Application slice, 2026-09-02:** model selection is complete and the retired R15 campaign is not being
 resumed. The active clean branch is `codex/m1-gemma-primary`, based on the five-function qualification

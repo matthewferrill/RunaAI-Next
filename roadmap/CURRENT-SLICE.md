@@ -28,10 +28,24 @@ criteria were published in `3c1dc57`, after which implementation began. Only the
 pending independent review and publication of the actual-startup amendment.
 
 M1-S2B implementation checkpoint, 2026-09-02: the authority foundation and actual PostgreSQL lifecycle
-are green, and the actual Omen DPAPI/handle-based file proof is green after retained RCAs. The first actual
+are green. The prior Omen DPAPI/handle-based file proof was 14/14, but shared native/helper bytes have since
+changed and that evidence is historical until one affected-scope rerun. The first actual
 Git/MXC startup stopped before Git launched because Omen MXC rejects a non-empty custom environment. The
-no-launcher command-line-control amendment has independent GO with P0=0/P1=0; the Git layer remains paused
-until the exact amendment is committed. No browser, HTTPS, model or production work has run.
+no-launcher command-line-control amendment has independent GO with P0=0/P1=0 and was published in
+`44ead36`. Its corrected implementation passes 8/8 focused checks and awaits exact-byte independent review
+and a source commit before one affected-scope actual retry. Independent review stopped those bytes at
+P0=0/P1=7 before actual execution; all seven gaps are recorded in
+`../gate7f/function-first/M1-S2B-GIT-IMPLEMENTATION-REVIEW-STOP-2026-09-02.md`. Their corrected implementation
+and expanded actual-proof source passed 13 focused checks, but a second exact-byte review stopped at
+P0=0/P1=8; a third review stopped the next bytes at P0=0/P1=5; and a fourth review found two remaining
+watcher/proof-integrity gaps at P0=0/P1=2. The watcher now drains final queued events before returning and
+the actual proof contains a mutate-and-restore arm. A fifth review found that close itself was not a drain
+and that the mutation was injected too early, again P0=0/P1=2. The latest correction keeps the watcher
+enabled through a bounded quiet/drain barrier and injects the byte-neutral mutation after successful child
+termination. Both corrections and the amended proof pass 13 focused
+checks; fresh independent review returned GO with P0=0/P1=0. A source commit remains mandatory before any
+actual retry.
+No browser, HTTPS, model or production work has run.
 
 Workspace baseline checkpoint: see
 `gate7f/function-first/M1-S2-WORKSPACE-BASELINE-IMPLEMENTATION-RESULTS-2026-09-02.md` for the accepted

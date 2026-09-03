@@ -8,12 +8,14 @@ import {
   admitUploadManifest, admitWorkspaceCancelRequest, admitWorkspaceManifest, bindingDigestFor, canonicalSha256, canonicalStringify,
   controlPipeFrameSchema, fileSetDigest, parseCanonicalWire,
   gitStreamFrameSchema, materializationReceiptSchema, sourceSelectionSchema, uploadManifestSchema,
-  validateGitStreamTranscript, workspaceManifestSchema
+  uploadSessionCreateResponseSchema, validateGitStreamTranscript, workspaceManifestSchema, workspaceReconciliationRequestSchema
 } from "./materialization-contracts.mjs";
 
 const d = "a".repeat(64);
 const t0 = "2026-09-03T12:00:00.000Z";
 const t1 = "2026-09-03T12:01:00.000Z";
+const t2 = "2026-09-03T12:02:00.000Z";
+const t30 = "2026-09-03T12:30:00.000Z";
 const readJson = name => JSON.parse(readFileSync(new URL(name, import.meta.url), "utf8"));
 const bindingRecord = { schemaVersion: "runa-workspace-binding/v1", participantId: "person_00001",
   projectId: "project_0001", environmentId: "control_0001", sourceId: "source_0001", taskId: "task_0000001",
@@ -42,7 +44,7 @@ const request = () => ({ schemaVersion: "runa-workspace-materialization-request/
   idempotencyKey: d, sourceId: "source_0001", taskId: "task_0000001", bindingDigest: binding,
   expectedSourceRevision: 1, capabilitySetVersion: CAPABILITY_SET_VERSION, capabilitySetDigest: CAPABILITY_SET_DIGEST,
   requestedRef: "main", uploadSessionId: null, uploadManifestDigest: null, limitsProfileId: MATERIALIZATION_POLICY_ID,
-  limitsProfileDigest: MATERIALIZATION_POLICY_DIGEST, deadlineAt: t1, createdAt: t0 });
+  limitsProfileDigest: MATERIALIZATION_POLICY_DIGEST, deadlineAt: t2, createdAt: t0 });
 
 test("wire admission rejects wrong capability, binding, duplicate keys, whitespace and impossible UTC", () => {
   assert.equal(admitMaterializationRequest(canonicalStringify(request()), bindingRecord).sourceId, "source_0001");
@@ -51,6 +53,7 @@ test("wire admission rejects wrong capability, binding, duplicate keys, whitespa
   assert.throws(() => admitMaterializationRequest(` ${canonicalStringify(request())}`, bindingRecord), /non-canonical-wire/u);
   assert.throws(() => admitMaterializationRequest(canonicalStringify(request()).replace('"requestId":"request_0001"', '"requestId":"request_0001","requestId":"request_0001"'), bindingRecord), /non-canonical-wire/u);
   assert.throws(() => admitMaterializationRequest(canonicalStringify({ ...request(), createdAt: "2026-02-30T12:00:00.000Z" }), bindingRecord));
+  assert.throws(() => admitMaterializationRequest(canonicalStringify({ ...request(), deadlineAt: t1 }), bindingRecord));
 });
 
 test("cancel is a closed binding-checked participant operation", () => {
@@ -60,6 +63,15 @@ test("cancel is a closed binding-checked participant operation", () => {
     capabilitySetDigest: CAPABILITY_SET_DIGEST, requestedAt: t0 };
   assert.equal(admitWorkspaceCancelRequest(canonicalStringify(value), bindingRecord).requestId, "request_0002");
   assert.throws(() => admitWorkspaceCancelRequest(canonicalStringify({ ...value, sourceId: "source_0002" }), bindingRecord));
+});
+
+test("server-issued reconciliation deadline is the exact hashed-policy duration", () => {
+  const value = { schemaVersion: "runa-workspace-reconciliation-request/v1", workspaceId: "workspace_01",
+    taskId: bindingRecord.taskId, bindingDigest: binding, operation: "workspace.reconcile",
+    capabilitySetVersion: CAPABILITY_SET_VERSION, capabilitySetDigest: CAPABILITY_SET_DIGEST,
+    requestedAt: t0, deadlineAt: "2026-09-03T12:00:30.000Z" };
+  assert.equal(workspaceReconciliationRequestSchema.safeParse(value).success, true);
+  assert.equal(workspaceReconciliationRequestSchema.safeParse({ ...value, deadlineAt: t1 }).success, false);
 });
 
 test("source selection enforces literal policies and rejects normalized IDN or encoded URLs", () => {
@@ -88,13 +100,14 @@ const manifest = () => {
     complete: true, adapterReleaseSha256: d, runtimeReleaseSha256: d, brokerReleaseSha256: d,
     capabilitySetVersion: CAPABILITY_SET_VERSION, capabilitySetDigest: CAPABILITY_SET_DIGEST,
     limitsProfileId: MATERIALIZATION_POLICY_ID, limitsProfileDigest: MATERIALIZATION_POLICY_DIGEST,
-    lifecycle: "ready", createdAt: t0, expiresAt: t1 };
+    lifecycle: "ready", createdAt: t0, expiresAt: t30 };
 };
 
 test("manifest admission recomputes file-set integrity and forbids incomplete ready state", () => {
   assert.equal(admitWorkspaceManifest(canonicalStringify(manifest()), bindingRecord).complete, true);
   assert.throws(() => admitWorkspaceManifest(canonicalStringify({ ...manifest(), fileSetDigest: d }), bindingRecord), /file-set-digest-mismatch/u);
   assert.equal(workspaceManifestSchema.safeParse({ ...manifest(), complete: false, rejectedCount: 1 }).success, false);
+  assert.equal(workspaceManifestSchema.safeParse({ ...manifest(), expiresAt: t1 }).success, false);
 });
 
 const receipt = () => ({ schemaVersion: "runa-workspace-materialization-receipt/v1", requestId: "request_0001",
@@ -121,9 +134,11 @@ test("ready receipt rejects indeterminate network, absent versions/digests and l
   const timedOut = { ...receipt(), sourceKind: "browser-folder-snapshot", outcome: "timed-out", nativeVersion: null,
     finalManifestDigest: null, networkState: "not-required", publicationState: "staging",
     databaseState: "terminal-recorded", cleanupState: "complete", durationMs: 120000, limitCode: "time",
-    errorCode: "materialization-timeout", retryableAfterReconciliation: true, effects: [] };
+    errorCode: "materialization-timeout", retryableAfterReconciliation: true, effects: [], finishedAt: t2 };
   assert.equal(materializationReceiptSchema.safeParse(timedOut).success, true);
   assert.equal(materializationReceiptSchema.safeParse({ ...timedOut, retryableAfterReconciliation: false }).success, false);
+  assert.equal(materializationReceiptSchema.safeParse({ ...timedOut, durationMs: 0, processState: "not-started",
+    publicationState: "not-started" }).success, false);
 });
 
 test("browser manifest has server-computed digest and rejects overlaps, duplicates and chunk mismatch", () => {
@@ -136,6 +151,14 @@ test("browser manifest has server-computed digest and rejects overlaps, duplicat
   assert.equal(uploadManifestSchema.safeParse({ ...value, entries: [{ ...value.entries[0], chunks: 2 }] }).success, false);
   assert.equal(uploadManifestSchema.safeParse({ ...value, entries: [{ ...value.entries[0], path: "COM¹.txt" }] }).success, false);
   assert.equal(uploadManifestSchema.safeParse({ ...value, entries: [{ ...value.entries[0], path: "Résumé.txt" }] }).success, false);
+  for (const path of ["CONIN$", "CONOUT$", "conin$.txt", "conout$.log"]) {
+    assert.equal(uploadManifestSchema.safeParse({ ...value, entries: [{ ...value.entries[0], path }] }).success, false, path);
+  }
+  const session = { schemaVersion: "runa-browser-folder-upload-session/v1", uploadSessionId: "upload_00001",
+    sourceId: bindingRecord.sourceId, limitsProfileId: MATERIALIZATION_POLICY_ID,
+    limitsProfileDigest: MATERIALIZATION_POLICY_DIGEST, issuedAt: t0, expiresAt: t2 };
+  assert.equal(uploadSessionCreateResponseSchema.safeParse(session).success, true);
+  assert.equal(uploadSessionCreateResponseSchema.safeParse({ ...session, expiresAt: t1 }).success, false);
 });
 
 const streamKey = Buffer.alloc(32, 3);

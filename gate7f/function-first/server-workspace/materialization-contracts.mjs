@@ -11,6 +11,10 @@ export const MATERIALIZATION_POLICY_DIGEST = "62580f8ba8ba08c8dae7aaa27b3da904e7
 const MAX_FRAME_BYTES = 1_048_576;
 const MAX_GIT_REQUEST_BYTES = 2_097_152;
 const MAX_GIT_RESPONSE_BYTES = 100_663_296;
+const UPLOAD_SESSION_LIFETIME_MS = 120_000;
+const MATERIALIZATION_DEADLINE_MS = 120_000;
+const CLEANUP_RECONCILIATION_DEADLINE_MS = 30_000;
+const WORKSPACE_LIFETIME_MS = 1_800_000;
 const id = z.string().regex(/^[a-z0-9][a-z0-9_-]{7,127}$/u);
 const digest = z.string().regex(/^[a-f0-9]{64}$/u);
 const utc = z.string().regex(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/u).refine(value => {
@@ -19,7 +23,7 @@ const utc = z.string().regex(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/u).r
 }, "invalid canonical UTC instant");
 const count = z.number().int().min(0).max(Number.MAX_SAFE_INTEGER);
 const positiveCount = z.number().int().min(1).max(Number.MAX_SAFE_INTEGER);
-const reservedWindowsName = /^(?:con|prn|aux|nul|com[1-9¹²³]|lpt[1-9¹²³])(?:\..*)?$/iu;
+const reservedWindowsName = /^(?:con|prn|aux|nul|conin\$|conout\$|com[1-9¹²³]|lpt[1-9¹²³])(?:\..*)?$/iu;
 
 const relativePath = z.string().min(1).max(1024).refine(value => {
   if (!/^[\x20-\x7e]+$/u.test(value) || Buffer.byteLength(value, "utf8") > 1024 || value.includes("\\") || value.startsWith("/") || value.endsWith("/")) return false;
@@ -87,13 +91,20 @@ export const materializationRequestSchema = z.object({
   const snapshot = value.uploadSessionId !== null || value.uploadManifestDigest !== null;
   if (git === snapshot) context.addIssue({ code: "custom", message: "exactly one Git or snapshot input is required" });
   if ((value.uploadSessionId === null) !== (value.uploadManifestDigest === null)) context.addIssue({ code: "custom", message: "snapshot session and manifest digest must both be present" });
-  if (Date.parse(value.deadlineAt) <= Date.parse(value.createdAt)) context.addIssue({ code: "custom", message: "deadlineAt must follow createdAt" });
+  if (Date.parse(value.deadlineAt) - Date.parse(value.createdAt) !== MATERIALIZATION_DEADLINE_MS) context.addIssue({ code: "custom", message: "deadlineAt must equal frozen materialization deadline" });
 });
 
 export const workspaceCancelRequestSchema = z.object({ schemaVersion: z.literal("runa-workspace-cancel-request/v1"),
   requestId: id, idempotencyKey: z.string().regex(/^[a-f0-9]{64}$/u), sourceId: id, taskId: id,
   bindingDigest: digest, expectedSourceRevision: positiveCount, capabilitySetVersion: z.literal(CAPABILITY_SET_VERSION),
   capabilitySetDigest: z.literal(CAPABILITY_SET_DIGEST), requestedAt: utc }).strict();
+
+export const workspaceReconciliationRequestSchema = z.object({ schemaVersion: z.literal("runa-workspace-reconciliation-request/v1"),
+  workspaceId: id, taskId: id, bindingDigest: digest, operation: z.enum(["workspace.reconcile", "workspace.cleanup"]),
+  capabilitySetVersion: z.literal(CAPABILITY_SET_VERSION), capabilitySetDigest: z.literal(CAPABILITY_SET_DIGEST),
+  requestedAt: utc, deadlineAt: utc }).strict().superRefine((value, context) => {
+  if (Date.parse(value.deadlineAt) - Date.parse(value.requestedAt) !== CLEANUP_RECONCILIATION_DEADLINE_MS) context.addIssue({ code: "custom", message: "deadlineAt must equal frozen cleanup/reconciliation deadline" });
+});
 
 export const manifestEntrySchema = z.object({ path: relativePath, bytes: count.max(4_194_304), sha256: digest,
   mediaClass: z.enum(["utf8-text", "binary"]) }).strict();
@@ -118,7 +129,7 @@ export const workspaceManifestSchema = z.object({
   if ((value.nativeVersionKind.endsWith("sha1") && value.nativeVersion.length !== 40) || (!value.nativeVersionKind.endsWith("sha1") && value.nativeVersion.length !== 64)) context.addIssue({ code: "custom", message: "native version length mismatch" });
   if (value.complete !== (value.rejectedCount === 0)) context.addIssue({ code: "custom", message: "complete requires zero rejected entries" });
   if (value.lifecycle === "ready" && (!value.complete || value.rejectedCount !== 0)) context.addIssue({ code: "custom", message: "ready manifest must be complete" });
-  if (Date.parse(value.expiresAt) <= Date.parse(value.createdAt)) context.addIssue({ code: "custom", message: "expiresAt must follow createdAt" });
+  if (Date.parse(value.expiresAt) - Date.parse(value.createdAt) !== WORKSPACE_LIFETIME_MS) context.addIssue({ code: "custom", message: "expiresAt must equal frozen workspace lifetime" });
 });
 
 const optionalDigest = digest.nullable();
@@ -158,7 +169,10 @@ export const materializationReceiptSchema = z.object({
   } else if (value.errorCode === null || !["not-started", "staging"].includes(value.publicationState) || value.databaseState !== "terminal-recorded" || !["not-started", "stopped"].includes(value.processState) || !["not-required", "complete"].includes(value.cleanupState)) context.addIssue({ code: "custom", message: "determinate non-ready outcome invariants failed" });
   const expectedRetryable = ["failed", "timed-out", "cancelled"].includes(value.outcome);
   if (value.retryableAfterReconciliation !== expectedRetryable) context.addIssue({ code: "custom", message: "retryability/outcome mismatch" });
-  if (value.outcome === "timed-out" && value.errorCode !== "materialization-timeout") context.addIssue({ code: "custom", message: "timed-out outcome requires exact error" });
+  if (value.outcome === "timed-out" && (value.errorCode !== "materialization-timeout" || value.workspaceId === null
+    || value.processState !== "stopped" || value.publicationState !== "staging" || value.databaseState !== "terminal-recorded"
+    || value.cleanupState !== "complete" || value.durationMs < MATERIALIZATION_DEADLINE_MS
+    || Date.parse(value.finishedAt) - Date.parse(value.startedAt) < MATERIALIZATION_DEADLINE_MS)) context.addIssue({ code: "custom", message: "timed-out outcome requires staged expired materialization" });
   if (value.outcome === "cancelled" && value.errorCode !== "cancellation-accepted") context.addIssue({ code: "custom", message: "cancelled outcome requires exact error" });
   if (value.outcome === "unknown" && value.errorCode !== "state-indeterminate") context.addIssue({ code: "custom", message: "unknown outcome requires exact error" });
   if (value.outcome === "rejected" && !["source-rejected", "capability-denied", "binding-mismatch", "limit-files", "limit-total-bytes", "limit-file-bytes", "limit-path", "limit-output", "limit-concurrency"].includes(value.errorCode)) context.addIssue({ code: "custom", message: "rejected outcome error mismatch" });
@@ -183,7 +197,10 @@ export const uploadSessionCreateRequestSchema = z.object({ schemaVersion: z.lite
   displayName: z.string().min(1).max(120), declaredFileCount: positiveCount.max(2000), declaredTotalBytes: count.max(67_108_864) }).strict();
 export const uploadSessionCreateResponseSchema = z.object({ schemaVersion: z.literal("runa-browser-folder-upload-session/v1"),
   uploadSessionId: id, sourceId: id, limitsProfileId: z.literal(MATERIALIZATION_POLICY_ID),
-  limitsProfileDigest: z.literal(MATERIALIZATION_POLICY_DIGEST), expiresAt: utc }).strict();
+  limitsProfileDigest: z.literal(MATERIALIZATION_POLICY_DIGEST), issuedAt: utc, expiresAt: utc }).strict()
+  .superRefine((value, context) => {
+    if (Date.parse(value.expiresAt) - Date.parse(value.issuedAt) !== UPLOAD_SESSION_LIFETIME_MS) context.addIssue({ code: "custom", message: "expiresAt must equal frozen upload-session lifetime" });
+  });
 
 export const uploadManifestSchema = z.object({ schemaVersion: z.literal("runa-browser-folder-upload-manifest/v1"),
   entries: z.array(uploadEntrySchema).min(1).max(2000), excludedPaths: z.array(relativePath).max(2000),
@@ -351,7 +368,7 @@ export function validateGitStreamTranscript(records, expectation, key) {
   return Object.freeze({ requestBytes, responseBytes, terminal: true });
 }
 
-export const contracts = Object.freeze({ authorityBindingSchema, sourceSelectionSchema, materializationRequestSchema, workspaceCancelRequestSchema, workspaceManifestSchema,
+export const contracts = Object.freeze({ authorityBindingSchema, sourceSelectionSchema, materializationRequestSchema, workspaceCancelRequestSchema, workspaceReconciliationRequestSchema, workspaceManifestSchema,
   materializationReceiptSchema, uploadSessionCreateRequestSchema, uploadSessionCreateResponseSchema,
   uploadManifestSchema, uploadManifestRecordSchema, controlPipeFrameSchema, gitStreamFrameSchema,
   gitOpenRequestSchema, gitOpenResponseSchema });

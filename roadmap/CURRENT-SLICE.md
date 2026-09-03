@@ -90,6 +90,16 @@ source commit and fresh independent GO. Its preflight now passes 10/10 focused a
 diff; these deterministic results earn no actual-system credit. Review:
 `../gate7f/function-first/M1-S2B1-SECOND-SEALED-CRITERIA-INDEPENDENT-REVIEW-2026-09-03.md`.
 
+Commit `b24389b` then stopped at P0=0/P1=3: the Windows oracle omitted `CONIN$`/`CONOUT$`, hashed policy times were
+not exact executable invariants, and a coordinator inside the Job could not terminate it and then truthfully publish
+the terminal receipt. No implementation or actual/model operation followed. The fourth correction closes those
+three only by completing the device oracle, binding all issued times to policy, requiring a real staged 120-second
+timeout, and making the external Control watchdog own deadline/Job termination/reconciliation/terminal receipt.
+Focused checks, source commit and fresh independent GO remain mandatory. Review:
+`../gate7f/function-first/M1-S2B1-THIRD-SEALED-CRITERIA-INDEPENDENT-REVIEW-2026-09-03.md`.
+Fourth-correction preflight now passes 11/11 focused and 15/15 roadmap checks with a clean diff; no actual or model
+operation ran.
+
 M1-S2B implementation checkpoint, 2026-09-02: the authority foundation and actual PostgreSQL lifecycle
 are green. The prior Omen DPAPI/handle-based file proof was 14/14, but shared native/helper bytes have since
 changed and that evidence is historical until one affected-scope rerun. The first actual

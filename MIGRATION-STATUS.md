@@ -469,6 +469,17 @@ source commit and another independent P0/P1 review remain mandatory. Third-corre
 focused contract checks and 15/15 roadmap checks with a clean diff; these deterministic results earn no actual-system
 credit.
 
+Commit `b24389b` sealed the third correction and its fresh review returned NO-GO at P0=0/P1=3. The reviewer reproduced
+10/10 focused and 15/15 roadmap checks, then proved that `CONIN$`/`CONOUT$` still passed, policy times were not exact
+schema invariants, and the coordinator inside the Job could not terminate that Job and afterward issue a truthful
+terminal receipt. No implementation or actual/model operation followed. The fourth prospective correction completes
+the printable-ASCII device oracle; binds materialization, upload, workspace and reconciliation times to the hashed
+policy; requires timeout to represent a real staged 120-second operation; and assigns Job/deadline/reconciliation/
+terminal-receipt ownership to the external Control watchdog. Review:
+`gate7f/function-first/M1-S2B1-THIRD-SEALED-CRITERIA-INDEPENDENT-REVIEW-2026-09-03.md`. Focused verification,
+source commit and fresh independent GO remain mandatory. Fourth-correction preflight now passes 11/11 focused
+contract checks and 15/15 roadmap checks with a clean diff; no actual or model operation ran.
+
 **Application slice, 2026-09-02:** model selection is complete and the retired R15 campaign is not being
 resumed. The active clean branch is `codex/m1-gemma-primary`, based on the five-function qualification
 decision. Gemma is the sole primary for Chat, Research, Code, Agent and Review. The immediate work is to

@@ -1,16 +1,15 @@
 # M1-S2B1 server-workspace materialization criteria — 2026-09-03
 
-Status: third corrected prospective criteria; fresh independent design review required before implementation
+Status: fourth corrected prospective criteria; fresh independent design review required before implementation
 
 Roadmap revision/digest retrieved before selection: `2026-08-28.1` / `6a8380d9e9e2f3eb07b7e51c77cda174c5541c0abbb07875dd5537627560cfd1`
 
 Milestone/capability scope: M1-S2B1; bounded C03/C06/C08/C15/C16 subsets
 
-The initial draft review and first sealed corrected-criteria review each returned NO-GO at P0=0/P1=7. The next review
-of exact commit `083c558` returned NO-GO at P0=0/P1=5 and is retained in
-`M1-S2B1-SECOND-SEALED-CRITERIA-INDEPENDENT-REVIEW-2026-09-03.md`. No dependency, implementation or actual
-operation followed any review. This third correction earns no acceptance credit until a fresh review returns
-P0=0/P1=0.
+The initial draft review and first sealed corrected-criteria review each returned NO-GO at P0=0/P1=7. Reviews of
+exact commits `083c558` and `b24389b` returned P0=0/P1=5 and P0=0/P1=3 respectively; the latter is retained in
+`M1-S2B1-THIRD-SEALED-CRITERIA-INDEPENDENT-REVIEW-2026-09-03.md`. No dependency, implementation or actual operation
+followed any review. This fourth correction earns no acceptance credit until a fresh review returns P0=0/P1=0.
 
 ## Outcome and reason this is next
 
@@ -88,11 +87,15 @@ independently reviewed and entered into the release manifest before installation
 which includes the upstream NTFS alternate-data-stream path fix; the proposed version is 1.41.0 but remains unpinned
 until that package review. No dependency download or implementation occurs under this criteria revision.
 
-The Control authority creates one **operation Job Object** with kill-on-close and active-process limit three, then
+The Control authority's watchdog remains outside the operation Job, owns its terminate/query/wait handle plus the
+created child-process handles, and is the only component allowed to enforce the deadline, terminate the Job, wait for
+zero active processes, reconcile filesystem/database state and publish a terminal receipt. It creates one
+**operation Job Object** with kill-on-close and active-process limit three, then
 creates the coordinator, materializer and optional ingress broker suspended under distinct, unique AppContainer SIDs.
 It sets mitigations, resource limits, DACLs and the exact inherited handle list before resume. No operation process
-may spawn a descendant. Broker-loss acceptance terminates this exact operation Job; terminal acceptance requires the
-Job's active-process count to reach zero.
+may spawn a descendant or inherit/duplicate the Job handle. Broker loss or timeout causes the external Control
+watchdog to terminate this exact operation Job; terminal acceptance requires that watchdog to observe the Job's
+active-process count reach zero before it records stopped/reconciled state.
 
 Coordinator control IPC and Git streaming IPC are separate:
 
@@ -125,7 +128,7 @@ The release manifest freezes the executable/runtime/DLL/module hashes and this e
 
 | Principal/process | Filesystem | Network | Environment/handles |
 |---|---|---|---|
-| Control authority process | PostgreSQL authority and protected workspace parent; creates exact opaque roots and performs final publication; no source contents in logs | existing application routes only | existing service environment; passes only explicit handles |
+| Control authority/watchdog outside operation Job | PostgreSQL authority and protected workspace parent; creates exact opaque roots, performs final publication/reconciliation and records the terminal receipt; no source contents in logs | existing application routes only | existing service environment; owns exact operation Job terminate/query/wait handle and created child-process handles; passes only explicit non-Job handles |
 | unique operation coordinator AppContainer | read pinned coordinator/runtime; no parent path/list right and no sibling; only inherited operation-root handles and object DACL rights | deny all | `SystemRoot`, `WINDIR`, owned `TEMP`/`TMP`, pinned-runtime-only `PATH`; control pipe handles only |
 | unique materializer AppContainer | read pinned materializer/runtime; inherited ingress/staging handles with exact data/write/append/attributes/delete/synchronize rights; no path-based parent traverse/list, final, sibling, application, database, profile, credential or Home access | deny all | same five-name environment; control handles plus the two Git stream handles only |
 | unique ingress AppContainer | read pinned ingress/runtime modules and read-only machine trust store required by the sealed host; no operation root, ingress, staging, final, database, application, profile, credential or Home access | outbound TCP only through the owned connector; all other connect paths fail closed and are audited | same five-name environment with empty proxy variables; control handles plus the two Git stream handles only |
@@ -291,6 +294,12 @@ cleanup-pending or removed; materialize is not a legal successor.
 The authoritative values are the two frozen policy JSON artifacts and their digests above; prose below is a readable
 summary and cannot override them.
 
+Executable contracts require the authority-issued materialization deadline to equal `createdAt + 120000 ms`, upload
+session expiry to equal `issuedAt + 120000 ms`, ready workspace expiry to equal `createdAt + 1800000 ms`, and each
+cleanup/reconciliation request deadline to equal `requestedAt + 30000 ms`. A timed-out receipt is valid only after a
+bound workspace reached durable staging, the real process is confirmed stopped, terminal database state and complete
+cleanup are recorded, and both monotonic duration and wall-clock span meet the 120000 ms deadline.
+
 - Maximum 2,000 regular files, 64 MiB total materialized bytes and 4 MiB per file.
 - Maximum normalized relative path: 1,024 UTF-8 bytes, 64 segments, 255 UTF-8 bytes per segment.
 - First-proof path character profile is printable ASCII only (`0x20`-`0x7e`); every non-ASCII path is rejected before
@@ -346,7 +355,8 @@ Git object storage and materialized content use separate roots; neither is `.git
 materializer fetches the configured ref without tags, resolves one commit, verifies the sealed expected commit,
 walks objects without checkout/archive extraction, and rejects symlink, gitlink/submodule, device or unsupported
 object types. Every output path uses the frozen printable-ASCII profile and rejects `.git` case variants, NTFS ADS
-including `::$INDEX_ALLOCATION`, reserved/device names including `COM¹`/`COM²`/`COM³` and `LPT¹`/`LPT²`/`LPT³`,
+including `::$INDEX_ALLOCATION`, reserved/device names including `CONIN$`, `CONOUT$`, `COM¹`/`COM²`/`COM³` and
+`LPT¹`/`LPT²`/`LPT³`,
 trailing dot/space aliases, absolute/traversal paths, duplicate/case collisions,
 reparse points and existing destinations. Files are opened create-new beneath the held staging identity and their
 bytes and aggregate manifest are SHA-256 checked. The separate Git object root is removed before `ready`.
@@ -377,8 +387,8 @@ request rejects browser/model-supplied participant/project/environment/capabilit
 
 - `POST /api/project-sources/folder-snapshots` with one strict
   `runa-browser-folder-upload-session-request/v1` body containing only display name and declared counts creates the
-  server-owned source/upload ids and returns `runa-browser-folder-upload-session/v1`, expiry and exact limits
-  profile/digest;
+  server-owned source/upload ids and returns `runa-browser-folder-upload-session/v1`, authority `issuedAt`, exact
+  120-second expiry and exact limits profile/digest;
 - `PUT /api/project-sources/folder-snapshots/{uploadId}/manifest` accepts one strict canonical
   `runa-browser-folder-upload-manifest/v1` body, maximum 512 KiB, with ordered included entries, ordered exclusions
   and no server id/binding/digest. The server compares declared session totals, applies the frozen exclusion/media
@@ -394,7 +404,7 @@ The server issues every upload/source id; the client never supplies one during c
 chunks; otherwise the exact chunk count is `ceil(fileBytes / 1 MiB)`, at most four. Included and excluded paths are
 strictly ordered/unique under Windows identity, cannot overlap and must equal the picker preview counts. The complete
 secret-basename/prefix/suffix exclusions and UTF-8 text-extension list are frozen in the materialization-policy file.
-The server NFC-normalizes and invariant-case-folds only for comparison, takes the last path segment as basename, and
+The server first rejects every non-ASCII path and then ASCII-lowercases only for comparison, takes the last path segment as basename, and
 excludes when that basename equals a listed basename, starts with a listed prefix or ends with a listed suffix. It
 classifies UTF-8 text only when the final extension equals a listed extension and the bytes pass strict UTF-8 decode
 without BOM/NUL; everything else remains binary and cannot be opened as text.
@@ -527,10 +537,11 @@ These are external actions against ordinary candidate paths, not alternate imple
 - **Timeout:** completely upload and finalize the ordinary browser-folder fixture, then submit the ordinary bound
   materialization request. After durable `staging` and the first actual staged file are observed, the external Control
   acceptance owner uses its existing process handle to suspend the real materializer process; it does not alter a row,
-  payload, deadline or application response. The real coordinator's frozen 120-second absolute deadline must
-  terminate the exact operation Job, publish the `materialization-timeout` receipt, remove/retain the real staging
-  state according to reconciliation, and permit retry only after reconciliation. This is an OS-level fault against
-  the production worker path—not a mock worker, response, endpoint or shortened test deadline.
+  payload, deadline or application response. The Control watchdog outside the Job enforces the frozen 120-second
+  absolute deadline, terminates the exact operation Job, waits until active-process count is zero, reconciles the real
+  staging/database state and only then publishes the `materialization-timeout` receipt. The coordinator never receives
+  a Job handle and cannot publish this terminal receipt. Retry is permitted only after reconciliation. This is an
+  OS-level fault against the production worker path—not a mock worker, response, endpoint or shortened test deadline.
 - **Broker loss after publication:** an external Control test owner watches the protected durable state until
   `published-pending-db`, then terminates the exact operation Job defined in the process topology. No source byte,
   endpoint result or

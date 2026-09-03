@@ -126,6 +126,12 @@ commit; their cause, pause/resume sequence, and evidence limits are recorded in
 candidate-only service/surface binding, then the production Control broker/worker/publication boundary. Actual
 Control/browser acceptance remains open and comparison-model testing remains tabled.
 
+The candidate-only service/surface binding now passes 31/31 focused checks and independent review. It routes the
+complete frozen participant operation set, permits only an empty browser request to connect the trusted configured
+public source, and makes all absent worker/read/cleanup ports explicitly unavailable without recording an intent.
+No UI availability is advertised. Exact scope and evidence limits:
+`../gate7f/function-first/M1-S2B1-CANDIDATE-SERVICE-SURFACE-2026-09-03.md`.
+
 M1-S2B implementation checkpoint, 2026-09-02: the authority foundation and actual PostgreSQL lifecycle
 are green. The prior Omen DPAPI/handle-based file proof was 14/14, but shared native/helper bytes have since
 changed and that evidence is historical until one affected-scope rerun. The first actual

@@ -7,11 +7,17 @@ const id = z.string().min(1).max(160).regex(/^[A-Za-z0-9][A-Za-z0-9_.:-]*$/);
 const schema = z.object({ projectId: id, experience: z.enum(["chat", "code"]),
   operation: z.enum(["sources.list", "sources.attach", "sources.retry", "sources.select", "project.prepare", "project.current",
     "task.create", "task.status", "task.cancel", "task.list", "grant.create", "grant.revoke", "proposal.create",
-    "proposal.approve", "proposal.execute", "proposal.reconcile", "run.start", "run.resume", "run.status", "run.list"]),
+    "proposal.approve", "proposal.execute", "proposal.reconcile", "run.start", "run.resume", "run.status", "run.list",
+    "source.connect-public-git", "source.connect-folder-snapshot", "workspace.materialize", "workspace.list-files",
+    "workspace.read-text", "workspace.cancel", "source.disconnect"]),
   input: z.unknown() }).strict();
 const METHODS = Object.freeze({ "task.create": "createTask", "task.status": "status", "task.cancel": "cancel",
   "grant.create": "createGrant", "grant.revoke": "revokeGrant", "proposal.create": "propose",
   "proposal.approve": "approve", "proposal.execute": "execute", "proposal.reconcile": "reconcile", "task.list": "listTasks" });
+const SERVER_WORKSPACE_METHODS = Object.freeze({ "source.connect-public-git": "connectPublicGit",
+  "source.connect-folder-snapshot": "connectFolderSnapshot", "workspace.materialize": "materialize",
+  "workspace.list-files": "listFiles", "workspace.read-text": "readText", "workspace.cancel": "cancel",
+  "source.disconnect": "disconnect" });
 export const M1_EXERCISE_FILES = Object.freeze({ "calculator.js": "// Disposable M1 exercise. This deliberately starts with a defect.\nexports.add = (a, b) => a - b;\n" });
 export const M1_EXERCISE_SUITE = Object.freeze({ suiteId: "calculator-add-v1", cases: [
   { testId: "positive", exportName: "add", args: [19, 8], expected: 27 },
@@ -44,10 +50,11 @@ export class M1SessionAuthority {
 
 export class M1FunctionSurface {
   constructor({ application, sources, tasks, orchestrator = null, sessions = new M1SessionAuthority(),
+    serverWorkspaces = null,
     prepareProject = context => ({ environmentId: `m1-${createHash("sha256").update(`${context.principalId}:${context.projectId}`).digest("hex").slice(0,32)}`,
       files: M1_EXERCISE_FILES }) }) {
     if (typeof prepareProject !== "function") throw fail("m1-trusted-project-fixtures-invalid");
-    Object.assign(this, { application, sources, tasks, orchestrator, sessions, prepareProject });
+    Object.assign(this, { application, sources, tasks, orchestrator, sessions, serverWorkspaces, prepareProject });
   }
   async checkedParticipant(credential, projectId, experience) {
     await this.application.authority();
@@ -83,6 +90,13 @@ export class M1FunctionSurface {
       const current = await this.checkedParticipant(await verifySession(), projectId, experience);
       return current.principalId === context.principalId;
     });
+    if (SERVER_WORKSPACE_METHODS[operation]) {
+      if (!this.serverWorkspaces) throw fail("server-workspace-unavailable");
+      const decision = await this.application.authorizer.authorize({ participant,
+        action: "propose-workspace-action", resource: `project:${projectId}` });
+      if (!decision?.allowed) throw fail("server-workspace-authorization-denied");
+      return this.serverWorkspaces[SERVER_WORKSPACE_METHODS[operation]](context, input);
+    }
     if (operation === "project.prepare") {
       if (input && Object.keys(input).length) throw fail("m1-surface-request-invalid");
       const fixture = await this.prepareProject(Object.freeze({ ...context }));

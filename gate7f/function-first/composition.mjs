@@ -15,6 +15,8 @@ import { createM1TaskWorkflow } from "./tasks/workflow.mjs";
 import { M1TaskOrchestrator } from "./tasks/orchestrator.mjs";
 import { M1RoleOrchestrator } from "./role-orchestrator.mjs";
 import { M1FunctionSurface, M1SessionAuthority, M1_EXERCISE_SUITE } from "./surface.mjs";
+import { PostgresServerWorkspaceStore } from "./server-workspace/postgres.mjs";
+import { ServerWorkspaceService } from "./server-workspace/service.mjs";
 
 const TRUSTED_TASK_HOOK_NAMES = new Set(["afterIntent", "beforeDispatch", "afterMaterialize", "afterTests", "afterCommit", "beforeCommit"]);
 export function validateTrustedTaskHooks(value) {
@@ -27,7 +29,8 @@ export function validateTrustedTaskHooks(value) {
   return Object.freeze({ ...value });
 }
 
-export async function composeM1Functions({ configuration, provider, pool, cipher, javascriptExecutor, dataDirectory, projectFixtures, taskHooks }) {
+export async function composeM1Functions({ configuration, provider, pool, cipher, javascriptExecutor, dataDirectory,
+  projectFixtures, taskHooks, serverWorkspace }) {
   // Construction-time fault injection for the isolated acceptance host only. These
   // hooks never enter a release schema, request, task, model plan or capability.
   const hooks = validateTrustedTaskHooks(taskHooks);
@@ -54,6 +57,17 @@ export async function composeM1Functions({ configuration, provider, pool, cipher
     suites: projectFixtures?.suites ?? { [M1_EXERCISE_SUITE.suiteId]: M1_EXERCISE_SUITE } });
   const store = new PostgresTaskStore({ pool, cipher }); await store.initialize();
   const sessions = new M1SessionAuthority();
+  let serverWorkspaces = null;
+  if (serverWorkspace !== undefined) {
+    if (!serverWorkspace || Object.getPrototypeOf(serverWorkspace) !== Object.prototype
+        || Object.keys(serverWorkspace).join(",") !== "sourceDefinition") {
+      throw new Error("m1-trusted-server-workspace-invalid");
+    }
+    const workspaceStore = new PostgresServerWorkspaceStore({ pool, cipher }); await workspaceStore.initialize();
+    serverWorkspaces = new ServerWorkspaceService({ store: workspaceStore,
+      sourceDefinition: serverWorkspace.sourceDefinition,
+      authorizeContext: context => sessions.authorize(context) });
+  }
   const tasks = new M1TaskService({ store, adapter, authorizeContext: context => sessions.authorize(context), hooks });
   const checkpointer = new PostgresSaver(pool, undefined, { schema: "runa_m1_checkpoints" }); await checkpointer.setup();
   const workflow = createM1TaskWorkflow({ service: tasks, checkpointer });
@@ -75,5 +89,6 @@ export async function composeM1Functions({ configuration, provider, pool, cipher
   }
   return { index, sources, tasks, orchestrator, review, health,
     attach(application) { return new M1FunctionSurface({ application, sources, tasks, orchestrator, sessions,
+      serverWorkspaces,
       ...(projectFixtures ? { prepareProject: projectFixtures.prepare } : {}) }); } };
 }

@@ -110,3 +110,32 @@ test("code endpoints require a live server-session verifier", async () => {
   const { surface } = fixture(); const value = request("project.prepare"); value.body.experience = "code"; delete value.verifySession;
   await assert.rejects(surface.dispatch(value), /session-verifier-required/);
 });
+
+test("server workspace operations route only after code, session, project and effect authorization", async () => {
+  const { application, sources, tasks, called } = fixture();
+  const serverWorkspaces = { async connectPublicGit(context, input) {
+    called.push(["connect-public-git", context, input]); return { created: true };
+  } };
+  const surface = new M1FunctionSurface({ application, sources, tasks, serverWorkspaces });
+  const value = request("source.connect-public-git", {}); value.body.experience = "code";
+  assert.deepEqual(await surface.dispatch(value), { created: true });
+  assert.equal(called.at(-2), "authorize");
+  assert.equal(called.at(-1)[0], "connect-public-git");
+  assert.equal(await surface.sessions.authorize(called.at(-1)[1]), true);
+});
+
+test("absent candidate service and deferred snapshot operation fail with explicit codes", async () => {
+  const { surface } = fixture();
+  const absent = request("source.connect-public-git", {}); absent.body.experience = "code";
+  await assert.rejects(surface.dispatch(absent), error => error.code === "server-workspace-unavailable");
+
+  const { application, sources, tasks } = fixture();
+  const serverWorkspaces = { async connectFolderSnapshot() {
+    throw Object.assign(new Error("server-workspace-folder-snapshot-unavailable"),
+      { code: "server-workspace-folder-snapshot-unavailable" });
+  } };
+  const routed = new M1FunctionSurface({ application, sources, tasks, serverWorkspaces });
+  const snapshot = request("source.connect-folder-snapshot", {}); snapshot.body.experience = "code";
+  await assert.rejects(routed.dispatch(snapshot),
+    error => error.code === "server-workspace-folder-snapshot-unavailable");
+});

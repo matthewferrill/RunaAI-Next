@@ -5,6 +5,7 @@ import pg from "pg";
 import { startSyntheticPostgres } from "../synthetic-postgres.mjs";
 import { testCipher } from "../../../gate4/fixtures.mjs";
 import { PostgresServerWorkspaceStore } from "./postgres.mjs";
+import { ServerWorkspaceService } from "./service.mjs";
 
 test("real PostgreSQL retains encrypted scoped source authority and idempotent intent", async t => {
   const root = path.resolve(import.meta.dirname, "../../..");
@@ -21,11 +22,22 @@ test("real PostgreSQL retains encrypted scoped source authority and idempotent i
 
   let store = new PostgresServerWorkspaceStore({ pool, cipher: testCipher() });
   await store.initialize();
-  const connected = await store.connectPublicGit(context, definition);
+  const operations = [];
+  const service = new ServerWorkspaceService({ store, sourceDefinition: definition,
+    authorizeContext: async (_context, operation) => { operations.push(operation); return true; } });
+  await assert.rejects(service.connectPublicGit(context, { repositoryHttpsUrl: definition.repositoryHttpsUrl }));
+  const connected = await service.connectPublicGit(context, {});
   assert.equal(connected.created, true);
   assert.equal(connected.source.lifecycle, "configured");
-  assert.equal((await store.connectPublicGit(context, definition)).created, false);
+  assert.equal((await service.connectPublicGit(context, {})).created, false);
   assert.equal((await store.listSources(context)).length, 1);
+
+  const beforeUnavailable = Number((await pool.query("SELECT count(*) AS count FROM runa_m1_server_workspaces.workspaces")).rows[0].count);
+  await assert.rejects(service.materialize(context, { sourceId: connected.source.sourceId }),
+    error => error.code === "server-workspace-materializer-unavailable");
+  const afterUnavailable = Number((await pool.query("SELECT count(*) AS count FROM runa_m1_server_workspaces.workspaces")).rows[0].count);
+  assert.equal(afterUnavailable, beforeUnavailable);
+  assert.deepEqual(operations, ["source.connect-public-git", "source.connect-public-git", "workspace.materialize"]);
 
   const first = await store.beginMaterialization(context, { sourceId: connected.source.sourceId });
   assert.equal(first.created, true);

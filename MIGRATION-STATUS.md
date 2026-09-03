@@ -509,6 +509,14 @@ test ledger expectation. An independent standing checker also stopped and correc
 record cross-binding, deadline, and cleanup issues before commit. Full RCA and exact resume boundaries:
 `gate7f/function-first/M1-S2B1-IMPLEMENTATION-PREFLIGHT-RCA-2026-09-03.md`.
 
+**M1-S2B1 candidate surface checkpoint, 2026-09-03:** the authenticated workspace surface now routes all seven
+frozen server-workspace operation names. A trusted candidate configuration can idempotently connect the selected
+public source; the browser cannot supply its URL/ref/commit or any host path. All operations whose real Control ports
+do not yet exist fail with explicit unavailable states, and unavailable materialization creates no intent. Focused
+verification passes 31/31 and independent review returned PASS. This is routing/local PostgreSQL evidence only, not
+an actual Control/browser or model result. Record:
+`gate7f/function-first/M1-S2B1-CANDIDATE-SERVICE-SURFACE-2026-09-03.md`.
+
 **Application slice, 2026-09-02:** model selection is complete and the retired R15 campaign is not being
 resumed. The active clean branch is `codex/m1-gemma-primary`, based on the five-function qualification
 decision. Gemma is the sole primary for Chat, Research, Code, Agent and Review. The immediate work is to

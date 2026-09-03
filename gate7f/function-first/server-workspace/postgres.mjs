@@ -21,7 +21,7 @@ const scopeId = z.string().min(1).max(160).regex(/^[^\u0000-\u001f\u007f]+$/u);
 const contextSchema = z.object({ principalId: scopeId, projectId: scopeId, sessionId: scopeId }).strict();
 const sourceIdSchema = z.string().regex(/^source-[a-f0-9-]{36}$/u);
 const workspaceIdSchema = z.string().regex(/^workspace-[a-f0-9-]{36}$/u);
-const trustedDefinitionSchema = z.object({
+export const publicGitSourceDefinitionSchema = z.object({
   environmentId: z.string().regex(/^[a-z0-9][a-z0-9_-]{7,127}$/u),
   displayName: z.string().min(1).max(120),
   repositoryHttpsUrl: z.string().min(1).max(2048),
@@ -107,7 +107,7 @@ export class PostgresServerWorkspaceStore {
   sourceRecord(context, row) {
     const value = this.decode("source", context, row.source_id, row);
     const selection = sourceSelectionSchema.parse(value?.selection);
-    const definition = trustedDefinitionSchema.parse({ environmentId: selection.environmentId,
+    const definition = publicGitSourceDefinitionSchema.parse({ environmentId: selection.environmentId,
       displayName: selection.displayName, repositoryHttpsUrl: selection.repositoryHttpsUrl,
       requestedRef: selection.requestedRef, expectedCommitOid: value?.expectedCommitOid });
     const ids = authorityIds(context, selection.environmentId);
@@ -164,7 +164,7 @@ export class PostgresServerWorkspaceStore {
   }
 
   async connectPublicGit(contextValue, definitionValue) {
-    const definition = trustedDefinitionSchema.parse(definitionValue);
+    const definition = publicGitSourceDefinitionSchema.parse(definitionValue);
     return this.scoped(contextValue, async (client, context) => {
       const definitionDigest = canonicalSha256(definition);
       const prior = (await client.query(`SELECT *

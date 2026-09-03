@@ -23,7 +23,15 @@ not run. Its first review stopped at P0=0/P1=4 on watcher-error, abnormal-cleanu
 pre-fixture policy-pin gaps. Those four items were corrected before focused preflight and independent
 exact-byte re-review were repeated.
 Focused checks pass 17/17, roadmap checks pass 15/15 and fresh exact-byte re-review returned GO with
-P0=0/P1=0. The source commit remains the only prerequisite to that one diagnostic run.
+P0=0/P1=0. At that point, the source commit was the only prerequisite to that one diagnostic run.
+Commit `fe0e3be` sealed the reviewed diagnostic, whose one run stopped before category watching, MXC or Git
+when the process-audit helper did not publish ready inside the file-only five-second wait. Cleanup left zero
+owned roots and matching helpers. Because stderr was discarded and early process exit was not raced, the
+underlying WMI-start condition is unknowable from the retained record. The corrected method captures only
+bounded stderr count/hash, races ready against error/exit, grants 30 seconds for actual Omen startup, starts
+the 30-second observation budget after WMI is armed and republishes the helper pin. It remains non-executable.
+Focused checks pass 17/17, roadmap checks pass 15/15, pinned PowerShell parsing and the helper pin pass, and fresh exact-byte review
+returned GO with P0=0/P1=0. A new source commit remains required. Acceptance stays paused.
 
 ## Slice selection record
 

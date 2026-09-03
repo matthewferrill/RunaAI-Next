@@ -75,7 +75,14 @@ vacuous process-audit acceptance and late policy-template-pin verification. The 
 error fatal, proves post-kill terminal exit before cleanup, requires observed pinned MXC and Git processes
 with zero survivors, and verifies the normalized policy template before fixture creation. It remains
 unexecuted. Focused checks pass 17/17, roadmap checks pass 15/15 and fresh exact-byte re-review returned GO
-with P0=0/P1=0. A source commit is the final prerequisite to its single execution.
+with P0=0/P1=0. Commit `fe0e3be` sealed those bytes. The single run then stopped before category watching,
+MXC or Git because its process-audit helper did not publish ready within a five-second file-only wait.
+Cleanup left zero owned roots/helpers. Because the method discarded helper stderr and ignored early exit at
+readiness, the underlying WMI-start condition is not retained. The correction uses bounded aggregate stderr
+metadata, races ready against error/exit, permits 30 seconds for actual Omen startup, begins the separate
+30-second observation budget only after WMI is armed, and repins the helper. It remains unexecuted. Focused
+checks pass 17/17, roadmap checks pass 15/15, pinned PowerShell parsing and the helper pin pass, and fresh exact-byte review returned
+GO with P0=0/P1=0. A new source commit remains required; acceptance remains paused.
 No browser, HTTPS, model or production work has run.
 
 Workspace baseline checkpoint: see

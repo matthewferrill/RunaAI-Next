@@ -96,7 +96,17 @@ exit, the process audit could accept no observed processes, and the policy-templ
 The revised source closes each point with a fail-closed error gate, bounded post-kill close proof, required
 pinned MXC/Git process observations and pre-fixture template-digest verification. It has not run; focused
 source/parser/observer/native checks pass 17/17, roadmap checks pass 15/15, and fresh exact-byte re-review
-returned GO with P0=0/P1=0. A source commit remains mandatory before its single execution.
+returned GO with P0=0/P1=0. Commit `fe0e3be` sealed those bytes. Its single diagnostic execution stopped
+before category watching, MXC or Git at `start-process-audit` because the process monitor did not publish
+ready within the five-second file-only wait. Read-only cleanup verification found zero owned roots and zero
+matching helper processes. This is a diagnostic-startup/method failure, not an application, Git or model
+failure. The runner had discarded monitor stderr and did not race early exit, so the underlying WMI-start
+condition is unknowable from retained evidence. The correction bounds and hashes stderr, races ready against
+terminal/error, gives actual Omen startup a bounded 30 seconds, starts the separate 30-second observation
+budget only after WMI is armed, and repins the helper. It remains unexecuted. Focused checks pass 17/17,
+roadmap checks pass 15/15, pinned
+PowerShell parsing and the helper pin pass, and fresh exact-byte review returned GO with P0=0/P1=0. A new
+source commit remains required before one corrected diagnostic; acceptance remains paused.
 
 **Application slice, 2026-09-02:** model selection is complete and the retired R15 campaign is not being
 resumed. The active clean branch is `codex/m1-gemma-primary`, based on the five-function qualification

@@ -11,12 +11,13 @@ Set-StrictMode -Version Latest
 $events = [Collections.Generic.List[object]]::new()
 $watcher = [Management.ManagementEventWatcher]::new('SELECT * FROM Win32_ProcessStartTrace')
 $watcher.Options.Timeout = [TimeSpan]::FromMilliseconds(100)
-$deadline = [DateTime]::UtcNow.AddMilliseconds($MaximumMs)
+$deadline = $null
 $rootProcess = $null
 
 try {
   $watcher.Start()
   [IO.File]::WriteAllText($ReadyPath, 'ready', [Text.Encoding]::ASCII)
+  $deadline = [DateTime]::UtcNow.AddMilliseconds($MaximumMs)
   while (-not [IO.File]::Exists($StopPath) -and [DateTime]::UtcNow -lt $deadline) {
     if (-not $rootProcess -and [IO.File]::Exists($RootPidPath)) {
       $observedRootPid = [int]([IO.File]::ReadAllText($RootPidPath, [Text.Encoding]::ASCII))

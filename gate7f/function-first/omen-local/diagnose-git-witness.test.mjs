@@ -7,10 +7,11 @@ import { loadOmenReleasePins } from "./release-pins.mjs";
 
 const runnerPath = resolve(import.meta.dirname, "diagnose-git-witness.mjs");
 const classifierPath = resolve(import.meta.dirname, "Classify-RunaRepositoryEvents.ps1");
+const processMonitorPath = resolve(import.meta.dirname, "Observe-RunaProcessTree.ps1");
 
 test("Git witness diagnostic is aggregate-only and limited to one status operation", async () => {
-  const [runner, classifier] = await Promise.all([
-    readFile(runnerPath, "utf8"), readFile(classifierPath, "utf8"),
+  const [runner, classifier, processMonitor] = await Promise.all([
+    readFile(runnerPath, "utf8"), readFile(classifierPath, "utf8"), readFile(processMonitorPath, "utf8"),
   ]);
   assert.match(runner, /observer\.observe\(candidate\.rootId, "status"\)/u);
   assert.equal((runner.match(/observer\.observe\(/gu) ?? []).length, 1);
@@ -24,6 +25,11 @@ test("Git witness diagnostic is aggregate-only and limited to one status operati
   assert.match(runner, /diagnostic-process-audit-terminal-missed/u);
   assert.match(runner, /pins\.processMonitorSha256/u);
   assert.ok(runner.indexOf("policyTemplateDigest(templateConfig)") < runner.indexOf("await mkdtemp("));
+  assert.match(runner, /waitForProcessReady\(processReadyPath, processMonitorExit, processDiagnostic\)/u);
+  assert.match(runner, /stdio: \["ignore", "ignore", "pipe"\]/u);
+  assert.match(runner, /stderrSha256/u);
+  assert.ok(processMonitor.indexOf("WriteAllText($ReadyPath")
+    < processMonitor.indexOf("$deadline = [DateTime]::UtcNow.AddMilliseconds($MaximumMs)"));
   assert.match(classifier, /NotifyFilters\]::FileName/u);
   assert.match(classifier, /NotifyFilters\]::LastWrite/u);
   assert.match(classifier, /NotifyFilters\]::Attributes/u);

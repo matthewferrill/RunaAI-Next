@@ -19,6 +19,26 @@ async function waitForFile(path, maximumMs = 5_000) {
   if (!existsSync(path)) throw coded("diagnostic-process-audit-ready-timeout");
 }
 
+async function waitForProcessReady(path, processOutcome, processDiagnostic, maximumMs = 30_000) {
+  const deadline = Date.now() + maximumMs;
+  while (!existsSync(path) && Date.now() < deadline) {
+    const signal = await Promise.race([
+      delay(20).then(() => null),
+      processOutcome.then(exitCode => ({ exitCode }), error => ({ error })),
+    ]);
+    if (signal) {
+      const error = coded(signal.error?.code ?? "diagnostic-process-audit-startup-failed");
+      Object.assign(error, processDiagnostic(), { exitCode: signal.exitCode ?? null });
+      throw error;
+    }
+  }
+  if (!existsSync(path)) {
+    const error = coded("diagnostic-process-audit-ready-timeout");
+    Object.assign(error, processDiagnostic(), { exitCode: null });
+    throw error;
+  }
+}
+
 async function treeDigest(root) {
   const hash = createHash("sha256");
   async function visit(path) {
@@ -191,15 +211,29 @@ export async function diagnoseGitWitness({ userProfilePath = homedir() } = {}) {
     processMonitor = spawn(pins.powershellPath, ["-NoLogo", "-NoProfile", "-NonInteractive",
       "-ExecutionPolicy", "Bypass", "-File", pins.processMonitorPath,
       "-ReadyPath", processReadyPath, "-RootPidPath", processRootPidPath,
-      "-StopPath", processStopPath, "-ResultPath", processResultPath, "-MaximumMs", "20000"],
-    { windowsHide: true, stdio: "ignore" });
+      "-StopPath", processStopPath, "-ResultPath", processResultPath, "-MaximumMs", "30000"],
+    { windowsHide: true, stdio: ["ignore", "ignore", "pipe"] });
+    let processMonitorStderr = Buffer.alloc(0), processMonitorOutputLimited = false;
+    processMonitor.stderr.on("data", chunk => {
+      if (processMonitorOutputLimited) return;
+      const next = Buffer.concat([processMonitorStderr, Buffer.from(chunk)]);
+      if (next.length > 64 * 1024) {
+        processMonitorOutputLimited = true;
+        try { processMonitor.kill(); } catch {}
+        return;
+      }
+      processMonitorStderr = next;
+    });
+    const processDiagnostic = () => ({ stderrBytes: processMonitorStderr.length,
+      stderrSha256: createHash("sha256").update(processMonitorStderr).digest("hex"),
+      outputLimited: processMonitorOutputLimited });
     processMonitorTerminal = new Promise(done => processMonitor.once("close", done));
     const processMonitorError = new Promise((_done, fail) =>
       processMonitor.once("error", () => fail(coded("diagnostic-process-audit-error"))));
-    processMonitorExit = bounded(Promise.race([processMonitorTerminal, processMonitorError]), 25_000,
+    processMonitorExit = bounded(Promise.race([processMonitorTerminal, processMonitorError]), 65_000,
       "diagnostic-process-audit-exit-timeout");
     processMonitorExit.catch(() => {});
-    await waitForFile(processReadyPath);
+    await waitForProcessReady(processReadyPath, processMonitorExit, processDiagnostic);
     const sdk = { createConfigFromPolicy, getPlatformSupport,
       spawnSandboxFromConfig: (config, options, cwd) => {
         const child = spawnSandboxFromConfig(config, options, cwd);
@@ -318,6 +352,8 @@ if (process.argv[1] && resolve(process.argv[1]) === resolve(import.meta.filename
   diagnoseGitWitness().then(result => process.stdout.write(`${JSON.stringify(result)}\n`), error => {
     process.stderr.write(`${JSON.stringify({ schemaVersion: "runaai-m1-omen-git-witness-diagnostic-error/v1",
       errorCode: error?.code ?? "diagnostic-failed", stage: error?.stage ?? "unknown",
+      exitCode: error?.exitCode ?? null, stderrBytes: error?.stderrBytes ?? null,
+      stderrSha256: error?.stderrSha256 ?? null, outputLimited: error?.outputLimited ?? null,
       privateValuesIncluded: false })}\n`);
     process.exitCode = 1;
   });

@@ -35,6 +35,8 @@ namespace RunaAI.OmenLocal {
     const uint FILE_FLAG_OPEN_REPARSE_POINT = 0x00200000;
     const uint FILE_FLAG_SEQUENTIAL_SCAN = 0x08000000;
     const uint FILE_ATTRIBUTE_REPARSE_POINT = 0x00000400;
+    const uint MOVEFILE_REPLACE_EXISTING = 0x00000001;
+    const uint MOVEFILE_WRITE_THROUGH = 0x00000008;
 
     [StructLayout(LayoutKind.Sequential)]
     struct FILETIME { public uint low; public uint high; }
@@ -59,6 +61,8 @@ namespace RunaAI.OmenLocal {
     static extern uint GetFinalPathNameByHandleW(SafeFileHandle handle, char[] path, uint size, uint flags);
     [DllImport("kernel32.dll", CharSet=CharSet.Unicode, SetLastError=true)]
     static extern uint GetShortPathNameW(string longPath, char[] shortPath, uint size);
+    [DllImport("kernel32.dll", CharSet=CharSet.Unicode, SetLastError=true)]
+    static extern bool MoveFileExW(string existingName, string newName, uint flags);
 
     static Exception Failure(string code) { return new InvalidOperationException(code); }
     static SafeFileHandle Open(string path, bool directory, bool shareDelete = true) {
@@ -136,6 +140,11 @@ namespace RunaAI.OmenLocal {
       uint length = GetShortPathNameW(Path.GetFullPath(path), buffer, (uint)buffer.Length);
       if (length == 0 || length >= buffer.Length) throw Failure("native-short-path-unavailable");
       return new string(buffer, 0, (int)length);
+    }
+    public static void CommitProtectedState(string temporaryPath, string destinationPath) {
+      if (!MoveFileExW(Path.GetFullPath(temporaryPath), Path.GetFullPath(destinationPath),
+          MOVEFILE_REPLACE_EXISTING | MOVEFILE_WRITE_THROUGH))
+        throw Failure("native-state-commit-failed");
     }
     static void RejectExecutableAttributes(string rootFull, string finalRoot, string finalGit) {
       string infoAttributes = Path.Combine(finalGit, "info", "attributes");
@@ -256,15 +265,20 @@ try {
   $entropy = [Text.Encoding]::UTF8.GetBytes('RunaAI-Omen-Local-v1')
   switch ($Action) {
     'protect' {
+      Ensure-RunaNativeType
       $path = [IO.Path]::GetFullPath([string]$inputValue.path)
       $plain = [Convert]::FromBase64String([string]$inputValue.dataBase64)
       $sealed = [Security.Cryptography.ProtectedData]::Protect($plain, $entropy,
         [Security.Cryptography.DataProtectionScope]::CurrentUser)
       $parent = [IO.Path]::GetDirectoryName($path)
       [IO.Directory]::CreateDirectory($parent) | Out-Null
-      $temporary = $path + '.new'
-      [IO.File]::WriteAllBytes($temporary, $sealed)
-      [IO.File]::Move($temporary, $path, $true)
+      $temporary = $path + '.new-' + [Guid]::NewGuid().ToString('N')
+      try {
+        [IO.File]::WriteAllBytes($temporary, $sealed)
+        [RunaAI.OmenLocal.NativeFile]::CommitProtectedState($temporary, $path)
+      } finally {
+        if ([IO.File]::Exists($temporary)) { [IO.File]::Delete($temporary) }
+      }
       Write-RunaJson @{ schemaVersion='runa-omen-native-result/v1'; protected=$true; bytes=$sealed.Length }
     }
     'unprotect' {

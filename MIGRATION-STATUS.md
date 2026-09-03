@@ -57,9 +57,17 @@ proof passed 13 focused checks, but a fifth review correctly found that watcher 
 drain and the proof mutation ran before contained-child completion, again P0=0/P1=2. The latest correction
 keeps the watcher enabled through a 250-millisecond quiet/drain barrier and fires the proof mutation after
 successful child close; the amended proof and 13 focused checks are green. Fresh
-independent review returned GO with P0=0/P1=0. A source commit remains mandatory before any actual retry.
-Models, browser/HTTPS
-acceptance and production remain untouched.
+independent review returned GO with P0=0/P1=0, and the reviewed source was committed as `11fa6c1`. Its
+affected actual Windows proof stopped at
+`confirm-and-protect-root` with `native-operation-failed`; no Git/MXC/network proof followed. Read-only
+reflection confirmed the root cause: pinned Windows PowerShell 5.1 exposes only the two-argument
+`System.IO.File.Move`, while the helper used the newer three-argument overwrite overload. The retained RCA
+and `MoveFileExW` correction plan are in
+`gate7f/function-first/M1-S2B-ACTUAL-WINDOWS-FAILURE-RCA-2026-09-02.md`. Corrected bytes remain
+non-executable. Six syntax checks, 14/14 focused checks, PowerShell parsing and the updated native release
+pin are green; fresh independent review returned GO with P0=0/P1=0. A new source commit remains mandatory.
+Models,
+browser/HTTPS acceptance and production remain untouched.
 
 **Application slice, 2026-09-02:** model selection is complete and the retired R15 campaign is not being
 resumed. The active clean branch is `codex/m1-gemma-primary`, based on the five-function qualification

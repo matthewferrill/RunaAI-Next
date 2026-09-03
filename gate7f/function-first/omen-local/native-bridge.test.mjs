@@ -1,6 +1,15 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
 import { OmenRootStore } from "./native-bridge.mjs";
+
+test("pinned Windows PowerShell helper uses the native atomic state-publish primitive", async () => {
+  const source = await readFile(new URL("./Invoke-RunaOmenNative.ps1", import.meta.url), "utf8");
+  assert.match(source, /MoveFileExW/u);
+  assert.match(source, /MOVEFILE_REPLACE_EXISTING \| MOVEFILE_WRITE_THROUGH/u);
+  assert.match(source, /native-state-commit-failed/u);
+  assert.doesNotMatch(source, /\[IO\.File\]::Move\([^\r\n]+,\s*\$true\)/u);
+});
 
 class FakeNative {
   constructor() { this.state = null; this.roots = new Map(); this.files = new Map(); }

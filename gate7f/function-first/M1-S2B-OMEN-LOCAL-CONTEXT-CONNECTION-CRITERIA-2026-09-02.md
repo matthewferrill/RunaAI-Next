@@ -2,14 +2,18 @@
 
 Status: the first startup amendment is published in `44ead36`. Later exact-byte implementation reviews
 stopped actual execution at P0=0/P1=8, P0=0/P1=5 and two successive P0=0/P1=2 reviews. The latest enabled-drain
-and late-event proof corrections are deterministic-green. Fresh exact-byte independent review returned
-GO with P0=0/P1=0; the source commit remains mandatory before actual execution.
+and late-event proof corrections became independently green and were committed in `11fa6c1`. The affected
+actual Windows proof then stopped at DPAPI state publication because the helper used a .NET overload absent
+from pinned Windows PowerShell 5.1. The root cause and finite correction are recorded in
+`M1-S2B-ACTUAL-WINDOWS-FAILURE-RCA-2026-09-02.md`. The correction passes 14/14 focused checks, syntax,
+PowerShell parsing and its updated release pin, but remains non-executable until fresh exact-byte
+independent review returned GO with P0=0/P1=0. A source commit remains mandatory before actual execution.
 
 ## Slice selection record
 
 - Selection date and source commit: 2026-09-02 / `4851818`.
 - Roadmap revision and SHA-256: `2026-08-28.1` /
-  `0b58eeda9563a03da4b896a0357796a0cfe1beda89a93fc36da3ee088f2470f8`.
+  `66c01202f400cb3290c09f0014ddf7ce24ae6474217e03a8ea67c101392e668f`.
 - Milestone and capability subsets: M1 product-foundation pull-forward; C02 project context, C03 explicit
   local text files, C06 repository orientation, C08 local Git observation, C15 usable connection/file
   surfaces, and C16 the exact Omen ordinary-user seat.

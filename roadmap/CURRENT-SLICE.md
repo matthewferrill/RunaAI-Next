@@ -43,8 +43,14 @@ the actual proof contains a mutate-and-restore arm. A fifth review found that cl
 and that the mutation was injected too early, again P0=0/P1=2. The latest correction keeps the watcher
 enabled through a bounded quiet/drain barrier and injects the byte-neutral mutation after successful child
 termination. Both corrections and the amended proof pass 13 focused
-checks; fresh independent review returned GO with P0=0/P1=0. A source commit remains mandatory before any
-actual retry.
+checks; fresh independent review returned GO with P0=0/P1=0, and those reviewed bytes were committed as
+`11fa6c1`. The affected actual Windows proof then
+stopped at `confirm-and-protect-root`: pinned Windows PowerShell 5.1 lacks the helper's three-argument
+`System.IO.File.Move` overload. No Git/MXC/network proof followed. The host-compatibility RCA and native
+`MoveFileExW` correction are recorded in
+`../gate7f/function-first/M1-S2B-ACTUAL-WINDOWS-FAILURE-RCA-2026-09-02.md`; the correction passes its six
+syntax checks, 14/14 focused checks, PowerShell parser and updated release pin. Fresh independent review
+returned GO with P0=0/P1=0. A source commit remains mandatory before one affected retry.
 No browser, HTTPS, model or production work has run.
 
 Workspace baseline checkpoint: see

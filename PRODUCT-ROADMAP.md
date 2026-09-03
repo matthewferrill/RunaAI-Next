@@ -136,7 +136,8 @@ contracts are recorded in
 M1-S2A has now implemented the first rebaseline slice: conversation lifecycle, real low-risk appearance
 settings and truthful Omen/Control/Home status in the single canvas. Deterministic verification and
 independent P0/P1 review are green; actual Control/database/browser acceptance remains a prerequisite to release. Local
-folder and local Git read-only are the next frozen implementation slice, not implied by the visible
+folder and local Git read-only are the next frozen implementation slice after independent criteria GO,
+not implied by the visible
 connection rows. Exact results are in
 `gate7f/function-first/M1-S2A-CONVERSATION-SETTINGS-SYSTEM-RESULTS-2026-09-02.md`.
 

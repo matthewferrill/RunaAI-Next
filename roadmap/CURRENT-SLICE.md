@@ -3,8 +3,9 @@
 Roadmap revision: 2026-08-28.1
 Milestone: M1
 Slice ID: M1-S2
-Status: M1-S2A product-foundation implementation and independent review are green; actual-system
-acceptance, application release and product qualification remain open.
+Status: M1-S2A product-foundation implementation and independent review are green. M1-S2B Omen local
+folder and local-Git read-only criteria are frozen after independent GO with P0=0/P1=0; implementation,
+actual-system acceptance, application release and product qualification remain open.
 
 Product-foundation checkpoint, 2026-09-02: the single-canvas workspace now implements participant-scoped
 conversation search/rename/archive/unarchive/branch/export/soft-delete, persisted low-risk appearance
@@ -17,6 +18,13 @@ not model or application failures. Independent publication review returned GO wi
 No model call, actual Control database acceptance, Control deployment or
 production routing occurred. Exact evidence and remaining gates are in
 `../gate7f/function-first/M1-S2A-CONVERSATION-SETTINGS-SYSTEM-RESULTS-2026-09-02.md`.
+
+Local-context connection freeze, 2026-09-02: `M1-S2B-OMEN-LOCAL-CONTEXT-CONNECTION-CRITERIA-2026-09-02.md`
+binds the next slice to the real Omen/Control split. Omen alone owns native folder selection, DPAPI root
+custody, bounded file reads and allowlisted local Git. Control PostgreSQL owns participant/project/device
+authorization, lifecycle and revocation. Browser-relayed results require signed receipts. No model,
+automatic indexing, write, Git mutation, remote operation or production route is included. Implementation
+has not started and waits for the criteria publication commit.
 
 Workspace baseline checkpoint: see
 `gate7f/function-first/M1-S2-WORKSPACE-BASELINE-IMPLEMENTATION-RESULTS-2026-09-02.md` for the accepted

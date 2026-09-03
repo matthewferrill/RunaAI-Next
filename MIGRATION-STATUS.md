@@ -24,10 +24,18 @@ export and recoverable delete. Four low-risk preferences persist per participant
 governed. Connection rows remain non-executable until their actual slices. Focused/cross-gate/roadmap
 checks pass 12/12, 91/91 and 15/15; the owned predecessor-upgrade PostgreSQL proof passes 25/25. The restricted tracked run reported four permission-only Windows
 ACL/process failures; its exact source file passed 31/31 in the required unrestricted Windows context,
-so no blind full-suite retry or model run occurred. Independent review and the exact actual Control
-publication review returned GO with zero P0/P1 findings; the exact actual Control
+so no blind full-suite retry or model run occurred. Independent publication review returned GO with zero
+P0/P1 findings; the exact actual Control
 database/browser/release gate remains open. No production route changed. See
 `gate7f/function-first/M1-S2A-CONVERSATION-SETTINGS-SYSTEM-RESULTS-2026-09-02.md`.
+
+**M1-S2B criteria freeze, 2026-09-02:** independent review returned GO with P0=0/P1=0 for
+`gate7f/function-first/M1-S2B-OMEN-LOCAL-CONTEXT-CONNECTION-CRITERIA-2026-09-02.md`. The new deployment
+cannot copy the legacy localhost assumption: Control cannot read Omen paths. A loopback-only Omen
+companion retains DPAPI-protected local root/key custody while Control PostgreSQL retains
+participant/project/device authorization and immediate revocation. File and fixed-command local-Git
+reads require pre-read Control capabilities and signed receipts; models, writes, remotes and production
+routing remain out of scope. Implementation waits for the criteria publication commit.
 
 **Application slice, 2026-09-02:** model selection is complete and the retired R15 campaign is not being
 resumed. The active clean branch is `codex/m1-gemma-primary`, based on the five-function qualification

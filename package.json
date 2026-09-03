@@ -71,6 +71,7 @@
     "@opentelemetry/exporter-trace-otlp-http": "0.221.0",
     "@opentelemetry/sdk-node": "0.221.0",
     "ai": "^7.0.67",
+    "isomorphic-git": "1.41.0",
     "pg": "8.23.0",
     "quickjs-emscripten": "0.32.0",
     "zod": "^4.4.3"

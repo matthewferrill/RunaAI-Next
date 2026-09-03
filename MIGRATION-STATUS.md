@@ -487,14 +487,16 @@ GO advances M1-S2B1 only to the separately gated Git-library package review; it 
 system acceptance credit. Review:
 `gate7f/function-first/M1-S2B1-FOURTH-SEALED-CRITERIA-INDEPENDENT-REVIEW-2026-09-03.md`.
 
-The next read-only package review is prepared but not yet independently accepted. `isomorphic-git@1.41.0` registry
-SHA-512/SHA-1 match the downloaded disposable tarball; its 36 regular files/4,891,940 unpacked bytes bind to unpacked-
-manifest SHA-256 `12cae54e881d4db9fe8e7f307135c0524bc62e08eb0478761f74957e82f64db8`. An isolated
-lock-only resolution binds 55 registry packages at closure SHA-256
-`b1f68762fd0c3ed16f3a57fd8683168bf856609683526e18a027036d057f8820`, with no install scripts; the 2026-09-03
-npm advisory observation is 0. Runtime admission allows only the ESM core with Runa's broker transport and denies the
-package CLI/HTTP adapters/CJS/UMD/manager/model entry points. Package checks pass 3/3 and roadmap checks 15/15. No
-repository install, implementation, actual operation or model call occurred. Package review:
+The practical `isomorphic-git@1.41.0` package gate is complete. Its exact version and matching registry SHA-512 are
+retained in the repository lockfile after a lifecycle-scripts-disabled install. All 55 reviewed closure packages are
+retained with registry resolution and integrity and none declares an install script. The isolated closure's 2026-09-03
+advisory result remains zero. The full application reports four advisories through pre-existing Mastra/AI-SDK
+dependencies whose affected versions were already present at `ff37b49`; they are tracked separately and are not
+attributed to `isomorphic-git`. Runtime admission allows only the ESM core with Runa's broker and denies the package
+CLI/HTTP adapters/CJS/UMD/manager/model entry points. Package checks pass 4/4. Deeper source-build, signature archival
+and archive-ledger formalization are deferred release hardening rather than implementation blockers. No implementation,
+actual operation or model call has occurred. The next work is the smallest public-repository materialization path,
+then one exact-commit review and one real Control/browser journey. Package review:
 `gate7f/function-first/M1-S2B1-ISOMORPHIC-GIT-PACKAGE-REVIEW-2026-09-03.md`.
 
 **Application slice, 2026-09-02:** model selection is complete and the retired R15 campaign is not being

@@ -3,6 +3,8 @@ import { readFileSync } from "node:fs";
 import test from "node:test";
 
 const manifest = JSON.parse(readFileSync(new URL("./m1-s2b1-isomorphic-git-release-manifest.json", import.meta.url), "utf8"));
+const packageJson = JSON.parse(readFileSync(new URL("../../../package.json", import.meta.url), "utf8"));
+const packageLock = JSON.parse(readFileSync(new URL("../../../package-lock.json", import.meta.url), "utf8"));
 const digest = /^[a-f0-9]{64}$/u;
 
 test("pins the exact reviewed registry artifact and unpacked release", () => {
@@ -40,5 +42,27 @@ test("admits only the ESM core with the Runa broker and records a time-bound cle
   }
   assert.equal(manifest.advisoryObservation.total, 0);
   assert.equal(manifest.advisoryObservation.timeBoundNotPermanentGuarantee, true);
-  assert.equal(manifest.reviewState, "prospective-uninstalled");
+  assert.equal(manifest.reviewState, "installed-pending-implementation");
+});
+
+test("retains the exact reviewed package and closure in the repository lockfile", () => {
+  assert.equal(packageJson.dependencies[manifest.package.name], manifest.package.version);
+  assert.equal(packageLock.packages[""].dependencies[manifest.package.name], manifest.package.version);
+  const installed = packageLock.packages["node_modules/isomorphic-git"];
+  assert.equal(installed.version, manifest.package.version);
+  assert.equal(installed.resolved, manifest.registryArtifact.url);
+  assert.equal(installed.integrity, `sha512-${manifest.registryArtifact.sha512Base64}`);
+
+  const retained = new Set();
+  for (const [lockPath, value] of Object.entries(packageLock.packages)) {
+    if (!lockPath || !value.version) continue;
+    const name = value.name ?? lockPath.slice(lockPath.lastIndexOf("node_modules/") + "node_modules/".length);
+    retained.add(`${name}@${value.version}`);
+    if (manifest.isolatedResolution.packageIds.includes(`${name}@${value.version}`)) {
+      assert.match(value.integrity, /^sha512-/u, `${name} integrity`);
+      assert.match(value.resolved, /^https:\/\/registry\.npmjs\.org\//u, `${name} registry`);
+      assert.notEqual(value.hasInstallScript, true, `${name} install script`);
+    }
+  }
+  for (const id of manifest.isolatedResolution.packageIds) assert.equal(retained.has(id), true, id);
 });

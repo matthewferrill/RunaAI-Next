@@ -2,11 +2,11 @@
 
 ## Status
 
-Prospective package record complete; source commit and independent review are required before installation.
+Practical package gate complete; implementation may begin.
 
-No package was installed in the repository. Registry metadata, the exact tarball and an isolated dependency-only
-lockfile were inspected in a disposable temporary directory. No endpoint other than the public npm registry and
-official public GitHub release pages was used. No Control/browser operation or model invocation occurred.
+The exact package is installed in the repository lockfile with lifecycle scripts disabled. Registry metadata, the
+exact tarball and an isolated dependency-only lockfile were also inspected in a disposable temporary directory. No
+Control/browser operation or model invocation occurred.
 
 ## Candidate and provenance
 
@@ -22,7 +22,7 @@ official public GitHub release pages was used. No Control/browser operation or m
 - Exact machine-readable record:
   `server-workspace/m1-s2b1-isomorphic-git-release-manifest.json`.
 - Canonical release-manifest SHA-256:
-  `b10102e79b9ffbd10c92efe411ec0f33c5faf98ed81cdf95fec9743eb30cbd92`.
+  `6f09998cca1cd0572b2c9aa9bd26398e9acff095f0ab0b841275d980f57f4d9a`.
 
 Release `1.38.7` is the upstream NTFS Alternate Data Streams fix. Candidate `1.41.0` is later than that floor and its
 official release adds HTTP `fetchOptions`; Runa does not expose those options to a participant or model.
@@ -35,9 +35,11 @@ The full path/version/integrity/resolved-url/script tuple set is bound by closur
 `b1f68762fd0c3ed16f3a57fd8683168bf856609683526e18a027036d057f8820`; its package ids are retained in the manifest.
 The isolated lockfile SHA-256 is `52c8b6910bf5d50718c0a5998751eaae898bc4df28b8adaa4f05b7b50e77f579`.
 
-`npm audit --package-lock-only` reported zero info, low, moderate, high or critical advisories on 2026-09-03. This is
-a time-bound registry observation, not a permanent safety guarantee. Installation must reproduce the exact package
-version, registry integrity and reviewed closure; drift stops the gate and triggers package re-review.
+The isolated `isomorphic-git` closure reported zero advisories on 2026-09-03. The full pre-existing application
+lockfile currently reports four advisories (two low, one moderate and one high) through Mastra/AI-SDK dependencies;
+all affected package versions were already present at `ff37b49`, and none belongs to the retained `isomorphic-git`
+closure. This is a time-bound observation, not a permanent safety guarantee. The application advisories remain a
+separate dependency-maintenance item and are not attributed to this package installation.
 
 ## Runtime entry-point decision
 
@@ -53,6 +55,8 @@ release allowlist and custom transport are the only reachable paths.
 
 ## Gate result
 
-The package is suitable to submit for independent package-review GO. This document does not authorize installation by
-itself and provides no implementation or actual-system acceptance credit. Package-record checks pass 3/3 and roadmap
-checks pass 15/15 with a clean diff.
+The practical entry gate is satisfied: exact version and registry integrity, scripts-disabled installation, retained
+lockfile closure, time-bound audit observation, and ESM-core-only admission through Runa's broker. The earlier requests
+for a reproducible source-to-tarball build, full signature archival and expanded archive-ledger formalization are
+deferred release hardening, not implementation blockers. This provides no implementation or actual-system acceptance
+credit. One exact-commit implementation review and one real Control/browser journey remain required.

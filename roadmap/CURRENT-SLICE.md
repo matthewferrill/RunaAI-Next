@@ -106,10 +106,14 @@ This approves only the separately gated Git-library package review; package inst
 blocked. Review:
 `../gate7f/function-first/M1-S2B1-FOURTH-SEALED-CRITERIA-INDEPENDENT-REVIEW-2026-09-03.md`.
 
-The uninstalled `isomorphic-git@1.41.0` package record is now prepared: registry integrity matches, 36 unpacked files
-bind to an exact manifest, 55 registry-resolved packages bind to an exact closure, no install scripts are present, the
-time-bound npm advisory result is zero, and only the ESM core with Runa's broker is runtime-admitted. Package checks
-pass 3/3 and roadmap checks 15/15. Source commit and independent package-review GO still gate installation. Review:
+The practical `isomorphic-git@1.41.0` package gate is now complete. The exact dependency and matching registry
+integrity are retained in the repository lockfile after a scripts-disabled install; all 55 reviewed closure packages
+remain registry-resolved with integrity and no install scripts. The isolated closure's 2026-09-03 advisory result is
+zero. Four full-application advisories were already present at `ff37b49` through separate Mastra/AI-SDK dependencies
+and are not attributed to this package. Only the ESM core with Runa's broker is runtime-admitted. Package checks pass
+4/4. Deeper build/signature/archive-ledger work is deferred release hardening. The next work is the smallest public-
+repository Control materialization path, followed by one exact-commit implementation review and one actual
+Control/browser journey. Review:
 `../gate7f/function-first/M1-S2B1-ISOMORPHIC-GIT-PACKAGE-REVIEW-2026-09-03.md`.
 
 M1-S2B implementation checkpoint, 2026-09-02: the authority foundation and actual PostgreSQL lifecycle

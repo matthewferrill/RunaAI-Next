@@ -272,6 +272,18 @@ fresh exact-byte review must repeat before commit.
 Fresh exact-byte re-review returned GO with P0=0/P1=0 and reproduced focused checks 35/35, roadmap checks 15/15
 and a clean diff check. No actual operation ran. A source commit is now the remaining gate before the one
 single-status diagnostic.
+Commit `77b3eeb` sealed the reviewed correction. Its sole actual status stopped with exit 128,
+`failureKind:permission-denied`, 50 stderr bytes and hash
+`25796725b6f5b304af0f76f2361e36b924b4a4e74bbe8b36887a1af9d84b329a`; repository/resources/fixture cleanup
+all passed and a read-only postcheck found zero roots/helpers. No successor/network/browser/model/production
+action ran. The prior cwd fatal is gone, but the record does not reveal whether runtime, refs, objects, index,
+attributes or work-tree access was denied. Acceptance stopped again. The frozen next diagnostic uses only
+existing local read-only verbs in order `branches -> show -> diffstat -> status`, proves unchanged/terminal state
+between operations, stops at the first fatal/error and publishes only fixed attempt aggregates. It permits no
+remotes, timeout, process audit, network, browser, model or production work and gives no acceptance credit.
+Deterministic tests, independent review and a source commit precede its one execution.
+Fresh design re-review returned GO with P0=0/P1=0 and reproduced the clean diff and 15/15 roadmap checks. No
+implementation or actual operation ran; the design must now be source-committed before implementation.
 
 **Application slice, 2026-09-02:** model selection is complete and the retired R15 campaign is not being
 resumed. The active clean branch is `codex/m1-gemma-primary`, based on the five-function qualification

@@ -648,3 +648,89 @@ format. Fresh deterministic checks and independent exact-byte review remain mand
 Fresh exact-byte re-review returned GO with P0=0/P1=0, independently reproducing 35/35 focused checks, 15/15
 roadmap checks and a clean diff check. No actual operation ran. These bytes may now be source-committed before
 the sole corrected single-status diagnostic.
+
+## Corrected single-status permission stop
+
+Commit `77b3eeb` sealed the independently reviewed cwd correction. Its one permitted actual execution again
+stopped after exactly one `status`, but the prior working-directory fatal is no longer present. The completed
+record reports exit 128, `failureKind:"permission-denied"`, 50 stderr bytes and SHA-256
+`25796725b6f5b304af0f76f2361e36b924b4a4e74bbe8b36887a1af9d84b329a`. The repository was unchanged; one
+wrapper, two witnesses and one guard were terminal/released; the fixture was removed; and no successor,
+network, browser, model or production action ran. An independent read-only postcheck found zero matching owned
+roots and helpers.
+
+The retained record proves only a single LF/CRLF-normalized fatal line containing exactly one of the allowlisted
+permission phrases and no competing fatal family. It does not expose the message stem, a path or the denied
+resource, so it cannot distinguish Git-runtime, refs, objects, index, attributes or work-tree access. The cwd
+correction demonstrably moved execution beyond the former cwd failure, but a successful status is not proven.
+This is an actual Omen Git permission-boundary failure, not a model/browser/network/production failure. Blindly
+rerunning status or widening filesystem authority is prohibited.
+
+### Frozen permission-boundary diagnostic design
+
+Implement one separately reviewed, source-sealed diagnostic using the same `77b3eeb` release pins, fixture,
+observer, witnesses, guard, cleanup and privacy boundary. It may invoke only existing read-only local public
+verbs, in this exact order: `branches`, `show` for the already-created exact commit, `diffstat`, then `status`.
+The order provides progressively broader Git observations, but the verbs overlap in their access to configuration,
+refs, objects, attributes, index and work-tree state. A first failure identifies only the earliest failing verb in
+this fixed sequence; it does not by itself identify the denied resource or access surface.
+After each operation it must prove the repository tree unchanged and all operation-owned resources terminal
+before starting the next. The first fatal or any harness/parser/lifecycle error stops immediately; no later verb
+starts. At most four wrappers, eight witnesses and four guards may exist. Remotes, timeout, process-audit,
+network listeners/probes, browser, model and production paths remain unreachable.
+
+A completed record has schema `runaai-m1-omen-git-permission-boundary-diagnostic/v1` and exactly these top-level
+keys in this order: `schemaVersion`, `plannedOperations`, `outcome`, `operationCount`,
+`successorAfterFailure`, `attempts`, `repositoryUnchanged`, `wrapperCount`, `witnessCount`, `guardCount`,
+`wrappersTerminal`, `witnessesTerminal`, `guardsReleased`, `fixtureRemoved`, `privateValuesIncluded`,
+`productionChanged`, `modelCalled`. `plannedOperations` is exactly
+`["branches","show","diffstat","status"]`; `outcome` is `first-fatal` or `all-succeeded`;
+`operationCount` is integer 1..4 and equals `attempts.length`; `successorAfterFailure` is false. Attempts are the
+exact ordered prefix of `plannedOperations` and each has exactly these keys in this order: `operation`, `outcome`,
+`exitCode`, `failureKind`, `stderrBytes`, `stderrSha256`, `repositoryUnchanged`, `wrapperTerminal`,
+`witnessesTerminal`, `guardReleased`. The last four attempt booleans are true. Attempt `outcome` is `succeeded`
+or `git-fatal`. A succeeded attempt has exit 0, null `failureKind`, zero stderr bytes and
+`stderrSha256:"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"`, the SHA-256 of empty bytes. A
+fatal attempt has integer exit code 1..4,294,967,295, integer stderr bytes 1..262,144, lowercase 64-hex SHA-256
+and `failureKind` exactly one of `dubious-ownership`, `repository-not-found`, `working-directory`,
+`configuration`, `index-or-object-read`, `option-or-usage`, `permission-denied`, `unknown`. `first-fatal`
+requires only the final attempt to be fatal and every predecessor to succeed; `all-succeeded` requires four
+succeeded attempts. Top-level `repositoryUnchanged`, `wrappersTerminal`, `witnessesTerminal`, `guardsReleased`
+and `fixtureRemoved` are true; `wrapperCount` and `guardCount` equal `operationCount`; `witnessCount` equals
+twice `operationCount`; and the three privacy/effect booleans are false. Any extra key, invalid order, other
+null shape, nonzero success stderr or nonterminal state rejects completed publication.
+
+A harness/instrumentation failure publishes schema
+`runaai-m1-omen-git-permission-boundary-diagnostic-error/v1` with exactly these top-level keys in this order:
+`schemaVersion`, `errorCode`, `stage`, `plannedOperations`, `operationCount`, `successorAfterFailure`,
+`attempts`, `wrapperCount`, `witnessCount`, `guardCount`, `wrappersTerminal`, `witnessesTerminal`,
+`guardsReleased`, `fixtureDisposition`, `privateValuesIncluded`. `plannedOperations` and attempt keys/value
+rules are identical to the completed schema; attempts are only a validated terminal prefix and contain at most
+one fatal, which may only be last. `operationCount` is integer 0..4 and counts started observer invocations;
+`attempts.length` is either `operationCount` or, when the current invocation did not reach a valid terminal Git
+observation, `operationCount - 1`. `wrapperCount` and `guardCount` are integers 0..`operationCount`, and
+`witnessCount` is integer 0..twice `operationCount`; the three terminal fields are booleans.
+`successorAfterFailure` and `privateValuesIncluded` are false. `stage` is exactly one of `preflight`,
+`create-owned-repository`, `confirm-owned-git-root`, `contained-git-branches`, `contained-git-show`,
+`contained-git-diffstat`, `contained-git-status`, `cleanup`, `publication`; `errorCode` is exactly one of
+`diagnostic-preflight-failed`, `diagnostic-fixture-failed`, `diagnostic-observer-failed`,
+`diagnostic-cleanup-failed`, `diagnostic-contract-invalid`. Cleanup uses bounded waits for every started wrapper,
+witness and guard. `fixtureDisposition` is `removed` only when all started resources are proved terminal/released
+and deletion is verified; if any closure is unresolved, deletion is forbidden and the fixture is `retained`.
+Raw stderr, paths, PIDs, command lines, Git fields, exception text and any extra key never cross either schema.
+
+This diagnostic gives no acceptance credit. A first fatal localizes the next RCA only to the earliest failing
+verb in the fixed sequence; `all-succeeded` would establish only that the failure did not recur in this bounded sequence and would
+still require a fresh full-proof admission decision. Deterministic contract/lifecycle/adversarial tests,
+roadmap checks, exact-byte independent review and a source commit are mandatory before its one execution.
+Acceptance remains paused.
+
+The first independent review of this design returned NO-GO at P0=0/P1=3: it rejected resource-level
+localization from overlapping verbs, found the completed schema inexact and found abnormal cleanup/error
+publication underspecified. The exact verb-only claim, completed/error key sets, enums, null/bound rules,
+prefix/count relationships and fail-closed fixture-retention rule above close those findings. These revised
+design bytes require fresh independent review before implementation.
+
+Fresh independent design re-review returned GO with P0=0/P1=0 and reproduced the clean diff check and 15/15
+roadmap checks. No implementation or actual operation ran. A documentation-only source commit is now the
+remaining gate before implementing this exact contract.

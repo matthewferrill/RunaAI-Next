@@ -99,6 +99,15 @@ mandatory before the sole permitted corrected single-status diagnostic; acceptan
 Fresh exact-byte re-review returned GO with P0=0/P1=0 and independently reproduced 35/35 focused checks,
 15/15 roadmap checks and a clean diff check. No actual operation ran. A source commit is now the sole remaining
 gate before that single-status diagnostic.
+Commit `77b3eeb` sealed the correction. The sole corrected actual status moved beyond the old cwd category but
+stopped with exit 128 and a 50-byte `permission-denied` fatal; unchanged/terminal/removed cleanup passed, a
+read-only postcheck found zero roots/helpers, and no successor/network/browser/model/production path ran. The
+denied resource is not present in the public record, so acceptance remains paused. The separately gated bounded
+diagnostic in the Git-witness RCA orders only existing local read-only verbs `branches`, `show`, `diffstat`,
+`status`, stops at the first fatal/error and provides no acceptance credit. It requires deterministic proof,
+independent review and a source commit before one execution.
+Fresh independent design re-review returned GO with P0=0/P1=0 and reproduced the clean diff and 15/15 roadmap
+checks. No implementation or actual operation ran; the design must now be source-committed before implementation.
 
 ## Slice selection record
 

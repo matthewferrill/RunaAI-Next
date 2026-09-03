@@ -226,6 +226,15 @@ ran; deterministic checks and fresh exact-byte review must repeat before commit.
 Fresh exact-byte re-review returned GO with P0=0/P1=0 and reproduced 35/35 focused checks, 15/15 roadmap checks
 and a clean diff check. No actual operation ran. A source commit is now the remaining gate before the one
 single-status diagnostic.
+Commit `77b3eeb` sealed the correction. Its sole actual status stopped at a new 50-byte, exit-128
+`permission-denied` fatal; unchanged repository, terminal resources, fixture removal and a zero-root/helper
+postcheck passed, and no successor/network/browser/model/production path ran. The prior cwd fatal is gone, but
+the denied resource is not published. Acceptance is stopped. The frozen diagnostic next orders only existing
+local read-only verbs `branches -> show -> diffstat -> status`, proves unchanged/terminal state between them,
+stops at the first fatal/error and publishes fixed aggregates only. It gives no acceptance credit and requires
+deterministic tests, independent review and a source commit before its one run.
+Fresh design re-review returned GO with P0=0/P1=0 and reproduced the clean diff and 15/15 roadmap checks. No
+implementation or actual operation ran; the design must now be source-committed before implementation.
 
 Workspace baseline checkpoint: see
 `gate7f/function-first/M1-S2-WORKSPACE-BASELINE-IMPLEMENTATION-RESULTS-2026-09-02.md` for the accepted

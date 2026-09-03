@@ -10,7 +10,7 @@ test("fatal diagnostic shares pre-status fixture and branches before every succe
   assert.ok(proof.indexOf("policyTemplateDigest(policyProbe, policyProbeRoot, pins.gitInstallRoot)")
     < proof.indexOf("await mkdtemp("));
   const start = proof.indexOf("if (fatalDiagnostic) {");
-  const stop = proof.indexOf("} else {\n    const status = await unchanged", start);
+  const stop = proof.indexOf("} else if (permissionBoundaryDiagnostic) {", start);
   assert.ok(start > 0 && stop > start);
   const branch = proof.slice(start, stop);
   assert.equal((branch.match(/observer\.observe\(/gu) ?? []).length, 1);

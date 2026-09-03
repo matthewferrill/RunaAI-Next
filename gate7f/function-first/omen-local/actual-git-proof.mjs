@@ -12,6 +12,9 @@ import { createContainedGitConfig, fixedArguments, OmenGitObserver, policyTempla
   spawnSandboxWithPinnedCwd } from "./git-observer.mjs";
 import { completedGitFatalDiagnostic, EMPTY_SHA256, failedGitFatalDiagnostic }
   from "./git-fatal-diagnostic-contract.mjs";
+import { completedPermissionBoundaryDiagnostic, createPermissionBoundaryCoordinator,
+  failedPermissionBoundaryDiagnostic }
+  from "./git-permission-boundary-diagnostic-contract.mjs";
 import { OmenRootStore, WindowsNativeBridge } from "./native-bridge.mjs";
 import { loadOmenReleasePins } from "./release-pins.mjs";
 import { startRepositoryWitness, startUiWitness } from "./windows-witness.mjs";
@@ -82,7 +85,10 @@ async function treeDigest(root) {
   await visit(root); return hash.digest("hex");
 }
 
-export async function runActualOmenGitProof({ userProfilePath = homedir(), fatalDiagnostic = false } = {}) {
+export async function runActualOmenGitProof({ userProfilePath = homedir(), fatalDiagnostic = false,
+  permissionBoundaryDiagnostic = false } = {}) {
+  if (fatalDiagnostic && permissionBoundaryDiagnostic) throw Object.assign(
+    new Error("omen-git-diagnostic-mode-invalid"), { code: "omen-git-diagnostic-mode-invalid" });
   const pins = await loadOmenReleasePins();
   for (const path of [pins.powershellPath, userProfilePath, pins.gitPath, pins.gitInstallRoot,
     pins.gitSystemConfigPath, pins.gitSystemAttributesPath, pins.nativeScriptPath,
@@ -116,6 +122,7 @@ export async function runActualOmenGitProof({ userProfilePath = homedir(), fatal
   const probes = [];
   const guardAudits = [], childAudits = [], witnessAudits = [];
   let diagnosticObservation = null, diagnosticRepositoryUnchanged = false, diagnosticOperationCount = 0;
+  let permissionCoordinator = null;
   let failure, stage = "create-owned-repository", activeMonitor = null, activeMonitorExit = null,
     activeAuditStop = null;
   const git = args => {
@@ -259,6 +266,37 @@ export async function runActualOmenGitProof({ userProfilePath = homedir(), fatal
       const after = await treeDigest(repository);
       diagnosticRepositoryUnchanged = before === after;
       if (observationError) throw observationError;
+    } else if (permissionBoundaryDiagnostic) {
+      const operations = [["branches", {}], ["show", { commit }], ["diffstat", {}], ["status", {}]];
+      permissionCoordinator = createPermissionBoundaryCoordinator(await treeDigest(repository));
+      for (const [operation, input] of operations) {
+        stage = `contained-git-${operation}`;
+        const before = await treeDigest(repository);
+        permissionCoordinator.begin(operation, before);
+        const childStart = childAudits.length, witnessStart = witnessAudits.length, guardStart = guardAudits.length;
+        let observation = null, observationError = null;
+        try {
+          await observer.observe(candidate.rootId, operation, input);
+          observation = { outcome: "succeeded", exitCode: 0, failureKind: null,
+            stderrBytes: 0, stderrSha256: EMPTY_SHA256 };
+        } catch (error) {
+          if (error?.code === "omen-git-process-failed") {
+            observation = { outcome: "git-fatal", exitCode: error.exitCode,
+              failureKind: error.failureKind, stderrBytes: error.stderrBytes, stderrSha256: error.stderrSha256 };
+          } else observationError = error;
+        }
+        const after = await treeDigest(repository);
+        const operationChildren = childAudits.slice(childStart), operationWitnesses = witnessAudits.slice(witnessStart),
+          operationGuards = guardAudits.slice(guardStart);
+        if (observationError) throw observationError;
+        const completed = permissionCoordinator.complete({ operation, observation, afterDigest: after,
+          wrapperCount: operationChildren.length, witnessCount: operationWitnesses.length,
+          guardCount: operationGuards.length, wrapperTerminal: operationChildren.every(audit => audit.terminal),
+          witnessesTerminal: operationWitnesses.every(audit => audit.terminal),
+          guardReleased: operationGuards.every(audit => audit.released) });
+        if (completed.outcome === "git-fatal") break;
+      }
+      permissionCoordinator.finish(await treeDigest(repository));
     } else {
     const status = await unchanged("status");
     probes.push(await startProbe("127.0.0.1", "loopback"));
@@ -578,10 +616,25 @@ export async function runActualOmenGitProof({ userProfilePath = homedir(), fatal
     guardReleased: guardAudits.every(audit => audit.released),
     fixtureRemoved: checks.ownedFixtureRemoved === true,
     fatalObservation: diagnosticObservation?.outcome === "git-fatal" ? diagnosticObservation : null };
+  const permissionTransition = permissionCoordinator?.snapshot() ?? { operationCount: 0,
+    successorAfterFailure: false, attempts: [], repositoryUnchanged: false };
+  const permissionState = { stage, operationCount: permissionTransition.operationCount,
+    successorAfterFailure: permissionTransition.successorAfterFailure, attempts: permissionTransition.attempts,
+    repositoryUnchanged: permissionTransition.repositoryUnchanged,
+    wrapperCount: childAudits.length, witnessCount: witnessAudits.length, guardCount: guardAudits.length,
+    wrappersTerminal: childAudits.every(audit => audit.terminal),
+    witnessesTerminal: witnessAudits.every(audit => audit.terminal),
+    guardsReleased: guardAudits.every(audit => audit.released), fixtureRemoved: checks.ownedFixtureRemoved === true };
   if (fatalDiagnostic) {
     if (failure) throw Object.assign(failure, { diagnosticState });
     try { return completedGitFatalDiagnostic(diagnosticObservation, diagnosticState); }
     catch (error) { throw Object.assign(error, { diagnosticState: { ...diagnosticState, stage: "publication" } }); }
+  }
+  if (permissionBoundaryDiagnostic) {
+    if (failure) throw Object.assign(failure, { permissionDiagnosticState: permissionState });
+    try { return completedPermissionBoundaryDiagnostic(permissionTransition.attempts, permissionState); }
+    catch (error) { throw Object.assign(error, { permissionDiagnosticState: { ...permissionState,
+      stage: "publication" } }); }
   }
   if (failure) throw failure;
   return { schemaVersion: "runaai-m1-omen-git-proof/v1", passed: Object.values(checks).every(Boolean), checks,
@@ -600,6 +653,21 @@ export async function runActualOmenGitFatalDiagnostic(options = {}) {
     throw Object.assign(new Error("runaai-m1-omen-git-fatal-diagnostic-failed"), {
       code: "runaai-m1-omen-git-fatal-diagnostic-failed",
       publicRecord,
+    });
+  }
+}
+
+export async function runActualOmenGitPermissionBoundaryDiagnostic(options = {}) {
+  try { return await runActualOmenGitProof({ ...options, permissionBoundaryDiagnostic: true }); }
+  catch (error) {
+    const state = error?.permissionDiagnosticState ?? { stage: "preflight", operationCount: 0,
+      successorAfterFailure: false, attempts: [], wrapperCount: 0, witnessCount: 0, guardCount: 0,
+      wrappersTerminal: true, witnessesTerminal: true, guardsReleased: true, fixtureRemoved: false };
+    let publicRecord;
+    try { publicRecord = failedPermissionBoundaryDiagnostic(error, state); }
+    catch { throw Object.assign(new Error("diagnostic-publication-refused"), { code: "diagnostic-publication-refused" }); }
+    throw Object.assign(new Error("runaai-m1-omen-git-permission-boundary-diagnostic-failed"), {
+      code: "runaai-m1-omen-git-permission-boundary-diagnostic-failed", publicRecord,
     });
   }
 }

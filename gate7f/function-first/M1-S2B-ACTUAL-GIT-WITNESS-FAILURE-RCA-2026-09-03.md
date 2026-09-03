@@ -674,7 +674,9 @@ verbs, in this exact order: `branches`, `show` for the already-created exact com
 The order provides progressively broader Git observations, but the verbs overlap in their access to configuration,
 refs, objects, attributes, index and work-tree state. A first failure identifies only the earliest failing verb in
 this fixed sequence; it does not by itself identify the denied resource or access surface.
-After each operation it must prove the repository tree unchanged and all operation-owned resources terminal
+Before `branches` it captures one immutable repository-tree baseline. Before and after every operation, and once
+again after the final attempted operation, the tree digest must equal that same baseline; no later operation may
+rebase equality after an unwitnessed gap. Each operation must also prove all operation-owned resources terminal
 before starting the next. The first fatal or any harness/parser/lifecycle error stops immediately; no later verb
 starts. At most four wrappers, eight witnesses and four guards may exist. Remotes, timeout, process-audit,
 network listeners/probes, browser, model and production paths remain unreachable.
@@ -708,8 +710,10 @@ A harness/instrumentation failure publishes schema
 rules are identical to the completed schema; attempts are only a validated terminal prefix and contain at most
 one fatal, which may only be last. `operationCount` is integer 0..4 and counts started observer invocations;
 `attempts.length` is either `operationCount` or, when the current invocation did not reach a valid terminal Git
-observation, `operationCount - 1`. `wrapperCount` and `guardCount` are integers 0..`operationCount`, and
-`witnessCount` is integer 0..twice `operationCount`; the three terminal fields are booleans.
+observation, `operationCount - 1`. `wrapperCount` and `guardCount` are integers from `attempts.length` through
+`operationCount`, and `witnessCount` is integer from twice `attempts.length` through twice `operationCount`;
+the three terminal fields are booleans. If the attempt prefix ends in `git-fatal`, `operationCount` must equal
+`attempts.length`; a larger count would prove an invalid successor started after failure and rejects publication.
 `successorAfterFailure` and `privateValuesIncluded` are false. `stage` is exactly one of `preflight`,
 `create-owned-repository`, `confirm-owned-git-root`, `contained-git-branches`, `contained-git-show`,
 `contained-git-diffstat`, `contained-git-status`, `cleanup`, `publication`; `errorCode` is exactly one of
@@ -734,3 +738,17 @@ design bytes require fresh independent review before implementation.
 Fresh independent design re-review returned GO with P0=0/P1=0 and reproduced the clean diff check and 15/15
 roadmap checks. No implementation or actual operation ran. A documentation-only source commit is now the
 remaining gate before implementing this exact contract.
+
+Commit `67012ca` sealed the approved design. The model-free implementation adds the exact completed/error
+contract, a distinct CLI entry, the ordered fail-closed mode and adversarial/source contract tests. The first
+implementation review returned NO-GO at P0=0/P1=3 because an error record could conceal a successor after a
+fatal, per-operation digest rebasing left inter-operation gaps unprotected, and the coordinator was checked only
+as source text. The correction requires fatal prefixes to consume the full operation count, uses one immutable
+baseline before/after every operation and at finalization, and executes a pure coordinator through every fatal
+position, observer interruption, mutation gap, partial resource startup and retained-cleanup publication. The
+focused Omen suite now passes 44/44 and six changed-file syntax checks pass. No actual operation ran. Roadmap/
+diff checks and fresh independent exact-byte implementation re-review remain mandatory before source commit.
+
+Fresh independent implementation re-review returned GO with P0=0/P1=0 and independently reproduced 44/44
+focused checks, six syntax checks, 15/15 roadmap checks and the clean diff. No actual operation ran. A source
+commit is now the sole remaining gate before exactly one permission-boundary diagnostic execution.

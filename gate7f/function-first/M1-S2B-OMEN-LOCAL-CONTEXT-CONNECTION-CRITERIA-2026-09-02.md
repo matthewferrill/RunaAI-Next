@@ -108,6 +108,15 @@ diagnostic in the Git-witness RCA orders only existing local read-only verbs `br
 independent review and a source commit before one execution.
 Fresh independent design re-review returned GO with P0=0/P1=0 and reproduced the clean diff and 15/15 roadmap
 checks. No implementation or actual operation ran; the design must now be source-committed before implementation.
+Commit `67012ca` sealed that design. First implementation review returned NO-GO at P0=0/P1=3 for a successor-
+after-fatal error-state hole, digest rebasing across unwitnessed gaps and source-text-only coordinator coverage.
+The correction rejects fatal/count mismatch, uses one immutable before/after/final repository baseline and adds
+executed pure transition tests across every fatal position, interruptions, mutations, partial startup and retained
+cleanup. Focused Omen checks now pass 44/44 and six syntax checks pass. No actual operation ran. Roadmap/diff
+checks and fresh independent implementation re-review still gate the source commit.
+Fresh independent implementation re-review returned GO with P0=0/P1=0 and reproduced 44/44 focused checks,
+six syntax checks, 15/15 roadmap checks and the clean diff. No actual operation ran. A source commit is now the
+sole remaining gate before exactly one permission-boundary diagnostic execution.
 
 ## Slice selection record
 

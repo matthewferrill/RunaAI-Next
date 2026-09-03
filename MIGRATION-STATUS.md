@@ -284,6 +284,15 @@ remotes, timeout, process audit, network, browser, model or production work and 
 Deterministic tests, independent review and a source commit precede its one execution.
 Fresh design re-review returned GO with P0=0/P1=0 and reproduced the clean diff and 15/15 roadmap checks. No
 implementation or actual operation ran; the design must now be source-committed before implementation.
+Commit `67012ca` sealed that design. First implementation review returned NO-GO at P0=0/P1=3 for a successor-
+after-fatal error-state hole, digest rebasing across unwitnessed gaps and source-text-only coordinator coverage.
+The correction rejects fatal/count mismatch, uses one immutable before/after/final repository baseline and adds
+executed pure transition tests across every fatal position, interruptions, mutations, partial startup and retained
+cleanup. Focused Omen checks now pass 44/44 and six syntax checks pass. No actual operation ran. Roadmap/diff
+checks and fresh independent implementation re-review still gate the source commit.
+Fresh independent implementation re-review returned GO with P0=0/P1=0 and reproduced 44/44 focused checks,
+six syntax checks, 15/15 roadmap checks and the clean diff. No actual operation ran. A source commit is now the
+sole remaining gate before exactly one permission-boundary diagnostic execution.
 
 **Application slice, 2026-09-02:** model selection is complete and the retired R15 campaign is not being
 resumed. The active clean branch is `codex/m1-gemma-primary`, based on the five-function qualification

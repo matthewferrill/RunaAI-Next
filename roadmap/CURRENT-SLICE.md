@@ -523,6 +523,13 @@ P0=0/P1=0 with 89/89 bounded tests. This is deterministic application evidence o
 route or actual-system acceptance ran. Record:
 `../gate7f/function-first/M1-S2-CONTEXTUAL-REVIEW-WORKFLOW-2026-09-03.md`.
 
+Device/install-readiness checkpoint, 2026-09-03: the deterministic evaluator distinguishes browser-only, one-time
+snapshot, optional non-executing persistent bridge and separately deferred local execution. Production evaluation is
+bound to the frozen manifest digest, exact signer publisher and authoritative, current enrollment certificate.
+Independent review stopped three trust gaps; the corrected lane passes 12/12 and re-review returned P0=0/P1=0.
+No package, install, device probe, enrollment, browser or Control action occurred. Record:
+`../gate7f/function-first/M1-S2-DEVICE-INSTALL-READINESS-PREFLIGHT-2026-09-03.md`.
+
 The historical halt text below is retained as evidence of the retired method, not current progress.
 
 Campaign halt, 2026-09-02: fresh zero-model stage `b230075b107b439480bfbecd64189e62`

@@ -555,6 +555,13 @@ paired with truncated inputs. The corrected bytes received independent PASS at P
 No model, browser runtime, network, production route or actual-system acceptance occurred. Record:
 `gate7f/function-first/M1-S2-CONTEXTUAL-REVIEW-WORKFLOW-2026-09-03.md`.
 
+**Device/install-readiness preflight, 2026-09-03:** four customer modes now have a frozen, digest-bound readiness
+contract: browser-only, one-time folder snapshot, optional non-executing persistent bridge, and separately deferred
+fully local execution. Independent review stopped and corrected arbitrary manifest injection, unbound signer identity,
+and unbound/non-expiring enrollment evidence. The corrected evaluator passes 12/12 and independent re-review returned
+P0=0/P1=0. This is deterministic status logic only—not an installer, device probe, enrollment, browser or Control
+acceptance result. Record: `gate7f/function-first/M1-S2-DEVICE-INSTALL-READINESS-PREFLIGHT-2026-09-03.md`.
+
 **Application slice, 2026-09-02:** model selection is complete and the retired R15 campaign is not being
 resumed. The active clean branch is `codex/m1-gemma-primary`, based on the five-function qualification
 decision. Gemma is the sole primary for Chat, Research, Code, Agent and Review. The immediate work is to

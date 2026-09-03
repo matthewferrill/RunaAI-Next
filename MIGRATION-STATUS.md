@@ -79,8 +79,24 @@ The first amended-correction review returned NO-GO with P0=0/P1=1 because the DP
 been inserted inside the embedded C# here-string. No actual proof ran. The function is now outside the
 here-string, and a pinned-host regression extracts and compiles the exact embedded C# bytes while separately
 asserting helper placement. Focused checks pass 15/15. Fresh exact-byte re-review returned GO with
-P0=0/P1=0; only the source commit remains before
-one affected Windows retry.
+P0=0/P1=0; correction `2b77422` was then source-sealed and passed the affected actual Windows proof 19/19.
+
+**M1-S2B Git witness stop, 2026-09-03:** the separate actual Git proof stopped on its first
+`contained-git-status` operation with `omen-git-source-changed`; no later Git verb,
+process/timeout/network arm, browser, model or production work ran. The witness exposes no event category,
+so this result cannot distinguish a real repository mutation from MXC's known reversible DACL
+notifications. Acceptance remains stopped pending the independently reviewed, single-operation
+aggregate diagnostic in
+`gate7f/function-first/M1-S2B-ACTUAL-GIT-WITNESS-FAILURE-RCA-2026-09-03.md`. The one-operation diagnostic
+source is now implemented with separate name/content/metadata/security watchers, complete tree-byte and
+owner/group/DACL equality checks, bounded lifecycle/cleanup checks and aggregate-only output. Its Node syntax,
+two focused source/parser preflights and pinned PowerShell parse are green. It has not run. Independent
+review stopped that draft at P0=0/P1=4: watcher errors were not fatal, abnormal cleanup did not prove terminal
+exit, the process audit could accept no observed processes, and the policy-template pin was checked too late.
+The revised source closes each point with a fail-closed error gate, bounded post-kill close proof, required
+pinned MXC/Git process observations and pre-fixture template-digest verification. It has not run; focused
+source/parser/observer/native checks pass 17/17, roadmap checks pass 15/15, and fresh exact-byte re-review
+returned GO with P0=0/P1=0. A source commit remains mandatory before its single execution.
 
 **Application slice, 2026-09-02:** model selection is complete and the retired R15 campaign is not being
 resumed. The active clean branch is `codex/m1-gemma-primary`, based on the five-function qualification

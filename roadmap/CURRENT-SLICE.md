@@ -59,7 +59,23 @@ DPAPI types and typed substep errors before another review/commit; no successor 
 The first amended-correction review stopped at P0=0/P1=1 because the new PowerShell helper was accidentally
 inside the embedded C# here-string. No actual proof ran. The placement is corrected; a pinned-host test now
 extracts and compiles the exact embedded C# and asserts helper placement. Focused checks pass 15/15; fresh
-independent review returned GO with P0=0/P1=0. A source commit remains mandatory.
+independent review returned GO with P0=0/P1=0. Correction `2b77422` was source-sealed and passed the actual
+Windows prerequisite 19/19. The separate actual Git proof stopped on its first `contained-git-status`
+operation with `omen-git-source-changed`; no successor verb or network arm ran. Because Node's witness does
+not classify the event, this is retained as an actual method failure pending one reviewed aggregate
+Windows-notify/durable-state diagnostic, not attributed to Git or a model. See
+`../gate7f/function-first/M1-S2B-ACTUAL-GIT-WITNESS-FAILURE-RCA-2026-09-03.md`.
+That aggregate-only diagnostic is now implemented and passes Node syntax plus two focused source/parser
+preflights in the pinned PowerShell host. It uses one status operation, four independently filtered Windows
+watchers, complete repository byte/set and owner/group/DACL equality, bounded process/guard cleanup and no
+private values. It has not run. Before its first review, independent exact-byte review and a source commit
+both remained mandatory.
+The first review stopped the draft at P0=0/P1=4 for nonfatal watcher errors, unproven abnormal cleanup,
+vacuous process-audit acceptance and late policy-template-pin verification. The revision makes every watcher
+error fatal, proves post-kill terminal exit before cleanup, requires observed pinned MXC and Git processes
+with zero survivors, and verifies the normalized policy template before fixture creation. It remains
+unexecuted. Focused checks pass 17/17, roadmap checks pass 15/15 and fresh exact-byte re-review returned GO
+with P0=0/P1=0. A source commit is the final prerequisite to its single execution.
 No browser, HTTPS, model or production work has run.
 
 Workspace baseline checkpoint: see

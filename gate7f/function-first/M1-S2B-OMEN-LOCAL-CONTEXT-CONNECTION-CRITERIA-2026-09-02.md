@@ -13,8 +13,17 @@ amended explicit assembly-load and typed-error correction initially received P0=
 was accidentally inside the C# here-string. No actual proof ran. The placement is corrected, and exact
 embedded-C# compilation plus six syntax checks, 15/15 focused checks, PowerShell parsing, the updated
 release pin and a read-only pinned-host DPAPI assembly probe pass. It remains
-non-executable. Fresh exact-byte independent review returned GO with P0=0/P1=0; a source commit remains
-mandatory before actual execution.
+non-executable. Fresh exact-byte independent review returned GO with P0=0/P1=0; correction `2b77422` was
+source-sealed and passed the affected actual Windows prerequisite 19/19. The first actual contained Git
+status then stopped on an unclassified repository notification. No successor Git or network arm ran. The
+slice remains non-executable pending the classification diagnostic defined in
+`M1-S2B-ACTUAL-GIT-WITNESS-FAILURE-RCA-2026-09-03.md`. That one-operation, aggregate-only diagnostic is
+implemented and passes its Node syntax plus two focused source/parser preflights in pinned PowerShell. It has
+not run. Its first review stopped at P0=0/P1=4 on watcher-error, abnormal-cleanup, process-observation and
+pre-fixture policy-pin gaps. Those four items were corrected before focused preflight and independent
+exact-byte re-review were repeated.
+Focused checks pass 17/17, roadmap checks pass 15/15 and fresh exact-byte re-review returned GO with
+P0=0/P1=0. The source commit remains the only prerequisite to that one diagnostic run.
 
 ## Slice selection record
 

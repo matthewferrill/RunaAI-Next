@@ -531,6 +531,14 @@ TLS, HTTP, Git fetch, Control worker/publication, browser action, production cha
 gate remains the separately reviewed real TLS connector/broker child. Record:
 `gate7f/function-first/M1-S2B1-GIT-STREAM-PREFLIGHT-2026-09-03.md`.
 
+**M1-S2B1 publication-primitive preflight, 2026-09-03:** the digest- and identity-bound deterministic
+publication contract now passes 29/29 focused compatibility checks and fresh independent review at P0=0/P1=0.
+Two review stops corrected malformed-handle ownership, exhaustive inspection cleanup, failed-close retention and
+truthful attempted-versus-confirmed move evidence. Publication remains one-shot, write-through and non-replacing;
+deletion is never authorized and database changes are proposals only. This is not native Windows, Control worker,
+database CAS, cleanup, browser, production or model acceptance. Record:
+`gate7f/function-first/M1-S2B1-PUBLICATION-PRIMITIVE-PREFLIGHT-2026-09-03.md`.
+
 **Contextual Review workflow, 2026-09-03:** the application now requires one to six exact selected locators,
 fully resolves and hash-verifies their canonical bytes in requested order before provider access, preserves
 application-owned citations, and isolates the simplified one-revision `accept`/`revise` checker to Review. The first

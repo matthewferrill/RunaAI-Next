@@ -145,6 +145,13 @@ no socket and earns no actual-system credit. Record:
 `../gate7f/function-first/M1-S2B1-GIT-STREAM-PREFLIGHT-2026-09-03.md`. Next remains the real TLS connector/broker
 child, separately reviewed before any Control worker, workspace publication or UI integration.
 
+The deterministic publication primitive now passes 29/29 focused materialization/publication compatibility checks
+and independent review at P0=0/P1=0 after two explicit review stops. It owns and closes or recovery-retains every
+accessible native handle, distinguishes attempted from confirmed moves, permits only a one-shot non-replacing
+write-through move, and never authorizes deletion or directly mutates PostgreSQL. It is not actual Windows or Control
+proof and does not establish a ready workspace. Record:
+`../gate7f/function-first/M1-S2B1-PUBLICATION-PRIMITIVE-PREFLIGHT-2026-09-03.md`.
+
 M1-S2B implementation checkpoint, 2026-09-02: the authority foundation and actual PostgreSQL lifecycle
 are green. The prior Omen DPAPI/handle-based file proof was 14/14, but shared native/helper bytes have since
 changed and that evidence is historical until one affected-scope rerun. The first actual

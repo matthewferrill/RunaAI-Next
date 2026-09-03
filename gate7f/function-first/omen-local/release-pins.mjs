@@ -6,7 +6,11 @@ const PIN_KEYS = ["schemaVersion", "platform", "nativeScriptRelativePath", "nati
   "gitSystemConfigPath", "gitSystemConfigSha256", "gitSystemAttributesPath",
   "gitSystemAttributesSha256", "mxcVersion", "mxcExecutorRelativePath", "mxcExecutorSha256",
   "policyTemplateSha256", "processMonitorRelativePath", "processMonitorSha256",
-  "repositoryWitnessRelativePath", "repositoryWitnessSha256", "uiWitnessRelativePath", "uiWitnessSha256"];
+  "repositoryWitnessRelativePath", "repositoryWitnessSha256", "uiWitnessRelativePath", "uiWitnessSha256",
+  "hostPrepRelativePath", "hostPrepSha256", "hostPrerequisiteReaderRelativePath",
+  "hostPrerequisiteReaderSha256", "hostTransitionRelativePath", "hostTransitionSha256",
+  "aclNativeSourceRelativePath", "aclNativeSourceSha256", "containedProcessSourceRelativePath",
+  "containedProcessSourceSha256", "hostRepairLauncherRelativePath", "hostRepairLauncherSha256"];
 
 export async function loadOmenReleasePins() {
   const repositoryRoot = resolve(import.meta.dirname, "../../..");
@@ -19,7 +23,9 @@ export async function loadOmenReleasePins() {
         pins.gitSystemAttributesPath].every(value => typeof value === "string" && value.length > 2)
       || ![pins.nativeScriptSha256, pins.powershellSha256, pins.gitSha256, pins.gitSystemConfigSha256,
         pins.gitSystemAttributesSha256, pins.mxcExecutorSha256, pins.policyTemplateSha256,
-        pins.processMonitorSha256, pins.repositoryWitnessSha256, pins.uiWitnessSha256]
+        pins.processMonitorSha256, pins.repositoryWitnessSha256, pins.uiWitnessSha256, pins.hostPrepSha256,
+        pins.hostPrerequisiteReaderSha256, pins.hostTransitionSha256, pins.aclNativeSourceSha256,
+        pins.containedProcessSourceSha256, pins.hostRepairLauncherSha256]
         .every(value => /^[a-f0-9]{64}$/u.test(value))) {
     throw Object.assign(new Error("omen-release-pins-invalid"), { code: "omen-release-pins-invalid" });
   }
@@ -28,5 +34,11 @@ export async function loadOmenReleasePins() {
     mxcExecutorPath: resolve(repositoryRoot, pins.mxcExecutorRelativePath),
     processMonitorPath: resolve(repositoryRoot, pins.processMonitorRelativePath),
     repositoryWitnessPath: resolve(repositoryRoot, pins.repositoryWitnessRelativePath),
-    uiWitnessPath: resolve(repositoryRoot, pins.uiWitnessRelativePath) });
+    uiWitnessPath: resolve(repositoryRoot, pins.uiWitnessRelativePath),
+    hostPrepPath: resolve(repositoryRoot, pins.hostPrepRelativePath),
+    hostPrerequisiteReaderPath: resolve(repositoryRoot, pins.hostPrerequisiteReaderRelativePath),
+    hostTransitionPath: resolve(repositoryRoot, pins.hostTransitionRelativePath),
+    aclNativeSourcePath: resolve(repositoryRoot, pins.aclNativeSourceRelativePath),
+    containedProcessSourcePath: resolve(repositoryRoot, pins.containedProcessSourceRelativePath),
+    hostRepairLauncherPath: resolve(repositoryRoot, pins.hostRepairLauncherRelativePath) });
 }

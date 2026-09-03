@@ -315,6 +315,67 @@ uses a pinned Runa-owned root-only `SetFileSecurityW` transition, order-preservi
 target-only API probe, the same durable at-most-once journal, and a new independent review before implementation.
 Fresh independent review returned GO with P0=0/P1=0. Implementation, its deterministic/adversarial test matrix,
 fresh exact-byte review and a source commit now gate the one elevated execution; no ACL has changed.
+Implementation preflight then used the real Omen Windows ACL APIs only on disposable user-temp directories. It
+found and corrected a fast-exit output-bound race plus probe setup/cleanup defects without touching `C:\`. The
+final probe proved successful target-only writes, exact rollback, exact child preservation and cleanup, but also
+proved Windows reorders the two added ACEs relative to the theoretical `SetEntriesInAclW` buffer. Production
+execution remains blocked. Independent review rejected the first relaxed semantic rule at P0=0/P1=1 because it
+did not constrain allow-versus-deny placement. The RCA now freezes canonical DACL order, exact ACL headers and
+raw target ACEs, prior-ACE relative byte preservation, atomic actual-post journaling and phase-aware revalidation;
+fresh design GO remains mandatory before implementation resumes. No Git diagnostic, model or browser ran.
+Fresh design re-review then returned GO with P0=0/P1=0. The first exact-byte implementation review stopped the
+prospective source at P0=0/P1=9 before any actual operation. The nine corrections now cover the secured mutex and
+abandoned-owner stop, protected path/identity guards, probe identity, truthful native API failure handling,
+immediate rollback drift checks, one journal schema/path, exact JavaScript journal semantics and Win32 bounds,
+the deprovision pin-drift tuple, and an executed coordinator crash/write matrix. The first corrected identity
+smoke stopped because its expected extended path was missing one leading slash and it incorrectly treated rename
+blocking as the invariant on this Windows build. The RCA now requires rename detection; the single amended rerun
+passed exact path, rename detection, hardlink/reparse rejection and cleanup. The complete focused Omen suite now
+passes 62/62, release pins match the executable source, and no UAC, `C:\` write, Git diagnostic, browser or model
+ran. Fresh exact-byte
+implementation re-review and a source commit remain mandatory before the sole elevated execution.
+That re-review reproduced 62/62 focused and 15/15 roadmap checks but returned NO-GO at P0=0/P1=6: mutex
+protection/abandoned/deprovision result paths, temporary-journal identity, immediate prepare/deprovision root path
+binding, conflicting target-SID journal validation, probe cleanup classification, and execution of the production
+coordinator rather than a disconnected model remain incomplete. The RCA freezes the six corrections. The prior
+green counts no longer admit commit or elevation; no actual operation ran.
+The first mutex correction smoke then stopped only at the literal protected-SDDL comparison; busy, abandoned and
+wrong-security checks passed. A bounded read-only SYSTEM/Administrators serialization diagnostic is the sole next
+action. The commit/elevation gate remains stopped.
+The pinned-5.1 serialization diagnostic then proved the exact protected form is
+`D:P(A;;0x1f0001;;;SY)(A;;0x1f0001;;;BA)`; the initial oracle had used `GA` for the same FullControl intent.
+Production and test literals now match the actual runtime. No protected object was changed.
+The first prepare/deprovision mutex-publication test then stopped because its ordinary-user abandoned-owner worker
+tried to reopen the intentionally SYSTEM/Administrators-only object and was correctly denied. The fixture now
+passes its existing authorized handle across threads without changing the ACL; the interrupted run has no gate
+credit and no system mutation occurred.
+That cross-process design also failed because the ordinary child cannot open the protected production mutex; its
+apparent abandoned record was a false positive from the outer catch and ownership was not released. The fixture is
+retired. A production C# wait helper will operate on an already-authorized handle, distinguish busy/abandoned and
+release abandoned ownership; same-handle Windows tests and exact two-operation tuple tests replace the invalid
+cross-process oracle.
+The first same-handle run then stopped before execution because a second PowerShell 5.1 `Add-Type` could not
+resolve the production type from a prior in-memory assembly. The exact production source and test driver will be
+compiled as one unit; no mutex behavior or system path was exercised by that failure.
+That unit still failed to compile because the appended driver left `using` directives after production type
+declarations. Those directives are removed and the test-only threading names are fully qualified; production bytes
+were not changed by this fixture error.
+The corrected helper smoke passed. All six review findings are now addressed in current source: protected mutex
+and same-handle wait/release, held temp/final journal identity, three immediate root path-binding gates, target-SID
+conflict rejection, executed cleanup-failure retention/recovery, and a production trace coordinator that gates
+public completion. Its matrix executes 33 lifecycle/failure/crash sequences; the disconnected model was removed.
+The complete focused Omen suite passes 61/61 and source pins match. Fresh exact-byte review, 15/15 roadmap checks,
+clean diff and source commit still precede elevation. No actual-root, Git, browser, network or model operation ran.
+Fresh re-review closed those six findings but returned NO-GO at P0=0/P1=1: the probe cleanup detected an identity
+mismatch yet still pathname-deleted after releasing the handle, risking deletion of a replacement. Cleanup is being
+changed to retain-and-stop on any mismatch, with a held-identity removal helper and an actual temp rename/replacement
+test. Commit and elevation remain blocked.
+The corrected temp rename/replacement smoke passed and proved the replacement marker remained untouched while the
+identity mismatch failed closed. Production now skips deletion after any mismatch; source pins are refreshed.
+The complete focused Omen suite passes 61/61; independent re-review remains.
+Final independent exact-byte re-review returned GO with P0=0/P1=0 and reproduced focused 61/61, roadmap 15/15,
+release pins 6/6 and the clean diff. It confirmed mismatch cleanup cannot delete a replacement and all prior six
+findings remain closed. No actual operation ran. A source commit now precedes the one elevated transition.
 
 **Application slice, 2026-09-02:** model selection is complete and the retired R15 campaign is not being
 resumed. The active clean branch is `codex/m1-gemma-primary`, based on the five-function qualification

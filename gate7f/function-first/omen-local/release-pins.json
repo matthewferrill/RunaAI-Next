@@ -22,5 +22,17 @@
   "repositoryWitnessRelativePath": "gate7f/function-first/omen-local/Watch-RunaRepository.ps1",
   "repositoryWitnessSha256": "14b5e39a594dda7023b95f9736e688a4803020c9740bb05be2b7ffca731bef86",
   "uiWitnessRelativePath": "gate7f/function-first/omen-local/Watch-RunaInteractiveDesktop.ps1",
-  "uiWitnessSha256": "5186c32cdc15c39214643407d5f3a8934cb6aaabca002fdd1c01f69acf762f63"
+  "uiWitnessSha256": "5186c32cdc15c39214643407d5f3a8934cb6aaabca002fdd1c01f69acf762f63",
+  "hostPrepRelativePath": "node_modules/@microsoft/mxc-sdk/bin/x64/wxc-host-prep.exe",
+  "hostPrepSha256": "a9b8b14a11a1c5888641297c26abca547c2afa4435085c03ccfebd1deface310",
+  "hostPrerequisiteReaderRelativePath": "gate7f/function-first/omen-local/Get-RunaOmenHostPrerequisites.ps1",
+  "hostPrerequisiteReaderSha256": "3f36e554c0af7a052bb4ac5cd7ce6b4d64a36a3ec0e6181116beee898a57d2d4",
+  "hostTransitionRelativePath": "gate7f/function-first/omen-local/Invoke-RunaOmenSystemDriveTransition.ps1",
+  "hostTransitionSha256": "a47934cbfcc1a9bab5f49faa5f3b69fe5847a781fb8fa8a8856830d214ace7ba",
+  "aclNativeSourceRelativePath": "gate7f/function-first/omen-local/RunaOmenAclNative.cs",
+  "aclNativeSourceSha256": "c5f5f77f7f7131b352e6d2072a162e2d028c90c79a89b389f1d53957c7fff27a",
+  "containedProcessSourceRelativePath": "gate7f/function-first/omen-local/RunaContainedProcess.cs",
+  "containedProcessSourceSha256": "a48da85d47c416bf1b6d0deed17aea6f204ef339565ae01509bfd2f89bbb2a4b",
+  "hostRepairLauncherRelativePath": "gate7f/function-first/omen-local/actual-host-prerequisite-repair.mjs",
+  "hostRepairLauncherSha256": "424b67c06a16e2c3768d9c1f4f290a50d8724bbd90437ef6b2b7b92a06a8979f"
 }

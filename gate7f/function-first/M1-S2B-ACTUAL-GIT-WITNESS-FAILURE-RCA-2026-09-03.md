@@ -4,6 +4,76 @@ Status: actual Git acceptance stopped on its first operation. This is an actual-
 failure under investigation, not a Git result failure and not a model failure. No successor Git verb,
 network probe, browser, model or production route ran.
 
+## Host-repair implementation preflight findings
+
+### Fast-exit output overflow
+
+- **Scope:** deterministic owned-temp contained-process preflight only; no system-drive change, Git diagnostic, browser witness, model call, or campaign retry occurred.
+- **Observed failure:** the new adversarial output-overflow case produced more than the configured byte limit but could finish before the 50 ms process polling loop marked `OutputOverflow`.
+- **Root cause:** `RunaContainedProcess` enforced the byte limit while the child was running, but did not re-evaluate the final aggregate byte count after both output drains completed.
+- **Correction:** enforce `OutputBytes > outputLimit` again after both drains become terminal. This closes the fast-exit race while preserving bounded capture and kill-on-close job containment.
+- **Resume rule:** rerun the focused preflight once after source parsing/compilation; any further failure stops this implementation stage for a new retained RCA.
+
+### Owned-temp ACL probe cleanup
+
+- **Scope:** disposable ACL API test directory under the current user's temporary directory; `C:\` was never targeted.
+- **Observed failure:** the real `SetFileSecurityW` parent-only transition and readback completed, but the unelevated test process could not delete the fixture afterward.
+- **Root cause:** the first correction restored only the parent descriptor. The child retained the deliberately restrictive inherited ACL, so unelevated recursive deletion still lacked the required child access. That ACL is correct for the eventual elevated probe but not for this unelevated owned-temp preflight.
+- **Correction:** before deletion, explicitly replace both disposable child and parent ACLs with current-owner full control, then require complete removal. The test-only cleanup never targets `C:\` or another pre-existing directory. Cleanup remains a hard pass condition.
+
+### Owned-temp ACL probe setup
+
+- **Scope:** disposable ACL API test directory under the current user's temporary directory; the root-drive coordinator did not run.
+- **Observed failure:** the corrected isolated test stopped while creating its child, before the target ACE transition.
+- **Root cause:** `ConfigureProbeParent` granted the current owner read/execute before child creation and therefore implicitly depended on an elevated Administrators token. The deterministic preflight intentionally runs without that token.
+- **Correction:** begin with current-owner full control inherited by the child; then `BuildProbeSetupExpected` reduces only the parent owner ACE to read/execute. This creates the required inheritance-inconsistent baseline while keeping setup and cleanup valid for the real unelevated Omen preflight.
+- **Diagnostic hold:** after this correction, setup and cleanup both completed and the fixture was removed, but the aggregate semantic result remained false. Before another preflight, the record was expanded with bounded booleans for setup write, target write, restore write, parent readback and child preservation so one diagnostic run can identify the exact invariant without exposing descriptors or paths.
+- **First diagnostic result:** all three target-only API calls returned success and the child remained exact, but the final parent canonical descriptor did not reproduce the theoretical setup snapshot. The next diagnostic separates immediate DACL equality from full canonical equality at setup, target and restore boundaries to determine whether Windows normalized control metadata or DACL bytes.
+- **Second diagnostic result:** setup DACL bytes were exact while full canonical bytes differed; the target-add readback differed at both full canonical and raw-DACL levels; restoring from the actual stable setup snapshot was exact; the child remained exact. A final bounded comparison now separates control flags, ACL header and ordered ACE bytes before the production design can resume.
+- **Final diagnostic result:** target control flags remained exact, but the ordered ACE sequence differed from the theoretical `SetEntriesInAclW` result. Exact rollback from the actual stable setup bytes and exact child preservation both passed. This proves Windows reorders the target additions and invalidates theoretical whole-descriptor equality as the post-write acceptance rule.
+
+### Revised actual-post acceptance after review stop
+
+The first proposed relaxation was rejected at P0=0/P1=1 because removal-and-compare alone could accept a new allow ACE before an applicable existing deny. The corrected rule is conjunctive:
+
+1. Both pre and actual-post descriptors parse losslessly. Owner, group and control flags are byte/exact-value equal.
+2. Both DACLs are Windows-canonical. Each raw ACL header has the same valid revision; zero reserved fields; `AclSize` equal to the complete header-plus-ACE byte length with no trailing bytes; and actual `AceCount = pre AceCount + 2`.
+3. The additions are exactly one standard non-object `ACCESS_ALLOWED_ACE` for `S-1-15-2-1` and one for `S-1-15-2-2`: ACE type allow, flags zero, exact `0x00120088` mask, exact standard ACE length and SID payload, and no callback/object/conditional bytes.
+4. Both additions are confined to the canonical explicit-allow block: after every explicit deny and before every inherited ACE. The complete DACL canonicality check also rejects any other deny/allow/inherited ordering defect.
+5. Removing only those two exact target ACEs from actual post reproduces every pre-existing ACE byte-for-byte in identical relative order. No other header, count, ACE or descriptor delta is admitted.
+6. A pre-write `authorized`/`prepare-started` journal may retain the theoretical planned post only as a plan and validates its exact two-ACE delta separately; it is never accepted as prepared authority. After the API returns, a successful semantic readback replaces both expected-post fields with the actual verified canonical bytes **in the same atomic, write-through `prepare-terminal` journal transition**. There is no intermediate terminal journal containing the theoretical post.
+7. Every later journal load is phase-aware: `prepared`, deprovision phases and any prepared-state terminal record must revalidate the full canonical pre-to-actual-post predicate above before any state claim or write. Deprovision still requires exact current bytes equal to that revalidated stored actual post and restores exact stored pre bytes.
+8. Any header, canonicality, placement, raw-target, prior-ACE, journal-write or readback mismatch enters the existing one-shot exact-pre rollback or reconciliation-required path. The aggregate prerequisite reader also requires the canonical/header/exact-target placement checks and is invoked only after exact equality to the revalidated actual journal post.
+9. The disposable probe includes an applicable explicit deny ahead of its allow block, applies the same actual-post predicate, freezes its actual post only for that probe, exact-restores the actual setup baseline, proves the child exact, and requires complete cleanup.
+
+### Static symbol spelling
+
+- **Scope:** source-presence assertion only.
+- **Observed failure:** the assertion searched for `CREATE_SUSPENDED`, while the reviewed C# constant is named `CreateSuspended` and carries the required `0x00000004` value.
+- **Root cause:** test spelling did not match the source-language identifier; runtime behavior was not implicated.
+- **Correction:** assert the actual identifier and retain the compiled/behavioral contained-process checks.
+
+### Disabled-launch publication test
+
+- **Scope:** fail-closed script-launch test with the actual gate disabled; the transition script body, Windows ACL APIs and host state did not run.
+- **Observed failure:** pinned Windows PowerShell refused to load the test script under the machine's default restricted execution policy.
+- **Root cause:** the test invocation omitted the explicit `-ExecutionPolicy Bypass` argument already frozen into the real source-controlled launcher.
+- **Correction:** make the test use the same explicit noninteractive launch contract and then validate that exactly one schema-valid `pin-drift` record is emitted with exit 1.
+
+### Mutex abandoned-state test lifecycle
+
+- **Scope:** deterministic local named-mutex test only; the host transition and UAC path did not run.
+- **Observed failure:** after the worker thread abandoned the mutex, `OpenExisting` reported that no named object remained.
+- **Root cause:** the abandoning worker also closed the last kernel handle, so Windows destroyed the named mutex before the assertion could observe its abandoned state.
+- **Correction:** retain an unowned anchor handle while the worker acquires and abandons through a second handle; assert `AbandonedMutexException` on the anchor and release it only in that exception path.
+
+### Identity-guard junction cleanup
+
+- **Scope:** an owned junction and directory tree under the current user's temporary directory; no protected or production path ran.
+- **Observed failure:** recursive parent deletion refused at the junction boundary after all identity assertions completed.
+- **Root cause:** the fixture cleanup asked `Directory.Delete(..., recursive:true)` to process a tree that still contained the deliberately rejected junction.
+- **Correction:** delete the exact owned junction entry non-recursively first, then recursively remove only the already-validated random fixture parent and require complete removal.
+
 ## Exact stopped attempt
 
 - Sealed source: `2b774224ac6cc515eb2784c7562ea57d724bcec2`.
@@ -1002,25 +1072,30 @@ The following design supersedes items 4 through 10 above:
 2. Before touching `C:\`, the elevated script performs one actual target-only API probe on a newly created,
    access-restricted parent/child tree beneath the protected host-state directory. It first gives the parent an
    inheritable allow ACE and creates the child so that ACE is inherited. It captures both raw DACLs before changing
-   the parent's inheritable ACE through `SetFileSecurityW`, then requires the parent's exact setup-expected bytes
-   and the child's exact before bytes to be unchanged across that setup call. Only that proof establishes the
+   the parent's inheritable ACE through `SetFileSecurityW`, then requires the parent's exact planned raw DACL plus
+   identical owner/group and permits only DACL auto-inheritance control-bit normalization; the child's exact before
+   bytes remain unchanged. Only that proof establishes the
    deliberately older inherited child ACE and the inheritance-inconsistent shape reported upstream. It then
    captures that proven inconsistent baseline and adds the
    two target ACEs only to the parent through the exact production in-memory merge and `SetFileSecurityW` path,
-   requires parent-after to equal the exact `SetEntriesInAclW` expected bytes and child-after to equal child-before
-   byte-for-byte, restores the parent, proves both parent and child equal their captured baselines, and removes the
+   requires parent-after to pass the reviewed canonical/header/exact-target/prior-ACE relation and child-after to
+   equal child-before byte-for-byte, restores the parent from the captured actual setup bytes, proves both parent
+   and child equal their captured baselines, and removes the
    tree. Cleanup failure retains the owned protected tree for reconciliation and stops before the system-drive
    journal or root write. Any no-op, wrong parent bytes, child normalization, restoration or cleanup failure is a
    failed probe. This is an actual Windows API/hardware preflight, not acceptance evidence for Git or a model.
 3. Descriptor authority is order-preserving. Canonical bytes are UTF-8
-   `runa-omen-system-drive-descriptor/v2`, NUL, one-byte DACL-present and one-byte DACL-null flags, uint32-LE DACL
-   control flags, uint32-LE owner-SID length plus bytes, uint32-LE group-SID length plus bytes, uint32-LE ACE count,
-   then for each ACE in its original order uint32-LE ordinal, uint32-LE ACE length and the exact raw ACE bytes.
-   No sorting occurs. Expected-post DACL bytes are generated in memory by `SetEntriesInAclW` against the exact
+   `runa-omen-system-drive-descriptor/v3`, NUL, one-byte DACL-present and one-byte DACL-null flags, uint32-LE DACL
+   control flags, uint32-LE owner-SID length plus bytes, uint32-LE group-SID length plus bytes, then uint32-LE raw
+   ACL length and the complete raw ACL header plus ACE byte sequence. The raw header retains revision, reserved
+   fields, `AclSize`, `AceCount` and absence of trailing bytes for restart-time validation.
+   No sorting occurs. Planned-post DACL bytes are generated in memory by `SetEntriesInAclW` against the exact
    pre-DACL using two `GRANT_ACCESS` entries in fixed order S-1-15-2-1 then S-1-15-2-2, mask 0x00120088 and
    inheritance 0. The returned ACL's exact sequence is authoritative; deleting exactly those two target ACEs from
-   it must reproduce every pre-existing ACE byte-for-byte and ordinal-for-ordinal. Post-write comparison requires
-   exact expected bytes, so target ACEs occupy precisely the positions returned by that in-memory Windows merge.
+   it must reproduce every pre-existing ACE byte-for-byte and ordinal-for-ordinal. The theoretical result is plan-
+   only because Windows can reorder the additions on write. Actual post acceptance uses the reviewed canonical
+   deny/allow/inherited placement, exact header and target-ACE shape and prior-ACE preservation rule; the verified
+   actual post replaces the planned fields atomically in the terminal journal write.
 4. The protected journal is version 2 and at most 524288 UTF-8 bytes. It rejects BOM, duplicate/unknown/missing
    keys, trailing data and decoded descriptors above 131072 bytes. Exact ordered keys are `schemaVersion`,
    `transactionId`, `operation`, `phase`, `transitionScriptSha256`, `writeApi`, `target`,
@@ -1071,6 +1146,7 @@ The following design supersedes items 4 through 10 above:
    | prepare/error/preflight/probe-cleanup-failed | unknown | false/false | absent | false |
    | prepare/error/preflight/pin-drift | unknown | false/false | absent | false |
    | prepare/error/preflight/pin-drift | unknown | false/false | absent | true |
+   | prepare/error/preflight/precondition-failed | unknown | false/false | absent | false |
    | prepare/error/preflight/precondition-failed | unknown | false/false | absent | true |
    | prepare/error/preflight/journal-failed | unprepared | false/false | unknown | true |
    | prepare/error/prepare/prepare-failed-no-change | unprepared | false/false | retained | true |
@@ -1081,6 +1157,7 @@ The following design supersedes items 4 through 10 above:
    | prepare/error/rollback/rollback-failed | unknown | true/false | retained | true |
    | prepare/error/complete/reconciliation-required | unknown | false/false | retained | true |
    | prepare/error/complete/reconciliation-required | unknown | false/false | unknown | true |
+   | prepare/error/complete/reconciliation-required | unknown | false/false | unknown | false |
    | prepare/error/complete/reconciliation-required | unknown | true/false | retained | true |
    | prepare/error/complete/result-invalid | unknown | false/false | unknown | false |
    | deprovision/error/preflight/pin-drift | unknown | false/false | unknown | false |
@@ -1129,3 +1206,185 @@ immediate root binding/revalidation, order-preserving descriptor authority, dura
 public matrix, exact direct restore/deprovision and vendor-command prohibition. No actual operation ran. The design
 may proceed to implementation; tests, fresh exact-byte implementation review and a source commit remain mandatory
 before the single elevated execution.
+
+## Exact-byte implementation review and identity-guard preflight stop
+
+The first independent exact-byte implementation review returned NO-GO with P0=0/P1=9. It found invalid mutex
+type namespaces and abandoned-owner handling; incomplete protected-path and identity enforcement; a probe identity
+gap; a false-green deprovision branch when the native API returned false but readback matched prestate; no immediate
+prewrite rollback gate; journal schema/path drift; incomplete JavaScript journal semantics plus acceptance of a
+negative Win32 error; an invalid post-probe pin-drift tuple; and no complete coordinator failure/crash matrix while
+the living status still described an earlier checkpoint. No actual system mutation ran. The implementation was
+held locally and each finding was corrected before any attempt to resume the actual witness.
+
+The first post-correction identity-guard smoke run then stopped the sequence with this retained aggregate result:
+
+`{"schemaVersion":"runa-omen-identity-guard-smoke/v1","passed":false,"exactPath":false,"renameBlocked":false,"hardlinkRejected":true,"reparseRejected":true,"fixtureRemoved":true,"privateValuesIncluded":false}`
+
+This is a test/guard implementation failure, not a host-preparation, Git, browser, model or product result. The
+temporary fixture was removed and no protected path was touched. The root causes are:
+
+1. The smoke test constructed the expected extended Win32 path as `\?\...` instead of the required `\\?\...`.
+   That guarantees `exactPath:false` even when `GetFinalPathNameByHandleW` returns the correct path.
+2. The test assumed that omitting `FILE_SHARE_DELETE` from the held directory handle would always make a separate
+   path-based `Directory.Move` fail. The actual Omen Windows/.NET operation completed, so that assumption is not a
+   valid security invariant on the deployed stack. Microsoft documents the normal share-delete rule, but the
+   guard must accept only behavior it verifies on the actual host rather than convert that documentation into a
+   false test oracle.
+3. The existing helper already detects a name swap by reopening the literal path and comparing volume serial,
+   file ID, final path, reparse status and link count, but the smoke test treated rename prevention as the proof.
+   The contract therefore conflated prevention with detection and failed without identifying which property was
+   authoritative.
+
+The corrected design is fail-closed and does not depend on rename blocking. The protected RunaAI and host-state
+directories remain SYSTEM/Administrators-only, journal path operations remain serialized by the exact secured
+mutex, and every path-based journal/probe action must be bracketed by `PathStillMatches` checks against the held
+identity. The actual `C:\` root cannot be substituted through the protected state path; it is independently bound
+and rechecked immediately before and after the sole root API call. The identity smoke must use the exact
+`\\?\` prefix, prove that a rename (whether blocked or permitted by this Windows build) cannot remain undetected,
+prove the original path fails its held identity after a successful rename, and continue to reject multi-link and
+reparse-point objects. A rename being allowed is recorded as platform behavior, not treated as a passing lock
+guarantee. No further test may run until this RCA/design amendment is in the working tree; the repaired identity
+smoke is then the only admitted next execution. If it fails again, the sequence stops again without retrying.
+
+That one admitted rerun passed: exact extended-path comparison, rename-change detection, hardlink rejection,
+reparse rejection and cleanup were all true. `renameBlocked:false` is retained as observed platform behavior;
+`renameDetected:true` is the corrected invariant. Afterward, one optional ad-hoc PowerShell parser invocation
+failed before parsing because its `$` variables were expanded by the outer command shell. It made no file or
+system change and is classified as an operator-command quoting error, not a source/test/product failure. It was
+not retried. The repository-owned parser test, which passes argument bytes without that nested quoting path,
+subsequently parsed the transition and reader successfully.
+
+The next independent exact-byte implementation review reproduced focused Omen 62/62, roadmap 15/15 and a clean
+diff, but correctly returned NO-GO at P0=0/P1=6 before execution. It found that the mutex DACL was not explicitly
+protected, abandoned ownership was not released, and deprovision mutex failures could collapse to result-invalid;
+temporary journal publication lacked exact temp link/path/volume identity; prepare and deprovision used only the
+held-object root check rather than path rebinding immediately before their writes; JavaScript journal validation
+did not reject a differently shaped explicit ACE for either target SID; a raw probe deletion exception could be
+misclassified as `probe-failed`; and the coordinator matrix executed a parallel model plus source-string checks
+rather than production control flow. The six-point correction gate is therefore:
+
+1. Protect the mutex DACL against inheritance, compare its literal protected SDDL, release ownership obtained by
+   `AbandonedMutexException`, and execute exact prepare/deprovision publication cases for busy, abandoned and
+   wrong-security outcomes.
+2. Open each temporary journal through the identity guard after its ACL is applied; prove one link, exact final
+   path and the held state-directory volume before atomic rename. Prove the final journal has the same volume and
+   exact final path while both state and file identities are held.
+3. Run the path-binding `Assert-RunaRootIdentity` immediately before the prepare and deprovision read/API sequence,
+   matching the already corrected rollback gate.
+4. Make the JavaScript descriptor relation SID-aware and reject every non-exact explicit ACE for either target
+   SID; add differently masked and differently flagged adversarial cases.
+5. Convert every probe cleanup exception, including recursive-delete exceptions, to the exact
+   `probe-cleanup-failed` code and execute retained-fixture/delete-failure behavior without touching protected or
+   root paths.
+6. Replace the disconnected coordinator oracle with the same production coordinator state machine imported by
+   the PowerShell wrapper or execute the production coordinator through injected journal/API/identity adapters.
+   The matrix must assert actual call order, root-write count, cleanup and public record for every failure/crash
+   boundary.
+
+No actual system mutation ran. The 62/62 result remains evidence for the reviewed bytes only and is superseded as
+a commit gate until all six corrections, fresh tests, living-status update and another independent review pass.
+
+The first post-review mutex smoke stopped with `aclExact:false` while busy rejection, abandoned-owner rejection
+and wrong-security rejection were all true. No global production mutex, protected path or ACL was changed; the
+test used a unique local kernel-object name and disposed it. The failure is limited to the literal SDDL oracle:
+the protected `MutexSecurity` serialization on pinned Windows PowerShell 5.1 did not equal the initially frozen
+`D:P(A;;GA;;;SY)(A;;GA;;;BA)` text. The next and only admitted action is a read-only serialization diagnostic on
+a new unique local mutex containing only the public SYSTEM and Builtin Administrators SIDs. It must publish the
+template and readback SDDL only, establish whether Windows reorders ACEs or omits/repositions the protection flag,
+then freeze the actual exact form in both production and the smoke test. Any other failed field would require a
+new stop rather than an oracle adjustment.
+
+The first diagnostic launcher failed before creating a mutex because it ran inline through the outer PowerShell 7
+host, whose `New-Object` overload binding rejected the four-argument constructor expression used successfully by
+the pinned Windows PowerShell 5.1 test. Its null cleanup errors were secondary. It produced no SDDL evidence and
+made no object or system change. The corrected method is a fixed script launched directly with pinned
+`powershell.exe -File`, eliminating both the host mismatch and nested quoting/constructor ambiguity; it remains the
+same single read-only serialization diagnostic.
+
+The pinned-5.1 diagnostic completed once. Both template and created-object readback were exactly
+`D:P(A;;0x1f0001;;;SY)(A;;0x1f0001;;;BA)`: the protected flag and ACE order were correct; Windows serializes
+`MutexRights.FullControl` as the exact numeric mask `0x1f0001`, not generic-all `GA`. Production and the smoke
+oracle now freeze that observed exact form. The diagnostic used a unique local name, disposed the object and
+included no private identity.
+
+The first production-path mutex publication test then stopped in the abandoned-owner fixture before invoking the
+abandoned child case. The ordinary test identity created and retained the initial handle, but a worker thread used
+`Mutex.OpenExisting`; the intentionally protected SYSTEM/Administrators-only DACL correctly denied that new open
+with `UnauthorizedAccessException`. Busy and wrong-security subprocess cases had run, but the interrupted run
+earns no gate credit. This is a fixture design error, not a production mutex failure. The corrected fixture passes
+the already-authorized `Mutex` object to the worker thread, lets that thread acquire and exit without release, and
+keeps the anchor handle alive. It does not broaden the ACL. The next admitted run is the corrected six-case
+production-path publication test; any further failure stops again.
+
+That corrected cross-process run also stopped and invalidated the entire fixture approach. `busyBothOperations`
+was false and `abandonedOwnershipReleased` was false; wrong-security and the apparent abandoned records were true.
+The cause is the same protected-object boundary at the child constructor: an ordinary child cannot obtain the
+full-control handle requested by the four-argument `Mutex` constructor when an existing object permits only SYSTEM
+and Administrators. Busy therefore never reached `WaitOne`. The apparent abandoned pass was a false positive:
+the outer production catch published the same reconciliation tuple after handle-open denial, and no abandoned
+ownership was acquired or released. No root/protected path was reached.
+
+Cross-process ordinary-user publication is therefore rejected as an invalid oracle. The corrected design moves
+the actual zero-time wait into a production C# helper that receives an already-authorized mutex handle and returns
+only `acquired`, `busy` or `abandoned`; it releases ownership immediately when `AbandonedMutexException` grants
+the caller ownership. The production PowerShell path opens and literal-verifies the protected global object, calls
+that helper, maps busy to the operation-specific precondition tuple and abandoned to reconciliation, and only
+marks the mutex held for `acquired`. The smoke uses the same production helper and the same handle across worker
+threads, so it exercises real Windows mutex ownership without reopening or weakening the DACL. Exact public tuple
+tests for both operations plus source wiring checks cover the two mappings. The failed cross-process fixture is
+removed and must not be retried.
+
+The first same-handle helper smoke stopped at test compilation before any mutex operation: pinned PowerShell 5.1
+compiled the exact production helper into an in-memory `Add-Type` assembly, then the separate test-driver
+`Add-Type` invocation could not resolve `RunaMutexWait` from that prior dynamic assembly. This is a PowerShell test
+assembly-reference error, not a helper result. The corrected test compiles the exact production C# source bytes
+and the test-only driver in one `Add-Type` unit, with no production test hook and no changed security. Its single
+next run remains the admitted helper proof.
+
+The one-unit compile still stopped before mutex execution because the appended test driver retained C# `using`
+directives after the production source's type declarations. C# requires all such directives before types. This is
+a second compile-fixture defect, with no runtime or system effect. The final mechanical correction removes those
+late directives and fully qualifies the test-only `Mutex`, `Thread` and `ManualResetEventSlim` names. The exact
+production source bytes remain unmodified by the fixture.
+
+The corrected same-handle helper smoke then passed the exact protected ACL, real busy detection, real abandoned
+detection with immediate ownership release, and wrong-security rejection. All six P1 corrections are now present:
+the production transition calls that helper; every successful journal publication proves held temp/final file ID,
+single-link/final-path and state-volume identity; prepare, rollback and deprovision each rebind the literal root
+path immediately before the write; JavaScript rejects differently masked or flagged explicit target-SID ACEs;
+the production cleanup helper was executed against a locked owned-temp file and proved both fixed failure detection
+with retention and recovery after release; and `RunaSystemDriveCoordinator` now traces the production probe,
+journal phases, root/rollback calls and removal. Production completion is rejected to `result-invalid` unless that
+trace matches the public tuple. Its PowerShell matrix executed 33 success/failure/crash sequences plus invalid-order,
+missing-write and wrong-completion adversaries. The disconnected JavaScript coordinator model was removed.
+
+The complete current focused Omen suite passes 61/61. It includes actual owned-temp Windows ACL, atomic move,
+hardlink/reparse, cleanup-failure and mutex operations; it is still deterministic preflight and is not actual-root,
+Git or model acceptance. Executable-source pins match. Fresh independent exact-byte review, roadmap verification,
+clean diff and a source commit still gate the one elevated transition. No UAC, `C:\` ACL, Git diagnostic, browser,
+network or model operation has run.
+
+Fresh re-review confirmed all six prior P1 findings closed but returned NO-GO at P0=0/P1=1 for a new cleanup
+path-rebinding defect. The probe finally block detected state/probe identity mismatch only by setting a flag, then
+disposed the held identity and still called pathname `TryRemoveTree($probeRoot)`. A privileged concurrent rename
+and replacement could therefore cause deletion of the replacement while the owned evidence tree remained at a new
+name, contradicting fail-closed retention. The correction is exact: open and hold the probe identity immediately
+after creation; if the state identity, held file ID/final path/link, or name binding mismatches, perform no pathname
+delete and return `probe-cleanup-failed`. When they match, a production `TryRemoveOwnedTree` helper revalidates the
+held identity against the literal path immediately before the bounded tree removal. An owned-temp adversarial test
+must rename the held directory, create a replacement plus marker at the original name, and prove cleanup returns
+false while both the moved original and replacement marker remain untouched. Only the test's final harness cleanup
+may then remove its own fixture.
+
+The corrected adversarial identity smoke passed all fields, including `renameDetected:true`,
+`replacementPreserved:true`, exact path, hardlink/reparse rejection, atomic file-ID preservation and final fixture
+removal. The production cleanup now performs no delete after any state/name/identity mismatch. Executable source
+pins were refreshed; the complete focused Omen suite passes 61/61. Independent re-review remains before commit or
+elevation.
+
+Final independent exact-byte re-review returned GO with P0=0/P1=0. It verified the immediate held probe identity,
+short-circuit no-delete behavior on every state/name/identity mismatch, production owned-tree revalidation before
+delete, and the actual temp rename/replacement marker preservation proof. It also reconfirmed all prior six
+corrections, reproduced the focused suite 61/61, roadmap 15/15, executable release pins 6/6 and the clean diff.
+No actual operation ran. A source commit is now the only repository gate before the one elevated transition.

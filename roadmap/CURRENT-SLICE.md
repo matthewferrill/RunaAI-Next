@@ -233,6 +233,14 @@ the denied resource is not published. Acceptance is stopped. The frozen diagnost
 local read-only verbs `branches -> show -> diffstat -> status`, proves unchanged/terminal state between them,
 stops at the first fatal/error and publishes fixed aggregates only. It gives no acceptance credit and requires
 deterministic tests, independent review and a source commit before its one run.
+
+The later host-prerequisite correction remains in implementation preflight. Real Windows ACL calls on owned temp
+fixtures found that the OS preserves every old ACE and permits exact rollback/child isolation, but reorders the two
+new AppContainer allows relative to the theoretical `SetEntriesInAclW` buffer. No root-drive write occurred. A
+first relaxed-delta proposal was independently stopped at P0=0/P1=1 because it could admit an allow before an
+applicable deny. The revised RCA requires Windows-canonical deny/allow/inherited order, exact ACL headers and raw
+target ACEs, exact relative bytes for all old ACEs, atomic verified-actual-post journaling and revalidation on every
+prepared/deprovision load. Fresh design GO precedes any implementation resume, commit, UAC operation or Git run.
 Fresh design re-review returned GO with P0=0/P1=0 and reproduced the clean diff and 15/15 roadmap checks. No
 implementation or actual operation ran; the design must now be source-committed before implementation.
 Commit `67012ca` sealed that design. First implementation review returned NO-GO at P0=0/P1=3 for a successor-
@@ -266,6 +274,50 @@ uses a pinned Runa-owned root-only `SetFileSecurityW` transition, order-preservi
 target-only API probe, the same durable at-most-once journal, and a new independent review before implementation.
 Fresh independent review returned GO with P0=0/P1=0. Implementation, its deterministic/adversarial test matrix,
 fresh exact-byte review and a source commit now gate the one elevated execution; no ACL has changed.
+
+The first exact-byte implementation review stopped the prospective source at P0=0/P1=9 before execution. The
+corrected bytes now include the secured mutex and abandoned-owner stop, protected path/identity enforcement,
+probe identity, native-API-false truth handling, an immediate rollback gate, one journal schema/path, complete
+JavaScript journal/Win32 validation, the truthful deprovision pin-drift tuple and an executed coordinator crash/
+write matrix. The first corrected identity smoke then stopped on a bad expected `\\?\` test literal and an invalid
+assumption that this Windows build would block a directory rename. The retained RCA changed the invariant to
+exact name/identity change detection. Its sole amended rerun passed exact path, rename detection, hardlink and
+reparse rejection, and cleanup. The complete focused Omen suite passes 62/62 and executable source pins match. No UAC,
+root ACL, Git diagnostic, browser or model operation ran. Fresh exact-byte implementation review and a source
+commit still gate the one elevated execution.
+That re-review reproduced focused 62/62, roadmap 15/15 and a clean diff but returned NO-GO at P0=0/P1=6. It
+requires an explicitly protected mutex plus truthful abandoned/busy/deprovision paths; held temp/final journal
+identity; path-binding prepare/deprovision root gates; rejection of every conflicting target-SID ACE; exact cleanup-
+failure classification; and execution of production coordinator control flow rather than a disconnected test
+model. The RCA records the finite correction gate. Commit, elevation and acceptance remain stopped.
+The first corrected mutex smoke stopped only on its literal protected-SDDL oracle while busy, abandoned and wrong-
+security behavior passed. One aggregate-safe local serialization diagnostic is admitted before correcting that
+oracle; no successor test or actual action has run.
+The one pinned-5.1 diagnostic proved the exact protected SYSTEM/Administrators mutex SDDL uses numeric
+`0x1f0001` rights rather than `GA`; production and the smoke oracle now freeze that actual form.
+The first production-path mutex-publication matrix stopped when its ordinary-user abandoned-owner fixture tried to
+reopen the protected object and was correctly denied. The fixture is corrected to abandon the already-authorized
+handle without weakening security; the interrupted run provides no acceptance credit.
+The next run proved cross-process ordinary-user testing cannot reach either protected wait path and can false-green
+the abandoned tuple through the outer catch. That fixture is retired. The wait moves into a production helper that
+uses the already-authorized handle and is exercised with real same-handle Windows ownership across threads.
+The first such smoke stopped at a PowerShell 5.1 dynamic-assembly reference error before any wait. The corrected
+fixture compiles the exact production C# bytes and test driver in one unit; no production test hook is added.
+The combined compile then exposed late test-driver `using` directives after production types; the fixture now uses
+fully qualified threading names. No mutex operation or system path ran.
+The corrected helper and all six review remediations now pass the complete focused Omen suite 61/61. Production
+itself traces probe, journal phases, root/rollback calls and removal, rejecting any completion that does not match
+the trace; 33 lifecycle/failure/crash sequences plus invalid-order adversaries execute that same coordinator. Held
+journal identity, all root path gates, target-SID conflicts and cleanup retention/recovery are covered. Fresh exact-
+byte review, roadmap/diff checks and source commit remain before any elevation.
+Fresh re-review confirmed the six corrections but stopped at P0=0/P1=1 because mismatch cleanup could still delete
+a replacement path after releasing the held probe identity. The correction forbids delete on mismatch and adds a
+held-identity removal helper plus actual temp rename/replacement preservation proof.
+That adversarial proof now passes: mismatch was detected, the replacement marker and moved original survived the
+production cleanup helper, and final harness cleanup succeeded. The complete focused Omen suite passes 61/61;
+fresh re-review remains before commit.
+Final independent exact-byte re-review returned GO with P0=0/P1=0 and reproduced focused 61/61, roadmap 15/15,
+pins 6/6 and the clean diff. A source commit is now the remaining gate before the one elevated transition.
 
 Workspace baseline checkpoint: see
 `gate7f/function-first/M1-S2-WORKSPACE-BASELINE-IMPLEMENTATION-RESULTS-2026-09-02.md` for the accepted

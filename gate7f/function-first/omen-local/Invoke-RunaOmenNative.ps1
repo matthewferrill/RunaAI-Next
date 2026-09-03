@@ -252,6 +252,11 @@ namespace RunaAI.OmenLocal {
 '@
 }
 
+function Ensure-RunaDpapi {
+  try { Add-Type -AssemblyName System.Security -ErrorAction Stop }
+  catch { throw 'native-dpapi-unavailable' }
+}
+
 try {
   if ($Action -eq 'hold-git') {
     $line = [Console]::In.ReadLine()
@@ -266,10 +271,13 @@ try {
   switch ($Action) {
     'protect' {
       Ensure-RunaNativeType
+      Ensure-RunaDpapi
       $path = [IO.Path]::GetFullPath([string]$inputValue.path)
       $plain = [Convert]::FromBase64String([string]$inputValue.dataBase64)
-      $sealed = [Security.Cryptography.ProtectedData]::Protect($plain, $entropy,
-        [Security.Cryptography.DataProtectionScope]::CurrentUser)
+      try {
+        $sealed = [System.Security.Cryptography.ProtectedData]::Protect($plain, $entropy,
+          [System.Security.Cryptography.DataProtectionScope]::CurrentUser)
+      } catch { throw 'native-dpapi-protect-failed' }
       $parent = [IO.Path]::GetDirectoryName($path)
       [IO.Directory]::CreateDirectory($parent) | Out-Null
       $temporary = $path + '.new-' + [Guid]::NewGuid().ToString('N')
@@ -282,11 +290,14 @@ try {
       Write-RunaJson @{ schemaVersion='runa-omen-native-result/v1'; protected=$true; bytes=$sealed.Length }
     }
     'unprotect' {
+      Ensure-RunaDpapi
       $path = [IO.Path]::GetFullPath([string]$inputValue.path)
       if (-not [IO.File]::Exists($path)) { throw 'native-state-missing' }
       $sealed = [IO.File]::ReadAllBytes($path)
-      $plain = [Security.Cryptography.ProtectedData]::Unprotect($sealed, $entropy,
-        [Security.Cryptography.DataProtectionScope]::CurrentUser)
+      try {
+        $plain = [System.Security.Cryptography.ProtectedData]::Unprotect($sealed, $entropy,
+          [System.Security.Cryptography.DataProtectionScope]::CurrentUser)
+      } catch { throw 'native-dpapi-unprotect-failed' }
       Write-RunaJson @{ schemaVersion='runa-omen-native-result/v1'; dataBase64=[Convert]::ToBase64String($plain) }
     }
     'inspect-root' {

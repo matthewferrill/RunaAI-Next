@@ -1,6 +1,6 @@
 # RunaAI migration status
 
-Status date: 2026-09-02. This is the living migration handoff for RunaAI-Next. Update it in the same
+Status date: 2026-09-03. This is the living migration handoff for RunaAI-Next. Update it in the same
 commit whenever a gate changes repository direction, authority, implementation status, safety
 boundaries, verification state, or the next planned work.
 
@@ -66,8 +66,21 @@ and `MoveFileExW` correction plan are in
 `gate7f/function-first/M1-S2B-ACTUAL-WINDOWS-FAILURE-RCA-2026-09-02.md`. Corrected bytes remain
 non-executable. Six syntax checks, 14/14 focused checks, PowerShell parsing and the updated native release
 pin are green; fresh independent review returned GO with P0=0/P1=0. A new source commit remains mandatory.
-Models,
+That correction was committed as `0b4e1d4`, but the one affected Windows proof stopped at the same
+`confirm-and-protect-root` stage. Read-only diagnostics proved the embedded native type compiled and found
+the immediate cause: the clean pinned Windows PowerShell 5.1 host had not loaded the `System.Security`
+assembly before the DPAPI reference. Explicit loading succeeds. The prior `File.Move` finding was a real
+latent defect, not the first failing substep. The amended correction adds explicit assembly loading, fully
+qualified DPAPI types and typed assembly/protect/unprotect failures. Six syntax checks, 14/14 focused
+checks, PowerShell parsing, the updated release pin and a read-only pinned-host DPAPI assembly probe were
+green; those bytes remained non-executable pending review and commit. Models,
 browser/HTTPS acceptance and production remain untouched.
+The first amended-correction review returned NO-GO with P0=0/P1=1 because the DPAPI PowerShell helper had
+been inserted inside the embedded C# here-string. No actual proof ran. The function is now outside the
+here-string, and a pinned-host regression extracts and compiles the exact embedded C# bytes while separately
+asserting helper placement. Focused checks pass 15/15. Fresh exact-byte re-review returned GO with
+P0=0/P1=0; only the source commit remains before
+one affected Windows retry.
 
 **Application slice, 2026-09-02:** model selection is complete and the retired R15 campaign is not being
 resumed. The active clean branch is `codex/m1-gemma-primary`, based on the five-function qualification

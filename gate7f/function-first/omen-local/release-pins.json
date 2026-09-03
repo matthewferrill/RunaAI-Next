@@ -2,7 +2,7 @@
   "schemaVersion": "runa-omen-local-release-pins/v1",
   "platform": "win32-x64-omen",
   "nativeScriptRelativePath": "gate7f/function-first/omen-local/Invoke-RunaOmenNative.ps1",
-  "nativeScriptSha256": "ab0b4ebf1db1ef97f4fb459fbd585779610c94793b4c8767b801d39bdbbf4d96",
+  "nativeScriptSha256": "de773e8a1c588ac7fbd31a978797b7aff89ac084bbd2b4f229defcefa072c35d",
   "powershellPath": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
   "powershellSha256": "7600ffe12da441fe89d035b13801e8e91d064bc544a27b19a5cf49f6ab8b18f5",
   "gitPath": "C:\\Program Files\\Git\\mingw64\\bin\\git.exe",

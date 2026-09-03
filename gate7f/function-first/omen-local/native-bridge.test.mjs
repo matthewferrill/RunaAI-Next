@@ -1,6 +1,8 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { spawnSync } from "node:child_process";
 import { readFile } from "node:fs/promises";
+import { fileURLToPath } from "node:url";
 import { OmenRootStore } from "./native-bridge.mjs";
 
 test("pinned Windows PowerShell helper uses the native atomic state-publish primitive", async () => {
@@ -8,7 +10,27 @@ test("pinned Windows PowerShell helper uses the native atomic state-publish prim
   assert.match(source, /MoveFileExW/u);
   assert.match(source, /MOVEFILE_REPLACE_EXISTING \| MOVEFILE_WRITE_THROUGH/u);
   assert.match(source, /native-state-commit-failed/u);
+  assert.match(source, /Add-Type -AssemblyName System\.Security -ErrorAction Stop/u);
+  assert.match(source, /System\.Security\.Cryptography\.ProtectedData/u);
+  assert.match(source, /native-dpapi-(?:unavailable|protect-failed|unprotect-failed)/u);
   assert.doesNotMatch(source, /\[IO\.File\]::Move\([^\r\n]+,\s*\$true\)/u);
+  const terminator = source.indexOf("\n'@\n}");
+  assert.ok(terminator > 0);
+  assert.ok(source.indexOf("function Ensure-RunaDpapi") > terminator);
+});
+
+test("exact embedded native C# compiles under pinned Windows PowerShell", { skip: process.platform !== "win32" }, async () => {
+  const scriptPath = fileURLToPath(new URL("./Invoke-RunaOmenNative.ps1", import.meta.url));
+  const scriptLiteral = scriptPath.replaceAll("'", "''");
+  const command = `$text=[IO.File]::ReadAllText('${scriptLiteral}');`
+    + "$match=[regex]::Match($text,\"(?s)Add-Type -TypeDefinition @'\\r?\\n(.*?)\\r?\\n'@\");"
+    + "if(-not $match.Success){exit 11};Add-Type -TypeDefinition $match.Groups[1].Value;"
+    + "if(-not [RunaAI.OmenLocal.NativeFile].GetMethod('CommitProtectedState')){exit 12}";
+  const result = spawnSync("C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+    ["-NoLogo", "-NoProfile", "-NonInteractive", "-Command", command],
+    { encoding: "utf8", windowsHide: true, timeout: 10_000 });
+  assert.equal(result.error, undefined);
+  assert.equal(result.status, 0, result.stderr);
 });
 
 class FakeNative {

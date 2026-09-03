@@ -51,6 +51,15 @@ stopped at `confirm-and-protect-root`: pinned Windows PowerShell 5.1 lacks the h
 `../gate7f/function-first/M1-S2B-ACTUAL-WINDOWS-FAILURE-RCA-2026-09-02.md`; the correction passes its six
 syntax checks, 14/14 focused checks, PowerShell parser and updated release pin. Fresh independent review
 returned GO with P0=0/P1=0. A source commit remains mandatory before one affected retry.
+That correction was committed as `0b4e1d4`; the one affected proof stopped at the same stage. Read-only
+diagnostics proved the exact embedded C# type compiled, then found the immediate cause: clean pinned
+PowerShell 5.1 had not loaded the `System.Security` DPAPI assembly. Explicit assembly loading succeeds.
+The `File.Move` defect was real but latent. The RCA now requires explicit assembly loading, fully qualified
+DPAPI types and typed substep errors before another review/commit; no successor actual proof ran.
+The first amended-correction review stopped at P0=0/P1=1 because the new PowerShell helper was accidentally
+inside the embedded C# here-string. No actual proof ran. The placement is corrected; a pinned-host test now
+extracts and compiles the exact embedded C# and asserts helper placement. Focused checks pass 15/15; fresh
+independent review returned GO with P0=0/P1=0. A source commit remains mandatory.
 No browser, HTTPS, model or production work has run.
 
 Workspace baseline checkpoint: see

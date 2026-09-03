@@ -6,14 +6,21 @@ and late-event proof corrections became independently green and were committed i
 actual Windows proof then stopped at DPAPI state publication because the helper used a .NET overload absent
 from pinned Windows PowerShell 5.1. The root cause and finite correction are recorded in
 `M1-S2B-ACTUAL-WINDOWS-FAILURE-RCA-2026-09-02.md`. The correction passes 14/14 focused checks, syntax,
-PowerShell parsing and its updated release pin, but remains non-executable until fresh exact-byte
-independent review returned GO with P0=0/P1=0. A source commit remains mandatory before actual execution.
+PowerShell parsing and its updated release pin, and independent review returned GO with P0=0/P1=0. After
+commit `0b4e1d4`, the one affected proof stopped at the same stage. The completed RCA found that the clean
+pinned PowerShell process had not loaded the DPAPI assembly; the overload defect was real but latent. The
+amended explicit assembly-load and typed-error correction initially received P0=0/P1=1 because its helper
+was accidentally inside the C# here-string. No actual proof ran. The placement is corrected, and exact
+embedded-C# compilation plus six syntax checks, 15/15 focused checks, PowerShell parsing, the updated
+release pin and a read-only pinned-host DPAPI assembly probe pass. It remains
+non-executable. Fresh exact-byte independent review returned GO with P0=0/P1=0; a source commit remains
+mandatory before actual execution.
 
 ## Slice selection record
 
 - Selection date and source commit: 2026-09-02 / `4851818`.
 - Roadmap revision and SHA-256: `2026-08-28.1` /
-  `66c01202f400cb3290c09f0014ddf7ce24ae6474217e03a8ea67c101392e668f`.
+  `d4f1d1a10db991a101f7ade37af19022fdc92a4d792e944a3ad56edc8ae9d23f`.
 - Milestone and capability subsets: M1 product-foundation pull-forward; C02 project context, C03 explicit
   local text files, C06 repository orientation, C08 local Git observation, C15 usable connection/file
   surfaces, and C16 the exact Omen ordinary-user seat.

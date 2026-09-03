@@ -440,6 +440,22 @@ contract checks remain 6/6 and roadmap checks 15/15, but implementation stays bl
 exists. The retained incident and exact continuation rule are in
 `gate7f/function-first/M1-S2B1-CORRECTED-CRITERIA-REVIEW-INFRASTRUCTURE-STOP-2026-09-03.md`.
 
+The service outage cleared, criteria were committed as `66fa658` with formatting cleanup `ec0b885`, and one fresh
+independent review completed normally. It returned NO-GO at P0=0/P1=7 for one-frame Git IPC, shape-only integrity,
+invalid ready-state combinations, normalizing URL admission/unfrozen network limits, inconsistent browser upload
+authority, shared coordinator sibling rights and fault methods outside the topology/capability set. No implementation
+or actual operation followed. The second prospective correction now adds bounded authenticated Git streaming,
+canonical/computed admission, strict ready invariants, exact network/materialization policy artifacts, server-owned
+upload sessions, unique operation identities/handles/DACLs, `workspace.cancel`, snapshot-expiry timeout and the exact
+operation Job. Its focused checks and fresh independent review remain pending. Review:
+`gate7f/function-first/M1-S2B1-SEALED-CRITERIA-INDEPENDENT-REVIEW-2026-09-03.md`.
+
+Second-correction preflight is now green at 10/10 focused contract checks and 15/15 roadmap checks with a clean diff.
+The first focused run stopped at 7/8 because its assertion used operation spelling `workspace.cancel` where the frozen
+effect is `workspace-cancel`; the artifact was correct, the one test expectation was corrected, and only that focused
+suite was rerun once; the later closed cancel-contract check expanded the final suite to nine. No live or model operation occurred. Source commit and fresh independent review remain the next
+gates.
+
 **Application slice, 2026-09-02:** model selection is complete and the retired R15 campaign is not being
 resumed. The active clean branch is `codex/m1-gemma-primary`, based on the five-function qualification
 decision. Gemma is the sole primary for Chat, Research, Code, Agent and Review. The immediate work is to

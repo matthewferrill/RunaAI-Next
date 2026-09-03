@@ -68,6 +68,21 @@ without P0=0/P1=0. Resume with one review of the source-committed corrected byte
 the failed dispatches. Incident:
 `../gate7f/function-first/M1-S2B1-CORRECTED-CRITERIA-REVIEW-INFRASTRUCTURE-STOP-2026-09-03.md`.
 
+After the service recovered, criteria commits `66fa658`/`ec0b885` received a normal fresh review. It returned NO-GO
+at P0=0/P1=7 for streaming IPC, computed/canonical integrity, ready-state invariants, exact URL/network policy,
+browser upload authority, per-operation OS isolation and in-scope fault methods. No implementation or actual operation
+followed. The second correction now freezes separate bounded control/stream protocols, computed admission, exact
+network/materialization policy JSON, server-issued upload sessions, unique operation AppContainer/object DACLs and
+Job, `workspace.cancel`, snapshot-expiry timeout and stronger state invariants. Focused verification, source commit and
+fresh independent P0/P1 review still gate implementation. Review:
+`../gate7f/function-first/M1-S2B1-SEALED-CRITERIA-INDEPENDENT-REVIEW-2026-09-03.md`.
+
+Second-correction preflight passes 10/10 focused contract checks and 15/15 roadmap checks with a clean diff. The first
+focused run stopped at 7/8 only because one assertion confused operation spelling `workspace.cancel` with effect
+spelling `workspace-cancel`; the artifact was unchanged, that expectation was corrected and the affected suite passed
+once. The later cancel-contract check expanded the final suite to nine. No actual operation or model ran. Source
+commit and fresh independent review remain mandatory.
+
 M1-S2B implementation checkpoint, 2026-09-02: the authority foundation and actual PostgreSQL lifecycle
 are green. The prior Omen DPAPI/handle-based file proof was 14/14, but shared native/helper bytes have since
 changed and that evidence is historical until one affected-scope rerun. The first actual

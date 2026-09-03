@@ -9,6 +9,7 @@
       "workspace.materialize",
       "workspace.list-files",
       "workspace.read-text",
+      "workspace.cancel",
       "source.disconnect"
     ],
     "internal": [
@@ -20,7 +21,14 @@
     "git-public-https",
     "browser-folder-snapshot"
   ],
-  "effects": [],
+  "effects": [
+    "source-record-create",
+    "upload-session-create",
+    "workspace-materialize",
+    "workspace-cancel",
+    "workspace-cleanup",
+    "source-disconnect"
+  ],
   "modelInvocation": false,
   "projectExecution": false,
   "repositoryMutation": false,

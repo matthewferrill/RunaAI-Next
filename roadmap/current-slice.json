@@ -29,11 +29,12 @@
     "gate7f/function-first/M1-S2B-PROJECT-SOURCE-ADAPTER-REGISTER-2026-09-03.md",
     "gate7f/function-first/M1-S2B-SERVER-MANAGED-WORKSPACE-INDEPENDENT-REVIEW-2026-09-03.md",
     "gate7f/function-first/M1-S2B1-SERVER-WORKSPACE-MATERIALIZATION-CRITERIA-2026-09-03.md",
-    "gate7f/function-first/M1-S2B1-CORRECTED-CRITERIA-REVIEW-INFRASTRUCTURE-STOP-2026-09-03.md"
+    "gate7f/function-first/M1-S2B1-CORRECTED-CRITERIA-REVIEW-INFRASTRUCTURE-STOP-2026-09-03.md",
+    "gate7f/function-first/M1-S2B1-SEALED-CRITERIA-INDEPENDENT-REVIEW-2026-09-03.md"
   ],
   "scopeDocument": "roadmap/CURRENT-SLICE.md",
   "capabilityIds": ["C01", "C02", "C03", "C04", "C06", "C07", "C08", "C12", "C15", "C16"],
-  "nextWork": "M1-S2B1 corrected prospective criteria await fresh independent P0/P1 review after three review dispatches across two workers failed at the response service with HTTP 404 before a verdict. Do not blindly retry; resume with one review of the source-committed corrected bytes after service recovery. Implementation and actual operations remain blocked. The correction freezes executable strict schemas, literal capability version/digest, closed lifecycle/receipt matrices, a network-denied materializer plus workspace-blind enforcing HTTPS broker, crash-safe non-replacing Windows publication/reconciliation, exact browser upload and observability limits, same-user/cross-project and cross-user isolation, no-change Home unavailability proof, and production-path fault methods. Deterministic contract checks receive no acceptance credit. No model, private credential, project execution, change, commit or push is included in B1. Home remains model-only, Omen is not the primary worker, the Omen ACL transition is deferred, and comparison-model testing remains tabled.",
+  "nextWork": "M1-S2B1 second prospective correction passes 10/10 focused contract checks and 15/15 roadmap checks and awaits source commit plus fresh independent P0/P1 review after the sealed criteria review returned P0=0/P1=7. No implementation or actual operation followed. The correction freezes separate bounded authenticated control and Git-stream IPC, canonical/computed admission, strict ready invariants, exact network/materialization policy artifacts and digests, server-issued browser upload sessions, unique per-operation AppContainer/object DACL/handle isolation, an exact operation Job, workspace.cancel, snapshot-expiry timeout and topology-bound fault methods. Implementation and actual Control/browser operations remain blocked until GO. Deterministic contract checks receive no acceptance credit. No model, private credential, project execution, change, commit or push is included in B1. Home remains model-only, Omen is not the primary worker, the Omen ACL transition is deferred, and comparison-model testing remains tabled.",
   "remainingRoadmapRequired": true,
   "completionClaim": "M1 completion is not whole-product completion."
 }

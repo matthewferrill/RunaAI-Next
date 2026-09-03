@@ -1,13 +1,15 @@
 # M1-S2B1 server-workspace materialization criteria — 2026-09-03
 
-Status: corrected prospective criteria freeze; fresh independent design review required before implementation
+Status: second corrected prospective criteria; fresh independent design review required before implementation
 
 Roadmap revision/digest retrieved before selection: `2026-08-28.1` / `6a8380d9e9e2f3eb07b7e51c77cda174c5541c0abbb07875dd5537627560cfd1`
 
 Milestone/capability scope: M1-S2B1; bounded C03/C06/C08/C15/C16 subsets
 
-First independent review disposition: NO-GO, P0=0/P1=7. No implementation or actual operation followed it. This
-revision closes those findings prospectively; it earns no acceptance credit until a fresh review returns P0=0/P1=0.
+The initial draft review and sealed corrected-criteria review each returned NO-GO at P0=0/P1=7. The latter reviewed
+exact commit `ec0b885` and is retained in `M1-S2B1-SEALED-CRITERIA-INDEPENDENT-REVIEW-2026-09-03.md`. No dependency,
+implementation or actual operation followed either review. This second correction earns no acceptance credit until a
+fresh review returns P0=0/P1=0.
 
 ## Outcome and reason this is next
 
@@ -42,7 +44,7 @@ cross-workspace storage isolation, actual Control cleanup, provider credentials,
 ## Included behavior
 
 - A new source/workspace capability-set version that grants only connection creation, materialization, bounded
-  manifest/file inspection and disconnect for this slice.
+  manifest/file inspection, cancellation and disconnect for this slice.
 - One manifest-configured public HTTPS Git endpoint/repository/ref selected through an authority-owned source id.
 - Exact immutable commit resolution followed by safe blob materialization into a separate content root.
 - One bounded non-Git browser folder snapshot with exact file manifest and snapshot digest.
@@ -85,22 +87,50 @@ independently reviewed and entered into the release manifest before installation
 which includes the upstream NTFS alternate-data-stream path fix; the proposed version is 1.41.0 but remains unpinned
 until that package review. No dependency download or implementation occurs under this criteria revision.
 
-Each child is created suspended under a unique AppContainer security identifier and Windows Job Object. The parent
-sets the full ACL, mitigations, CPU/memory/process/time limits, handle list and network capability before resume.
-Only three anonymous-pipe handles are inherited: request, response and a one-use 256-bit HMAC key. Frames are
-length-prefixed canonical JSON, at most 1 MiB, sequence exactly 1, and bind request id, nonce, payload length/digest
-and HMAC. Any extra frame, inherited handle, child/grandchild process, malformed frame or post-terminal survivor is
-fatal. The complete allowed process tree is coordinator -> one materializer and, for Git only, one ingress broker;
-neither child may spawn a descendant. The HMAC handle and request pipe close immediately after the one request.
+The Control authority creates one **operation Job Object** with kill-on-close and active-process limit three, then
+creates the coordinator, materializer and optional ingress broker suspended under distinct, unique AppContainer SIDs.
+It sets mitigations, resource limits, DACLs and the exact inherited handle list before resume. No operation process
+may spawn a descendant. Broker-loss acceptance terminates this exact operation Job; terminal acceptance requires the
+Job's active-process count to reach zero.
+
+Coordinator control IPC and Git streaming IPC are separate:
+
+- Each Control/coordinator, coordinator/materializer and coordinator/broker control channel has request, response and
+  one-use 256-bit HMAC-secret handles. The request side admits exactly one canonical operation or cancel frame,
+  sequence 1, then EOF. The response side admits exactly one receipt or terminal frame, sequence 1, then EOF. Each
+  payload is at most 1 MiB.
+- Git adds two unidirectional anonymous pipes: materializer-to-broker request stream and broker-to-materializer
+  response stream. `runa-materialization-pipe-frame/v2` admits strictly increasing per-direction sequences and exactly
+  two request ordinals. Ordinal 0 is GET info/refs; ordinal 1 is POST git-upload-pack. Open/body/end frames are HMAC
+  authenticated over the canonical header and exact body bytes. Each body frame is at most 1 MiB; aggregate request
+  bodies are at most 2 MiB and response bodies at most 96 MiB, with at most 128 frames in either direction. A broker
+  terminal frame after response 1 and then EOF is mandatory. Missing, duplicate, reordered, post-terminal,
+  wrong-direction or over-limit frames are fatal.
+- Control generates one additional random 256-bit Git-stream HMAC key and sends the same key once through each
+  child's separate authenticated control bootstrap. The coordinator never receives that key. Both workers zeroize it
+  after the terminal/EOF boundary, and neither may persist or log it.
+- The materializer inherits five handles for Git: its control request/response/secret plus Git request-write and
+  response-read. The broker inherits five: its control request/response/secret plus Git request-read and
+  response-write. The coordinator has the matching control endpoints but never receives source bodies. Secret and
+  write handles close at their specified terminal boundary; every unexpected inherited handle is fatal.
 
 The release manifest freezes the executable/runtime/DLL/module hashes and this exact access table:
 
 | Principal/process | Filesystem | Network | Environment/handles |
 |---|---|---|---|
-| Control authority process | PostgreSQL authority and protected workspace parent; no source contents in logs | existing application routes only | existing service environment; no child handle inheritance |
-| coordinator service identity | traverse/create/rename/delete exact opaque child names under protected parent; read pinned release; no participant/profile/Home/deployment trees | deny all | `SystemRoot`, `WINDIR`, `TEMP`, `TMP`, `PATH` containing only pinned runtime directory; three explicit pipe handles only |
-| unique materializer AppContainer | read pinned materializer/runtime modules; read/write/delete its exact ingress and staging identities; no parent listing, final root, sibling, application, database, profile, credential or Home access | deny all | same five-name environment with owned temp; request/response/HMAC pipes only |
-| unique ingress AppContainer | read pinned ingress/runtime modules and certificate trust required by the sealed host; no ingress/staging/final/database/application/profile/credential/Home access | outbound TCP only through the owned connector; all other API calls denied by policy and audited | same five-name environment with empty proxy variables; request/response/HMAC pipes only |
+| Control authority process | PostgreSQL authority and protected workspace parent; creates exact opaque roots and performs final publication; no source contents in logs | existing application routes only | existing service environment; passes only explicit handles |
+| unique operation coordinator AppContainer | read pinned coordinator/runtime; no parent path/list right and no sibling; only inherited operation-root handles and object DACL rights | deny all | `SystemRoot`, `WINDIR`, owned `TEMP`/`TMP`, pinned-runtime-only `PATH`; control pipe handles only |
+| unique materializer AppContainer | read pinned materializer/runtime; inherited ingress/staging handles with exact data/write/append/attributes/delete/synchronize rights; no path-based parent traverse/list, final, sibling, application, database, profile, credential or Home access | deny all | same five-name environment; control handles plus the two Git stream handles only |
+| unique ingress AppContainer | read pinned ingress/runtime modules and read-only machine trust store required by the sealed host; no operation root, ingress, staging, final, database, application, profile, credential or Home access | outbound TCP only through the owned connector; all other connect paths fail closed and are audited | same five-name environment with empty proxy variables; control handles plus the two Git stream handles only |
+
+The protected parent DACL is non-inheriting and grants full control only to SYSTEM, Administrators and the Control
+authority service SID. Each create-new operation object has a protected object-specific DACL granting its unique SID
+only `FILE_READ_DATA`, `FILE_WRITE_DATA`, `FILE_APPEND_DATA`, `FILE_READ_ATTRIBUTES`,
+`FILE_WRITE_ATTRIBUTES`, `FILE_LIST_DIRECTORY`, `FILE_TRAVERSE`, `DELETE` and `SYNCHRONIZE`; it grants neither
+`WRITE_DAC`, `WRITE_OWNER` nor access to the parent or another operation object. The authority passes held handles,
+not parent paths. Final workspaces remove the operation ACE and receive a new read-only project-service ACE only after
+publication. Actual isolation proves both same-user/cross-project and cross-user operation SIDs receive access denied
+when opening a known sibling by path or handle duplication.
 
 The coordinator, materializer, ingress broker, runtime, loaded native DLLs and application-owned modules are each
 verified against the release manifest before resume and re-observed from OS process/module inventory before terminal
@@ -108,26 +138,41 @@ acceptance. A module outside the exact set, an unverified trust-store path, or a
 the attempt. The AppContainer profiles, ACL entries, temp roots, pipe handles and jobs are removed only after zero
 processes and exact owned identity are proven.
 
-The snapshot adapter uses the same network-denied materializer but no ingress broker. Both adapters publish only
-after exact manifest verification. The authoritative manifest and lifecycle remain in protected PostgreSQL/broker
-state outside source content. An uncertain outcome is observed and reconciled, never blindly rerun.
+The snapshot adapter uses the same network-denied materializer but no ingress broker. Both adapters return a signed
+publication proposal to the Control authority, which independently verifies the held staging identity and exact
+manifest before performing the non-replacing rename. The authoritative manifest and lifecycle remain in protected
+PostgreSQL/application state outside source content. An uncertain outcome is observed and reconciled, never blindly
+rerun.
 
 ## Frozen model-independent schemas
 
 The closed capability set is `m1-s2b1-materialization-2026-09-03.1`, file
 `server-workspace/m1-s2b1-capability-set.json`, canonical-JSON SHA-256
-`268da8ecb04683cb8f82fd4a98ac04a4ed6c5ffaa590b4fca31c8407664b62cb`. Participant operations are exactly
+`001ff34d840293fb7de17a76b518b29bf68755b5f230cf386de96a51288b0aea`. Participant operations are exactly
 `source.connect-public-git`, `source.connect-folder-snapshot`, `workspace.materialize`, `workspace.list-files`,
-`workspace.read-text` and `source.disconnect`. Internal-only operations are exactly `workspace.reconcile` and
-`workspace.cleanup`. The set grants no effect, model invocation, project execution, repository mutation or remote
-publication. Requests with any other capability version/digest or operation fail before durable intent.
+`workspace.read-text`, `workspace.cancel` and `source.disconnect`. Internal-only operations are exactly
+`workspace.reconcile` and `workspace.cleanup`. Its only effects are source-record/upload-session creation, workspace
+materialization/cancel/cleanup and source disconnect. It grants no model invocation, project execution, repository
+mutation or remote publication. Requests with any other capability version/digest or operation fail before durable
+intent.
+
+The materialization/inspection policy is `server-workspace/m1-s2b1-materialization-policy.json`, canonical-JSON
+SHA-256 `8c53b2213f5a090101106064f30e2055762898127578a86f89aa7b3c6ed6ef72`. The public network policy is
+`server-workspace/m1-s2b1-network-policy.json`, canonical-JSON SHA-256
+`f898215b4a02d2f76c5686f0fec27f6fcf081c5beed4fdbdb4b84d8148914e3f`. These artifacts freeze all numeric limits,
+secret-pattern exclusions, text extension classification, denied IPv4/IPv6 CIDRs, metadata addresses, redirects,
+proxies and DNS/socket/header/body/frame limits. Changing either digest creates a new policy version and requires new
+criteria/review; it cannot silently widen an existing capability.
 
 The executable strict schemas and cross-field invariants are in
 `server-workspace/materialization-contracts.mjs`; their deterministic contract tests are
 `server-workspace/materialization-contracts.test.mjs`. These checks are a criteria freeze and receive no
-actual-system acceptance credit. All objects reject unknown keys, non-canonical encodings, duplicate/unordered paths
-and invalid UTC timestamps. Client/model input never supplies participant, project, environment, capability version,
-workspace path, worker identity or endpoint.
+actual-system acceptance credit. Admission functions compare raw bytes with their canonical serialization before
+schema parsing, which rejects whitespace variants, duplicate keys, BOM/NUL and noncanonical encodings. They require
+real round-trippable millisecond UTC instants; compare capability/policy/binding digests to authority values; recompute
+file-set/upload/payload digests and HMACs; and reject unknown keys or duplicate/unordered/colliding paths. Client/model
+input never supplies participant, project, environment, capability version, workspace path, worker identity or
+endpoint.
 
 ### `runa-workspace-source-selection/v1`
 
@@ -136,9 +181,10 @@ Server-owned record:
 - `sourceId`, `projectId`, `participantId`, `environmentId`
 - `sourceKind`: `git-public-https` or `browser-folder-snapshot`
 - `displayName`
-- Git only: exact configured `repositoryHttpsUrl`, `requestedRef`, endpoint policy id
-- lifecycle: `known|configured|connected|tested|enabled|revoked|failed`
-- `capabilitySetVersion`, creation/update/revoke timestamps and revision
+- Git only: exact configured `repositoryHttpsUrl`, `requestedRef`, endpoint policy id/digest
+- lifecycle: `known|configured|connected|tested|enabled|disconnected|expired|revoked|failed|unknown`
+- independent cleanup state: `not-required|pending|complete|indeterminate`
+- exact capability version/digest, creation/update/revoke timestamps and revision
 
 The browser uses only `sourceId` after selection. Raw URLs are not accepted from conversation/model operations.
 
@@ -171,7 +217,8 @@ hash; every materialized file and complete file set has SHA-256 integrity.
 - network policy result, process/job result, bytes/files/duration and limit observations
 - publication, database and cleanup states
 - allowlisted error code, retryability only after reconciliation, worker/release identity and timestamps
-- `credentialsPresent:false`, `privateValuesIncluded:false`, `modelInvoked:false`, `effects:[]`
+- `credentialsPresent:false`, `privateValuesIncluded:false`, `modelInvoked:false`, and an exact ordered subset of
+  `workspace-materialize|workspace-cancel|workspace-cleanup` consistent with outcome
 
 Receipt outcomes are closed as follows:
 
@@ -196,17 +243,17 @@ record revision, capability digest and predecessor state.
 | `configured` | endpoint/upload session validates | `connected` |
 | `connected` | one complete materialization verifies | `tested` |
 | `tested` | participant enables inspection | `enabled` |
-| `configured|connected|tested|enabled` | explicit disconnect with no live workspace | `disconnected` |
-| `configured|connected|tested|enabled` | expiry | `expired` |
-| any nonterminal | authority revocation | `revoked` |
-| any nonterminal | determinate operation failure | `failed` |
-| any nonterminal | effect/process state cannot be proven | `unknown` |
-| `disconnected|expired|revoked|failed|unknown` | owned artifacts remain | `cleanup-pending` |
-| `cleanup-pending` | exact owned cleanup verified | predecessor terminal state with cleanup-complete marker |
+| `configured|connected|tested|enabled` | explicit disconnect | `disconnected`, cleanup state pending/complete |
+| `configured|connected|tested|enabled` | expiry | `expired`, cleanup state pending/complete |
+| any nonterminal | authority revocation | `revoked`, cleanup state pending/complete/indeterminate |
+| any nonterminal | determinate operation failure | `failed`, cleanup state pending/complete |
+| any nonterminal | effect/process state cannot be proven | `unknown`, cleanup state indeterminate |
+| any terminal lifecycle | exact owned cleanup verified | lifecycle unchanged, cleanup state `complete` |
 
-There is no transition out of `revoked`. Reconnect from `disconnected`, recovery from `failed`, or replacement of an
-`unknown` record creates a new revision/source instance only after reconciliation; it never reactivates stale
-authority.
+Source lifecycle and cleanup state are independent columns in one CAS record; cleanup never changes the terminal
+lifecycle. There is no transition out of `revoked`. Reconnect from `disconnected`, recovery from `failed`, or
+replacement of an `unknown` record creates a new revision/source instance only after reconciliation; it never
+reactivates stale authority.
 
 | Workspace predecessor | Operation/event | Workspace successor |
 |---|---|---|
@@ -226,12 +273,18 @@ cleanup-pending or removed; materialize is not a legal successor.
 
 ## Exact first limits
 
+The authoritative values are the two frozen policy JSON artifacts and their digests above; prose below is a readable
+summary and cannot override them.
+
 - Maximum 2,000 regular files, 64 MiB total materialized bytes and 4 MiB per file.
 - Maximum normalized relative path: 1,024 UTF-8 bytes, 64 segments, 255 UTF-8 bytes per segment.
 - File-tree response: 2,000 entries; individual text read: 256 KiB; combined response: 512 KiB.
 - Git resolution/fetch/materialization: 120 seconds; folder upload: 120 seconds; cleanup/reconciliation: 30 seconds.
 - One in-flight materialization per source/project and two per participant; excess returns bounded busy status.
 - Ready workspace expires after 30 minutes in this first proof. Expiry prevents new reads and enters cleanup.
+- DNS is limited to 16 total A/AAAA answers and 3 seconds. Git is limited to two connections, 10-second idle time,
+  16 KiB request headers, 32 KiB response headers, 2 MiB aggregate request bodies, 96 MiB aggregate response bodies,
+  1 MiB IPC frames, 128 frames per direction and the existing 120-second absolute deadline.
 
 Exceeding any source limit rejects the complete materialization. The product may list safe counts/reasons, but does
 not publish a partial workspace as ready.
@@ -249,8 +302,9 @@ non-canonical paths. Redirect status is terminal and a proxy is never read from 
 The ingress broker is the owned enforcing connect layer. For every socket it:
 
 1. resolves A and AAAA records through the configured OS resolver, normalizes every answer, and rejects the complete
-   request if any answer is loopback, unspecified, link-local, private/unique-local, carrier-grade NAT, multicast,
-   reserved, benchmark/documentation or a configured cloud-metadata destination;
+   request if any answer falls in a CIDR or metadata address in the exact frozen network-policy artifact. IPv4-mapped
+   IPv6 is decoded and classified as IPv4; zone identifiers, noncanonical numeric forms and more than 16 answers are
+   rejected. The policy file, not a runtime registry lookup or prose category, is the acceptance oracle;
 2. records the complete answer set digest, chooses one allowed IP, injects that address into the socket connection,
    and uses only the configured hostname for TLS SNI, certificate verification and the HTTP `Host` header;
 3. prevents a library from performing a second resolution or opening a socket directly; only the broker's sealed
@@ -258,8 +312,16 @@ The ingress broker is the owned enforcing connect layer. For every socket it:
 4. admits exactly `GET /<sealed-repository>.git/info/refs?service=git-upload-pack` and
    `POST /<sealed-repository>.git/git-upload-pack`; methods, paths, queries, content types and response status/types
    outside the smart-HTTP contract fail closed;
-5. bounds request bytes, response headers, each response body, aggregate bytes, connection count, idle time and
-   120-second absolute deadline; it neither logs nor retains source bodies.
+5. enforces the exact policy-file limits for DNS, two connections, request/response headers, aggregate bodies,
+   individual frames, idle time and the 120-second absolute deadline; it streams frames and neither spools, logs nor
+   retains source bodies.
+
+The classifier consumes the resolver's binary address, never reparses a hostname or URL. It compares the first
+prefix-length bits in network byte order against every frozen CIDR; an IPv4-mapped address is first reduced to its
+last 32 bits and checked against IPv4. Any parse/family/prefix ambiguity, zero answers or one denied member rejects
+the whole answer set. One allowed binary address is selected once and reused for both smart-HTTP connections; TLS
+uses the original sealed ASCII hostname. The actual oracle logs only family, policy digest, answer-set digest,
+selected-address digest and allow/deny result—not the source body.
 
 The materializer's exact-pinned Git library consumes only that bounded pipe transport. It has no native Git binary,
 credential helper, prompt, hook, external protocol, file protocol, filter, LFS, submodule or project-command path.
@@ -296,18 +358,34 @@ SameSite=Strict session cookie, an exact session-bound CSRF header and `Sec-Fetc
 request rejects browser/model-supplied participant/project/environment/capability fields. The endpoints are closed:
 
 - `POST /api/project-sources/folder-snapshots` with one strict
-  `runa-browser-folder-upload-manifest/v1` JSON body, maximum 512 KiB, creates an unexpired upload session;
+  `runa-browser-folder-upload-session-request/v1` body containing only display name and declared counts creates the
+  server-owned source/upload ids and returns `runa-browser-folder-upload-session/v1`, expiry and exact limits
+  profile/digest;
+- `PUT /api/project-sources/folder-snapshots/{uploadId}/manifest` accepts one strict canonical
+  `runa-browser-folder-upload-manifest/v1` body, maximum 512 KiB, with ordered included entries, ordered exclusions
+  and no server id/binding/digest. The server compares declared session totals, applies the frozen exclusion/media
+  policy, computes the canonical manifest digest and returns the server-owned manifest record;
 - `PUT /api/project-sources/folder-snapshots/{uploadId}/files/{ordinal}` with
   `application/octet-stream`, `Content-Length <= 1,048,576`, exact `Upload-Offset`, `Upload-Chunk-Sha256` and
   monotonically increasing zero-based chunk ordinal writes one create-only declared range;
-- `POST /api/project-sources/folder-snapshots/{uploadId}/finalize` with the exact manifest digest and zero other
-  fields closes the session; and
+- `POST /api/project-sources/folder-snapshots/{uploadId}/finalize` accepts only the server-returned manifest digest
+  and closes the session; and
 - `DELETE /api/project-sources/folder-snapshots/{uploadId}` cancels it and begins exact owned cleanup.
 
-At most four 1 MiB chunks are permitted per 4 MiB file. A repeated chunk is idempotent only when upload id, file
+The server issues every upload/source id; the client never supplies one during creation. Zero-byte files require zero
+chunks; otherwise the exact chunk count is `ceil(fileBytes / 1 MiB)`, at most four. Included and excluded paths are
+strictly ordered/unique under Windows identity, cannot overlap and must equal the picker preview counts. The complete
+secret-basename/prefix/suffix exclusions and UTF-8 text-extension list are frozen in the materialization-policy file.
+The server NFC-normalizes and invariant-case-folds only for comparison, takes the last path segment as basename, and
+excludes when that basename equals a listed basename, starts with a listed prefix or ends with a listed suffix. It
+classifies UTF-8 text only when the final extension equals a listed extension and the bytes pass strict UTF-8 decode
+without BOM/NUL; everything else remains binary and cannot be opened as text.
+
+A repeated chunk is idempotent only when upload id, file
 ordinal, chunk ordinal, offset, length and digest all match the already retained bytes; any mismatch conflicts and
 closes the session. Missing/out-of-order/overlapping ranges, extra bytes/files, expired/finalized/cancelled sessions,
-digest mismatch, replay under another session, or disconnect during finalize cannot publish a workspace.
+file or canonical manifest-digest mismatch, replay under another session, or disconnect during finalize cannot
+publish a workspace.
 
 The server independently revalidates names, counts, sizes, paths, types and hashes before atomic publication.
 Folder entries and any picker-reported non-file item are excluded. Names that imply devices, ADS or path aliases,
@@ -319,9 +397,11 @@ The acceptance fixture contains only generated non-private text files and one in
 ## Windows publication and reconciliation
 
 All candidate roots are siblings on one fixed NTFS volume beneath one administrator-created protected parent.
-Participants, the web process and children cannot create or rename entries in that parent. The coordinator opens the
-parent no-follow, records its volume serial and file id, and creates opaque ingress, staging and final names with
-create-new semantics while holding their handles. The expected final name must be absent; an existing final name is
+Participants and operation processes cannot create or rename entries in that parent. The Control authority opens the
+parent no-follow, records its volume serial and file id, creates opaque ingress/staging objects with create-new
+semantics and derives an opaque final name bound in PostgreSQL while holding the created handles. It applies the
+object-specific operation DACL before passing only ingress/staging handles. The final name must remain absent until
+publication; an existing final name is
 `unknown/publication-name-conflict`, never replaced, merged or deleted.
 
 PostgreSQL commits `intent-recorded` before the coordinator creates any child or directory. During staging, every
@@ -329,10 +409,10 @@ file is opened relative to the held root, written, reopened no-follow, identity/
 `FlushFileBuffers`; directory metadata and the manifest are flushed before publication. The authority manifest is
 stored outside the content root and binds every file identity/digest plus the parent/staging/final identities.
 
-Publication uses a pinned native helper around `MoveFileExW` with `MOVEFILE_WRITE_THROUGH` and without
-`MOVEFILE_REPLACE_EXISTING`; the helper accepts only the already verified sibling staging/final paths under the held
-parent. Immediately afterward the coordinator reopens the final name no-follow, proves same volume and expected file
-id, rechecks absence of staging plus every manifest/file digest, and only then performs the
+Publication uses the Control authority's pinned native helper around `MoveFileExW` with `MOVEFILE_WRITE_THROUGH` and
+without `MOVEFILE_REPLACE_EXISTING`; the helper accepts only the already verified sibling staging/final paths under
+the held parent. Immediately afterward the authority reopens the final name no-follow, proves same volume and
+expected file id, rechecks absence of staging plus every manifest/file digest, and only then performs the
 `published-pending-db -> ready` PostgreSQL CAS. If the exact host cannot prove this behavior, B1 stops before actual
 proof. No source-controlled or source-writable manifest is accepted as authority.
 
@@ -424,13 +504,14 @@ an infrastructure/method failure against Gemma.
 These are external actions against ordinary candidate paths, not alternate implementations or mocked results:
 
 - **Cancel:** call the same authenticated participant cancel endpoint after the durable `staging` state is observed;
-  the operation carries the original binding/idempotency key and does not signal a process directly.
-- **Timeout:** the sealed public source fixture includes a separately owned HTTPS test endpoint whose TLS and response
-  bytes are real but whose upload-pack response intentionally stalls beyond the 120-second absolute deadline. It is
-  preclassified as a public test endpoint and cannot share production/private addresses. This fault scenario is
-  separate from the successful Git source and receives no repository-quality credit.
+  the closed `workspace.cancel` capability carries the original binding/idempotency key and does not signal a process
+  directly.
+- **Timeout:** create an ordinary browser-folder upload session, upload its first declared chunk, then send no
+  successor request until the frozen 120-second server expiry. The ordinary expiry/cleanup/reconciliation path must
+  produce the timed-out receipt. No second network endpoint, mock response or private destination is introduced.
 - **Broker loss after publication:** an external Control test owner watches the protected durable state until
-  `published-pending-db`, then terminates the exact candidate coordinator Job. No source byte, endpoint result or
+  `published-pending-db`, then terminates the exact operation Job defined in the process topology. No source byte,
+  endpoint result or
   database row is injected or edited.
 - **Cleanup failure:** an external test owner opens one candidate-owned disposable file without delete sharing before
   disconnect. The ordinary cleanup path must retain `cleanup-pending`; closing that exact handle permits the ordinary

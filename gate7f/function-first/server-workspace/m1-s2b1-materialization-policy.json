@@ -1,0 +1,47 @@
+{
+  "schemaVersion": "runaai-materialization-policy/v1",
+  "policyId": "m1-s2b1-materialization-limits-v1",
+  "maximumFiles": 2000,
+  "maximumTotalBytes": 67108864,
+  "maximumFileBytes": 4194304,
+  "maximumPathUtf8Bytes": 1024,
+  "maximumPathSegments": 64,
+  "maximumSegmentUtf8Bytes": 255,
+  "maximumManifestBytes": 524288,
+  "maximumChunkBytes": 1048576,
+  "maximumChunksPerFile": 4,
+  "uploadSessionLifetimeMs": 120000,
+  "workspaceLifetimeMs": 1800000,
+  "textReadBytes": 262144,
+  "combinedReadResponseBytes": 524288,
+  "excludedBasenamesCaseInsensitive": [
+    ".env",
+    "id_dsa",
+    "id_ecdsa",
+    "id_ed25519",
+    "id_rsa"
+  ],
+  "excludedSuffixesCaseInsensitive": [
+    ".key",
+    ".p12",
+    ".pfx"
+  ],
+  "excludedPrefixesCaseInsensitive": [
+    ".env."
+  ],
+  "utf8TextExtensionsCaseInsensitive": [
+    ".cjs",
+    ".css",
+    ".html",
+    ".js",
+    ".json",
+    ".jsx",
+    ".md",
+    ".mjs",
+    ".ts",
+    ".tsx",
+    ".txt",
+    ".yaml",
+    ".yml"
+  ]
+}

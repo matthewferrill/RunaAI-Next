@@ -1,65 +1,154 @@
 import assert from "node:assert/strict";
+import { createHash, createHmac } from "node:crypto";
 import { readFileSync } from "node:fs";
 import test from "node:test";
-import { CAPABILITY_SET_VERSION, canonicalSha256, materializationRequestSchema, materializationReceiptSchema, sourceSelectionSchema, workspaceManifestSchema } from "./materialization-contracts.mjs";
+import {
+  CAPABILITY_SET_DIGEST, CAPABILITY_SET_VERSION, MATERIALIZATION_POLICY_DIGEST, MATERIALIZATION_POLICY_ID,
+  NETWORK_POLICY_DIGEST, NETWORK_POLICY_ID, admitGitOpenRequest, admitMaterializationReceipt, admitMaterializationRequest, admitPipeFrame,
+  admitUploadManifest, admitWorkspaceCancelRequest, admitWorkspaceManifest, bindingDigestFor, canonicalSha256, canonicalStringify,
+  controlPipeFrameSchema, fileSetDigest,
+  gitStreamFrameSchema, materializationReceiptSchema, sourceSelectionSchema, uploadManifestSchema,
+  validateGitStreamTranscript, workspaceManifestSchema
+} from "./materialization-contracts.mjs";
 
 const d = "a".repeat(64);
 const t0 = "2026-09-03T12:00:00.000Z";
 const t1 = "2026-09-03T12:01:00.000Z";
+const readJson = name => JSON.parse(readFileSync(new URL(name, import.meta.url), "utf8"));
+const bindingRecord = { schemaVersion: "runa-workspace-binding/v1", participantId: "person_00001",
+  projectId: "project_0001", environmentId: "control_0001", sourceId: "source_0001", taskId: "task_0000001",
+  sourceRevision: 1, capabilitySetVersion: CAPABILITY_SET_VERSION, capabilitySetDigest: CAPABILITY_SET_DIGEST };
+const binding = bindingDigestFor(bindingRecord);
 
-test("capability set has the frozen canonical digest and closed operation set", () => {
-  const value = JSON.parse(readFileSync(new URL("./m1-s2b1-capability-set.json", import.meta.url), "utf8"));
-  assert.equal(value.capabilitySetVersion, CAPABILITY_SET_VERSION);
-  assert.equal(canonicalSha256(value), "268da8ecb04683cb8f82fd4a98ac04a4ed6c5ffaa590b4fca31c8407664b62cb");
-  assert.deepEqual(value.operations.participant, ["source.connect-public-git", "source.connect-folder-snapshot", "workspace.materialize", "workspace.list-files", "workspace.read-text", "source.disconnect"]);
-  assert.deepEqual(value.operations.internal, ["workspace.reconcile", "workspace.cleanup"]);
-  assert.deepEqual(value.effects, []);
+test("all three frozen policy artifacts have their exact canonical digests", () => {
+  const capability = readJson("./m1-s2b1-capability-set.json");
+  assert.equal(capability.capabilitySetVersion, CAPABILITY_SET_VERSION);
+  assert.equal(canonicalSha256(capability), CAPABILITY_SET_DIGEST);
+  assert.deepEqual(capability.operations.participant, ["source.connect-public-git", "source.connect-folder-snapshot", "workspace.materialize", "workspace.list-files", "workspace.read-text", "workspace.cancel", "source.disconnect"]);
+  assert.deepEqual(capability.effects, ["source-record-create", "upload-session-create", "workspace-materialize", "workspace-cancel", "workspace-cleanup", "source-disconnect"]);
+  assert.equal(canonicalSha256(readJson("./m1-s2b1-network-policy.json")), NETWORK_POLICY_DIGEST);
+  assert.equal(canonicalSha256(readJson("./m1-s2b1-materialization-policy.json")), MATERIALIZATION_POLICY_DIGEST);
 });
 
-test("request contract rejects mixed Git and snapshot authority", () => {
-  const base = { schemaVersion: "runa-workspace-materialization-request/v1", requestId: "request_0001", idempotencyKey: d,
-    sourceId: "source_0001", taskId: "task_0000001", bindingDigest: d, expectedSourceRevision: 1,
-    capabilitySetVersion: CAPABILITY_SET_VERSION, capabilitySetDigest: d, limitsProfileId: "m1-s2b1-materialization-limits/v1",
-    deadlineAt: t1, createdAt: t0 };
-  assert.equal(materializationRequestSchema.safeParse({ ...base, requestedRef: "main", uploadSessionId: null, uploadManifestDigest: null }).success, true);
-  assert.equal(materializationRequestSchema.safeParse({ ...base, requestedRef: "main", uploadSessionId: "upload_0001", uploadManifestDigest: d }).success, false);
+const request = () => ({ schemaVersion: "runa-workspace-materialization-request/v1", requestId: "request_0001",
+  idempotencyKey: d, sourceId: "source_0001", taskId: "task_0000001", bindingDigest: binding,
+  expectedSourceRevision: 1, capabilitySetVersion: CAPABILITY_SET_VERSION, capabilitySetDigest: CAPABILITY_SET_DIGEST,
+  requestedRef: "main", uploadSessionId: null, uploadManifestDigest: null, limitsProfileId: MATERIALIZATION_POLICY_ID,
+  limitsProfileDigest: MATERIALIZATION_POLICY_DIGEST, deadlineAt: t1, createdAt: t0 });
+
+test("wire admission rejects wrong capability, binding, duplicate keys, whitespace and impossible UTC", () => {
+  assert.equal(admitMaterializationRequest(canonicalStringify(request()), bindingRecord).sourceId, "source_0001");
+  assert.throws(() => admitMaterializationRequest(canonicalStringify({ ...request(), capabilitySetDigest: d }), bindingRecord));
+  assert.throws(() => admitMaterializationRequest(canonicalStringify(request()), { ...bindingRecord, projectId: "project_0002" }));
+  assert.throws(() => admitMaterializationRequest(` ${canonicalStringify(request())}`, bindingRecord), /non-canonical-wire/u);
+  assert.throws(() => admitMaterializationRequest(canonicalStringify(request()).replace('"requestId":"request_0001"', '"requestId":"request_0001","requestId":"request_0001"'), bindingRecord), /non-canonical-wire/u);
+  assert.throws(() => admitMaterializationRequest(canonicalStringify({ ...request(), createdAt: "2026-02-30T12:00:00.000Z" }), bindingRecord));
 });
 
-test("source selection requires canonical HTTPS and closed fields", () => {
+test("cancel is a closed binding-checked participant operation", () => {
+  const value = { schemaVersion: "runa-workspace-cancel-request/v1", requestId: "request_0002", idempotencyKey: d,
+    sourceId: bindingRecord.sourceId, taskId: bindingRecord.taskId, bindingDigest: binding,
+    expectedSourceRevision: bindingRecord.sourceRevision, capabilitySetVersion: CAPABILITY_SET_VERSION,
+    capabilitySetDigest: CAPABILITY_SET_DIGEST, requestedAt: t0 };
+  assert.equal(admitWorkspaceCancelRequest(canonicalStringify(value), bindingRecord).requestId, "request_0002");
+  assert.throws(() => admitWorkspaceCancelRequest(canonicalStringify({ ...value, sourceId: "source_0002" }), bindingRecord));
+});
+
+test("source selection enforces literal policies and rejects normalized IDN or encoded URLs", () => {
   const base = { schemaVersion: "runa-workspace-source-selection/v1", sourceId: "source_0001", projectId: "project_0001",
     participantId: "person_00001", environmentId: "control_0001", displayName: "Public fixture", lifecycle: "known",
-    capabilitySetVersion: CAPABILITY_SET_VERSION, revision: 1, createdAt: t0, updatedAt: t0, revokedAt: null,
-    sourceKind: "git-public-https", repositoryHttpsUrl: "https://example.com/fixture.git", requestedRef: "main",
-    endpointPolicyId: "endpoint_0001", uploadSessionId: null };
+    cleanupState: "not-required", capabilitySetVersion: CAPABILITY_SET_VERSION, capabilitySetDigest: CAPABILITY_SET_DIGEST,
+    revision: 1, createdAt: t0, updatedAt: t0, revokedAt: null, sourceKind: "git-public-https",
+    repositoryHttpsUrl: "https://example.com/fixture.git", requestedRef: "main", endpointPolicyId: NETWORK_POLICY_ID,
+    endpointPolicyDigest: NETWORK_POLICY_DIGEST };
   assert.equal(sourceSelectionSchema.safeParse(base).success, true);
-  assert.equal(sourceSelectionSchema.safeParse({ ...base, repositoryHttpsUrl: "http://example.com/fixture.git" }).success, false);
-  assert.equal(sourceSelectionSchema.safeParse({ ...base, clientParticipantId: "person_00002" }).success, false);
+  for (const repositoryHttpsUrl of ["http://example.com/fixture.git", "https://éxample.com/fixture.git", "https://xn--xample-9ua.com/fixture.git", "https://example.com/%66ixture.git", "https://example.com/a/../fixture.git"]) {
+    assert.equal(sourceSelectionSchema.safeParse({ ...base, repositoryHttpsUrl }).success, false, repositoryHttpsUrl);
+  }
 });
 
-test("manifest contract enforces sorted unique paths and source/version agreement", () => {
-  const base = { schemaVersion: "runa-workspace-manifest/v1", workspaceId: "workspace_01", sourceId: "source_0001", bindingDigest: d,
-    sourceKind: "git-public-https", nativeVersionKind: "git-commit-sha1", nativeVersion: "b".repeat(40),
-    entries: [{ path: "a.txt", bytes: 1, sha256: d, mediaClass: "utf8-text" }], fileSetDigest: d, excludedCount: 0,
-    rejectedCount: 0, complete: true, adapterReleaseSha256: d, runtimeReleaseSha256: d, brokerReleaseSha256: d,
-    capabilitySetVersion: CAPABILITY_SET_VERSION, capabilitySetDigest: d, lifecycle: "ready", createdAt: t0, expiresAt: t1 };
-  assert.equal(workspaceManifestSchema.safeParse(base).success, true);
-  assert.equal(workspaceManifestSchema.safeParse({ ...base, sourceKind: "browser-folder-snapshot" }).success, false);
-  assert.equal(workspaceManifestSchema.safeParse({ ...base, entries: [base.entries[0], base.entries[0]] }).success, false);
+const manifest = () => {
+  const entries = [{ path: "a.txt", bytes: 1, sha256: d, mediaClass: "utf8-text" }];
+  return { schemaVersion: "runa-workspace-manifest/v1", workspaceId: "workspace_01", sourceId: "source_0001",
+    bindingDigest: binding, sourceKind: "git-public-https", nativeVersionKind: "git-commit-sha1",
+    nativeVersion: "c".repeat(40), entries, fileSetDigest: fileSetDigest(entries), excludedCount: 0, rejectedCount: 0,
+    complete: true, adapterReleaseSha256: d, runtimeReleaseSha256: d, brokerReleaseSha256: d,
+    capabilitySetVersion: CAPABILITY_SET_VERSION, capabilitySetDigest: CAPABILITY_SET_DIGEST,
+    limitsProfileId: MATERIALIZATION_POLICY_ID, limitsProfileDigest: MATERIALIZATION_POLICY_DIGEST,
+    lifecycle: "ready", createdAt: t0, expiresAt: t1 };
+};
+
+test("manifest admission recomputes file-set integrity and forbids incomplete ready state", () => {
+  assert.equal(admitWorkspaceManifest(canonicalStringify(manifest()), bindingRecord).complete, true);
+  assert.throws(() => admitWorkspaceManifest(canonicalStringify({ ...manifest(), fileSetDigest: d }), bindingRecord), /file-set-digest-mismatch/u);
+  assert.equal(workspaceManifestSchema.safeParse({ ...manifest(), complete: false, rejectedCount: 1 }).success, false);
 });
 
-test("ready and uncertain receipt outcomes have closed invariants", () => {
-  const base = { schemaVersion: "runa-workspace-materialization-receipt/v1", requestId: "request_0001", sourceId: "source_0001", sourceKind: "git-public-https",
-    workspaceId: "workspace_01", taskId: "task_0000001", bindingDigest: d, capabilitySetVersion: CAPABILITY_SET_VERSION,
-    capabilitySetDigest: d, outcome: "ready", nativeVersion: "b".repeat(40), beforeManifestDigest: null, stagingManifestDigest: d,
-    finalManifestDigest: d, networkState: "bounded-complete", processState: "stopped", publicationState: "published-acknowledged",
-    databaseState: "ready-recorded", cleanupState: "complete", filesObserved: 1, bytesObserved: 1, durationMs: 1, limitCode: "none",
-    errorCode: null, retryableAfterReconciliation: false, workerReleaseSha256: d, startedAt: t0, finishedAt: t1,
-    credentialsPresent: false, privateValuesIncluded: false, modelInvoked: false, effects: [] };
-  assert.equal(materializationReceiptSchema.safeParse(base).success, true);
-  assert.equal(materializationReceiptSchema.safeParse({ ...base, outcome: "unknown", errorCode: "broker-lost", retryableAfterReconciliation: true }).success, false);
-  assert.equal(materializationReceiptSchema.safeParse({ ...base, processState: "stop-unconfirmed" }).success, false);
+const receipt = () => ({ schemaVersion: "runa-workspace-materialization-receipt/v1", requestId: "request_0001",
+  sourceId: "source_0001", sourceKind: "git-public-https", workspaceId: "workspace_01", taskId: "task_0000001",
+  bindingDigest: binding, capabilitySetVersion: CAPABILITY_SET_VERSION, capabilitySetDigest: CAPABILITY_SET_DIGEST,
+  limitsProfileId: MATERIALIZATION_POLICY_ID, limitsProfileDigest: MATERIALIZATION_POLICY_DIGEST, outcome: "ready",
+  nativeVersion: "c".repeat(40), beforeManifestDigest: null, stagingManifestDigest: d, finalManifestDigest: d,
+  networkState: "bounded-complete", processState: "stopped", publicationState: "published-acknowledged",
+  databaseState: "ready-recorded", cleanupState: "complete", filesObserved: 1, bytesObserved: 1, durationMs: 1,
+  limitCode: "none", errorCode: null, retryableAfterReconciliation: false, workerReleaseSha256: d,
+  startedAt: t0, finishedAt: t1, credentialsPresent: false, privateValuesIncluded: false, modelInvoked: false,
+  effects: ["workspace-materialize"] });
+
+test("ready receipt rejects indeterminate network, absent versions/digests and limit failures", () => {
+  assert.equal(admitMaterializationReceipt(canonicalStringify(receipt()), bindingRecord).outcome, "ready");
+  for (const patch of [{ networkState: "indeterminate" }, { nativeVersion: null }, { stagingManifestDigest: null }, { limitCode: "time" }]) {
+    assert.equal(materializationReceiptSchema.safeParse({ ...receipt(), ...patch }).success, false, JSON.stringify(patch));
+  }
 });
 
-test("canonical digest is stable across nested object key order", () => {
-  assert.equal(canonicalSha256({ z: { b: 2, a: 1 }, a: [2, { y: 1, x: 0 }] }), canonicalSha256({ a: [2, { x: 0, y: 1 }], z: { a: 1, b: 2 } }));
+test("browser manifest has server-computed digest and rejects overlaps, duplicates and chunk mismatch", () => {
+  const value = { schemaVersion: "runa-browser-folder-upload-manifest/v1",
+    entries: [{ path: "a.txt", bytes: 1, sha256: d, chunks: 1 }], excludedPaths: ["secret.key"], totalBytes: 1 };
+  const admitted = admitUploadManifest(canonicalStringify(value));
+  assert.equal(admitted.manifestDigest, canonicalSha256(value));
+  assert.equal(uploadManifestSchema.safeParse({ ...value, excludedPaths: ["secret.key", "secret.key"] }).success, false);
+  assert.equal(uploadManifestSchema.safeParse({ ...value, excludedPaths: ["a.txt"] }).success, false);
+  assert.equal(uploadManifestSchema.safeParse({ ...value, entries: [{ ...value.entries[0], chunks: 2 }] }).success, false);
+});
+
+const frame = (direction, sequence, requestOrdinal, frameType, payloadBytes = 0) => ({
+  schemaVersion: "runa-materialization-pipe-frame/v2", channelId: "channel_0001", sequence,
+  requestId: "request_0001", nonce: d, payloadSha256: createHash("sha256").update(Buffer.alloc(payloadBytes)).digest("hex"),
+  payloadBytes, hmacSha256: d, direction, requestOrdinal, frameType
+});
+
+test("stream schema and transcript permit bounded multi-frame two-request Git exchange only", () => {
+  const frames = [
+    frame("materializer-to-broker", 1, 0, "open-request"), frame("materializer-to-broker", 2, 0, "end-request"),
+    frame("broker-to-materializer", 1, 0, "open-response"), frame("broker-to-materializer", 2, 0, "response-body", 10),
+    frame("broker-to-materializer", 3, 0, "end-response"), frame("materializer-to-broker", 3, 1, "open-request"),
+    frame("materializer-to-broker", 4, 1, "request-body", 10), frame("materializer-to-broker", 5, 1, "end-request"),
+    frame("broker-to-materializer", 4, 1, "open-response"), frame("broker-to-materializer", 5, 1, "end-response"),
+    frame("broker-to-materializer", 6, 1, "terminal")
+  ];
+  for (const item of frames) assert.equal(gitStreamFrameSchema.safeParse(item).success, true);
+  assert.deepEqual(validateGitStreamTranscript(frames), { requestBytes: 10, responseBytes: 10, terminal: true });
+  assert.throws(() => validateGitStreamTranscript(frames.slice(0, -1)), /pipe-terminal-pattern-invalid/u);
+  assert.equal(gitStreamFrameSchema.safeParse({ ...frames[0], direction: "broker-to-materializer" }).success, false);
+});
+
+test("Git request heads admit only the two sealed smart HTTP shapes", () => {
+  const advertised = { schemaVersion: "runa-public-git-http-request/v1", requestOrdinal: 0, method: "GET",
+    pathAndQuery: "/org/fixture.git/info/refs?service=git-upload-pack",
+    accept: "application/x-git-upload-pack-advertisement", contentType: null, contentLength: 0 };
+  assert.equal(admitGitOpenRequest(canonicalStringify(advertised), "/org/fixture.git").requestOrdinal, 0);
+  assert.throws(() => admitGitOpenRequest(canonicalStringify({ ...advertised, pathAndQuery: "/other.git/info/refs?service=git-upload-pack" }), "/org/fixture.git"), /git-request-path-mismatch/u);
+  assert.throws(() => admitGitOpenRequest(canonicalStringify({ ...advertised, method: "POST" }), "/org/fixture.git"));
+});
+
+test("pipe admission recomputes HMAC and rejects arbitrary header fields or wrong key", () => {
+  const base = { schemaVersion: "runa-materialization-pipe-frame/v2", channelId: "channel_0001", sequence: 1,
+    requestId: "request_0001", nonce: d, payloadSha256: createHash("sha256").update("x").digest("hex"), payloadBytes: 1,
+    frameType: "operation-request" };
+  const hmacSha256 = createHmac("sha256", Buffer.alloc(32, 1)).update(canonicalStringify(base)).update("x").digest("hex");
+  const signed = { ...base, hmacSha256 };
+  assert.equal(admitPipeFrame(controlPipeFrameSchema, canonicalStringify(signed), "x", Buffer.alloc(32, 1)).frameType, "operation-request");
+  assert.throws(() => admitPipeFrame(controlPipeFrameSchema, canonicalStringify(signed), "x", Buffer.alloc(32, 2)), /pipe-hmac-mismatch/u);
+  assert.equal(controlPipeFrameSchema.safeParse({ ...base, hmacSha256, extra: true }).success, false);
 });

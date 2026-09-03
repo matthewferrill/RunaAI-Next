@@ -51,6 +51,23 @@ SSRF/redirect/DNS boundary, capability-version, cross-workspace isolation, histo
 scope-inheritance and first-transport overbreadth findings. This is not implementation or actual-system acceptance.
 Review: `../gate7f/function-first/M1-S2B-SERVER-MANAGED-WORKSPACE-INDEPENDENT-REVIEW-2026-09-03.md`.
 
+M1-S2B1 corrected prospective criteria freeze, 2026-09-03: the first independent design review stopped the draft at
+P0=0/P1=7 before implementation or actual operations. The correction now freezes executable strict schemas, literal
+capability version/digest and closed lifecycle/receipt tables; separates a network-denied materializer from a
+workspace-blind enforcing HTTPS broker; defines crash-safe non-replacing Windows publication/reconciliation; makes
+browser observability and the upload protocol exact; proves same-user/cross-project plus cross-user isolation; leaves
+actual Home untouched; and freezes production-path fault methods. It still includes no model, private credential,
+execution, change, commit or push. Deterministic contract tests receive no actual acceptance credit. Fresh independent
+P0/P1 review is required before implementation. Criteria:
+`../gate7f/function-first/M1-S2B1-SERVER-WORKSPACE-MATERIALIZATION-CRITERIA-2026-09-03.md`.
+
+Corrected-criteria review infrastructure stop, 2026-09-03: three fresh read-only review dispatches across two
+independent workers returned the same service-side HTTP 404 before a verdict. This is not a product, Control, browser,
+Git or model disposition. Contract checks pass 6/6 and roadmap checks pass 15/15, but implementation remains blocked
+without P0=0/P1=0. Resume with one review of the source-committed corrected bytes after service recovery; do not replay
+the failed dispatches. Incident:
+`../gate7f/function-first/M1-S2B1-CORRECTED-CRITERIA-REVIEW-INFRASTRUCTURE-STOP-2026-09-03.md`.
+
 M1-S2B implementation checkpoint, 2026-09-02: the authority foundation and actual PostgreSQL lifecycle
 are green. The prior Omen DPAPI/handle-based file proof was 14/14, but shared native/helper bytes have since
 changed and that evidence is historical until one affected-scope rerun. The first actual

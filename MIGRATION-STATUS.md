@@ -423,6 +423,23 @@ and first-transport overbreadth findings. Implementation and actual-system accep
 criteria. Review:
 `gate7f/function-first/M1-S2B-SERVER-MANAGED-WORKSPACE-INDEPENDENT-REVIEW-2026-09-03.md`.
 
+**M1-S2B1 corrected prospective criteria, 2026-09-03:** the first independent design review stopped the draft at
+P0=0/P1=7 before implementation or actual operations. The correction freezes executable strict schemas, a literal
+non-expanding capability set/digest and closed lifecycle/receipt matrices; replaces native Git networking with a
+network-denied materializer plus a workspace-blind enforcing HTTPS broker; defines crash-safe non-replacing Windows
+publication/reconciliation; makes the browser snapshot's observable limits and upload protocol explicit; adds both
+same-user/cross-project and cross-user isolation; leaves actual Home untouched; and freezes production-path fault
+methods. Scope remains one public HTTPS Git materialization and one browser-folder snapshot, with no model, private
+credential, project execution, change, commit or push. The six deterministic contract checks are criteria evidence
+only and receive no acceptance credit. Fresh independent P0/P1 review remains required before implementation. Criteria:
+`gate7f/function-first/M1-S2B1-SERVER-WORKSPACE-MATERIALIZATION-CRITERIA-2026-09-03.md`.
+
+Fresh review of those corrected bytes is paused by review infrastructure, not by a Runa/model/test finding. Three
+dispatches across two independent workers returned the same service-side HTTP 404 before producing a verdict. Local
+contract checks remain 6/6 and roadmap checks 15/15, but implementation stays blocked because no independent GO
+exists. The retained incident and exact continuation rule are in
+`gate7f/function-first/M1-S2B1-CORRECTED-CRITERIA-REVIEW-INFRASTRUCTURE-STOP-2026-09-03.md`.
+
 **Application slice, 2026-09-02:** model selection is complete and the retired R15 campaign is not being
 resumed. The active clean branch is `codex/m1-gemma-primary`, based on the five-function qualification
 decision. Gemma is the sole primary for Chat, Research, Code, Agent and Review. The immediate work is to

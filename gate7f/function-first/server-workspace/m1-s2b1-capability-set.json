@@ -1,0 +1,28 @@
+{
+  "schemaVersion": "runaai-capability-set/v1",
+  "capabilitySetVersion": "m1-s2b1-materialization-2026-09-03.1",
+  "milestone": "M1-S2B1",
+  "operations": {
+    "participant": [
+      "source.connect-public-git",
+      "source.connect-folder-snapshot",
+      "workspace.materialize",
+      "workspace.list-files",
+      "workspace.read-text",
+      "source.disconnect"
+    ],
+    "internal": [
+      "workspace.reconcile",
+      "workspace.cleanup"
+    ]
+  },
+  "sourceKinds": [
+    "git-public-https",
+    "browser-folder-snapshot"
+  ],
+  "effects": [],
+  "modelInvocation": false,
+  "projectExecution": false,
+  "repositoryMutation": false,
+  "remotePublication": false
+}

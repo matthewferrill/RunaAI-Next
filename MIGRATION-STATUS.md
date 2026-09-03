@@ -499,6 +499,16 @@ actual operation or model call has occurred. The next work is the smallest publi
 then one exact-commit review and one real Control/browser journey. Package review:
 `gate7f/function-first/M1-S2B1-ISOMORPHIC-GIT-PACKAGE-REVIEW-2026-09-03.md`.
 
+**M1-S2B1 implementation checkpoint, 2026-09-03:** commit `13a7ca6` adds the bounded public-Git
+materialization core. This authority increment adds a separate encrypted PostgreSQL store for
+server-owned public-source records and idempotent `intent-recorded` workspaces. Focused checks pass 16/16 with real
+disposable PostgreSQL and local Git object/filesystem integration. No Control network fetch, protected publication,
+ready workspace, browser operation, production change, or model call is claimed. The preflight stopped rather than
+replaying on a Windows `pg_ctl` restricted-token incompatibility, a TCP-only false readiness check, and one stale
+test ledger expectation. An independent standing checker also stopped and corrected participant-wide concurrency,
+record cross-binding, deadline, and cleanup issues before commit. Full RCA and exact resume boundaries:
+`gate7f/function-first/M1-S2B1-IMPLEMENTATION-PREFLIGHT-RCA-2026-09-03.md`.
+
 **Application slice, 2026-09-02:** model selection is complete and the retired R15 campaign is not being
 resumed. The active clean branch is `codex/m1-gemma-primary`, based on the five-function qualification
 decision. Gemma is the sole primary for Chat, Research, Code, Agent and Review. The immediate work is to

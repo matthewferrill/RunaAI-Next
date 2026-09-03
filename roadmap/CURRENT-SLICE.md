@@ -116,6 +116,16 @@ repository Control materialization path, followed by one exact-commit implementa
 Control/browser journey. Review:
 `../gate7f/function-first/M1-S2B1-ISOMORPHIC-GIT-PACKAGE-REVIEW-2026-09-03.md`.
 
+The first bounded implementation checkpoints are now source-local. Commit `13a7ca6` adds only the custom
+two-request broker transport and public-Git object/tree materialization core. This authority increment adds a
+separate encrypted PostgreSQL source/workspace-intent store without claiming a fetch, publication, ready workspace,
+browser route, or model call. Its focused set passes 16/16, including actual disposable PostgreSQL and local Git
+object/filesystem integration. Three preflight-method stops and four implementation findings were corrected before
+commit; their cause, pause/resume sequence, and evidence limits are recorded in
+`../gate7f/function-first/M1-S2B1-IMPLEMENTATION-PREFLIGHT-RCA-2026-09-03.md`. The next stage is the minimal
+candidate-only service/surface binding, then the production Control broker/worker/publication boundary. Actual
+Control/browser acceptance remains open and comparison-model testing remains tabled.
+
 M1-S2B implementation checkpoint, 2026-09-02: the authority foundation and actual PostgreSQL lifecycle
 are green. The prior Omen DPAPI/handle-based file proof was 14/14, but shared native/helper bytes have since
 changed and that evidence is historical until one affected-scope rerun. The first actual

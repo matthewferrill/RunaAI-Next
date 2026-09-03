@@ -34,11 +34,12 @@
     "gate7f/function-first/M1-S2B1-SECOND-SEALED-CRITERIA-INDEPENDENT-REVIEW-2026-09-03.md",
     "gate7f/function-first/M1-S2B1-THIRD-SEALED-CRITERIA-INDEPENDENT-REVIEW-2026-09-03.md",
     "gate7f/function-first/M1-S2B1-FOURTH-SEALED-CRITERIA-INDEPENDENT-REVIEW-2026-09-03.md",
-    "gate7f/function-first/M1-S2B1-ISOMORPHIC-GIT-PACKAGE-REVIEW-2026-09-03.md"
+    "gate7f/function-first/M1-S2B1-ISOMORPHIC-GIT-PACKAGE-REVIEW-2026-09-03.md",
+    "gate7f/function-first/M1-S2B1-IMPLEMENTATION-PREFLIGHT-RCA-2026-09-03.md"
   ],
   "scopeDocument": "roadmap/CURRENT-SLICE.md",
   "capabilityIds": ["C01", "C02", "C03", "C04", "C06", "C07", "C08", "C12", "C15", "C16"],
-  "nextWork": "M1-S2B1 criteria have independent GO at P0=0/P1=0. The practical isomorphic-git 1.41.0 gate is complete: exact dependency and registry integrity are retained in the repository lockfile after a scripts-disabled install, all 55 reviewed closure packages retain registry integrity with no install scripts, the isolated closure has a time-bound zero-advisory result, and only ESM core through Runa's broker is admitted. Four full-application advisories are pre-existing Mastra/AI-SDK items and are tracked separately. Package checks pass 4/4. Deeper package provenance work is deferred release hardening. Next implement the smallest public-repository Control materialization path, obtain one exact-commit review, then run one real Control/browser journey. No implementation, actual operation or model call has occurred. Home remains model-only, Omen is not the primary worker, the Omen ACL transition is deferred, and comparison-model testing remains tabled.",
+  "nextWork": "M1-S2B1 criteria and package gate are complete. Commit 13a7ca6 adds the bounded public-Git core; the authority increment passes 16/16 focused checks with real disposable PostgreSQL and local Git object/filesystem integration. Its preflight RCA records three method stops and four checker findings corrected before commit. No Control fetch, protected publication, ready workspace, browser operation, production change or model call is claimed. Next bind the candidate-only service/surface, then implement the Control broker/worker/publication boundary, obtain exact-commit review, and run one real Control/browser journey. Home remains model-only, Omen is not the primary worker, and comparison-model testing remains tabled.",
   "remainingRoadmapRequired": true,
   "completionClaim": "M1 completion is not whole-product completion."
 }

@@ -135,6 +135,24 @@ child termination before parsing/publication, bounded drain through guard releas
 schemas and fail-closed cleanup. Acceptance remains paused for corrected design review, implementation,
 preflight, independent exact-byte review and commit before exactly one further proof. No browser, HTTPS, model
 or production work has run.
+The corrected design subsequently received independent GO at P0=0/P1=0 and was sealed in doc-only commit
+`904d52e`. The first implementation review stopped the code before execution at P0=0/P1=8 for repository/UI
+lifecycle cleanup, real terminal-state proof, abort-to-spawn ordering, the final security-snapshot barrier,
+native no-follow ACL reads, pre-bind UI cancellation, least-privilege/fail-closed UI instrumentation and the
+actual-proof manifest. The working-tree correction closes all eight. Focused Omen checks pass 26/26 and both
+sidecars compile in pinned Windows PowerShell 5.1. A separately gated disposable actual witness preflight now
+covers a static junction, a completion-boundary replacement and UI cancellation, but it remains unexecuted
+until fresh independent exact-byte GO and a source commit. A green committed preflight is required before the
+single corrected Git proof. Acceptance remains paused; no model/browser/HTTPS/network/production work ran.
+A follow-up review verified the original eight findings closed but stopped at P0=0/P1=3 because Windows
+line-ending conversion could break the pins, preflight failure cleanup did not prove every sidecar terminal,
+and the clean junction check lacked an exact non-traversal discriminator. The working tree now pins both
+sidecars to LF, retains and requires bounded terminal closure before fixture deletion, preserves an unresolved
+fixture, and requires the exact three expected security entries. Focused checks remain 26/26. These amended
+bytes are still unexecuted and await fresh independent GO plus a source commit.
+Fresh current-byte review returned GO with P0=0/P1=0, independently verifying all eleven findings closed,
+the LF-stable hashes, 26/26 focused checks, 15/15 roadmap checks, five syntax checks and a clean diff check.
+The actual preflight remains unexecuted until this reviewed tree is source-committed.
 
 Workspace baseline checkpoint: see
 `gate7f/function-first/M1-S2-WORKSPACE-BASELINE-IMPLEMENTATION-RESULTS-2026-09-02.md` for the accepted

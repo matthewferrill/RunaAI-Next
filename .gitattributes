@@ -33,3 +33,5 @@ gate7f/function-first/acceptance/Invoke-ControlExactRegression.ps1 text eol=lf
 # Omen native release pins hash committed PowerShell bytes. Keep checkout bytes stable on Windows.
 gate7f/function-first/omen-local/Invoke-RunaOmenNative.ps1 text eol=lf
 gate7f/function-first/omen-local/Observe-RunaProcessTree.ps1 text eol=lf
+gate7f/function-first/omen-local/Watch-RunaRepository.ps1 text eol=lf
+gate7f/function-first/omen-local/Watch-RunaInteractiveDesktop.ps1 text eol=lf

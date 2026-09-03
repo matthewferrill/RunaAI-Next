@@ -75,7 +75,7 @@ export async function runActualOmenGitProof({ userProfilePath = homedir() } = {}
   const pins = await loadOmenReleasePins();
   for (const path of [pins.powershellPath, userProfilePath, pins.gitPath, pins.gitInstallRoot,
     pins.gitSystemConfigPath, pins.gitSystemAttributesPath, pins.nativeScriptPath,
-    pins.mxcExecutorPath, pins.processMonitorPath]) {
+    pins.mxcExecutorPath, pins.processMonitorPath, pins.repositoryWitnessPath, pins.uiWitnessPath]) {
     if (!path || !existsSync(path)) throw Object.assign(new Error("omen-git-prerequisite-missing"), { code: "omen-git-prerequisite-missing" });
   }
   const pinnedFiles = [
@@ -83,11 +83,20 @@ export async function runActualOmenGitProof({ userProfilePath = homedir() } = {}
     [pins.gitPath, pins.gitSha256], [pins.gitSystemConfigPath, pins.gitSystemConfigSha256],
     [pins.gitSystemAttributesPath, pins.gitSystemAttributesSha256],
     [pins.mxcExecutorPath, pins.mxcExecutorSha256], [pins.processMonitorPath, pins.processMonitorSha256],
+    [pins.repositoryWitnessPath, pins.repositoryWitnessSha256], [pins.uiWitnessPath, pins.uiWitnessSha256],
   ];
   const pinnedBytes = await Promise.all(pinnedFiles.map(([path]) => readFile(path)));
   if (!pinnedFiles.every(([, digest], index) =>
     createHash("sha256").update(pinnedBytes[index]).digest("hex") === digest)) {
     throw Object.assign(new Error("omen-git-release-pin-mismatch"), { code: "omen-git-release-pin-mismatch" });
+  }
+  const policyProbeRoot = "C:\\RunaPolicyDigestProbe";
+  const policyProbe = createContainedGitConfig({ createConfigFromPolicy }, { root: policyProbeRoot,
+    gitInstallRoot: resolve(pins.gitInstallRoot), gitPath: resolve(pins.gitPath),
+    args: fixedArguments("status", {}, policyProbeRoot), containerId: "runa-omen-git-policy-digest-probe" });
+  if (policyTemplateDigest(policyProbe) !== pins.policyTemplateSha256) {
+    throw Object.assign(new Error("omen-git-policy-template-digest-mismatch"),
+      { code: "omen-git-policy-template-digest-mismatch" });
   }
   const root = await mkdtemp(join(tmpdir(), "runa-m1-omen-git-"));
   const exactRoot = await realpath(root), repository = join(root, "repository"),
@@ -188,6 +197,9 @@ export async function runActualOmenGitProof({ userProfilePath = homedir() } = {}
       gitSystemAttributesPath: pins.gitSystemAttributesPath,
       expectedGitSystemAttributesSha256: pins.gitSystemAttributesSha256,
       expectedPolicyTemplateSha256: pins.policyTemplateSha256,
+      repositoryWitnessPath: pins.repositoryWitnessPath,
+      expectedRepositoryWitnessSha256: pins.repositoryWitnessSha256,
+      uiWitnessPath: pins.uiWitnessPath, expectedUiWitnessSha256: pins.uiWitnessSha256,
       sdk });
     const unchanged = async (operation, input = {}) => {
       stage = `contained-git-${operation}`;
@@ -222,9 +234,13 @@ export async function runActualOmenGitProof({ userProfilePath = homedir() } = {}
        mxcExecutorPath: resolve(pins.mxcExecutorPath), mxcSha256: pins.mxcExecutorSha256,
       nativeScriptSha256: pins.nativeScriptSha256, powershellPath: resolve(pins.powershellPath),
        powershellSha256: pins.powershellSha256, policyTemplateSha256: pins.policyTemplateSha256,
+       repositoryWitnessPath: resolve(pins.repositoryWitnessPath),
+       repositoryWitnessSha256: pins.repositoryWitnessSha256,
+       uiWitnessPath: resolve(pins.uiWitnessPath), uiWitnessSha256: pins.uiWitnessSha256,
        rootId: candidate.rootId, network: "deny-all",
       filesystem: "read-only-selected-root-and-git-runtime", stdin: "closed",
-      customEnvironment: "omitted", executableExtensionPoints: "closed", timeoutMs: 15_000 };
+      customEnvironment: "omitted", executableExtensionPoints: "closed", timeoutMs: 15_000,
+      ui: "windows-allowed-container-isolated-no-clipboard-input-system-control-settings-ime" };
     const expectedReleaseDigest = createHash("sha256").update(canonicalJson(expectedReleaseManifest)).digest("hex");
     checks.exactMxcManifest = containedResults.every(result =>
       result.isolation.provider === "microsoft-mxc" && result.isolation.tier === "appcontainer-dacl"

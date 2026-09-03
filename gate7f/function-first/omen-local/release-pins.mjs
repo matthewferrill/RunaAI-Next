@@ -5,7 +5,8 @@ const PIN_KEYS = ["schemaVersion", "platform", "nativeScriptRelativePath", "nati
   "powershellPath", "powershellSha256", "gitPath", "gitInstallRoot", "gitSha256", "mxcPackage",
   "gitSystemConfigPath", "gitSystemConfigSha256", "gitSystemAttributesPath",
   "gitSystemAttributesSha256", "mxcVersion", "mxcExecutorRelativePath", "mxcExecutorSha256",
-  "policyTemplateSha256", "processMonitorRelativePath", "processMonitorSha256"];
+  "policyTemplateSha256", "processMonitorRelativePath", "processMonitorSha256",
+  "repositoryWitnessRelativePath", "repositoryWitnessSha256", "uiWitnessRelativePath", "uiWitnessSha256"];
 
 export async function loadOmenReleasePins() {
   const repositoryRoot = resolve(import.meta.dirname, "../../..");
@@ -18,11 +19,14 @@ export async function loadOmenReleasePins() {
         pins.gitSystemAttributesPath].every(value => typeof value === "string" && value.length > 2)
       || ![pins.nativeScriptSha256, pins.powershellSha256, pins.gitSha256, pins.gitSystemConfigSha256,
         pins.gitSystemAttributesSha256, pins.mxcExecutorSha256, pins.policyTemplateSha256,
-        pins.processMonitorSha256].every(value => /^[a-f0-9]{64}$/u.test(value))) {
+        pins.processMonitorSha256, pins.repositoryWitnessSha256, pins.uiWitnessSha256]
+        .every(value => /^[a-f0-9]{64}$/u.test(value))) {
     throw Object.assign(new Error("omen-release-pins-invalid"), { code: "omen-release-pins-invalid" });
   }
   return Object.freeze({ ...pins, repositoryRoot, pinsPath,
     nativeScriptPath: resolve(repositoryRoot, pins.nativeScriptRelativePath),
     mxcExecutorPath: resolve(repositoryRoot, pins.mxcExecutorRelativePath),
-    processMonitorPath: resolve(repositoryRoot, pins.processMonitorRelativePath) });
+    processMonitorPath: resolve(repositoryRoot, pins.processMonitorRelativePath),
+    repositoryWitnessPath: resolve(repositoryRoot, pins.repositoryWitnessRelativePath),
+    uiWitnessPath: resolve(repositoryRoot, pins.uiWitnessRelativePath) });
 }

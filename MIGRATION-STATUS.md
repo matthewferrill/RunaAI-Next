@@ -169,6 +169,27 @@ typed witness that latches and aborts on the
 first prohibited event before any output parsing or publication. Acceptance remains paused for corrected
 design review, implementation, preflight, independent exact-byte review and source commit before exactly one
 further disposable proof. No retry/model/network/browser/production work is authorized before those gates.
+The corrected design then received independent GO at P0=0/P1=0 and was sealed in doc-only commit `904d52e`.
+The first implementation review stopped the prospective code before execution at P0=0/P1=8: two lifecycle
+leaks/terminal-state errors, an abort-to-spawn race, a stale security-snapshot interval, path-following ACL
+risk, no pre-bind UI cancellation, excessive/unchecked UI instrumentation, and stale proof-manifest fields.
+All eight are now corrected in the working tree. Focused Omen checks pass 26/26; both sidecars parse and their
+embedded C# compiles under pinned Windows PowerShell 5.1. The corrected implementation uses real-close
+tracking, abort barriers, native no-follow handles, three stable final security snapshots, least-privilege
+input-desktop observation, checked Win32 cleanup and an early policy-pin assertion. Its separately gated
+disposable Windows witness preflight is written but deliberately unexecuted. Fresh independent exact-byte
+review and a source commit remain mandatory before that preflight; one actual Git proof is admitted only if
+the committed preflight passes. Models, browser, HTTPS, network and production remain untouched.
+A follow-up exact-byte review confirmed the original eight production findings closed but returned
+P0=0/P1=3 on deployment/preflight integrity: checkout line endings could invalidate the pinned sidecars,
+preflight failures could delete a fixture before every sidecar was terminal, and a stable junction target
+could false-green without an exact entry count. The working tree now pins both sidecars to LF, retains and
+requires terminal closure for every preflight handle before cleanup, preserves unresolved fixtures, and
+requires the exact three-entry clean junction snapshot. Focused checks remain 26/26 and enforce the Git
+attributes. The amended bytes remain unexecuted pending fresh independent GO and commit.
+Fresh current-byte review returned GO with P0=0/P1=0 and independently verified all eleven findings closed,
+both LF-stable hashes matching their pins, 26/26 focused checks, 15/15 roadmap checks, five syntax checks and
+a clean diff check. The actual preflight remains unexecuted until this reviewed tree is source-committed.
 
 **Application slice, 2026-09-02:** model selection is complete and the retired R15 campaign is not being
 resumed. The active clean branch is `codex/m1-gemma-primary`, based on the five-function qualification

@@ -306,7 +306,7 @@ error/timeout/invalid-output cleanup semantics. None of those rejected bytes ran
   filename/path and latch permanently. Abort is one UTF-8 JSON line with exactly `schemaVersion`, `operationId`
   and `errorCode`; schema is `runa-omen-repository-witness-abort/v1` and the code is one of
   `repository-name-event`, `repository-content-event`, `repository-metadata-event`, `watcher-error`,
-  `watcher-count-overflow`, `security-snapshot-failed`, `security-baseline-changed` or
+  `watcher-count-overflow`, `witness-drain-timeout`, `security-snapshot-failed`, `security-baseline-changed` or
   `witness-protocol-invalid`. Security events increment
   only a bounded count; every category count is capped at 1,000,000 and an attempted overflow latches
   `watcher-count-overflow`. Security-only activity is permitted only when the final digest exactly equals the
@@ -351,5 +351,49 @@ error/timeout/invalid-output cleanup semantics. None of those rejected bytes ran
   exact-byte review and source-commit the complete production plus proof path. Then run exactly one disposable
   actual Omen Git proof using that final configuration. Any failure stops again; no model, browser, network or
   production operation is part of this correction.
+
+### Corrected implementation review checkpoint
+
+The frozen correction design received independent GO at P0=0/P1=0 and was source-sealed as doc-only commit
+`904d52e`. The first independent review of the implementation stopped it before any actual preflight or Git
+operation at P0=0/P1=8. It found: a repository-sidecar leak if UI-sidecar construction threw synchronously;
+terminal-timeout state being mistaken for a real child close; an abort-to-spawn race; a stale final-security
+snapshot interval; path-based ACL reads that could follow a replacement/reparse target; no clean pre-bind UI
+cancel path; excessive desktop rights plus false-green process-image and unchecked Win32 cleanup failures; and
+an out-of-date actual-proof manifest with no early policy-pin assertion. These are implementation/method
+defects, not Git or model results.
+
+The current unexecuted correction places every sidecar under one guarded nullable lifecycle, tracks actual
+child close separately from operation outcome, re-kills and requires close after a missed terminal, checks an
+abort immediately before spawn and after the child stop function is armed, and cleanly cancels a UI sidecar
+that was never bound. Repository owner/group/DACL snapshots now open every root/entry with pinned native
+handles using `FILE_FLAG_OPEN_REPARSE_POINT`, verify final containment and root volume/file identity before
+querying security by handle, and use an active A/B quiet barrier followed by watcher disable, callback drain
+and a C snapshot. Success requires the initial, armed, A, B and C count/digest states to agree. The UI witness
+requests only read/enumerate/hook-control desktop rights, distinguishes a vanished process from an
+instrumentation error, and latches failures from process-handle close, event unhook, thread-stop posting,
+desktop close and message-loop operations. The actual proof now validates the normalized policy pin before
+creating its fixture and includes both sidecar identities plus the explicit UI capability in its expected
+release manifest.
+
+Deterministic observer/protocol/native-sidecar checks currently pass 26/26, both exact PowerShell files parse
+and their embedded C# compiles in the pinned Windows PowerShell 5.1 runtime, and Node syntax is green. A new
+explicitly gated disposable actual witness preflight covers a clean junction without following its target, a
+replacement during the completion/drain boundary, and UI cancellation before PID binding. That preflight has
+not run: the corrected bytes first require fresh independent exact-byte GO and a source commit. Only a green
+committed preflight may admit one actual Git proof; any actual failure stops again for RCA and redesign.
+
+The next exact-byte review confirmed that all original eight production-observer/sidecar findings were closed,
+but remained NO-GO at P0=0/P1=3 on the new deployment/preflight layer. The sidecar hashes were not protected
+from Windows line-ending conversion, failure paths could delete the disposable fixture without proving every
+sidecar terminal, and `securityEqual` alone did not prove that a static junction target was excluded. The
+working-tree correction pins both PowerShell files to LF in `.gitattributes`, tracks/terminates/awaits every
+preflight witness and preserves the fixture if terminal state is unresolved, and requires the exact three-entry
+clean snapshot (root, `.git`, junction). Deterministic coverage now also enforces the LF attributes. These
+amended bytes remain unexecuted and require another independent exact-byte review before commit.
+That fresh current-byte review returned GO with P0=0/P1=0. It independently verified all eight original
+production findings and all three follow-up deployment/preflight findings closed, both raw sidecar hashes
+matching their LF-stable release pins, 26/26 focused checks, 15/15 roadmap checks, five Node syntax checks and
+a clean diff check. The actual preflight remains unexecuted until this complete reviewed tree is committed.
 
 Git acceptance remains paused. The model campaign remains closed and unaffected.

@@ -2,7 +2,6 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { EventEmitter } from "node:events";
 import { createHash } from "node:crypto";
-import { writeFileSync } from "node:fs";
 import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
@@ -10,11 +9,36 @@ import { createConfigFromPolicy } from "@microsoft/mxc-sdk";
 import { fixedArguments, inspectRepositoryConfig, OmenGitObserver, sanitizeRemoteUrl,
   structuredResult } from "./git-observer.mjs";
 
-const POLICY_TEMPLATE_SHA256 = "7d7eb3da575a5fcf1566081395b0b27c8ba7d9d8c9531785bdd313cdbde10f27";
+const POLICY_TEMPLATE_SHA256 = "aadd3371cf626bf7bf09a6c019a6c52efaaf08df4054e9457966c638491ecf40";
+
+function deferred() { let resolve; const promise = new Promise(done => { resolve = done; }); return { promise, resolve }; }
+function witnessFactories({ repositoryNameEvents = () => 0 } = {}) {
+  const repository = () => {
+    const result = deferred();
+    return { ready: Promise.resolve(), abort: new Promise(() => {}), result: result.promise,
+      exit: Promise.resolve(0), complete() { result.resolve({ counts: { name: repositoryNameEvents(), content: 0,
+        metadata: 0, security: 2, errors: 0 }, securityEntries: 3, securityEqual: true }); }, terminate() {} };
+  };
+  const ui = () => {
+    const result = deferred();
+    return { ready: Promise.resolve(), abort: new Promise(() => {}), result: result.promise,
+      exit: Promise.resolve(0), bindWrapper() {}, complete() { result.resolve({ inputDesktopEvents: 0,
+        attributableWindowEvents: 0, errors: 0, overflow: false, survivorObserved: false }); },
+      cancelBeforeBind() {}, terminate() {} };
+  };
+  return { repository, ui };
+}
+
+function witnessOptions(systemConfig, systemConfigSha, systemAttributes, systemAttributesSha, factories) {
+  return { repositoryWitnessPath: systemConfig, expectedRepositoryWitnessSha256: systemConfigSha,
+    uiWitnessPath: systemAttributes, expectedUiWitnessSha256: systemAttributesSha,
+    repositoryWitnessFactory: factories.repository, uiWitnessFactory: factories.ui };
+}
 
 class FakeChild extends EventEmitter {
   constructor(stdout) {
     super(); this.stdout = new EventEmitter(); this.stderr = new EventEmitter();
+    this.pid = 4321;
     this.stdin = { on() {}, end() {} };
     queueMicrotask(() => { this.stdout.emit("data", Buffer.from(stdout)); this.emit("close", 0); });
   }
@@ -22,17 +46,93 @@ class FakeChild extends EventEmitter {
 }
 
 class ControlledChild extends EventEmitter {
-  constructor({ output = Buffer.alloc(0), exitCode = null, stderr = Buffer.alloc(0) } = {}) {
+  constructor({ output = Buffer.alloc(0), exitCode = null, stderr = Buffer.alloc(0), closeOnKill = null } = {}) {
     super(); this.stdout = new EventEmitter(); this.stderr = new EventEmitter();
-    this.stdin = { on() {}, end() {} }; this.exitCode = exitCode;
+    this.pid = 4321;
+    this.stdin = { on() {}, end() {} }; this.exitCode = exitCode; this.killCount = 0;
+    this.closeOnKill = closeOnKill;
     queueMicrotask(() => {
       if (output.length) this.stdout.emit("data", output);
       if (stderr.length) this.stderr.emit("data", stderr);
       if (exitCode !== null) this.emit("close", exitCode);
     });
   }
-  kill() { /* deliberately does not close, exercising the terminal deadline */ }
+  kill() { this.killCount += 1;
+    if (this.closeOnKill === this.killCount) queueMicrotask(() => this.emit("close", 1)); }
 }
+
+async function lifecycleHarness(t, { repositoryFactory, uiFactory, createPolicy = createConfigFromPolicy,
+  spawnFactory = () => new FakeChild("# branch.head main\0"), terminalGraceMs = 20 } = {}) {
+  const directory = await mkdtemp(join(tmpdir(), "runa-git-lifecycle-unit-"));
+  t.after(() => rm(directory, { recursive: true, force: true }));
+  const gitPath = join(directory, "git.exe"), mxcPath = join(directory, "wxc-exec.exe");
+  const repositoryWitnessPath = join(directory, "repository.ps1"), uiWitnessPath = join(directory, "ui.ps1");
+  await Promise.all([writeFile(gitPath, "git"), writeFile(mxcPath, "mxc"),
+    writeFile(repositoryWitnessPath, "repository"), writeFile(uiWitnessPath, "ui")]);
+  const digest = value => createHash("sha256").update(value).digest("hex");
+  const gitSha = digest("git"), mxcSha = digest("mxc"), repositorySha = digest("repository"), uiSha = digest("ui");
+  const rootStore = { localRootForGit: async () => ({ rootId: "root-1", path: directory,
+    gitFinalPath: join(directory, ".git"), volumeId: "00000001", fileId: "0000000000000001" }) };
+  const nativeBridge = { verifyRelease: async () => ({ scriptSha256: "a".repeat(64),
+    powershellPath: gitPath, powershellSha256: gitSha }),
+  holdGit: async () => ({ rootFinalPath: directory, gitFinalPath: join(directory, ".git"), release: async () => {} }),
+  safeRead: async (_root, path) => {
+    if (path === ".git\\config") return Buffer.from("[core]\nrepositoryformatversion = 0");
+    throw Object.assign(new Error("missing"), { code: "native-open-denied" });
+  } };
+  return new OmenGitObserver({ rootStore, nativeBridge, gitPath, expectedGitSha256: gitSha,
+    gitInstallRoot: directory, mxcExecutorPath: mxcPath, expectedMxcSha256: mxcSha,
+    expectedNativeScriptSha256: "a".repeat(64), expectedPowerShellSha256: gitSha,
+    gitSystemConfigPath: repositoryWitnessPath, expectedGitSystemConfigSha256: repositorySha,
+    gitSystemAttributesPath: uiWitnessPath, expectedGitSystemAttributesSha256: uiSha,
+    expectedPolicyTemplateSha256: POLICY_TEMPLATE_SHA256,
+    repositoryWitnessPath, expectedRepositoryWitnessSha256: repositorySha,
+    uiWitnessPath, expectedUiWitnessSha256: uiSha, repositoryWitnessFactory: repositoryFactory,
+    uiWitnessFactory: uiFactory, terminalGraceMs, sdk: {
+      getPlatformSupport: () => ({ isSupported: true, availableMethods: ["processcontainer"],
+        isolationTier: "appcontainer-dacl", isolationWarnings: ["AppContainer + DACL tier selected: unit"] }),
+      createConfigFromPolicy: createPolicy, spawnSandboxFromConfig: spawnFactory,
+    } });
+}
+
+function trackedWitness(kind, state, abort = new Promise(() => {})) {
+  const result = deferred(), exit = deferred();
+  const finish = () => { if (state.finished) return; state.finished = true;
+    result.resolve(kind === "repository" ? { counts: { name: 0, content: 0, metadata: 0, security: 0, errors: 0 },
+      securityEntries: 1, securityEqual: true } : { inputDesktopEvents: 0, attributableWindowEvents: 0,
+      errors: 0, overflow: false, survivorObserved: false }); exit.resolve(0); };
+  return { ready: Promise.resolve(), abort, result: result.promise, exit: exit.promise,
+    bindWrapper() { state.bound = true; }, complete() { state.completed = true; finish(); },
+    cancelBeforeBind() { state.cancelled = true; exit.resolve(0); state.finished = true; },
+    terminate() { state.terminated = true; exit.resolve(1); } };
+}
+
+test("a synchronous UI witness startup failure still closes the repository witness", async t => {
+  const repositoryState = {};
+  const observer = await lifecycleHarness(t, {
+    repositoryFactory: () => trackedWitness("repository", repositoryState),
+    uiFactory: () => { throw Object.assign(new Error("ui-start-failed"), { code: "ui-start-failed" }); },
+  });
+  await assert.rejects(observer.observe("root-1", "status"), { code: "ui-start-failed" });
+  assert.equal(repositoryState.completed, true);
+  assert.equal(repositoryState.finished, true);
+});
+
+test("a repository abort during policy construction prevents process spawn and cancels unbound UI", async t => {
+  const repositoryState = {}, uiState = {}, abort = deferred(); let spawnCount = 0;
+  const observer = await lifecycleHarness(t, {
+    repositoryFactory: () => trackedWitness("repository", repositoryState, abort.promise),
+    uiFactory: () => trackedWitness("ui", uiState),
+    createPolicy: (...args) => { const config = createConfigFromPolicy(...args);
+      abort.resolve(Object.assign(new Error("source changed"), { code: "omen-git-source-changed" })); return config; },
+    spawnFactory: () => { spawnCount += 1; return new FakeChild("# branch.head main\0"); },
+  });
+  await assert.rejects(observer.observe("root-1", "status"), { code: "omen-git-source-changed" });
+  assert.equal(spawnCount, 0);
+  assert.equal(repositoryState.completed, true);
+  assert.equal(uiState.cancelled, true);
+  assert.equal(uiState.bound, undefined);
+});
 
 test("repository config denies executable, include and lazy-fetch surfaces", () => {
   assert.deepEqual(inspectRepositoryConfig("[core]\n\trepositoryformatversion = 0\n[remote \"origin\"]\n\turl = https://user:secret@example.test/org/repo.git").remotes,
@@ -114,7 +214,7 @@ test("observer authors a fixed deny-all MXC request and parses NUL output", asyn
   await writeFile(systemConfig, "system config"); await writeFile(systemAttributes, "system attributes");
   const systemConfigSha = createHash("sha256").update("system config").digest("hex");
   const systemAttributesSha = createHash("sha256").update("system attributes").digest("hex");
-  let policy, generated, spawnCount = 0, mutateAfterChildClose = false;
+  let policy, generated, spawnCount = 0, mutateAfterChildClose = false, mutatedAfterClose = false;
   const sdk = {
     getPlatformSupport: () => ({ isSupported: true, availableMethods: ["processcontainer"],
       isolationTier: "appcontainer-dacl", isolationWarnings: ["AppContainer + DACL tier selected: unit"] }),
@@ -124,10 +224,10 @@ test("observer authors a fixed deny-all MXC request and parses NUL output", asyn
       const child = new FakeChild("# branch.head main\0? notes.txt\0");
       if (mutateAfterChildClose) {
         mutateAfterChildClose = false;
-        child.once("close", exitCode => {
-          assert.equal(exitCode, 0);
-          setTimeout(() => writeFileSync(join(directory, "mutated-after-child-close.txt"), "changed"), 50);
-        });
+         child.once("close", exitCode => {
+           assert.equal(exitCode, 0);
+           mutatedAfterClose = true;
+         });
       }
       return child; },
   };
@@ -147,7 +247,9 @@ test("observer authors a fixed deny-all MXC request and parses NUL output", asyn
     expectedNativeScriptSha256, expectedPowerShellSha256: expectedGitSha256,
     gitSystemConfigPath: systemConfig, expectedGitSystemConfigSha256: systemConfigSha,
     gitSystemAttributesPath: systemAttributes, expectedGitSystemAttributesSha256: systemAttributesSha,
-    expectedPolicyTemplateSha256: POLICY_TEMPLATE_SHA256, sdk });
+    expectedPolicyTemplateSha256: POLICY_TEMPLATE_SHA256,
+    ...witnessOptions(systemConfig, systemConfigSha, systemAttributes, systemAttributesSha,
+      witnessFactories({ repositoryNameEvents: () => mutatedAfterClose ? 1 : 0 })), sdk });
   const result = await observer.observe("root-1", "status");
   assert.deepEqual(result.fields, ["# branch.head main", "? notes.txt"]);
   assert.equal(policy.network.egress.default, "deny");
@@ -160,6 +262,13 @@ test("observer authors a fixed deny-all MXC request and parses NUL output", asyn
   assert.match(generated.process.commandLine, /protocol\.allow=never/u);
   assert.match(generated.process.commandLine, /safe\.directory=/u);
   assert.equal(policy.timeoutMs, 15_000);
+  assert.equal(policy.ui.allowWindows, true);
+  assert.equal(generated.processContainer.ui.isolation, "container");
+  assert.equal(generated.processContainer.ui.desktopSystemControl, false);
+  assert.equal(generated.processContainer.ui.systemSettings, "none");
+  assert.equal(generated.processContainer.ui.ime, false);
+  assert.equal(generated.ui.clipboard, "none");
+  assert.equal(generated.ui.injection, false);
   assert.equal(Object.hasOwn(generated.process, "env"), false);
   assert.equal(result.isolation.policyDigest.length, 64);
   assert.doesNotMatch(generated.process.commandLine, /"(?:fetch|pull|push|clone)"/u);
@@ -202,7 +311,8 @@ test("Git output decoding rejects malformed UTF-8 instead of replacing bytes", a
       expectedNativeScriptSha256, expectedPowerShellSha256: expectedGitSha256,
       gitSystemConfigPath: systemConfig, expectedGitSystemConfigSha256: systemConfigSha,
       gitSystemAttributesPath: systemAttributes, expectedGitSystemAttributesSha256: systemAttributesSha,
-      expectedPolicyTemplateSha256: POLICY_TEMPLATE_SHA256, sdk });
+      expectedPolicyTemplateSha256: POLICY_TEMPLATE_SHA256,
+      ...witnessOptions(systemConfig, systemConfigSha, systemAttributes, systemAttributesSha, witnessFactories()), sdk });
     await assert.rejects(observer.observe("root-1", "status"), { code: "omen-git-output-invalid" });
   } finally { await rm(directory, { recursive: true, force: true }); }
 });
@@ -234,16 +344,25 @@ test("output termination is bounded and raw stderr never crosses the diagnostic 
     expectedPowerShellSha256: gitSha, gitSystemConfigPath: systemConfig,
     expectedGitSystemConfigSha256: systemConfigSha, gitSystemAttributesPath: systemAttributes,
     expectedGitSystemAttributesSha256: systemAttributesSha,
-    expectedPolicyTemplateSha256: POLICY_TEMPLATE_SHA256, terminalGraceMs: 20, sdk: {
+    expectedPolicyTemplateSha256: POLICY_TEMPLATE_SHA256,
+    ...witnessOptions(systemConfig, systemConfigSha, systemAttributes, systemAttributesSha, witnessFactories()),
+    terminalGraceMs: 20, sdk: {
       getPlatformSupport: () => ({ isSupported: true, availableMethods: ["processcontainer"],
         isolationTier: "appcontainer-dacl", isolationWarnings: ["AppContainer + DACL tier selected: unit"] }),
       createConfigFromPolicy, spawnSandboxFromConfig: () => childFactory(),
-    } });
-  await assert.rejects(makeObserver(() => new ControlledChild({ output: Buffer.alloc(300_000, 65) }))
+  } });
+  let terminalMissedChild;
+  const terminalStart = Date.now();
+  await assert.rejects(makeObserver(() => (terminalMissedChild = new ControlledChild({
+    output: Buffer.alloc(300_000, 65), closeOnKill: 2 })))
     .observe("root-1", "status"), { code: "omen-git-terminal-exit-missed" });
+  assert.ok(Date.now() - terminalStart < 1_000, `terminal cleanup took ${Date.now() - terminalStart}ms`);
+  assert.equal(terminalMissedChild.killCount, 2);
   const secret = Buffer.from("private path and token must not escape");
+  const stderrStart = Date.now();
   const failure = await makeObserver(() => new ControlledChild({ stderr: secret, exitCode: 1 }))
     .observe("root-1", "status").then(() => null, error => error);
+  assert.ok(Date.now() - stderrStart < 1_000, `stderr failure took ${Date.now() - stderrStart}ms`);
   assert.equal(failure.code, "omen-git-process-failed");
   assert.equal(failure.stderrBytes, secret.length);
   assert.equal(failure.stderrSha256, createHash("sha256").update(secret).digest("hex"));

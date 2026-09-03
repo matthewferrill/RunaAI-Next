@@ -153,7 +153,7 @@ export async function diagnoseGitWitness({ userProfilePath = homedir() } = {}) {
   const quiescencePath = resolve(import.meta.dirname, "../acceptance/Wait-R15WatcherQuiescence.ps1");
   for (const path of [pins.powershellPath, pins.gitPath, pins.gitInstallRoot, pins.gitSystemConfigPath,
     pins.gitSystemAttributesPath, pins.nativeScriptPath, pins.mxcExecutorPath,
-    classifierPath, quiescencePath, userProfilePath]) {
+    pins.repositoryWitnessPath, pins.uiWitnessPath, classifierPath, quiescencePath, userProfilePath]) {
     if (!path || !existsSync(path)) throw coded("diagnostic-prerequisite-missing");
   }
   const pinnedFiles = [
@@ -161,6 +161,7 @@ export async function diagnoseGitWitness({ userProfilePath = homedir() } = {}) {
     [pins.gitPath, pins.gitSha256], [pins.gitSystemConfigPath, pins.gitSystemConfigSha256],
     [pins.gitSystemAttributesPath, pins.gitSystemAttributesSha256],
     [pins.mxcExecutorPath, pins.mxcExecutorSha256],
+    [pins.repositoryWitnessPath, pins.repositoryWitnessSha256], [pins.uiWitnessPath, pins.uiWitnessSha256],
   ];
   const pinnedBytes = await Promise.all(pinnedFiles.map(([path]) => readFile(path)));
   if (!pinnedFiles.every(([, digest], index) =>
@@ -240,7 +241,10 @@ export async function diagnoseGitWitness({ userProfilePath = homedir() } = {}) {
       expectedGitSystemConfigSha256: pins.gitSystemConfigSha256,
       gitSystemAttributesPath: pins.gitSystemAttributesPath,
       expectedGitSystemAttributesSha256: pins.gitSystemAttributesSha256,
-      expectedPolicyTemplateSha256: pins.policyTemplateSha256, sdk });
+      expectedPolicyTemplateSha256: pins.policyTemplateSha256,
+      repositoryWitnessPath: pins.repositoryWitnessPath,
+      expectedRepositoryWitnessSha256: pins.repositoryWitnessSha256,
+      uiWitnessPath: pins.uiWitnessPath, expectedUiWitnessSha256: pins.uiWitnessSha256, sdk });
 
     stage = "start-category-witness";
     classifier = startClassifier(pins.powershellPath, classifierPath, repository);

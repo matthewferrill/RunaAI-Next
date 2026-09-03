@@ -1,7 +1,9 @@
 # M1-S2B1 server-workspace materialization criteria — 2026-09-03
 
-Status: corrected prospective criteria freeze; fresh independent design review required before implementation  
-Roadmap revision/digest retrieved before selection: `2026-08-28.1` / `6a8380d9e9e2f3eb07b7e51c77cda174c5541c0abbb07875dd5537627560cfd1`  
+Status: corrected prospective criteria freeze; fresh independent design review required before implementation
+
+Roadmap revision/digest retrieved before selection: `2026-08-28.1` / `6a8380d9e9e2f3eb07b7e51c77cda174c5541c0abbb07875dd5537627560cfd1`
+
 Milestone/capability scope: M1-S2B1; bounded C03/C06/C08/C15/C16 subsets
 
 First independent review disposition: NO-GO, P0=0/P1=7. No implementation or actual operation followed it. This

@@ -1,7 +1,9 @@
 # M1-S2B1 corrected-criteria review infrastructure stop — 2026-09-03
 
-Status: PAUSED before implementation; independent verdict unavailable  
-Affected checkpoint: fresh independent P0/P1 review of the corrected prospective M1-S2B1 criteria  
+Status: PAUSED before implementation; independent verdict unavailable
+
+Affected checkpoint: fresh independent P0/P1 review of the corrected prospective M1-S2B1 criteria
+
 Product/model disposition: none
 
 ## What happened

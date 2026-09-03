@@ -396,4 +396,12 @@ production findings and all three follow-up deployment/preflight findings closed
 matching their LF-stable release pins, 26/26 focused checks, 15/15 roadmap checks, five Node syntax checks and
 a clean diff check. The actual preflight remains unexecuted until this complete reviewed tree is committed.
 
+Commit `ac10286` sealed the complete reviewed implementation. The single gated actual Windows witness
+preflight then passed 4/4 on that committed source: the clean root contained exactly root, `.git` and one
+junction security entry; the external target was not traversed; a directory-to-junction replacement issued
+immediately after completion was detected; UI cancellation before wrapper binding closed normally; and the
+owned disposable fixture was removed. Its public record states `productionChanged:false` and
+`modelCalled:false`. No Git/MXC operation, network, browser or production surface was invoked. This green
+preflight admits the one corrected actual Omen Git proof; any failure in that proof stops the campaign again.
+
 Git acceptance remains paused. The model campaign remains closed and unaffected.

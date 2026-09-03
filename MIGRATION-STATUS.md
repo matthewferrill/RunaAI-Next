@@ -190,6 +190,10 @@ attributes. The amended bytes remain unexecuted pending fresh independent GO and
 Fresh current-byte review returned GO with P0=0/P1=0 and independently verified all eleven findings closed,
 both LF-stable hashes matching their pins, 26/26 focused checks, 15/15 roadmap checks, five syntax checks and
 a clean diff check. The actual preflight remains unexecuted until this reviewed tree is source-committed.
+Commit `ac10286` sealed that reviewed tree. Its single gated actual Windows witness preflight passed 4/4:
+static-junction non-traversal, completion-boundary replacement detection, clean UI pre-bind cancellation and
+owned-fixture removal. The record reports no model or production change; it ran no Git/MXC, network or browser
+operation. One corrected actual Omen Git proof is now admitted. Any actual failure stops again for RCA.
 
 **Application slice, 2026-09-02:** model selection is complete and the retired R15 campaign is not being
 resumed. The active clean branch is `codex/m1-gemma-primary`, based on the five-function qualification

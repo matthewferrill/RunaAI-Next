@@ -153,6 +153,10 @@ bytes are still unexecuted and await fresh independent GO plus a source commit.
 Fresh current-byte review returned GO with P0=0/P1=0, independently verifying all eleven findings closed,
 the LF-stable hashes, 26/26 focused checks, 15/15 roadmap checks, five syntax checks and a clean diff check.
 The actual preflight remains unexecuted until this reviewed tree is source-committed.
+Commit `ac10286` sealed the reviewed tree. The single gated actual Windows witness preflight then passed 4/4:
+static-junction non-traversal, completion-boundary replacement detection, UI pre-bind cancellation and owned
+fixture removal. It invoked no Git/MXC, model, browser, network or production surface. The one corrected actual
+Omen Git proof is now admitted; any actual failure stops the slice again for RCA.
 
 Workspace baseline checkpoint: see
 `gate7f/function-first/M1-S2-WORKSPACE-BASELINE-IMPLEMENTATION-RESULTS-2026-09-02.md` for the accepted

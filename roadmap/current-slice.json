@@ -39,12 +39,13 @@
     "gate7f/function-first/M1-S2B1-CANDIDATE-SERVICE-SURFACE-2026-09-03.md",
     "gate7f/function-first/M1-S2B1-NETWORK-POLICY-PREFLIGHT-2026-09-03.md",
     "gate7f/function-first/M1-S2B1-GIT-STREAM-PREFLIGHT-2026-09-03.md",
+    "gate7f/function-first/M1-S2B1-TLS-BROKER-PREFLIGHT-2026-09-03.md",
     "gate7f/function-first/M1-S2B1-PUBLICATION-PRIMITIVE-PREFLIGHT-2026-09-03.md",
     "gate7f/function-first/M1-S2-CONTEXTUAL-REVIEW-WORKFLOW-2026-09-03.md"
   ],
   "scopeDocument": "roadmap/CURRENT-SLICE.md",
   "capabilityIds": ["C01", "C02", "C03", "C04", "C06", "C07", "C08", "C12", "C15", "C16"],
-  "nextWork": "M1-S2B1 criteria, package gate, public-Git core, PostgreSQL authority, candidate-only service/surface binding, binary network policy, bounded authenticated Git stream session, and the deterministic publication primitive are complete locally. Contextual Review is also deterministically green and independently reviewed. TLS has green focused evidence but awaits final independent re-review; supplied-source Research and device readiness are paused on explicit P1 review findings. No Control fetch, native publication, ready workspace, browser operation, production change or model call is claimed. Correct and independently seal each stopped lane once, then compose the specialized Control worker/publication host and run one real Control/browser journey. Home remains model-only, Omen is not the primary worker, and comparison-model testing remains tabled.",
+  "nextWork": "M1-S2B1 criteria, package gate, public-Git core, PostgreSQL authority, candidate-only service/surface binding, binary network policy, bounded authenticated Git stream session, local TLS broker, and deterministic publication primitive are complete locally. Contextual Review is also deterministically green and independently reviewed. Supplied-source Research and device readiness have bounded corrections pending independent re-review. No public Control fetch, native publication, ready workspace, browser operation, production change or model call is claimed. Seal the corrected product lanes, compose the specialized Control worker/publication host, and run one real Control/browser journey. Home remains model-only, Omen is not the primary worker, and comparison-model testing remains tabled.",
   "remainingRoadmapRequired": true,
   "completionClaim": "M1 completion is not whole-product completion."
 }

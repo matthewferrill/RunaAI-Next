@@ -56,12 +56,17 @@ test("rejects authority commit mismatch without creating staging", async t => {
 
 test("custom transport rejects a request before the broker when shape or options widen", async () => {
   let calls = 0;
-  const http = createGitBrokerHttp({ repositoryHttpsUrl: "https://github.com/example/sealed.git",
-    sourceId: "source_0001", requestId: "request_0001", broker: { async request() { calls += 1; } } });
-  await assert.rejects(http.request({ url: "https://github.com/example/sealed.git/info/refs?service=git-upload-pack",
+  const makeHttp = requestId => createGitBrokerHttp({
+    repositoryHttpsUrl: "https://github.com/example/sealed.git",
+    sourceId: "source_0001", requestId, deadlineAt: Date.now() + 120_000,
+    broker: { async request() { calls += 1; } }
+  });
+  await assert.rejects(makeHttp("request_0001").request({
+    url: "https://github.com/example/sealed.git/info/refs?service=git-upload-pack",
     method: "GET", headers: { accept: "application/x-git-upload-pack-advertisement" },
     fetchOptions: { redirect: "follow" } }), error => error.code === "git-broker-option-denied");
-  await assert.rejects(http.request({ url: "https://github.com/example/other.git/info/refs?service=git-upload-pack",
+  await assert.rejects(makeHttp("request_0002").request({
+    url: "https://github.com/example/other.git/info/refs?service=git-upload-pack",
     method: "GET", headers: { accept: "application/x-git-upload-pack-advertisement" } }),
   error => error.code === "git-broker-request-shape-denied");
   assert.equal(calls, 0);

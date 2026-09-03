@@ -104,7 +104,7 @@ export class PublicGitSourceAdapter {
     assertSeparateAbsoluteRoots(objectDirectory, stagingDirectory);
     await mkdir(objectDirectory, { recursive: false });
     const http = createGitBrokerHttp({ broker: this.broker, repositoryHttpsUrl: source.repositoryHttpsUrl,
-      sourceId: source.sourceId, requestId: request.requestId });
+      sourceId: source.sourceId, requestId: request.requestId, deadlineAt: Date.parse(request.deadlineAt) });
     await git.clone({ fs, http, dir: objectDirectory, url: source.repositoryHttpsUrl, ref: source.requestedRef,
       singleBranch: true, depth: 1, tags: false, noCheckout: true });
     if (http.requestCount() !== 2) throw fail("git-broker-request-count-invalid");

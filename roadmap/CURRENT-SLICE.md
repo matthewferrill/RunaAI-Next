@@ -145,6 +145,13 @@ no socket and earns no actual-system credit. Record:
 `../gate7f/function-first/M1-S2B1-GIT-STREAM-PREFLIGHT-2026-09-03.md`. Next remains the real TLS connector/broker
 child, separately reviewed before any Control worker, workspace publication or UI integration.
 
+The streaming TLS connector/broker prerequisite now passes 29/29 focused checks and 54/54 exact combined
+stream/network/adapter/TLS checks, with independent P0=0/P1=0 re-review. Retained review stops corrected attempt-wide
+deadline and poison semantics, URL/DNS/TLS trust, bounded online POST streaming, iterator cancellation, resource
+cleanup, deferred HTTP rejection and timing-sensitive test ownership. This is local synthetic TLS evidence, not a
+public fetch or Control process/Job Object result. Record:
+`../gate7f/function-first/M1-S2B1-TLS-BROKER-PREFLIGHT-2026-09-03.md`.
+
 The deterministic publication primitive now passes 29/29 focused materialization/publication compatibility checks
 and independent review at P0=0/P1=0 after two explicit review stops. It owns and closes or recovery-retains every
 accessible native handle, distinguishes attempted from confirmed moves, permits only a one-shot non-replacing

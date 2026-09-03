@@ -531,6 +531,14 @@ TLS, HTTP, Git fetch, Control worker/publication, browser action, production cha
 gate remains the separately reviewed real TLS connector/broker child. Record:
 `gate7f/function-first/M1-S2B1-GIT-STREAM-PREFLIGHT-2026-09-03.md`.
 
+**M1-S2B1 TLS broker preflight, 2026-09-03:** the deadline-bound streaming transport, authenticated framed client,
+broker child and strict TLS/HTTP connector now pass 29/29 focused checks and 54/54 combined stream/network/adapter/TLS
+checks. Independent re-review returned P0=0/P1=0 after retained stops corrected lifecycle, trust, resource, unbounded
+POST buffering, deferred rejection and timing-sensitive evidence gaps. A failure poisons the whole attempt without
+retry and cleans or zeroizes IPC, network and body resources. Evidence uses a local synthetic TLS server only; no
+public network, Control process/Job Object, protected publication, browser, production or model acceptance is claimed.
+Record: `gate7f/function-first/M1-S2B1-TLS-BROKER-PREFLIGHT-2026-09-03.md`.
+
 **M1-S2B1 publication-primitive preflight, 2026-09-03:** the digest- and identity-bound deterministic
 publication contract now passes 29/29 focused compatibility checks and fresh independent review at P0=0/P1=0.
 Two review stops corrected malformed-handle ownership, exhaustive inspection cleanup, failed-close retention and

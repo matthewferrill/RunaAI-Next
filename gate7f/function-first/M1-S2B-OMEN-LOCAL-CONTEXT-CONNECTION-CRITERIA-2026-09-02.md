@@ -30,8 +30,19 @@ owned roots and matching helpers. Because stderr was discarded and early process
 underlying WMI-start condition is unknowable from the retained record. The corrected method captures only
 bounded stderr count/hash, races ready against error/exit, grants 30 seconds for actual Omen startup, starts
 the 30-second observation budget after WMI is armed and republishes the helper pin. It remains non-executable.
-Focused checks pass 17/17, roadmap checks pass 15/15, pinned PowerShell parsing and the helper pin pass, and fresh exact-byte review
-returned GO with P0=0/P1=0. A new source commit remains required. Acceptance stays paused.
+Focused checks pass 17/17, roadmap checks pass 15/15, pinned PowerShell parsing and the helper pin pass, and
+fresh exact-byte review returned GO with P0=0/P1=0. At that point, a new source commit remained required and
+acceptance stayed paused. Commit `207194b` sealed the correction. Its single run stopped before category
+watching, MXC or Git with exit 1 and a bounded 368-byte stderr fingerprint; cleanup left zero roots/helpers.
+Read-only probes show type resolution, watcher construction/configuration and disposal work, narrowing the
+unobserved boundary to WMI start versus ready publication. The next correction emits and strictly validates a
+privacy-safe typed stage, exception class, numeric HResult and optional management-status name while excluding
+messages/paths; the monitor is repinned. It remains non-executable pending preflight, independent review and a
+source commit. The first review stopped at P0=0/P1=1 because the parser did not reject unknown fields despite
+the exact-schema claim. It now requires the exact six-key set and has positive plus extra-key rejection
+coverage. The revised bytes remain non-executable. Focused checks pass 18/18, roadmap checks pass 15/15,
+parser/pin checks pass, and fresh exact-byte re-review returned GO with P0=0/P1=0. A source commit remains
+required before one typed diagnostic. Acceptance stays paused.
 
 ## Slice selection record
 

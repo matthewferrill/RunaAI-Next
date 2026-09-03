@@ -27,8 +27,10 @@ async function waitForProcessReady(path, processOutcome, processDiagnostic, maxi
       processOutcome.then(exitCode => ({ exitCode }), error => ({ error })),
     ]);
     if (signal) {
-      const error = coded(signal.error?.code ?? "diagnostic-process-audit-startup-failed");
-      Object.assign(error, processDiagnostic(), { exitCode: signal.exitCode ?? null });
+      const diagnostic = processDiagnostic();
+      const error = coded(diagnostic.monitorErrorCode ?? signal.error?.code
+        ?? "diagnostic-process-audit-startup-failed");
+      Object.assign(error, diagnostic, { exitCode: signal.exitCode ?? null });
       throw error;
     }
   }
@@ -37,6 +39,24 @@ async function waitForProcessReady(path, processOutcome, processDiagnostic, maxi
     Object.assign(error, processDiagnostic(), { exitCode: null });
     throw error;
   }
+}
+
+export function parseProcessMonitorError(bytes) {
+  let value;
+  try { value = JSON.parse(bytes.toString("utf8").trim()); } catch { return null; }
+  const codes = new Set(["process-audit-construct-failed", "process-audit-configure-failed",
+    "process-audit-wmi-start-failed", "process-audit-ready-publish-failed"]);
+  const keys = ["schemaVersion", "errorCode", "exceptionType", "hResult", "managementStatus",
+    "privateValuesIncluded"];
+  if (!value || value.schemaVersion !== "runa-omen-process-tree-audit-error/v1"
+      || Object.keys(value).sort().join("\0") !== [...keys].sort().join("\0")
+      || !codes.has(value.errorCode) || value.privateValuesIncluded !== false
+      || typeof value.exceptionType !== "string" || value.exceptionType.length > 200
+      || !/^[A-Za-z][A-Za-z0-9.]+$/u.test(value.exceptionType)
+      || !Number.isSafeInteger(value.hResult)
+      || value.managementStatus !== null && (typeof value.managementStatus !== "string"
+        || !/^[A-Za-z][A-Za-z0-9]{0,100}$/u.test(value.managementStatus))) return null;
+  return value;
 }
 
 async function treeDigest(root) {
@@ -224,9 +244,14 @@ export async function diagnoseGitWitness({ userProfilePath = homedir() } = {}) {
       }
       processMonitorStderr = next;
     });
-    const processDiagnostic = () => ({ stderrBytes: processMonitorStderr.length,
-      stderrSha256: createHash("sha256").update(processMonitorStderr).digest("hex"),
-      outputLimited: processMonitorOutputLimited });
+    const processDiagnostic = () => {
+      const safe = processMonitorOutputLimited ? null : parseProcessMonitorError(processMonitorStderr);
+      return { stderrBytes: processMonitorStderr.length,
+        stderrSha256: createHash("sha256").update(processMonitorStderr).digest("hex"),
+        outputLimited: processMonitorOutputLimited, monitorErrorCode: safe?.errorCode ?? null,
+        monitorExceptionType: safe?.exceptionType ?? null, monitorHResult: safe?.hResult ?? null,
+        monitorManagementStatus: safe?.managementStatus ?? null };
+    };
     processMonitorTerminal = new Promise(done => processMonitor.once("close", done));
     const processMonitorError = new Promise((_done, fail) =>
       processMonitor.once("error", () => fail(coded("diagnostic-process-audit-error"))));
@@ -354,6 +379,9 @@ if (process.argv[1] && resolve(process.argv[1]) === resolve(import.meta.filename
       errorCode: error?.code ?? "diagnostic-failed", stage: error?.stage ?? "unknown",
       exitCode: error?.exitCode ?? null, stderrBytes: error?.stderrBytes ?? null,
       stderrSha256: error?.stderrSha256 ?? null, outputLimited: error?.outputLimited ?? null,
+      monitorExceptionType: error?.monitorExceptionType ?? null,
+      monitorHResult: error?.monitorHResult ?? null,
+      monitorManagementStatus: error?.monitorManagementStatus ?? null,
       privateValuesIncluded: false })}\n`);
     process.exitCode = 1;
   });

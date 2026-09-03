@@ -18,5 +18,5 @@
   "mxcExecutorSha256": "6049c64723af1173c3739dc6cd6b2f33f6c021bb2832c4216233cba7f71aee9a",
   "policyTemplateSha256": "7d7eb3da575a5fcf1566081395b0b27c8ba7d9d8c9531785bdd313cdbde10f27",
   "processMonitorRelativePath": "gate7f/function-first/omen-local/Observe-RunaProcessTree.ps1",
-  "processMonitorSha256": "40c12da9abbde7d00e0ec4e17cb355a6e2e104dce2ac91df5f7bc8a4468efd11"
+  "processMonitorSha256": "4ba2417a07cd79dfeace117ef0392d62ab13d47068760e9dfa4b26b2e0ade4c5"
 }

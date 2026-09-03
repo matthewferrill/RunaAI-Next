@@ -97,5 +97,34 @@ wait remains bounded at 65 seconds, and abnormal cleanup still requires terminal
 The changed monitor is release-repinned and source-tested for the ordering invariant. These corrected bytes
 remain unexecuted.
 Focused checks pass 17/17, roadmap checks pass 15/15, pinned PowerShell parsing and the new monitor pin pass,
-and fresh exact-byte review returned GO with P0=0/P1=0. A new source commit is the remaining prerequisite.
-No acceptance retry is authorized by this correction.
+and fresh exact-byte review returned GO with P0=0/P1=0. At that point, a new source commit was the remaining
+prerequisite. No acceptance retry was authorized by that correction.
+
+## Second sealed diagnostic startup stop
+
+Commit `207194b` sealed the reviewed readiness correction. Its single corrected diagnostic stopped again at
+`start-process-audit`, now with `diagnostic-process-audit-startup-failed`, process exit 1, 368 stderr bytes,
+SHA-256 `da49ffd40d89c76e2487f1e494bb52154b1ec43a1522a0ce698d59346ac2fd82`, and
+`outputLimited:false`. The helper still emitted an ordinary PowerShell error, so the wrapper retained its
+bounded fingerprint but not a safe internal stage. Category watching, MXC, Git and all acceptance successors
+again did not run. Read-only postchecks again found zero owned roots and matching helper processes.
+
+Clean pinned-host, read-only probes established that the short management type resolves without explicit
+assembly loading and that constructing `ManagementEventWatcher`, configuring its timeout and disposing it
+all succeed. They did not start WMI. This narrows the unobserved failure to `watcher.Start()` or ready-file
+publication, but retained evidence does not justify choosing between them.
+
+The finite correction emits one strict, privacy-safe structured error from the monitor for construct,
+configure, WMI-start or ready-publication failure. It includes only the code, exception class, numeric HResult,
+optional `ManagementStatus` name and `privateValuesIncluded:false`; exception messages and paths are excluded.
+The Node wrapper accepts only that exact schema/allowlist and otherwise retains only the existing bounded byte
+count/hash. Source checks require the typed WMI boundary and prohibit exception-message publication. The
+monitor is repinned again. Focused preflight, independent exact-byte review and a new source commit are
+required before one typed corrected diagnostic. Acceptance remains paused, with no Git-proof retry allowed.
+
+The first review of that typed correction stopped before execution at P0=0/P1=1 because the parser required
+the six known fields but did not reject an additional unknown field, contradicting the exact-schema claim.
+The parser now requires exactly the six public keys and a focused regression accepts the valid schema while
+rejecting an otherwise-valid record with an extra key. The revised bytes remain unexecuted. Focused checks
+pass 18/18, roadmap checks pass 15/15, parser/pin checks pass, and fresh exact-byte re-review returned GO with
+P0=0/P1=0. A source commit remains required before the one typed diagnostic.

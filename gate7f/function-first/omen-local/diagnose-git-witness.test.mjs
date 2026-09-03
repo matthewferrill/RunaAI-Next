@@ -3,6 +3,7 @@ import { spawnSync } from "node:child_process";
 import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import test from "node:test";
+import { parseProcessMonitorError } from "./diagnose-git-witness.mjs";
 import { loadOmenReleasePins } from "./release-pins.mjs";
 
 const runnerPath = resolve(import.meta.dirname, "diagnose-git-witness.mjs");
@@ -28,6 +29,10 @@ test("Git witness diagnostic is aggregate-only and limited to one status operati
   assert.match(runner, /waitForProcessReady\(processReadyPath, processMonitorExit, processDiagnostic\)/u);
   assert.match(runner, /stdio: \["ignore", "ignore", "pipe"\]/u);
   assert.match(runner, /stderrSha256/u);
+  assert.match(runner, /parseProcessMonitorError/u);
+  assert.match(processMonitor, /process-audit-wmi-start-failed/u);
+  assert.match(processMonitor, /privateValuesIncluded=\$false/u);
+  assert.doesNotMatch(processMonitor, /Exception\.Message/u);
   assert.ok(processMonitor.indexOf("WriteAllText($ReadyPath")
     < processMonitor.indexOf("$deadline = [DateTime]::UtcNow.AddMilliseconds($MaximumMs)"));
   assert.match(classifier, /NotifyFilters\]::FileName/u);
@@ -48,4 +53,12 @@ test("category witness parses in the pinned Windows PowerShell", { skip: process
     ["-NoLogo", "-NoProfile", "-NonInteractive", "-Command", source],
     { windowsHide: true, encoding: "utf8", timeout: 15_000 });
   assert.equal(result.status, 0, result.stderr || result.stdout);
+});
+
+test("process-monitor errors require the exact privacy-safe schema", () => {
+  const valid = { schemaVersion: "runa-omen-process-tree-audit-error/v1",
+    errorCode: "process-audit-wmi-start-failed", exceptionType: "System.Management.ManagementException",
+    hResult: -2146233087, managementStatus: "AccessDenied", privateValuesIncluded: false };
+  assert.deepEqual(parseProcessMonitorError(Buffer.from(JSON.stringify(valid))), valid);
+  assert.equal(parseProcessMonitorError(Buffer.from(JSON.stringify({ ...valid, unexpected: "value" }))), null);
 });

@@ -81,8 +81,19 @@ Cleanup left zero owned roots/helpers. Because the method discarded helper stder
 readiness, the underlying WMI-start condition is not retained. The correction uses bounded aggregate stderr
 metadata, races ready against error/exit, permits 30 seconds for actual Omen startup, begins the separate
 30-second observation budget only after WMI is armed, and repins the helper. It remains unexecuted. Focused
-checks pass 17/17, roadmap checks pass 15/15, pinned PowerShell parsing and the helper pin pass, and fresh exact-byte review returned
-GO with P0=0/P1=0. A new source commit remains required; acceptance remains paused.
+checks pass 17/17, roadmap checks pass 15/15, pinned PowerShell parsing and the helper pin pass, and fresh
+exact-byte review returned GO with P0=0/P1=0. At that point, a new source commit remained required and
+acceptance remained paused. Commit `207194b` sealed the correction. Its single run stopped before category
+watching, MXC or Git with exit 1 and a bounded 368-byte stderr fingerprint; cleanup left zero roots/helpers.
+Read-only host probes show type resolution, watcher construction/configuration and disposal work, narrowing
+the unobserved boundary to WMI start versus ready publication. The next correction emits and strictly validates
+a privacy-safe typed stage, exception class, numeric HResult and optional management-status name while
+excluding messages/paths; the monitor is repinned. It remains unexecuted pending preflight, independent review
+and a source commit. The first review stopped at P0=0/P1=1 because the parser did not reject unknown fields
+despite the exact-schema claim. It now requires the exact six-key set and has positive plus extra-key rejection
+coverage. The revised bytes remain unexecuted. Focused checks pass 18/18, roadmap checks pass 15/15,
+parser/pin checks pass, and fresh exact-byte re-review returned GO with P0=0/P1=0. A source commit remains
+required before one typed diagnostic. Acceptance remains paused.
 No browser, HTTPS, model or production work has run.
 
 Workspace baseline checkpoint: see

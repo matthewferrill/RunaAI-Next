@@ -9,14 +9,38 @@ param(
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
 $events = [Collections.Generic.List[object]]::new()
-$watcher = [Management.ManagementEventWatcher]::new('SELECT * FROM Win32_ProcessStartTrace')
-$watcher.Options.Timeout = [TimeSpan]::FromMilliseconds(100)
+$watcher = $null
 $deadline = $null
 $rootProcess = $null
 
 try {
+  $startupStage = 'construct'
+  $watcher = [Management.ManagementEventWatcher]::new('SELECT * FROM Win32_ProcessStartTrace')
+  $startupStage = 'configure'
+  $watcher.Options.Timeout = [TimeSpan]::FromMilliseconds(100)
+  $startupStage = 'start'
   $watcher.Start()
+  $startupStage = 'publish-ready'
   [IO.File]::WriteAllText($ReadyPath, 'ready', [Text.Encoding]::ASCII)
+} catch {
+  $errorCode = switch ($startupStage) {
+    'construct' { 'process-audit-construct-failed' }
+    'configure' { 'process-audit-configure-failed' }
+    'start' { 'process-audit-wmi-start-failed' }
+    default { 'process-audit-ready-publish-failed' }
+  }
+  $managementStatus = if ($_.Exception -is [Management.ManagementException]) {
+    [string]$_.Exception.ErrorCode
+  } else { $null }
+  $safeError = [ordered]@{ schemaVersion='runa-omen-process-tree-audit-error/v1';
+    errorCode=$errorCode; exceptionType=$_.Exception.GetType().FullName;
+    hResult=[int]$_.Exception.HResult; managementStatus=$managementStatus; privateValuesIncluded=$false }
+  [Console]::Error.WriteLine(($safeError | ConvertTo-Json -Compress -Depth 3))
+  if ($watcher) { try { $watcher.Dispose() } catch {} }
+  exit 1
+}
+
+try {
   $deadline = [DateTime]::UtcNow.AddMilliseconds($MaximumMs)
   while (-not [IO.File]::Exists($StopPath) -and [DateTime]::UtcNow -lt $deadline) {
     if (-not $rootProcess -and [IO.File]::Exists($RootPidPath)) {

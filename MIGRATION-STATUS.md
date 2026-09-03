@@ -105,8 +105,21 @@ condition is unknowable from retained evidence. The correction bounds and hashes
 terminal/error, gives actual Omen startup a bounded 30 seconds, starts the separate 30-second observation
 budget only after WMI is armed, and repins the helper. It remains unexecuted. Focused checks pass 17/17,
 roadmap checks pass 15/15, pinned
-PowerShell parsing and the helper pin pass, and fresh exact-byte review returned GO with P0=0/P1=0. A new
-source commit remains required before one corrected diagnostic; acceptance remains paused.
+PowerShell parsing and the helper pin pass, and fresh exact-byte review returned GO with P0=0/P1=0. At that
+point, a new source commit remained required before one corrected diagnostic and acceptance remained paused.
+Commit `207194b` sealed that correction. The single run stopped before category watching, MXC or Git with
+process exit 1, 368 bounded stderr bytes, retained SHA-256
+`da49ffd40d89c76e2487f1e494bb52154b1ec43a1522a0ce698d59346ac2fd82` and no output overflow. Cleanup again
+left zero owned roots/helpers. Read-only pinned-host probes show management type resolution, watcher
+construction, timeout configuration and disposal succeed without starting WMI, narrowing the missing stage
+to WMI start versus ready publication. The monitor now emits an allowlisted structured error containing only
+stage code, exception class, numeric HResult and optional management-status name; messages/paths are excluded.
+The wrapper strictly validates it and otherwise retains only count/hash. These bytes are unexecuted pending
+focused preflight, independent review and a source commit. The first review stopped at P0=0/P1=1 because the
+parser did not reject unknown keys despite the exact-schema claim. It now requires exactly the six allowed
+keys, with positive and extra-key rejection coverage. The revised bytes remain unexecuted. Focused checks
+pass 18/18, roadmap checks pass 15/15, parser/pin checks pass, and fresh exact-byte re-review returned GO with
+P0=0/P1=0. A source commit remains required before one typed diagnostic. Acceptance remains paused.
 
 **Application slice, 2026-09-02:** model selection is complete and the retired R15 campaign is not being
 resumed. The active clean branch is `codex/m1-gemma-primary`, based on the five-function qualification

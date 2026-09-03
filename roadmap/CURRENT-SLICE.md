@@ -132,6 +132,11 @@ public source, and makes all absent worker/read/cleanup ports explicitly unavail
 No UI availability is advertised. Exact scope and evidence limits:
 `../gate7f/function-first/M1-S2B1-CANDIDATE-SERVICE-SURFACE-2026-09-03.md`.
 
+The workspace-blind binary network-policy prerequisite passes 17/17 focused checks and independent review after
+closing shared-policy-mutation and full-CIDR-boundary findings. It opens no socket and receives no actual-system
+credit. Record: `../gate7f/function-first/M1-S2B1-NETWORK-POLICY-PREFLIGHT-2026-09-03.md`. Next implement and
+review the real TLS connector/broker child without widening into workspace publication or UI.
+
 M1-S2B implementation checkpoint, 2026-09-02: the authority foundation and actual PostgreSQL lifecycle
 are green. The prior Omen DPAPI/handle-based file proof was 14/14, but shared native/helper bytes have since
 changed and that evidence is historical until one affected-scope rerun. The first actual

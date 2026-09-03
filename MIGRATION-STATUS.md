@@ -517,6 +517,12 @@ verification passes 31/31 and independent review returned PASS. This is routing/
 an actual Control/browser or model result. Record:
 `gate7f/function-first/M1-S2B1-CANDIDATE-SERVICE-SURFACE-2026-09-03.md`.
 
+**M1-S2B1 network-policy preflight, 2026-09-03:** the workspace-blind binary resolver classifier now passes
+17/17 focused checks and independent review. It snapshots the digest-verified policy, rejects a complete answer set
+on any denied member, covers every frozen CIDR boundary, and returns no address literal in observations. It performs
+no DNS/network operation and earns no actual acceptance. The next implementation gate is the real TLS connector and
+broker child. Record: `gate7f/function-first/M1-S2B1-NETWORK-POLICY-PREFLIGHT-2026-09-03.md`.
+
 **Application slice, 2026-09-02:** model selection is complete and the retired R15 campaign is not being
 resumed. The active clean branch is `codex/m1-gemma-primary`, based on the five-function qualification
 decision. Gemma is the sole primary for Chat, Research, Code, Agent and Review. The immediate work is to

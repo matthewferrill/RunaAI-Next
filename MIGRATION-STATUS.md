@@ -212,6 +212,24 @@ The next review reduced the design stop to P0=0/P1=1: the dubious-ownership advi
 literal. The RCA now freezes three complete LF-framed variants, exact blank line and tab indentation, quoted
 byte-identical private path reuse, and `unknown` for every deviation. No diagnostic has run; revised design
 still requires fresh GO before implementation.
+Fresh design review returned GO with P0=0/P1=0 and doc-only commit `2dbe284` sealed it. The bounded classifier,
+exact public record contract and shared one-status diagnostic mode are now implemented but unexecuted. The
+diagnostic uses the existing actual proof fixture through its first status, records one wrapper/two witnesses/
+one native guard, branches before every successor/network arm and requires unchanged repository bytes plus
+terminal cleanup. Focused Omen tests pass 33/33, four Node syntax checks and `git diff --check` pass. Independent
+exact-byte implementation review and a source commit remain mandatory before the one admitted diagnostic.
+Acceptance and the model campaign remain paused.
+The first implementation review stopped execution at P0=0/P1=4: permission phrases were not counted exactly,
+contradictory operation state could be collapsed during error publication, diagnostic mode started live probe
+listeners, and the root could be deleted before every owned resource was independently terminal. No actual run
+occurred. The correction requires exactly one permission phrase, rejects contradictory lifecycle values, keeps
+identical inert fixture remotes and no listener through the shared first status, defers full-proof probes until
+after that status, and kills/releases plus boundedly awaits exact child/witness/guard handles before deletion.
+Unresolved cleanup preserves the root. Focused Omen checks pass 33/33. Fresh exact-byte review remains required
+before source commit or the single diagnostic; acceptance remains paused.
+Fresh current-byte review returned GO with P0=0/P1=0 and independently reproduced focused checks 33/33,
+roadmap checks 15/15, four syntax checks and a clean diff check. No actual operation ran. A source commit is now
+the only remaining gate before the single admitted diagnostic; acceptance and model testing remain paused.
 
 **Application slice, 2026-09-02:** model selection is complete and the retired R15 campaign is not being
 resumed. The active clean branch is `codex/m1-gemma-primary`, based on the five-function qualification

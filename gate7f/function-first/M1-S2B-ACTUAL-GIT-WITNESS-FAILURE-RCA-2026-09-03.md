@@ -507,4 +507,31 @@ That re-review remained NO-GO at P0=0/P1=1 because the optional safe-directory a
 rather than defined. The three literal grammars above now freeze its lines, blank line, one-tab indentation,
 same-path rule, quoting and terminal LF; every deviation returns `unknown`. No diagnostic has run.
 
+Fresh design review returned GO with P0=0/P1=0, and doc-only commit `2dbe284` sealed the frozen contract.
+The implementation now adds the strict whole-buffer classifier, safe `failureKind`, exact completed/error
+record builders and a diagnostic mode in the existing actual proof so fixture creation is byte-identical
+through the first `status`. That mode records exactly one contained operation, branches before `log` or any
+later/network arm, and requires unchanged repository bytes plus terminal wrapper, both witnesses, native guard
+and fixture cleanup before a completed record. Successful Git with any stderr is a harness error rather than a
+false completed diagnostic. Focused Omen tests pass 33/33, including all signature families, malformed/hostile
+near misses, private-value non-publication, exact schemas and lifecycle/null rejection. Four Node syntax checks
+and `git diff --check` pass. The source remains unexecuted and uncommitted pending independent exact-byte review.
+
+The first implementation review returned NO-GO with P0=0/P1=4. It found that permission classification did
+not require exactly one phrase, invalid operation/successor state could be collapsed in the error record, the
+diagnostic inherited live probe listeners before its branch, and fixture deletion preceded independent proof
+that every owned wrapper/witness/guard was terminal. No actual diagnostic ran. The correction now counts all
+three permission phrases and requires a total of one; rejects rather than rewrites contradictory operation
+state; uses identical inert remote bytes with no listener through the shared first status and starts live probes
+only after that status in full-proof mode; and retains exact child, witness and guard handles/promises so cleanup
+kills/releases and boundedly proves terminal state before root deletion. Any unresolved owned resource or
+cleanup error preserves the fixture. Focused Omen tests pass 33/33, including repeated/mixed permission phrases,
+contradictory lifecycle rejection, no-listener/no-successor ordering and terminal-before-delete source gates.
+Fresh exact-byte review is required before commit or execution.
+
+Fresh current-byte re-review returned GO with P0=0/P1=0. The reviewer independently reproduced 33/33 focused
+Omen checks, 15/15 roadmap checks, four Node syntax checks and a clean diff check, and confirmed every prior
+finding closed. No actual operation ran during review. These exact bytes may now be source-committed before the
+single admitted diagnostic.
+
 Git acceptance is paused at this new stop. The model campaign remains closed and unaffected.

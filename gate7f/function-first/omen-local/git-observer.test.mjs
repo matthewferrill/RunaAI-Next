@@ -6,7 +6,7 @@ import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { createConfigFromPolicy } from "@microsoft/mxc-sdk";
-import { fixedArguments, inspectRepositoryConfig, OmenGitObserver, sanitizeRemoteUrl,
+import { classifyGitFatal, fixedArguments, inspectRepositoryConfig, OmenGitObserver, sanitizeRemoteUrl,
   structuredResult } from "./git-observer.mjs";
 
 const POLICY_TEMPLATE_SHA256 = "aadd3371cf626bf7bf09a6c019a6c52efaaf08df4054e9457966c638491ecf40";
@@ -366,6 +366,47 @@ test("output termination is bounded and raw stderr never crosses the diagnostic 
   assert.equal(failure.code, "omen-git-process-failed");
   assert.equal(failure.stderrBytes, secret.length);
   assert.equal(failure.stderrSha256, createHash("sha256").update(secret).digest("hex"));
+  assert.equal(failure.failureKind, "unknown");
   assert.equal(Object.hasOwn(failure, "diagnostic"), false);
   assert.doesNotMatch(JSON.stringify(failure), /private path|token/u);
+  const unexpected = await makeObserver(() => new ControlledChild({ stderr: secret, exitCode: 0 }))
+    .observe("root-1", "status").then(() => null, error => error);
+  assert.equal(unexpected.code, "omen-git-unexpected-stderr");
+  assert.equal(unexpected.failureKind, "unknown");
+  assert.doesNotMatch(JSON.stringify(unexpected), /private path|token/u);
+});
+
+test("Git fatal classifier publishes only fixed whole-buffer categories", () => {
+  const privatePath = "C:\\Users\\private-owner\\owned-repository";
+  const cases = [
+    [`fatal: detected dubious ownership in repository at '${privatePath}'\n`, "dubious-ownership"],
+    [`fatal: detected dubious ownership in repository at '${privatePath}'\nTo add an exception for this directory, call:\n\n\tgit config --global --add safe.directory '${privatePath}'\n`, "dubious-ownership"],
+    [`fatal: detected dubious ownership in repository at '${privatePath}'\n'${privatePath}' is on a file system that does not record ownership\nTo add an exception for this directory, call:\n\n\tgit config --global --add safe.directory '${privatePath}'\n`, "dubious-ownership"],
+    ["fatal: not a git repository (or any of the parent directories): .git\n", "repository-not-found"],
+    ["fatal: Unable to read current working directory: Access is denied\n", "working-directory"],
+    ["fatal: unable to read config file C:/private/config: Permission denied\n", "configuration"],
+    ["fatal: object abcdef cannot be read\n", "index-or-object-read"],
+    ["fatal: unknown option `unsafe'\n", "option-or-usage"],
+    ["unknown option: unsafe\nusage: git status [<options>]\n\t--short\tshow status\n", "option-or-usage"],
+    ["fatal: cannot open C:/private/index: Permission denied\n", "permission-denied"],
+  ];
+  for (const [value, expected] of cases) assert.equal(classifyGitFatal(Buffer.from(value)), expected);
+});
+
+test("Git fatal classifier fails closed for malformed, ambiguous, or near-miss private text", () => {
+  const privatePath = "C:\\Users\\private-owner\\secret-token";
+  const values = [
+    Buffer.from([]), Buffer.from([0xff]), Buffer.from("fatal: bad object abc"),
+    Buffer.from("fatal: bad object abc\r"), Buffer.from("fatal: bad object abc\rbare\n"),
+    Buffer.from("fatal: bad object abc\nextra\n"), Buffer.from("fatal: bad object abc\0\n"),
+    Buffer.from(`fatal: detected dubious ownership in repository at '${privatePath}'\nTo add an exception for this directory, call:\n\n git config --global --add safe.directory '${privatePath}'\n`),
+    Buffer.from(`fatal: detected dubious ownership in repository at '${privatePath}'\nTo add an exception for this directory, call:\n\n\tgit config --global --add safe.directory 'C:\\different'\n`),
+    Buffer.from(`fatal: detected dubious ownership in repository at '${privatePath}'\nfatal: cannot open ${privatePath}: Permission denied\n`),
+    Buffer.from("fatal: cannot open index: Permission denied; Access is denied\n"),
+    Buffer.from("fatal: Permission denied because Permission denied\n"),
+    Buffer.from(`${"x".repeat(8_193)}\n`), Buffer.from(`${"x\n".repeat(17)}`),
+  ];
+  for (const value of values) assert.equal(classifyGitFatal(value), "unknown");
+  const publicError = { errorCode: "omen-git-process-failed", failureKind: classifyGitFatal(values[8]) };
+  assert.doesNotMatch(JSON.stringify(publicError), /private-owner|secret-token|different/u);
 });

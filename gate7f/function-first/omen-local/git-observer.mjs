@@ -136,6 +136,54 @@ function decodeUtf8(bytes, code) {
   catch { throw coded(code); }
 }
 
+const GIT_FATAL_KINDS = Object.freeze(["dubious-ownership", "repository-not-found", "working-directory",
+  "configuration", "index-or-object-read", "option-or-usage", "permission-denied", "unknown"]);
+
+function classifyDubiousOwnership(text) {
+  const first = /^fatal: detected dubious ownership in repository at '([^'\n]+)'\n$/u.exec(text);
+  if (first) return true;
+  const advice = /^fatal: detected dubious ownership in repository at '([^'\n]+)'\nTo add an exception for this directory, call:\n\n\tgit config --global --add safe\.directory '([^'\n]+)'\n$/u.exec(text);
+  if (advice) return advice[1] === advice[2];
+  const noOwnership = /^fatal: detected dubious ownership in repository at '([^'\n]+)'\n'([^'\n]+)' is on a file system that does not record ownership\nTo add an exception for this directory, call:\n\n\tgit config --global --add safe\.directory '([^'\n]+)'\n$/u.exec(text);
+  return Boolean(noOwnership && noOwnership[1] === noOwnership[2] && noOwnership[1] === noOwnership[3]);
+}
+
+export function classifyGitFatal(stderr) {
+  try {
+    if (!Buffer.isBuffer(stderr) || stderr.length < 1 || stderr.length > OUTPUT_LIMIT) return "unknown";
+    const decoded = new TextDecoder("utf-8", { fatal: true, ignoreBOM: true }).decode(stderr);
+    if (/\r(?!\n)/u.test(decoded)) return "unknown";
+    const text = decoded.replaceAll("\r\n", "\n");
+    if (!text.endsWith("\n") || /[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/u.test(text)) return "unknown";
+    const lines = text.slice(0, -1).split("\n");
+    if (lines.length > 16 || lines.some(line => line.length > 8_192)) return "unknown";
+
+    const repositoryNotFound = /^(?:fatal: not a git repository: [^\n]+|fatal: not a git repository \(or any of the parent directories\): [^\n]+|fatal: not a git repository \(or any parent up to mount point [^\n]+)\n$/u.test(text);
+    const workingDirectory = /^(?:fatal: Unable to read current working directory[^\n]*|fatal: cannot chdir to [^\n]+|fatal: cannot come back to cwd[^\n]*)\n$/u.test(text);
+    const configuration = /^(?:fatal: unable to read config file [^\n]+|fatal: bad config line [^\n]+|fatal: error processing config file\(s\)(?:: [^\n]+)?)\n$/u.test(text);
+    const indexOrObject = /^(?:fatal: index file corrupt[^\n]*|fatal: unable to read index file[^\n]*|fatal: failed to read object[^\n]*|fatal: bad object[^\n]*|fatal: invalid object[^\n]*|fatal: object [^\n]+ cannot be read)\n$/u.test(text);
+    const optionOrUsage = /^(?:fatal: unknown option[^\n]*|fatal: invalid option[^\n]*|error: unknown option[^\n]*)\n$/u.test(text)
+      || /^unknown option: [^\n]+\nusage: git [^\n]+\n(?:[\t\u0020-\u007e]*\n)*$/u.test(text);
+    const excludedPermissionPrefix = /^(?:fatal: detected dubious ownership in repository at '|fatal: not a git repository: |fatal: not a git repository \(or any of the parent directories\): |fatal: not a git repository \(or any parent up to mount point |fatal: Unable to read current working directory|fatal: cannot chdir to |fatal: cannot come back to cwd|fatal: unable to read config file |fatal: bad config line |fatal: error processing config file\(s\)|fatal: index file corrupt|fatal: unable to read index file|fatal: failed to read object|fatal: bad object|fatal: invalid object|fatal: object |fatal: unknown option|fatal: invalid option|error: unknown option|unknown option: )/u.test(text);
+    const permissionPhraseCount = ["Permission denied", "Access is denied", "Operation not permitted"]
+      .reduce((total, phrase) => total + text.split(phrase).length - 1, 0);
+    const permissionDenied = !excludedPermissionPrefix && permissionPhraseCount === 1
+      && /^fatal: [^\n]*(?:Permission denied|Access is denied|Operation not permitted)[^\n]*\n$/u.test(text);
+    const matches = [
+      ["dubious-ownership", classifyDubiousOwnership(text)],
+      ["repository-not-found", repositoryNotFound],
+      ["working-directory", workingDirectory],
+      ["configuration", configuration],
+      ["index-or-object-read", indexOrObject],
+      ["option-or-usage", optionOrUsage],
+      ["permission-denied", permissionDenied],
+    ].filter(([, matched]) => matched).map(([kind]) => kind);
+    return matches.length === 1 ? matches[0] : "unknown";
+  } catch {
+    return "unknown";
+  }
+}
+
 function safeField(value, maximum = 4_096, { tabs = false } = {}) {
   if (typeof value !== "string" || value.length > maximum
       || (tabs ? /[\u0000-\u0008\u000a-\u001f\u007f]/u : /[\u0000-\u001f\u007f]/u).test(value)) {
@@ -518,6 +566,11 @@ export class OmenGitObserver {
         if (outcome.exitCode !== 0) throw Object.assign(coded("omen-git-process-failed"), {
           exitCode: outcome.exitCode, stderrBytes: stderr.length,
           stderrSha256: createHash("sha256").update(stderr).digest("hex"),
+          failureKind: classifyGitFatal(stderr),
+        });
+        if (stderr.length !== 0) throw Object.assign(coded("omen-git-unexpected-stderr"), {
+          stderrBytes: stderr.length, stderrSha256: createHash("sha256").update(stderr).digest("hex"),
+          failureKind: "unknown",
         });
         const result = structuredResult(operation, stdout);
         response = Object.freeze({ schemaVersion: "runa-omen-git-result/v1", rootId, operation,

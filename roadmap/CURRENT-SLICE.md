@@ -174,6 +174,22 @@ The next review reduced the design stop to P0=0/P1=1 because the safe-directory 
 undefined token. The RCA now gives three literal LF-framed grammars with exact blank line, one-tab indentation,
 quoted byte-identical private path reuse and `unknown` for every deviation. No diagnostic ran; fresh design GO
 remains required before implementation.
+Fresh design review returned GO with P0=0/P1=0 and doc-only commit `2dbe284` sealed the contract. The classifier,
+exact completed/error schemas and one-status mode in the shared actual proof fixture are implemented but
+unexecuted. That mode records exactly one wrapper, two typed witnesses and one native guard, branches before
+every successor/network arm, and requires unchanged repository bytes plus terminal cleanup. Focused Omen tests
+pass 33/33; four Node syntax checks and `git diff --check` pass. Fresh independent implementation review and a
+source commit remain mandatory before the single admitted diagnostic.
+The first implementation review returned NO-GO at P0=0/P1=4 for non-exact permission phrase counting,
+collapsed contradictory operation state, live diagnostic listeners and delete-before-terminal cleanup. No
+actual operation ran. The correction now requires exactly one permission phrase, rejects contradictory state,
+uses inert identical remote bytes with no listener through the shared first status, defers full-proof listeners
+until after that status, and retains/terminates/awaits exact wrapper, witness and guard resources before root
+deletion. Unresolved cleanup preserves the fixture. Focused Omen tests pass 33/33; fresh independent review,
+commit and then the one admitted diagnostic remain mandatory.
+Fresh current-byte review returned GO with P0=0/P1=0 and independently reproduced 33/33 focused checks,
+15/15 roadmap checks, four syntax checks and a clean diff check. No actual operation ran. These exact bytes may
+now be committed before the single admitted diagnostic; acceptance remains paused.
 
 Workspace baseline checkpoint: see
 `gate7f/function-first/M1-S2-WORKSPACE-BASELINE-IMPLEMENTATION-RESULTS-2026-09-02.md` for the accepted

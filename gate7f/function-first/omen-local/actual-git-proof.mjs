@@ -9,8 +9,11 @@ import { once } from "node:events";
 import { createConfigFromPolicy, getPlatformSupport, spawnSandboxFromConfig } from "@microsoft/mxc-sdk";
 import { canonicalJson } from "../local-context-contract.mjs";
 import { createContainedGitConfig, fixedArguments, OmenGitObserver, policyTemplateDigest } from "./git-observer.mjs";
+import { completedGitFatalDiagnostic, EMPTY_SHA256, failedGitFatalDiagnostic }
+  from "./git-fatal-diagnostic-contract.mjs";
 import { OmenRootStore, WindowsNativeBridge } from "./native-bridge.mjs";
 import { loadOmenReleasePins } from "./release-pins.mjs";
+import { startRepositoryWitness, startUiWitness } from "./windows-witness.mjs";
 
 async function waitForFile(path, maximumMs = 5_000) {
   const deadline = Date.now() + maximumMs;
@@ -26,6 +29,13 @@ async function waitForExit(child, maximumMs = 5_000) {
     child.once("error", fail); child.once("close", finish);
     timer = setTimeout(() => { try { child.kill(); } catch {} finish(null); }, maximumMs);
   });
+}
+
+async function requireTerminal(promise, maximumMs, code) {
+  let timer;
+  return Promise.race([promise, new Promise((_done, fail) => {
+    timer = setTimeout(() => fail(Object.assign(new Error(code), { code })), maximumMs);
+  })]).finally(() => clearTimeout(timer));
 }
 
 async function startProbe(host, name) {
@@ -71,7 +81,7 @@ async function treeDigest(root) {
   await visit(root); return hash.digest("hex");
 }
 
-export async function runActualOmenGitProof({ userProfilePath = homedir() } = {}) {
+export async function runActualOmenGitProof({ userProfilePath = homedir(), fatalDiagnostic = false } = {}) {
   const pins = await loadOmenReleasePins();
   for (const path of [pins.powershellPath, userProfilePath, pins.gitPath, pins.gitInstallRoot,
     pins.gitSystemConfigPath, pins.gitSystemAttributesPath, pins.nativeScriptPath,
@@ -103,6 +113,8 @@ export async function runActualOmenGitProof({ userProfilePath = homedir() } = {}
     statePath = join(root, "state", "roots.dpapi");
   const checks = {};
   const probes = [];
+  const guardAudits = [], childAudits = [], witnessAudits = [];
+  let diagnosticObservation = null, diagnosticRepositoryUnchanged = false, diagnosticOperationCount = 0;
   let failure, stage = "create-owned-repository", activeMonitor = null, activeMonitorExit = null,
     activeAuditStop = null;
   const git = args => {
@@ -122,32 +134,32 @@ export async function runActualOmenGitProof({ userProfilePath = homedir() } = {}
     const lanAddress = Object.values(networkInterfaces()).flat().find(value =>
       value?.family === "IPv4" && value.internal === false)?.address;
     if (!lanAddress) throw Object.assign(new Error("omen-lan-probe-address-missing"), { code: "omen-lan-probe-address-missing" });
-    probes.push(await startProbe("127.0.0.1", "loopback"));
-    probes.push(await startProbe(lanAddress, "lan"));
     await writeFile(join(repository, ".gitmodules"), `[submodule "probe"]\n\tpath = vendor/probe\n`
-      + `\turl = http://127.0.0.1:${probes[0].port}/runa/probe.git\n`);
+      + "\turl = http://127.0.0.1:1/runa/probe.git\n");
     git(["add", "--", ".gitmodules"]);
     git(["update-index", "--add", "--cacheinfo", `160000,${initialCommit},vendor/probe`]);
     git(["-c", "user.name=Runa actual test", "-c", "user.email=runa@example.invalid", "commit", "-m", "Add inert submodule marker"]);
     const commit = git(["rev-parse", "HEAD"]);
     git(["remote", "add", "origin", "https://fixture-user:fixture-secret@example.invalid/runa/owned.git"]);
-    git(["remote", "add", "loopback-probe", `http://127.0.0.1:${probes[0].port}/runa/probe.git`]);
-    git(["remote", "add", "lan-probe", `http://${lanAddress}:${probes[1].port}/runa/probe.git`]);
+    git(["remote", "add", "loopback-probe", "http://127.0.0.1:1/runa/probe.git"]);
+    git(["remote", "add", "lan-probe", `http://${lanAddress}:1/runa/probe.git`]);
     git(["remote", "add", "public-probe", "https://github.com/octocat/Hello-World.git"]);
     await writeFile(join(repository, "notes.txt"), "initial\nworking change\n");
     const bridge = new WindowsNativeBridge({ powershellPath: resolve(pins.powershellPath),
       scriptPath: pins.nativeScriptPath, expectedScriptSha256: pins.nativeScriptSha256,
       expectedPowerShellSha256: pins.powershellSha256 });
-    const guardAudits = [], holdGit = bridge.holdGit.bind(bridge);
+    const holdGit = bridge.holdGit.bind(bridge);
     bridge.holdGit = async (...args) => {
       const guard = await holdGit(...args);
       const audit = { processId: guard.processId, executablePath: guard.executablePath,
-        executableSha256: guard.executableSha256, released: false };
+        executableSha256: guard.executableSha256, released: false, releasePromise: null };
       guardAudits.push(audit);
-      return Object.freeze({ ...guard, release: async () => {
-        await guard.release();
+      audit.release = async () => {
+        audit.releasePromise ??= guard.release();
+        await audit.releasePromise;
         try { process.kill(guard.processId, 0); } catch { audit.released = true; }
-      } });
+      };
+      return Object.freeze({ ...guard, release: audit.release });
     };
     const roots = new OmenRootStore({ statePath, nativeBridge: bridge, userProfilePath: resolve(userProfilePath),
       protectedSystemPaths: ["C:\\Windows", "C:\\Program Files", "C:\\Program Files (x86)", "C:\\ProgramData"] });
@@ -162,6 +174,11 @@ export async function runActualOmenGitProof({ userProfilePath = homedir() } = {}
       spawnSandboxFromConfig: (config, options, cwd) => {
         capturedPolicies.push({ config: JSON.parse(JSON.stringify(config)), options: { ...options }, cwd });
         const child = spawnSandboxFromConfig(config, options, cwd);
+        let resolveTerminal;
+        const audit = { child, terminal: false,
+          terminalPromise: new Promise(done => { resolveTerminal = done; }) };
+        childAudits.push(audit);
+        child.once("close", exitCode => { audit.terminal = true; audit.exitCode = exitCode; resolveTerminal(exitCode); });
         if (attemptIdentitySwap) {
           attemptIdentitySwap = false;
           try { renameSync(repository, `${repository}-swap`); renameSync(`${repository}-swap`, repository); }
@@ -188,6 +205,15 @@ export async function runActualOmenGitProof({ userProfilePath = homedir() } = {}
         if (processAuditRootPidPath) writeFileSync(processAuditRootPidPath, String(child.pid), { flag: "wx" });
         return child;
       } };
+    const trackedWitness = (kind, factory) => options => {
+      const witness = factory(options), audit = { kind, witness, terminal: false };
+      witnessAudits.push(audit);
+      audit.terminalPromise = Promise.resolve(witness.exit).then(exitCode => {
+        audit.terminal = true; audit.exitCode = exitCode; return exitCode;
+      });
+      audit.terminalPromise.catch(() => {});
+      return witness;
+    };
     const observer = new OmenGitObserver({ rootStore: roots, nativeBridge: bridge, gitPath: pins.gitPath,
       expectedGitSha256: pins.gitSha256, gitInstallRoot: pins.gitInstallRoot,
       mxcExecutorPath: pins.mxcExecutorPath, expectedMxcSha256: pins.mxcExecutorSha256,
@@ -200,7 +226,8 @@ export async function runActualOmenGitProof({ userProfilePath = homedir() } = {}
       repositoryWitnessPath: pins.repositoryWitnessPath,
       expectedRepositoryWitnessSha256: pins.repositoryWitnessSha256,
       uiWitnessPath: pins.uiWitnessPath, expectedUiWitnessSha256: pins.uiWitnessSha256,
-      sdk });
+      repositoryWitnessFactory: trackedWitness("repository", startRepositoryWitness),
+      uiWitnessFactory: trackedWitness("ui", startUiWitness), sdk });
     const unchanged = async (operation, input = {}) => {
       stage = `contained-git-${operation}`;
       const before = await treeDigest(repository);
@@ -209,7 +236,28 @@ export async function runActualOmenGitProof({ userProfilePath = homedir() } = {}
       checks[`repositoryUnchangedAfter${operation[0].toUpperCase()}${operation.slice(1)}`] = before === after;
       return result;
     };
+    if (fatalDiagnostic) {
+      stage = "contained-git-status";
+      const before = await treeDigest(repository);
+      diagnosticOperationCount = 1;
+      let observationError = null;
+      try {
+        await observer.observe(candidate.rootId, "status");
+        diagnosticObservation = { outcome: "status-succeeded", exitCode: 0, failureKind: null,
+          stderrBytes: 0, stderrSha256: EMPTY_SHA256 };
+      } catch (error) {
+        if (error?.code === "omen-git-process-failed") {
+          diagnosticObservation = { outcome: "git-fatal", exitCode: error.exitCode,
+            failureKind: error.failureKind, stderrBytes: error.stderrBytes, stderrSha256: error.stderrSha256 };
+        } else observationError = error;
+      }
+      const after = await treeDigest(repository);
+      diagnosticRepositoryUnchanged = before === after;
+      if (observationError) throw observationError;
+    } else {
     const status = await unchanged("status");
+    probes.push(await startProbe("127.0.0.1", "loopback"));
+    probes.push(await startProbe(lanAddress, "lan"));
     const log = await unchanged("log");
     const diffstat = await unchanged("diffstat");
     const branches = await unchanged("branches");
@@ -458,21 +506,88 @@ export async function runActualOmenGitProof({ userProfilePath = homedir() } = {}
       && resolve(guard.executablePath) === resolve(pins.powershellPath)
       && guard.executableSha256 === pins.powershellSha256);
     checks.zeroProbeConnections = probes.every(probe => probe.connections() === 0);
+    }
   } catch (error) { error.stage ??= stage; failure = error; }
   finally {
+    let cleanupError = null;
+    const retainCleanupError = error => { cleanupError ??= error; };
     if (activeMonitor) {
-      try { if (activeAuditStop && !existsSync(activeAuditStop)) await writeFile(activeAuditStop, "stop"); } catch {}
-      try { await activeMonitorExit; } catch { try { activeMonitor.kill(); } catch {} }
+      try { if (activeAuditStop && !existsSync(activeAuditStop)) await writeFile(activeAuditStop, "stop"); }
+      catch (error) { retainCleanupError(error); }
+      try { await activeMonitorExit; }
+      catch (error) { try { activeMonitor.kill(); } catch {} retainCleanupError(error); }
     }
-    await Promise.all(probes.map(probe => new Promise(done => probe.server.close(done))));
-    if (resolve(root) !== resolve(exactRoot) || !resolve(root).startsWith(resolve(tmpdir()) + sep)
-        || !root.includes("runa-m1-omen-git-")) throw new Error("omen-git-cleanup-root-invalid");
-    await rm(root, { recursive: true, force: true, maxRetries: 3, retryDelay: 100 });
-    checks.ownedFixtureRemoved = !existsSync(root);
+    for (const audit of childAudits) {
+      if (audit.terminal) continue;
+      try { audit.child.kill(); } catch {}
+      try { await requireTerminal(audit.terminalPromise, 5_000, "omen-git-cleanup-child-terminal-missed"); }
+      catch (error) { retainCleanupError(error); }
+    }
+    for (const audit of witnessAudits) {
+      if (audit.terminal) continue;
+      try { audit.witness.terminate(); } catch {}
+      try { await requireTerminal(audit.terminalPromise, 2_000, "omen-git-cleanup-witness-terminal-missed"); }
+      catch (error) { retainCleanupError(error); }
+    }
+    for (const audit of guardAudits) {
+      if (audit.released) continue;
+      try { await requireTerminal(audit.release(), 5_000, "omen-git-cleanup-guard-terminal-missed"); }
+      catch (error) { retainCleanupError(error); }
+    }
+    try { await Promise.all(probes.map(probe => new Promise(done => probe.server.close(done)))); }
+    catch (error) { retainCleanupError(error); }
+    const resourcesTerminal = childAudits.every(audit => audit.terminal)
+      && witnessAudits.every(audit => audit.terminal) && guardAudits.every(audit => audit.released);
+    if (!resourcesTerminal) retainCleanupError(Object.assign(new Error("omen-git-owned-resource-terminal-missed"),
+      { code: "omen-git-owned-resource-terminal-missed" }));
+    try {
+      if (resolve(root) !== resolve(exactRoot) || !resolve(root).startsWith(resolve(tmpdir()) + sep)
+          || !root.includes("runa-m1-omen-git-")) {
+        throw Object.assign(new Error("omen-git-cleanup-root-invalid"), { code: "omen-git-cleanup-root-invalid" });
+      }
+      if (!cleanupError) {
+        await rm(root, { recursive: true, force: true, maxRetries: 3, retryDelay: 100 });
+        checks.ownedFixtureRemoved = !existsSync(root);
+      }
+    } catch (error) { retainCleanupError(error); }
+    if (cleanupError) {
+      stage = "cleanup";
+      cleanupError.stage = "cleanup";
+      failure ??= cleanupError;
+    }
+  }
+  const diagnosticState = { stage, operationCount: diagnosticOperationCount, successorStarted: false,
+    repositoryUnchanged: diagnosticRepositoryUnchanged,
+    wrapperCount: childAudits.length, witnessCount: witnessAudits.length, guardCount: guardAudits.length,
+    wrapperTerminal: childAudits.every(audit => audit.terminal),
+    witnessesTerminal: witnessAudits.every(audit => audit.terminal),
+    guardReleased: guardAudits.every(audit => audit.released),
+    fixtureRemoved: checks.ownedFixtureRemoved === true,
+    fatalObservation: diagnosticObservation?.outcome === "git-fatal" ? diagnosticObservation : null };
+  if (fatalDiagnostic) {
+    if (failure) throw Object.assign(failure, { diagnosticState });
+    try { return completedGitFatalDiagnostic(diagnosticObservation, diagnosticState); }
+    catch (error) { throw Object.assign(error, { diagnosticState: { ...diagnosticState, stage: "publication" } }); }
   }
   if (failure) throw failure;
   return { schemaVersion: "runaai-m1-omen-git-proof/v1", passed: Object.values(checks).every(Boolean), checks,
     privateValuesIncluded: false, productionChanged: false, modelCalled: false };
+}
+
+export async function runActualOmenGitFatalDiagnostic(options = {}) {
+  try { return await runActualOmenGitProof({ ...options, fatalDiagnostic: true }); }
+  catch (error) {
+    const state = error?.diagnosticState ?? { stage: "preflight", operationCount: 0, successorStarted: false,
+      repositoryUnchanged: false, wrapperTerminal: false, witnessesTerminal: false, guardReleased: false,
+      fixtureRemoved: false };
+    let publicRecord;
+    try { publicRecord = failedGitFatalDiagnostic(error, state); }
+    catch { throw Object.assign(new Error("diagnostic-publication-refused"), { code: "diagnostic-publication-refused" }); }
+    throw Object.assign(new Error("runaai-m1-omen-git-fatal-diagnostic-failed"), {
+      code: "runaai-m1-omen-git-fatal-diagnostic-failed",
+      publicRecord,
+    });
+  }
 }
 
 if (process.argv[1] && resolve(process.argv[1]) === resolve(import.meta.filename)) {

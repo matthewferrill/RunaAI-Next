@@ -244,6 +244,28 @@ checks and fresh independent implementation re-review still gate the source comm
 Fresh independent implementation re-review returned GO with P0=0/P1=0 and reproduced 44/44 focused checks,
 six syntax checks, 15/15 roadmap checks and the clean diff. No actual operation ran. A source commit is now the
 sole remaining gate before exactly one permission-boundary diagnostic execution.
+Commit `acd2eb8` sealed the implementation. Its one actual run stopped on the first `branches` verb with the
+same exit-128, 50-byte `permission-denied` hash as the prior `status`; no later verb ran. Repository/lifecycle/
+cleanup passed and the read-only postcheck found zero roots/helpers. Native exact-argv equivalence passes on a
+separate fixture outside MXC, making MXC visibility or a containment/fixture interaction the leading hypothesis,
+not a proven resource-level cause; the denied resource remains private/unknown. Acceptance is paused.
+Read-only host-prerequisite inspection then found the omitted gate: MXC's null-device verifier passes, but `C:\`
+lacks both documented non-inheriting AppContainer read-attribute grants; the current token is not elevated. This
+confirmed harness/deployment readiness defect is the leading Git-fatal cause, though the exact Git access remains
+unpublished. Denial capture is paused. The frozen correction pins an aggregate-only prerequisite reader, tests/
+reviews/commits it, performs reversible vendor `prepare-system-drive` once through UAC, verifies both root grants
+plus null-device readiness, then admits one post-repair `branches` resume. No ACL has changed yet.
+Independent design review stopped that first correction at P0=0/P1=3. The revised frozen design now defines
+exact fail-closed reader/transition schemas, immediate full-descriptor drift and expected-delta checks, bounded
+one-attempt preparation/rollback, a protected durable pre-state journal, full restoration proof, and deployment-
+owned removal. Fresh design re-review is required before implementation; Git and ACL mutation remain paused.
+Subsequent review converged those lifecycle controls, but a current upstream Microsoft high-impact bug then
+invalidated the vendor system-drive writer: its `SetNamedSecurityInfoW` path can propagate ACL normalization into
+descendants, and the proposed fix is unmerged. Vendor prepare/unprepare is now prohibited. The superseding design
+uses a pinned Runa-owned root-only `SetFileSecurityW` transition, order-preserving DACL bytes, an actual disposable
+target-only API probe, the same durable at-most-once journal, and a new independent review before implementation.
+Fresh independent review returned GO with P0=0/P1=0. Implementation, its deterministic/adversarial test matrix,
+fresh exact-byte review and a source commit now gate the one elevated execution; no ACL has changed.
 
 Workspace baseline checkpoint: see
 `gate7f/function-first/M1-S2-WORKSPACE-BASELINE-IMPLEMENTATION-RESULTS-2026-09-02.md` for the accepted

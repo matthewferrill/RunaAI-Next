@@ -752,3 +752,380 @@ diff checks and fresh independent exact-byte implementation re-review remain man
 Fresh independent implementation re-review returned GO with P0=0/P1=0 and independently reproduced 44/44
 focused checks, six syntax checks, 15/15 roadmap checks and the clean diff. No actual operation ran. A source
 commit is now the sole remaining gate before exactly one permission-boundary diagnostic execution.
+
+## Permission-boundary earliest-verb result
+
+Commit `acd2eb8` sealed the reviewed diagnostic implementation. Its one permitted actual execution stopped at
+the first planned verb, `branches`; `show`, `diffstat` and `status` did not start. The completed record was
+`outcome:"first-fatal"`, operationCount 1, exit 128, `failureKind:"permission-denied"`, stderrBytes 50 and
+stderr SHA-256 `25796725b6f5b304af0f76f2361e36b924b4a4e74bbe8b36887a1af9d84b329a`. The single attempt and top-level
+record both proved the repository unchanged; one wrapper and guard and two witnesses were terminal/released;
+the fixture was removed; and successor/private-value/production-change/model-call booleans were false. A
+separate read-only postcheck returned `ownedRoots:0` and `matchingHelpers:0`.
+
+This is the same exit/category/byte/hash tuple produced by the earlier single `status`, now on the narrower
+`for-each-ref` branches verb. The deterministic native equivalence gate executes the same pinned Git binary,
+argv shapes and runtime cwd outside MXC on a separate deterministic repository and passes all five public verbs
+without stderr or repository change. That contrast makes an MXC/AppContainer visibility or containment/fixture
+interaction the leading hypothesis, but it does not exclude fixture-specific repository/configuration behavior
+and does not prove the denied resource. Git runtime/config, common repository metadata and other process
+prerequisites remain possible. Adding a broad user/profile/system root is not an acceptable fix.
+
+Acceptance remains stopped. The next method must use the pinned SDK's deny-and-record capability in `block`
+mode against exactly one `branches` operation so the access remains denied while a disposable private report is
+classified into fixed resource categories. The design must keep ETL retention false, place output only in an
+owned disposable directory, publish no path/text/PID and remove the report with the fixture after bounded
+terminal proof. Its exact report parser, privacy contract, support preflight, lifecycle and public schema require
+deterministic adversarial tests, independent review and a source commit before one execution. No further actual
+Git, full proof, browser, network, model or production operation is authorized from this result.
+
+The first independent review of this result/RCA returned NO-GO at P0=0/P1=1 because the native equivalence gate
+uses a separate fixture and therefore could not prove the stated MXC causal class. The bounded comparison and
+leading-hypothesis wording above closes that overclaim. Fresh review remains required before commit.
+
+Fresh independent re-review returned GO with P0=0/P1=0 and reproduced the clean diff and 15/15 roadmap checks.
+No actual operation ran during review.
+
+## Host-prerequisite root cause and correction design
+
+The installed Microsoft-signed `wxc-host-prep.exe` is version 0.8.0, SHA-256
+`a9b8b14a11a1c5888641297c26abca547c2afa4435085c03ccfebd1deface310`. The pinned SDK documentation requires
+AppContainer access preparation for both the Windows null device and the system-drive root. One read-only vendor
+`verify-null-device` returned exit 0, proving that descriptor matches. An aggregate-only ACL readback of `C:\`
+then found neither required non-inheriting read-attribute grant: `ALL APPLICATION PACKAGES` (`S-1-15-2-1`) and
+`ALL RESTRICTED APPLICATION PACKAGES` (`S-1-15-2-2`) were both false. The current token is not elevated.
+
+This confirms a host-readiness defect that the RunaAI preflight omitted. Microsoft documents that AppContainer
+processes can fail with `ERROR_ACCESS_DENIED` during startup when these system-drive grants are absent. That is a
+sufficient reason to reject the host as ready and is the leading cause of the Git fatal, but the aggregate public
+record still does not prove which Git access produced the exact 50-byte line. The previously proposed denial-
+capture run is paused: a known missing prerequisite must be corrected and verified first, avoiding another
+unnecessary diagnostic and its additional ETW/WPR support risk.
+
+Freeze the correction as follows before changing the host:
+
+1. Pin the signed 0.8.0 host-prep binary, a dedicated aggregate-only prerequisite reader and the privileged
+   transition coordinator, with each path and SHA-256 in the release manifest. The reader validates exactly the
+   two system-drive SID/right/non-inheritance tuples with no conflicting explicit ACE for either target SID and invokes only the
+   pinned host-prep binary with `verify-null-device` and no optional flags. A completed record has keys in this exact order:
+   `schemaVersion`, `outcome`, `systemDrivePrepared`, `nullDevicePrepared`, `ready`,
+   `privateValuesIncluded`. The literals are `schemaVersion:"runa-omen-host-prerequisites/v1"` and
+   `outcome:"completed"`; the next three values are booleans, `ready` must equal the conjunction of the two
+   prepared booleans, and `privateValuesIncluded` must be false.
+2. A reader error has keys in this exact order: `schemaVersion`, `outcome`, `stage`, `code`, `childExitCode`,
+   `childOutputBytes`, `privateValuesIncluded`. Its schema literal is the same, `outcome` is `error`, `stage` is
+   one of `pins`, `token`, `system-drive`, `null-device` or `result`; `code` is one of `pin-invalid`, `pin-drift`,
+   `token-not-elevated`, `acl-read-failed`, `acl-shape-invalid`, `child-start-failed`, `child-timeout`,
+   `child-exit-invalid`, `child-output-unexpected`, `child-terminal-unresolved` or `result-invalid`.
+   Stage/code pairs are exact: pins permits pin-invalid or pin-drift; token permits token-not-elevated;
+   system-drive permits acl-read-failed or acl-shape-invalid; null-device permits child-start-failed,
+   child-timeout, child-exit-invalid, child-output-unexpected or child-terminal-unresolved; result permits only
+   result-invalid. `childExitCode` is null before child start, on start failure or unresolved termination, and
+   otherwise is the terminal child's normalized unsigned 32-bit value from 0 through 4294967295;
+   `childOutputBytes` is null before child start and otherwise an integer from 0 through 8192. Raw child output
+   is never parsed or published and cannot affect the readiness decision; bounded unstructured status output is
+   captured privately and discarded. Crossing the 8192-byte combined stdout/stderr bound terminates the child and
+   produces `child-output-unexpected`; a fresh kill-on-close, non-breakaway job must prove terminal/no-survivor
+   status within five seconds or the fixed error is `child-terminal-unresolved`. The child timeout is 30 seconds.
+   Exit 0 means null prepared, exit 1 means null not prepared, and every other terminal exit produces
+   `child-exit-invalid`. Actual use requires an elevated token and otherwise returns `token-not-elevated`; the
+   post-preparation read executes inside the already elevated coordinator, so it creates no second UAC prompt.
+3. Unit/adversarial tests exercise exact key order/literals, conjunction and false-private invariants, every fixed
+   error, missing/extra/elevated/unexpected ACE shapes, null-device exits 0/1/other, timeout/output bounds, binary/
+   script pin drift and raw ACL/path/text rejection. Coordinator tests additionally cover every phase and crash
+   boundary; mutex busy, abandoned and wrong-security paths; malformed, oversized, truncated, duplicate-key,
+   reparse, hardlink and path-identity journal cases; job assignment before process resume; every terminal and
+   no-survivor result; all pre/post/partial descriptor branches; every phase-write and journal-delete failure;
+   rollback/deprovision exit, timeout and output outcomes; every exact public matrix and redaction invariant; and
+   proof that each stopped path launches zero successor writers. These are deterministic preflight checks, not
+   actual acceptance. The pinned PowerShell parser must pass under Windows PowerShell 5.1. No Git/model/browser/
+   network operation may run from these tests or the reader.
+4. A separate privileged transition coordinator owns the one preparation. Immediately before mutation it must
+   revalidate the exact pinned executable/hash and argv, read the complete canonical system-drive owner/group/
+   DACL, and require the reviewed baseline shape with both target ACEs absent; any partial or drifted starting
+   state stops without mutation. The coordinator first acquires the zero-wait exclusive named mutex
+   `Global\RunaAI-SystemDrivePreparation-v1`, created with protected DACL
+   `D:P(A;;GA;;;SY)(A;;GA;;;BA)`, and holds it until every child and verification handle is terminal. Busy mutex
+   acquisition stops; `WAIT_ABANDONED` always publishes reconciliation-required and starts no child.
+   It opens `C:\ProgramData`, `RunaAI` and `host-state` by native no-reparse directory handles, rejects reparse
+   points/aliases or any parent identity change, and creates the journal with create-new/no-replacement semantics;
+   the temporary and final files must each have one hard link and remain on the held parent volume. It writes the
+   full pre-state, its digest, transaction id, expected post-state and phase to
+   `C:\ProgramData\RunaAI\host-state\system-drive-preparation-v1.json`, flushes file and directory metadata, then
+   atomically renames without replacement before starting the child. The fixed journal file and directories use
+   protected, non-inheriting DACLs granting full control only to local SYSTEM and BUILTIN Administrators. An
+   existing journal must pass the same no-reparse/single-link/path-identity checks and validate exactly. Journal
+   JSON is at most 524288 UTF-8 bytes, rejects BOM, duplicate/unknown/missing keys and trailing data, and has exact
+   ordered keys `schemaVersion`, `transactionId`, `operation`, `phase`, `hostPrepSha256`, `prepareArgv`,
+   `unprepareArgv`, `preDescriptorBase64`, `preDescriptorSha256`, `expectedPostDescriptorBase64`,
+   `expectedPostDescriptorSha256`, `prepareAttempt`, `rollbackAttempt`, `deprovisionAttempt`, `systemDriveState`,
+   `rollbackVerified`. The schema literal is `runa-omen-system-drive-journal/v1`; transactionId is 32 lowercase
+   hexadecimal characters from 16 cryptographic random bytes; operation is prepare or deprovision; hashes are 64
+   lowercase hex characters. The argv arrays are exactly `["prepare-system-drive","--target","C:\\"]` and
+   `["unprepare-system-drive","--target","C:\\"]`. Each attempt has exact ordered keys `started`, `terminal`,
+   `exitCode`, `outputBytes`: the first two are booleans, exitCode is null unless terminal and otherwise uint32,
+   and outputBytes is null unless started and otherwise 0..8192. Descriptor Base64 decodes to 1..131072 bytes.
+   Its canonical binary digest domain is UTF-8 `runa-omen-system-drive-descriptor/v1` plus NUL plus: length-prefixed
+   owner SID bytes, group SID bytes, uint32 DACL control flags, ACE count 0..512, then every length-prefixed raw ACE
+   byte sequence sorted lexicographically; duplicate ACEs remain duplicated. Expected-post bytes are exactly that
+   pre-state plus the two target raw allow ACEs before sorting. Each descriptor SHA-256 covers those domain bytes.
+   The only
+   stable reusable phase is `prepared`, whose current descriptor must equal its expected post-state and which may
+   be consumed only by an explicit `deprovision` operation. Every other preexisting phase requires owner
+   reconciliation and starts no child. Phases are exactly `authorized`, `prepare-started`, `prepare-terminal`,
+   `rollback-started`, `rollback-terminal`, `prepared`, `deprovision-started` and `deprovision-terminal`; each
+   transition is an atomic flushed journal replacement. `prepare-started`, `rollback-started` or
+   `deprovision-started` is durably committed before its corresponding child launch. Authorized permits prepare
+   operation, all attempts false/null, unprepared state and rollback-unverified. Prepare-started changes only its
+   attempt to started/nonterminal and state unknown. Prepare-terminal requires that attempt terminal with exit/
+   output and equality-derived state. Rollback-started additionally requires terminal prepare, rollback started/
+   nonterminal, state unknown and rollback-unverified. Rollback-terminal requires terminal prepare and rollback
+   attempts plus equality-derived state and sets rollbackVerified exactly when state is unprepared. Prepared
+   requires terminal exit-0 in-bounds prepare, exact prepared state, no rollback/deprovision and rollback-unverified.
+   Deprovision-started requires the prior prepared invariants, operation deprovision, and a started/nonterminal
+   deprovision attempt with state unknown. Deprovision-terminal additionally requires terminal exit/output and an
+   equality-derived state. A phase replacement failure before a writer launch starts no child; after any writer
+   may have started it publishes reconciliation-required and starts no successor writer. This deliberately sacrifices
+   automatic crash recovery to preserve at-most-once writes and the no-blind-retry rule. The exact preparation
+   child is the pinned executable with `prepare-system-drive --target C:\`, one attempt, 30-second timeout and
+   8192-byte combined-output cap. Output remains private and is never published.
+5. After the terminal preparation child, the coordinator rereads the complete canonical owner/group/DACL before
+   deciding on rollback. Exact structural equality to the journaled pre-state means no ACL change occurred: it
+   publishes `prepare-failed-no-change`, retains the journal for RCA and starts no rollback writer. Exact equality
+   to expected post-state after exit 0 is success; owner, group, DACL flags, ACE order after canonicalization and
+   every other ACE must be unchanged except the two documented additions. A nonzero exit with exact post-state or
+   any partial/unknown descriptor starts at most one bounded `unprepare-system-drive --target C:\`; an exit-0
+   descriptor mismatch does the same. Rollback then requires full canonical equality to the journaled pre-state.
+   Every privileged child runs inside a fresh non-breakaway Windows job
+   with kill-on-close. On timeout or output overflow the coordinator closes the job, waits at most five seconds
+   for the process handle to signal and the job's active-process count to reach zero, and only then may inspect
+   or roll back. If terminal/no-survivor proof is unresolved, it retains the journal and stops without starting a
+   second ACL writer. Git stays prohibited. If equality is not restored, retain the protected journal and stop
+   for owner reconciliation; do not retry or apply a broader ACL rewrite.
+6. The coordinator's only public record has exact ordered keys `schemaVersion`, `operation`, `outcome`, `stage`,
+   `code`, `systemDriveState`, `rollbackAttempted`, `rollbackVerified`, `journalState`,
+   `privateValuesIncluded`. `schemaVersion` is `runa-omen-system-drive-preparation/v1`; `operation` is `prepare` or
+   `deprovision`; `outcome` is `prepared`, `restored`, `deprovisioned` or `error`; `stage` is `preflight`,
+   `prepare`, `verify`, `rollback`, `deprovision` or `complete`; `systemDriveState` is `prepared`, `unprepared` or
+   `unknown`; `journalState` is `absent`, `retained`, `removed` or `unknown`; the two rollback fields and
+   `privateValuesIncluded` are booleans, with the last always false. `systemDriveState` may be prepared only after
+   exact expected-post equality, unprepared only after exact pre-state equality, and otherwise is unknown.
+   Codes are exactly `prepared`, `prepare-failed-no-change`, `prepare-failed-restored`,
+   `post-state-mismatch-restored`, `deprovisioned`, `precondition-failed`, `pin-drift`, `journal-failed`,
+   `reconciliation-required`, `child-start-failed`, `child-terminal-unresolved`, `journal-removal-failed`,
+   `rollback-failed`, `deprovision-failed-no-change`, `deprovision-failed-prepared` or `result-invalid`.
+7. The valid terminal matrices are frozen. Prepare success is prepare/prepared/complete/prepared, state prepared,
+   rollback false/false, journal retained. Unchanged failure is prepare/error/prepare/prepare-failed-no-change,
+   state unprepared, rollback false/false, journal retained. Verified rollback is prepare/restored/complete with
+   code prepare-failed-restored or post-state-mismatch-restored, state unprepared, rollback true/true, journal
+   removed. Prepare journal-removal failure is prepare/error/rollback/journal-removal-failed, state unprepared,
+   rollback true/true, journal retained. Deprovision success is deprovision/deprovisioned/complete/deprovisioned,
+   state unprepared, rollback false/false, journal removed. Deprovision journal-removal failure is deprovision/
+   error/deprovision/journal-removal-failed, state unprepared, rollback false/false, journal retained. For either
+   operation, pin drift is error/preflight/pin-drift with state unknown and journal absent; precondition failure is
+   error/preflight/precondition-failed with equality-derived state and journal absent; journal failure is error/
+   preflight/journal-failed with state unprepared for prepare or prepared for deprovision and journal unknown;
+   reconciliation is error/preflight/reconciliation-required with equality-derived state and journal retained or
+   unknown. Prepare child-start failure is error/prepare/child-start-failed with state unprepared and journal
+   retained; deprovision child-start failure is error/deprovision/child-start-failed with state prepared and journal
+   retained. Child-terminal-unresolved for the prepare or deprovision child uses that matching stage, state
+   unknown, rollback false/false and journal retained; unresolved rollback is prepare/error/rollback/
+   child-terminal-unresolved with state unknown, rollback true/false and journal retained. A terminal deprovision
+   child that is not exit 0 and in bounds uses
+   deprovision/error/deprovision/deprovision-failed-no-change when exact pre-state is observed, or deprovision/
+   error/deprovision/deprovision-failed-prepared when exact post-state remains; both use rollback false/false and
+   journal retained. Any other deprovision descriptor uses deprovision/error/complete/reconciliation-required,
+   unknown state, rollback false/false and retained journal. Rollback
+   failure is prepare/error/rollback/rollback-failed, rollback true/false, journal retained and state prepared only
+   on exact post equality, otherwise unknown. The sole canonical fallback per known operation is operation/error/
+   complete/result-invalid, state unknown, rollback false/false, journal unknown, private false. Every other tuple
+   is rejected. Reconciliation-required always uses stage complete; state is unknown unless exact pre/post equality
+   was read after a terminal child, rollback flags reflect only a durably started and terminal verified rollback,
+   and journal state is retained or unknown. `rollbackVerified` can be true only when `rollbackAttempted` is true
+   and full pre-state equality passed. No path, ACL, SDDL, SID, account, process id, raw output, transaction id or
+   descriptor digest may enter the public
+   record.
+8. On `prepared`, the prerequisite intentionally remains installed because MXC requires it. The protected journal
+   remains owned by the RunaAI host deployment until MXC is deprovisioned. Removal must use this same reviewed
+   coordinator: it first requires the current complete canonical descriptor to match the journaled expected
+   post-state, atomically commits `deprovision-started`, invokes one bounded vendor
+   `unprepare-system-drive --target C:\`, proves terminal/no-survivor status before descriptor inspection, atomically
+   commits `deprovision-terminal`, then requires exit 0, output within bounds and exact equality with the journaled
+   pre-state before deleting the journal. A terminal nonzero/timeout/output failure with exact pre-state publishes
+   deprovision-failed-no-change and retains the journal; exact post-state publishes deprovision-failed-prepared;
+   any other state requires owner reconciliation. Unresolved termination publishes child-terminal-unresolved and
+   performs no read/delete. Drift or failed restoration retains the journal and stops for owner
+   reconciliation. The vendor command is therefore a bounded rollback mechanism, not presumed exact without the
+   full-descriptor comparison.
+9. Independent exact-byte review and a source commit gate remediation. Then run the sealed coordinator once under
+   an explicitly elevated owner token. The reader executes inside that same elevated coordinator after transition
+   verification, so the entire operation requires one UAC prompt, and emits its separate aggregate record. If the
+   transition is not `prepared`, either readiness boolean is false, or either record errors, stop with retained
+   RCA; do not execute Git. If both readiness booleans are true, source-record that host evidence and admit exactly
+   one post-repair execution of sealed commit `acd2eb8`, resuming at `branches`.
+10. Any fatal/error stops again. `all-succeeded` proves only the four bounded read-only verbs on the disposable
+   actual host fixture and requires a separate admission decision before the full Omen proof. Network, browser,
+   model and production remain prohibited throughout this correction.
+
+The direct vendor remediation requires UAC because the current token is not elevated. User interaction is not
+needed until the reviewed source checkpoint is ready and the single elevation prompt must be accepted. No host
+ACL has been changed yet.
+
+The first independent review of this host-prerequisite correction returned NO-GO at P0=0/P1=3: the reader
+schemas were not exact enough, the privileged change lacked an immediate drift check and full-descriptor delta
+proof, and rollback plus durable ownership were underspecified. A later re-review found three remaining crash,
+unnecessary-rollback and public-lifecycle representation gaps; items 1 through 10 now also freeze conservative
+at-most-once recovery, state-first rollback admission and exact prepare/deprovision/journal-cleanup matrices.
+Fresh independent design re-review remains required before implementation.
+
+## Upstream host-prep safety finding and superseding correction
+
+The order-preservation check exposed a separate upstream blocker. Microsoft issue 648, still open and labeled a
+high-impact Windows bug on 2026-09-03, reports that `prepare-system-drive` and `unprepare-system-drive` can cause
+`SetNamedSecurityInfoW` to normalize descendant ACLs recursively. Its proposed target-only `SetFileSecurityW` fix
+in pull request 649 was closed on 2026-08-28 pending Microsoft discussion and was not merged. The installed 0.8.0
+binary's own documented implementation still names `SetNamedSecurityInfoW`. Therefore the preceding vendor
+system-drive mutation design is retained only as rejected design history: the installed vendor prepare/unprepare
+commands must not run on `C:\`.
+
+The following design supersedes items 4 through 10 above:
+
+1. The Microsoft-signed host-prep binary remains pinned solely for the read-only elevated
+   `verify-null-device` check. A new pinned RunaAI transition script owns system-drive preparation and removal.
+   Its only root write API is `SetFileSecurityW` with exactly `DACL_SECURITY_INFORMATION`; Microsoft documents
+   that security applied to a directory by this API is not inherited by its children. Source and static tests
+   reject `SetNamedSecurityInfo`, `SetSecurityInfo`, `Set-Acl`, `icacls`, recursion and vendor system-drive verbs.
+   Before any probe DACL call, the elevated script rehashes its exact source against the release pin, validates
+   that its loaded binding resolves only Advapi32 `SetFileSecurityW`/`SetEntriesInAclW` with the frozen constants,
+   and opens the literal protected probe root through held no-reparse handles with volume/file/final-path identity
+   checks. Pin, binding, constant or path drift stops before any write.
+2. Before touching `C:\`, the elevated script performs one actual target-only API probe on a newly created,
+   access-restricted parent/child tree beneath the protected host-state directory. It first gives the parent an
+   inheritable allow ACE and creates the child so that ACE is inherited. It captures both raw DACLs before changing
+   the parent's inheritable ACE through `SetFileSecurityW`, then requires the parent's exact setup-expected bytes
+   and the child's exact before bytes to be unchanged across that setup call. Only that proof establishes the
+   deliberately older inherited child ACE and the inheritance-inconsistent shape reported upstream. It then
+   captures that proven inconsistent baseline and adds the
+   two target ACEs only to the parent through the exact production in-memory merge and `SetFileSecurityW` path,
+   requires parent-after to equal the exact `SetEntriesInAclW` expected bytes and child-after to equal child-before
+   byte-for-byte, restores the parent, proves both parent and child equal their captured baselines, and removes the
+   tree. Cleanup failure retains the owned protected tree for reconciliation and stops before the system-drive
+   journal or root write. Any no-op, wrong parent bytes, child normalization, restoration or cleanup failure is a
+   failed probe. This is an actual Windows API/hardware preflight, not acceptance evidence for Git or a model.
+3. Descriptor authority is order-preserving. Canonical bytes are UTF-8
+   `runa-omen-system-drive-descriptor/v2`, NUL, one-byte DACL-present and one-byte DACL-null flags, uint32-LE DACL
+   control flags, uint32-LE owner-SID length plus bytes, uint32-LE group-SID length plus bytes, uint32-LE ACE count,
+   then for each ACE in its original order uint32-LE ordinal, uint32-LE ACE length and the exact raw ACE bytes.
+   No sorting occurs. Expected-post DACL bytes are generated in memory by `SetEntriesInAclW` against the exact
+   pre-DACL using two `GRANT_ACCESS` entries in fixed order S-1-15-2-1 then S-1-15-2-2, mask 0x00120088 and
+   inheritance 0. The returned ACL's exact sequence is authoritative; deleting exactly those two target ACEs from
+   it must reproduce every pre-existing ACE byte-for-byte and ordinal-for-ordinal. Post-write comparison requires
+   exact expected bytes, so target ACEs occupy precisely the positions returned by that in-memory Windows merge.
+4. The protected journal is version 2 and at most 524288 UTF-8 bytes. It rejects BOM, duplicate/unknown/missing
+   keys, trailing data and decoded descriptors above 131072 bytes. Exact ordered keys are `schemaVersion`,
+   `transactionId`, `operation`, `phase`, `transitionScriptSha256`, `writeApi`, `target`,
+   `preDescriptorBase64`, `preDescriptorSha256`, `expectedPostDescriptorBase64`,
+   `expectedPostDescriptorSha256`, `prepareAttempt`, `rollbackAttempt`, `deprovisionAttempt`,
+   `systemDriveState`, `rollbackVerified`. Literals are schema `runa-omen-system-drive-journal/v2`, API
+   `SetFileSecurityW:DACL_SECURITY_INFORMATION` and target `C:\`; transaction and digest formats and the exact
+   path/mutex/no-reparse/single-link/atomic-flush controls remain as frozen above. Each attempt has ordered keys
+   `started`, `terminal`, `win32Success`, `win32Error`: the first two are booleans, win32Success is null until
+   terminal and then boolean, and win32Error is null before terminal or on success and otherwise uint32.
+5. After the probe and immediately before publishing `authorized`, the script rehashes its own exact pinned bytes,
+   revalidates the write API constant and literal target, opens the actual `C:\` root with a native no-reparse
+   handle, and binds its volume serial, file id and final root path while holding that handle. It rereads complete
+   owner/group/DACL bytes, requires both target trustees absent with no conflicting explicit target ACE, builds
+   the reversible expected post through the exact in-memory merge, and proves removal of the two inserted ACEs
+   reproduces the complete ordered pre-DACL. The journal prestate comes only from this read. Immediately after
+   durably publishing `prepare-started` and before the write call, it rechecks script hash, held root identity and
+   exact current descriptor equality to journal prestate; any drift stops without the API call. Immediately after
+   the call it rechecks held root identity before accepting any descriptor readback. A name/identity or post-state
+   mismatch can never be success.
+6. Version-2 phases remain `authorized`, `prepare-started`, `prepare-terminal`, `rollback-started`,
+   `rollback-terminal`, `prepared`, `deprovision-started`, `deprovision-terminal`. The same at-most-once rules
+   apply: the matching started phase is durably committed before each API call; the terminal phase is committed
+   after it returns and full readback completes; abandoned ownership or any preexisting nonstable phase starts no
+   writer. Prepare-started/rollback-started/deprovision-started each make state unknown until exact readback.
+   Prepared is the only stable retained phase and can be consumed only by explicit deprovision.
+7. The public record schema is `runa-omen-system-drive-transition/v2` with exact ordered keys `schemaVersion`,
+   `operation`, `outcome`, `stage`, `code`, `systemDriveState`, `rollbackAttempted`, `rollbackVerified`,
+   `journalState`, `targetOnlyProbePassed`, `privateValuesIncluded`. The enums and invariants above remain, with
+   targetOnlyProbePassed and privateValuesIncluded boolean and the latter always false. Before-probe failures use
+   false; every path reaching the root journal/write requires true. Codes are exactly `prepared`,
+   `prepare-failed-no-change`, `prepare-failed-restored`, `post-state-mismatch-restored`, `deprovisioned`,
+   `deprovision-failed-unprepared`, `deprovision-failed-prepared`, `precondition-failed`, `pin-drift`,
+   `probe-failed`, `probe-cleanup-failed`, `journal-failed`, `journal-removal-failed`,
+   `reconciliation-required`, `rollback-failed` or `result-invalid`. An API false/GetLastError result or API-
+   success readback mismatch with exact pre-state launches no
+   rollback and uses prepare/error/prepare/prepare-failed-no-change. Any other prepare state admits exactly one
+   journaled root-only rollback; exact restoration uses prepare/restored/complete with code prepare-failed-restored
+   or post-state-mismatch-restored. Unknown restoration uses prepare/error/rollback/rollback-failed. The canonical
+   result-invalid tuple uses the known operation, error/complete/result-invalid, unknown state, rollback false/
+   false, journal unknown, probe false and private false.
+8. The complete v2 public matrix is below; `/` separates operation/outcome/stage/code. Every row has
+   `privateValuesIncluded:false`, and every combination not listed is rejected.
+
+   | tuple | state | rollback | journal | probe |
+   | --- | --- | --- | --- | --- |
+   | prepare/error/preflight/probe-failed | unknown | false/false | absent | false |
+   | prepare/error/preflight/probe-cleanup-failed | unknown | false/false | absent | false |
+   | prepare/error/preflight/pin-drift | unknown | false/false | absent | false |
+   | prepare/error/preflight/pin-drift | unknown | false/false | absent | true |
+   | prepare/error/preflight/precondition-failed | unknown | false/false | absent | true |
+   | prepare/error/preflight/journal-failed | unprepared | false/false | unknown | true |
+   | prepare/error/prepare/prepare-failed-no-change | unprepared | false/false | retained | true |
+   | prepare/prepared/complete/prepared | prepared | false/false | retained | true |
+   | prepare/restored/complete/prepare-failed-restored | unprepared | true/true | removed | true |
+   | prepare/restored/complete/post-state-mismatch-restored | unprepared | true/true | removed | true |
+   | prepare/error/rollback/journal-removal-failed | unprepared | true/true | retained | true |
+   | prepare/error/rollback/rollback-failed | unknown | true/false | retained | true |
+   | prepare/error/complete/reconciliation-required | unknown | false/false | retained | true |
+   | prepare/error/complete/reconciliation-required | unknown | false/false | unknown | true |
+   | prepare/error/complete/reconciliation-required | unknown | true/false | retained | true |
+   | prepare/error/complete/result-invalid | unknown | false/false | unknown | false |
+   | deprovision/error/preflight/pin-drift | unknown | false/false | unknown | false |
+   | deprovision/error/preflight/pin-drift | prepared | false/false | retained | true |
+   | deprovision/error/preflight/precondition-failed | unknown | false/false | retained or unknown | false |
+   | deprovision/error/preflight/probe-failed | prepared | false/false | retained | false |
+   | deprovision/error/preflight/probe-cleanup-failed | prepared | false/false | retained | false |
+   | deprovision/error/preflight/journal-failed | prepared | false/false | unknown | true |
+   | deprovision/deprovisioned/complete/deprovisioned | unprepared | false/false | removed | true |
+   | deprovision/error/deprovision/deprovision-failed-unprepared | unprepared | false/false | retained | true |
+   | deprovision/error/deprovision/deprovision-failed-prepared | prepared | false/false | retained | true |
+   | deprovision/error/deprovision/journal-removal-failed | unprepared | false/false | retained | true |
+   | deprovision/error/complete/reconciliation-required | unknown | false/false | retained | true |
+   | deprovision/error/complete/reconciliation-required | unknown | false/false | retained | false |
+   | deprovision/error/complete/reconciliation-required | unknown | false/false | unknown | false |
+   | deprovision/error/complete/result-invalid | unknown | false/false | unknown | false |
+
+   `state` is `systemDriveState`; rollback is attempted/verified; journal is `journalState`; probe is
+   `targetOnlyProbePassed`. The repeated pin-drift rows are the exact before-probe false and after-probe true
+   variants and start no later write. The repeated reconciliation rows are the only permitted variants: prepare uses
+   false/false with retained or unknown before rollback starts and true/false with retained after rollback starts;
+   deprovision uses retained/probe true after probe or retained-or-unknown/probe false before it. `journal-failed`
+   means a phase publication failed before the corresponding root
+   API began. Any phase failure after an API may have started maps only to reconciliation-required. API false uses
+   prepare-failed-no-change or prepare-failed-restored according to readback; API success with mismatched readback
+   uses prepare-failed-no-change or post-state-mismatch-restored. This distinguishes API return failure, semantic
+   mismatch, phase failure and restoration failure without publishing Win32 error text.
+9. Deprovision requires the stable prepared journal and exact expected-post readback, commits its started phase,
+   calls root-only `SetFileSecurityW` with the exact journaled pre-DACL, commits terminal readback and requires API
+   success plus exact pre-state before journal removal. API failure with exact pre-state is deprovision/error/
+   deprovision/deprovision-failed-unprepared; exact post-state is deprovision/error/deprovision/
+   deprovision-failed-prepared; any other state is reconciliation-required. Journal-removal failure remains a
+   truthful error with exact state and retained journal. No vendor system-drive command or descendant write runs.
+10. The deterministic/adversarial coordinator matrix in item 3 above applies to version 2, replacing child-job
+   cases with every Win32 success/error/crash boundary, exact SetEntriesInAcl order preservation, target-only probe
+   failure/cleanup and proof that every stop launches zero later root writes. Independent exact-byte review and a
+   source commit still gate one elevated execution. After `prepared`, the same elevated process runs the sealed
+   aggregate prerequisite reader; only ready=true admits one sealed `acd2eb8` Git diagnostic from `branches`.
+
+This upstream safety discovery invalidates the earlier assumption that the vendor command affected only the root.
+No host ACL or descendant ACL has been changed, and the vendor system-drive mutation is now explicitly prohibited.
+
+Fresh independent review of the superseding version-2 design returned GO with P0=0/P1=0. It reproduced the clean
+diff and 15/15 roadmap checks and confirmed the pre-probe trust gate, inheritance-inconsistent actual API probe,
+immediate root binding/revalidation, order-preserving descriptor authority, durable at-most-once journal, complete
+public matrix, exact direct restore/deprovision and vendor-command prohibition. No actual operation ran. The design
+may proceed to implementation; tests, fresh exact-byte implementation review and a source commit remain mandatory
+before the single elevated execution.

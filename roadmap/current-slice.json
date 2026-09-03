@@ -32,11 +32,12 @@
     "gate7f/function-first/M1-S2B1-CORRECTED-CRITERIA-REVIEW-INFRASTRUCTURE-STOP-2026-09-03.md",
     "gate7f/function-first/M1-S2B1-SEALED-CRITERIA-INDEPENDENT-REVIEW-2026-09-03.md",
     "gate7f/function-first/M1-S2B1-SECOND-SEALED-CRITERIA-INDEPENDENT-REVIEW-2026-09-03.md",
-    "gate7f/function-first/M1-S2B1-THIRD-SEALED-CRITERIA-INDEPENDENT-REVIEW-2026-09-03.md"
+    "gate7f/function-first/M1-S2B1-THIRD-SEALED-CRITERIA-INDEPENDENT-REVIEW-2026-09-03.md",
+    "gate7f/function-first/M1-S2B1-FOURTH-SEALED-CRITERIA-INDEPENDENT-REVIEW-2026-09-03.md"
   ],
   "scopeDocument": "roadmap/CURRENT-SLICE.md",
   "capabilityIds": ["C01", "C02", "C03", "C04", "C06", "C07", "C08", "C12", "C15", "C16"],
-  "nextWork": "M1-S2B1 commit b24389b passed 10/10 focused and 15/15 roadmap checks but fresh independent review returned NO-GO P0=0/P1=3. No implementation or actual/model operation followed. The fourth prospective correction completes the printable-ASCII Windows device oracle, binds materialization/upload/workspace/reconciliation times to the hashed policy, requires timeout to represent an actual staged 120-second operation, and assigns deadline/Job termination/reconciliation/terminal receipt ownership to the external Control watchdog. Fourth-correction preflight passes 11/11 focused and 15/15 roadmap checks with a clean diff. Source commit and fresh independent P0/P1 GO still gate dependency installation, implementation and actual Control/browser operations. Deterministic checks receive no acceptance credit. Home remains model-only, Omen is not the primary worker, the Omen ACL transition is deferred, and comparison-model testing remains tabled.",
+  "nextWork": "M1-S2B1 exact commit 3ea30c5 received independent criteria GO at P0=0/P1=0 after 11/11 focused, 15/15 roadmap and targeted path/time/watchdog probes. No dependency, implementation, actual operation or model invocation followed. The next gate is read-only package review and exact release-manifest pinning for the proposed Git library version, registry tarball integrity, unpacked release digest and dependency set. Installation and implementation remain blocked until that package review is source-committed and independently accepted. Home remains model-only, Omen is not the primary worker, the Omen ACL transition is deferred, and comparison-model testing remains tabled.",
   "remainingRoadmapRequired": true,
   "completionClaim": "M1 completion is not whole-product completion."
 }

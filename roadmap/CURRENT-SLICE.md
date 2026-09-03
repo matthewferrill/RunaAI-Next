@@ -100,6 +100,12 @@ Focused checks, source commit and fresh independent GO remain mandatory. Review:
 Fourth-correction preflight now passes 11/11 focused and 15/15 roadmap checks with a clean diff; no actual or model
 operation ran.
 
+Exact commit `3ea30c5` then received independent GO at P0=0/P1=0. The reviewer reproduced 11/11 focused, 15/15
+roadmap and all targeted path/time/watchdog adversarial probes. No implementation, actual operation or model ran.
+This approves only the separately gated Git-library package review; package installation and implementation remain
+blocked. Review:
+`../gate7f/function-first/M1-S2B1-FOURTH-SEALED-CRITERIA-INDEPENDENT-REVIEW-2026-09-03.md`.
+
 M1-S2B implementation checkpoint, 2026-09-02: the authority foundation and actual PostgreSQL lifecycle
 are green. The prior Omen DPAPI/handle-based file proof was 14/14, but shared native/helper bytes have since
 changed and that evidence is historical until one affected-scope rerun. The first actual

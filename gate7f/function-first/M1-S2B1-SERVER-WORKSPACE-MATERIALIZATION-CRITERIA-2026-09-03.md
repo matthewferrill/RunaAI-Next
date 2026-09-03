@@ -1,6 +1,6 @@
 # M1-S2B1 server-workspace materialization criteria — 2026-09-03
 
-Status: fourth corrected prospective criteria; fresh independent design review required before implementation
+Status: corrected prospective criteria independently reviewed GO at P0=0/P1=0; package review gates implementation
 
 Roadmap revision/digest retrieved before selection: `2026-08-28.1` / `6a8380d9e9e2f3eb07b7e51c77cda174c5541c0abbb07875dd5537627560cfd1`
 
@@ -9,7 +9,9 @@ Milestone/capability scope: M1-S2B1; bounded C03/C06/C08/C15/C16 subsets
 The initial draft review and first sealed corrected-criteria review each returned NO-GO at P0=0/P1=7. Reviews of
 exact commits `083c558` and `b24389b` returned P0=0/P1=5 and P0=0/P1=3 respectively; the latter is retained in
 `M1-S2B1-THIRD-SEALED-CRITERIA-INDEPENDENT-REVIEW-2026-09-03.md`. No dependency, implementation or actual operation
-followed any review. This fourth correction earns no acceptance credit until a fresh review returns P0=0/P1=0.
+followed any review. The fourth correction at exact commit `3ea30c5` received GO at P0=0/P1=0, retained in
+`M1-S2B1-FOURTH-SEALED-CRITERIA-INDEPENDENT-REVIEW-2026-09-03.md`. It authorizes the package-review gate only and
+earns no implementation or actual-system acceptance credit.
 
 ## Outcome and reason this is next
 

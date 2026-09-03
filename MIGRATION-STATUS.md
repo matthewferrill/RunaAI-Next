@@ -480,6 +480,13 @@ terminal-receipt ownership to the external Control watchdog. Review:
 source commit and fresh independent GO remain mandatory. Fourth-correction preflight now passes 11/11 focused
 contract checks and 15/15 roadmap checks with a clean diff; no actual or model operation ran.
 
+Exact commit `3ea30c5` received fresh independent **GO at P0=0/P1=0**. The reviewer reproduced 11/11 focused and
+15/15 roadmap checks plus the exact device-name, policy-time, staged-timeout and external-watchdog adversarial probes.
+No dependency, network/endpoint, implementation, actual Control/browser operation or model invocation occurred. The
+GO advances M1-S2B1 only to the separately gated Git-library package review; it provides no implementation or actual-
+system acceptance credit. Review:
+`gate7f/function-first/M1-S2B1-FOURTH-SEALED-CRITERIA-INDEPENDENT-REVIEW-2026-09-03.md`.
+
 **Application slice, 2026-09-02:** model selection is complete and the retired R15 campaign is not being
 resumed. The active clean branch is `codex/m1-gemma-primary`, based on the five-function qualification
 decision. Gemma is the sole primary for Chat, Research, Code, Agent and Review. The immediate work is to

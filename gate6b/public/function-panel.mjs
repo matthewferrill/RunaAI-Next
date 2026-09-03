@@ -80,7 +80,7 @@ const publicErrors = new Set(["m1-grant-session-mismatch", "m1-grant-expired", "
 export function functionDescription(mode, experience) {
   if (mode === "work" && experience === "code") return "Describe a change to this disposable JavaScript project. Runa can plan, inspect, edit and run its fixed tests under your selected approval profile. Your own files, repositories, network and systems remain inaccessible.";
   if (mode === "research") return "Ask questions about the source sections you attach and explicitly select. Runa retrieves only those sections and shows their references. This is not live web research and cannot perform actions.";
-  if (mode === "review") return "Ask Runa to review the source sections you attach and explicitly select. Findings must distinguish supported evidence from uncertainty. Reviewing does not edit or execute anything.";
+  if (mode === "review") return "Ask Runa to review the exact source sections, artifact text, or diffs you attach and explicitly select. Findings stay linked to that context and its citations. Reviewing does not edit or execute anything.";
   return experience === "code"
     ? "Discuss, explain, and draft code. A draft is not execution. Choose Run in sandbox for a JavaScript block, or Work in disposable Code project for a governed multi-step task. Neither can access your own files or network."
     : "Ask questions, brainstorm, draft writing, and work with text you paste here. Ordinary chat does not browse the live web or perform actions. Select Research or Review to work with explicitly supplied project sources.";
@@ -93,6 +93,28 @@ export function functionAnswerSelection(mode, sources, experience) {
   return { lane: mode, workspace: { sources: sources.map(({ sourceId, sectionId }) => ({ sourceId, sectionId })) } };
 }
 
+export function reviewResultPresentation(evidence) {
+  if (!evidence?.review) return null;
+  const value = evidence.review;
+  const contexts = Array.isArray(value.contexts) ? value.contexts.filter(context =>
+    ["source", "artifact", "diff"].includes(context?.contextType)
+      && typeof context?.sourceId === "string" && typeof context?.sectionId === "string"
+      && /^[a-f0-9]{64}$/.test(context?.contentSha256 ?? "")) : [];
+  const accepted = ["accepted-primary", "accepted-revision"].includes(value.status)
+    && value.checker?.finalVerdict === "accept";
+  return {
+    accepted,
+    status: value.status,
+    summary: value.status === "accepted-revision"
+      ? "Review accepted after one bounded revision and one accepting recheck."
+      : value.status === "accepted-primary"
+        ? "Review accepted the primary answer; checker echo could not alter it."
+        : "Review was not accepted as complete.",
+    contexts,
+    findings: accepted && Array.isArray(value.findings) ? value.findings.slice(0, 1) : [],
+  };
+}
+
 /** Only server response metadata is displayed here; model prose never supplies a receipt. */
 export function appendAnswerEvidence(root, host, evidence) {
   const details = element(root, "details", null, "answer-evidence");
@@ -100,6 +122,21 @@ export function appendAnswerEvidence(root, host, evidence) {
   if (!evidence) {
     details.append(element(root, "p", "Historical evidence unavailable for this saved answer."));
     host.append(details); return details;
+  }
+  const reviewResult = reviewResultPresentation(evidence);
+  if (reviewResult) {
+    const reviewSection = element(root, "section", null, "review-result");
+    reviewSection.append(element(root, "h3", "Review result"), element(root, "p", reviewResult.summary));
+    const contextList = element(root, "ul");
+    for (const context of reviewResult.contexts) {
+      const label = context.label ? `${context.label} · ` : "";
+      contextList.append(element(root, "li", `${context.contextType}: ${label}${context.sourceId} / ${context.sectionId} · SHA-256 ${context.contentSha256}`));
+    }
+    if (contextList.childElementCount) reviewSection.append(contextList);
+    for (const finding of reviewResult.findings) {
+      reviewSection.append(element(root, "p", `Finding severity: ${finding.severity}. Citations: ${finding.citationOrdinals.join(", ") || "none"}.`, "review-finding-meta"));
+    }
+    details.append(reviewSection);
   }
   const retrieval = evidence.retrieval;
   const message = !retrieval?.attempted ? "No source retrieval was performed for this answer."
@@ -134,22 +171,27 @@ export async function initializeFunctionPanel({ root = document, request, getCon
   if (!host || !heading) return unavailable;
   let mode = "conversation";
   const sourcePanel = element(root, "section"); sourcePanel.id = "m1-source-panel";
-  const review = element(root, "button", "Review selected sources"); review.type = "button";
+  const review = element(root, "button", "Review selected context"); review.type = "button";
   const presentMode = () => {
     const description = root.getElementById("experience-description");
     if (description) description.textContent = functionDescription(mode, getContext().experience);
     sourcePanel.hidden = getContext().experience !== "chat" || !["research", "review"].includes(mode);
-    review.textContent = mode === "review" ? "Return to research" : "Review selected sources";
+    review.textContent = mode === "review" ? "Return to research" : "Review selected context";
     onModeChange(mode);
   };
   host.classList.add("function-panel");
-  sourcePanel.append(element(root, "h2", "Selected sources"), element(root, "p", "Only text you attach and select is supplied. Up to six sections per answer; 8,000 characters each.", "navigation-empty"));
-  const list = element(root, "div"), sourceForm = element(root, "form"), label = element(root, "input"), content = element(root, "textarea");
+  sourcePanel.append(element(root, "h2", "Selected context"), element(root, "p", "Only text, artifact content, or diff text you attach and select is supplied. Up to six items per answer; 8,000 characters each.", "navigation-empty"));
+  const list = element(root, "div"), sourceForm = element(root, "form"), contextType = element(root, "select"),
+    label = element(root, "input"), content = element(root, "textarea");
   list.id = "m1-sources";
+  contextType.setAttribute("aria-label", "Review context type");
+  for (const [value, text] of [["source", "Source section"], ["artifact", "Artifact text"], ["diff", "Code diff"]]) {
+    const option = element(root, "option", text); option.value = value; contextType.append(option);
+  }
   label.placeholder = "Section label"; label.maxLength = 120; label.required = true; label.setAttribute("aria-label", "Source section label");
   content.placeholder = "Paste a source section…"; content.maxLength = 8000; content.rows = 5; content.required = true; content.setAttribute("aria-label", "Source section content");
   const attach = element(root, "button", "Attach section"); attach.type = "submit";
-  sourceForm.append(label, content, attach); sourcePanel.append(list, sourceForm, review); host.append(sourcePanel);
+  sourceForm.append(contextType, label, content, attach); sourcePanel.append(list, sourceForm, review); host.append(sourcePanel);
   review.addEventListener("click", () => { mode = mode === "review" ? "research" : "review"; presentMode(); });
   const codePanel = element(root, "section"); codePanel.id = "m1-code-panel";
   codePanel.append(element(root, "h2", "Disposable Code workspace"), element(root, "p", "A small JavaScript exercise, separate from your files and repositories. Runa can inspect, repair, run fixed tests, and propose undoing her recorded changes.", "navigation-empty"));
@@ -203,7 +245,8 @@ export async function initializeFunctionPanel({ root = document, request, getCon
         if (checkbox.checked && selected.length >= 6) { checkbox.checked = false; setStatus("Select up to six sections.", token); return; }
         selected = checkbox.checked ? [...selected, source] : selected.filter(item => item.sourceId !== source.sourceId);
       });
-      checkLabel.append(checkbox, root.createTextNode(`${source.label} (${source.characters} characters)${source.indexed ? "" : " — index unavailable"}`));
+      const kind = { source: "Source", artifact: "Artifact", diff: "Diff" }[source.contextType] ?? "Source";
+      checkLabel.append(checkbox, root.createTextNode(`${kind}: ${source.label} (${source.characters} characters)${source.indexed ? "" : " — index unavailable"}`));
       row.append(checkLabel);
       if (!source.indexed) {
         const retry = button("Retry indexing", async () => {
@@ -266,8 +309,9 @@ export async function initializeFunctionPanel({ root = document, request, getCon
   });
   sourceForm.addEventListener("submit", async event => {
     event.preventDefault(); if (attach.disabled) return;
-    const token = ticket(), draft = { label: label.value, content: content.value };
-    if (sourceAttempt?.key !== token.key || sourceAttempt?.label !== draft.label || sourceAttempt?.content !== draft.content) {
+    const token = ticket(), draft = { contextType: contextType.value, label: label.value, content: content.value };
+    if (sourceAttempt?.key !== token.key || sourceAttempt?.contextType !== draft.contextType
+        || sourceAttempt?.label !== draft.label || sourceAttempt?.content !== draft.content) {
       sourceAttempt = { ...draft, key: token.key, requestId: `source-${crypto.randomUUID()}` };
     }
     const requestId = sourceAttempt.requestId; attach.disabled = true;

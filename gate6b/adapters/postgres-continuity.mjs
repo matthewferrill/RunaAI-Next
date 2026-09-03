@@ -18,7 +18,7 @@ const lockKey = value => {
 
 function routeFor(lane) {
   return { general: "general-chat", guarded: "guarded-chat", research: "research-chat",
-    workspace: "workspace-chat", code: "code-chat" }[lane] ?? "general-chat";
+    workspace: "workspace-chat", code: "code-chat", review: "review-chat" }[lane] ?? "general-chat";
 }
 
 function safeTitle(value) {

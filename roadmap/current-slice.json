@@ -38,11 +38,12 @@
     "gate7f/function-first/M1-S2B1-IMPLEMENTATION-PREFLIGHT-RCA-2026-09-03.md",
     "gate7f/function-first/M1-S2B1-CANDIDATE-SERVICE-SURFACE-2026-09-03.md",
     "gate7f/function-first/M1-S2B1-NETWORK-POLICY-PREFLIGHT-2026-09-03.md",
-    "gate7f/function-first/M1-S2B1-GIT-STREAM-PREFLIGHT-2026-09-03.md"
+    "gate7f/function-first/M1-S2B1-GIT-STREAM-PREFLIGHT-2026-09-03.md",
+    "gate7f/function-first/M1-S2-CONTEXTUAL-REVIEW-WORKFLOW-2026-09-03.md"
   ],
   "scopeDocument": "roadmap/CURRENT-SLICE.md",
   "capabilityIds": ["C01", "C02", "C03", "C04", "C06", "C07", "C08", "C12", "C15", "C16"],
-  "nextWork": "M1-S2B1 criteria, package gate, public-Git core, PostgreSQL authority, candidate-only service/surface binding, binary network policy, and bounded authenticated Git stream session are complete locally. The stream prerequisite passes 15/15 focused checks and independent review but opens no socket. No Control fetch, protected publication, ready workspace, browser operation, production change or model call is claimed. Next implement and review the real TLS connector/broker child, then the specialized Control worker/publication host and one real Control/browser journey. Home remains model-only, Omen is not the primary worker, and comparison-model testing remains tabled.",
+  "nextWork": "M1-S2B1 criteria, package gate, public-Git core, PostgreSQL authority, candidate-only service/surface binding, binary network policy, and bounded authenticated Git stream session are complete locally. The contextual Review application workflow is also deterministically green and independently reviewed, but actual combined application acceptance remains open. No Control fetch, protected publication, ready workspace, browser operation, production change or model call is claimed. Continue the reviewed TLS connector/broker and independent product lanes, then compose the specialized Control worker/publication host and run one real Control/browser journey. Home remains model-only, Omen is not the primary worker, and comparison-model testing remains tabled.",
   "remainingRoadmapRequired": true,
   "completionClaim": "M1 completion is not whole-product completion."
 }

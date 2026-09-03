@@ -30,9 +30,9 @@ export const Gate2AnswerRequestSchema = z.object({
     maximumEvidenceCharacters: z.number().int().min(128).max(48_000),
   }).strict(),
 }).strict().superRefine((request, context) => {
-  if (request.lane === "workspace" && !request.workspace) {
+  if (["workspace", "review"].includes(request.lane) && !request.workspace) {
     context.addIssue({ code: z.ZodIssueCode.custom, path: ["workspace"],
-      message: "The workspace lane requires one through six explicit source ranges." });
+      message: "The workspace and review lanes require one through six explicit source ranges." });
   }
   if (!["workspace", "research", "review"].includes(request.lane) && request.workspace) {
     context.addIssue({ code: z.ZodIssueCode.custom, path: ["workspace"],
@@ -55,6 +55,31 @@ const scopeFiltering = z.object({
   consideredCount: z.number().int().nonnegative(), eligibleCount: z.number().int().nonnegative(),
   excludedCount: z.number().int().nonnegative(),
   excludedByReason: z.record(z.string(), z.number().int().nonnegative()),
+}).strict();
+const reviewContext = z.object({
+  contextType: z.enum(["source", "artifact", "diff"]),
+  targetId: boundedId,
+  sourceId: boundedId,
+  sectionId: boundedId,
+  contentSha256: z.string().regex(/^[a-f0-9]{64}$/),
+  label: z.string().trim().min(1).max(120).nullable(),
+}).strict();
+const reviewResult = z.object({
+  status: z.enum(["accepted-primary", "accepted-revision", "incomplete"]),
+  contexts: z.array(reviewContext).max(6),
+  checker: z.object({
+    initialVerdict: z.enum(["accept", "revise"]),
+    finalVerdict: z.literal("accept"),
+    revisionPasses: z.number().int().min(0).max(1),
+    attemptCount: z.number().int().min(1).max(2),
+    finalAnswerOrigin: z.enum(["primary", "checker-correction"]),
+  }).strict().nullable(),
+  findings: z.array(z.object({
+    findingId: boundedId,
+    text: z.string().min(1).max(16_000),
+    severity: z.literal("unclassified"),
+    citationOrdinals: z.array(z.number().int().positive()).max(24),
+  }).strict()).max(1),
 }).strict();
 
 export const Gate2AnswerResponseSchema = z.object({
@@ -81,6 +106,7 @@ export const Gate2AnswerResponseSchema = z.object({
     explicitSources: z.number().int().nonnegative(), resolvedSources: z.number().int().nonnegative(),
     extraReads: z.literal(0), citationStatus: z.enum(["not-applicable", "recognized", "missing", "contains-unknown"]),
   }).strict()),
+  review: reviewResult.nullable().default(null),
   citations: z.array(citation),
   model: z.object({ role: z.string(), provider: z.string(), modelId: z.string() }).strict(),
   completion: z.object({ reason: z.string(), timedOut: z.boolean(), outputLimited: z.boolean() }).strict(),

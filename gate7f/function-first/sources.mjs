@@ -6,7 +6,10 @@ const hash = value => createHash("sha256").update(value).digest("hex");
 const fail = code => Object.assign(new Error(code), { code });
 const id = z.string().min(1).max(160).regex(/^[^\u0000-\u001f\u007f]+$/);
 const contextSchema = z.object({ principalId: id, projectId: id, sessionId: id }).strict();
+const reviewScopeSchema = z.object({ principalId: id, projectId: id }).strict();
+const contextType = z.enum(["source", "artifact", "diff"]);
 const attachSchema = z.object({ requestId: id, label: z.string().trim().min(1).max(120),
+  contextType: contextType.default("source"),
   // Validate emptiness without transforming canonical source text. Citations,
   // encrypted storage and retries must bind the exact supplied UTF-8 bytes.
   content: z.string().min(1).max(8_000)
@@ -24,14 +27,18 @@ export class PostgresSuppliedSourceStore {
     await this.pool.query(`CREATE SCHEMA IF NOT EXISTS runa_m1_sources;
       CREATE TABLE IF NOT EXISTS runa_m1_sources.sections (
         principal_id text NOT NULL, project_id text NOT NULL, source_id text PRIMARY KEY,
-        request_id text NOT NULL, input_digest text NOT NULL, indexed boolean NOT NULL DEFAULT false,
+        request_id text NOT NULL, input_digest text NOT NULL, context_type text NOT NULL DEFAULT 'source',
+        indexed boolean NOT NULL DEFAULT false,
         created_at timestamptz NOT NULL DEFAULT now(),
-        UNIQUE(principal_id,project_id,request_id));`);
+        UNIQUE(principal_id,project_id,request_id));
+      ALTER TABLE runa_m1_sources.sections ADD COLUMN IF NOT EXISTS context_type text NOT NULL DEFAULT 'source';`);
   }
   async attach(rawContext, rawInput) {
     const context = contextSchema.parse(rawContext), input = attachSchema.parse(rawInput);
     if (["runa:personal", "runa:ephemeral"].includes(context.projectId)) throw fail("m1-source-project-required");
     const digest = hash(JSON.stringify(input));
+    const legacySourceDigest = input.contextType === "source"
+      ? hash(JSON.stringify({ requestId: input.requestId, label: input.label, content: input.content })) : null;
     const client = await this.pool.connect();
     let sourceId;
     try {
@@ -39,7 +46,9 @@ export class PostgresSuppliedSourceStore {
       await client.query("SELECT pg_advisory_xact_lock(hashtextextended($1,0))", [`m1-source:${context.principalId}:${context.projectId}`]);
       const existing = (await client.query(`SELECT source_id,input_digest FROM runa_m1_sources.sections
         WHERE principal_id=$1 AND project_id=$2 AND request_id=$3`, [context.principalId, context.projectId, input.requestId])).rows[0];
-      if (existing && existing.input_digest !== digest) throw fail("m1-source-request-conflict");
+      if (existing && existing.input_digest !== digest && existing.input_digest !== legacySourceDigest) {
+        throw fail("m1-source-request-conflict");
+      }
       sourceId = existing?.source_id ?? `m1-source-${randomUUID()}`;
       if (!existing) {
         const count = Number((await client.query(`SELECT count(*) count FROM runa_m1_sources.sections
@@ -49,8 +58,9 @@ export class PostgresSuppliedSourceStore {
         await client.query(`INSERT INTO runa_workspace.source_sections
           (project_scope,source_id,section_id,content_sha256,active,content_envelope) VALUES($1,$2,'provided',$3,true,$4::jsonb)`,
         [context.projectId, sourceId, hash(input.content), JSON.stringify(envelope)]);
-        await client.query(`INSERT INTO runa_m1_sources.sections(principal_id,project_id,source_id,request_id,input_digest)
-          VALUES($1,$2,$3,$4,$5)`, [context.principalId, context.projectId, sourceId, input.requestId, digest]);
+        await client.query(`INSERT INTO runa_m1_sources.sections
+          (principal_id,project_id,source_id,request_id,input_digest,context_type)
+          VALUES($1,$2,$3,$4,$5,$6)`, [context.principalId, context.projectId, sourceId, input.requestId, digest, input.contextType]);
       }
       await client.query("COMMIT");
     } catch (error) { await client.query("ROLLBACK").catch(() => {}); throw error; }
@@ -78,11 +88,12 @@ export class PostgresSuppliedSourceStore {
     }
     return { schemaVersion: "runaai-m1-source/v1", sourceId, sectionId: "provided",
       contentSha256: source.contentSha256, label: source.label, characters: source.content.length,
+      contextType: source.contextType,
       indexed, status: indexed ? "ready" : "retained-index-unavailable", contentRetained: true };
   }
   async list(rawContext) {
     const context = contextSchema.parse(rawContext);
-    const rows = (await this.pool.query(`SELECT s.source_id,s.indexed,w.content_sha256,w.content_envelope
+    const rows = (await this.pool.query(`SELECT s.source_id,s.context_type,s.indexed,w.content_sha256,w.content_envelope
       FROM runa_m1_sources.sections s JOIN runa_workspace.source_sections w
         ON w.project_scope=s.project_id AND w.source_id=s.source_id AND w.section_id='provided'
       WHERE s.principal_id=$1 AND s.project_id=$2 AND w.active ORDER BY s.created_at,s.source_id LIMIT 24`,
@@ -90,15 +101,16 @@ export class PostgresSuppliedSourceStore {
     return rows.map(row => {
       const value = this.cipher.decrypt(privateContext(context.projectId, row.source_id), row.content_envelope);
       if (hash(value.content) !== row.content_sha256) throw fail("m1-source-integrity-invalid");
+      const selectedContextType = contextType.parse(row.context_type);
       return { sourceId: row.source_id, sectionId: "provided", contentSha256: row.content_sha256,
-        label: value.label, characters: value.content.length, indexed: row.indexed };
+        contextType: selectedContextType, label: value.label, characters: value.content.length, indexed: row.indexed };
     });
   }
   async selected(rawContext, sourceIds) {
     const context = contextSchema.parse(rawContext);
     const ids = z.array(id).min(1).max(6).parse(sourceIds);
     if (new Set(ids).size !== ids.length) throw fail("m1-source-selection-invalid");
-    const rows = (await this.pool.query(`SELECT s.source_id,w.content_sha256,w.content_envelope
+    const rows = (await this.pool.query(`SELECT s.source_id,s.context_type,w.content_sha256,w.content_envelope
       FROM runa_m1_sources.sections s JOIN runa_workspace.source_sections w
         ON w.project_scope=s.project_id AND w.source_id=s.source_id AND w.section_id='provided'
       WHERE s.principal_id=$1 AND s.project_id=$2 AND s.source_id=ANY($3::text[]) AND w.active`,
@@ -109,7 +121,35 @@ export class PostgresSuppliedSourceStore {
       const value = this.cipher.decrypt(privateContext(context.projectId, sourceId), row.content_envelope);
       if (hash(value.content) !== row.content_sha256) throw fail("m1-source-integrity-invalid");
       return { projectId: context.projectId, sourceId, sectionId: "provided",
-        contentSha256: row.content_sha256, content: value.content, label: value.label, active: true };
+        contentSha256: row.content_sha256, content: value.content, label: value.label,
+        contextType: contextType.parse(row.context_type), active: true };
+    });
+  }
+
+  // Review presentation metadata is resolved from the same owned source rows as
+  // the canonical bytes. Browser-supplied labels or kinds never become trusted
+  // review context, and the exact selected revisions must still match.
+  async describeReviewContexts(rawScope, rawReferences) {
+    const scope = reviewScopeSchema.parse(rawScope);
+    const references = z.array(referenceSchema).min(1).max(6).parse(rawReferences);
+    if (references.some(reference => reference.projectId !== scope.projectId)) throw fail("m1-review-context-denied");
+    const ids = references.map(reference => reference.sourceId);
+    if (new Set(ids).size !== ids.length) throw fail("m1-review-context-invalid");
+    const rows = (await this.pool.query(`SELECT s.source_id,s.context_type,w.content_sha256,w.content_envelope
+      FROM runa_m1_sources.sections s JOIN runa_workspace.source_sections w
+        ON w.project_scope=s.project_id AND w.source_id=s.source_id AND w.section_id='provided'
+      WHERE s.principal_id=$1 AND s.project_id=$2 AND s.source_id=ANY($3::text[]) AND w.active`,
+    [scope.principalId, scope.projectId, ids])).rows;
+    if (rows.length !== references.length) throw fail("m1-review-context-denied");
+    return references.map(reference => {
+      const row = rows.find(value => value.source_id === reference.sourceId);
+      if (!row || reference.sectionId !== "provided" || row.content_sha256 !== reference.contentSha256) {
+        throw fail("m1-review-context-revision-conflict");
+      }
+      const value = this.cipher.decrypt(privateContext(scope.projectId, reference.sourceId), row.content_envelope);
+      return { contextType: contextType.parse(row.context_type), targetId: reference.sourceId,
+        sourceId: reference.sourceId, sectionId: reference.sectionId, contentSha256: reference.contentSha256,
+        label: z.string().trim().min(1).max(120).parse(value.label) };
     });
   }
 }

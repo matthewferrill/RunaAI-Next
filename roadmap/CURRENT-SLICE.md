@@ -500,6 +500,15 @@ campaign is required unless a material model, inference-setting, prompt, checker
 change occurs. The remaining work is exact-current-application acceptance, production routing and the
 customer trial, not another model campaign.
 
+Contextual Review implementation checkpoint, 2026-09-03: Review now requires one to six exact selected locators,
+binds their server-resolved count/order/identity and complete canonical bytes before provider access, preserves
+application-owned citations and the isolated one-revision `accept`/`revise` checker, and remains contextual rather
+than a permanent selector. Independent review stopped the first green draft on context-free provider access, silent
+partial resolution and full-content digests paired with truncated inputs. The corrected bytes received PASS at
+P0=0/P1=0 with 89/89 bounded tests. This is deterministic application evidence only; no model, browser, production
+route or actual-system acceptance ran. Record:
+`../gate7f/function-first/M1-S2-CONTEXTUAL-REVIEW-WORKFLOW-2026-09-03.md`.
+
 The historical halt text below is retained as evidence of the retired method, not current progress.
 
 Campaign halt, 2026-09-02: fresh zero-model stage `b230075b107b439480bfbecd64189e62`

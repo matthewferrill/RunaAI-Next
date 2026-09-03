@@ -907,6 +907,11 @@ body.workspace-active .primary-button:hover { filter: brightness(1.07); }
 .answer-evidence p, .answer-evidence li { font-size:inherit; }
 .answer-evidence ol { padding-left:1.3rem; }
 .evidence-warning { color:#795712; }
+.review-result { margin:.65rem 0; padding:.65rem .75rem; border:1px solid var(--workspace-edge-low); border-radius:.65rem; background:var(--workspace-accent-soft); }
+.review-result h3 { margin:0 0 .35rem; font-size:.95rem; }
+.review-result p { margin:.3rem 0; }
+.review-result ul { margin:.35rem 0; padding-left:1.3rem; overflow-wrap:anywhere; }
+.review-finding-meta { color:var(--workspace-ink-muted); font-size:.86rem; }
 
 .workspace-destinations { display: grid; gap: .2rem; padding: .15rem 0 .7rem; border-bottom: 1px solid var(--workspace-edge-low); }
 .workspace-destinations button { display:flex; align-items:center; gap:.65rem; width:100%; border:0; border-radius:.65rem; background:transparent; color:var(--workspace-ink); padding:.62rem .7rem; text-align:left; cursor:pointer; }

@@ -52,13 +52,17 @@ function emptyV1(request, { answer, reason, auditCode, ground = "no-ground-neede
 }
 
 class ExplicitIndex {
-  constructor(delegate, references) {
+  constructor(delegate, references, { preserveExactSelection = false } = {}) {
     this.delegate = delegate;
     this.references = references;
+    this.preserveExactSelection = preserveExactSelection;
     this.searches = [];
   }
   async search({ projectId, query, maximumPassages, deadlineMs }) {
     this.searches.push({ projectId, query });
+    if (this.preserveExactSelection) {
+      return { references: structuredClone(this.references), degraded: false, unavailable: [] };
+    }
     if (typeof this.delegate?.searchSelected === "function") {
       const result = await this.delegate.searchSelected({ projectId, query, maximumPassages, deadlineMs,
         references: this.references });
@@ -75,6 +79,19 @@ class ExplicitIndex {
       degraded: false, unavailable: [] };
   }
   async rerank(query, sources, maximumPassages, options) {
+    if (this.preserveExactSelection) {
+      const exact = sources.length === this.references.length && sources.every((source, index) => {
+        const reference = this.references[index];
+        return source.projectId === reference.projectId && source.sourceId === reference.sourceId
+          && source.sectionId === reference.sectionId && source.contentSha256 === reference.contentSha256
+          && typeof source.content === "string" && sha256(source.content) === reference.contentSha256;
+      });
+      if (!exact || maximumPassages < sources.length) {
+        throw Object.assign(new Error("Review evidence no longer matches the complete selected revisions."),
+          { code: "review-context-not-fully-supplied" });
+      }
+      return { sources: structuredClone(sources), degraded: false, unavailable: [], truncated: false };
+    }
     if (typeof this.delegate?.rerank !== "function") {
       return { sources: sources.slice(0, maximumPassages), degraded: true, unavailable: ["reranker"] };
     }
@@ -145,9 +162,108 @@ function providerFor(providers, role) {
   return provider;
 }
 
+class BoundReviewRecordProxy extends EphemeralRecordProxy {
+  constructor(delegate, references, sources) {
+    super(delegate);
+    this.references = references;
+    this.sources = sources;
+  }
+  async activeSources(projectId, references) {
+    const exact = references.length === this.references.length && references.every((reference, index) => {
+      const expected = this.references[index];
+      return projectId === expected.projectId && reference.projectId === expected.projectId
+        && reference.sourceId === expected.sourceId && reference.sectionId === expected.sectionId
+        && reference.contentSha256 === expected.contentSha256;
+    });
+    if (!exact) throw Object.assign(new Error("Review evidence selection changed after admission."),
+      { code: "review-context-not-fully-supplied" });
+    return structuredClone(this.sources);
+  }
+}
+
+function auditValue(response, prefix) {
+  const entry = response.auditCodes.find(code => code.startsWith(prefix));
+  return entry ? entry.slice(prefix.length) : null;
+}
+
+function reviewChecker(response) {
+  if (auditValue(response, "response-check-kind:") !== "evidence-review"
+      || auditValue(response, "response-check-performed:") !== "true") return null;
+  const corrected = auditValue(response, "response-check-corrected:") === "true";
+  const attemptCount = Number(auditValue(response, "response-check-attempt-count:"));
+  const finalAnswerOrigin = auditValue(response, "response-check-final-origin:");
+  if ((corrected && (attemptCount !== 2 || finalAnswerOrigin !== "checker-correction"))
+      || (!corrected && (attemptCount !== 1 || finalAnswerOrigin !== "primary"))) return null;
+  return { initialVerdict: corrected ? "revise" : "accept", finalVerdict: "accept",
+    revisionPasses: corrected ? 1 : 0, attemptCount, finalAnswerOrigin };
+}
+
+function reviewResult(request, response, contexts) {
+  if (request.lane !== "review") return null;
+  const checker = response.completion.reason === "complete" && response.citations.length > 0
+    ? reviewChecker(response) : null;
+  const status = !checker ? "incomplete" : checker.revisionPasses ? "accepted-revision" : "accepted-primary";
+  const findings = status === "incomplete" ? [] : [{
+    findingId: `review-${sha256(JSON.stringify([request.requestId, response.answer, response.citations])).slice(0, 32)}`,
+    text: response.answer,
+    severity: "unclassified",
+    citationOrdinals: response.citations.map(citation => citation.ordinal),
+  }];
+  return { status, contexts, checker, findings };
+}
+
+function exactReviewContexts(references, contexts) {
+  const values = Array.isArray(contexts) ? contexts : [];
+  if (values.length !== references.length) throw Object.assign(new Error("Review context resolution was incomplete."),
+    { code: "review-context-resolution-invalid" });
+  return references.map((reference, index) => {
+    const value = values[index];
+    const valid = value && ["source", "artifact", "diff"].includes(value.contextType)
+      && typeof value.targetId === "string" && value.targetId.length > 0 && value.targetId.length <= 160
+      && value.sourceId === reference.sourceId && value.sectionId === reference.sectionId
+      && value.contentSha256 === reference.contentSha256
+      && (value.label === null || (typeof value.label === "string" && value.label.trim().length > 0 && value.label.length <= 120));
+    if (!valid) throw Object.assign(new Error("Review context resolution did not match the selected revisions."),
+      { code: "review-context-resolution-invalid" });
+    return { contextType: value.contextType, targetId: value.targetId, sourceId: value.sourceId,
+      sectionId: value.sectionId, contentSha256: value.contentSha256, label: value.label };
+  });
+}
+
+function exactRequestedReviewReferences(request, references) {
+  const requested = request.workspace.sources;
+  const locatorKeys = requested.map(locator => `${locator.sourceId}\u0000${locator.sectionId}`);
+  const exact = references.length === requested.length && new Set(locatorKeys).size === locatorKeys.length
+    && references.every((reference, index) => reference.projectId === request.project.projectId
+      && reference.sourceId === requested[index].sourceId && reference.sectionId === requested[index].sectionId
+      && /^[a-f0-9]{64}$/.test(reference.contentSha256));
+  if (!exact) throw Object.assign(new Error("Review requires every requested locator in its original order."),
+    { code: "review-context-selection-denied" });
+  return references;
+}
+
+function exactBoundReviewSources(request, references, sources) {
+  const values = Array.isArray(sources) ? sources : [];
+  const exact = values.length === references.length && values.every((source, index) => {
+    const reference = references[index];
+    return source && source.active !== false && source.projectId === request.project.projectId
+      && source.sourceId === reference.sourceId && source.sectionId === reference.sectionId
+      && source.contentSha256 === reference.contentSha256 && typeof source.content === "string"
+      && sha256(source.content) === reference.contentSha256;
+  });
+  const characters = exact ? values.reduce((total, source) => total + source.content.length, 0) : Infinity;
+  if (!exact || values.length > request.budgets.maximumPassages
+      || characters > request.budgets.maximumEvidenceCharacters) {
+    throw Object.assign(new Error("Review cannot supply every selected revision in full within the server-owned bounds."),
+      { code: "review-context-not-fully-supplied" });
+  }
+  return structuredClone(values);
+}
+
 export class Gate2ReadOnlyService {
   constructor({ records, index, providers, continuity, workspaceResolver, telemetry = null,
     approvedKnowledge = null,
+    reviewContextResolver = null, requireReviewCheck = false,
     statusProvider = () => ({ provider: "unknown", retrieval: "unknown", reranker: "unknown" }) }) {
     this.records = records;
     this.index = index;
@@ -156,6 +272,8 @@ export class Gate2ReadOnlyService {
     this.workspaceResolver = workspaceResolver;
     this.telemetry = telemetry;
     this.approvedKnowledge = approvedKnowledge;
+    this.reviewContextResolver = reviewContextResolver;
+    this.requireReviewCheck = requireReviewCheck === true;
     this.statusProvider = statusProvider;
   }
 
@@ -175,6 +293,8 @@ export class Gate2ReadOnlyService {
       || explicitSources
       || (request.lane === "general" && requiresProjectRecord(request.message, request.history));
     let resolvedWorkspace = { references: [], denied: [] };
+    let reviewContexts = [];
+    let boundReviewSources = null;
     let knowledgeDelivery = null;
     let response = deterministicResponse(request);
     if (!response && knowledgeRequired && !explicitSources && this.index.requiresExplicitSelection === true) {
@@ -190,6 +310,29 @@ export class Gate2ReadOnlyService {
         answer: "That information belongs to another project and is not available in this chat.",
         reason: "workspace-cross-project-denied", auditCode: "workspace-cross-project-denied",
       });
+      if (!response && request.lane === "review") {
+        exactRequestedReviewReferences(request, resolvedWorkspace.references);
+        try {
+          const sources = await this.records.activeSources(request.project.projectId, resolvedWorkspace.references);
+          boundReviewSources = exactBoundReviewSources(request, resolvedWorkspace.references, sources);
+        } catch (error) {
+          if (error?.code !== "review-context-not-fully-supplied") throw error;
+          response = emptyV1(request, {
+            answer: "Runa could not review every selected revision in full within the current evidence bounds.",
+            reason: error.code, auditCode: error.code, ground: "record-silent",
+          });
+        }
+      }
+      if (!response && request.lane === "review") {
+        const described = this.reviewContextResolver
+          ? await this.reviewContextResolver.describeReviewContexts({
+            principalId: request.participant.principalId, projectId: request.project.projectId,
+          }, resolvedWorkspace.references)
+          : resolvedWorkspace.references.map(reference => ({ contextType: "source", targetId: reference.sourceId,
+            sourceId: reference.sourceId, sectionId: reference.sectionId,
+            contentSha256: reference.contentSha256, label: null }));
+        reviewContexts = exactReviewContexts(resolvedWorkspace.references, described);
+      }
       if (response) knowledgeFallbackReason = "not-evaluated-workspace-boundary";
     }
 
@@ -220,13 +363,16 @@ export class Gate2ReadOnlyService {
 
     if (!response) {
       const selectedIndex = explicitSources
-        ? new ExplicitIndex(this.index, resolvedWorkspace.references)
+        ? new ExplicitIndex(this.index, resolvedWorkspace.references,
+          { preserveExactSelection: request.lane === "review" })
         : this.index;
       // Application-bound conversations use the outer durable coordinator and
       // revision-checked continuity store. An inner answer cache must not replay
       // stale/incomplete output after the authoritative context advances.
-      const selectedRecords = request.participant.verified && request.contextRevision === undefined
-        ? this.records : new EphemeralRecordProxy(this.records);
+      const selectedRecords = boundReviewSources
+        ? new BoundReviewRecordProxy(this.records, resolvedWorkspace.references, boundReviewSources)
+        : request.participant.verified && request.contextRevision === undefined
+          ? this.records : new EphemeralRecordProxy(this.records);
       const advisoryContext = providerAdvisoryFromDelivery(knowledgeDelivery);
       try {
         const provider = providerFor(this.providers, role);
@@ -253,6 +399,13 @@ export class Gate2ReadOnlyService {
     response.requestId = request.requestId;
     response.lane = request.lane;
     if (response.model.role !== "not-invoked") response.model.role = role;
+    if (request.lane === "review" && this.requireReviewCheck && response.completion.reason === "complete"
+        && (!reviewChecker(response) || response.citations.length === 0)) {
+      response.answer = "Runa could not complete the required Review check. No Review finding was accepted.";
+      response.citations = [];
+      response.completion.reason = "provider-response-check-invalid";
+      response.auditCodes.push("required-review-check-missing");
+    }
     const gates = applyCommonAnswerGates(response, request);
     const knowledgeReceipt = approvedKnowledgeReceipt(knowledgeDelivery, knowledgeFallbackReason, {
       delivered: response.auditCodes.includes("approved-knowledge-delivered"),
@@ -267,6 +420,7 @@ export class Gate2ReadOnlyService {
       extraReads: 0,
       citationStatus: citationStatus(response),
     } : null;
+    response.review = reviewResult(request, response, reviewContexts);
     response.gates = gates;
     response.execution = answerExecutionStamp(request.lane);
     response.status = {

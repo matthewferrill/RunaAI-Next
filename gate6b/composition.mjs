@@ -145,6 +145,7 @@ export async function createProductionComposition({ loadedConfig, releaseRoot })
     ...(m1 ? { review: m1.review } : {}) };
   const answerService = new Gate2ReadOnlyService({ records: workspace, index: m1?.index ?? workspace, providers,
     continuity, workspaceResolver: workspace, approvedKnowledge,
+    reviewContextResolver: m1?.sources ?? null, requireReviewCheck: Boolean(m1),
     statusProvider: () => ({ provider: "private-openai-compatible", retrieval: m1 ? "qdrant-nomic-selected-sources" : "postgres-direct",
       reranker: m1 ? "explicit-window-bge" : "explicit-window-not-required-for-explicit-source-set" }) });
   const actionService = new Gate3GovernedActionService({ store: actionStore });

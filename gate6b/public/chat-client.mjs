@@ -2,7 +2,7 @@ export const CHAT_DEADLINE_MS = 65_000;
 
 const retryableCompletionReasons = new Set([
   "timeout", "output-limited", "provider-output-empty", "provider-response-invalid",
-  "provider-shape-invalid", "provider-incomplete", "provider-transport-failed",
+  "provider-shape-invalid", "provider-response-check-invalid", "provider-incomplete", "provider-transport-failed",
   "provider-model-mismatch", "provider-role-mismatch", "provider-role-unavailable",
   "unverified-action-claim", "dependency-unavailable",
 ]);

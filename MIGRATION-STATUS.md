@@ -531,6 +531,14 @@ TLS, HTTP, Git fetch, Control worker/publication, browser action, production cha
 gate remains the separately reviewed real TLS connector/broker child. Record:
 `gate7f/function-first/M1-S2B1-GIT-STREAM-PREFLIGHT-2026-09-03.md`.
 
+**Contextual Review workflow, 2026-09-03:** the application now requires one to six exact selected locators,
+fully resolves and hash-verifies their canonical bytes in requested order before provider access, preserves
+application-owned citations, and isolates the simplified one-revision `accept`/`revise` checker to Review. The first
+green draft was stopped at P1=3 for context-free provider access, silent partial resolution, and full-content hashes
+paired with truncated inputs. The corrected bytes received independent PASS at P0=0/P1=0 with 89/89 bounded tests.
+No model, browser runtime, network, production route or actual-system acceptance occurred. Record:
+`gate7f/function-first/M1-S2-CONTEXTUAL-REVIEW-WORKFLOW-2026-09-03.md`.
+
 **Application slice, 2026-09-02:** model selection is complete and the retired R15 campaign is not being
 resumed. The active clean branch is `codex/m1-gemma-primary`, based on the five-function qualification
 decision. Gemma is the sole primary for Chat, Research, Code, Agent and Review. The immediate work is to

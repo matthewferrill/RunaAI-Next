@@ -19,9 +19,11 @@ test("saved evidence retains exact application references but no answer, source 
   const response = evidenceResponse();
   const saved = answerEvidence(response);
   assert.equal(saved.citations[0].contentSha256, response.citations[0].contentSha256);
-  assert.equal(saved.schemaVersion, "runaai-answer-evidence/v1");
+  assert.equal(saved.schemaVersion, "runaai-answer-evidence/v2");
+  assert.equal(saved.review, null);
   assert.deepEqual(saved.execution, { status: "not-executed" });
   assert.equal("answer" in saved, false); assert.equal("model" in saved, false);
+  assert.equal(JSON.stringify(saved).includes(response.answer), false);
   response.citations[0].sourceId = "changed";
   assert.equal(saved.citations[0].sourceId, "source-one");
   assert.deepEqual(readAnswerEvidence(saved), saved);

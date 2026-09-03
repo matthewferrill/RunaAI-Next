@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
-import { SelectedSourceIndex } from "./sources.mjs";
+import { PostgresSuppliedSourceStore, SelectedSourceIndex } from "./sources.mjs";
 
 const content = "Synthetic Atlas launch: April 9. Do not confuse it with Beacon.";
 const source = { projectId: "project-atlas", sourceId: "source-atlas", sectionId: "provided",
@@ -83,4 +83,22 @@ test("only explicitly named M1 collections and credential-free endpoints are acc
   const base = { endpoint: "http://127.0.0.1:6333", collection: "production" };
   assert.throws(() => new SelectedSourceIndex(base), /config-invalid/);
   assert.throws(() => new SelectedSourceIndex({ ...base, collection: "m1_ok", endpoint: "http://user:password@localhost:6333" }), /config-invalid/);
+});
+
+test("Review context descriptions preserve server-owned kind and exact selected revision", async () => {
+  const digest = reference.contentSha256;
+  const store = new PostgresSuppliedSourceStore({
+    pool: { async query(sql, args) {
+      assert.match(sql, /principal_id=\$1 AND s\.project_id=\$2/);
+      assert.deepEqual(args, ["alice", source.projectId, [source.sourceId]]);
+      return { rows: [{ source_id: source.sourceId, context_type: "diff", content_sha256: digest,
+        content_envelope: { label: "Exact proposed diff" } }] };
+    } },
+    cipher: { decrypt: (_context, envelope) => envelope }, index: {},
+  });
+  const result = await store.describeReviewContexts({ principalId: "alice", projectId: source.projectId }, [reference]);
+  assert.deepEqual(result, [{ contextType: "diff", targetId: source.sourceId, sourceId: source.sourceId,
+    sectionId: source.sectionId, contentSha256: digest, label: "Exact proposed diff" }]);
+  await assert.rejects(store.describeReviewContexts({ principalId: "alice", projectId: source.projectId },
+    [{ ...reference, contentSha256: "f".repeat(64) }]), /revision-conflict/);
 });

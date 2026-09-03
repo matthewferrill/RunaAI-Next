@@ -110,6 +110,18 @@ test("code endpoints require a live server-session verifier", async () => {
   const { surface } = fixture(); const value = request("project.prepare"); value.body.experience = "code"; delete value.verifySession;
   await assert.rejects(surface.dispatch(value), /session-verifier-required/);
 });
+test("selected Review context preserves server-owned source, artifact and diff kinds", async () => {
+  const { application, sources, tasks } = fixture();
+  sources.selected = async (_context, sourceIds) => sourceIds.map((sourceId, index) => ({ sourceId,
+    sectionId: "provided", contentSha256: `${index + 1}`.repeat(64),
+    contextType: ["source", "artifact", "diff"][index], label: `Context ${index + 1}` }));
+  const surface = new M1FunctionSurface({ application, sources, tasks });
+  const value = request("sources.select", { sourceIds: ["one", "two", "three"] });
+  assert.deepEqual((await surface.dispatch(value)).sources.map(({ sourceId, contextType }) => ({ sourceId, contextType })), [
+    { sourceId: "one", contextType: "source" }, { sourceId: "two", contextType: "artifact" },
+    { sourceId: "three", contextType: "diff" },
+  ]);
+});
 
 test("server workspace operations route only after code, session, project and effect authorization", async () => {
   const { application, sources, tasks, called } = fixture();

@@ -82,7 +82,8 @@ export class M1FunctionSurface {
     if (operation === "sources.select") {
       const selection = z.object({ sourceIds: z.array(id).min(1).max(6) }).strict().parse(input);
       const selected = await this.sources.selected(context, selection.sourceIds);
-      return { sources: selected.map(({ sourceId, sectionId, contentSha256, label }) => ({ sourceId, sectionId, contentSha256, label })) };
+      return { sources: selected.map(({ sourceId, sectionId, contentSha256, contextType = "source", label }) =>
+        ({ sourceId, sectionId, contentSha256, contextType, label })) };
     }
     if (experience !== "code") throw fail("m1-code-experience-required");
     if (typeof verifySession !== "function") throw fail("m1-session-verifier-required");

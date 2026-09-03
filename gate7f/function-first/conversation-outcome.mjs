@@ -1,5 +1,7 @@
 export const INCOMPLETE_ANSWER_REASONS = Object.freeze(["timeout", "output-limited", "provider-output-empty",
   "provider-response-invalid", "provider-shape-invalid", "provider-incomplete", "provider-transport-failed",
+  "provider-response-check-invalid",
+  "review-context-not-fully-supplied",
   "provider-model-mismatch", "provider-role-mismatch", "provider-role-unavailable", "unverified-action-claim",
   "dependency-unavailable"]);
 

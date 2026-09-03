@@ -35,7 +35,16 @@ cannot copy the legacy localhost assumption: Control cannot read Omen paths. A l
 companion retains DPAPI-protected local root/key custody while Control PostgreSQL retains
 participant/project/device authorization and immediate revocation. File and fixed-command local-Git
 reads require pre-read Control capabilities and signed receipts; models, writes, remotes and production
-routing remain out of scope. Implementation waits for the criteria publication commit.
+routing remain out of scope. The original criteria were published in `3c1dc57`, after which implementation
+began. Only the Git layer is now paused pending independent review and publication of the actual-startup
+amendment.
+
+**M1-S2B actual checkpoint, 2026-09-02:** Control authority contracts pass 5/5 focused and 9/9 actual
+PostgreSQL checks. Omen local files pass 14/14 actual DPAPI/Windows-handle checks after documented method
+and fixture RCAs. The first actual Git/MXC run stopped before Git startup on MXC custom-environment error
+`0x800700CB`. The no-environment, fixed-command-line amendment has independent GO with P0=0/P1=0; Git
+remains paused until the exact amendment is committed. Models, browser/HTTPS acceptance and production
+remain untouched.
 
 **Application slice, 2026-09-02:** model selection is complete and the retired R15 campaign is not being
 resumed. The active clean branch is `codex/m1-gemma-primary`, based on the five-function qualification

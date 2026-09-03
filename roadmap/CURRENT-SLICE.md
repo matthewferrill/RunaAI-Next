@@ -23,8 +23,15 @@ Local-context connection freeze, 2026-09-02: `M1-S2B-OMEN-LOCAL-CONTEXT-CONNECTI
 binds the next slice to the real Omen/Control split. Omen alone owns native folder selection, DPAPI root
 custody, bounded file reads and allowlisted local Git. Control PostgreSQL owns participant/project/device
 authorization, lifecycle and revocation. Browser-relayed results require signed receipts. No model,
-automatic indexing, write, Git mutation, remote operation or production route is included. Implementation
-has not started and waits for the criteria publication commit.
+automatic indexing, write, Git mutation, remote operation or production route is included. The original
+criteria were published in `3c1dc57`, after which implementation began. Only the Git layer is now paused
+pending independent review and publication of the actual-startup amendment.
+
+M1-S2B implementation checkpoint, 2026-09-02: the authority foundation and actual PostgreSQL lifecycle
+are green, and the actual Omen DPAPI/handle-based file proof is green after retained RCAs. The first actual
+Git/MXC startup stopped before Git launched because Omen MXC rejects a non-empty custom environment. The
+no-launcher command-line-control amendment has independent GO with P0=0/P1=0; the Git layer remains paused
+until the exact amendment is committed. No browser, HTTPS, model or production work has run.
 
 Workspace baseline checkpoint: see
 `gate7f/function-first/M1-S2-WORKSPACE-BASELINE-IMPLEMENTATION-RESULTS-2026-09-02.md` for the accepted

@@ -1,13 +1,13 @@
 # M1-S2B Omen local-folder and local-Git read-only criteria — 2026-09-02
 
-Status: frozen for implementation after independent review GO with P0=0/P1=0. Implementation may start
-only from the committed criteria publication.
+Status: frozen criteria amended after the first actual Omen Git startup RCA; independent re-review is GO
+with P0=0/P1=0. The Git layer remains paused until this exact amendment is committed.
 
 ## Slice selection record
 
 - Selection date and source commit: 2026-09-02 / `4851818`.
 - Roadmap revision and SHA-256: `2026-08-28.1` /
-  `cf8fa380bf7f060ef0c65d83ee6c909d5b5b2700d76fa2a3629c3323433271e2`.
+  `1c5fb61fb304ce1e03a3c499d8698991962e7ad3ebc84d1c87e09fda23623b70`.
 - Milestone and capability subsets: M1 product-foundation pull-forward; C02 project context, C03 explicit
   local text files, C06 repository orientation, C08 local Git observation, C15 usable connection/file
   surfaces, and C16 the exact Omen ordinary-user seat.
@@ -139,10 +139,19 @@ credential-free host/repository display before leaving Omen.
 
 `.git` must be a real in-root directory; `.git` indirection files, linked worktrees, submodule traversal,
 object alternates, replace objects, promisor/partial-clone lazy fetch and repository config includes are
-refused. System/global configuration is replaced by empty owned files; repository config is parsed first
-and refused if it names an executable helper/filter/fsmonitor/external diff, include or outside-root
-object store. `GIT_OPTIONAL_LOCKS=0`, `GIT_NO_REPLACE_OBJECTS=1`, `GIT_NO_LAZY_FETCH=1`,
-`GIT_TERMINAL_PROMPT=0` and an empty credential helper are mandatory. The child runs only in the new
+refused. Repository config is parsed first and refused if it names an executable
+helper/filter/fsmonitor/external diff, include or outside-root object store. The pinned Git command prefix
+is exactly `--no-optional-locks --no-replace-objects --no-lazy-fetch --no-pager`, followed by literal
+`-c` pairs for `core.hooksPath=NUL`, `credential.helper=`, `credential.interactive=false`, `core.askPass=`,
+`core.fsmonitor=false`, `diff.external=`, `core.attributesFile=NUL`, `core.excludesFile=NUL`,
+`interactive.diffFilter=`, `protocol.allow=never`, `maintenance.auto=false`, `gc.auto=0`,
+`fetch.writeCommitGraph=false`, `core.untrackedCache=false`, `core.preloadIndex=false` and the exact
+`safe.directory=<selected-root>` value. Diff/show additionally require `--no-ext-diff --no-textconv`.
+System/global config may be parsed by Git because MXC cannot accept the environment variables that would
+replace it, but these exact later command-line values override every executable, prompting, network,
+conversion, maintenance and optional-write surface reachable by the closed read-only verbs. Repository
+attributes may select a diff driver but `--no-ext-diff --no-textconv` prevents it from running.
+Remote-capable verbs remain unreachable, so no credential or terminal prompt path exists. The child runs only in the new
 manifest-bound `runa-omen-git-readonly/v1` network-denied Windows containment profile.
 Status/log/branches/diff/show use NUL-delimited machine
 formats; invalid UTF-8, unexpected fields, control characters, excessive paths or output overflow fail
@@ -151,12 +160,18 @@ closed rather than reaching the UI.
 The new `runa-omen-git-readonly/v1` containment manifest pins MXC `0.8.0`, the generated policy bytes, the
 absolute `git.exe` path/hash, release runtime files and the exact read-only selected-root grant. Its
 AppContainer declares neither `internetClient` nor `privateNetworkClientServer`, receives no writable
-path, inherited handle, stdin, inherited environment or credential. It receives only the release-pinned
-Windows loader variables plus the Git-denial variables enumerated above, each with an exact value; the
-actual Omen startup proof freezes that manifest. It is additionally constrained by a
-kill-on-close job with child-process count one, 512 MiB memory and the operation deadline. Release
-acceptance requires first-run and post-restart proof on actual Omen that public, LAN and loopback probe
-listeners receive zero connections. An MXC warning, unsupported tier, policy drift, required broad ACL
+path, inherited handle, stdin, custom/inherited environment or credential. `process.env` is omitted
+because actual Omen MXC 0.8.0 rejects every non-empty custom environment before `CreateProcessW`; the
+fixed Git command-line controls above replace the required safety effects without adding a launcher or
+shell. The actual Omen startup proof freezes that manifest. MXC enforces the 15-second process timeout;
+the companion also bounds captured output and treats a missed terminal exit as failure. This slice does
+not claim a ProcessContainer child-count or memory ceiling because MXC 0.8.0 exposes neither control.
+Security instead depends on the fixed Git verbs and flags, closed executable-extension points, read-only
+root/runtime grants and deny-all network containment. Actual acceptance must inventory the MXC process
+tree during a deliberately long bounded operation and fail if an executable other than the pinned MXC
+executor and pinned Git workload appears, or if either remains after completion or timeout. Release
+acceptance also requires first-run and post-restart proof on actual Omen that public, LAN and loopback
+probe listeners receive zero connections. An MXC warning, unsupported tier, policy drift, required broad ACL
 change or inability to start pinned Git is a stopped actual-system failure; the design may not silently
 reuse Gate 7E or run Git outside this profile.
 

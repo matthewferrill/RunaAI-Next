@@ -127,4 +127,45 @@ the six known fields but did not reject an additional unknown field, contradicti
 The parser now requires exactly the six public keys and a focused regression accepts the valid schema while
 rejecting an otherwise-valid record with an extra key. The revised bytes remain unexecuted. Focused checks
 pass 18/18, roadmap checks pass 15/15, parser/pin checks pass, and fresh exact-byte re-review returned GO with
-P0=0/P1=0. A source commit remains required before the one typed diagnostic.
+P0=0/P1=0. At that point, a source commit remained required before the one typed diagnostic.
+
+## Third sealed diagnostic stop and incompatible monitor RCA
+
+Commit `b2cd9af` sealed the exact-schema correction. Its single run again stopped before category watching,
+MXC or Git, now conclusively at `process-audit-wmi-start-failed`. The pinned PowerShell call to
+`ManagementEventWatcher.Start()` threw `System.Management.Automation.MethodInvocationException` with HResult
+`-2146233087`; the bounded 253-byte error record has SHA-256
+`1d704a9e92c1ac5ff7bda240c1abf54582905f27da5d90714c1753d69c6d2bfb`, no overflow and no private values.
+Read-only postchecks found zero owned roots and monitor processes. The event-subscription monitor is therefore
+incompatible with the actual ordinary Omen execution context and is retired rather than retried.
+
+An attempted replacement used repeated `Get-CimInstance Win32_Process` snapshots and a real Windows
+parent/child proof. Independent exact-byte review stopped it before execution with P0=0/P1=3: finite polling
+could miss short-lived descendants while later logic treated the result as exhaustive, the proof did not bind
+evidence to the exact expected root/leaf PIDs and parent relationship, and abnormal cleanup had not been
+exercised with safe PID-reuse/read-failure handling. The polling bytes and proof were removed; no polling proof
+or Git operation ran.
+
+The event-classification diagnostic is instead narrowed to facts its existing actual surfaces can prove: it
+requires exactly one pinned MXC wrapper child to close with exit 0, the native guard to release with no
+surviving guard, repository tree and security descriptor equality, aggregate category evidence with zero
+watcher errors, and exact disposable-root cleanup. It does not claim that the wrapper had no unobserved
+descendants. Exhaustive process accounting remains a separate Git-acceptance blocker, and the WMI event
+monitor remains recorded as incompatible with ordinary Omen execution. Focused preflight and independent
+exact-byte review must pass before a source commit and one event-classification diagnostic resume. Git
+acceptance remains paused; no model, browser, network or production action is included.
+
+## Narrowed-diagnostic review stop and cleanup correction
+
+The first review of the narrowed bytes returned P0=0/P1=2 without executing them. First, the code recorded
+`ownedFixtureRemoved` after `rm` but did not gate successful return on it. Second, the injected MXC child
+record retained no process handle or terminal promise, so an abnormal observer terminal miss could release the
+guard and allow root deletion while the exact wrapper remained alive.
+
+The correction retains the exact child handle and one close promise outside the main operation. On every
+abnormal path it kills through that handle and requires bounded terminal close; if closure cannot be proven,
+cleanup fails and deliberately preserves the evidence root. After permitted root removal, successful return
+now requires `ownedFixtureRemoved=true`. Focused source assertions cover both close reconciliation and the
+post-cleanup success gate. The focused suite passes 17/17, roadmap verification passes 15/15, Node
+syntax/diff checks are green, and independent exact-byte re-review returned GO with P0=0/P1=0. The reviewed
+bytes remain unexecuted and must be source-committed before the one diagnostic resume.

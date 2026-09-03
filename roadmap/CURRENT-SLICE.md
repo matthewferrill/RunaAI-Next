@@ -93,7 +93,21 @@ and a source commit. The first review stopped at P0=0/P1=1 because the parser di
 despite the exact-schema claim. It now requires the exact six-key set and has positive plus extra-key rejection
 coverage. The revised bytes remain unexecuted. Focused checks pass 18/18, roadmap checks pass 15/15,
 parser/pin checks pass, and fresh exact-byte re-review returned GO with P0=0/P1=0. A source commit remains
-required before one typed diagnostic. Acceptance remains paused.
+required before one typed diagnostic. Commit `b2cd9af` sealed it. The single run conclusively stopped before
+category watching, MXC or Git at `process-audit-wmi-start-failed`; cleanup left zero roots/helpers. The
+incompatible event-subscription design is retired. Independent review stopped a proposed CIM-polling
+replacement before execution (P0=0/P1=3): polling was not exhaustive, exact expected PIDs were not bound, and
+abnormal cleanup was not safely proven. No polling proof or Git operation ran. The diagnostic is now narrowed
+to one pinned MXC wrapper child close/exit, native-guard release/no survivor, unchanged tree/security
+descriptor, aggregate event categories, zero watcher errors and owned-root cleanup. It explicitly does not
+prove exhaustive process accounting, which remains a separate Git-acceptance blocker. The first narrowed-byte
+review stopped at P0=0/P1=2: cleanup removal was not enforced, and an abnormal MXC-wrapper terminal miss could
+leave the exact child live while deleting its root. The correction retains its child handle/terminal promise,
+kills and requires bounded close on abnormal paths, preserves the root if closure is unproven, and gates
+success on verified root removal. The focused suite passes 17/17, roadmap verification passes 15/15, Node
+syntax/diff checks are green, and independent exact-byte re-review returned GO with P0=0/P1=0. The reviewed
+bytes remain unexecuted and must be source-committed before one diagnostic resume. No
+model/network/acceptance work is included. Acceptance remains paused.
 No browser, HTTPS, model or production work has run.
 
 Workspace baseline checkpoint: see

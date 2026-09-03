@@ -42,7 +42,22 @@ source commit. The first review stopped at P0=0/P1=1 because the parser did not 
 the exact-schema claim. It now requires the exact six-key set and has positive plus extra-key rejection
 coverage. The revised bytes remain non-executable. Focused checks pass 18/18, roadmap checks pass 15/15,
 parser/pin checks pass, and fresh exact-byte re-review returned GO with P0=0/P1=0. A source commit remains
-required before one typed diagnostic. Acceptance stays paused.
+required before one typed diagnostic. Commit `b2cd9af` sealed it. The single run conclusively stopped before
+category watching, MXC or Git at `process-audit-wmi-start-failed`; cleanup left zero roots/helpers. The
+incompatible event-subscription monitor is retired. Independent review stopped a proposed CIM-polling
+replacement before execution (P0=0/P1=3): snapshots were not exhaustive, the exact expected PIDs were not
+bound, and abnormal-cleanup safety was not proven. No polling proof or Git operation ran. The corrected
+diagnostic is deliberately narrower: one pinned MXC wrapper child must close with exit 0, the native guard
+must release with no surviving guard, repository tree/security must remain unchanged, category evidence must
+be aggregate-only with zero watcher errors, and the owned root must be removed. It does not prove exhaustive
+descendant accounting; that remains a separate acceptance blocker. The first narrowed-byte review stopped at
+P0=0/P1=2 because removal was not success-gated and an abnormal MXC-wrapper terminal miss could leave the
+exact child alive while deleting its root. The correction retains its handle/terminal promise, kills and
+requires bounded close on abnormal paths, preserves the root if closure is unproven, and requires verified
+root removal before success. The focused suite passes 17/17, roadmap verification passes 15/15, Node
+syntax/diff checks are green, and independent exact-byte re-review returned GO with P0=0/P1=0. The reviewed
+bytes remain non-executable until source-committed; only then may one diagnostic resume. No
+model/network/acceptance work is included. Acceptance stays paused.
 
 ## Slice selection record
 

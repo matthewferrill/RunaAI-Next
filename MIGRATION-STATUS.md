@@ -119,7 +119,25 @@ focused preflight, independent review and a source commit. The first review stop
 parser did not reject unknown keys despite the exact-schema claim. It now requires exactly the six allowed
 keys, with positive and extra-key rejection coverage. The revised bytes remain unexecuted. Focused checks
 pass 18/18, roadmap checks pass 15/15, parser/pin checks pass, and fresh exact-byte re-review returned GO with
-P0=0/P1=0. A source commit remains required before one typed diagnostic. Acceptance remains paused.
+P0=0/P1=0. At that point, a source commit remained required before one typed diagnostic. Commit `b2cd9af`
+sealed it. The single run conclusively stopped before category watching, MXC or Git at
+`process-audit-wmi-start-failed`: `ManagementEventWatcher.Start()` is incompatible with the ordinary Omen
+context (MethodInvocationException, HResult -2146233087; bounded 253-byte error hash retained). Cleanup left
+zero owned roots/helpers. That event-subscription design is retired. A proposed CIM-polling replacement was
+stopped before execution by independent review (P0=0/P1=3): snapshots could miss short-lived descendants,
+the proof did not bind the exact expected parent/child PIDs, and abnormal-cleanup safety was not proven. No
+polling proof or Git operation ran. The current correction removes process accounting from this narrow
+event-classification diagnostic. It proves only one pinned MXC wrapper child closed with exit 0, native-guard
+release with no surviving guard, unchanged repository tree/security descriptor, aggregate event categories,
+zero watcher errors and owned-root cleanup. It does not claim exhaustive descendant accounting; that remains
+a separate Git-acceptance blocker. The first narrowed-byte review stopped at P0=0/P1=2 because successful
+cleanup was recorded but not enforced and an abnormal MXC-wrapper terminal miss could leave that exact child
+alive while deleting its root. The correction retains the exact child handle and terminal promise, kills and
+requires bounded close on every abnormal path, preserves the root when closure cannot be proved, and enforces
+owned-root removal before success. The focused suite passes 17/17, roadmap verification passes 15/15, Node
+syntax/diff checks are green, and independent exact-byte re-review returned GO with P0=0/P1=0. The reviewed
+bytes remain unexecuted and must be source-committed before one diagnostic resume. No model/network or
+acceptance work is included. Acceptance remains paused.
 
 **Application slice, 2026-09-02:** model selection is complete and the retired R15 campaign is not being
 resumed. The active clean branch is `codex/m1-gemma-primary`, based on the five-function qualification

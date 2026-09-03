@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 import { spawn, spawnSync } from "node:child_process";
-import { existsSync, writeFileSync } from "node:fs";
+import { existsSync } from "node:fs";
 import { mkdir, mkdtemp, readFile, readdir, realpath, rm, writeFile } from "node:fs/promises";
 import { homedir, tmpdir } from "node:os";
 import { join, relative, resolve, sep } from "node:path";
@@ -11,54 +11,6 @@ import { OmenRootStore, WindowsNativeBridge } from "./native-bridge.mjs";
 import { loadOmenReleasePins } from "./release-pins.mjs";
 
 const coded = code => Object.assign(new Error(code), { code });
-const delay = milliseconds => new Promise(done => setTimeout(done, milliseconds));
-
-async function waitForFile(path, maximumMs = 5_000) {
-  const deadline = Date.now() + maximumMs;
-  while (!existsSync(path) && Date.now() < deadline) await delay(20);
-  if (!existsSync(path)) throw coded("diagnostic-process-audit-ready-timeout");
-}
-
-async function waitForProcessReady(path, processOutcome, processDiagnostic, maximumMs = 30_000) {
-  const deadline = Date.now() + maximumMs;
-  while (!existsSync(path) && Date.now() < deadline) {
-    const signal = await Promise.race([
-      delay(20).then(() => null),
-      processOutcome.then(exitCode => ({ exitCode }), error => ({ error })),
-    ]);
-    if (signal) {
-      const diagnostic = processDiagnostic();
-      const error = coded(diagnostic.monitorErrorCode ?? signal.error?.code
-        ?? "diagnostic-process-audit-startup-failed");
-      Object.assign(error, diagnostic, { exitCode: signal.exitCode ?? null });
-      throw error;
-    }
-  }
-  if (!existsSync(path)) {
-    const error = coded("diagnostic-process-audit-ready-timeout");
-    Object.assign(error, processDiagnostic(), { exitCode: null });
-    throw error;
-  }
-}
-
-export function parseProcessMonitorError(bytes) {
-  let value;
-  try { value = JSON.parse(bytes.toString("utf8").trim()); } catch { return null; }
-  const codes = new Set(["process-audit-construct-failed", "process-audit-configure-failed",
-    "process-audit-wmi-start-failed", "process-audit-ready-publish-failed"]);
-  const keys = ["schemaVersion", "errorCode", "exceptionType", "hResult", "managementStatus",
-    "privateValuesIncluded"];
-  if (!value || value.schemaVersion !== "runa-omen-process-tree-audit-error/v1"
-      || Object.keys(value).sort().join("\0") !== [...keys].sort().join("\0")
-      || !codes.has(value.errorCode) || value.privateValuesIncluded !== false
-      || typeof value.exceptionType !== "string" || value.exceptionType.length > 200
-      || !/^[A-Za-z][A-Za-z0-9.]+$/u.test(value.exceptionType)
-      || !Number.isSafeInteger(value.hResult)
-      || value.managementStatus !== null && (typeof value.managementStatus !== "string"
-        || !/^[A-Za-z][A-Za-z0-9]{0,100}$/u.test(value.managementStatus))) return null;
-  return value;
-}
-
 async function treeDigest(root) {
   const hash = createHash("sha256");
   async function visit(path) {
@@ -151,7 +103,7 @@ export async function diagnoseGitWitness({ userProfilePath = homedir() } = {}) {
   const classifierPath = resolve(import.meta.dirname, "Classify-RunaRepositoryEvents.ps1");
   const quiescencePath = resolve(import.meta.dirname, "../acceptance/Wait-R15WatcherQuiescence.ps1");
   for (const path of [pins.powershellPath, pins.gitPath, pins.gitInstallRoot, pins.gitSystemConfigPath,
-    pins.gitSystemAttributesPath, pins.nativeScriptPath, pins.mxcExecutorPath, pins.processMonitorPath,
+    pins.gitSystemAttributesPath, pins.nativeScriptPath, pins.mxcExecutorPath,
     classifierPath, quiescencePath, userProfilePath]) {
     if (!path || !existsSync(path)) throw coded("diagnostic-prerequisite-missing");
   }
@@ -160,7 +112,6 @@ export async function diagnoseGitWitness({ userProfilePath = homedir() } = {}) {
     [pins.gitPath, pins.gitSha256], [pins.gitSystemConfigPath, pins.gitSystemConfigSha256],
     [pins.gitSystemAttributesPath, pins.gitSystemAttributesSha256],
     [pins.mxcExecutorPath, pins.mxcExecutorSha256],
-    [pins.processMonitorPath, pins.processMonitorSha256],
   ];
   const pinnedBytes = await Promise.all(pinnedFiles.map(([path]) => readFile(path)));
   if (!pinnedFiles.every(([, digest], index) =>
@@ -179,13 +130,12 @@ export async function diagnoseGitWitness({ userProfilePath = homedir() } = {}) {
   const root = await mkdtemp(join(tmpdir(), "runa-m1-omen-git-diagnostic-"));
   const exactRoot = await realpath(root), repository = join(root, "repository");
   const statePath = join(root, "state", "roots.dpapi");
-  let stage = "create-owned-repository", failure = null, classifier = null, processMonitor = null;
-  let processMonitorExit = null, processMonitorTerminal = null, processStopPath = null;
+  let stage = "create-owned-repository", failure = null, classifier = null;
+  const childRecords = [];
   const aggregate = { observerCode: null, containedExitCode: null, containedChildren: 0,
     nameEvents: null, contentEvents: null, metadataEvents: null, securityEvents: null,
     watcherErrors: null, treeEqual: false, securityEqual: false, securityEntries: null,
     nativeGuardReleased: false, nativeGuardSurvived: null, watcherExitCode: null,
-    processDescendants: null, processSurvivors: null, processTreeValid: false,
     ownedFixtureRemoved: false };
   try {
     await mkdir(repository);
@@ -222,50 +172,14 @@ export async function diagnoseGitWitness({ userProfilePath = homedir() } = {}) {
     const candidate = await roots.inspectSelectedRoot(repository);
     await roots.confirm(candidate);
 
-    const childRecords = [];
-    const processReadyPath = join(root, "process-audit.ready");
-    const processRootPidPath = join(root, "process-audit.pid");
-    processStopPath = join(root, "process-audit.stop");
-    const processResultPath = join(root, "process-audit.json");
-    stage = "start-process-audit";
-    processMonitor = spawn(pins.powershellPath, ["-NoLogo", "-NoProfile", "-NonInteractive",
-      "-ExecutionPolicy", "Bypass", "-File", pins.processMonitorPath,
-      "-ReadyPath", processReadyPath, "-RootPidPath", processRootPidPath,
-      "-StopPath", processStopPath, "-ResultPath", processResultPath, "-MaximumMs", "30000"],
-    { windowsHide: true, stdio: ["ignore", "ignore", "pipe"] });
-    let processMonitorStderr = Buffer.alloc(0), processMonitorOutputLimited = false;
-    processMonitor.stderr.on("data", chunk => {
-      if (processMonitorOutputLimited) return;
-      const next = Buffer.concat([processMonitorStderr, Buffer.from(chunk)]);
-      if (next.length > 64 * 1024) {
-        processMonitorOutputLimited = true;
-        try { processMonitor.kill(); } catch {}
-        return;
-      }
-      processMonitorStderr = next;
-    });
-    const processDiagnostic = () => {
-      const safe = processMonitorOutputLimited ? null : parseProcessMonitorError(processMonitorStderr);
-      return { stderrBytes: processMonitorStderr.length,
-        stderrSha256: createHash("sha256").update(processMonitorStderr).digest("hex"),
-        outputLimited: processMonitorOutputLimited, monitorErrorCode: safe?.errorCode ?? null,
-        monitorExceptionType: safe?.exceptionType ?? null, monitorHResult: safe?.hResult ?? null,
-        monitorManagementStatus: safe?.managementStatus ?? null };
-    };
-    processMonitorTerminal = new Promise(done => processMonitor.once("close", done));
-    const processMonitorError = new Promise((_done, fail) =>
-      processMonitor.once("error", () => fail(coded("diagnostic-process-audit-error"))));
-    processMonitorExit = bounded(Promise.race([processMonitorTerminal, processMonitorError]), 65_000,
-      "diagnostic-process-audit-exit-timeout");
-    processMonitorExit.catch(() => {});
-    await waitForProcessReady(processReadyPath, processMonitorExit, processDiagnostic);
     const sdk = { createConfigFromPolicy, getPlatformSupport,
       spawnSandboxFromConfig: (config, options, cwd) => {
         const child = spawnSandboxFromConfig(config, options, cwd);
-        const record = { processId: child.pid, exitCode: null, closed: false };
+        const record = { child, processId: child.pid, exitCode: null, closed: false, terminal: null };
         childRecords.push(record);
-        child.once("close", exitCode => { record.exitCode = exitCode; record.closed = true; });
-        writeFileSync(processRootPidPath, String(child.pid), { flag: "wx" });
+        record.terminal = new Promise(done => child.once("close", exitCode => {
+          record.exitCode = exitCode; record.closed = true; done(exitCode);
+        }));
         return child;
       } };
     const observer = new OmenGitObserver({ rootStore: roots, nativeBridge: bridge,
@@ -293,31 +207,6 @@ export async function diagnoseGitWitness({ userProfilePath = homedir() } = {}) {
       aggregate.containedExitCode = childRecords[0].exitCode;
     }
 
-    stage = "finish-process-audit";
-    await writeFile(processStopPath, "stop", { flag: "wx" });
-    const processExitCode = await processMonitorExit;
-    processMonitor = null; processMonitorExit = null; processStopPath = null;
-    await waitForFile(processResultPath);
-    const processAudit = JSON.parse(await readFile(processResultPath, "utf8"));
-    const descendants = Array.isArray(processAudit.descendants) ? processAudit.descendants
-      : processAudit.descendants ? [processAudit.descendants] : [];
-    const survivors = Array.isArray(processAudit.survivorProcessIds) ? processAudit.survivorProcessIds
-      : processAudit.survivorProcessIds ? [processAudit.survivorProcessIds] : [];
-    aggregate.processDescendants = descendants.length;
-    aggregate.processSurvivors = survivors.length;
-    const rootProcessValid = processAudit.rootProcess
-      && resolve(processAudit.rootProcess.executablePath ?? "C:\\missing") === resolve(pins.mxcExecutorPath)
-      && processAudit.rootProcess.executableSha256 === pins.mxcExecutorSha256;
-    aggregate.processTreeValid = processExitCode === 0
-      && processAudit.schemaVersion === "runa-omen-process-tree-audit/v1"
-      && processAudit.timedOut === false && childRecords.length === 1
-      && processAudit.rootPid === childRecords[0].processId && rootProcessValid
-      && descendants.length >= 1
-      && descendants.every(process => String(process.processName).toLowerCase() === "git.exe"
-        && resolve(process.executablePath ?? "C:\\missing") === resolve(pins.gitPath)
-        && process.executableSha256 === pins.gitSha256)
-      && survivors.length === 0;
-
     stage = "finish-category-witness";
     classifier.stop();
     const witness = await bounded(classifier.result, 15_000, "diagnostic-watcher-result-timeout");
@@ -333,8 +222,8 @@ export async function diagnoseGitWitness({ userProfilePath = homedir() } = {}) {
     classifier = null;
     if (aggregate.containedChildren !== 1 || aggregate.containedExitCode !== 0
         || aggregate.watcherExitCode !== 0 || !aggregate.nativeGuardReleased
-        || aggregate.nativeGuardSurvived !== false || !aggregate.processTreeValid
-        || aggregate.watcherErrors !== 0) {
+        || aggregate.nativeGuardSurvived !== false || !aggregate.treeEqual
+        || !aggregate.securityEqual || aggregate.watcherErrors !== 0) {
       throw coded("diagnostic-lifecycle-invalid");
     }
   } catch (error) {
@@ -342,15 +231,11 @@ export async function diagnoseGitWitness({ userProfilePath = homedir() } = {}) {
     failure = error;
   } finally {
     let cleanupFailure = null;
-    if (processMonitor) {
-      try { if (processStopPath && !existsSync(processStopPath)) await writeFile(processStopPath, "stop"); } catch {}
-      let terminal = false;
-      try { await bounded(processMonitorTerminal, 2_000, "diagnostic-process-audit-cleanup-timeout"); terminal = true; }
-      catch { try { processMonitor.kill(); } catch {} }
-      if (!terminal) {
-        try { await bounded(processMonitorTerminal, 2_000, "diagnostic-process-audit-terminal-missed"); }
-        catch (error) { error.stage = "cleanup-process-audit"; cleanupFailure = error; }
-      }
+    for (const record of childRecords) {
+      if (record.closed) continue;
+      try { record.child.kill(); } catch {}
+      try { await bounded(record.terminal, 5_000, "diagnostic-contained-child-terminal-missed"); }
+      catch (error) { error.stage = "cleanup-contained-child"; cleanupFailure ??= error; }
     }
     if (classifier) {
       classifier.stop();
@@ -369,6 +254,7 @@ export async function diagnoseGitWitness({ userProfilePath = homedir() } = {}) {
     aggregate.ownedFixtureRemoved = !existsSync(root);
   }
   if (failure) throw failure;
+  if (!aggregate.ownedFixtureRemoved) throw coded("diagnostic-owned-fixture-removal-unverified");
   return { schemaVersion: "runaai-m1-omen-git-witness-diagnostic/v1", aggregate,
     privateValuesIncluded: false, productionChanged: false, modelCalled: false };
 }
@@ -377,11 +263,6 @@ if (process.argv[1] && resolve(process.argv[1]) === resolve(import.meta.filename
   diagnoseGitWitness().then(result => process.stdout.write(`${JSON.stringify(result)}\n`), error => {
     process.stderr.write(`${JSON.stringify({ schemaVersion: "runaai-m1-omen-git-witness-diagnostic-error/v1",
       errorCode: error?.code ?? "diagnostic-failed", stage: error?.stage ?? "unknown",
-      exitCode: error?.exitCode ?? null, stderrBytes: error?.stderrBytes ?? null,
-      stderrSha256: error?.stderrSha256 ?? null, outputLimited: error?.outputLimited ?? null,
-      monitorExceptionType: error?.monitorExceptionType ?? null,
-      monitorHResult: error?.monitorHResult ?? null,
-      monitorManagementStatus: error?.monitorManagementStatus ?? null,
       privateValuesIncluded: false })}\n`);
     process.exitCode = 1;
   });

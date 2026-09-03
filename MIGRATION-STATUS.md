@@ -539,6 +539,15 @@ retry and cleans or zeroizes IPC, network and body resources. Evidence uses a lo
 public network, Control process/Job Object, protected publication, browser, production or model acceptance is claimed.
 Record: `gate7f/function-first/M1-S2B1-TLS-BROKER-PREFLIGHT-2026-09-03.md`.
 
+**M1-S2B1 Control-worker composition correction, 2026-09-03:** the native topology is now prospectively frozen at
+public-Git child handles 9/7/5 and snapshot 6/5 with five/three Control-owned bootstrap pipes, exact role/direction
+binding, a two-phase control exchange across publication, pre-effect deadline ownership and retained post-timeout
+recovery. Three review stops (P1=5, P1=3, P1=1) were corrected before final independent GO at P0=0/P1=0. This is
+criteria only, not native implementation or Control acceptance. The first implementation prerequisite is the
+executable two-phase control-frame schema and adversarial validator tests. Records:
+`gate7f/function-first/M1-S2B1-CONTROL-WORKER-COMPOSITION-CORRECTION-2026-09-03.md` and
+`gate7f/function-first/M1-S2B1-CONTROL-WORKER-COMPOSITION-INDEPENDENT-REVIEW-2026-09-03.md`.
+
 **M1-S2B1 publication-primitive preflight, 2026-09-03:** the digest- and identity-bound deterministic
 publication contract now passes 29/29 focused compatibility checks and fresh independent review at P0=0/P1=0.
 Two review stops corrected malformed-handle ownership, exhaustive inspection cleanup, failed-close retention and

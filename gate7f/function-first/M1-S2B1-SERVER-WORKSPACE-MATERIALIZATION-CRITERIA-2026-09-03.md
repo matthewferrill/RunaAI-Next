@@ -99,32 +99,32 @@ may spawn a descendant or inherit/duplicate the Job handle. Broker loss or timeo
 watchdog to terminate this exact operation Job; terminal acceptance requires that watchdog to observe the Job's
 active-process count reach zero before it records stopped/reconciled state.
 
-Coordinator control IPC and Git streaming IPC are separate:
+Coordinator control, bootstrap and Git streaming IPC remain separate. The corrected endpoint, bootstrap authority,
+key-delivery and inherited-handle topology is now solely defined by
+`M1-S2B1-CONTROL-WORKER-COMPOSITION-CORRECTION-2026-09-03.md`. That successor preserves the request/response payload,
+Git-frame, HMAC, sequence, body-size and terminal/EOF limits from this section while correcting the historical
+secret-as-handle wording and materializer handle count. Implementation must not combine the old and successor
+topologies.
 
-- Each Control/coordinator, coordinator/materializer and coordinator/broker control channel has request, response and
-  one-use 256-bit HMAC-secret handles. The request side admits exactly one canonical operation or cancel frame,
-  sequence 1, then EOF. The response side admits exactly one receipt or terminal frame, sequence 1, then EOF. Each
-  payload is at most 1 MiB.
-- Git adds two unidirectional anonymous pipes: materializer-to-broker request stream and broker-to-materializer
-  response stream. `runa-materialization-pipe-frame/v2` admits strictly increasing per-direction sequences and exactly
-  two request ordinals. Ordinal 0 is GET info/refs; ordinal 1 is POST git-upload-pack. Open/body/end frames are HMAC
-  authenticated over the canonical header and exact body bytes. Each body frame is at most 1 MiB; aggregate request
-  bodies are at most 2 MiB and response bodies at most 96 MiB, with at most 128 frames in either direction. A broker
-  terminal frame after response 1 and then EOF is mandatory. Missing, duplicate, reordered, post-terminal,
+- Each accepted operation control channel is a two-phase exchange across the publication barrier. Request sequence 1
+  is the canonical operation. After response sequence 1 carries the exact proposal, request sequence 2 is exactly
+  `finalize` or `cancel`, followed by EOF; response sequence 2 is the terminal result, followed by EOF. A standalone
+  pre-operation cancel uses request sequence 1 and one terminal response. Failure before a proposal also returns one
+  terminal response. No third, reordered or post-EOF frame is admitted. Every control frame is HMAC-bound and at most
+  1 MiB. The exact transition and key/bootstrap ownership are defined by the successor topology document.
+- Git uses two unidirectional anonymous pipes: materializer-to-broker request stream and broker-to-materializer
+  response stream. `runa-materialization-pipe-frame/v2` requires strictly increasing per-direction sequences and
+  exactly two request ordinals. Ordinal 0 is GET info/refs; ordinal 1 is POST git-upload-pack. Open/body/end frames are
+  HMAC-authenticated over the canonical header and exact body bytes. Each body frame is at most 1 MiB; aggregate
+  request bodies are at most 2 MiB and response bodies at most 96 MiB, with at most 128 frames in either direction. A
+  broker terminal frame after response 1 and then EOF is mandatory. Missing, duplicate, reordered, post-terminal,
   wrong-direction or over-limit frames are fatal.
 - Every Git frame is admitted from the canonical raw header plus exact payload bytes through
-  `validateGitStreamTranscript`; it recomputes the payload digest/HMAC and requires one constant authority-issued
-  `channelId`, materialization `requestId` and 256-bit nonce for the entire transcript. Open-request payloads must parse
-  as the exact 16 KiB-bounded request-head schema and open-response payloads as the exact 32 KiB-bounded response-head
-  schema. Head-declared content lengths must equal accumulated body bytes. Body frames must be nonempty; end and
-  terminal frames must have empty payloads. No self-declared identity or non-body payload escapes accounting.
-- Control generates one additional random 256-bit Git-stream HMAC key and sends the same key once through each
-  child's separate authenticated control bootstrap. The coordinator never receives that key. Both workers zeroize it
-  after the terminal/EOF boundary, and neither may persist or log it.
-- The materializer inherits five handles for Git: its control request/response/secret plus Git request-write and
-  response-read. The broker inherits five: its control request/response/secret plus Git request-read and
-  response-write. The coordinator has the matching control endpoints but never receives source bodies. Secret and
-  write handles close at their specified terminal boundary; every unexpected inherited handle is fatal.
+  `validateGitStreamTranscript`; it recomputes payload digest/HMAC and requires one constant authority-issued
+  `channelId`, materialization `requestId` and 256-bit nonce for the entire transcript. Open-request payloads use the
+  exact 16 KiB-bounded request-head schema and open-response payloads the exact 32 KiB-bounded response-head schema.
+  Head-declared content lengths must equal accumulated body bytes. Body frames are nonempty; end and terminal frames
+  have empty payloads. No self-declared identity or non-body payload escapes accounting.
 
 The release manifest freezes the executable/runtime/DLL/module hashes and this exact access table:
 
@@ -132,8 +132,8 @@ The release manifest freezes the executable/runtime/DLL/module hashes and this e
 |---|---|---|---|
 | Control authority/watchdog outside operation Job | PostgreSQL authority and protected workspace parent; creates exact opaque roots, performs final publication/reconciliation and records the terminal receipt; no source contents in logs | existing application routes only | existing service environment; owns exact operation Job terminate/query/wait handle and created child-process handles; passes only explicit non-Job handles |
 | unique operation coordinator AppContainer | read pinned coordinator/runtime; no parent path/list right and no sibling; only inherited operation-root handles and object DACL rights | deny all | `SystemRoot`, `WINDIR`, owned `TEMP`/`TMP`, pinned-runtime-only `PATH`; control pipe handles only |
-| unique materializer AppContainer | read pinned materializer/runtime; inherited ingress/staging handles with exact data/write/append/attributes/delete/synchronize rights; no path-based parent traverse/list, final, sibling, application, database, profile, credential or Home access | deny all | same five-name environment; control handles plus the two Git stream handles only |
-| unique ingress AppContainer | read pinned ingress/runtime modules and read-only machine trust store required by the sealed host; no operation root, ingress, staging, final, database, application, profile, credential or Home access | outbound TCP only through the owned connector; all other connect paths fail closed and are audited | same five-name environment with empty proxy variables; control handles plus the two Git stream handles only |
+| unique materializer AppContainer | read pinned materializer/runtime; inherited ingress/staging handles with exact data/write/append/attributes/delete/synchronize rights; no path-based parent traverse/list, final, sibling, application, database, profile, credential or Home access | deny all | same five-name environment; exact mode-specific control/bootstrap, Git-stream and filesystem handles from the successor topology only |
+| unique ingress AppContainer | read pinned ingress/runtime modules and read-only machine trust store required by the sealed host; no operation root, ingress, staging, final, database, application, profile, credential or Home access | outbound TCP only through the owned connector; all other connect paths fail closed and are audited | same five-name environment with empty proxy variables; exact control/bootstrap and Git-stream handles from the successor topology only |
 
 The protected parent DACL is non-inheriting and grants full control only to SYSTEM, Administrators and the Control
 authority service SID. Each create-new operation object has a protected object-specific DACL granting its unique SID

@@ -152,6 +152,14 @@ cleanup, deferred HTTP rejection and timing-sensitive test ownership. This is lo
 public fetch or Control process/Job Object result. Record:
 `../gate7f/function-first/M1-S2B1-TLS-BROKER-PREFLIGHT-2026-09-03.md`.
 
+The corrected Control-worker composition criteria now have independent GO at P0=0/P1=0 after three retained review
+stops. Public Git uses five Control-owned bootstrap pipes and exact child handle totals 9/7/5; snapshot uses three and
+6/5. Role/direction ownership, two-phase control framing across non-servable publication, pre-effect deadline
+ownership, post-timeout recovery, exact-zero reconciliation and terminal receipt ordering are frozen. This is criteria
+only. The executable two-phase control-frame schema/tests are the first implementation prerequisite. Records:
+`../gate7f/function-first/M1-S2B1-CONTROL-WORKER-COMPOSITION-CORRECTION-2026-09-03.md` and
+`../gate7f/function-first/M1-S2B1-CONTROL-WORKER-COMPOSITION-INDEPENDENT-REVIEW-2026-09-03.md`.
+
 The deterministic publication primitive now passes 29/29 focused materialization/publication compatibility checks
 and independent review at P0=0/P1=0 after two explicit review stops. It owns and closes or recovery-retains every
 accessible native handle, distinguishes attempted from confirmed moves, permits only a one-shot non-replacing

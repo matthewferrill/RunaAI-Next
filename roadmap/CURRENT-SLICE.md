@@ -18,12 +18,18 @@ operations and the earlier accepted artifact source/HTTP/PostgreSQL integration 
 The model campaign remains tabled. The formerly planned fresh 360+12 campaign is obsolete and must not be scheduled
 unless a material model-facing artifact, inference setting, role prompt, checker semantic, frozen functional contract,
 or actual production defect creates a new prospectively frozen qualification need. Native Control-worker work remains
-stopped before execution. Its independently reviewed bytes were preserved locally at `b6725c2`; a no-commit merge of
-accepted primary `5e78891` is now in progress, and the working-tree semantic union retains the `9714874` result-read
-ports plus `25190d9` dependency/witness controls alongside the native candidate. The working-tree conflict resolution
-remains unstaged and the merge remains uncommitted pending fresh exact-byte review; no deterministic, PostgreSQL,
-native, browser, network or model command has run for the reconciled bytes. The actual browser harness and server-
-authentication prerequisite remains open for Artifact and Agent browser acceptance.
+stopped before execution. Its independently reviewed bytes were preserved locally at `b6725c2`; the semantic-union
+merge with exact accepted primary `5e78891` is committed locally at `422cc6d`, retaining the `9714874` result-read
+ports plus `25190d9` dependency/witness controls alongside the native candidate. Reviewed one-file Playwright package-
+preflight commit `1ddbea6` from primary was then carried by local merge `9a1bde5`. Immediately before this
+documentation-only record update, the native branch was clean and seven commits ahead of its tracking ref; neither
+local merge has been pushed. No deterministic test, import, PostgreSQL, native, browser, network or model command has
+run for these combined bytes. A fresh independent combined-byte review is required before the exact lock-bound
+deterministic gate 1. The actual-browser harness design was not yet committed at the native merge boundary and was not
+included in either native merge. Primary subsequently committed that design at `5cf13f1`, after `1ddbea6`; native
+`9a1bde5` has not carried it. Deterministic gate 1 remains stopped until exact primary `5cf13f1` is reconciled and the resulting combined
+bytes receive fresh independent review. The design's server-authentication prerequisite remains open for Artifact and
+Agent browser acceptance.
 
 Product-foundation checkpoint, 2026-09-02: the single-canvas workspace now implements participant-scoped
 conversation search/rename/archive/unarchive/branch/export/soft-delete, persisted low-risk appearance
@@ -1000,10 +1006,15 @@ function to work without erasing passed historical evidence or unrelated roadmap
 
 Current direction, 2026-09-04: integrate the separately verified Artifact DOM (`b6ece37`) and Agent PostgreSQL
 fixture (`58ca066`) through reviewed, non-destructive landing. Native bytes originating from `a20fd32` are preserved at
-`b6725c2`; their no-commit reconciliation with accepted primary `5e78891` now has a working-tree semantic union that
-awaits fresh review before staging, commit or any finite deterministic gate. Then satisfy the actual browser
-harness/server-authentication prerequisite and run only the still-open acceptance evidence. Do not replay
-already-passed Artifact, PostgreSQL, or model operations unchanged. The model campaign is tabled under the
+`b6725c2`; their semantic union with accepted primary `5e78891` is committed locally at `422cc6d`, and reviewed
+one-file Playwright package-preflight commit `1ddbea6` is carried by local merge `9a1bde5`. The Artifact result ports
+and native candidate coexist in those merged bytes. Before exact lock-bound deterministic gate 1, obtain a fresh
+combined-byte review; no deterministic test, import, PostgreSQL, native, browser, network or model command has run for
+that combined state. Neither local merge is pushed. Primary subsequently committed the actual-browser harness design
+at `5cf13f1`, after `1ddbea6`; it remains absent from native `9a1bde5`. Reconcile exact `5cf13f1`, obtain a fresh
+independent review of the resulting combined bytes, and only then consider the exact lock-bound deterministic gate 1.
+Then satisfy the design's server-authentication prerequisite and run only the still-open acceptance evidence. Do not
+replay already-passed Artifact, PostgreSQL, or model operations unchanged. The model campaign is tabled under the
 material-change rule above.
 
 Active work remains M1-S2, specified in

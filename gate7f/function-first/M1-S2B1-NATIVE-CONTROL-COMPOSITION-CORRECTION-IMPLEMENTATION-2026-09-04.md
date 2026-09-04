@@ -7,18 +7,19 @@ Approved design SHA-256: `6EB02D980DFFF041D60D843C5A85A26E41ED09A46D1AA8FE9C83CF
 Roadmap digest retrieved before editing: `49fd172f29ce119d23ea4abfd6fe0eb09c4cf1611c904a49af2fd902a5e3df84`  
 Milestone/slice: `M1` / `M1-S2`; the retrieved 17-capability set was not changed.
 
-Status: source and deterministic test authoring only. Nothing in this record is native, PostgreSQL, network, browser,
-model, production, or end-user acceptance. No test, syntax command, compilation, service, database, native process,
-network action, commit, or push was run while authoring these bytes. The next gate is a different independent
-reviewer examining the frozen source, tests, diff, and hashes before any deterministic command is authorized.
+Status: reviewed source and deterministic-test bytes are locally preserved and baseline-reconciled, but remain
+unexecuted. Nothing in this record is native, PostgreSQL, network, browser, model, production, or end-user acceptance.
+The next action is preservation-first reconciliation of exact primary `5cf13f1`, followed by a different independent
+reviewer examining the resulting combined frozen source, tests, package preflight, diff, and hashes before the exact
+lock-bound deterministic gate 1 is authorized.
 
-## Baseline reconciliation working-tree correction — unexecuted
+## Local preservation and post-merge state — unexecuted
 
 After a fresh independent review returned `GO P0=0/P1=0`, the exact native lane was preserved in local commit
-`b6725c2`. A no-commit merge of accepted primary `5e78891` was then started to bring in the `9714874` Artifact
-result-read source/HTTP integration and `25190d9` dependency/witness rules without rewriting either history. The sole
-textual conflict is `composition.mjs`; this working-tree correction resolves it as a semantic union while leaving the
-conflict resolution unstaged and the merge uncommitted for another exact-byte review.
+`b6725c2`. The semantic-union merge with exact accepted primary `5e78891` was then committed locally at `422cc6d`,
+bringing in the `9714874` Artifact result-read source/HTTP integration and `25190d9` dependency/witness rules without
+rewriting either history. Reviewed one-file Playwright package-preflight commit `1ddbea6` from primary was subsequently
+carried by local merge `9a1bde5`.
 
 The union imports and constructs `createPostgresArtifactResultSourcePorts` independently of native enablement,
 returns `conversationResults` and `taskResults` on every composed M1 result, and passes both into the same
@@ -26,11 +27,15 @@ returns `conversationResults` and `taskResults` on every composed M1 result, and
 candidate construction, reverse cleanup boundary, attachment ownership and one-use close. A bounded source assertion
 in `native-candidate-wiring.test.mjs` proves those Artifact ports remain unconditional and coexist at the native
 attachment point. Current-state prose retains the primary Artifact/Agent/no-replay/browser/model limits and the native
-STOP/preservation/reconciliation history.
+STOP/preservation/reconciliation history. At the `9a1bde5` merge boundary, the actual-browser harness design was not
+included. Primary subsequently committed it at `5cf13f1`, after `1ddbea6`; native `9a1bde5` has not carried that commit.
 
-No test, syntax check, import, junction, PostgreSQL, native process, Control operation, browser, model, network, commit
-or push was run for these merged bytes. The next action is a different-agent exact-byte review; even a GO authorizes
-only completion of the local reconciliation commit, not execution acceptance.
+Immediately before this documentation-only record update, the native branch at `9a1bde5` was clean and seven commits
+ahead of its tracking ref; neither local merge has been pushed. No deterministic test, syntax check, import, junction,
+PostgreSQL, native process, Control operation, browser, model or network action has run for these combined bytes. The
+next action is a different-agent combined-byte review. Only its `GO P0=0/P1=0` may authorize the already frozen exact
+lock-bound deterministic gate 1, but first exact primary `5cf13f1` must be reconciled and the resulting combined bytes
+must receive that fresh review. Neither the commits nor that review constitute execution acceptance.
 
 ## Retained STOP history
 
@@ -154,8 +159,9 @@ different-agent exact-byte review.
 
 The branch was subsequently found to be a sibling of accepted application work rather than a descendant of accepted
 `9714874` plus method-rules commit `25190d9`. At that stage this correction did not attempt reconciliation. Those exact
-bytes were later preserved at `b6725c2`; the current no-commit working tree now contains the semantic reconciliation
-described above and remains stopped for fresh review before any deterministic gate-1 execution.
+bytes were later preserved at `b6725c2`; the semantic reconciliation was committed at `422cc6d`, and the reviewed
+one-file primary package preflight was carried through `9a1bde5`. The combined bytes remain stopped for fresh review
+before any exact lock-bound deterministic gate-1 execution.
 
 ## Authored deterministic checks — not executed
 
@@ -207,11 +213,10 @@ PostgreSQL, native, browser, model, network, release, or acceptance result for t
 - `server-workspace/postgres-native-interface.test.mjs`: `A3AA81BB5B425F2324A508ED642EE73A6BD101CF078BF6D28F85518488F35E57`
 - `server-workspace/publication-owned-primitive.test.mjs`: `C08ACD342E0D7CBBF5B248A9562CA9044B0C85DBE0DCD7F562CA067ED954D61D`
 
-## Baseline-reconciled working-tree hashes — not executed
+## Baseline-reconciled semantic-union hashes — not executed
 
-These hashes supersede only the corresponding pre-reconciliation identities above. They freeze the unstaged semantic
-union and status reconciliation for fresh independent review; they are not test, import, merge-completion or execution
-evidence.
+These hashes preserve the exact semantic-union inputs that were reviewed and committed at `422cc6d`. They supersede
+only the corresponding pre-reconciliation identities above and are not test, import or execution evidence.
 
 - `composition.mjs`: `D40A422B3418D0E5EBA9DF32960E8425EF1FE42FC27A997EF729CD43AE38C687`
 - `server-workspace/native-candidate-wiring.test.mjs`:
@@ -221,11 +226,41 @@ evidence.
 - unchanged reconciled `package-lock.json` witness:
   `CEFCC1B9D086FB5EB8088A1BE3A1D86FD5B4360BB22ABA768C530BBBCF007308`
 
+## Post-merge combined-byte checkpoint — stopped, not executed
+
+The reviewed native preservation commit is `b6725c25c17b47325c6d0192ab8ffb5c27ee8e2e`. Semantic-union merge commit
+`422cc6d848426e2c15f8aec048be88b4fe9675ce` has parents `b6725c2` and exact accepted primary `5e78891`; package-
+preflight merge commit `9a1bde5ae1a06213a7414209c51f353487e7c03a` has parents `422cc6d` and reviewed one-file
+primary commit `1ddbea6`. Immediately before this documentation-only record update, the native branch at `9a1bde5`
+was clean and seven commits ahead of `origin/codex/m1-native-control-host`. No push or remote contact occurred.
+
+The exact current identities are:
+
+- Artifact/native coexistence `composition.mjs`:
+  `D40A422B3418D0E5EBA9DF32960E8425EF1FE42FC27A997EF729CD43AE38C687`
+- coexistence assertion `server-workspace/native-candidate-wiring.test.mjs`:
+  `F3A417B62C39722699A293451E5A4916D8379442254F429C620C356A0A02ABC6`
+- carried `M1-S2-PLAYWRIGHT-CORE-PACKAGE-PREFLIGHT-2026-09-04.md`:
+  `408E4D561D59808F0AA79F17A14F8E1CF82D37D07E08DEE8D3C955ABA07F474B`
+- unchanged `package-lock.json` witness:
+  `CEFCC1B9D086FB5EB8088A1BE3A1D86FD5B4360BB22ABA768C530BBBCF007308`
+- this checkpoint's `MIGRATION-STATUS.md`:
+  `CEFA8F30C02A675C2BF9ED7AF2A2DA05136EA60124F857D109DA7F0797F428DB`
+- this checkpoint's `roadmap/CURRENT-SLICE.md`:
+  `369162F5C8C9273B56E39776E5976648B6CCD67DE5F3DF9064DA4E2427B17FFB`
+
+Primary subsequently advanced cleanly to `5cf13f1`, which commits the actual-browser harness design after
+`1ddbea6`. That commit is absent from native `9a1bde5`. This is therefore a preservation checkpoint, not authorization:
+exact primary `5cf13f1` must first be reconciled, and the resulting combined bytes require fresh independent review
+before deterministic gate 1. No deterministic test, syntax check, import, junction, PostgreSQL, native process,
+Control operation, browser, model or network action has run for the current combined source/test/package state.
+
 ## Exact dependency preflight and cleanup — frozen, not executed
 
 The deterministic command may not use `D:\Projects\Runalab\node_modules` or any ambient ancestor. After a different
-reviewer returns `GO P0=0/P1=0` for the reconciled exact bytes, one command may temporarily place the accepted
-dependency tree at this worktree's local Node resolution point. Both this worktree and the accepted source must have
+reviewer returns `GO P0=0/P1=0` for the resulting combined source/test/package bytes after preservation-first
+reconciliation of exact primary `5cf13f1`, one command may temporarily place the accepted dependency tree at this
+worktree's local Node resolution point. Both this worktree and the accepted source must have
 `package-lock.json` SHA-256
 `cefcc1b9d086fb5eb8088a1be3a1d86fd5b4360bb22aba768c530bbbcf007308`; the source must be the ordinary directory
 `D:\Projects\Runalab\runaai-next-m1-gemma-primary\node_modules`, with exact `zod@4.4.3` and `pg@8.23.0`; and the local

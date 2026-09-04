@@ -32,14 +32,14 @@ semantic, frozen functional contract, or actual production defect creates a new 
 need. Native Control-worker work remains stopped before execution. Its reviewed history was preserved at `b6725c2`,
 semantically reconciled with accepted primary `5e78891` at `422cc6d`, carried through Playwright package preflight by
 `9a1bde5`, recorded at `09d55df`, carried through browser-harness design `5cf13f1` at `907dba5`, and frozen in the
-three-record checkpoint `b064842`. An in-progress no-commit merge now integrates exact primary `b99f8bf`, whose
-parents are Agent integration merge `5c6b2e1` and Artifact head `bf56905`. The resulting working tree therefore
+three-record checkpoint `b064842`. Reviewed local merge `6709a0f` now integrates exact primary `b99f8bf`, whose
+parents are Agent integration merge `5c6b2e1` and Artifact head `bf56905`. The resulting committed tree therefore
 includes the Agent PostgreSQL fixture from `58ca066` and the complete Artifact DOM chain through the separately
 verified 58/58 retained-owner/`result-stale` correction while preserving the Artifact-result/native-candidate
 coexistence and both histories. Native and primary integration work remain unpushed. No Native deterministic test,
 syntax check, import, PostgreSQL, native process, browser, network or model command has run for these merged bytes.
-After the local merge is completed and its exact result identity and hashes are frozen, that combined state requires
-fresh independent review before the finite lock-bound Native deterministic gate 1. The actual browser design's listed
+The exact `6709a0f` combined state and corrected living-status records require fresh independent review before the
+finite lock-bound Native deterministic gate 1. The actual browser design's listed
 product prerequisites, Playwright/Edge package preflight, server-authentication, built-candidate journey and browser
 acceptance remain open; no release, model, production or customer credit is claimed, Artifact and Agent have no actual
 browser acceptance, and the application is not product-qualified.
@@ -681,8 +681,8 @@ A later browser-design review retained P0=0/P1=1 for stale retained controls, an
 retained P0=0/P1=1 for production `result-stale` handling. No execution followed either STOP. The final corrected
 seven-file suite subsequently passed 58/58 with verified junction cleanup, five syntax checks, 15/15 roadmap checks and
 a clean diff check. Exact Artifact head `bf56905` commits those corrected source/test/evidence bytes and is the second
-parent of completed local primary merge `b99f8bf`, now being integrated by the in-progress Native merge. Native merge
-completion, exact combined-byte review, push, ordinary authenticated browser plus server-authentication acceptance,
+parent of completed local primary merge `b99f8bf`, now integrated with Native checkpoint `b064842` by reviewed local
+merge `6709a0f`. Exact combined-byte review, push, ordinary authenticated browser plus server-authentication acceptance,
 release, model, production and customer proof remain outstanding; no such operation ran during the deterministic
 verification. Records:
 `gate7f/function-first/M1-S2-ARTIFACT-RESULT-DOM-PREFLIGHT-2026-09-04.md` and

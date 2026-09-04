@@ -8,10 +8,10 @@ Roadmap digest retrieved before editing: `49fd172f29ce119d23ea4abfd6fe0eb09c4cf1
 Milestone/slice: `M1` / `M1-S2`; the retrieved 17-capability set was not changed.
 
 Status: reviewed source and deterministic-test bytes are locally preserved through exact native checkpoint `b064842`
-and remain unexecuted. An in-progress no-commit merge integrates exact primary `b99f8bf`, including the Agent and
+and remain unexecuted. Reviewed local merge `6709a0f` integrates exact primary `b99f8bf`, including the Agent and
 Artifact results recorded below. Nothing in this record is native, PostgreSQL, network, browser, model, production or
-end-user acceptance. After local merge completion, its exact result and hashes require fresh independent combined-byte
-review before the exact lock-bound deterministic gate 1 is authorized.
+end-user acceptance. The exact combined commit and these corrected status records require fresh independent review
+before the exact lock-bound deterministic gate 1 is authorized.
 
 ## Local preservation and post-merge state — unexecuted
 
@@ -33,13 +33,13 @@ STOP/preservation/reconciliation history. Historically, at the `9a1bde5` merge b
 design was not included. Primary subsequently committed it at `5cf13f1`, after `1ddbea6`; `09d55df` preserved that
 historical absence before local merge `907dba5` carried exact `5cf13f1` into native.
 
-An in-progress no-commit merge now combines exact native checkpoint `b064842` with exact primary `b99f8bf`. The latter
+Reviewed local merge `6709a0f` combines exact native checkpoint `b064842` with exact primary `b99f8bf`. The latter
 has parents Agent integration merge `5c6b2e1` and Artifact head `bf56905`, so the working tree includes Agent
 PostgreSQL commit `58ca066` and the Artifact 58/58 retained-owner/`result-stale` correction while retaining the native
 composition. All local Native and primary integration work remains unpushed. No Native deterministic test, syntax
 check, import, junction, PostgreSQL, native process, Control operation, browser, model or network action has run for
-these merged bytes. After local merge completion, only fresh independent review of its exact frozen result may
-authorize the lock-bound deterministic gate 1. Neither the merge nor that review constitutes execution acceptance.
+these merged bytes. Only fresh independent review of the exact frozen result and these corrected records may authorize
+the lock-bound deterministic gate 1. Neither the merge nor that review constitutes execution acceptance.
 
 ## Retained STOP history
 
@@ -166,8 +166,9 @@ The branch was subsequently found to be a sibling of accepted application work r
 bytes were later preserved at `b6725c2`; the semantic reconciliation was committed at `422cc6d`, and the reviewed
 one-file primary package preflight was carried through `9a1bde5`. Status commit `09d55df` recorded that historical
 checkpoint before browser-harness design commit `5cf13f1` was carried through `907dba5` and recorded at `b064842`.
-The in-progress merge with exact primary `b99f8bf` remains stopped for completion, hash freeze and fresh combined-byte
-review before any exact lock-bound deterministic gate-1 execution.
+Historically, the subsequent no-commit merge with exact primary `b99f8bf` stopped for completion, hash freeze and fresh
+combined-byte review before any exact lock-bound deterministic gate-1 execution. That merge is now completed locally at
+`6709a0f`; the corrected current gate is the fresh exact-tree review described below.
 
 ## Authored deterministic checks — not executed
 
@@ -293,32 +294,55 @@ network, production or end-user acceptance action ran for the exact combined sta
 preserved that history; the browser design's separate implementation, package, server-authentication, actual-browser
 and acceptance gates remain open.
 
-## Agent/Artifact primary carry checkpoint — merge in progress, not executed
+## Agent/Artifact primary carry checkpoint — merged locally, not executed
 
-Exact native checkpoint `b064842465aed46fcec05d4a1ed64ccd9357fc0b` has sole parent `907dba5`. The current
-no-commit merge uses exact primary `b99f8bfe6c5a4959a7f4693f2041e773c7c22d56` as `MERGE_HEAD`; that primary commit
+Exact native checkpoint `b064842465aed46fcec05d4a1ed64ccd9357fc0b` has sole parent `907dba5`. Reviewed local merge
+`6709a0f411f90c6c30706f3d995c07ecb2fcb1a4` has exact parents `b064842465aed46fcec05d4a1ed64ccd9357fc0b`
+and primary `b99f8bfe6c5a4959a7f4693f2041e773c7c22d56`; that primary commit
 has parents Agent integration merge `5c6b2e1a29c0dc3f6b20bb94e3bafc65d6834ee1` and Artifact head
 `bf569055e4bbebf72c83263df0c815c1920069a0`. It includes Agent PostgreSQL commit `58ca066` and the separately verified
-Artifact 58/58 retained-owner/`result-stale` correction. The resolved working-tree status union preserves all prior
+Artifact 58/58 retained-owner/`result-stale` correction. The committed union preserves all prior
 Native checkpoints, Artifact-result/native-candidate coexistence, the Playwright package preflight, actual-browser
 design, no-replay rule and tabled-model boundary.
 
-The conflict-resolved record hashes frozen for post-completion review are:
+The pre-commit conflict-resolution hashes were:
 
 - `MIGRATION-STATUS.md`: `2B7515C5C506D6EC0AFA6DD146265A7D4DA6821DFFA3AFB630AA2B8DDF7F9A88`
 - `roadmap/CURRENT-SLICE.md`: `B74F8F912249F59A7AC1AE1E7BEADDAE1254FC09AC1B89046B7F945F2513826A`
 
+They identify the reviewed merge inputs and are superseded for current-record review by the correction hashes frozen
+below; they are not presented as hashes of the post-merge living records.
+
 No Native deterministic test, syntax check, import, junction, PostgreSQL, native process, Control operation, browser,
 model, network, release, production or customer acceptance action has run for these merged bytes, and the local work
-remains unpushed. After local merge completion, freeze its exact result identity and hashes and obtain fresh independent
-combined-byte review before deterministic gate 1. Browser implementation, package, server-authentication, built-
+remains unpushed. Obtain fresh independent combined-byte review of exact merge `6709a0f` and the corrected status
+records before deterministic gate 1. Browser implementation, package, server-authentication, built-
 candidate journey, actual-browser and acceptance gates remain open.
+
+## Roadmap-reader stop and root cause — corrected before testing
+
+The first required post-merge planning-context read stopped before tests with
+`roadmap-invalid:document-revision:roadmap/CURRENT-SLICE.md`. Exact commit `5e78891` had changed only the prose header
+from authoritative revision `2026-08-28.1` to `2026-09-04.1`; it did not change `PRODUCT-ROADMAP.md`,
+`roadmap/capabilities.json`, or `roadmap/current-slice.json`. Both merge parents inherited that pre-existing mismatch,
+and the merge-resolution review checked conflict shape, hashes and diffs but did not execute the required roadmap
+validator. The failure was therefore a planning-publication defect, not a Native, Agent, Artifact, model, browser, or
+database result. No test or external operation ran after the stop.
+
+This correction restores `roadmap/CURRENT-SLICE.md` to the catalog revision `2026-08-28.1` and updates all three living
+records from in-progress-merge language to exact local merge `6709a0f`. Prevention is structural: run
+`npm run verify:roadmap` after independent review and before committing any changed plan or handoff; a roadmap-revision
+change must update the catalog, slice JSON and both prose documents as one reviewed unit. The single authorized
+`npm run verify:roadmap` retry then passed: planning context reported revision `2026-08-28.1`, digest
+`fb87550a71d9783ade102ff1591a2e8094746fd6c7dda3c0a943a972fa648275`, all 17 capability families, and 15/15 roadmap
+tests. No broader deterministic, import, PostgreSQL, native, browser, network or model operation ran. Deterministic
+Native gate 1 remains blocked until a fresh exact-tree review is green.
 
 ## Exact dependency preflight and cleanup — frozen, not executed
 
-The deterministic command may not use `D:\Projects\Runalab\node_modules` or any ambient ancestor. After the current
-merge is completed, its exact result identity and hashes are frozen, and a different reviewer returns `GO P0=0/P1=0`
-for those combined source/test/package/browser-design bytes, one command may temporarily place the accepted dependency
+The deterministic command may not use `D:\Projects\Runalab\node_modules` or any ambient ancestor. After exact merge
+`6709a0f`, these corrected records and their hashes are frozen, and a different reviewer returns `GO P0=0/P1=0` for
+those combined source/test/package/browser-design bytes, one command may temporarily place the accepted dependency
 tree at this worktree's local Node resolution point. Both this worktree and the accepted source must have
 `package-lock.json` SHA-256
 `cefcc1b9d086fb5eb8088a1be3a1d86fd5b4360bb22aba768c530bbbcf007308`; the source must be the ordinary directory

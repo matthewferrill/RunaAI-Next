@@ -1,6 +1,6 @@
 # Current slice: Milestone 1, function-first Runa
 
-Roadmap revision: 2026-09-04.1
+Roadmap revision: 2026-08-28.1
 Milestone: M1
 Slice ID: M1-S2
 Status: M1-S2A product-foundation implementation and independent review are green. On 2026-09-03 the steward
@@ -21,14 +21,14 @@ unless a material model-facing artifact, inference setting, role prompt, checker
 or actual production defect creates a new prospectively frozen qualification need. Native Control-worker work remains
 stopped before execution. Its reviewed history was preserved at `b6725c2`, semantically reconciled with accepted
 primary `5e78891` at `422cc6d`, carried through Playwright package preflight by `9a1bde5`, recorded at `09d55df`,
-carried through browser-harness design `5cf13f1` at `907dba5`, and frozen in the three-record checkpoint `b064842`. An
-in-progress no-commit merge now integrates exact primary `b99f8bf`, whose parents are Agent integration merge
-`5c6b2e1` and Artifact head `bf56905`. The resulting working tree includes the Agent PostgreSQL fixture from
+carried through browser-harness design `5cf13f1` at `907dba5`, and frozen in the three-record checkpoint `b064842`.
+Reviewed local merge `6709a0f` now integrates exact primary `b99f8bf`, whose parents are Agent integration merge
+`5c6b2e1` and Artifact head `bf56905`. The resulting committed tree includes the Agent PostgreSQL fixture from
 `58ca066` and the complete Artifact DOM chain through the separately verified 58/58 retained-owner/`result-stale`
 correction while preserving Artifact-result/native-candidate coexistence and both histories. Native and primary
 integration work remain unpushed. No Native deterministic test, syntax check, import, PostgreSQL, native process,
-browser, network or model command has run for these merged bytes. After local merge completion and exact result/hash
-freeze, the combined state requires fresh independent review before the finite lock-bound Native deterministic gate 1.
+browser, network or model command has run for these merged bytes. The exact combined commit and corrected living-status
+records require fresh independent review before the finite lock-bound Native deterministic gate 1.
 The actual browser design's listed product prerequisites, Playwright/Edge package preflight, server-authentication,
 built-candidate journey and Artifact/Agent browser acceptance remain open; no release, model, production or customer
 credit is claimed.
@@ -280,8 +280,8 @@ A later browser-design review retained P0=0/P1=1 for stale retained controls, an
 retained P0=0/P1=1 for production `result-stale` handling. No execution followed either STOP. The final corrected
 seven-file suite subsequently passed 58/58 with verified junction cleanup, five syntax checks, 15/15 roadmap checks and
 a clean diff check. Exact Artifact head `bf56905` commits those corrected source/test/evidence bytes and is the second
-parent of completed local primary merge `b99f8bf`, now being integrated by the in-progress Native merge. Native merge
-completion, exact combined-byte review, push, ordinary authenticated browser plus server-authentication acceptance,
+parent of completed local primary merge `b99f8bf`, now integrated with Native checkpoint `b064842` by reviewed local
+merge `6709a0f`. Exact combined-byte review, push, ordinary authenticated browser plus server-authentication acceptance,
 release, model, production and customer proof remain outstanding. Records:
 `../gate7f/function-first/M1-S2-ARTIFACT-RESULT-DOM-PREFLIGHT-2026-09-04.md`.
 `../gate7f/function-first/M1-S2-ARTIFACT-DOM-BROAD-SUITE-METHOD-RCA-2026-09-04.md`.
@@ -1038,15 +1038,15 @@ function to work without erasing passed historical evidence or unrelated roadmap
 
 ## Next implementation slice
 
-Current direction, 2026-09-04: complete the in-progress no-commit merge of exact Native checkpoint `b064842` with
-exact primary `b99f8bf`. That primary already contains Agent PostgreSQL commit `58ca066` through merge `5c6b2e1` and
+Current direction, 2026-09-04: exact local merge `6709a0f` completed the union of Native checkpoint `b064842` with
+exact primary `b99f8bf`. That primary contains Agent PostgreSQL commit `58ca066` through merge `5c6b2e1` and
 the complete Artifact DOM chain through exact head `bf56905`, including the separately verified 58/58 retained-owner/
 `result-stale` correction. The merged working tree preserves the Native history from `b6725c2`, `422cc6d`, `9a1bde5`,
 `09d55df`, `907dba5` and `b064842`, together with Artifact-result/native-candidate coexistence, the Playwright package
 preflight and actual-browser design. Native and primary integration work remain unpushed. No Native deterministic
 test, syntax check, import, PostgreSQL, native process, browser, network or model command has run for these merged
-bytes. After local merge completion, freeze its exact result identity and hashes and obtain fresh independent combined-
-byte review before considering the finite lock-bound Native deterministic gate 1. Then satisfy the actual browser
+bytes. Obtain fresh independent review of the exact `6709a0f` combined tree and these corrected status records before
+considering the finite lock-bound Native deterministic gate 1. Then satisfy the actual browser
 design's listed product prerequisites, Playwright/Edge package preflight, server-authentication and built-candidate
 journey and run only still-open acceptance evidence. Do not replay already-passed Artifact, PostgreSQL or model
 operations unchanged. The model campaign remains tabled under the material-change rule above; no browser, release,

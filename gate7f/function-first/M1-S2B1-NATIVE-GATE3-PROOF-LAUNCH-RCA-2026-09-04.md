@@ -169,3 +169,9 @@ for that newly observed class until the shared result is reconciled.
 The earlier statement that the resource proof could now resume is superseded. The complete eligibility, topology,
 diagnostic and retained-fixture RCA is
 `M1-S2B1-NATIVE-GATE3-RESOURCE-PROOF-ELIGIBILITY-RCA-2026-09-04.md`. There is no unchanged-byte retry.
+
+After that RCA and its exact retained manifest were committed as `f0abd88`, cleanup reauthenticated the fixture's
+canonical contained path, non-reparse directory type, Windows device/inode/birth identity, absent `node_modules`
+junction, absent owned PostgreSQL PID and unchanged 154-file/95,077,638-byte manifest digest. It then removed only
+`fixture-gL8ivm` and proved the exact root absent while all four compact parent/operator logs remained present. The
+failed result and its bounded evidence are retained; generated scratch is not.

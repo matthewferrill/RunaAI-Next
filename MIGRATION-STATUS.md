@@ -2041,6 +2041,12 @@ the nonzero Node exit-code value. The systemic correction and analogous-path con
 resume begins with one independently reviewed, preflight-only actual-Control stage after the shared product,
 process-launch and evidence-lifecycle corrections land.
 
+Commit `f0abd88` sealed that RCA and its compact evidence. A post-commit cleanup reauthenticated the retained fixture
+by exact contained path, ordinary non-reparse type, Windows device/inode/birth identity and unchanged canonical
+154-file/95,077,638-byte manifest, confirmed the owned PostgreSQL PID and temporary `node_modules` junction absent,
+removed only the 95 MB generated scratch root, and proved it absent. All four compact parent/operator logs remain.
+This closes retained scratch only; it does not convert `parent-03` into a product result or resume the stopped stage.
+
 ## Previous qualification closeout (2026-08-27, retained evidence)
 
 The steward has now authorized the coordinated qualification package, reversible environment work on

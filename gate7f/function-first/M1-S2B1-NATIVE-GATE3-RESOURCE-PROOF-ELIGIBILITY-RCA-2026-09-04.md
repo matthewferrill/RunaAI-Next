@@ -153,3 +153,14 @@ was not today's failing path.
    are not replayed.
 
 Human testing is not required for this correction. No further Omen resource-proof run is authorized.
+
+## Retained-fixture cleanup result
+
+Commit `f0abd88` sealed this RCA and the failure's compact evidence before cleanup. The cleanup gate then revalidated
+the exact canonical root beneath the stage evidence directory, its expected `fixture-gL8ivm` leaf, ordinary-directory
+and non-reparse state, Windows device `2961632313`, inode `562949954516422`, birth time
+`1788538143233.5686`, absent `node_modules` junction, absent owned PostgreSQL PID `16932`, and unchanged canonical
+manifest: schema `runaai-directory-manifest/v1`, 154 files, 95,077,638 bytes, SHA-256
+`09c33ad6ea141feee5e6d2ea4293022fab5169f7f26a30a3de524808f4f8c9a7`. It removed only that authenticated generated
+root and proved it absent. The four parent/operator stdout/stderr logs remained present. This closes the scratch
+retention cleanup without changing the failed-stage classification or making the resource proof eligible to resume.

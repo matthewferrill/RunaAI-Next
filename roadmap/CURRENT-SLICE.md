@@ -1114,6 +1114,11 @@ production-startup diagnostic, compact-evidence/scratch cleanup and the shared p
 Gate 2, browser or model replay is permitted. The affected proof remains paused until one reviewed preflight-only
 Control stage is green.
 
+Commit `f0abd88` sealed the systemic RCA before cleanup. The retained 95 MB fixture was then reauthenticated by exact
+contained path, non-reparse type, Windows identity and unchanged canonical manifest, removed by its exact literal
+path, and proved absent; the owned PostgreSQL PID and temporary junction were absent and all four compact logs remain.
+Only generated scratch was removed. `parent-03` remains a failed method/eligibility attempt and the stage stays paused.
+
 Active work remains M1-S2, specified in
 `../gate7f/function-first/M1-S2-FUNCTIONS-AND-GREEN-CRITERIA.md`. The complete R10
 result leaves only Chat and Code qualified and does not support a customer route.

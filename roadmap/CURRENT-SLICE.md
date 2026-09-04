@@ -21,15 +21,15 @@ or actual production defect creates a new prospectively frozen qualification nee
 stopped before execution. Its independently reviewed bytes were preserved locally at `b6725c2`; the semantic-union
 merge with exact accepted primary `5e78891` is committed locally at `422cc6d`, retaining the `9714874` result-read
 ports plus `25190d9` dependency/witness controls alongside the native candidate. Reviewed one-file Playwright package-
-preflight commit `1ddbea6` from primary was then carried by local merge `9a1bde5`. Immediately before this
-documentation-only record update, the native branch was clean and seven commits ahead of its tracking ref; neither
-local merge has been pushed. No deterministic test, import, PostgreSQL, native, browser, network or model command has
-run for these combined bytes. A fresh independent combined-byte review is required before the exact lock-bound
-deterministic gate 1. The actual-browser harness design was not yet committed at the native merge boundary and was not
-included in either native merge. Primary subsequently committed that design at `5cf13f1`, after `1ddbea6`; native
-`9a1bde5` has not carried it. Deterministic gate 1 remains stopped until exact primary `5cf13f1` is reconciled and the resulting combined
-bytes receive fresh independent review. The design's server-authentication prerequisite remains open for Artifact and
-Agent browser acceptance.
+preflight commit `1ddbea6` from primary was then carried by local merge `9a1bde5`, and documentation-only checkpoint
+`09d55df` recorded that boundary. Primary browser-harness design commit `5cf13f1` was subsequently carried by local
+merge `907dba5`; native now includes primary through exact `5cf13f1`. Immediately before this record-only update, the
+native branch was clean and ten commits ahead of its tracking ref; the local preservation, checkpoint and merge
+commits remain unpushed. No deterministic test, import, PostgreSQL, native, browser, network or model command has run
+for these combined bytes. Deterministic gate 1 remains stopped until the exact combined bytes at `907dba5` receive
+fresh independent review. Historically, the actual-browser harness design was not yet committed at the `9a1bde5`
+merge boundary and was absent there; `09d55df` preserved that checkpoint before the later carry. The design's server-
+authentication prerequisite remains open for Artifact and Agent browser acceptance.
 
 Product-foundation checkpoint, 2026-09-02: the single-canvas workspace now implements participant-scoped
 conversation search/rename/archive/unarchive/branch/export/soft-delete, persisted low-risk appearance
@@ -1007,15 +1007,15 @@ function to work without erasing passed historical evidence or unrelated roadmap
 Current direction, 2026-09-04: integrate the separately verified Artifact DOM (`b6ece37`) and Agent PostgreSQL
 fixture (`58ca066`) through reviewed, non-destructive landing. Native bytes originating from `a20fd32` are preserved at
 `b6725c2`; their semantic union with accepted primary `5e78891` is committed locally at `422cc6d`, and reviewed
-one-file Playwright package-preflight commit `1ddbea6` is carried by local merge `9a1bde5`. The Artifact result ports
-and native candidate coexist in those merged bytes. Before exact lock-bound deterministic gate 1, obtain a fresh
-combined-byte review; no deterministic test, import, PostgreSQL, native, browser, network or model command has run for
-that combined state. Neither local merge is pushed. Primary subsequently committed the actual-browser harness design
-at `5cf13f1`, after `1ddbea6`; it remains absent from native `9a1bde5`. Reconcile exact `5cf13f1`, obtain a fresh
-independent review of the resulting combined bytes, and only then consider the exact lock-bound deterministic gate 1.
-Then satisfy the design's server-authentication prerequisite and run only the still-open acceptance evidence. Do not
-replay already-passed Artifact, PostgreSQL, or model operations unchanged. The model campaign is tabled under the
-material-change rule above.
+one-file Playwright package-preflight commit `1ddbea6` is carried by local merge `9a1bde5`. Documentation-only status
+commit `09d55df` preserved that checkpoint, after which exact primary browser-harness design commit `5cf13f1` was
+carried by local merge `907dba5`. Native now includes primary through `5cf13f1`, and the Artifact result ports and
+native candidate coexist in the combined bytes. Neither the preservation, checkpoint nor merge commits are pushed,
+and no deterministic test, import, PostgreSQL, native, browser, network or model command has run for that combined
+state. Obtain fresh independent review of the exact bytes at `907dba5` before considering the exact lock-bound
+deterministic gate 1. Then satisfy the design's server-authentication prerequisite and run only the still-open
+acceptance evidence. Do not replay already-passed Artifact, PostgreSQL, or model operations unchanged. The model
+campaign is tabled under the material-change rule above.
 
 Active work remains M1-S2, specified in
 `../gate7f/function-first/M1-S2-FUNCTIONS-AND-GREEN-CRITERIA.md`. The complete R10

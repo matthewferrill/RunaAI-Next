@@ -32,15 +32,16 @@ need. Native Control-worker work remains stopped before execution. Its independe
 locally at `b6725c2`. The semantic-union merge with exact accepted primary `5e78891` is committed locally at
 `422cc6d`, retaining the `9714874` result-read ports plus `25190d9` dependency/witness-method controls alongside the
 native candidate. Reviewed one-file Playwright package-preflight commit `1ddbea6` from primary was then carried by
-local merge `9a1bde5`. Immediately before this documentation-only record update, the native branch was clean and
-seven commits ahead of its tracking ref; neither local merge has been pushed. The Artifact result ports and native
-candidate still coexist, but no deterministic test, import, PostgreSQL, native, browser, network or model command has
-run for these combined bytes. A fresh independent combined-byte review is required before the exact lock-bound
-deterministic gate 1. The actual-browser harness design was not yet committed at the native merge boundary and was not
-included in either native merge. Primary subsequently committed that design at `5cf13f1`, after `1ddbea6`; native
-`9a1bde5` has not carried it. Deterministic gate 1 remains stopped until exact primary `5cf13f1` is reconciled and the resulting combined
-bytes receive fresh independent review. The design's server-authentication prerequisite remains open; therefore
-Artifact and Agent have no actual browser acceptance and the application is not product-qualified.
+local merge `9a1bde5`, and documentation-only checkpoint `09d55df` recorded that boundary. Primary browser-harness
+design commit `5cf13f1` was subsequently carried by local merge `907dba5`; native now includes primary through exact
+`5cf13f1`. Immediately before this record-only update, the native branch was clean and ten commits ahead of its
+tracking ref; the local preservation, checkpoint and merge commits remain unpushed. The Artifact result ports and
+native candidate still coexist, but no deterministic test, import, PostgreSQL, native, browser, network or model
+command has run for these combined bytes. Deterministic gate 1 remains stopped until the exact combined bytes at
+`907dba5` receive fresh independent review. Historically, the actual-browser harness design was not yet committed at
+the `9a1bde5` merge boundary and was absent there; `09d55df` preserved that checkpoint before the later carry. The
+design's server-authentication prerequisite remains open; therefore Artifact and Agent have no actual browser
+acceptance and the application is not product-qualified.
 
 **M1-S2A checkpoint, 2026-09-02:** the conversation lifecycle, Settings and honest
 Omen/Control/Home status implementation is complete in the working branch and deterministically green.

@@ -164,12 +164,12 @@ $expectedHashes = [ordered]@{
   'gate7f\function-first\server-workspace\postgres-lifecycle.integration.test.mjs' = 'FINAL_GO_64_HEX_LIFECYCLE_TEST'
   'gate7f\function-first\server-workspace\postgres.integration.test.mjs' = $compatibilityTestSha256
 }
-$expectedCandidateNames = @(
+[string[]]$expectedCandidateNames = @(
   'FINAL_GO_EXACT_CANDIDATE_TEST_NAME_1',
   'FINAL_GO_EXACT_CANDIDATE_TEST_NAME_2',
   'FINAL_GO_EXACT_CANDIDATE_TEST_NAME_3'
 )
-$expectedCompatibilityNames = @(
+[string[]]$expectedCompatibilityNames = @(
   'real PostgreSQL retains encrypted scoped source authority and idempotent intent'
 )
 
@@ -312,7 +312,10 @@ function Assert-ExactOutputFile([string]$literalPath) {
 
 try {
   if (@('Candidate', 'Compatibility') -cnotcontains $mode) { throw 'run-mode-invalid' }
-  $expectedNames = if ($mode -ceq 'Candidate') { $expectedCandidateNames } else { $expectedCompatibilityNames }
+  [string[]]$expectedNames = if ($mode -ceq 'Candidate') {
+    $expectedCandidateNames
+  } else { $expectedCompatibilityNames }
+  if ($expectedNames -isnot [System.Array]) { throw 'selected-test-names-not-array' }
   if ($expectedNames.Count -ne $(if ($mode -ceq 'Candidate') { 3 } else { 1 }) -or
       @($expectedNames | Where-Object { $_ -like 'FINAL_GO_*' }).Count -ne 0) {
     throw 'unresolved-selected-test-name-pins'

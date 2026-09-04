@@ -1090,15 +1090,20 @@ owner. The actual no-mock proof remains gated in
 `../gate7f/function-first/M1-S2B1-NATIVE-GATE3-PRODUCTION-RESOURCE-OWNERSHIP-RCA-2026-09-04.md`; it will use disposable
 Control PostgreSQL plus a real failed M1/Qdrant initialization and must prove zero sessions and complete cleanup.
 The first reviewed bounded launch at commit `323e530` stopped before its inner operator because it combined the
-portable PowerShell 7 `$PSHOME` with the Windows PowerShell executable name. No database or test started. The
-shell-host identity-family RCA and full repository shape audit are recorded in
+portable PowerShell 7 `$PSHOME` with the Windows PowerShell executable name. The corrected executable launch at
+`c622e3e` then stopped at its first source hash because the PowerShell 7 caller's mixed `PSModulePath` let a Core-only
+Utility module shadow the Windows PowerShell Desktop module. Its cleanup also falsely labeled seven ten-hour-old
+Reallusion PostgreSQL processes as new because the failure preceded real baseline capture. No proof PostgreSQL,
+Node test or product path started in either attempt. The executable/module-boundary and baseline-attribution RCA and
+full repository shape audit are recorded in
 `../gate7f/function-first/M1-S2B1-NATIVE-GATE3-PROOF-LAUNCH-RCA-2026-09-04.md`; failed `parent-01` evidence is retained.
+Failed `parent-02` evidence is also retained and receives no application or model credit.
 The audit also identifies 18 ambient local PowerShell-script launch/comparison sites across nine production files,
 four bare local JavaScript launchers, three environment-derived local launchers, and separate remote-profile command
 builders. They remain a required systemic executable-identity correction lane before Gate 3 final review/human
 testing; no blanket fix is claimed. The resource-ownership proof's dependency set contains none of those paths. Its
-corrected parent pins the OS-derived full Windows PowerShell executable identity and may resume once at fresh
-`parent-02` only after new exact-byte review and a clean commit.
+next method uses child-only Desktop module state, exact executable/module provenance, explicit baseline validity and
+fresh `parent-03`; it may resume once only after new exact-byte review and a clean commit.
 
 Active work remains M1-S2, specified in
 `../gate7f/function-first/M1-S2-FUNCTIONS-AND-GREEN-CRITERIA.md`. The complete R10

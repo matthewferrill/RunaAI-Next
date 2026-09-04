@@ -3,6 +3,16 @@ param()
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
+$ProgressPreference = 'SilentlyContinue'
+
+$windowsPowerShellHome = [IO.Path]::Combine([Environment]::SystemDirectory, 'WindowsPowerShell', 'v1.0')
+$windowsPowerShellModuleRoot = [IO.Path]::Combine($windowsPowerShellHome, 'Modules')
+$utilityModuleManifest = [IO.Path]::Combine($windowsPowerShellModuleRoot,
+  'Microsoft.PowerShell.Utility', 'Microsoft.PowerShell.Utility.psd1')
+$utilityModuleImplementation = [IO.Path]::Combine($windowsPowerShellModuleRoot,
+  'Microsoft.PowerShell.Utility', 'Microsoft.PowerShell.Utility.psm1')
+# Establish the Desktop-only search boundary before any module-backed command is resolved.
+$env:PSModulePath = $windowsPowerShellModuleRoot
 
 $worktree = 'D:\Projects\Runalab\runaai-next-native-control-host'
 $dependencySource = 'D:\Projects\Runalab\runaai-next-m1-gemma-primary\node_modules'
@@ -10,6 +20,7 @@ $localModules = Join-Path $worktree 'node_modules'
 $toolRoot = 'D:\Projects\Runalab\artifacts\tools'
 $postgresBin = Join-Path $toolRoot 'postgresql\bin\pgsql\bin'
 $node = 'C:\Program Files\nodejs\node.exe'
+$taskkill = [IO.Path]::Combine([Environment]::SystemDirectory, 'taskkill.exe')
 $parentRelative = 'gate7f/function-first/Invoke-NativeGate3ResourceOwnershipProofBounded.ps1'
 $directoryManifestPath = Join-Path $worktree 'gate7f\function-first\directory-manifest.mjs'
 $testPath = Join-Path $worktree 'gate7f\function-first\production-resource-ownership.integration.test.mjs'
@@ -31,6 +42,7 @@ $sourcePins = [ordered]@{
 }
 $toolPins = [ordered]@{
   $node = 'BAE898ADD4643FCF890A83AD8AE56E20DCE7E781CAB161A53991CEBA70C99FFB'
+  $taskkill = '1249717315FC8F4D2DF17D5DB9DA0444795FDB9FB83DFB1F763C3F39282244F7'
   (Join-Path $postgresBin 'postgres.exe') = 'AF5B897CB69C9CE692A4A15ECD022B540DB85DB1ADD0F66D2B9F0697BE2451A0'
   (Join-Path $postgresBin 'initdb.exe') = '68195F0C6F22694660BA86D914AE8C74BCD38E71EB342F98E065B1962311142E'
   (Join-Path $postgresBin 'pg_ctl.exe') = '552049183DF455921657C8E498E9745E8508BF77D2C2E5CB9C21B2CBDC798822'
@@ -47,11 +59,13 @@ $failures = [System.Collections.Generic.List[string]]::new()
 $junctionCreated = $false
 $runner = $null
 $beforePostgres = @()
+$postgresBaselineCaptured = $false
 $sourceStatusBefore = $null
 $head = $null
 $greenResult = $null
 $receiptPid = $null
 $dependencyManifestBefore = $null
+$utilityModuleFacts = $null
 $hadMethodGate = Test-Path Env:RUNAAI_GATE3_RESOURCE_PROOF_METHOD
 $priorMethodGate = if ($hadMethodGate) { (Get-Item Env:RUNAAI_GATE3_RESOURCE_PROOF_METHOD).Value } else { $null }
 $forbiddenNodeEnvironment = @('NODE_OPTIONS', 'NODE_PATH', 'NODE_EXTRA_CA_CERTS', 'NODE_ICU_DATA',
@@ -76,6 +90,22 @@ function Assert-Hash([string]$Path, [string]$Expected) {
   if (($item.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0) { throw "hash-target-is-reparse-point:$Path" }
   $actual = (Get-FileHash -LiteralPath $Path -Algorithm SHA256).Hash
   if ($actual -cne $Expected) { throw "hash-mismatch:${Path}:${actual}" }
+}
+
+function Get-DotNetSha256([string]$Path) {
+  $fullPath = [IO.Path]::GetFullPath($Path)
+  if (-not [IO.File]::Exists($fullPath)) { throw "hash-target-not-file:$Path" }
+  $attributes = [IO.File]::GetAttributes($fullPath)
+  if (($attributes -band [IO.FileAttributes]::Directory) -ne 0) { throw "hash-target-not-file:$Path" }
+  if (($attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0) { throw "hash-target-is-reparse-point:$Path" }
+  $stream = [IO.File]::Open($fullPath, [IO.FileMode]::Open, [IO.FileAccess]::Read, [IO.FileShare]::Read)
+  $hasher = [Security.Cryptography.SHA256]::Create()
+  try {
+    return ([BitConverter]::ToString($hasher.ComputeHash($stream))).Replace('-', '')
+  } finally {
+    $hasher.Dispose()
+    $stream.Dispose()
+  }
 }
 
 function Get-PostgresPids {
@@ -107,24 +137,33 @@ function Assert-ExactJunction {
 
 function Stop-OwnedRunnerTree {
   if ($null -eq $runner -or $runner.HasExited) { return }
-  $taskkill = Join-Path ([Environment]::SystemDirectory) 'taskkill.exe'
-  $kill = Start-Process -FilePath $taskkill -ArgumentList "/PID $($runner.Id) /T /F" -WindowStyle Hidden -PassThru
+  $killStart = [Diagnostics.ProcessStartInfo]::new()
+  $killStart.FileName = $taskkill
+  $killStart.Arguments = "/PID $($runner.Id) /T /F"
+  $killStart.UseShellExecute = $false
+  $killStart.CreateNoWindow = $true
+  $kill = [Diagnostics.Process]::new()
+  $kill.StartInfo = $killStart
+  if (-not $kill.Start()) { throw 'owned-taskkill-start-failed' }
   if (-not $kill.WaitForExit(20000)) {
     $killPid = $kill.Id
     $kill.Kill()
     if (-not $kill.WaitForExit(5000)) { throw "owned-taskkill-terminal-unconfirmed:$killPid" }
     $kill.Refresh()
-    if (-not $kill.HasExited -or $null -ne (Get-Process -Id $killPid -ErrorAction SilentlyContinue)) {
+    if (-not $kill.HasExited) {
       throw "owned-taskkill-process-remains:$killPid"
     }
+    $kill.Dispose()
     throw "owned-node-runner-taskkill-timeout:$($runner.Id)"
   }
   $kill.WaitForExit()
   $kill.Refresh()
-  if (-not $kill.HasExited -or $null -ne (Get-Process -Id $kill.Id -ErrorAction SilentlyContinue)) {
+  if (-not $kill.HasExited) {
     throw "owned-taskkill-process-remains:$($kill.Id)"
   }
-  if ($kill.ExitCode -ne 0) { throw "owned-node-runner-taskkill-failed:$($kill.ExitCode)" }
+  $killExitCode = $kill.ExitCode
+  $kill.Dispose()
+  if ($killExitCode -ne 0) { throw "owned-node-runner-taskkill-failed:$killExitCode" }
   if (-not $runner.WaitForExit(30000)) { throw "owned-node-runner-exit-timeout:$($runner.Id)" }
   $runner.Refresh()
   if (-not $runner.HasExited) { throw "owned-node-runner-did-not-exit:$($runner.Id)" }
@@ -138,10 +177,41 @@ try {
   if ($parentGateInvalid) {
     throw 'bounded-parent-method-gate-required'
   }
+  if (-not (Test-Path Env:RUNAAI_WINDOWS_POWERSHELL_MODULE_PATH) -or
+      $env:RUNAAI_WINDOWS_POWERSHELL_MODULE_PATH -cne $windowsPowerShellModuleRoot) {
+    throw 'windows-powershell-module-path-gate-invalid'
+  }
+  if ($PSVersionTable.PSEdition -cne 'Desktop' -or -not (Same-Path $PSHOME $windowsPowerShellHome)) {
+    throw 'windows-powershell-child-edition-invalid'
+  }
+  if ((Get-DotNetSha256 $utilityModuleManifest) -cne 'C09DF190ADDC67F7C6C38E7EA1DCA719FD87807107F688C3F60ED8816E1C48A6' -or
+      (Get-DotNetSha256 $utilityModuleImplementation) -cne 'F9232F3DE3C94DD03CAF40F54B22876C9D810C657C41E54AB2D10469B45F26B5') {
+    throw 'windows-powershell-utility-module-hash-invalid'
+  }
+  Import-Module -Name $utilityModuleManifest -Force -ErrorAction Stop
+  $fileHashCommands = @(Get-Command Get-FileHash -All -ErrorAction Stop)
+  if ($fileHashCommands.Count -ne 1) { throw 'windows-powershell-file-hash-command-count-invalid' }
+  $fileHashCommand = $fileHashCommands[0]
+  if ($fileHashCommand.CommandType -ne [Management.Automation.CommandTypes]::Function -or
+      $fileHashCommand.Source -cne 'Microsoft.PowerShell.Utility' -or
+      -not (Same-Path $fileHashCommand.Module.Path $utilityModuleManifest) -or
+      -not (Same-Path $fileHashCommand.ScriptBlock.File $utilityModuleImplementation) -or
+      $fileHashCommand.Module.Version.ToString() -cne '3.1.0.0' -or
+      $fileHashCommand.Module.Guid.ToString() -cne '1da87e53-152b-403e-98dc-74d7b4d63d59') {
+    throw 'windows-powershell-utility-module-identity-invalid'
+  }
+  $utilityModuleFacts = [ordered]@{ commandType = $fileHashCommand.CommandType.ToString()
+    commandSource = $fileHashCommand.Source; moduleGuid = $fileHashCommand.Module.Guid.ToString()
+    moduleVersion = $fileHashCommand.Module.Version.ToString(); manifestPath = $fileHashCommand.Module.Path
+    implementationPath = $fileHashCommand.ScriptBlock.File
+    manifestSha256 = 'C09DF190ADDC67F7C6C38E7EA1DCA719FD87807107F688C3F60ED8816E1C48A6'
+    implementationSha256 = 'F9232F3DE3C94DD03CAF40F54B22876C9D810C657C41E54AB2D10469B45F26B5' }
   foreach ($name in $forbiddenNodeEnvironment) {
     if (Test-Path "Env:$name") { throw "node-startup-environment-must-be-absent:$name" }
   }
   if (-not (Same-Path (Get-Location).Path $worktree)) { throw 'operator-working-directory-mismatch' }
+  $beforePostgres = @(Get-PostgresPids)
+  $postgresBaselineCaptured = $true
   if (Test-Path -LiteralPath $evidenceRoot) { throw 'operator-evidence-root-already-exists' }
   if (Test-Path -LiteralPath $artifactRoot) { throw 'fixture-artifact-root-already-exists' }
   if ($null -ne (Get-LiteralItemOrNull $localModules)) { throw 'worktree-node-modules-must-be-absent' }
@@ -180,7 +250,6 @@ try {
     throw 'dependency-source-complete-manifest-mismatch'
   }
 
-  $beforePostgres = @(Get-PostgresPids)
   New-Item -ItemType Directory -Path $evidenceRoot -ErrorAction Stop | Out-Null
   New-Item -ItemType Junction -Path $localModules -Target $dependencySource -ErrorAction Stop | Out-Null
   $junctionCreated = $true
@@ -240,7 +309,8 @@ try {
     head = $head; nodeVersion = $nodeVersion; postgresVersion = $postgresVersion; tests = 1; pass = 1; fail = 0
     dependencyManifestSha256 = $dependencyManifestBefore.sha256; postgresProcessId = $receiptPid
     candidateSessionsAfterEarlyFailure = 0; candidateSessionsAfterM1Failure = 0; syntheticClusterStopped = $true
-    fixtureRootCleaned = $true; modelInvoked = $false; productionChanged = $false; privateValuesIncluded = $false }
+    fixtureRootCleaned = $true; powershellEdition = $PSVersionTable.PSEdition; powershellHome = $PSHOME
+    utilityModule = $utilityModuleFacts; modelInvoked = $false; productionChanged = $false; privateValuesIncluded = $false }
 } catch {
   Add-Failure $_.Exception.Message
 } finally {
@@ -270,10 +340,18 @@ try {
     }
   } catch { Add-Failure "dependency-source-witness:$($_.Exception.Message)" }
   try {
+    if (-not $postgresBaselineCaptured) {
+      if ($junctionCreated -or $null -ne $runner) { Add-Failure 'postgres-baseline-missing-after-stateful-entry' }
+      throw 'postgres-baseline-not-captured-no-process-attribution'
+    }
     $finalPostgres = @(Get-PostgresPids)
     $unexpectedPostgres = @($finalPostgres | Where-Object { $beforePostgres -notcontains $_ })
     if ($unexpectedPostgres.Count -ne 0) { Add-Failure "final-postgres-process-remains:$($unexpectedPostgres -join ',')" }
-  } catch { Add-Failure "postgres-process-witness:$($_.Exception.Message)" }
+  } catch {
+    if ($postgresBaselineCaptured -or $junctionCreated -or $null -ne $runner) {
+      Add-Failure "postgres-process-witness:$($_.Exception.Message)"
+    }
+  }
   try {
     $finalHead = (& git -c core.excludesFile= -c safe.directory=$worktree rev-parse HEAD).Trim()
     $sourceStatusAfter = @(& git -c core.excludesFile= -c safe.directory=$worktree status --porcelain=v1 --untracked-files=all)

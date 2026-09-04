@@ -9,9 +9,10 @@ companion, real-module wiring, source-multiplicity, SafeText, dependency-binding
 received fresh P0=0/P1=0 review. The reviewed method bounded the junction to the seven-test suite, required verified
 `finally` cleanup and aggregated suite/cleanup failures before five explicit current-byte syntax checks, roadmap
 verification and the diff check. Its one corrected run passed 53/53, removed the authenticated worktree-local junction,
-passed all five syntax checks and 15/15 roadmap checks, and completed a clean diff check. Source commit and ordinary-
-browser acceptance remain required. This record does not claim a deployed Control
-release, actual Omen browser proof, production route, customer acceptance, artifact creation, or completion of C05.
+passed all five syntax checks and 15/15 roadmap checks, and completed a clean diff check. The exact bytes are locally
+committed at `b6ece37`. Primary-branch integration, push, and ordinary authenticated browser/server-authentication
+acceptance remain required. This record does not claim a deployed Control release, model acceptance, actual Omen
+browser proof, production route, customer acceptance, artifact creation, or completion of C05.
 
 ## Bound scope
 
@@ -114,8 +115,10 @@ an actual-system or user acceptance substitute.
 ## Remaining gate
 
 The four corrected STOPs now have fresh P0=0/P1=0 review, green 53/53 verification, verified link-only cleanup, five
-green syntax checks, 15/15 roadmap checks and a clean diff check. After a source commit, run the frozen
-ordinary authenticated Omen -> Control browser journey once against a built candidate: current Research/Review and
-Code results, ready/non-ready state, inert markup, exact download bytes/type/name/digest, reload and sign-out/sign-in.
+green syntax checks, 15/15 roadmap checks, a clean diff check, and exact local source commit `b6ece37`. Remaining gates
+are reviewed primary-branch integration and push plus the frozen ordinary authenticated Omen -> Control browser journey
+once against a built candidate: current Research/Review and Code results, ready/non-ready state, inert markup, exact
+download bytes/type/name/digest, reload and sign-out/sign-in. Actual browser/server-authentication, release, model,
+production and customer acceptance remain open.
 Any actual-system failure stops that exact gate for retained RCA and corrected-design review before one bounded
 resume. Broader C03/C05 formats, artifact production, upload, editing, sharing and publication remain deferred.

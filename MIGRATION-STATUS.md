@@ -2012,6 +2012,24 @@ Model identity, tool authority and durable records remain application-owned. Pre
 Control release and all protected data while validating the candidate. This replaces the old
 two-model/qualification-before-disposable-functions next-step sequence below.
 
+## Native Gate 3 preflight stop (2026-09-04)
+
+The actual disposable PostgreSQL Gate 2 remains green at Candidate 3/3 and Compatibility 1/1. The required
+independent Native source/build review and read-only Omen/Control toolchain preflight then stopped Gate 3 before any
+compile or Native execution. The real watchdog, Windows host and child bootstraps were still deliberate fail-closed
+interfaces, and the shared handle-ownership protocol, Native-first release verification, exact manifest sealing,
+owner activation and reproducible build authority were not yet complete. Neither Omen nor Control exposed a usable
+.NET SDK/compiler on PATH; Control's ambient Node is `v24.19.0`, while its installed application release retains the
+required `v22.22.0` runtime.
+
+The systemic RCA is
+`gate7f/function-first/M1-S2B1-NATIVE-GATE3-PREFLIGHT-RCA-2026-09-04.md`. Gate 3 is paused as a six-stage state
+machine from protocol freeze through one Control local-Native proof. Implementation is active in isolated,
+non-overlapping worktrees with continuous independent review. A publisher-hash-verified portable .NET 10.0.400 SDK
+is the frozen compiler input; it is not globally installed and the product output will be self-contained `win-x64`.
+No passed Gate 1, Gate 2, Artifact, Agent, browser or model evidence is replayed. No production route, protected data,
+public Git repository, PostgreSQL service or model was touched by this preflight.
+
 ## Previous qualification closeout (2026-08-27, retained evidence)
 
 The steward has now authorized the coordinated qualification package, reversible environment work on

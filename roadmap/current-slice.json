@@ -48,11 +48,15 @@
     "gate7f/function-first/M1-S2-ARTIFACT-RESULT-SURFACE-CRITERIA-INDEPENDENT-REVIEW-2026-09-04.md",
     "gate7f/function-first/M1-S2-CONTEXTUAL-REVIEW-WORKFLOW-2026-09-03.md",
     "gate7f/function-first/M1-S2-SUPPLIED-SOURCE-RESEARCH-WORKFLOW-2026-09-03.md",
-    "gate7f/function-first/M1-S2-DEVICE-INSTALL-READINESS-PREFLIGHT-2026-09-03.md"
+    "gate7f/function-first/M1-S2-DEVICE-INSTALL-READINESS-PREFLIGHT-2026-09-03.md",
+    "gate7f/function-first/M1-S2B1-NATIVE-POSTGRES-GATE2-RESULTS-2026-09-04.md",
+    "gate7f/function-first/M1-S2B1-NATIVE-CONTROL-COMPOSITION-CORRECTION-DESIGN-2026-09-04.md",
+    "gate7f/function-first/M1-S2B1-NATIVE-CONTROL-COMPOSITION-CORRECTION-IMPLEMENTATION-2026-09-04.md",
+    "gate7f/function-first/M1-S2B1-NATIVE-GATE3-PREFLIGHT-RCA-2026-09-04.md"
   ],
   "scopeDocument": "roadmap/CURRENT-SLICE.md",
   "capabilityIds": ["C01", "C02", "C03", "C04", "C06", "C07", "C08", "C12", "C15", "C16"],
-  "nextWork": "M1-S2B1 criteria, package gate, public-Git core, PostgreSQL authority, candidate-only service/surface binding, binary network policy, bounded authenticated Git stream session, local TLS broker, corrected Control-worker composition criteria, executable two-phase Control-frame prerequisite, deterministic publication primitive, contextual Review, supplied-source Research, deterministic device/install readiness, and artifact-result surface criteria are complete locally. No public Control fetch, native publication, ready workspace, artifact-result implementation, installer, browser operation, production change or model call is claimed. Correct and independently re-review the PostgreSQL lifecycle lane, then compose the specialized worker/publication host and run one real Control/browser journey while independent Agent, connection and artifact implementation lanes advance at stable interfaces. Home remains model-only, Omen is not the primary worker, and comparison-model testing remains tabled.",
+  "nextWork": "M1-S2B1 deterministic Gate 1 and actual disposable PostgreSQL Gate 2 are complete; passed evidence is retained and will not be replayed. Native Gate 3 stopped before compilation because its real watchdog, Windows host, child bootstraps, shared ownership IPC, Native-first release verifier, exact sealed membership, owner activation and pinned build authority were incomplete. Complete the documented G3-A contract, G3-B native build, G3-C worker wiring and G3-D release-integrity stages in isolated reviewed lanes; then obtain exact five-part G3-E GO and run one bounded Control-local G3-F proof without public Git. Only that green result may make the separate actual Control Candidate, built-candidate browser journey and human acceptance eligible. No production, protected-data, browser, model or customer credit is claimed. Home remains model-only, Omen is not the primary worker, and comparison-model testing remains tabled.",
   "remainingRoadmapRequired": true,
   "completionClaim": "M1 completion is not whole-product completion."
 }

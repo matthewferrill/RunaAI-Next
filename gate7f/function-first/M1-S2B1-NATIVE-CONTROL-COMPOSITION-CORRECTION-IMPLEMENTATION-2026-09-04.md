@@ -569,3 +569,17 @@ source-only result can satisfy that gate. Control must compile reviewed source, 
 source/binary/runtime/policy hash, and obtain a new independent five-part source/hash GO before the single actual
 Control run. A first failure at any gate stops; it is documented and corrected before one fresh affected run. No
 unchanged-byte retry is permitted.
+
+## Native Gate 3 preflight stop
+
+The independent five-part source/build review and actual Omen/Control toolchain preflight stopped Gate 3 before any
+compilation or Native execution. The real watchdog, Windows host and worker bootstraps were still fail-closed
+interfaces; the cross-language handle-ownership protocol, reproducible compiler authority, Native-first release
+verification, exact manifest membership/sealing and production activation path were not constructible from commit
+`6fb28fd`. Omen and Control also had no .NET SDK or current compiler on PATH; Control's ambient Node was `v24.19.0`,
+not the sealed application Node `v22.22.0`.
+
+The full systemic analysis and corrected `G3-A` through `G3-F` state machine are in
+`M1-S2B1-NATIVE-GATE3-PREFLIGHT-RCA-2026-09-04.md`. No Gate 1, Gate 2, model, browser or production work is replayed.
+Gate 3 resumes with contract and implementation construction in isolated lanes, then exact five-part review, then one
+Control build/local-Native proof. The actual public-Git Candidate remains a later separate gate.

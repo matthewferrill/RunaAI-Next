@@ -1061,10 +1061,14 @@ the complete Artifact DOM chain through exact head `bf56905`, including the sepa
 `09d55df`, `907dba5` and `b064842`, together with Artifact-result/native-candidate coexistence, the Playwright package
 preflight and actual-browser design. Native and primary integration work remain unpushed. Deterministic Gate 1 is green
 with its 51 retained plus 23/23 affected-only correction checks. Actual disposable PostgreSQL Gate 2 is green at
-Candidate 3/3 plus Compatibility 1/1, with every stop retained and corrected before affected-only resume. Next,
-independently review and run the Native source/build/hash Gate 3; only its exact five-part GO may authorize the one
-actual Control Candidate run, followed by the server-authenticated built-candidate browser journey and still-open
-acceptance evidence. Do not replay
+Candidate 3/3 plus Compatibility 1/1, with every stop retained and corrected before affected-only resume. Gate 3
+preflight then stopped before compilation: the repository still held fail-closed Native/watchdog/child interfaces,
+had no common ownership IPC, Native-first release verifier, sealed exact membership, owner activation or usable pinned
+compiler authority on either host. Its systemic RCA and corrected `G3-A` through `G3-F` state machine are in
+`../gate7f/function-first/M1-S2B1-NATIVE-GATE3-PREFLIGHT-RCA-2026-09-04.md`. Complete those bounded construction
+stages in isolated reviewed lanes; only exact five-part GO may authorize one Control local-Native proof, and only that
+green result may make the separate actual Control Candidate run eligible. The server-authenticated built-candidate
+browser journey and acceptance evidence remain later gates. Do not replay
 already-passed Artifact, Agent or model operations unchanged. The model campaign remains tabled under the material-
 change rule above; Gate 2 claims only its owned disposable PostgreSQL boundary and no Native-process, browser, release,
 model, production or customer-acceptance credit.

@@ -47,10 +47,12 @@ test("scoped admission locks only exact principal project source and returns ver
 test("outer-join row locks name only the concrete workspace side", async () => {
   const source = await readFile(sourceUrl, "utf8");
   const lockedOuterJoins = lockedOuterJoinQueries(source);
+  const rowLock = /\bFOR\s+(?:NO\s+KEY\s+UPDATE|UPDATE|KEY\s+SHARE|SHARE)\b/giu;
   assert.equal(lockedOuterJoins.length, 2);
   const migration = lockedOuterJoins.find(sql => sql.includes("workspace_row.lifecycle IN"));
   const admission = lockedOuterJoins.find(sql => sql.includes("workspace.lifecycle IN"));
   assert.ok(migration); assert.ok(admission);
+  for (const sql of lockedOuterJoins) assert.equal([...sql.matchAll(rowLock)].length, 1);
   assert.match(migration, /\bFOR\s+UPDATE\s+OF\s+workspace_row\s*$/iu);
   assert.match(admission, /\bFOR\s+UPDATE\s+OF\s+workspace\s*$/iu);
 });

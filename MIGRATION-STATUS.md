@@ -557,6 +557,14 @@ checks pass 15/15 and fresh independent review returned GO at P0=0/P1=0. This is
 not native worker, PostgreSQL, browser, production or model acceptance. Record:
 `gate7f/function-first/M1-S2B1-CONTROL-FRAME-PREFLIGHT-2026-09-04.md`.
 
+**M1-S2B1 bootstrap contract preflight, 2026-09-04:** exact five-channel public-Git and three-channel snapshot
+bootstrap record sets now fail as one operation: an invalid phase, replay or writer failure immediately poisons
+every sibling, destroys every record and zeroizes all generated key material before returning the error. Focused
+checks pass 14/14, combined Bootstrap/materialization checks pass 29/29, and fresh independent review returned GO
+at P0=0/P1=0. This authorizes native source-port implementation only. It does not prove OS writer provenance,
+inherited handles, process/Job fencing, deadline/recovery wiring, native execution or acceptance. Record:
+`gate7f/function-first/M1-S2B1-BOOTSTRAP-CONTRACT-PREFLIGHT-2026-09-04.md`.
+
 **M1-S2B1 publication-primitive preflight, 2026-09-03:** the digest- and identity-bound deterministic
 publication contract now passes 29/29 focused compatibility checks and fresh independent review at P0=0/P1=0.
 Two review stops corrected malformed-handle ownership, exhaustive inspection cleanup, failed-close retention and

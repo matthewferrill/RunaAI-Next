@@ -168,6 +168,14 @@ invalid transition and covers every exact relationship, direction, sequence, dec
 browser behavior or production operation. Record:
 `../gate7f/function-first/M1-S2B1-CONTROL-FRAME-PREFLIGHT-2026-09-04.md`.
 
+The bootstrap contract prerequisite now passes 14/14 focused and 29/29 combined Bootstrap/materialization checks,
+with fresh independent GO at P0=0/P1=0. Exact five-channel public-Git and three-channel snapshot record sets share
+one poison boundary: invalid phase, replay or writer failure synchronously destroys every record and zeroizes every
+sibling's generated key material before returning. This authorizes native source-port implementation only. OS writer
+provenance, inherited handles, process/Job fencing, external deadline/recovery behavior and actual native acceptance
+remain unproved. Record:
+`../gate7f/function-first/M1-S2B1-BOOTSTRAP-CONTRACT-PREFLIGHT-2026-09-04.md`.
+
 The deterministic publication primitive now passes 29/29 focused materialization/publication compatibility checks
 and independent review at P0=0/P1=0 after two explicit review stops. It owns and closes or recovery-retains every
 accessible native handle, distinguishes attempted from confirmed moves, permits only a one-shot non-replacing

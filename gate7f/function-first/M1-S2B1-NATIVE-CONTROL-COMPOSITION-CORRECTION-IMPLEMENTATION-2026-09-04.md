@@ -552,11 +552,20 @@ evidence commit: `npm run verify:roadmap` reported revision `2026-08-28.1`, dige
 tests. The planning bytes remained unchanged after that command, so neither a second roadmap run nor any Native-test
 replay is authorized for this evidence commit.
 
+## Disposable PostgreSQL Gate 2 result — passed
+
+The separately reviewed actual PostgreSQL Candidate passed 3/3 once at exact clean commit `8cdd4e4`; the separately
+authorized Compatibility case passed 1/1 once at exact clean commit `5a6aaad`. Both runs emitted exact owned-process
+terminal receipts, removed only owned synthetic data and their dependency junctions, preserved the seven unrelated
+PostgreSQL processes, and left no live run root. The stopped SQLSTATE `0A000` attempt and three pre-execution harness
+stops each have a complete RCA and affected-only correction; no stop was graded against a model. Exact evidence is in
+`M1-S2B1-NATIVE-POSTGRES-GATE2-RESULTS-2026-09-04.md`.
+
 ## Deliberately deferred gates
 
-The signed manifest and every real native/watchdog/coordinator/materializer/TLS method remain blocked on gate 3 of the
-approved design. No mock or source-only result can satisfy that gate. After deterministic tests and disposable
-PostgreSQL each receive independent exact-byte authorization and pass once, Control must compile reviewed source,
-seal every loaded source/binary/runtime/policy hash, and obtain a new independent five-part source/hash GO before the
-single actual Control run. A first failure at any gate stops; it is documented and corrected before one fresh affected
-run. No unchanged-byte retry is permitted.
+The deterministic and disposable PostgreSQL gates are complete. The signed manifest and every real
+native/watchdog/coordinator/materializer/TLS method remain blocked on gate 3 of the approved design. No mock or
+source-only result can satisfy that gate. Control must compile reviewed source, seal every loaded
+source/binary/runtime/policy hash, and obtain a new independent five-part source/hash GO before the single actual
+Control run. A first failure at any gate stops; it is documented and corrected before one fresh affected run. No
+unchanged-byte retry is permitted.

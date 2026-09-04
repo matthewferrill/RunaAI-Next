@@ -29,7 +29,8 @@ deterministic runs, and the Agent PostgreSQL run are retained evidence and must 
 The model campaign remains tabled. Historical R14/R15 evidence remains immutable, and the obsolete fresh 360+12
 campaign must not be scheduled unless a material model-facing artifact, inference setting, role prompt, checker
 semantic, frozen functional contract, or actual production defect creates a new prospectively frozen qualification
-need. Native Control-worker work remains stopped before execution. Its reviewed history was preserved at `b6725c2`,
+need. Native Control-worker work has completed deterministic and actual disposable-PostgreSQL gates but remains stopped
+before Native execution. Its reviewed history was preserved at `b6725c2`,
 semantically reconciled with accepted primary `5e78891` at `422cc6d`, carried through Playwright package preflight by
 `9a1bde5`, recorded at `09d55df`, carried through browser-harness design `5cf13f1` at `907dba5`, and frozen in the
 three-record checkpoint `b064842`. Reviewed local merge `6709a0f` now integrates exact primary `b99f8bf`, whose
@@ -49,9 +50,17 @@ ownership-declaration assertion were traced to the earlier unexecuted `b6725c2` 
 `GO P0=0/P1=0`, exact correction commit `48dd9f9` passed all 19 syntax files and only the 23 affected checks. The 51
 earlier green checks were retained, not replayed. The authenticated dependency junction was removed; both lockfiles,
 exact HEAD `48dd9f916e97913deb862ba365b29c1bbff8fb02` and an empty worktree were verified. No PostgreSQL server, Native
-process, Control operation, browser, network or model action ran. The next separate gate is disposable PostgreSQL
-Native-authority validation; it requires fresh review and does not authorize unchanged Artifact, Agent or model
-replay. Record: `gate7f/function-first/M1-S2B1-NATIVE-DETERMINISTIC-GATE1-FAILURE-RCA-2026-09-04.md`.
+process, Control operation, browser, network or model action ran. Record:
+`gate7f/function-first/M1-S2B1-NATIVE-DETERMINISTIC-GATE1-FAILURE-RCA-2026-09-04.md`.
+
+**Native disposable PostgreSQL gate 2, corrected and passed 2026-09-04:** the actual Candidate stage passed 3/3 once at
+exact clean `8cdd4e4`; the separate Compatibility stage passed 1/1 once at exact clean `5a6aaad`. Both emitted terminal
+owned-process receipts, removed owned synthetic data/junctions, and left seven unrelated PostgreSQL processes unchanged.
+One actual SQLSTATE `0A000` outer-join lock defect and three pre-execution harness stops were fully recorded, corrected
+systemically, independently reviewed, and resumed only at the affected stage; none was attributed to a model. Gate 3
+Native source/build/hash is next. No Native process, public Git, Control operation, browser, model, production, release,
+or customer credit is claimed. Record:
+`gate7f/function-first/M1-S2B1-NATIVE-POSTGRES-GATE2-RESULTS-2026-09-04.md`.
 
 **M1-S2A checkpoint, 2026-09-02:** the conversation lifecycle, Settings and honest
 Omen/Control/Home status implementation is complete in the working branch and deterministically green.

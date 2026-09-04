@@ -160,6 +160,14 @@ only. The executable two-phase control-frame schema/tests are the first implemen
 `../gate7f/function-first/M1-S2B1-CONTROL-WORKER-COMPOSITION-CORRECTION-2026-09-03.md` and
 `../gate7f/function-first/M1-S2B1-CONTROL-WORKER-COMPOSITION-INDEPENDENT-REVIEW-2026-09-03.md`.
 
+The executable two-phase Control-frame prerequisite now passes 15/15 focused checks and independent review at
+P0=0/P1=0. Its first review stop is retained: independent direction arrays could not enforce the proposal barrier
+and tests under-covered relationships and boundaries. The correction admits events incrementally, poisons any
+invalid transition and covers every exact relationship, direction, sequence, decision, EOF, binding, key length and
+1 MiB payload boundary. This does not prove native Windows pipes, handles, processes, PostgreSQL composition,
+browser behavior or production operation. Record:
+`../gate7f/function-first/M1-S2B1-CONTROL-FRAME-PREFLIGHT-2026-09-04.md`.
+
 The deterministic publication primitive now passes 29/29 focused materialization/publication compatibility checks
 and independent review at P0=0/P1=0 after two explicit review stops. It owns and closes or recovery-retains every
 accessible native handle, distinguishes attempted from confirmed moves, permits only a one-shot non-replacing

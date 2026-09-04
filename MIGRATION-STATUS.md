@@ -548,6 +548,15 @@ executable two-phase control-frame schema and adversarial validator tests. Recor
 `gate7f/function-first/M1-S2B1-CONTROL-WORKER-COMPOSITION-CORRECTION-2026-09-03.md` and
 `gate7f/function-first/M1-S2B1-CONTROL-WORKER-COMPOSITION-INDEPENDENT-REVIEW-2026-09-03.md`.
 
+**M1-S2B1 two-phase Control-frame preflight, 2026-09-04:** the first implementation review retained a P0=0/P1=2
+stop because separate request/response arrays could not prove cross-direction chronology and critical pair/boundary
+coverage was incomplete. No native work followed that stop. The corrected incremental admission state machine now
+gates request/proposal/decision/terminal order online, poisons invalid channels, covers all three exact worker
+relationships and enforces directional EOF, HMAC/binding, 32-byte keys and the exact 1 MiB payload limit. Focused
+checks pass 15/15 and fresh independent review returned GO at P0=0/P1=0. This is deterministic framing evidence,
+not native worker, PostgreSQL, browser, production or model acceptance. Record:
+`gate7f/function-first/M1-S2B1-CONTROL-FRAME-PREFLIGHT-2026-09-04.md`.
+
 **M1-S2B1 publication-primitive preflight, 2026-09-03:** the digest- and identity-bound deterministic
 publication contract now passes 29/29 focused compatibility checks and fresh independent review at P0=0/P1=0.
 Two review stops corrected malformed-handle ownership, exhaustive inspection cleanup, failed-close retention and

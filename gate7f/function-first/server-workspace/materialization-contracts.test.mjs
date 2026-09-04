@@ -6,7 +6,7 @@ import {
   CAPABILITY_SET_DIGEST, CAPABILITY_SET_VERSION, MATERIALIZATION_POLICY_DIGEST, MATERIALIZATION_POLICY_ID,
   NETWORK_POLICY_DIGEST, NETWORK_POLICY_ID, admitGitOpenRequest, admitMaterializationReceipt, admitMaterializationRequest, admitPipeFrame,
   admitUploadManifest, admitWorkspaceCancelRequest, admitWorkspaceManifest, bindingDigestFor, canonicalSha256, canonicalStringify,
-  controlPipeFrameSchema, fileSetDigest, parseCanonicalWire,
+  controlPipeFrameSchema, createControlPipeAdmission, fileSetDigest, parseCanonicalWire, validateControlPipeTranscript,
   gitStreamFrameSchema, materializationReceiptSchema, sourceSelectionSchema, uploadManifestSchema,
   uploadSessionCreateResponseSchema, validateGitStreamTranscript, workspaceManifestSchema, workspaceReconciliationRequestSchema
 } from "./materialization-contracts.mjs";
@@ -173,6 +173,92 @@ const streamRecord = (direction, sequence, requestOrdinal, frameType, payload = 
   return { rawHeader: canonicalStringify({ ...base, hmacSha256 }), payload: bytes };
 };
 
+const controlRecord = (direction, sequence, frameType, payload = "x", patch = {}) => {
+  const bytes = Buffer.isBuffer(payload) ? payload : Buffer.from(payload);
+  const base = { schemaVersion: "runa-materialization-pipe-frame/v2", channelId: "channel_0001", sequence,
+    requestId: "request_0001", nonce: d, payloadSha256: createHash("sha256").update(bytes).digest("hex"),
+    payloadBytes: bytes.length, direction, frameType, ...patch };
+  const hmacSha256 = createHmac("sha256", streamKey).update(canonicalStringify(base)).update(bytes).digest("hex");
+  return { rawHeader: canonicalStringify({ ...base, hmacSha256 }), payload: bytes };
+};
+
+const eof = direction => ({ direction, eof: true });
+const controlExpectation = { relationship: "control-coordinator", channelId: "channel_0001", requestId: "request_0001", nonce: d };
+const controlPairs = [
+  ["control-coordinator", "control-to-coordinator", "coordinator-to-control"],
+  ["coordinator-materializer", "coordinator-to-materializer", "materializer-to-coordinator"],
+  ["coordinator-broker", "coordinator-to-broker", "broker-to-coordinator"]
+];
+const finalizedEvents = (requestDirection, responseDirection, decision = "finalize") => [
+  controlRecord(requestDirection, 1, "operation-request"),
+  controlRecord(responseDirection, 1, "operation-proposal"),
+  controlRecord(requestDirection, 2, decision),
+  eof(requestDirection),
+  controlRecord(responseDirection, 2, "terminal"),
+  eof(responseDirection)
+];
+
+test("incremental control admission enforces the proposal barrier for all three exact relationships", () => {
+  for (const [relationship, requestDirection, responseDirection] of controlPairs) {
+    const expectation = { ...controlExpectation, relationship };
+    assert.deepEqual(validateControlPipeTranscript(finalizedEvents(requestDirection, responseDirection), expectation, streamKey),
+      { outcome: "finalized", requestFrames: 2, responseFrames: 2, terminal: true, eof: true });
+    assert.equal(validateControlPipeTranscript(finalizedEvents(requestDirection, responseDirection, "cancel-request"), expectation, streamKey).outcome,
+      "cancelled-after-proposal");
+    const admission = createControlPipeAdmission(expectation, streamKey);
+    admission.admit(controlRecord(requestDirection, 1, "operation-request"));
+    assert.throws(() => admission.admit(controlRecord(requestDirection, 2, "finalize")), /control-transition-invalid/u);
+    assert.throws(() => admission.admit(controlRecord(responseDirection, 1, "operation-proposal")), /control-admission-poisoned/u);
+  }
+});
+
+test("control transcript admits only the sealed one-phase terminal variants", () => {
+  const preCancel = [controlRecord("control-to-coordinator", 1, "cancel-request"), eof("control-to-coordinator"),
+    controlRecord("coordinator-to-control", 1, "terminal"), eof("coordinator-to-control")];
+  assert.equal(validateControlPipeTranscript(preCancel, controlExpectation, streamKey).outcome, "cancelled-before-operation");
+  const earlyFailure = [controlRecord("control-to-coordinator", 1, "operation-request"),
+    controlRecord("coordinator-to-control", 1, "terminal"), eof("coordinator-to-control"), eof("control-to-coordinator")];
+  assert.equal(validateControlPipeTranscript(earlyFailure, controlExpectation, streamKey).outcome, "failed-before-proposal");
+});
+
+test("control admission rejects role confusion, chronology violations, third frames and EOF violations", () => {
+  const allDirections = controlPairs.flatMap(([, requestDirection, responseDirection]) => [requestDirection, responseDirection]);
+  for (const [relationship, requestDirection, responseDirection] of controlPairs) {
+    const expectation = { ...controlExpectation, relationship };
+    for (const direction of allDirections.filter(value => value !== requestDirection)) {
+      assert.throws(() => validateControlPipeTranscript([controlRecord(direction, 1, "operation-request")], expectation, streamKey));
+    }
+    for (const direction of allDirections.filter(value => value !== responseDirection)) {
+      assert.throws(() => validateControlPipeTranscript([controlRecord(requestDirection, 1, "operation-request"),
+        controlRecord(direction, 1, "operation-proposal")], expectation, streamKey));
+    }
+  }
+  assert.throws(() => validateControlPipeTranscript([controlRecord("coordinator-to-control", 1, "operation-proposal")], controlExpectation, streamKey), /control-transition-invalid/u);
+  assert.throws(() => validateControlPipeTranscript([controlRecord("control-to-coordinator", 1, "operation-request"),
+    eof("control-to-coordinator")], controlExpectation, streamKey), /control-eof-invalid/u);
+  const complete = finalizedEvents("control-to-coordinator", "coordinator-to-control");
+  assert.throws(() => validateControlPipeTranscript([...complete, controlRecord("coordinator-to-control", 3, "terminal")], controlExpectation, streamKey), /control-channel-complete/u);
+  assert.throws(() => validateControlPipeTranscript(complete.slice(0, -1), controlExpectation, streamKey), /control-eof-required/u);
+  assert.throws(() => validateControlPipeTranscript([...complete.slice(0, 4), controlRecord("control-to-coordinator", 3, "cancel-request")], controlExpectation, streamKey));
+});
+
+test("control admission enforces exact key, binding and payload boundaries", () => {
+  const directions = ["control-to-coordinator", "coordinator-to-control"];
+  const normal = finalizedEvents(...directions);
+  assert.throws(() => createControlPipeAdmission(controlExpectation, Buffer.alloc(31)), /pipe-key-invalid/u);
+  assert.throws(() => createControlPipeAdmission(controlExpectation, Buffer.alloc(33)), /pipe-key-invalid/u);
+  assert.throws(() => validateControlPipeTranscript(normal, { ...controlExpectation, requestId: "request_0002" }, streamKey), /pipe-channel-binding-invalid/u);
+  assert.throws(() => validateControlPipeTranscript([controlRecord(directions[0], 1, "operation-request", "x", { channelId: "channel_0002" })], controlExpectation, streamKey), /pipe-channel-binding-invalid/u);
+  assert.throws(() => validateControlPipeTranscript([controlRecord(directions[0], 1, "operation-request", "x", { nonce: "b".repeat(64) })], controlExpectation, streamKey), /pipe-channel-binding-invalid/u);
+  assert.throws(() => validateControlPipeTranscript(normal, controlExpectation, Buffer.alloc(32, 9)), /pipe-hmac-mismatch/u);
+  assert.throws(() => validateControlPipeTranscript([controlRecord(directions[0], 1, "operation-request", Buffer.alloc(0))], controlExpectation, streamKey), /control-payload-empty/u);
+  const boundary = createControlPipeAdmission(controlExpectation, streamKey);
+  assert.equal(boundary.admit(controlRecord(directions[0], 1, "operation-request", Buffer.alloc(1_048_576))).frame.payloadBytes, 1_048_576);
+  assert.throws(() => createControlPipeAdmission(controlExpectation, streamKey)
+    .admit(controlRecord(directions[0], 1, "operation-request", Buffer.alloc(1_048_577))));
+  assert.equal(controlPipeFrameSchema.safeParse({ ...JSON.parse(normal[0].rawHeader), frameType: "operation-proposal" }).success, false);
+});
+
 test("stream schema and transcript permit bounded multi-frame two-request Git exchange only", () => {
   const request0 = canonicalStringify({ schemaVersion: "runa-public-git-http-request/v1", requestOrdinal: 0,
     method: "GET", pathAndQuery: "/org/fixture.git/info/refs?service=git-upload-pack",
@@ -213,7 +299,7 @@ test("Git request heads admit only the two sealed smart HTTP shapes", () => {
 test("pipe admission recomputes HMAC and rejects arbitrary header fields or wrong key", () => {
   const base = { schemaVersion: "runa-materialization-pipe-frame/v2", channelId: "channel_0001", sequence: 1,
     requestId: "request_0001", nonce: d, payloadSha256: createHash("sha256").update("x").digest("hex"), payloadBytes: 1,
-    frameType: "operation-request" };
+    direction: "control-to-coordinator", frameType: "operation-request" };
   const hmacSha256 = createHmac("sha256", Buffer.alloc(32, 1)).update(canonicalStringify(base)).update("x").digest("hex");
   const signed = { ...base, hmacSha256 };
   assert.equal(admitPipeFrame(controlPipeFrameSchema, canonicalStringify(signed), "x", Buffer.alloc(32, 1)).frameType, "operation-request");

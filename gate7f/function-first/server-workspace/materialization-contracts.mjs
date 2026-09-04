@@ -220,8 +220,26 @@ export const uploadManifestRecordSchema = z.object({ schemaVersion: z.literal("r
 const pipeBase = { schemaVersion: z.literal("runa-materialization-pipe-frame/v2"), channelId: id,
   sequence: positiveCount.max(128), requestId: id, nonce: z.string().regex(/^[a-f0-9]{64}$/u),
   payloadSha256: digest, payloadBytes: count.max(MAX_FRAME_BYTES), hmacSha256: digest };
-export const controlPipeFrameSchema = z.object({ ...pipeBase, sequence: z.literal(1),
-  frameType: z.enum(["operation-request", "operation-receipt", "cancel-request", "terminal"]) }).strict();
+const controlRequestDirection = z.enum(["control-to-coordinator", "coordinator-to-materializer", "coordinator-to-broker"]);
+const controlResponseDirection = z.enum(["coordinator-to-control", "materializer-to-coordinator", "broker-to-coordinator"]);
+const controlDirectionPairs = Object.freeze({
+  "control-coordinator": ["control-to-coordinator", "coordinator-to-control"],
+  "coordinator-materializer": ["coordinator-to-materializer", "materializer-to-coordinator"],
+  "coordinator-broker": ["coordinator-to-broker", "broker-to-coordinator"]
+});
+export const controlPipeFrameSchema = z.object({ ...pipeBase,
+  direction: z.union([controlRequestDirection, controlResponseDirection]),
+  frameType: z.enum(["operation-request", "operation-proposal", "finalize", "cancel-request", "terminal"]) }).strict()
+  .superRefine((value, context) => {
+    const requestDirection = controlRequestDirection.safeParse(value.direction).success;
+    const requestType = ["operation-request", "finalize", "cancel-request"].includes(value.frameType);
+    if (requestDirection !== requestType) context.addIssue({ code: "custom", message: "control frame type/direction mismatch" });
+    if (value.frameType === "operation-request" && value.sequence !== 1) context.addIssue({ code: "custom", message: "operation request requires sequence 1" });
+    if (value.frameType === "operation-proposal" && value.sequence !== 1) context.addIssue({ code: "custom", message: "operation proposal requires sequence 1" });
+    if (value.frameType === "finalize" && value.sequence !== 2) context.addIssue({ code: "custom", message: "finalize requires sequence 2" });
+    if (value.frameType === "cancel-request" && ![1, 2].includes(value.sequence)) context.addIssue({ code: "custom", message: "cancel requires sequence 1 or 2" });
+    if (value.frameType === "terminal" && ![1, 2].includes(value.sequence)) context.addIssue({ code: "custom", message: "terminal requires sequence 1 or 2" });
+  });
 export const gitStreamFrameSchema = z.object({ ...pipeBase, direction: z.enum(["materializer-to-broker", "broker-to-materializer"]),
   requestOrdinal: z.number().int().min(0).max(1),
   frameType: z.enum(["open-request", "request-body", "end-request", "open-response", "response-body", "end-response", "terminal"]) }).strict()
@@ -315,6 +333,79 @@ export function admitPipeFrame(schema, rawHeader, payload, key) {
   const observed = Buffer.from(frame.hmacSha256, "hex");
   if (observed.length !== expected.length || !timingSafeEqual(observed, expected)) throw new Error("pipe-hmac-mismatch");
   return frame;
+}
+
+const controlPipeExpectationSchema = z.object({
+  relationship: z.enum(["control-coordinator", "coordinator-materializer", "coordinator-broker"]),
+  channelId: id, requestId: id, nonce: z.string().regex(/^[a-f0-9]{64}$/u)
+}).strict();
+
+const exactKeys = (value, keys) => value !== null && typeof value === "object" && !Array.isArray(value)
+  && Object.keys(value).sort().join(",") === [...keys].sort().join(",");
+
+export function createControlPipeAdmission(expectation, key) {
+  const expected = controlPipeExpectationSchema.parse(expectation);
+  if (!Buffer.isBuffer(key) || key.length !== 32) throw new Error("pipe-key-invalid");
+  const [requestDirection, responseDirection] = controlDirectionPairs[expected.relationship];
+  const nextSequence = { [requestDirection]: 1, [responseDirection]: 1 };
+  let state = "await-request-1", outcome = null, requestFrames = 0, responseFrames = 0, poisoned = false;
+  const poison = error => { poisoned = true; state = "poisoned"; throw error; };
+  const requireUsable = () => {
+    if (poisoned) throw new Error("control-admission-poisoned");
+    if (state === "complete") throw new Error("control-channel-complete");
+  };
+  const admit = record => {
+    requireUsable();
+    try {
+      if (!exactKeys(record, ["rawHeader", "payload"])) throw new Error("pipe-record-shape-invalid");
+      if (!Buffer.isBuffer(record.payload)) throw new Error("pipe-payload-type-invalid");
+      const frame = admitPipeFrame(controlPipeFrameSchema, record.rawHeader, record.payload, key);
+      if (frame.channelId !== expected.channelId || frame.requestId !== expected.requestId || frame.nonce !== expected.nonce) throw new Error("pipe-channel-binding-invalid");
+      if (![requestDirection, responseDirection].includes(frame.direction)) throw new Error("control-direction-invalid");
+      if (frame.sequence !== nextSequence[frame.direction]++) throw new Error("pipe-sequence-invalid");
+      if (frame.payloadBytes === 0) throw new Error("control-payload-empty");
+      if (state === "await-request-1" && frame.direction === requestDirection && frame.sequence === 1 && frame.frameType === "operation-request") state = "await-response-1";
+      else if (state === "await-request-1" && frame.direction === requestDirection && frame.sequence === 1 && frame.frameType === "cancel-request") state = "await-request-eof-pre-cancel";
+      else if (state === "await-response-1" && frame.direction === responseDirection && frame.sequence === 1 && frame.frameType === "operation-proposal") state = "await-request-2";
+      else if (state === "await-response-1" && frame.direction === responseDirection && frame.sequence === 1 && frame.frameType === "terminal") state = "await-response-eof-early";
+      else if (state === "await-request-2" && frame.direction === requestDirection && frame.sequence === 2 && frame.frameType === "finalize") { outcome = "finalized"; state = "await-request-eof-decision"; }
+      else if (state === "await-request-2" && frame.direction === requestDirection && frame.sequence === 2 && frame.frameType === "cancel-request") { outcome = "cancelled-after-proposal"; state = "await-request-eof-decision"; }
+      else if (state === "await-response-terminal-1" && frame.direction === responseDirection && frame.sequence === 1 && frame.frameType === "terminal") state = "await-response-eof-pre-cancel";
+      else if (state === "await-response-terminal-2" && frame.direction === responseDirection && frame.sequence === 2 && frame.frameType === "terminal") state = "await-response-eof-decision";
+      else throw new Error("control-transition-invalid");
+      if (frame.direction === requestDirection) requestFrames += 1; else responseFrames += 1;
+      return Object.freeze({ state, frame });
+    } catch (error) { return poison(error); }
+  };
+  const end = direction => {
+    requireUsable();
+    try {
+      if (direction === requestDirection && state === "await-request-eof-pre-cancel") state = "await-response-terminal-1";
+      else if (direction === requestDirection && state === "await-request-eof-decision") state = "await-response-terminal-2";
+      else if (direction === responseDirection && state === "await-response-eof-early") { outcome = "failed-before-proposal"; state = "await-request-eof-early"; }
+      else if (direction === requestDirection && state === "await-request-eof-early") state = "complete";
+      else if (direction === responseDirection && state === "await-response-eof-pre-cancel") { outcome = "cancelled-before-operation"; state = "complete"; }
+      else if (direction === responseDirection && state === "await-response-eof-decision") state = "complete";
+      else throw new Error("control-eof-invalid");
+      return Object.freeze({ state, direction });
+    } catch (error) { return poison(error); }
+  };
+  const summary = () => {
+    if (poisoned) throw new Error("control-admission-poisoned");
+    if (state !== "complete") throw new Error("control-eof-required");
+    return Object.freeze({ outcome, requestFrames, responseFrames, terminal: true, eof: true });
+  };
+  return Object.freeze({ admit, end, summary });
+}
+
+export function validateControlPipeTranscript(events, expectation, key) {
+  if (!Array.isArray(events)) throw new Error("control-transcript-shape-invalid");
+  const admission = createControlPipeAdmission(expectation, key);
+  for (const event of events) {
+    if (exactKeys(event, ["direction", "eof"]) && event.eof === true) admission.end(event.direction);
+    else admission.admit(event);
+  }
+  return admission.summary();
 }
 
 const gitStreamExpectationSchema = z.object({ channelId: id, requestId: id,

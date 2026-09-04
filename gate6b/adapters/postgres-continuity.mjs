@@ -5,6 +5,7 @@ import { createConversationContext, parseConversationScope, CONVERSATION_CONTEXT
   from "../../gate7f/function-first/conversation-context.mjs";
 import { isRetryableConversationFailure } from "../../gate7f/function-first/conversation-outcome.mjs";
 import { answerEvidence, readAnswerEvidence } from "../../gate7f/function-first/conversation-evidence.mjs";
+import { conversationResultOwnerHmac } from "../../gate7f/function-first/artifact-result-owner-binding.mjs";
 import { defaultUserSettings, validateUserSetting } from "../product-foundation.mjs";
 
 const coded = (code, message) => Object.assign(new Error(message), { code });
@@ -100,6 +101,9 @@ export class PostgresSelectedContinuityStore {
         END IF;
       END $settings$;
       ALTER TABLE runa_core.chats ADD COLUMN IF NOT EXISTS deleted_at timestamptz;
+      -- Existing rows stay NULL. Artifact reads admit them only when their retained source HMAC can
+      -- reproduce the exact current record or these creation semantics; renamed/unverifiable history fails closed.
+      ALTER TABLE runa_core.chats ADD COLUMN IF NOT EXISTS result_owner_hmac text;
     `);
   }
 
@@ -448,13 +452,15 @@ export class PostgresSelectedContinuityStore {
       const envelope = this.cipher.encrypt(privateContext("chat", participantId, branchId), privateData);
       await client.query(`INSERT INTO runa_core.chats
         (chat_id,participant_id,project_id,parent_chat_id,branch_from_turn,turn_count,archived,unread,
-         created_at,updated_at,title_envelope,title_hmac,locator_hmac,source_content_hmac)
-        VALUES($1,$2,$3,$4,$5,$5,false,false,$6,$6,$7::jsonb,$8,$9,$10)`,
+         created_at,updated_at,title_envelope,title_hmac,locator_hmac,source_content_hmac,result_owner_hmac)
+        VALUES($1,$2,$3,$4,$5,$5,false,false,$6,$6,$7::jsonb,$8,$9,$10,$11)`,
       [branchId, participantId, retained.projectId, retained.chatId, retained.turnCount, now,
         JSON.stringify(envelope), envelope.contentHmac,
         this.cipher.digest({ domain: "project-chat", kind: "chat", locator: `chat:${branchId}` }),
         this.cipher.digest({ domain: "project-chat", kind: "chat", locator: `chat:${branchId}`,
-          publicData, privateData })]);
+          publicData, privateData }),
+        conversationResultOwnerHmac(this.cipher, { participantId, projectId: retained.projectId,
+          chatId: branchId, experience: operation.experience })]);
       const rows = (await client.query(`SELECT turn_ordinal,occurred_at,route,origin_request_id,content_envelope
         FROM runa_core.chat_turns WHERE participant_id=$1 AND chat_id=$2 AND turn_ordinal<$3 ORDER BY turn_ordinal`,
       [participantId, retained.chatId, retained.turnCount])).rows;
@@ -498,11 +504,13 @@ export class PostgresSelectedContinuityStore {
     const envelope = this.cipher.encrypt(context, privateData);
     await client.query(`INSERT INTO runa_core.chats
       (chat_id,participant_id,project_id,parent_chat_id,branch_from_turn,turn_count,archived,unread,
-       created_at,updated_at,title_envelope,title_hmac,locator_hmac,source_content_hmac)
-      VALUES($1,$2,$3,NULL,NULL,0,false,false,$4,$4,$5::jsonb,$6,$7,$8)`, [chatId, participantId,
+       created_at,updated_at,title_envelope,title_hmac,locator_hmac,source_content_hmac,result_owner_hmac)
+      VALUES($1,$2,$3,NULL,NULL,0,false,false,$4,$4,$5::jsonb,$6,$7,$8,$9)`, [chatId, participantId,
       projectId, now, JSON.stringify(envelope), envelope.contentHmac,
       this.cipher.digest({ domain: "project-chat", kind: "chat", locator: `chat:${chatId}` }),
-      this.cipher.digest({ domain: "project-chat", kind: "chat", locator: `chat:${chatId}`, publicData, privateData })]);
+      this.cipher.digest({ domain: "project-chat", kind: "chat", locator: `chat:${chatId}`, publicData, privateData }),
+      conversationResultOwnerHmac(this.cipher, { participantId, projectId, chatId,
+        experience: request.experience })]);
   }
 
   async #insertTurn(client, request, response, ordinal) {

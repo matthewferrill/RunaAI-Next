@@ -8,6 +8,18 @@ const mime = new Map([[".html", "text/html; charset=utf-8"], [".js", "text/javas
   [".mjs", "text/javascript; charset=utf-8"],
   [".css", "text/css; charset=utf-8"], [".svg", "image/svg+xml"]]);
 const coded = (code, message) => Object.assign(new Error(message), { code });
+const RESULT_HTTP_STATUS = Object.freeze({
+  "result-request-invalid": 400,
+  "result-owner-not-found": 404,
+  "result-not-ready": 409,
+  "result-stale": 409,
+  "result-owner-over-capacity": 413,
+  "result-source-too-large": 413,
+  "result-list-too-large": 413,
+  "result-too-large": 413,
+  "result-source-invalid": 503,
+  "result-unavailable": 503,
+});
 
 function json(response, status, value) {
   const payload = Buffer.from(JSON.stringify(value));
@@ -294,10 +306,10 @@ export function createCandidateHttpServer({ application, runtimeStatus, readines
       return json(response, 404, { schemaVersion: "runa2-gate6b-error/v1", errorCode: "route-not-found", correlationId });
     } catch (error) {
       const code = typeof error?.code === "string" ? error.code : "candidate-request-failed";
-      const status = code === "candidate-shadow-authority" ? 423
+      const status = RESULT_HTTP_STATUS[code] ?? (code === "candidate-shadow-authority" ? 423
         : code.includes("authentication") || code.startsWith("identity-") ? 401
           : code.includes("authorization") || code.includes("denied") || code === "fresh-step-up-required" ? 403
-            : code.includes("unavailable") ? 503 : 400;
+            : code.includes("unavailable") ? 503 : 400);
       return json(response, status, { schemaVersion: "runa2-gate6b-error/v1", errorCode: code,
         correlationId, privateValuesIncluded: false });
     }

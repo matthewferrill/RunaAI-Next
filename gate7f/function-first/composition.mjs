@@ -17,6 +17,7 @@ import { M1RoleOrchestrator } from "./role-orchestrator.mjs";
 import { M1FunctionSurface, M1SessionAuthority, M1_EXERCISE_SUITE } from "./surface.mjs";
 import { PostgresServerWorkspaceStore } from "./server-workspace/postgres.mjs";
 import { ServerWorkspaceService } from "./server-workspace/service.mjs";
+import { createPostgresArtifactResultSourcePorts } from "./artifact-result-postgres.mjs";
 
 const TRUSTED_TASK_HOOK_NAMES = new Set(["afterIntent", "beforeDispatch", "afterMaterialize", "afterTests", "afterCommit", "beforeCommit"]);
 export function validateTrustedTaskHooks(value) {
@@ -56,6 +57,7 @@ export async function composeM1Functions({ configuration, provider, pool, cipher
   const adapter = new DisposableJavascriptProjectAdapter({ baseDirectory, executor: javascriptExecutor,
     suites: projectFixtures?.suites ?? { [M1_EXERCISE_SUITE.suiteId]: M1_EXERCISE_SUITE } });
   const store = new PostgresTaskStore({ pool, cipher }); await store.initialize();
+  const { conversationResults, taskResults } = createPostgresArtifactResultSourcePorts({ pool, cipher });
   const sessions = new M1SessionAuthority();
   let serverWorkspaces = null;
   if (serverWorkspace !== undefined) {
@@ -87,8 +89,8 @@ export async function composeM1Functions({ configuration, provider, pool, cipher
     ]);
     return { qdrant, embedding, reranker, ready: qdrant && embedding && reranker };
   }
-  return { index, sources, tasks, orchestrator, review, health,
+  return { index, sources, tasks, orchestrator, review, health, conversationResults, taskResults,
     attach(application) { return new M1FunctionSurface({ application, sources, tasks, orchestrator, sessions,
-      serverWorkspaces,
+      serverWorkspaces, conversationResults, taskResults,
       ...(projectFixtures ? { prepareProject: projectFixtures.prepare } : {}) }); } };
 }

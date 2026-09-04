@@ -210,6 +210,14 @@ owner-point source-port and HTTP implementation only. PostgreSQL, HTTP, DOM/brow
 actual acceptance remain unproved. Record:
 `../gate7f/function-first/M1-S2-ARTIFACT-RESULT-CORE-PREFLIGHT-2026-09-04.md`.
 
+Artifact owner-point source ports and authenticated Chat/Code `result.list`/`result.read` now pass their one allowed
+disposable PostgreSQL plus loopback HTTP integration test. Four retained source/fixture review stops corrected task
+row and receipt/effect graph binding, cryptographic nullable owner and strict migrated-chat admission, genuine fresh-
+process restart evidence, complete schema/table/canary/row-digest no-copy proof, and throw-path authority comparison.
+Fresh review returned GO at P0=0/P1=0; the actual integration passed 1/1 and cleanup left zero owned entries/processes.
+This does not prove DOM/browser, model, Control, production or customer acceptance. Record:
+`../gate7f/function-first/M1-S2-ARTIFACT-RESULT-SOURCE-HTTP-INTEGRATION-2026-09-04.md`.
+
 The contextual Agent-governance implementation now passes 54/54 focused checks and fresh independent review at
 P0=0/P1=0 after a retained P1=2 stop. Consequential actions consume task-scoped authority inside the same transaction
 before their first write; run start/resume reserve the exact active window under that compare-and-set boundary.

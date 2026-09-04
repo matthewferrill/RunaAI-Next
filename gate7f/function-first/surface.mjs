@@ -1,6 +1,10 @@
 import { createHash } from "node:crypto";
 import { z } from "zod";
 import { assertConversationContext } from "./conversation-context.mjs";
+import { resultListInputSchema, resultReadInputSchema, resultFailure } from "./artifact-result-contracts.mjs";
+import {
+  listConversationResults, listTaskResults, readConversationResult, readTaskResult,
+} from "./artifact-result-projection.mjs";
 
 const fail = code => Object.assign(new Error(code), { code });
 const id = z.string().min(1).max(160).regex(/^[A-Za-z0-9][A-Za-z0-9_.:-]*$/);
@@ -10,7 +14,8 @@ const agentMutation = z.enum(["grant.create", "grant.revoke", "proposal.create",
 const agentActionSchema = z.object({ schemaVersion: z.literal("runaai-agent-action-request/v1"),
   taskId: id, authorityDigest: sha, operation: agentMutation, input: z.unknown() }).strict();
 const schema = z.object({ projectId: id, experience: z.enum(["chat", "code"]),
-  operation: z.enum(["sources.list", "sources.attach", "sources.retry", "sources.select", "project.prepare", "project.current",
+  operation: z.enum(["sources.list", "sources.attach", "sources.retry", "sources.select", "result.list", "result.read",
+    "project.prepare", "project.current",
     "task.create", "task.status", "task.agent-fence", "task.agent-action", "task.cancel", "task.list", "grant.create", "grant.revoke", "proposal.create",
     "proposal.approve", "proposal.execute", "proposal.reconcile", "run.start", "run.resume", "run.status", "run.list",
     "source.connect-public-git", "source.connect-folder-snapshot", "workspace.materialize", "workspace.list-files",
@@ -56,11 +61,12 @@ export class M1SessionAuthority {
 
 export class M1FunctionSurface {
   constructor({ application, sources, tasks, orchestrator = null, sessions = new M1SessionAuthority(),
-    serverWorkspaces = null,
+    serverWorkspaces = null, conversationResults = null, taskResults = null,
     prepareProject = context => ({ environmentId: `m1-${createHash("sha256").update(`${context.principalId}:${context.projectId}`).digest("hex").slice(0,32)}`,
       files: M1_EXERCISE_FILES }) }) {
     if (typeof prepareProject !== "function") throw fail("m1-trusted-project-fixtures-invalid");
-    Object.assign(this, { application, sources, tasks, orchestrator, sessions, serverWorkspaces, prepareProject });
+    Object.assign(this, { application, sources, tasks, orchestrator, sessions, serverWorkspaces,
+      conversationResults, taskResults, prepareProject });
   }
   async checkedParticipant(credential, projectId, experience) {
     await this.application.authority();
@@ -90,6 +96,25 @@ export class M1FunctionSurface {
       const selected = await this.sources.selected(context, selection.sourceIds);
       return { sources: selected.map(({ sourceId, sectionId, contentSha256, contextType = "source", label }) =>
         ({ sourceId, sectionId, contentSha256, contextType, label })) };
+    }
+    if (["result.list", "result.read"].includes(operation)) {
+      const contract = operation === "result.list" ? resultListInputSchema : resultReadInputSchema;
+      const request = contract.safeParse(input);
+      if (!request.success) throw resultFailure("result-request-invalid");
+      const owner = request.data.owner;
+      if (owner.kind === "conversation") {
+        if (!this.conversationResults?.readOwner) throw resultFailure("result-unavailable");
+        const source = await this.conversationResults.readOwner(context, { chatId: owner.chatId });
+        if (source?.chatId !== owner.chatId || source?.projectId !== context.projectId
+            || source?.experience !== experience) throw resultFailure("result-owner-not-found");
+        return operation === "result.list" ? listConversationResults(source)
+          : readConversationResult(source, request.data);
+      }
+      if (experience !== "code") throw resultFailure("result-owner-not-found");
+      if (!this.taskResults?.readOwner) throw resultFailure("result-unavailable");
+      const source = await this.taskResults.readOwner(context, { taskId: owner.taskId });
+      if (source?.task?.taskId !== owner.taskId) throw resultFailure("result-owner-not-found");
+      return operation === "result.list" ? listTaskResults(source) : readTaskResult(source, request.data);
     }
     if (experience !== "code") throw fail("m1-code-experience-required");
     if (typeof verifySession !== "function") throw fail("m1-session-verifier-required");

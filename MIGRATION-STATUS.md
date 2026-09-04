@@ -603,6 +603,16 @@ This authorizes bounded owner-point source-port and HTTP implementation only. No
 model, Control or actual acceptance operation ran. Record:
 `gate7f/function-first/M1-S2-ARTIFACT-RESULT-CORE-PREFLIGHT-2026-09-04.md`.
 
+**Artifact-result source/HTTP integration, 2026-09-04:** exact owner-point conversation/task ports now bound row IDs,
+encrypted source integrity, nullable personal and managed-project ownership, migrated legacy chats, and the complete
+proposal/intent/receipt graph before projection. Authenticated Chat and Code expose bounded `result.list`/`result.read`
+with frozen public HTTP errors. Independent source/fixture reviews retained P1=2, P1=2, P1=2 and P1=1 stops before
+execution; corrections added cryptographic owner binding, strict legacy admission, a real fresh-process restart,
+complete no-copy/no-write evidence and throw-path authority comparison. Fresh review returned GO at P0=0/P1=0, and
+the one disposable PostgreSQL plus authenticated loopback HTTP run passed 1/1. Cleanup left zero owned entries and
+zero Runa-tool PostgreSQL processes. No browser, model, Control, production or customer acceptance is claimed. Record:
+`gate7f/function-first/M1-S2-ARTIFACT-RESULT-SOURCE-HTTP-INTEGRATION-2026-09-04.md`.
+
 **Contextual Agent-governance preflight, 2026-09-04:** every consequential Agent action now consumes a task-scoped
 authority digest inside the same transaction before its first write, while run start/resume reserve the exact active
 window under that compare-and-set boundary. Authoritative projection restores ask-every-time approval and explicit

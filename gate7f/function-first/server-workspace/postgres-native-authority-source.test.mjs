@@ -10,6 +10,14 @@ function between(source, start, end) {
   return source.slice(from, to);
 }
 
+function lockedOuterJoinQueries(source) {
+  const outerJoin = /\b(?:LEFT|RIGHT|FULL)(?:\s+OUTER)?\s+JOIN\b/iu;
+  const rowLock = /\bFOR\s+(?:NO\s+KEY\s+UPDATE|UPDATE|KEY\s+SHARE|SHARE)\b/iu;
+  return [...source.matchAll(/\.query\s*\(\s*`([\s\S]*?)`/gu)]
+    .map(match => match[1])
+    .filter(sql => outerJoin.test(sql) && rowLock.test(sql));
+}
+
 test("candidate PostgreSQL source is additive and stores immutable encrypted authority and publication evidence", async () => {
   const source = await readFile(sourceUrl, "utf8");
   assert.match(source, /const s = this\.sqlSchema/u);
@@ -34,6 +42,17 @@ test("scoped admission locks only exact principal project source and returns ver
   assert.match(body, /this\.#candidateAuthorityFromRow/u);
   assert.match(body, /disposition: "reconciliation-required"/u);
   assert.doesNotMatch(body, /count\(\*\)|LIMIT\s+\d+|OFFSET|readdir|glob/u);
+});
+
+test("outer-join row locks name only the concrete workspace side", async () => {
+  const source = await readFile(sourceUrl, "utf8");
+  const lockedOuterJoins = lockedOuterJoinQueries(source);
+  assert.equal(lockedOuterJoins.length, 2);
+  const migration = lockedOuterJoins.find(sql => sql.includes("workspace_row.lifecycle IN"));
+  const admission = lockedOuterJoins.find(sql => sql.includes("workspace.lifecycle IN"));
+  assert.ok(migration); assert.ok(admission);
+  assert.match(migration, /\bFOR\s+UPDATE\s+OF\s+workspace_row\s*$/iu);
+  assert.match(admission, /\bFOR\s+UPDATE\s+OF\s+workspace\s*$/iu);
 });
 
 test("atomic begin binds watchdog authority workspace and digest outbox without retry loops", async () => {

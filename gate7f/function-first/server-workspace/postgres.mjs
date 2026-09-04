@@ -499,7 +499,8 @@ export class PostgresServerWorkspaceStore {
         LEFT JOIN ${s}.operation_authorities AS authority
           ON authority.workspace_id=workspace_row.workspace_id
         WHERE authority.workspace_id IS NULL
-          AND workspace_row.lifecycle IN ('intent-recorded','staging','published-pending-db') FOR UPDATE`)).rows;
+          AND workspace_row.lifecycle IN ('intent-recorded','staging','published-pending-db')
+        FOR UPDATE OF workspace_row`)).rows;
       for (const row of unauthorisedNonterminalRows) {
         const migrationContext = { principalId: row.principal_id, projectId: row.project_id,
           sessionId: "operation-authority-migration" };

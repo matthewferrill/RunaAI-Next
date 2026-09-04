@@ -82,7 +82,8 @@ test("top-level candidate construction is static, default-off and not steerable 
   assert.match(composition, /createPublicGitControlWorkerComposition\(\{ database: workspaceStore, watchdog, nativeHost,[\s\S]*workerReleaseSha256: candidate\.workerReleaseSha256 \}\)/u);
   assert.equal(composition.indexOf("await checkpointer.setup()")
     < composition.lastIndexOf("createNativeCandidateAttachment(nativeCandidateResources"), true);
-  assert.equal(composition.includes("nativeCandidateResources = null"), false);
+  assert.equal(composition.match(/let nativeCandidateResources = null;/gu)?.length, 1);
+  assert.doesNotMatch(composition, /(?<!let )nativeCandidateResources = null;/u);
   assert.match(composition,
     /catch \(error\) \{[\s\S]*rejectNativeCandidateConstruction\(nativeCandidateResources, error\)/u);
   assert.match(productionComposition, /const m1Functions = m1 \? await m1\.attach\(application\) : null;/u);

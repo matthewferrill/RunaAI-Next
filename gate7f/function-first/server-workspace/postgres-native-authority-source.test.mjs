@@ -12,9 +12,10 @@ function between(source, start, end) {
 
 test("candidate PostgreSQL source is additive and stores immutable encrypted authority and publication evidence", async () => {
   const source = await readFile(sourceUrl, "utf8");
+  assert.match(source, /const s = this\.sqlSchema/u);
   for (const table of ["operation_authorities", "workspace_effect_claims",
     "workspace_publication_authorities", "outbox"]) {
-    assert.match(source, new RegExp("CREATE TABLE IF NOT EXISTS \\$\\{this\\.sqlSchema\\}\\." + table, "u"));
+    assert.match(source, new RegExp("CREATE TABLE IF NOT EXISTS \\$\\{s\\}\\." + table, "u"));
   }
   assert.match(source, /operation_authorities_immutable/u);
   assert.match(source, /workspace_effect_claims_immutable/u);

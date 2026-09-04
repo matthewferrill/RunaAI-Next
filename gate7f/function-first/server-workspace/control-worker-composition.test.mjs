@@ -770,5 +770,5 @@ test("candidate composition source has no dynamic native selection or broad proc
     "node:net", "node:http", "node:https", "readdir(", "glob("]) {
     assert.equal(sourceText.includes(denied), false, denied);
   }
-  assert.match(sourceText, /materializeInputSchema = z\.object\(\{ context: plainContext,[\s\S]*sourceId:[\s\S]*\}\.strict\(\)/u);
+  assert.match(sourceText, /materializeInputSchema = z\.object\(\{ context: plainContext,[\s\S]*sourceId:[\s\S]*\}\)\.strict\(\)/u);
 });

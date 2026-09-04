@@ -27,11 +27,19 @@ Reviewed local merge `6709a0f` now integrates exact primary `b99f8bf`, whose par
 `58ca066` and the complete Artifact DOM chain through the separately verified 58/58 retained-owner/`result-stale`
 correction while preserving Artifact-result/native-candidate coexistence and both histories. Native and primary
 integration work remain unpushed. No Native deterministic test, syntax check, import, PostgreSQL, native process,
-browser, network or model command has run for these merged bytes. The exact combined commit and corrected living-status
-records require fresh independent review before the finite lock-bound Native deterministic gate 1.
+browser, network or model command had run for those merged bytes before the first deterministic gate attempt.
 The actual browser design's listed product prerequisites, Playwright/Edge package preflight, server-authentication,
 built-candidate journey and Artifact/Agent browser acceptance remain open; no release, model, production or customer
 credit is claimed.
+
+Native deterministic gate-1 stop, 2026-09-04: the one authorized seven-file command at exact clean `39fd184` reported
+51/56 passing and five failures, then stopped. Dependency-junction cleanup, both lockfiles, exact HEAD and clean
+worktree were verified. Static RCA found one real `postgres.mjs` parser defect, two executed broken source-text
+assertions and one latent broken ownership-declaration assertion, all originating in the earlier unexecuted `b6725c2`
+bundle. No PostgreSQL server, Native process, Control operation, browser, network or model action ran. The one-source/
+three-test correction and syntax-first, 23-check affected-only resume require fresh independent review and a source
+commit; the 51 green checks must not be replayed. RCA:
+`../gate7f/function-first/M1-S2B1-NATIVE-DETERMINISTIC-GATE1-FAILURE-RCA-2026-09-04.md`.
 
 Product-foundation checkpoint, 2026-09-02: the single-canvas workspace now implements participant-scoped
 conversation search/rename/archive/unarchive/branch/export/soft-delete, persisted low-risk appearance
@@ -1043,10 +1051,10 @@ exact primary `b99f8bf`. That primary contains Agent PostgreSQL commit `58ca066`
 the complete Artifact DOM chain through exact head `bf56905`, including the separately verified 58/58 retained-owner/
 `result-stale` correction. The merged working tree preserves the Native history from `b6725c2`, `422cc6d`, `9a1bde5`,
 `09d55df`, `907dba5` and `b064842`, together with Artifact-result/native-candidate coexistence, the Playwright package
-preflight and actual-browser design. Native and primary integration work remain unpushed. No Native deterministic
-test, syntax check, import, PostgreSQL, native process, browser, network or model command has run for these merged
-bytes. Obtain fresh independent review of the exact `6709a0f` combined tree and these corrected status records before
-considering the finite lock-bound Native deterministic gate 1. Then satisfy the actual browser
+preflight and actual-browser design. Native and primary integration work remain unpushed. The first deterministic gate
+at exact `39fd184` stopped with 51/56 passing and five source/harness failures; cleanup was green and no external
+operation ran. Review the one-source/three-test correction and syntax-first affected-only resume, commit it, then run
+only those 23 affected checks. After that, satisfy the actual browser
 design's listed product prerequisites, Playwright/Edge package preflight, server-authentication and built-candidate
 journey and run only still-open acceptance evidence. Do not replay already-passed Artifact, PostgreSQL or model
 operations unchanged. The model campaign remains tabled under the material-change rule above; no browser, release,

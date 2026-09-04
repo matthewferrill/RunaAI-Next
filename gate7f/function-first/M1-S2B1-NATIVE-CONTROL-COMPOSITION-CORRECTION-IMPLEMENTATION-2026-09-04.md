@@ -7,13 +7,15 @@ Approved design SHA-256: `6EB02D980DFFF041D60D843C5A85A26E41ED09A46D1AA8FE9C83CF
 Roadmap digest retrieved before editing: `49fd172f29ce119d23ea4abfd6fe0eb09c4cf1611c904a49af2fd902a5e3df84`  
 Milestone/slice: `M1` / `M1-S2`; the retrieved 17-capability set was not changed.
 
-Status: reviewed source and deterministic-test bytes are locally preserved through exact native checkpoint `b064842`
-and remain unexecuted. Reviewed local merge `6709a0f` integrates exact primary `b99f8bf`, including the Agent and
-Artifact results recorded below. Nothing in this record is native, PostgreSQL, network, browser, model, production or
-end-user acceptance. The exact combined commit and these corrected status records require fresh independent review
-before the exact lock-bound deterministic gate 1 is authorized.
+Status: reviewed local merge `6709a0f` integrates exact primary `b99f8bf`, including the Agent and Artifact results
+recorded below. The first deterministic gate-1 command ran once at `39fd184` and stopped with 51/56 passing, five
+failures, verified dependency-junction cleanup and a clean unchanged worktree. Static RCA found one product parser
+defect and three harness assertions authored in the earlier unexecuted Native bundle. Their bounded source/test/method
+correction is present but unexecuted and requires fresh independent review plus a source commit before the affected-
+scope resume. Nothing in this record is PostgreSQL-server, Native-process, Control, network, browser, model,
+production or end-user acceptance.
 
-## Local preservation and post-merge state — unexecuted
+## Local preservation and post-merge state — historical pre-attempt checkpoint
 
 After a fresh independent review returned `GO P0=0/P1=0`, the exact native lane was preserved in local commit
 `b6725c2`. The semantic-union merge with exact accepted primary `5e78891` was then committed locally at `422cc6d`,
@@ -36,10 +38,10 @@ historical absence before local merge `907dba5` carried exact `5cf13f1` into nat
 Reviewed local merge `6709a0f` combines exact native checkpoint `b064842` with exact primary `b99f8bf`. The latter
 has parents Agent integration merge `5c6b2e1` and Artifact head `bf56905`, so the working tree includes Agent
 PostgreSQL commit `58ca066` and the Artifact 58/58 retained-owner/`result-stale` correction while retaining the native
-composition. All local Native and primary integration work remains unpushed. No Native deterministic test, syntax
-check, import, junction, PostgreSQL, native process, Control operation, browser, model or network action has run for
-these merged bytes. Only fresh independent review of the exact frozen result and these corrected records may authorize
-the lock-bound deterministic gate 1. Neither the merge nor that review constitutes execution acceptance.
+composition. All local Native and primary integration work remains unpushed. At that checkpoint, no Native
+deterministic test, syntax check, import, junction, PostgreSQL, native process, Control operation, browser, model or
+network action had run for the merged bytes. Fresh independent review later authorized the single stopped gate attempt
+at `39fd184` retained below; neither the merge nor its pre-attempt review constituted execution acceptance.
 
 ## Retained STOP history
 
@@ -170,7 +172,7 @@ Historically, the subsequent no-commit merge with exact primary `b99f8bf` stoppe
 combined-byte review before any exact lock-bound deterministic gate-1 execution. That merge is now completed locally at
 `6709a0f`; the corrected current gate is the fresh exact-tree review described below.
 
-## Authored deterministic checks — not executed
+## Authored deterministic-check scope — historical inventory
 
 - `control-worker-composition.test.mjs`: exact topology/EOF and terminal chronology; every early/final terminal identity
   substitution negative; retained-locator DB-before-watchdog
@@ -294,7 +296,7 @@ network, production or end-user acceptance action ran for the exact combined sta
 preserved that history; the browser design's separate implementation, package, server-authentication, actual-browser
 and acceptance gates remain open.
 
-## Agent/Artifact primary carry checkpoint — merged locally, not executed
+## Agent/Artifact primary carry checkpoint — historical pre-attempt state
 
 Exact native checkpoint `b064842465aed46fcec05d4a1ed64ccd9357fc0b` has sole parent `907dba5`. Reviewed local merge
 `6709a0f411f90c6c30706f3d995c07ecb2fcb1a4` has exact parents `b064842465aed46fcec05d4a1ed64ccd9357fc0b`
@@ -313,11 +315,11 @@ The pre-commit conflict-resolution hashes were:
 They identify the reviewed merge inputs and are superseded for current-record review by the correction hashes frozen
 below; they are not presented as hashes of the post-merge living records.
 
-No Native deterministic test, syntax check, import, junction, PostgreSQL, native process, Control operation, browser,
-model, network, release, production or customer acceptance action has run for these merged bytes, and the local work
-remains unpushed. Obtain fresh independent combined-byte review of exact merge `6709a0f` and the corrected status
-records before deterministic gate 1. Browser implementation, package, server-authentication, built-
-candidate journey, actual-browser and acceptance gates remain open.
+At that checkpoint no Native deterministic test, syntax check, import, junction, PostgreSQL, native process, Control
+operation, browser, model, network, release, production or customer acceptance action had run for the merged bytes,
+and the local work remained unpushed. The later exact-tree review authorized the one gate attempt at `39fd184`; its
+51/56 stop and affected-only correction supersede that historical pre-gate direction. Browser implementation, package,
+server-authentication, built-candidate journey, actual-browser and acceptance gates remain open.
 
 ## Roadmap-reader stop and root cause — corrected before testing
 
@@ -338,35 +340,81 @@ change must update the catalog, slice JSON and both prose documents as one revie
 tests. No broader deterministic, import, PostgreSQL, native, browser, network or model operation ran. Deterministic
 Native gate 1 remains blocked until a fresh exact-tree review is green.
 
-## Exact dependency preflight and cleanup — frozen, not executed
+The subsequent gate-1 attempt and full failure disposition are retained in
+`M1-S2B1-NATIVE-DETERMINISTIC-GATE1-FAILURE-RCA-2026-09-04.md`. It reported 51/56 passing and five failures, then
+stopped with verified link-only dependency cleanup and a clean exact `39fd184` worktree. One extra closing parenthesis
+in `postgres.mjs` blocked three files at parse; two source-text assertions rejected correct syntax/SQL aliasing; and
+static review found a third latent ownership-declaration assertion before any retry. The correction changes one
+product-source token and those three assertions only. The 51 green checks remain retained and must not be replayed.
 
-The deterministic command may not use `D:\Projects\Runalab\node_modules` or any ambient ancestor. After exact merge
-`6709a0f`, these corrected records and their hashes are frozen, and a different reviewer returns `GO P0=0/P1=0` for
-those combined source/test/package/browser-design bytes, one command may temporarily place the accepted dependency
-tree at this worktree's local Node resolution point. Both this worktree and the accepted source must have
+Fresh exact-byte re-review of the correction and repaired method returned `GO P0=0/P1=0`. The single authorized
+planning validation then passed before source commit: `npm run verify:roadmap` reported revision `2026-08-28.1`, digest
+`ef2938d1d15f773fc3831decfbd2f5abfd2b378645d34bc6b8735e97f8eadf71`, all 17 capability families, and 15/15 roadmap
+tests. This supersedes the historical `c68eb8f` planning digest only for the corrected current planning records. It is
+not Native, PostgreSQL, Control, browser, network, model, release, production or customer-acceptance evidence, and the
+roadmap command must not be rerun after source-test resume while those planning bytes remain unchanged.
+
+## Corrected affected-scope dependency preflight and cleanup — frozen, not executed
+
+The corrected resume may not use `D:\Projects\Runalab\node_modules` or any ambient ancestor. After the one source and
+three harness corrections receive `GO P0=0/P1=0` and are source-committed, one command may temporarily place the
+accepted dependency tree at this worktree's local Node resolution point. Both this worktree and the accepted source must have
 `package-lock.json` SHA-256
 `cefcc1b9d086fb5eb8088a1be3a1d86fd5b4360bb22aba768c530bbbcf007308`; the source must be the ordinary directory
 `D:\Projects\Runalab\runaai-next-m1-gemma-primary\node_modules`, with exact `zod@4.4.3` and `pg@8.23.0`; and the local
 target `D:\Projects\Runalab\runaai-next-native-control-host\node_modules` must be absent, including no dangling link.
 
-The future one-command wrapper must perform these exact operations in one `try/finally` scope:
+The corrected one-command wrapper must perform these exact operations:
 
-1. treat only `ItemNotFoundException` as target absence; reject any occupied target;
-2. hash both lockfiles and reject unless both equal the digest above;
-3. reject the source if it is missing, not a directory, or a reparse point, and read the exact Zod/pg versions from
+1. parse all 19 listed Native/production-union JavaScript files before creating a junction and stop on the first error;
+2. treat only `ItemNotFoundException` as target absence; reject any occupied target;
+3. hash both lockfiles and reject unless both equal the digest above;
+4. reject the source if it is missing, not a directory, or a reparse point, and read the exact Zod/pg versions from
    that source;
-4. create only a junction at the exact local target, immediately re-open it, require `ReparsePoint`, exact
+5. create only a junction at the exact local target, immediately re-open it, require `ReparsePoint`, exact
    `LinkType=Junction`, exactly one target, and ordinal-ignore-case resolved equality with the accepted source;
-5. clear `NODE_PATH`, resolve the local `node_modules\zod\package.json` and `node_modules\pg\package.json`, and require
-   both to resolve through that authenticated local junction before the reviewed test command;
-6. in `finally`, re-open and re-authenticate the junction and its sole target, call the junction object's nonrecursive
+6. clear `NODE_PATH`, resolve the local `node_modules\zod\package.json` and `node_modules\pg\package.json`, and require
+   both to resolve through that authenticated local junction before the three affected-scope test commands;
+7. in `finally`, re-open and re-authenticate the junction and its sole target, call the junction object's nonrecursive
    `.Delete()` only, prove the local path absent using the same dangling-link-safe lookup, prove the accepted source
    remains an ordinary directory, and re-hash both lockfiles;
-7. aggregate the primary and cleanup errors so a cleanup problem cannot mask a test problem or be mistaken for green.
+8. aggregate the primary and cleanup errors so a cleanup problem cannot mask a test problem or be mistaken for green.
 
-No junction was created while authoring this record.
+The stopped attempt's junction was verified and removed; no junction was created while authoring this correction.
 
 ```powershell
+$nativeInitialStatus = @(& git -c safe.directory=D:/Projects/Runalab/runaai-next-native-control-host status --porcelain=v1 --untracked-files=all)
+if ($LASTEXITCODE -ne 0) { throw "native initial repository status check stopped with exit $LASTEXITCODE" }
+if ($nativeInitialStatus.Count -ne 0) { throw 'native affected-only resume requires a clean committed worktree' }
+$nativeExpectedHead = (& git -c safe.directory=D:/Projects/Runalab/runaai-next-native-control-host rev-parse HEAD).Trim()
+if ($LASTEXITCODE -ne 0 -or $nativeExpectedHead -notmatch '^[0-9a-f]{40}$') {
+  throw 'native affected-only resume could not authenticate its starting HEAD'
+}
+$nativeSyntaxFiles = @(
+  'gate6b/composition.mjs',
+  'gate7f/function-first/composition.mjs',
+  'gate7f/function-first/composition.test.mjs',
+  'gate7f/function-first/server-workspace/control-coordinator-child.mjs',
+  'gate7f/function-first/server-workspace/control-watchdog-host.mjs',
+  'gate7f/function-first/server-workspace/control-worker-composition.mjs',
+  'gate7f/function-first/server-workspace/control-worker-composition.test.mjs',
+  'gate7f/function-first/server-workspace/materialization-contracts.mjs',
+  'gate7f/function-first/server-workspace/native-authority-contracts.test.mjs',
+  'gate7f/function-first/server-workspace/native-candidate-config.mjs',
+  'gate7f/function-first/server-workspace/native-candidate-wiring.test.mjs',
+  'gate7f/function-first/server-workspace/postgres-native-authority-source.test.mjs',
+  'gate7f/function-first/server-workspace/postgres-native-interface.test.mjs',
+  'gate7f/function-first/server-workspace/postgres.mjs',
+  'gate7f/function-first/server-workspace/public-git-materializer-child.mjs',
+  'gate7f/function-first/server-workspace/publication-owned-primitive.test.mjs',
+  'gate7f/function-first/server-workspace/publication-primitive.mjs',
+  'gate7f/function-first/server-workspace/service.mjs',
+  'gate7f/function-first/server-workspace/windows-native-host.mjs'
+)
+foreach ($nativeSyntaxFile in $nativeSyntaxFiles) {
+  & node --check $nativeSyntaxFile
+  if ($LASTEXITCODE -ne 0) { throw "native syntax check stopped at $nativeSyntaxFile with exit $LASTEXITCODE" }
+}
 $nativeDependencySource = 'D:\Projects\Runalab\runaai-next-m1-gemma-primary\node_modules'
 $nativeDependencyLink = 'D:\Projects\Runalab\runaai-next-native-control-host\node_modules'
 $nativeExpectedLockHash = 'cefcc1b9d086fb5eb8088a1be3a1d86fd5b4360bb22aba768c530bbbcf007308'
@@ -416,8 +464,12 @@ try {
     }
   }
   $env:NODE_PATH = $null
-  & node --test --test-concurrency=1 gate7f/function-first/composition.test.mjs gate7f/function-first/server-workspace/control-worker-composition.test.mjs gate7f/function-first/server-workspace/native-authority-contracts.test.mjs gate7f/function-first/server-workspace/publication-owned-primitive.test.mjs gate7f/function-first/server-workspace/native-candidate-wiring.test.mjs gate7f/function-first/server-workspace/postgres-native-authority-source.test.mjs gate7f/function-first/server-workspace/postgres-native-interface.test.mjs
-  if ($LASTEXITCODE -ne 0) { throw "native deterministic gate stopped with exit $LASTEXITCODE" }
+  & node --test --test-concurrency=1 gate7f/function-first/composition.test.mjs gate7f/function-first/server-workspace/native-candidate-wiring.test.mjs gate7f/function-first/server-workspace/postgres-native-interface.test.mjs
+  if ($LASTEXITCODE -ne 0) { throw "native parser-affected resume stopped with exit $LASTEXITCODE" }
+  & node --test --test-concurrency=1 --test-name-pattern '^candidate composition source has no dynamic native selection or broad process filesystem network calls$' gate7f/function-first/server-workspace/control-worker-composition.test.mjs
+  if ($LASTEXITCODE -ne 0) { throw "native control source-shape resume stopped with exit $LASTEXITCODE" }
+  & node --test --test-concurrency=1 --test-name-pattern '^candidate PostgreSQL source is additive and stores immutable encrypted authority and publication evidence$' gate7f/function-first/server-workspace/postgres-native-authority-source.test.mjs
+  if ($LASTEXITCODE -ne 0) { throw "native PostgreSQL source-shape resume stopped with exit $LASTEXITCODE" }
 } catch {
   $null = $nativeFailures.Add($_.Exception)
 } finally {
@@ -461,44 +513,23 @@ if ($nativeFailures.Count -gt 1) {
 }
 ```
 
-## Post-junction current-byte checks — frozen, not executed
+## Post-junction current-byte cleanliness — frozen, not executed
 
 Only after the wrapper above returns without an exception and has proved the worktree-local junction absent, run the
-following from exact worktree root `D:\Projects\Runalab\runaai-next-native-control-host`. The 19-file syntax list is
-the complete Native/production-union JavaScript scope for this gate. Stop on the first nonzero result. The current-byte
-roadmap result already passed on the identical committed planning records at `c68eb8f` (revision `2026-08-28.1`, digest
-`fb87550a71d9783ade102ff1591a2e8094746fd6c7dda3c0a943a972fa648275`, 17 capability families and 15/15 tests); do not
-rerun it solely for ceremony. Neither syntax nor repository cleanliness can substitute for the seven deterministic
-tests, and none receives PostgreSQL, native, Control, browser, network, model, release or customer-acceptance credit.
+following from exact worktree root `D:\Projects\Runalab\runaai-next-native-control-host`. Stop on the first nonzero
+result. The 19-file syntax list now runs before any junction or test in the corrected wrapper. The `c68eb8f` roadmap
+result belongs to the pre-RCA planning records and remains historical evidence. After review, run
+`npm run verify:roadmap` once on the corrected current records before their commit; do not rerun it after the later
+source-test resume if those planning bytes stay unchanged. Neither syntax nor repository cleanliness can substitute for the 23 affected resumed
+checks, and none receives PostgreSQL, native, Control, browser, network, model, release or customer-acceptance credit.
 
 ```powershell
-$nativeSyntaxFiles = @(
-  'gate6b/composition.mjs',
-  'gate7f/function-first/composition.mjs',
-  'gate7f/function-first/composition.test.mjs',
-  'gate7f/function-first/server-workspace/control-coordinator-child.mjs',
-  'gate7f/function-first/server-workspace/control-watchdog-host.mjs',
-  'gate7f/function-first/server-workspace/control-worker-composition.mjs',
-  'gate7f/function-first/server-workspace/control-worker-composition.test.mjs',
-  'gate7f/function-first/server-workspace/materialization-contracts.mjs',
-  'gate7f/function-first/server-workspace/native-authority-contracts.test.mjs',
-  'gate7f/function-first/server-workspace/native-candidate-config.mjs',
-  'gate7f/function-first/server-workspace/native-candidate-wiring.test.mjs',
-  'gate7f/function-first/server-workspace/postgres-native-authority-source.test.mjs',
-  'gate7f/function-first/server-workspace/postgres-native-interface.test.mjs',
-  'gate7f/function-first/server-workspace/postgres.mjs',
-  'gate7f/function-first/server-workspace/public-git-materializer-child.mjs',
-  'gate7f/function-first/server-workspace/publication-owned-primitive.test.mjs',
-  'gate7f/function-first/server-workspace/publication-primitive.mjs',
-  'gate7f/function-first/server-workspace/service.mjs',
-  'gate7f/function-first/server-workspace/windows-native-host.mjs'
-)
-foreach ($nativeSyntaxFile in $nativeSyntaxFiles) {
-  & node --check $nativeSyntaxFile
-  if ($LASTEXITCODE -ne 0) { throw "native syntax check stopped at $nativeSyntaxFile with exit $LASTEXITCODE" }
-}
 & git -c safe.directory=D:/Projects/Runalab/runaai-next-native-control-host diff --check
 if ($LASTEXITCODE -ne 0) { throw "native repository diff check stopped with exit $LASTEXITCODE" }
+$nativeCurrentHead = (& git -c safe.directory=D:/Projects/Runalab/runaai-next-native-control-host rev-parse HEAD).Trim()
+if ($LASTEXITCODE -ne 0 -or -not [System.StringComparer]::Ordinal.Equals($nativeCurrentHead, $nativeExpectedHead)) {
+  throw 'native affected-only resume changed or lost its authenticated starting HEAD'
+}
 $nativeRepositoryStatus = @(& git -c safe.directory=D:/Projects/Runalab/runaai-next-native-control-host status --porcelain=v1 --untracked-files=all)
 if ($LASTEXITCODE -ne 0) { throw "native repository status check stopped with exit $LASTEXITCODE" }
 if ($nativeRepositoryStatus.Count -ne 0) { throw 'native deterministic gate changed the committed worktree' }

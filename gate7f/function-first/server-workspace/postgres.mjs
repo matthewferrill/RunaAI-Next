@@ -1768,7 +1768,7 @@ export class PostgresServerWorkspaceStore {
           || row.capability_digest !== input.capabilitySetDigest
           || sourceRow.revision !== row.source_revision || !activeSourceLifecycles.includes(sourceRow.lifecycle)
           || canonicalSha256(source.selection) !== canonicalSha256(current.source)
-          || source.expectedCommitOid !== current.expectedCommitOid)) {
+          || source.expectedCommitOid !== current.expectedCommitOid) {
         throw fail("workspace-transition-conflict");
       }
       const authorityRow = (await client.query(`SELECT * FROM ${this.sqlSchema}.operation_authorities

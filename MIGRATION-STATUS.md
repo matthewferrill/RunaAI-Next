@@ -37,12 +37,20 @@ parents are Agent integration merge `5c6b2e1` and Artifact head `bf56905`. The r
 includes the Agent PostgreSQL fixture from `58ca066` and the complete Artifact DOM chain through the separately
 verified 58/58 retained-owner/`result-stale` correction while preserving the Artifact-result/native-candidate
 coexistence and both histories. Native and primary integration work remain unpushed. No Native deterministic test,
-syntax check, import, PostgreSQL, native process, browser, network or model command has run for these merged bytes.
-The exact `6709a0f` combined state and corrected living-status records require fresh independent review before the
-finite lock-bound Native deterministic gate 1. The actual browser design's listed
+syntax check, import, PostgreSQL, native process, browser, network or model command had run for those merged bytes
+before the first deterministic gate attempt. The actual browser design's listed
 product prerequisites, Playwright/Edge package preflight, server-authentication, built-candidate journey and browser
 acceptance remain open; no release, model, production or customer credit is claimed, Artifact and Agent have no actual
 browser acceptance, and the application is not product-qualified.
+
+**Native deterministic gate-1 stop, 2026-09-04:** the one authorized seven-file command at exact clean `39fd184`
+reported 51/56 passing and five failures, then stopped. Dependency-junction cleanup, both lockfiles, exact HEAD and
+clean worktree were verified. Static RCA found one real `postgres.mjs` parser defect, two executed broken source-text
+assertions and one latent broken ownership-declaration assertion, all originating in the earlier unexecuted `b6725c2`
+bundle. No PostgreSQL server, Native process, Control operation, browser, network or model action ran. The one-source/
+three-test correction and syntax-first, 23-check affected-only resume require fresh independent review and a source
+commit; the 51 green checks must not be replayed. Record:
+`gate7f/function-first/M1-S2B1-NATIVE-DETERMINISTIC-GATE1-FAILURE-RCA-2026-09-04.md`.
 
 **M1-S2A checkpoint, 2026-09-02:** the conversation lifecycle, Settings and honest
 Omen/Control/Home status implementation is complete in the working branch and deterministically green.

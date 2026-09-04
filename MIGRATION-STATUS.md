@@ -565,6 +565,16 @@ deletion is never authorized and database changes are proposals only. This is no
 database CAS, cleanup, browser, production or model acceptance. Record:
 `gate7f/function-first/M1-S2B1-PUBLICATION-PRIMITIVE-PREFLIGHT-2026-09-03.md`.
 
+**Artifact-result surface criteria, 2026-09-04:** corrected prospective criteria now have independent GO at
+P0=0/P1=0 after retained P1=5 and P1=2 review stops. The criteria freeze bounded owner-point reads, restart-stable
+non-enumerable locators, strict result schemas/readiness, exact canonical TXT/JSON/DIFF bytes, and positive privacy,
+error and provenance projection. The final correction prevents JavaScript enumeration from reordering numeric-like
+JSON keys and requires exact checker/one-finding/citation-context binding for every accepted Review result. This is
+criteria only: no artifact store, C05 completion, implementation, PostgreSQL proof, browser journey, model call or
+production operation is claimed. Records:
+`gate7f/function-first/M1-S2-ARTIFACT-RESULT-SURFACE-CRITERIA-2026-09-03.md` and
+`gate7f/function-first/M1-S2-ARTIFACT-RESULT-SURFACE-CRITERIA-INDEPENDENT-REVIEW-2026-09-04.md`.
+
 **Contextual Review workflow, 2026-09-03:** the application now requires one to six exact selected locators,
 fully resolves and hash-verifies their canonical bytes in requested order before provider access, preserves
 application-owned citations, and isolates the simplified one-revision `accept`/`revise` checker to Review. The first

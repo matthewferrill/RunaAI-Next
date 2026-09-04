@@ -175,6 +175,15 @@ write-through move, and never authorizes deletion or directly mutates PostgreSQL
 proof and does not establish a ready workspace. Record:
 `../gate7f/function-first/M1-S2B1-PUBLICATION-PRIMITIVE-PREFLIGHT-2026-09-03.md`.
 
+The artifact-result surface now has corrected prospective criteria and independent GO at P0=0/P1=0 after two
+retained review stops. It freezes bounded owner-point reads, restart-stable non-enumerable locators, strict result
+schemas/readiness, exact canonical TXT/JSON/DIFF bytes, and positive privacy/error/provenance projection. Numeric-like
+JSON keys cannot be reordered by JavaScript object enumeration, and accepted Review output requires the exact
+checker, one finding and retained citation/context relationship. This is criteria only: no artifact store, C05
+completion, implementation, PostgreSQL proof, browser journey, model call or production operation is claimed.
+Records: `../gate7f/function-first/M1-S2-ARTIFACT-RESULT-SURFACE-CRITERIA-2026-09-03.md` and
+`../gate7f/function-first/M1-S2-ARTIFACT-RESULT-SURFACE-CRITERIA-INDEPENDENT-REVIEW-2026-09-04.md`.
+
 M1-S2B implementation checkpoint, 2026-09-02: the authority foundation and actual PostgreSQL lifecycle
 are green. The prior Omen DPAPI/handle-based file proof was 14/14, but shared native/helper bytes have since
 changed and that evidence is historical until one affected-scope rerun. The first actual

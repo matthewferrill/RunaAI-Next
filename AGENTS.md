@@ -39,6 +39,12 @@ RunaAI; `Next` is only a temporary repository and checkout label during migratio
    query is already proven available. Prefer an owned PID plus start/path identity, or a fail-closed exact executable-
    root census, and keep unrelated processes outside that root out of the result. A witness-method failure must not
    cause a passed database, browser or model operation to be rerun; resume only the corrected evidence step.
+   Every actual-system failure pauses its affected stage before retry. Its RCA must map the complete prerequisite,
+   acquisition, ownership, observation and cleanup chain; search active analogous paths for the same failure shape;
+   and correct the shared boundary when the defect is systemic. A narrow symptom patch cannot authorize resume while
+   another active path retains the same cause. Preserve the failed result, independently review the corrected method,
+   and resume only the affected stage on new exact bytes. Classify application, environment, operator, evidence and
+   model failures separately; a method or prerequisite failure is never charged to a model.
 2. Create a short-lived branch from `runa2/integration` for one approved migration gate.
 3. Baseline the behavior before implementing it and commit the green criteria before the implementation.
 4. Keep old and new adapters side by side until parity, restart, duplicate, dependency-loss, and rollback

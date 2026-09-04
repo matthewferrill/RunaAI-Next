@@ -138,3 +138,34 @@ inner identity or requiring an unrelated byte-only change to the inner on every 
 The affected resource-ownership proof may resume before that broader lane finishes because its complete executable
 dependency set is the corrected, exact hash-pinned parent/inner pair and it does not invoke any inventoried ambient
 launcher. That is bounded evidence for this proof only, not closure of the broader family.
+
+## Parent-03 result and superseding stop
+
+Independent exact-byte review returned `GO P0=0/P1=0`, and commit
+`5f09551fb0d58a38fbd9a373da4aab98cb64c8e3` sealed the corrected parent/inner boundary. The one authorized
+`parent-03` run reached the actual Node integration test. It then stopped because production composition returned
+`sandbox-preflight-failed` before the test's intended PostgreSQL `42501` fault. The disposable PostgreSQL process
+`16932` was stopped with a controlled terminal receipt and is absent. No model, browser, Native host, production route
+or protected data was used.
+
+This does not reopen either corrected shell failure and does not prove or disprove the production pool-ownership
+change. It exposes a different, earlier eligibility defect in the resource-proof method. The retained evidence is:
+
+- parent stdout: 0 bytes, SHA-256
+  `E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855`;
+- parent stderr: 562 bytes, SHA-256
+  `C0DDD9AF9AF0828937AFC0CC4BC62B248026CD69CAFAAD756E0A4B198F987F97`;
+- operator stdout: 1,437 bytes, SHA-256
+  `D1E8C501751AC5334B8033BCC78D8E379C8E53A75DB34722751BC4A309474C06`;
+- operator stderr: 0 bytes, the empty-file SHA-256 above; and
+- retained synthetic fixture manifest: schema `runaai-directory-manifest/v1`, 154 files, 95,077,638 bytes,
+  SHA-256 `09c33ad6ea141feee5e6d2ea4293022fab5169f7f26a30a3de524808f4f8c9a7`.
+
+The parent error text also lost the Node exit code and rendered `node-test-failed:` with no value. That observation is
+fail-closed but incomplete. Its exact cause is not yet proven. The active executable-boundary lane is auditing the
+repository-wide `Start-Process`/exit-code/output-drain lifecycle; the Gate 3 wrappers remain explicitly uncorrected
+for that newly observed class until the shared result is reconciled.
+
+The earlier statement that the resource proof could now resume is superseded. The complete eligibility, topology,
+diagnostic and retained-fixture RCA is
+`M1-S2B1-NATIVE-GATE3-RESOURCE-PROOF-ELIGIBILITY-RCA-2026-09-04.md`. There is no unchanged-byte retry.

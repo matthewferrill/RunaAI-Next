@@ -1101,9 +1101,18 @@ Failed `parent-02` evidence is also retained and receives no application or mode
 The audit also identifies 18 ambient local PowerShell-script launch/comparison sites across nine production files,
 four bare local JavaScript launchers, three environment-derived local launchers, and separate remote-profile command
 builders. They remain a required systemic executable-identity correction lane before Gate 3 final review/human
-testing; no blanket fix is claimed. The resource-ownership proof's dependency set contains none of those paths. Its
-next method uses child-only Desktop module state, exact executable/module provenance, explicit baseline validity and
-fresh `parent-03`; it may resume once only after new exact-byte review and a clean commit.
+testing; no blanket fix is claimed. Historically, the resource-ownership proof's then-known dependency set contained
+none of those paths, and the reviewed next method used child-only Desktop module state, exact executable/module
+provenance, explicit baseline validity and fresh `parent-03`.
+
+That reviewed `parent-03` run reached the actual Node case and then stopped 0/1 before the intended PostgreSQL fault:
+the real production acquisition path returned `sandbox-preflight-failed`. Disposable PostgreSQL PID `16932` stopped
+cleanly and no candidate pool was constructed, so this is neither a model nor pool-ownership result. The complete RCA
+in `../gate7f/function-first/M1-S2B1-NATIVE-GATE3-RESOURCE-PROOF-ELIGIBILITY-RCA-2026-09-04.md` supersedes the
+Omen-bound retry plan. It requires graph-ordered prerequisite eligibility, actual-Control topology, a bounded shared
+production-startup diagnostic, compact-evidence/scratch cleanup and the shared process-launch correction. No Gate 1,
+Gate 2, browser or model replay is permitted. The affected proof remains paused until one reviewed preflight-only
+Control stage is green.
 
 Active work remains M1-S2, specified in
 `../gate7f/function-first/M1-S2-FUNCTIONS-AND-GREEN-CRITERIA.md`. The complete R10

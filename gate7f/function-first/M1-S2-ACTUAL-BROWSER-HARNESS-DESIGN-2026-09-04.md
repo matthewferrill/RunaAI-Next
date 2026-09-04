@@ -7,6 +7,20 @@ Artifact and Agent presentation through a real side-by-side Control HTTPS candid
 change, dependency installation, browser launch, service start, database mutation, network operation, release change,
 or acceptance run.
 
+The 2026-09-04 resource-proof eligibility RCA adds a mandatory cross-method correction before this design can become
+executable. The actual candidate acquisition graph must be qualified on Control under one coherent host identity,
+sealed runtime, stage-owned transient root and stage-owned `LOCALAPPDATA`. The real MXC sandbox preflight must be green
+before the seed adapter starts disposable PostgreSQL or any other later-stage resource. The candidate still performs
+its own fail-closed production preflight; the harness cannot inject, cache, mock or bypass it. On every terminal result,
+the method must seal compact bounded evidence and an identity-bound non-content manifest, then remove exact generated
+scratch including synthetic secrets. A failed evidence seal or authenticated cleanup retains the root and blocks.
+Every Edge, candidate, Caddy and seed-helper child must also use the shared reviewed process boundary. A failed child
+record retains only bounded stage/code, an exact integer exit code or explicit `unknown`, signal, deadline,
+stdout/stderr byte counts and digests, terminal status and cleanup facts; it never retains or substitutes raw output.
+Output drain, process-tree termination and cleaner aggregation must be determinate before any ready/failure result.
+Until this prerequisite-order and evidence-lifecycle amendment receives independent review, no browser attempt is
+eligible. See `M1-S2B1-NATIVE-GATE3-RESOURCE-PROOF-ELIGIBILITY-RCA-2026-09-04.md`.
+
 ## Retained independent review STOP
 
 The first independent review of this design returned `STOP P0=0/P1=5` before any package, import, test, browser,

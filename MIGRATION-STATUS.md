@@ -2030,6 +2030,17 @@ is the frozen compiler input; it is not globally installed and the product outpu
 No passed Gate 1, Gate 2, Artifact, Agent, browser or model evidence is replayed. No production route, protected data,
 public Git repository, PostgreSQL service or model was touched by this preflight.
 
+The separately reviewed Gate 3 production-resource `parent-03` method reached its actual Node case but stopped
+0/1 at the earlier production sandbox prerequisite rather than the intended PostgreSQL fault. Its disposable
+PostgreSQL PID `16932` stopped with owned-data removal; the production pool was never constructed. The failure is a
+method/topology/observability stop, not a model or PostgreSQL-engine failure. The proof had documented Control while
+pinning and running Omen inputs, allocated PostgreSQL before same-envelope sandbox eligibility, and received only the
+generic `sandbox-preflight-failed` because production discarded its bounded receipt/observation. Its wrapper also lost
+the nonzero Node exit-code value. The systemic correction and analogous-path containment are recorded in
+`gate7f/function-first/M1-S2B1-NATIVE-GATE3-RESOURCE-PROOF-ELIGIBILITY-RCA-2026-09-04.md`. No Omen retry is eligible;
+resume begins with one independently reviewed, preflight-only actual-Control stage after the shared product,
+process-launch and evidence-lifecycle corrections land.
+
 ## Previous qualification closeout (2026-08-27, retained evidence)
 
 The steward has now authorized the coordinated qualification package, reversible environment work on

@@ -32,7 +32,40 @@ import { composeM1Functions } from "../gate7f/function-first/composition.mjs";
 import { createNativeCandidateConfig } from "../gate7f/function-first/server-workspace/native-candidate-config.mjs";
 import { composeUserSystemStatus } from "./product-foundation.mjs";
 
-const coded = (code, message) => Object.assign(new Error(message), { code });
+const coded = (code, message, details) => Object.assign(new Error(message), { code,
+  ...(details === undefined ? {} : { details }) });
+
+const boundedInteger = (value, minimum = 0, maximum = Number.MAX_SAFE_INTEGER) => Number.isSafeInteger(value)
+  && value >= minimum && value <= maximum ? value : null;
+
+function sandboxPreflightFailureDetails(preflight) {
+  const receipt = preflight?.receipt;
+  const observation = preflight?.startupObservation;
+  const safeObservation = observation?.schemaVersion === "runa2-sandbox-startup-observation/v1"
+      && typeof observation === "object" && !Array.isArray(observation)
+    ? Object.freeze({ schemaVersion: observation.schemaVersion,
+      processStarted: observation.processStarted === true,
+      exitCode: boundedInteger(observation.exitCode, -0x80000000, 0x7fffffff),
+      rawStdoutBytes: boundedInteger(observation.rawStdoutBytes, 0, 160_000),
+      rawStderrBytes: boundedInteger(observation.rawStderrBytes, 0, 160_000),
+      resultMarkerCount: boundedInteger(observation.resultMarkerCount, 0, 100),
+      classifiedErrorCode: /^[a-z0-9-]{1,100}$/u.test(observation.classifiedErrorCode ?? "")
+        ? observation.classifiedErrorCode : "sandbox-unavailable",
+      privateValuesIncluded: false })
+    : null;
+  const acceptedStatuses = new Set(["executed", "unavailable", "failed", "timed-out", "output-limited"]);
+  const acceptedTiers = new Set(["unavailable", "base-container", "appcontainer-bfs", "appcontainer-dacl"]);
+  return Object.freeze({ schemaVersion: "runa2-production-startup-failure/v1", stage: "sandbox-preflight",
+    ready: false,
+    status: acceptedStatuses.has(receipt?.status) ? receipt.status : "unavailable",
+    errorCode: /^[a-z0-9-]{1,100}$/u.test(receipt?.errorCode ?? "")
+      ? receipt.errorCode : receipt?.status === "executed" ? "sandbox-preflight-result-invalid" : "sandbox-unavailable",
+    exitCode: boundedInteger(receipt?.exitCode, -0x80000000, 0x7fffffff),
+    durationMs: boundedInteger(receipt?.durationMs, 0, 10_000),
+    isolationTier: acceptedTiers.has(receipt?.isolation?.tier) ? receipt.isolation.tier : "unavailable",
+    startupObservation: safeObservation,
+    privateValuesIncluded: false });
+}
 
 async function jsonFile(path, code) {
   try { return JSON.parse(await readFile(path, "utf8")); }
@@ -146,7 +179,8 @@ export async function createProductionComposition({ loadedConfig, releaseRoot })
   });
   const sandboxPreflight = await javascriptExecutor.preflight();
   if (!sandboxPreflight.ready) {
-    throw coded("sandbox-preflight-failed", "The harmless JavaScript sandbox did not pass startup validation.");
+    throw coded("sandbox-preflight-failed", "The harmless JavaScript sandbox did not pass startup validation.",
+      sandboxPreflightFailureDetails(sandboxPreflight));
   }
 
   const [connectionString, coreEncryption, coreHmac, learningEncryption, learningHmac,

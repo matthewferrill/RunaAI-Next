@@ -5,6 +5,12 @@ Disposition: `STOP` before successful-Native activation or Gate 3 build proof
 Discovery: independent full construction-path source review  
 Production, protected data, model, browser or network changed: no
 
+> Method amendment: the `parent-03` execution proved that the frozen fixture below was Omen-bound even though this
+> record required Control, and that it allocated disposable PostgreSQL before the earlier real sandbox prerequisite
+> was eligible. Its generic startup error also discarded the bounded cause. The application ownership correction
+> remains under proof; the execution method and resume rule below are superseded by
+> `M1-S2B1-NATIVE-GATE3-RESOURCE-PROOF-ELIGIBILITY-RCA-2026-09-04.md`. No Omen retry is permitted.
+
 ## Root cause and full issue family
 
 `createProductionComposition` constructed the real PostgreSQL pool and initialized several stores before it called

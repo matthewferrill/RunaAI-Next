@@ -4,6 +4,7 @@
   "description": "The steward's method, 2026-08-18: build the industry-standard agent stack end to end, customizing nothing. Then migrate Runa into it one piece at a time, where every piece — governance and security included — proves it belongs against the standard before it replaces anything.",
   "main": "index.js",
   "scripts": {
+    "postinstall": "node tools/patch-mxc-sdk-diagnostic.mjs",
     "verify:roadmap": "node roadmap/read-next-slice.mjs --check && node --test roadmap/roadmap.test.mjs",
     "roadmap:next": "node roadmap/read-next-slice.mjs",
     "test": "node tools/run-tracked-tests.mjs",

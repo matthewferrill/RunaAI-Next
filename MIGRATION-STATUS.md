@@ -565,6 +565,19 @@ at P0=0/P1=0. This authorizes native source-port implementation only. It does no
 inherited handles, process/Job fencing, deadline/recovery wiring, native execution or acceptance. Record:
 `gate7f/function-first/M1-S2B1-BOOTSTRAP-CONTRACT-PREFLIGHT-2026-09-04.md`.
 
+**M1-S2B1 native Control deterministic gate-1 stop, 2026-09-04:** the first independent exact-byte review returned
+`STOP P0=0/P1=6` before any command ran. It found a staging/ready final-digest disagreement, false determinate-failure
+authority after an indeterminate publication boundary, count-only native resource proof, missing literal immutable-
+update triggers, missing real/adversarial coverage, and no exact local dependency-junction method. The unexecuted
+correction now uses the authoritative ready-manifest digest, records/retains `unknown|cleanup-pending` without lease
+release after claim/attempt ambiguity, binds one ordered 53-resource watchdog inventory, adds the triggers and real
+module/store/adversarial checks, and freezes dependency lock SHA-256
+`cefcc1b9d086fb5eb8088a1be3a1d86fd5b4360bb22aba768c530bbbcf007308` with exact junction creation/identity/finally
+cleanup. No junction, test, import, PostgreSQL, native process, network, browser, model, production action, commit or
+push followed. Because this branch is a sibling of accepted `9714874` plus `25190d9`, the frozen bytes must next be
+preserved and separately reconciled against that baseline, then freshly reviewed before deterministic execution.
+Record: `gate7f/function-first/M1-S2B1-NATIVE-CONTROL-COMPOSITION-CORRECTION-IMPLEMENTATION-2026-09-04.md`.
+
 **M1-S2B1 PostgreSQL lifecycle actual-run stop, 2026-09-04:** after fresh implementation review authorized one
 disposable lifecycle run and one later compatibility run, the lifecycle command stopped at 3/4 passed. PostgreSQL
 code `23514` occurred while the harness installed a table-wide rollback fault constraint over an older legitimate

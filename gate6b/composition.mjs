@@ -73,6 +73,46 @@ export async function protectedImportCompleted(pool, enabled) {
   }
 }
 
+async function closeProductionCompositionResources(m1, pool) {
+  const failures = [];
+  if (m1) {
+    try { await m1.close(); } catch (error) { failures.push(error); }
+  }
+  try { await pool.end(); } catch (error) { failures.push(error); }
+  if (failures.length === 1) throw failures[0];
+  if (failures.length > 1) throw new AggregateError(failures, "production-composition-cleanup-failed");
+}
+
+// This seam owns the exact post-compose boundary used below. It exists so the
+// failure and transfer rules can be driven deterministically without opening
+// PostgreSQL or constructing the production dependency graph.
+export async function createOwnedProductionComposition({ m1, pool, build }) {
+  if ((!m1 || typeof m1.close === "function") && typeof pool?.end === "function"
+      && typeof build === "function") {
+    try {
+      const value = await build();
+      if (!value || typeof value !== "object" || Array.isArray(value) || Object.hasOwn(value, "close")) {
+        throw coded("production-composition-result-invalid", "The production composition result is invalid.");
+      }
+      let closeAttempt = null;
+      return Object.freeze({ ...value,
+        async close() {
+          closeAttempt ??= closeProductionCompositionResources(m1, pool);
+          return closeAttempt;
+        } });
+    } catch (error) {
+      const cleanupFailures = [];
+      if (m1) {
+        try { await m1.close(); } catch (cleanupError) { cleanupFailures.push(cleanupError); }
+      }
+      try { await pool.end(); } catch (cleanupError) { cleanupFailures.push(cleanupError); }
+      if (cleanupFailures.length === 0) throw error;
+      throw new AggregateError([error, ...cleanupFailures], "production-composition-construction-cleanup-failed");
+    }
+  }
+  throw coded("production-composition-owner-invalid", "The production composition ownership boundary is invalid.");
+}
+
 export async function createProductionComposition({ loadedConfig, releaseRoot }) {
   const config = loadedConfig.value;
   const relative = value => isAbsolute(value) ? value : resolve(loadedConfig.directory, value);
@@ -141,6 +181,7 @@ export async function createProductionComposition({ loadedConfig, releaseRoot })
   });
   const m1 = config.functionFirst ? await composeM1Functions({ configuration: config.functionFirst, provider: config.provider,
     pool, cipher: coreCipher, javascriptExecutor, dataDirectory: resolve(loadedConfig.directory, "..", "state") }) : null;
+  return createOwnedProductionComposition({ m1, pool, build: async () => {
   const providers = { ...createReleaseAnswerProviders(config.provider, { requestControls: config.functionFirst?.requestControls }),
     ...(m1 ? { review: m1.review } : {}) };
   const answerService = new Gate2ReadOnlyService({ records: workspace, index: m1?.index ?? workspace, providers,
@@ -272,8 +313,9 @@ export async function createProductionComposition({ loadedConfig, releaseRoot })
     runtime: await runtimeStatus(), readiness: await readinessStatus(), client,
   });
 
-  return Object.freeze({ application, browserCeremony, ordinarySessions, m1Functions: m1?.attach(application) ?? null,
+  const m1Functions = m1 ? await m1.attach(application) : null;
+  return { application, browserCeremony, ordinarySessions, m1Functions,
     runtimeStatus, readinessStatus, dependencyHealth,
-    releaseManifest: manifest,
-    async close() { await pool.end(); } });
+    releaseManifest: manifest };
+  } });
 }

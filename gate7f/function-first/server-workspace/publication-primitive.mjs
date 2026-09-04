@@ -2,7 +2,11 @@ import { z } from "zod";
 import {
   admitWorkspaceManifest,
   canonicalSha256,
+  materializationEffectClaimSchema,
+  nativeOwnedResourceProjectionSchema,
   parseCanonicalWire,
+  rawHandleOwnershipReceiptSchema,
+  workspaceManifestSchema,
   workspaceLifecycle
 } from "./materialization-contracts.mjs";
 
@@ -63,6 +67,64 @@ export const publicationStateSnapshotSchema = z.object({
   stagingName: opaqueName,
   finalName: opaqueName
 }).strict();
+
+/** Durable projection returned by PostgreSQL after the publication effect claim is won. */
+export const durablePublicationAuthoritySchema = z.object({
+  schemaVersion: z.literal("runa-workspace-durable-publication-authority/v1"),
+  operationId: id,
+  workspaceId: id,
+  workspaceRevision: z.number().int().min(1).max(Number.MAX_SAFE_INTEGER),
+  operationAuthorityDigest: digest,
+  requestDigest: digest,
+  bindingDigest: digest,
+  authorityManifest: publicationAuthorityManifestSchema,
+  authorityManifestDigest: digest,
+  parentResourceId: id,
+  ingressRootResourceId: id,
+  stagingRootResourceId: id,
+  publicationClaim: materializationEffectClaimSchema.nullable(),
+  workspaceLifecycle: z.enum(["staging", "published-pending-db", "ready", "failed", "cancelled", "unknown", "cleanup-pending"]),
+  state: z.enum(["staging-authorized", "publication-claimed", "published-observed", "unknown"]),
+}).strict().superRefine((value, context) => {
+  const claimRequired = value.state === "publication-claimed" || value.state === "published-observed";
+  const claimForbidden = value.state === "staging-authorized";
+  if ((claimRequired && value.publicationClaim === null)
+      || (claimForbidden && value.publicationClaim !== null)
+      || (value.publicationClaim !== null && (value.publicationClaim.operationId !== value.operationId
+        || value.publicationClaim.effect !== "publication"
+        || (value.state === "publication-claimed" && value.publicationClaim.state !== "claimed")
+        || (value.state === "published-observed" && value.publicationClaim.state !== "observed")))
+      || value.authorityManifest.workspaceId !== value.workspaceId
+      || canonicalSha256(value.authorityManifest) !== value.authorityManifestDigest) {
+    context.addIssue({ code: "custom", message: "durable publication authority binding mismatch" });
+  }
+});
+
+const ownedSiblingObservationSchema = z.discriminatedUnion("state", [
+  z.object({ state: z.literal("absent") }).strict(),
+  z.object({ state: z.literal("indeterminate") }).strict(),
+  z.object({ state: z.literal("present"), identity: nativeIdentitySchema,
+    internalResourceId: id, ownershipVerified: z.literal(true) }).strict(),
+]);
+
+const publicationOwnershipBatchSchema = z.object({
+  schemaVersion: z.literal("runa-publication-inspection-owned-batch/v1"),
+  operationId: id,
+  phase: z.literal("publication-inspection"),
+  ownedResources: z.array(nativeOwnedResourceProjectionSchema).min(1).max(256),
+  ownedResourcesDigest: digest,
+  ownershipReceipt: rawHandleOwnershipReceiptSchema,
+}).strict();
+const ownedNativeResultEnvelopeSchema = z.object({
+  schemaVersion: z.literal("runa-publication-inspection-owned-result/v1"),
+  operationId: id,
+  result: z.unknown(),
+  ownershipBatches: z.array(publicationOwnershipBatchSchema).max(9),
+}).strict();
+
+const requiredOwnedHostMethods = ["observeOwnedSibling", "inspectOwnedManifestTree", "flushOwnedFile",
+  "flushOwnedDirectoryMetadata", "flushAuthorityManifest", "moveOwnedSiblingNoReplaceWriteThrough",
+  "closeOwnedResource"];
 
 const terminalCleanupStates = new Set(["cancelled", "failed", "expired", "cleanup-pending"]);
 const requiredHostMethods = ["openParentNoFollow", "observeSiblingNoFollow", "inspectManifestTree",
@@ -400,9 +462,248 @@ export async function publishWorkspaceNoReplace(input, host) {
   }
 }
 
+export function authoritativeFinalWorkspaceManifestDigest(rawManifest) {
+  const stagingManifest = workspaceManifestSchema.parse(rawManifest);
+  if (stagingManifest.lifecycle !== "staging") throw fail("publication-final-digest-source-not-staging");
+  return canonicalSha256(workspaceManifestSchema.parse({ ...stagingManifest, lifecycle: "ready" }));
+}
+
+function requireOwnedHost(host) {
+  if (!host || requiredOwnedHostMethods.some(method => typeof host[method] !== "function")) {
+    throw fail("publication-owned-host-contract-invalid");
+  }
+}
+
+function requireOwnershipVerifier(value, operationId) {
+  if (!value || value.operationId !== operationId || typeof value.verifyOwnershipReceipt !== "function") {
+    throw fail("publication-ownership-verifier-invalid");
+  }
+  return value;
+}
+
+function containsRawHandle(value, seen = new Set()) {
+  if (value === null || typeof value !== "object" || seen.has(value)) return false;
+  seen.add(value);
+  for (const key of Reflect.ownKeys(value)) {
+    if (typeof key !== "string" || /raw.*handle|handle(?:hex|value|number|pointer)$/iu.test(key)) return true;
+    if (containsRawHandle(value[key], seen)) return true;
+  }
+  return false;
+}
+
+function collectReturnedResourceIds(value, found = new Set(), seen = new Set()) {
+  if (value === null || typeof value !== "object" || seen.has(value)) return found;
+  seen.add(value);
+  for (const key of Reflect.ownKeys(value)) {
+    if (typeof key !== "string") continue;
+    const candidate = value[key];
+    if (key === "internalResourceId" && id.safeParse(candidate).success) found.add(candidate);
+    collectReturnedResourceIds(candidate, found, seen);
+  }
+  return found;
+}
+
+async function admitOwnedNativeResult(raw, { operationId, ownership, openedResources, openedBatchIds }) {
+  const priorResources = new Set(openedResources);
+  const returnedResourceIds = collectReturnedResourceIds(raw);
+  for (const resourceId of returnedResourceIds) openedResources.add(resourceId);
+  if (containsRawHandle(raw)) throw fail("publication-native-result-exposes-raw-handle");
+  const envelope = ownedNativeResultEnvelopeSchema.parse(raw);
+  if (envelope.operationId !== operationId) throw fail("publication-ownership-operation-mismatch");
+  const resultResourceIds = collectReturnedResourceIds(envelope.result);
+  const ownedResources = envelope.ownershipBatches.flatMap(batch => batch.ownedResources);
+  const ownedResourceIds = ownedResources.map(resource => resource.internalResourceId);
+  if (new Set(ownedResourceIds).size !== ownedResourceIds.length
+      || ownedResourceIds.some(resourceId => priorResources.has(resourceId))
+      || canonicalSha256([...resultResourceIds].sort()) !== canonicalSha256([...ownedResourceIds].sort())) {
+    throw fail("publication-ownership-resource-coverage-invalid");
+  }
+  for (const batch of envelope.ownershipBatches) {
+    const batchIds = batch.ownedResources.map(resource => resource.internalResourceId);
+    const ownedResourcesDigest = canonicalSha256(batch.ownedResources);
+    if (openedBatchIds.has(batch.ownershipReceipt.batchId)) {
+      throw fail("publication-ownership-receipt-coverage-invalid");
+    }
+    openedBatchIds.add(batch.ownershipReceipt.batchId);
+    if (batch.operationId !== operationId
+        || batch.ownershipReceipt.operationId !== operationId
+        || batch.ownershipReceipt.resourceCount !== batch.ownedResources.length
+        || batch.ownedResourcesDigest !== ownedResourcesDigest
+        || await ownership.verifyOwnershipReceipt(freeze({ receipt: batch.ownershipReceipt,
+          ownedResourcesDigest, internalResourceIds: batchIds })) !== true) {
+      throw fail("publication-ownership-receipt-coverage-invalid");
+    }
+  }
+  return freeze({ result: envelope.result, ownedResources });
+}
+
+function admitDurablePublicationInput({ bindingRecord, workspaceManifestRaw, durableAuthority }) {
+  const authority = durablePublicationAuthoritySchema.parse(durableAuthority);
+  const workspaceManifest = admitWorkspaceManifest(workspaceManifestRaw, bindingRecord);
+  if (containsRawHandle(durableAuthority)
+      || workspaceManifest.workspaceId !== authority.workspaceId
+      || workspaceManifest.bindingDigest !== authority.bindingDigest
+      || canonicalSha256(workspaceManifest) !== authority.authorityManifest.workspaceManifestDigest) {
+    throw fail("publication-durable-authority-binding-mismatch");
+  }
+  return { authority, workspaceManifest };
+}
+
+async function inspectOwnedCandidate(host, { parentResourceId, descriptor, authorityManifest,
+  workspaceManifest, operationId, ownership, openedResources, openedBatchIds,
+  observedLifecycle, flush = false }) {
+  let observed, observedResources;
+  try {
+    const admitted = await admitOwnedNativeResult(await host.observeOwnedSibling({
+      operationId, parentResourceId, name: descriptor.name, noFollow: true,
+    }), { operationId, ownership, openedResources, openedBatchIds });
+    observed = ownedSiblingObservationSchema.parse(admitted.result);
+    observedResources = admitted.ownedResources;
+  } catch { return freeze({ state: "indeterminate", treeVerified: false }); }
+  if (observed.state !== "present") {
+    if (observedResources.length !== 0) return freeze({ state: "indeterminate", treeVerified: false });
+    return freeze({ state: observed.state, treeVerified: false });
+  }
+  if (observedResources.length !== 1 || observedResources[0].internalResourceId !== observed.internalResourceId
+      || observedResources[0].nativeObjectType !== "directory"
+      || observedResources[0].role !== "publication-inspection"
+      || observedResources[0].child !== "control" || observedResources[0].direction !== "none") {
+    return freeze({ state: "indeterminate", treeVerified: false });
+  }
+  const expectedIdentity = descriptor.identity ?? descriptor.expectedIdentity;
+  if (!sameIdentity(observed.identity, expectedIdentity)) return freeze({ state: "mismatch", treeVerified: false });
+  let inspected, inspectedResources;
+  try {
+    const admitted = await admitOwnedNativeResult(await host.inspectOwnedManifestTree({
+      operationId, rootResourceId: observed.internalResourceId, noFollow: true, requireSingleLink: true,
+      rejectAdditionalEntries: true, expectedEntries: authorityManifest.files.map(file => freeze({ ...file }))
+    }), { operationId, ownership, openedResources, openedBatchIds });
+    inspected = admitted.result;
+    inspectedResources = admitted.ownedResources;
+  } catch { return freeze({ state: "exact", treeVerified: false }); }
+  if (containsRawHandle(inspected) || !inspected || Object.getPrototypeOf(inspected) !== Object.prototype
+      || Object.keys(inspected).sort().join(",") !== "additionalEntries,fileSetDigest,files,reparseEntries"
+      || !Array.isArray(inspected.files) || !Array.isArray(inspected.additionalEntries)
+      || !Array.isArray(inspected.reparseEntries) || inspected.additionalEntries.length !== 0
+      || inspected.reparseEntries.length !== 0 || inspected.files.length !== authorityManifest.files.length
+      || inspected.fileSetDigest !== workspaceManifest.fileSetDigest
+      || inspectedResources.length !== inspected.files.length) {
+    return freeze({ state: "exact", treeVerified: false });
+  }
+  for (let index = 0; index < authorityManifest.files.length; index += 1) {
+    const actual = inspected.files[index], expected = authorityManifest.files[index];
+    if (!actual || Object.getPrototypeOf(actual) !== Object.prototype
+        || Object.keys(actual).sort().join(",") !== "bytes,identity,internalResourceId,linkCount,ownershipVerified,path,sha256"
+        || actual.ownershipVerified !== true || actual.path !== expected.path || actual.bytes !== expected.bytes
+        || actual.sha256 !== expected.sha256 || actual.linkCount !== 1
+        || !sameIdentity(actual.identity, expected.identity) || !id.safeParse(actual.internalResourceId).success
+        || inspectedResources[index].internalResourceId !== actual.internalResourceId
+        || inspectedResources[index].nativeObjectType !== "file"
+        || inspectedResources[index].role !== "publication-inspection"
+        || inspectedResources[index].child !== "control" || inspectedResources[index].direction !== "none") {
+      return freeze({ state: "exact", treeVerified: false });
+    }
+  }
+  if (flush) {
+    for (const file of inspected.files) {
+      await host.flushOwnedFile({ fileResourceId: file.internalResourceId, path: file.path });
+    }
+    await host.flushOwnedDirectoryMetadata({ rootResourceId: observed.internalResourceId,
+      order: "children-before-root" });
+  }
+  return freeze({ state: "exact", treeVerified: true, identity: observed.identity,
+    manifestDigest: observedLifecycle === "ready"
+      ? authoritativeFinalWorkspaceManifestDigest(workspaceManifest)
+      : canonicalSha256(workspaceManifest) });
+}
+
+async function closeOwnedResources(host, operationId, resources) {
+  const failures = [];
+  for (const internalResourceId of [...resources].reverse()) {
+    try { await host.closeOwnedResource({ operationId, internalResourceId }); } catch (error) { failures.push(error); }
+  }
+  if (failures.length > 0) throw fail("publication-owned-resource-close-failed");
+}
+
+/** Candidate publication path. Raw handles cannot enter or leave this function. */
+export async function publishWorkspaceNoReplaceOwned(input, host, ownershipVerifier) {
+  requireOwnedHost(host);
+  const { authority, workspaceManifest } = admitDurablePublicationInput(input);
+  const ownership = requireOwnershipVerifier(ownershipVerifier, authority.operationId);
+  if (workspaceManifest.lifecycle !== "staging" || authority.workspaceLifecycle !== "staging"
+      || authority.state !== "publication-claimed") throw fail("publication-lifecycle-not-staging");
+  const openedResources = new Set(), openedBatchIds = new Set();
+  let moveAttempted = false;
+  try {
+    const staging = await inspectOwnedCandidate(host, { parentResourceId: authority.parentResourceId,
+      descriptor: authority.authorityManifest.staging, authorityManifest: authority.authorityManifest,
+      workspaceManifest, operationId: authority.operationId, ownership, openedResources, openedBatchIds,
+      observedLifecycle: "staging", flush: true });
+    const finalBefore = await inspectOwnedCandidate(host, { parentResourceId: authority.parentResourceId,
+      descriptor: authority.authorityManifest.final, authorityManifest: authority.authorityManifest,
+      workspaceManifest, operationId: authority.operationId, ownership, openedResources, openedBatchIds,
+      observedLifecycle: "ready" });
+    if (!(staging.state === "exact" && staging.treeVerified) || finalBefore.state !== "absent") {
+      return classifyPublicationRelationship({ databaseState: "staging", staging, final: finalBefore });
+    }
+    await host.flushAuthorityManifest({ authorityManifestDigest: authority.authorityManifestDigest });
+    moveAttempted = true;
+    try {
+      await host.moveOwnedSiblingNoReplaceWriteThrough({ parentResourceId: authority.parentResourceId,
+        stagingResourceId: authority.stagingRootResourceId, stagingName: authority.authorityManifest.staging.name,
+        finalName: authority.authorityManifest.final.name,
+        expectedStagingIdentity: authority.authorityManifest.staging.identity,
+        publicationClaimId: authority.publicationClaim.claimId, replaceExisting: false, writeThrough: true });
+    } catch { /* Observe the claimed effect once. Never invoke it again. */ }
+    const stagingAfter = await inspectOwnedCandidate(host, { parentResourceId: authority.parentResourceId,
+      descriptor: authority.authorityManifest.staging, authorityManifest: authority.authorityManifest,
+      workspaceManifest, operationId: authority.operationId, ownership, openedResources, openedBatchIds,
+      observedLifecycle: "staging" });
+    const finalAfter = await inspectOwnedCandidate(host, { parentResourceId: authority.parentResourceId,
+      descriptor: authority.authorityManifest.final, authorityManifest: authority.authorityManifest,
+      workspaceManifest, operationId: authority.operationId, ownership, openedResources, openedBatchIds,
+      observedLifecycle: "ready" });
+    if (stagingAfter.state === "absent" && finalAfter.state === "exact" && finalAfter.treeVerified) {
+      return proposal("published-verified", "record-published-pending-db",
+        "owned-non-replacing-write-through-move-reopened-and-verified", {
+          filesystemMutationAttempted: true, filesystemMutationConfirmed: true,
+          observedFinalIdentity: finalAfter.identity,
+          observedFinalDigest: finalAfter.manifestDigest,
+          databaseTransitionProposal: freeze({ from: "staging", to: "published-pending-db",
+            expectedRevision: authority.workspaceRevision }),
+        });
+    }
+    return proposal("unknown", "record-unknown", "publication-effect-indeterminate", {
+      filesystemMutationAttempted: moveAttempted, filesystemMutationConfirmed: false, deletionAuthorized: false,
+    });
+  } finally { await closeOwnedResources(host, authority.operationId, openedResources); }
+}
+
+export async function reconcileWorkspacePublicationOwned(input, host, ownershipVerifier) {
+  requireOwnedHost(host);
+  const { authority, workspaceManifest } = admitDurablePublicationInput(input);
+  const ownership = requireOwnershipVerifier(ownershipVerifier, authority.operationId);
+  const openedResources = new Set(), openedBatchIds = new Set();
+  try {
+    const staging = await inspectOwnedCandidate(host, { parentResourceId: authority.parentResourceId,
+      descriptor: authority.authorityManifest.staging, authorityManifest: authority.authorityManifest,
+      workspaceManifest, operationId: authority.operationId, ownership, openedResources, openedBatchIds,
+      observedLifecycle: "staging" });
+    const final = await inspectOwnedCandidate(host, { parentResourceId: authority.parentResourceId,
+      descriptor: authority.authorityManifest.final, authorityManifest: authority.authorityManifest,
+      workspaceManifest, operationId: authority.operationId, ownership, openedResources, openedBatchIds,
+      observedLifecycle: "ready" });
+    return classifyPublicationRelationship({ databaseState: authority.workspaceLifecycle, staging, final });
+  } finally { await closeOwnedResources(host, authority.operationId, openedResources); }
+}
+
 export const publicationProofBoundary = Object.freeze({
   deterministicPreflightOnly: true,
   actualWindowsControlProofRequired: true,
+  candidatePathUsesOpaqueOwnedResourceIds: true,
+  candidatePathAcceptsRawHandles: false,
+  publicationInspectionRequiresWatchdogSignedOwnershipBatches: true,
+  closeIsOperationScopedAndExhaustiveForReturnedResourceIds: true,
   requiredNativeClaims: Object.freeze(["held-parent-no-follow", "ntfs-volume-and-file-id",
     "file-no-follow-single-link", "FlushFileBuffers-files-and-directories",
     "MoveFileExW-MOVEFILE_WRITE_THROUGH-without-MOVEFILE_REPLACE_EXISTING", "post-move-reopen-and-identity-check"])

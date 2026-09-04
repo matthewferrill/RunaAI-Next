@@ -1,0 +1,7 @@
+{
+  "schemaVersion": "runa-public-git-native-control-release-manifest-template/v1",
+  "sealed": false,
+  "reason": "deterministic-interface-source-only",
+  "members": [],
+  "signatureBase64": null
+}

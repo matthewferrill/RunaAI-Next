@@ -275,6 +275,200 @@ export const bindingDigestFor = value => canonicalSha256(authorityBindingSchema.
 export const fileSetDigest = entries => canonicalSha256({ schemaVersion: "runa-workspace-file-set/v1", entries });
 export const uploadManifestDigest = manifest => canonicalSha256(manifest);
 
+const canonicalBase64 = z.string().min(1).max(2048).refine(value => {
+  try { return Buffer.from(value, "base64").toString("base64") === value; } catch { return false; }
+}, "invalid canonical base64");
+
+/**
+ * Candidate-native authority is issued and timed only by the external watchdog. The digest deliberately excludes
+ * the attestation; the signature binds that digest plus the pinned watchdog/key identity at verification time.
+ */
+export const watchdogAuthorityAttestationSchema = z.object({
+  schemaVersion: z.literal("runa-public-git-operation-authority-attestation/v1"),
+  algorithm: z.literal("ed25519"),
+  signingKeyId: id,
+  signingKeyVersion: z.number().int().min(1).max(Number.MAX_SAFE_INTEGER),
+  watchdogIdentitySha256: digest,
+  authorityDigest: digest,
+  signatureBase64: canonicalBase64,
+}).strict();
+
+const operationAuthorityUnsignedSchema = z.object({
+  schemaVersion: z.literal("runa-public-git-operation-authority/v1"),
+  operationId: id,
+  taskId: id,
+  operationMode: z.literal("public-git"),
+  requestedAt: utc,
+  deadlineAt: utc,
+  topologyDigest: digest,
+  capabilitySetVersion: z.literal(CAPABILITY_SET_VERSION),
+  capabilitySetDigest: z.literal(CAPABILITY_SET_DIGEST),
+  workerReleaseSha256: digest,
+}).strict();
+
+export const publicGitOperationAuthoritySchema = operationAuthorityUnsignedSchema.extend({
+  authorityDigest: digest,
+  attestation: watchdogAuthorityAttestationSchema,
+}).strict().superRefine((value, context) => {
+  const unsigned = operationAuthorityUnsignedSchema.parse({
+    schemaVersion: value.schemaVersion, operationId: value.operationId, taskId: value.taskId,
+    operationMode: value.operationMode, requestedAt: value.requestedAt, deadlineAt: value.deadlineAt,
+    topologyDigest: value.topologyDigest, capabilitySetVersion: value.capabilitySetVersion,
+    capabilitySetDigest: value.capabilitySetDigest, workerReleaseSha256: value.workerReleaseSha256,
+  });
+  if (value.operationId !== value.taskId) {
+    context.addIssue({ code: "custom", message: "operation and task identities must match" });
+  }
+  if (Date.parse(value.deadlineAt) - Date.parse(value.requestedAt) !== MATERIALIZATION_DEADLINE_MS) {
+    context.addIssue({ code: "custom", message: "watchdog authority must have the frozen duration" });
+  }
+  const authorityDigest = canonicalSha256(unsigned);
+  if (value.authorityDigest !== authorityDigest || value.attestation.authorityDigest !== authorityDigest) {
+    context.addIssue({ code: "custom", message: "watchdog authority digest mismatch" });
+  }
+});
+
+const retainedLocatorFields = {
+  requestScopeDigest: digest,
+  operationId: id,
+  authorityDigest: digest,
+  attestation: watchdogAuthorityAttestationSchema,
+};
+
+export const materializationAdmissionResultSchema = z.discriminatedUnion("disposition", [
+  z.object({ disposition: z.literal("existing"), ...retainedLocatorFields }).strict(),
+  z.object({ disposition: z.literal("absent"), requestScopeDigest: digest,
+    sourceRevision: count.min(1).max(Number.MAX_SAFE_INTEGER) }).strict(),
+  z.object({ disposition: z.literal("reconciliation-required"), ...retainedLocatorFields }).strict(),
+]);
+
+export const materializationOperationLookupInputSchema = z.object({
+  operationId: id,
+  authorityDigest: digest,
+}).strict();
+
+export const materializationEffectClaimSchema = z.object({
+  schemaVersion: z.literal("runa-workspace-effect-claim/v1"),
+  operationId: id,
+  effect: z.enum(["git-fetch", "publication"]),
+  claimId: id,
+  claimRevision: z.literal(1),
+  state: z.enum(["claimed", "observed", "failed-unknown"]),
+  claimDigest: digest,
+  claimedAt: utc,
+  updatedAt: utc,
+}).strict().superRefine((value, context) => {
+  if (Date.parse(value.updatedAt) < Date.parse(value.claimedAt)) {
+    context.addIssue({ code: "custom", message: "effect claim update precedes claim" });
+  }
+  const claimDigest = canonicalSha256({ schemaVersion: value.schemaVersion, operationId: value.operationId,
+    effect: value.effect, claimId: value.claimId, claimRevision: value.claimRevision, claimedAt: value.claimedAt });
+  if (value.claimDigest !== claimDigest) context.addIssue({ code: "custom", message: "effect claim digest mismatch" });
+});
+
+export const watchdogUnusedLeaseClosureSchema = z.object({
+  schemaVersion: z.literal("runa-watchdog-unused-lease-closure/v1"),
+  authorityDigest: digest,
+  databaseBound: z.literal(false),
+  ownedResourceCount: z.literal(0),
+  authorityTimerClosed: z.literal(true),
+  authorityWaitClosed: z.literal(true),
+  ledgerState: z.literal("unused-closed"),
+  ledgerRevision: count.min(1).max(Number.MAX_SAFE_INTEGER),
+  closedAt: utc,
+  receiptHmac: digest,
+}).strict();
+
+export const watchdogUnissuedLeaseSettlementSchema = z.discriminatedUnion("disposition", [
+  z.object({ schemaVersion: z.literal("runa-watchdog-unissued-lease-settlement/v1"),
+    disposition: z.literal("unused-closed"), leaseId: id, databaseBound: z.literal(false),
+    ownedResourceCount: z.literal(0), authorityTimerClosed: z.literal(true), authorityWaitClosed: z.literal(true),
+    ledgerRevision: count.min(1).max(Number.MAX_SAFE_INTEGER), settledAt: utc, receiptHmac: digest }).strict(),
+  z.object({ schemaVersion: z.literal("runa-watchdog-unissued-lease-settlement/v1"),
+    disposition: z.literal("watchdog-retained"), leaseId: id, databaseBound: z.literal(false),
+    ownedResourceCount: z.literal(0), authorityTimerClosed: z.boolean(), authorityWaitClosed: z.boolean(),
+    ledgerRevision: count.min(1).max(Number.MAX_SAFE_INTEGER), settledAt: utc, receiptHmac: digest }).strict(),
+]);
+
+const retainedOperationBase = { operationId: id, authorityDigest: digest,
+  ledgerRevision: count.min(1).max(Number.MAX_SAFE_INTEGER) };
+export const watchdogRetainedOperationSchema = z.discriminatedUnion("disposition", [
+  z.object({ disposition: z.literal("active-observe"), ...retainedOperationBase,
+    authorityTimerOpen: z.literal(true), authorityWaitClosed: z.literal(false) }).strict(),
+  z.object({ disposition: z.literal("recovery-resumable"), ...retainedOperationBase,
+    recoveryCas: digest }).strict(),
+  z.object({ disposition: z.literal("terminal"), ...retainedOperationBase,
+    terminalReceipt: z.unknown() }).strict(),
+]);
+
+export const watchdogRetainedRecoveryEntrySchema = z.object({
+  schemaVersion: z.literal("runa-watchdog-retained-recovery-entry/v1"),
+  disposition: z.literal("recovery-entered"),
+  operationId: id,
+  authorityDigest: digest,
+  sourceLedgerRevision: count.min(1).max(Number.MAX_SAFE_INTEGER),
+  recoveryCas: digest,
+  recoveryOwner: z.literal(true),
+}).strict();
+
+export const nativeResourceRoleSchema = z.enum([
+  "operation-job", "child-process", "child-primary-thread", "inherited-pipe", "inherited-directory",
+  "bootstrap-pipe", "control-parent-duplicate", "publication-parent", "publication-ingress-root",
+  "publication-staging-root", "publication-inspection", "operation-token", "authority-timer",
+  "authority-event",
+]);
+export const nativeResourceDirectionSchema = z.enum([
+  "none", "control-to-coordinator", "coordinator-to-control", "coordinator-to-materializer",
+  "materializer-to-coordinator", "coordinator-to-broker", "broker-to-coordinator",
+  "materializer-to-broker", "broker-to-materializer", "control-bootstrap-to-coordinator",
+  "control-bootstrap-to-coordinator-materializer", "control-bootstrap-to-coordinator-broker",
+  "control-bootstrap-to-materializer", "control-bootstrap-to-broker", "control-held-to-materializer",
+]);
+
+const rawHandleResourceSchema = z.object({
+  internalResourceId: id,
+  nativeObjectType: z.enum(["job", "process", "thread", "pipe", "directory", "file", "token", "timer", "event"]),
+  role: nativeResourceRoleSchema,
+  child: z.enum(["control", "coordinator", "materializer", "ingress-broker"]),
+  direction: nativeResourceDirectionSchema,
+  sourceProcessId: count.min(1).max(4_294_967_295),
+  rawHandleHex: z.string().regex(/^[a-f0-9]{16}$/u),
+}).strict();
+
+export const nativeOwnedResourceProjectionSchema = rawHandleResourceSchema.omit({ rawHandleHex: true }).strict();
+
+export const rawHandleBatchSchema = z.object({
+  schemaVersion: z.literal("runa-public-git-raw-handle-batch/v1"),
+  operationId: id,
+  batchId: id,
+  batchRevision: z.literal(1),
+  phase: z.enum(["setup", "pre-resume", "publication-inspection"]),
+  resources: z.array(rawHandleResourceSchema).min(1).max(256),
+  batchDigest: digest,
+}).strict().superRefine((value, context) => {
+  const resourceIds = value.resources.map(resource => resource.internalResourceId);
+  const handles = value.resources.map(resource => resource.rawHandleHex);
+  if (new Set(resourceIds).size !== resourceIds.length || new Set(handles).size !== handles.length) {
+    context.addIssue({ code: "custom", message: "native ownership batch aliases a resource or handle" });
+  }
+  const batchDigest = canonicalSha256({ schemaVersion: value.schemaVersion, operationId: value.operationId,
+    batchId: value.batchId, batchRevision: value.batchRevision, phase: value.phase, resources: value.resources });
+  if (value.batchDigest !== batchDigest) context.addIssue({ code: "custom", message: "native ownership batch digest mismatch" });
+});
+
+export const rawHandleOwnershipReceiptSchema = z.object({
+  schemaVersion: z.literal("runa-public-git-raw-handle-ownership-receipt/v1"),
+  operationId: id,
+  batchId: id,
+  batchRevision: z.literal(1),
+  resourceCount: count.min(1).max(256),
+  batchDigest: digest,
+  ownershipCommitted: z.literal(true),
+  ledgerRevision: count.min(1).max(Number.MAX_SAFE_INTEGER),
+  watchdogProcessIdentitySha256: digest,
+  receiptHmac: digest,
+}).strict();
+
 export function parseCanonicalWire(schema, raw, maximumBytes = 1_048_576) {
   const bytes = Buffer.isBuffer(raw) ? raw : Buffer.from(raw, "utf8");
   if (bytes.length === 0 || bytes.length > maximumBytes || (bytes[0] === 0xef && bytes[1] === 0xbb && bytes[2] === 0xbf) || bytes.includes(0)) throw new Error("non-canonical-wire");
@@ -462,4 +656,9 @@ export function validateGitStreamTranscript(records, expectation, key) {
 export const contracts = Object.freeze({ authorityBindingSchema, sourceSelectionSchema, materializationRequestSchema, workspaceCancelRequestSchema, workspaceReconciliationRequestSchema, workspaceManifestSchema,
   materializationReceiptSchema, uploadSessionCreateRequestSchema, uploadSessionCreateResponseSchema,
   uploadManifestSchema, uploadManifestRecordSchema, controlPipeFrameSchema, gitStreamFrameSchema,
-  gitOpenRequestSchema, gitOpenResponseSchema });
+  gitOpenRequestSchema, gitOpenResponseSchema, watchdogAuthorityAttestationSchema,
+  publicGitOperationAuthoritySchema, materializationAdmissionResultSchema,
+  materializationOperationLookupInputSchema, materializationEffectClaimSchema,
+  watchdogUnusedLeaseClosureSchema, watchdogUnissuedLeaseSettlementSchema, watchdogRetainedOperationSchema,
+  watchdogRetainedRecoveryEntrySchema,
+  rawHandleBatchSchema, rawHandleOwnershipReceiptSchema, nativeOwnedResourceProjectionSchema });

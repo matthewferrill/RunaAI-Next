@@ -176,6 +176,17 @@ provenance, inherited handles, process/Job fencing, external deadline/recovery b
 remain unproved. Record:
 `../gate7f/function-first/M1-S2B1-BOOTSTRAP-CONTRACT-PREFLIGHT-2026-09-04.md`.
 
+Native Control deterministic gate-1 review stop, 2026-09-04: independent exact-byte review returned
+`STOP P0=0/P1=6` before any deterministic command. The stopped source disagreed on staging-versus-ready publication
+digest, could record determinate failure after an indeterminate publication claim/effect, counted rather than exactly
+bound all native resources, omitted two literal immutable-update trigger names, under-covered real/adversarial paths,
+and lacked a lock-identified worktree-local dependency procedure. Corrected source/tests now bind the authoritative
+ready digest, retain `unknown|cleanup-pending` ownership after the publication boundary, enumerate 53 exact resources,
+add the immutable triggers and coverage, and freeze an exact temporary-junction preflight/cleanup; these corrections
+remain unexecuted and require a different fresh reviewer. The native branch is also a sibling of accepted application
+work at `9714874` plus `25190d9`; preserve these bytes and separately reconcile that baseline before any gate-1 run.
+Record: `../gate7f/function-first/M1-S2B1-NATIVE-CONTROL-COMPOSITION-CORRECTION-IMPLEMENTATION-2026-09-04.md`.
+
 The first independently authorized disposable PostgreSQL lifecycle run stopped at 3/4 passed before the intended
 product action. A harness fault-injection constraint was validated against an older legitimate
 `source-disconnected` outbox row, so PostgreSQL rejected fixture setup with code `23514`. The compatibility run did

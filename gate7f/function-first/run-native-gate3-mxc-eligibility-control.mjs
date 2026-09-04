@@ -49,10 +49,16 @@ async function assertOwnerPrivate(directory) {
   const result = runPowerShell(`$ErrorActionPreference='Stop';$p=${target};$me=[Security.Principal.WindowsIdentity]::GetCurrent();
 $acl=[IO.Directory]::GetAccessControl($p);$rules=@($acl.GetAccessRules($true,$true,[Security.Principal.SecurityIdentifier]));
 $owner=$acl.GetOwner([Security.Principal.SecurityIdentifier]).Value;$ids=@($rules|ForEach-Object{$_.IdentityReference.Value}|Sort-Object -Unique);if($owner-cne$me.User.Value-or$ids.Count-ne2-or
-  $ids-notcontains$me.User.Value-or$ids-notcontains'S-1-5-18'-or@($rules|Where-Object{$_.AccessControlType-ne'Allow'-or
+  $acl.AreAccessRulesProtected-ne$true-or$ids-notcontains$me.User.Value-or$ids-notcontains'S-1-5-18'-or@($rules|Where-Object{$_.IsInherited-or$_.AccessControlType-ne'Allow'-or
   ($_.FileSystemRights-band[Security.AccessControl.FileSystemRights]::FullControl)-ne[Security.AccessControl.FileSystemRights]::FullControl}).Count-ne0){throw'acl'};'ok'`,
   "native-gate3-eligibility-acl-invalid");
   if (result !== "ok") throw coded("native-gate3-eligibility-acl-invalid");
+}
+
+async function createOwnerPrivate(directory) {
+  await mkdir(directory);
+  makeOwnerPrivate(directory);
+  await assertOwnerPrivate(directory);
 }
 
 async function writeExclusiveJson(filename, value) {
@@ -85,8 +91,7 @@ $bad=@($acl.GetAccessRules($true,$true,[Security.Principal.SecurityIdentifier])|
   for (const directory of [path.join(STAGING_PARENT, "RunaAI"),
     path.join(STAGING_PARENT, "RunaAI", "Gate7F"), STAGING]) {
     if (await pathAbsent(directory)) {
-      await mkdir(directory);
-      makeOwnerPrivate(directory);
+      await createOwnerPrivate(directory);
     }
     await assertOwnerPrivate(directory);
   }
@@ -209,13 +214,12 @@ export async function run() {
     rootIdentity = { dev: rootItem.dev, ino: rootItem.ino, birthtimeMs: rootItem.birthtimeMs };
     makeOwnerPrivate(root);
     await assertOwnerPrivate(root);
-    await mkdir(journal);
-    await mkdir(scratch);
+    await createOwnerPrivate(journal);
+    await createOwnerPrivate(scratch);
     scratchCreated = true;
     const scratchItem = await lstat(scratch);
     scratchIdentity = { dev: scratchItem.dev, ino: scratchItem.ino, birthtimeMs: scratchItem.birthtimeMs };
-    for (const directory of [local, temp, transient]) await mkdir(directory);
-    for (const directory of [journal, scratch, local, temp, transient]) await assertOwnerPrivate(directory);
+    for (const directory of [local, temp, transient]) await createOwnerPrivate(directory);
 
     const deployment = path.join(import.meta.dirname, "control", "deployment");
     const bootstrap = path.join(import.meta.dirname, "native-gate3-control-node-bootstrap.mjs");

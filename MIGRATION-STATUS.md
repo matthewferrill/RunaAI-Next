@@ -583,6 +583,14 @@ production operation is claimed. Records:
 `gate7f/function-first/M1-S2-ARTIFACT-RESULT-SURFACE-CRITERIA-2026-09-03.md` and
 `gate7f/function-first/M1-S2-ARTIFACT-RESULT-SURFACE-CRITERIA-INDEPENDENT-REVIEW-2026-09-04.md`.
 
+**Artifact-result core preflight, 2026-09-04:** the strict contract, source-admission, canonicalization and projection
+core now passes 28/28 focused checks and fresh independent review at P0=0/P1=0 after retained P1=6 and P1=3 stops.
+The corrections enforce exact plain-array prototypes, relationship-refined reads, base64/digest/length integrity,
+deterministic source order, contradictory-check rejection and complete Research/Review/inspected-text state coverage.
+This authorizes bounded owner-point source-port and HTTP implementation only. No PostgreSQL, HTTP, browser, provider,
+model, Control or actual acceptance operation ran. Record:
+`gate7f/function-first/M1-S2-ARTIFACT-RESULT-CORE-PREFLIGHT-2026-09-04.md`.
+
 **Contextual Review workflow, 2026-09-03:** the application now requires one to six exact selected locators,
 fully resolves and hash-verifies their canonical bytes in requested order before provider access, preserves
 application-owned citations, and isolates the simplified one-revision `accept`/`revise` checker to Review. The first

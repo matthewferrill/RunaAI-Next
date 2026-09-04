@@ -192,6 +192,14 @@ completion, implementation, PostgreSQL proof, browser journey, model call or pro
 Records: `../gate7f/function-first/M1-S2-ARTIFACT-RESULT-SURFACE-CRITERIA-2026-09-03.md` and
 `../gate7f/function-first/M1-S2-ARTIFACT-RESULT-SURFACE-CRITERIA-INDEPENDENT-REVIEW-2026-09-04.md`.
 
+The artifact-result contract/source/canonicalization/projection core now passes 28/28 focused checks and fresh
+independent review at P0=0/P1=0 after retained P1=6 and P1=3 stops. It enforces exact plain-array prototypes,
+relationship-refined read descriptors, base64/digest/length integrity, deterministic source ordering,
+contradictory-check rejection, and complete Research/Review/inspected-text state coverage. This authorizes bounded
+owner-point source-port and HTTP implementation only. PostgreSQL, HTTP, DOM/browser, provider/model, Control and
+actual acceptance remain unproved. Record:
+`../gate7f/function-first/M1-S2-ARTIFACT-RESULT-CORE-PREFLIGHT-2026-09-04.md`.
+
 M1-S2B implementation checkpoint, 2026-09-02: the authority foundation and actual PostgreSQL lifecycle
 are green. The prior Omen DPAPI/handle-based file proof was 14/14, but shared native/helper bytes have since
 changed and that evidence is historical until one affected-scope rerun. The first actual

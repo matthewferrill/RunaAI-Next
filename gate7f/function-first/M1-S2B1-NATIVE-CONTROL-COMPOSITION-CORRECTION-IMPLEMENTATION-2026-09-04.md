@@ -461,6 +461,49 @@ if ($nativeFailures.Count -gt 1) {
 }
 ```
 
+## Post-junction current-byte checks — frozen, not executed
+
+Only after the wrapper above returns without an exception and has proved the worktree-local junction absent, run the
+following from exact worktree root `D:\Projects\Runalab\runaai-next-native-control-host`. The 19-file syntax list is
+the complete Native/production-union JavaScript scope for this gate. Stop on the first nonzero result. The current-byte
+roadmap result already passed on the identical committed planning records at `c68eb8f` (revision `2026-08-28.1`, digest
+`fb87550a71d9783ade102ff1591a2e8094746fd6c7dda3c0a943a972fa648275`, 17 capability families and 15/15 tests); do not
+rerun it solely for ceremony. Neither syntax nor repository cleanliness can substitute for the seven deterministic
+tests, and none receives PostgreSQL, native, Control, browser, network, model, release or customer-acceptance credit.
+
+```powershell
+$nativeSyntaxFiles = @(
+  'gate6b/composition.mjs',
+  'gate7f/function-first/composition.mjs',
+  'gate7f/function-first/composition.test.mjs',
+  'gate7f/function-first/server-workspace/control-coordinator-child.mjs',
+  'gate7f/function-first/server-workspace/control-watchdog-host.mjs',
+  'gate7f/function-first/server-workspace/control-worker-composition.mjs',
+  'gate7f/function-first/server-workspace/control-worker-composition.test.mjs',
+  'gate7f/function-first/server-workspace/materialization-contracts.mjs',
+  'gate7f/function-first/server-workspace/native-authority-contracts.test.mjs',
+  'gate7f/function-first/server-workspace/native-candidate-config.mjs',
+  'gate7f/function-first/server-workspace/native-candidate-wiring.test.mjs',
+  'gate7f/function-first/server-workspace/postgres-native-authority-source.test.mjs',
+  'gate7f/function-first/server-workspace/postgres-native-interface.test.mjs',
+  'gate7f/function-first/server-workspace/postgres.mjs',
+  'gate7f/function-first/server-workspace/public-git-materializer-child.mjs',
+  'gate7f/function-first/server-workspace/publication-owned-primitive.test.mjs',
+  'gate7f/function-first/server-workspace/publication-primitive.mjs',
+  'gate7f/function-first/server-workspace/service.mjs',
+  'gate7f/function-first/server-workspace/windows-native-host.mjs'
+)
+foreach ($nativeSyntaxFile in $nativeSyntaxFiles) {
+  & node --check $nativeSyntaxFile
+  if ($LASTEXITCODE -ne 0) { throw "native syntax check stopped at $nativeSyntaxFile with exit $LASTEXITCODE" }
+}
+& git -c safe.directory=D:/Projects/Runalab/runaai-next-native-control-host diff --check
+if ($LASTEXITCODE -ne 0) { throw "native repository diff check stopped with exit $LASTEXITCODE" }
+$nativeRepositoryStatus = @(& git -c safe.directory=D:/Projects/Runalab/runaai-next-native-control-host status --porcelain=v1 --untracked-files=all)
+if ($LASTEXITCODE -ne 0) { throw "native repository status check stopped with exit $LASTEXITCODE" }
+if ($nativeRepositoryStatus.Count -ne 0) { throw 'native deterministic gate changed the committed worktree' }
+```
+
 ## Deliberately deferred gates
 
 The signed manifest and every real native/watchdog/coordinator/materializer/TLS method remain blocked on gate 3 of the

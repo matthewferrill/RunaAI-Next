@@ -218,6 +218,32 @@ Fresh review returned GO at P0=0/P1=0; the actual integration passed 1/1 and cle
 This does not prove DOM/browser, model, Control, production or customer acceptance. Record:
 `../gate7f/function-first/M1-S2-ARTIFACT-RESULT-SOURCE-HTTP-INTEGRATION-2026-09-04.md`.
 
+The Artifact result DOM presentation is now implemented in the existing Files and artifacts single canvas. Its
+pre-review bytes passed 12/12 focused real-module DOM/download and product-foundation checks. The current saved project conversation or opened
+Code task supplies the owner; list metadata never supplies authority. Selected ready bytes must pass canonical base64,
+exact length, SHA-256 and fatal UTF-8 verification before inert `textContent` preview or an explicit user-action Blob
+download is enabled. Exact type/safe filename and temporary object-URL revocation are enforced; Research citations
+and Review contexts use independently verified companion metadata. Unknown/reconciliation states remain non-actionable.
+The focused suite was green; a later broad command retained 46 passes and two pre-assertion `pg` loader failures
+because this isolated UI worktree has no worktree-local dependency tree and the ambient ancestor tree lacks `pg`,
+then stopped before roadmap/diff checks. No
+successor ran. The first independent implementation review then stopped at P0=0/P1=3 for descriptor relationship/
+order admission, metadata-first Research/Review gating and real current-owner/Files wiring evidence. Corrections are
+source-complete but unexecuted. A second review stopped those bytes at P0=0/P1=2 for same-source multiplicity/
+coherence and incomplete Research SafeText admission. A third review stopped at P0=0/P1=2 because the selected
+closure was falsely described as dependency-free and its Review revision-mismatch regression expected report-level
+copy instead of whole-list rejection. The latest unexecuted correction requires identical lockfiles, exact
+`zod@4.4.3`, a worktree-local authenticated `node_modules` junction with verified link-only cleanup and no ambient
+parent fallback; the mismatch now proves `result-client-list-invalid`, list-only traffic and no preview/download.
+A fourth review stopped at P0=0/P1=1 because roadmap/diff remained inside the junction lifetime and explicit current-
+byte syntax checks were absent. The corrected method limits the authenticated junction to exactly seven tests,
+always verifies/removes it in `finally`, aggregates suite/cleanup failures, and only after both are green runs five
+explicit syntax checks, roadmap verification and the diff check in order. Fresh review returned P0=0/P1=0; the one
+corrected run passed 53/53, removed the junction, passed all five syntax checks, 15/15 roadmap checks and the diff check.
+Source commit, ordinary browser acceptance, Control/release and customer proof remain outstanding. Records:
+`../gate7f/function-first/M1-S2-ARTIFACT-RESULT-DOM-PREFLIGHT-2026-09-04.md`.
+`../gate7f/function-first/M1-S2-ARTIFACT-DOM-BROAD-SUITE-METHOD-RCA-2026-09-04.md`.
+
 The contextual Agent-governance implementation now passes 54/54 focused checks and fresh independent review at
 P0=0/P1=0 after a retained P1=2 stop. Consequential actions consume task-scoped authority inside the same transaction
 before their first write; run start/resume reserve the exact active window under that compare-and-set boundary.

@@ -613,6 +613,35 @@ the one disposable PostgreSQL plus authenticated loopback HTTP run passed 1/1. C
 zero Runa-tool PostgreSQL processes. No browser, model, Control, production or customer acceptance is claimed. Record:
 `gate7f/function-first/M1-S2-ARTIFACT-RESULT-SOURCE-HTTP-INTEGRATION-2026-09-04.md`.
 
+**Artifact-result DOM preflight, 2026-09-04:** the existing Files and artifacts canvas now resolves the current saved
+project conversation or opened Code task and lists only bounded `result.list` metadata. A selected ready result is
+base64 decoded and independently checked for exact byte length, SHA-256 and fatal UTF-8 before inert `textContent`
+preview and explicit user-action download are enabled. The download uses the frozen safe filename, exact Blob media
+type and a temporary same-document object URL that is always revoked. Independently verified companion metadata keeps
+Research citations and Review contexts with their reports; unknown/reconciliation-required results remain
+non-actionable. Focused real-module DOM/download and product-foundation checks passed 12/12 on the pre-review bytes. A later broad command
+retained 46 passes and two pre-assertion `ERR_MODULE_NOT_FOUND: pg` loader failures because the isolated UI worktree
+has no worktree-local dependency tree and the ambient ancestor tree lacks `pg`; it stopped before roadmap/diff checks
+and no successor ran. This is a method/
+environment stop, not an application failure. The first independent implementation review then returned STOP at
+P0=0/P1=3 for descriptor relationship/order admission, metadata-first Research/Review companion gating and real
+current-owner/Files wiring evidence. Those corrections are now source-complete but unexecuted. The corrected
+bytes then stopped fresh review at P0=0/P1=2 for same-source multiplicity/coherence and incomplete Research SafeText
+admission. A third fresh review stopped at P0=0/P1=2 because the selected closure was falsely described as
+dependency-free and the Review revision-mismatch regression expected report-level copy instead of whole-list
+rejection. The latest unexecuted correction binds identical lockfiles, exact `zod@4.4.3`, an authenticated
+worktree-local `node_modules` junction with verified link-only cleanup and no ambient parent fallback; it also proves
+`result-client-list-invalid`, list-only traffic and no preview/download for the mismatch. The corrected dependency-
+bound method then stopped review at P0=0/P1=1 because roadmap/diff still ran inside the junction lifetime and current-
+byte syntax checks were absent. The corrected method runs only the seven tests while the authenticated junction
+exists, always verifies/removes it in `finally`, aggregates suite/cleanup failures, and only after both are green runs
+five explicit syntax checks, roadmap verification and the diff check in order. Fresh review returned P0=0/P1=0; the
+one corrected run passed 53/53, removed the junction, passed all five syntax checks, 15/15 roadmap checks and the diff
+check. Source commit and ordinary Omen -> Control browser acceptance remain required; no browser, model,
+Control, production or customer operation ran. Records:
+`gate7f/function-first/M1-S2-ARTIFACT-RESULT-DOM-PREFLIGHT-2026-09-04.md` and
+`gate7f/function-first/M1-S2-ARTIFACT-DOM-BROAD-SUITE-METHOD-RCA-2026-09-04.md`.
+
 **Contextual Agent-governance preflight, 2026-09-04:** every consequential Agent action now consumes a task-scoped
 authority digest inside the same transaction before its first write, while run start/resume reserve the exact active
 window under that compare-and-set boundary. Authoritative projection restores ask-every-time approval and explicit

@@ -1,3 +1,5 @@
+import { renderArtifactResults } from "./artifact-results.mjs";
+
 const settingLabels = Object.freeze({
   theme: "Theme", textSize: "Text size", density: "Density", reducedMotion: "Reduced motion",
 });
@@ -35,7 +37,8 @@ export function applyUserSettings(document, values = {}) {
   }
 }
 
-export function initializeProductViews(root = document, { request, experience, openChat }) {
+export function initializeProductViews(root = document, { request, experience, openChat,
+  resultContext = () => null }) {
   const view = root.getElementById("product-view");
   const conversation = root.getElementById("conversation-surface");
   const composer = root.getElementById("chat-form");
@@ -44,9 +47,9 @@ export function initializeProductViews(root = document, { request, experience, o
   let settings = null;
   let viewGeneration = 0;
 
-  function showShell(title, eyebrow = "RunaAI workspace") {
+  function showShell(title, eyebrow = "RunaAI workspace", activeName = title.toLowerCase()) {
     const generation = ++viewGeneration;
-    active = title.toLowerCase();
+    active = activeName;
     conversation.hidden = true;
     composer.hidden = true;
     actions.hidden = true;
@@ -221,13 +224,18 @@ export function initializeProductViews(root = document, { request, experience, o
     if (name === "connections") { showShell("Connections"); view.append(renderConnections()); return; }
     if (name === "search") return renderSearch();
     if (name === "archived") return renderSearch({ archived: true });
-    if (name === "files") { showShell("Files and artifacts"); view.append(card("No connected files", "Local folders and uploads are not enabled yet. Runa cannot read your files from this view.")); return; }
+    if (name === "files") {
+      const generation = showShell("Files and artifacts", "Current verified results", "files");
+      const content = element(root, "div", "product-stack"); view.append(content);
+      return renderArtifactResults({ root, container: content, request, context: resultContext(),
+        isCurrent: () => isCurrent(generation) });
+    }
     if (name === "tasks") { showShell("Tasks"); view.append(card("No active background tasks", "Agent work appears here only after a governed task has been proposed or started.")); }
   }
 
   for (const button of root.querySelectorAll("[data-workspace-view]")) {
-    button.addEventListener("click", () => void open(button.dataset.workspaceView));
+    button.addEventListener("click", () => open(button.dataset.workspaceView));
   }
-  root.getElementById("show-archived")?.addEventListener("click", () => void open("archived"));
+  root.getElementById("show-archived")?.addEventListener("click", () => open("archived"));
   return Object.freeze({ open, close, active: () => active, applySettings: values => applyUserSettings(root, values) });
 }

@@ -7,8 +7,8 @@ $ErrorActionPreference = 'Stop'
 $worktree = 'D:\Projects\Runalab\runaai-next-native-control-host'
 $parentRelative = 'gate7f/function-first/Invoke-NativeGate3ResourceOwnershipProofBounded.ps1'
 $inner = Join-Path $worktree 'gate7f\function-first\Invoke-NativeGate3ResourceOwnershipProof.ps1'
-$innerSha256 = '4F60820E62352088A4887ADC1E43DCEB6189BC919C205827CA191B05259447A7'
-$evidenceRoot = Join-Path $worktree 'artifacts\runs\native-gate3-production-resource-ownership-parent-01'
+$innerSha256 = '777CEAEF51C08BC9C7BEE3E922FA888CD1FCFAF171D4915DAF32BB4E4CA4A4CF'
+$evidenceRoot = Join-Path $worktree 'artifacts\runs\native-gate3-production-resource-ownership-parent-02'
 $stdoutPath = Join-Path $evidenceRoot 'stdout.log'
 $stderrPath = Join-Path $evidenceRoot 'stderr.log'
 $resultPath = Join-Path $evidenceRoot 'result.json'
@@ -66,9 +66,17 @@ try {
   }
   $actualInnerSha256 = (Get-FileHash -LiteralPath $inner -Algorithm SHA256).Hash
   if ($actualInnerSha256 -cne $innerSha256) { throw "bounded-parent-inner-hash-mismatch:$actualInnerSha256" }
+  $powershell = Join-Path ([Environment]::SystemDirectory) 'WindowsPowerShell\v1.0\powershell.exe'
+  $powershellItem = Get-Item -LiteralPath $powershell -Force -ErrorAction Stop
+  $powershellIdentityInvalid = $powershellItem.PSIsContainer
+  $powershellIdentityInvalid = $powershellIdentityInvalid -or ($powershellItem.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0
+  $powershellIdentityInvalid = $powershellIdentityInvalid -or $powershellItem.VersionInfo.FileVersion -cne '10.0.26100.8972 (WinBuild.160101.0800)'
+  $powershellIdentityInvalid = $powershellIdentityInvalid -or (Get-FileHash -LiteralPath $powershell -Algorithm SHA256).Hash -cne '7600FFE12DA441FE89D035B13801E8E91D064BC544A27B19A5CF49F6AB8B18F5'
+  if ($powershellIdentityInvalid) {
+    throw 'bounded-parent-windows-powershell-identity-invalid'
+  }
   New-Item -ItemType Directory -Path $evidenceRoot -ErrorAction Stop | Out-Null
   $env:RUNAAI_GATE3_RESOURCE_PROOF_PARENT = 'runaai-native-gate3-resource-ownership-parent/v1'
-  $powershell = Join-Path $PSHOME 'powershell.exe'
   $arguments = "-NoLogo -NoProfile -NonInteractive -ExecutionPolicy Bypass -File `"$inner`""
   $runner = Start-Process -FilePath $powershell -ArgumentList $arguments -WorkingDirectory $worktree `
     -RedirectStandardOutput $stdoutPath -RedirectStandardError $stderrPath -WindowStyle Hidden -PassThru

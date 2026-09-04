@@ -1089,6 +1089,16 @@ not only the Native branch: pre-transfer failure closes M1 then pool with aggreg
 owner. The actual no-mock proof remains gated in
 `../gate7f/function-first/M1-S2B1-NATIVE-GATE3-PRODUCTION-RESOURCE-OWNERSHIP-RCA-2026-09-04.md`; it will use disposable
 Control PostgreSQL plus a real failed M1/Qdrant initialization and must prove zero sessions and complete cleanup.
+The first reviewed bounded launch at commit `323e530` stopped before its inner operator because it combined the
+portable PowerShell 7 `$PSHOME` with the Windows PowerShell executable name. No database or test started. The
+shell-host identity-family RCA and full repository shape audit are recorded in
+`../gate7f/function-first/M1-S2B1-NATIVE-GATE3-PROOF-LAUNCH-RCA-2026-09-04.md`; failed `parent-01` evidence is retained.
+The audit also identifies 18 ambient local PowerShell-script launch/comparison sites across nine production files,
+four bare local JavaScript launchers, three environment-derived local launchers, and separate remote-profile command
+builders. They remain a required systemic executable-identity correction lane before Gate 3 final review/human
+testing; no blanket fix is claimed. The resource-ownership proof's dependency set contains none of those paths. Its
+corrected parent pins the OS-derived full Windows PowerShell executable identity and may resume once at fresh
+`parent-02` only after new exact-byte review and a clean commit.
 
 Active work remains M1-S2, specified in
 `../gate7f/function-first/M1-S2-FUNCTIONS-AND-GREEN-CRITERIA.md`. The complete R10

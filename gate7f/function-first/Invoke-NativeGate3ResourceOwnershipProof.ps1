@@ -10,7 +10,7 @@ $localModules = Join-Path $worktree 'node_modules'
 $toolRoot = 'D:\Projects\Runalab\artifacts\tools'
 $postgresBin = Join-Path $toolRoot 'postgresql\bin\pgsql\bin'
 $node = 'C:\Program Files\nodejs\node.exe'
-$wrapperRelative = 'gate7f/function-first/Invoke-NativeGate3ResourceOwnershipProof.ps1'
+$parentRelative = 'gate7f/function-first/Invoke-NativeGate3ResourceOwnershipProofBounded.ps1'
 $directoryManifestPath = Join-Path $worktree 'gate7f\function-first\directory-manifest.mjs'
 $testPath = Join-Path $worktree 'gate7f\function-first\production-resource-ownership.integration.test.mjs'
 $artifactRoot = Join-Path $worktree 'artifacts\runs\native-gate3-production-resource-ownership'
@@ -157,8 +157,8 @@ try {
   if ($LASTEXITCODE -ne 0 -or $sourceStatusBefore.Count -ne 0) { throw 'worktree-must-be-clean' }
   $head = (& git -c core.excludesFile= -c safe.directory=$worktree rev-parse HEAD).Trim()
   if ($LASTEXITCODE -ne 0 -or $head -notmatch '^[a-f0-9]{40}$') { throw 'head-identity-invalid' }
-  $wrapperCommit = (& git -c core.excludesFile= -c safe.directory=$worktree log -1 --format=%H -- $wrapperRelative).Trim()
-  if ($LASTEXITCODE -ne 0 -or $wrapperCommit -cne $head) { throw "reviewed-wrapper-is-not-at-head:$wrapperCommit" }
+  $methodCommit = (& git -c core.excludesFile= -c safe.directory=$worktree log -1 --format=%H -- $parentRelative).Trim()
+  if ($LASTEXITCODE -ne 0 -or $methodCommit -cne $head) { throw "reviewed-method-is-not-at-head:$methodCommit" }
 
   foreach ($entry in $sourcePins.GetEnumerator()) { Assert-Hash (Join-Path $worktree $entry.Key) $entry.Value }
   foreach ($entry in $toolPins.GetEnumerator()) { Assert-Hash $entry.Key $entry.Value }

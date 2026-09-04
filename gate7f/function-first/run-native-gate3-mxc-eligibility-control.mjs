@@ -22,8 +22,9 @@ const psEnvironment = Object.freeze({ ComSpec: "C:\\Windows\\System32\\cmd.exe",
 
 function psLiteral(value) { return `'${String(value).replaceAll("'", "''")}'`; }
 function runPowerShell(script, code) {
+  const hardenedScript = `$ProgressPreference='SilentlyContinue';${script}`;
   const result = spawnSync(POWERSHELL, ["-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass",
-    "-EncodedCommand", Buffer.from(script, "utf16le").toString("base64")],
+    "-EncodedCommand", Buffer.from(hardenedScript, "utf16le").toString("base64")],
   { encoding: "utf8", windowsHide: true, timeout: 10_000, maxBuffer: 65_536, env: psEnvironment });
   if (result.status !== 0 || result.signal !== null || result.error || result.stderr !== "") throw coded(code);
   return result.stdout.trim();

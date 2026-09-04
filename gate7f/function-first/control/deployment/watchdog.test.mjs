@@ -70,7 +70,8 @@ process.stdout.write((mode==='exfiltrate'?wire.toString('hex')+'\\n':'')+ack+'\\
       entrypoint:{path:entrypoint,sha256:pins.find(pin=>pin.path===entrypoint).sha256},
       manifest:{path:manifest,sha256:pins.find(pin=>pin.path===manifest).sha256}}:{})});
   const options={prepared,wrapperFile,helperFile,hostFile,hostSha256:digest(await readFile(hostFile)),wrapperSha256:digest(await readFile(wrapperFile)),helperSha256:digest(await readFile(helperFile)),
-    powershellSha256:digest(await readFile(POWERSHELL)),assertOwnerPrivate:privateHook};
+    powershellSha256:digest(await readFile(POWERSHELL)),assertOwnerPrivate:privateHook,
+    ...(v2?{createOwnerPrivate:mkdir}:{})};
   const observation=()=>inspectWatchdog({directory,requestSha256:prepared.requestSha256,assertOwnerPrivate:privateHook});
   let launched;
   return {base,directory,side,grand,program,entrypoint,prepared,options,observation,
@@ -173,6 +174,13 @@ test('durable terminal ordering ignores Windows process-time granularity but rej
     started.recordedAt=new Date(Date.parse(supervisor.recordedAt)-1).toISOString();
     await writeFile(startedPath,JSON.stringify(started));
     await assert.rejects(f.observation(),/m1-watchdog-started-binding/u);
+  }finally{await f.close();}
+});
+
+test('v2 launch rejects a missing private provisioner before creating host support directories',async()=>{
+  const f=await fixture('success',{v2:true});try{const options={...f.options};delete options.createOwnerPrivate;
+    await assert.rejects(launchWatchdog(options),/private-provisioner/u);
+    assert.deepEqual(await readdir(f.directory),['request.json']);
   }finally{await f.close();}
 });
 

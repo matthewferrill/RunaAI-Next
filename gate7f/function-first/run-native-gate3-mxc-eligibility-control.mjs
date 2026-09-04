@@ -259,7 +259,8 @@ export async function run() {
     if (prepared.request.argumentsSha256 !== argvDigest([bootstrap])) throw coded("native-gate3-eligibility-argv-drift");
     const launched = await launchWatchdog({ prepared, wrapperFile: wrapper, wrapperSha256: members[3].sha256,
       helperFile: helper, helperSha256: members[4].sha256, hostFile: host, hostSha256: members[2].sha256,
-      powershellSha256: digest(await plainFile(POWERSHELL, 100 * 1024 * 1024, true)), assertOwnerPrivate });
+      powershellSha256: digest(await plainFile(POWERSHELL, 100 * 1024 * 1024, true)), assertOwnerPrivate,
+      createOwnerPrivate });
     completion = await launched.completion;
     if (completion?.stopped === true) {
       observation = await inspectWatchdog({ directory: journal, requestSha256: prepared.requestSha256,

@@ -1,4 +1,4 @@
-import {lstat,mkdir,open,readdir,realpath} from 'node:fs/promises';
+import {lstat,open,readdir,realpath} from 'node:fs/promises';
 import {createHash,randomBytes,randomUUID} from 'node:crypto';
 import {spawn} from 'node:child_process';
 import path from 'node:path';
@@ -121,7 +121,7 @@ export async function prepareWatchdogRequest({directory,transitionId,descriptorS
 
 /** Starts only the separately pinned watchdog. The watchdog (not this Node
  * process) owns the finite job. Losing this caller cannot remove its deadline. */
-export async function launchWatchdog({prepared,wrapperFile,wrapperSha256,helperFile,helperSha256,hostFile,hostSha256,powershellSha256,assertOwnerPrivate}){
+export async function launchWatchdog({prepared,wrapperFile,wrapperSha256,helperFile,helperSha256,hostFile,hostSha256,powershellSha256,assertOwnerPrivate,createOwnerPrivate}){
   await directoryBoundary(prepared.directory,assertOwnerPrivate);
   demand(digest(await plainFile(prepared.requestFile,65536))===prepared.requestSha256,'request-drift');
   demand(digest(JSON.stringify(prepared.request))===prepared.requestSha256,'prepared-drift');
@@ -140,7 +140,8 @@ export async function launchWatchdog({prepared,wrapperFile,wrapperSha256,helperF
     demand(prepared.request.pins.some(item=>item.path===file&&item.sha256===pin),'supervisor-package-binding');
   const hostEnv=v2?hostEnvironment(prepared.directory):{...process.env,NODE_OPTIONS:'',NODE_PATH:'',
     PSModulePath:String.raw`C:\Windows\system32\WindowsPowerShell\v1.0\Modules;C:\Program Files\WindowsPowerShell\Modules`};
-  if(v2){await mkdir(hostEnv.LOCALAPPDATA);await mkdir(hostEnv.TEMP);
+  if(v2){demand(typeof createOwnerPrivate==='function','private-provisioner');
+    await createOwnerPrivate(hostEnv.LOCALAPPDATA);await createOwnerPrivate(hostEnv.TEMP);
     await directoryBoundary(hostEnv.LOCALAPPDATA,assertOwnerPrivate);await directoryBoundary(hostEnv.TEMP,assertOwnerPrivate);}
   const secret=v2?randomBytes(32):null;
   const child=spawn(prepared.request.supervisorExecutable,[hostFile,prepared.requestFile,prepared.requestSha256,wrapperSha256,helperSha256,hostSha256,powershellSha256],

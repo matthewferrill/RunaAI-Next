@@ -4,14 +4,20 @@ import { assertConversationContext } from "./conversation-context.mjs";
 
 const fail = code => Object.assign(new Error(code), { code });
 const id = z.string().min(1).max(160).regex(/^[A-Za-z0-9][A-Za-z0-9_.:-]*$/);
+const sha = z.string().regex(/^[a-f0-9]{64}$/);
+const agentMutation = z.enum(["grant.create", "grant.revoke", "proposal.create", "proposal.approve",
+  "proposal.execute", "run.start", "run.resume"]);
+const agentActionSchema = z.object({ schemaVersion: z.literal("runaai-agent-action-request/v1"),
+  taskId: id, authorityDigest: sha, operation: agentMutation, input: z.unknown() }).strict();
 const schema = z.object({ projectId: id, experience: z.enum(["chat", "code"]),
   operation: z.enum(["sources.list", "sources.attach", "sources.retry", "sources.select", "project.prepare", "project.current",
-    "task.create", "task.status", "task.cancel", "task.list", "grant.create", "grant.revoke", "proposal.create",
+    "task.create", "task.status", "task.agent-fence", "task.agent-action", "task.cancel", "task.list", "grant.create", "grant.revoke", "proposal.create",
     "proposal.approve", "proposal.execute", "proposal.reconcile", "run.start", "run.resume", "run.status", "run.list",
     "source.connect-public-git", "source.connect-folder-snapshot", "workspace.materialize", "workspace.list-files",
     "workspace.read-text", "workspace.cancel", "source.disconnect"]),
   input: z.unknown() }).strict();
 const METHODS = Object.freeze({ "task.create": "createTask", "task.status": "status", "task.cancel": "cancel",
+  "task.agent-fence": "agentActionFence",
   "grant.create": "createGrant", "grant.revoke": "revokeGrant", "proposal.create": "propose",
   "proposal.approve": "approve", "proposal.execute": "execute", "proposal.reconcile": "reconcile", "task.list": "listTasks" });
 const SERVER_WORKSPACE_METHODS = Object.freeze({ "source.connect-public-git": "connectPublicGit",
@@ -104,6 +110,23 @@ export class M1FunctionSurface {
       return this.tasks.registerProject(context, fixture);
     }
     if (operation === "project.current") return this.tasks.currentProject(context);
+    if (operation === "task.agent-action") {
+      const action = agentActionSchema.parse(input);
+      const agentActionAuthority = { schemaVersion: "runaai-agent-action-authority/v1",
+        taskId: action.taskId, authorityDigest: action.authorityDigest };
+      const options = { agentActionAuthority };
+      let value;
+      if (action.operation === "grant.create") value = await this.tasks.createGrant(context, action.input, options);
+      else if (action.operation === "grant.revoke") value = await this.tasks.revokeGrant(context, action.input, options);
+      else if (action.operation === "proposal.create") value = await this.tasks.propose(context, action.input, options);
+      else if (action.operation === "proposal.approve") value = await this.tasks.approve(context, action.input, options);
+      else if (action.operation === "proposal.execute") value = await this.tasks.execute(context, action.input, options);
+      else {
+        if (!this.orchestrator) throw fail("m1-orchestrator-unavailable");
+        value = await this.orchestrator[action.operation.slice(4)](context, action.input, options);
+      }
+      return { value, agentActionAuthority: await this.tasks.agentActionFence(context, { taskId: action.taskId }) };
+    }
     if (METHODS[operation]) return this.tasks[METHODS[operation]](context, input);
     if (!this.orchestrator) throw fail("m1-orchestrator-unavailable");
     return this.orchestrator[operation.slice(4)](context, input);

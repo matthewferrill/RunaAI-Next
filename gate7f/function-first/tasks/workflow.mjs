@@ -16,7 +16,8 @@ export function createM1TaskWorkflow({ service, checkpointer }) {
     })
     .addNode("execute_or_reconcile", async (state, config) => {
       const context = parseContext(config.configurable.authorityContext);
-      const result = await service.execute(context, { proposalId: state.proposalId });
+      const result = await service.execute(context, { proposalId: state.proposalId },
+        { agentRunAuthority: config.configurable.agentRunAuthority ?? null });
       return { proposalId: state.proposalId, status: result.proposal.status, receiptId: result.receipt?.receiptId ?? null };
     })
     .addEdge(START, "read_authority")
@@ -24,11 +25,12 @@ export function createM1TaskWorkflow({ service, checkpointer }) {
     .addEdge("execute_or_reconcile", END)
     .compile({ checkpointer });
   return {
-    async run(rawContext, rawInput, { resume = false } = {}) {
+    async run(rawContext, rawInput, { resume = false, agentRunAuthority = null } = {}) {
       const context = parseContext(rawContext), { proposalId } = parseProposalId(rawInput);
       // Scope-check even an already-completed checkpoint before using its identifiers.
       await service.proposalState(context, proposalId);
-      const config = { configurable: { thread_id: threadKey(context, proposalId), authorityContext: context } };
+      const config = { configurable: { thread_id: threadKey(context, proposalId), authorityContext: context,
+        agentRunAuthority } };
       const prior = resume ? await graph.getState(config) : null;
       await graph.invoke(resume && prior?.values?.proposalId ? null : { proposalId }, config);
       // A checkpoint is not an authority receipt or a freshness claim. Re-read the durable record.

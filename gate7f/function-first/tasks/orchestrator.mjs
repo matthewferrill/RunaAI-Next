@@ -56,10 +56,12 @@ export class M1TaskOrchestrator {
     assert(this.budgets.maximumRequestActiveMs <= this.budgets.maximumRunActiveMs, "m1-orchestrator-budget-invalid");
   }
 
-  async start(rawContext, rawInput) {
+  async start(rawContext, rawInput, { agentActionAuthority = null } = {}) {
     const context = parseContext(rawContext), input = parse(startSchema, rawInput);
     parseId(input.taskId); parseId(input.grantId); parseId(input.requestId);
+    if (this.plannerRole === "agent") assert(agentActionAuthority, "m1-agent-action-authority-required");
     const run = await this.store.transaction(context, async tx => {
+      if (agentActionAuthority) await this.service.consumeAgentActionAuthority(tx, context, input.taskId, agentActionAuthority);
       const key = requestKey(input.taskId, input.requestId), requestDigest = digest({ ...input, plannerRole: this.plannerRole });
       const prior = await tx.byRequest("run", key);
       if (prior) { assert(prior.requestDigest === requestDigest, "m1-request-id-conflict"); return prior; }
@@ -76,7 +78,13 @@ export class M1TaskOrchestrator {
       await tx.audit("conversational-run-created", run.runId, { requestDigest });
       return run;
     });
-    return this.resume(context, { runId: run.runId });
+    let resumeAuthority = null;
+    if (agentActionAuthority) {
+      const current = await this.service.agentActionFence(context, { taskId: input.taskId });
+      resumeAuthority = { schemaVersion: current.schemaVersion, taskId: current.taskId,
+        authorityDigest: current.authorityDigest };
+    }
+    return this.resume(context, { runId: run.runId }, { agentActionAuthority: resumeAuthority });
   }
 
   async status(rawContext, rawInput) {
@@ -101,14 +109,19 @@ export class M1TaskOrchestrator {
     })) }));
   }
 
-  async resume(rawContext, rawInput) {
+  async resume(rawContext, rawInput, { agentActionAuthority = null } = {}) {
     const context = parseContext(rawContext), { runId, grantId, grantRevision } = parse(resumeSchema, rawInput);
     parseId(runId);
     const retained = await this.load(context, runId);
     assert((retained.plannerRole ?? "agent") === this.plannerRole, "m1-planner-role-mismatch");
+    if (this.plannerRole === "agent") assert(agentActionAuthority, "m1-agent-action-authority-required");
     return this.store.operation(`orchestrator:${runId}`, async () => {
-      const activeWindow = await this.reserveActiveWindow(context, runId);
+      const activeWindow = await this.reserveActiveWindow(context, runId, agentActionAuthority);
       if (!activeWindow) return this.status(context, { runId });
+      const agentRunAuthority = this.plannerRole === "agent" ? {
+        schemaVersion: "runaai-agent-run-authority/v1", taskId: retained.taskId, runId,
+        windowId: activeWindow.windowId,
+      } : null;
       try {
         drive: {
           if (grantId !== undefined) {
@@ -167,7 +180,7 @@ export class M1TaskOrchestrator {
             const step = currentPlan.steps[run.nextStep];
             proposal = await this.service.propose(context, { taskId: run.taskId, grantId: run.grantId,
               grantRevision: run.grantRevision, requestId: step.requestId,
-              capabilityId: step.capabilityId, arguments: step.arguments });
+              capabilityId: step.capabilityId, arguments: step.arguments }, { agentRunAuthority });
             await this.update(context, runId, state => { state.pendingProposalId = proposal.proposalId; });
           }
           if (proposal.status === "pending-approval") {
@@ -180,7 +193,8 @@ export class M1TaskOrchestrator {
             break drive;
           }
           await this.update(context, runId, state => { state.status = "running"; });
-          const result = await this.workflow.run(context, { proposalId: proposal.proposalId }, { resume: true });
+          const result = await this.workflow.run(context, { proposalId: proposal.proposalId },
+            { resume: true, agentRunAuthority });
           if (!result.receipt) {
             await this.update(context, runId, state => {
               state.status = ["unknown", "dispatched"].includes(result.proposal.status) ? "needs-reconciliation" : "failed";
@@ -210,9 +224,12 @@ export class M1TaskOrchestrator {
     });
   }
 
-  async reserveActiveWindow(context, runId) {
+  async reserveActiveWindow(context, runId, agentActionAuthority = null) {
     const windowId = makeId("window"), startedAtMs = this.now();
-    const run = await this.update(context, runId, state => {
+    const run = await this.store.transaction(context, async tx => {
+      const state = await tx.get("run", runId); assert(state, "m1-run-not-found");
+      if (agentActionAuthority) await this.service.consumeAgentActionAuthority(tx, context,
+        state.taskId, agentActionAuthority);
       upgradeRunBudgets(state);
       if (state.activeWindow !== null && state.activeWindow !== undefined) {
         assertActiveWindow(state.activeWindow);
@@ -220,13 +237,18 @@ export class M1TaskOrchestrator {
         state.recoveredActiveWindowCount = (state.recoveredActiveWindowCount ?? 0) + 1;
         state.activeWindow = null;
       }
-      if (finished.has(state.status)) return;
-      const remaining = state.budgets.maximumRunActiveMs - state.consumedMs;
-      if (remaining <= 0) {
-        state.status = "budget-exhausted"; state.errorCode = "m1-orchestration-budget-exhausted"; return;
+      if (!finished.has(state.status)) {
+        const remaining = state.budgets.maximumRunActiveMs - state.consumedMs;
+        if (remaining <= 0) {
+          state.status = "budget-exhausted"; state.errorCode = "m1-orchestration-budget-exhausted";
+        } else {
+          state.activeWindow = { windowId, startedAtMs,
+            reservedMs: Math.min(state.budgets.maximumRequestActiveMs, remaining) };
+        }
       }
-      state.activeWindow = { windowId, startedAtMs,
-        reservedMs: Math.min(state.budgets.maximumRequestActiveMs, remaining) };
+      state.updatedAtMs = this.now();
+      await tx.save("run", runId, state);
+      return state;
     });
     return run.activeWindow?.windowId === windowId ? structuredClone(run.activeWindow) : null;
   }

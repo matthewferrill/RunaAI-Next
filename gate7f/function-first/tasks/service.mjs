@@ -7,7 +7,13 @@ import {
 
 const mutation = id => ["project.apply-change", "project.restore"].includes(id);
 const terminal = new Set(["completed", "denied", "cancelled", "stale", "failed", "not-published"]);
+const agentUnsettledProposalStates = new Set(["dispatching", "dispatched", "unknown"]);
+const agentProposalStates = new Set([...terminal, ...agentUnsettledProposalStates,
+  "pending-approval", "authorized"]);
+const agentIntentStates = new Set(["prepared", "dispatching", "recorded", "not-published", "unknown"]);
+const reconciledIntentStates = new Set(["recorded", "not-published"]);
 const clone = value => structuredClone(value);
+const agentAuthoritySchemaVersion = "runaai-agent-action-authority/v1";
 
 /** Application-owned ports. Models may only receive bindModel(...). */
 export class M1TaskService {
@@ -81,7 +87,7 @@ export class M1TaskService {
     });
   }
 
-  async createGrant(rawContext, rawInput) {
+  async createGrant(rawContext, rawInput, { agentActionAuthority = null, agentRunAuthority = null } = {}) {
     const context = parseContext(rawContext), input = parseGrant(rawInput);
     await this.checkContext(context);
     assert(new Date(input.expiresAt).valueOf() > this.now().valueOf()
@@ -91,6 +97,7 @@ export class M1TaskService {
     const capabilities = input.capabilityIds ?? Object.keys(CAPABILITIES);
     assert(new Set(capabilities).size === capabilities.length, "m1-grant-duplicates");
     const grant = await this.store.transaction(context, async tx => {
+      await this.authorizeAgentMutation(tx, context, input.taskId, { agentActionAuthority, agentRunAuthority });
       const task = await this.requireTask(tx, input.taskId, true);
       for (const prior of await tx.list("grant", task.taskId)) {
         if (prior.status !== "active") continue;
@@ -121,10 +128,11 @@ export class M1TaskService {
       { taskId, grantId, grantRevision, requestId, capabilityId, arguments: args }) });
   }
 
-  async propose(rawContext, rawInput) {
+  async propose(rawContext, rawInput, { agentActionAuthority = null, agentRunAuthority = null } = {}) {
     const context = parseContext(rawContext), input = parseProposal(rawInput);
     const requestDigest = digest(input), key = requestKey(input.taskId, input.requestId);
     const snapshot = await this.store.transaction(context, async tx => {
+      await this.authorizeAgentMutation(tx, context, input.taskId, { agentActionAuthority, agentRunAuthority });
       const existing = await tx.byRequest("proposal", key);
       if (existing) { assert(existing.requestDigest === requestDigest, "m1-request-id-conflict"); return { existing }; }
       const { task, grant, project } = await this.authority(tx, context, input);
@@ -136,6 +144,7 @@ export class M1TaskService {
       binding: binding(context, snapshot.project.environmentId), reference: snapshot.project.reference,
       capabilityId: input.capabilityId, args: snapshot.resolved.arguments });
     return this.store.transaction(context, async tx => {
+      await this.authorizeAgentMutation(tx, context, input.taskId, { agentActionAuthority, agentRunAuthority });
       const existing = await tx.byRequest("proposal", key);
       if (existing) { assert(existing.requestDigest === requestDigest, "m1-request-id-conflict"); return existing; }
       const { project, grant } = await this.authority(tx, context, input);
@@ -158,11 +167,12 @@ export class M1TaskService {
     });
   }
 
-  async approve(rawContext, rawInput) {
+  async approve(rawContext, rawInput, { agentActionAuthority = null, agentRunAuthority = null } = {}) {
     const context = parseContext(rawContext), input = parseApproval(rawInput);
     await this.checkContext(context);
     const result = await this.store.transaction(context, async tx => {
       const proposal = await this.requireProposal(tx, input.proposalId);
+      await this.authorizeAgentMutation(tx, context, proposal.taskId, { agentActionAuthority, agentRunAuthority });
       assert(proposal.proposalDigest === input.proposalDigest, "m1-proposal-digest-mismatch");
       if (proposal.status === "completed") return this.result(tx, proposal, true);
       const errorCode = await this.pendingAuthority(tx, context, proposal);
@@ -214,11 +224,12 @@ export class M1TaskService {
     }
   }
 
-  async execute(rawContext, rawInput) {
+  async execute(rawContext, rawInput, { agentActionAuthority = null, agentRunAuthority = null } = {}) {
     const context = parseContext(rawContext), { proposalId } = parseProposalId(rawInput);
     return this.store.operation(proposalId, async () => {
       const start = await this.store.transaction(context, async tx => {
         const proposal = await this.requireProposal(tx, proposalId);
+        await this.authorizeAgentMutation(tx, context, proposal.taskId, { agentActionAuthority, agentRunAuthority });
         if (proposal.status === "completed" || terminal.has(proposal.status)) return { result: await this.result(tx, proposal, true) };
         const intent = await tx.get("intent", proposalId);
         // An existing dispatch means a previous process may have executed. Never invoke it again.
@@ -482,11 +493,12 @@ export class M1TaskService {
     return result;
   }
 
-  async revokeGrant(rawContext, rawInput) {
+  async revokeGrant(rawContext, rawInput, { agentActionAuthority = null, agentRunAuthority = null } = {}) {
     const context = parseContext(rawContext), { grantId } = parseGrantId(rawInput);
     const result = await this.store.transaction(context, async tx => {
       const grant = await tx.get("grant", grantId);
       assert(grant, "m1-grant-not-found");
+      await this.authorizeAgentMutation(tx, context, grant.taskId, { agentActionAuthority, agentRunAuthority });
       if (grant.status !== "revoked") { grant.status = "revoked"; grant.revision += 1; grant.updatedAt = this.timestamp(); }
       grant.definitionDigest = grantDefinitionDigest(grant);
       await tx.save("grant", grantId, grant);
@@ -525,11 +537,120 @@ export class M1TaskService {
           approvableProposalIds.push(proposal.proposalId);
         } catch (error) { if (!error.code?.startsWith("m1-")) throw error; }
       }
-      return { task, project, grants: await tx.list("grant", taskId), proposals, receipts,
+      const grants = await tx.list("grant", taskId);
+      let agentActionAuthority = null;
+      if (online) {
+        try {
+          agentActionAuthority = await this.agentActionState(tx, context, taskId,
+            { task, project, grants, proposals, intents: await tx.list("intent", taskId) });
+        } catch (error) {
+          if (error.code !== "m1-session-authority-unavailable") throw error;
+        }
+      }
+      return { task, project, grants, proposals, receipts,
         pendingReconciliation, approvableProposalIds,
+        agentActionAuthority,
         currentReceiptIds: receipts.filter(receipt => receipt.afterRevision === project.revision
           && digest(receipt.afterReference) === digest(project.reference)).map(receipt => receipt.receiptId) };
     });
+  }
+
+  async agentActionFence(rawContext, rawInput) {
+    const context = parseContext(rawContext), { taskId } = parseTaskId(rawInput);
+    return this.store.transaction(context, tx => this.agentActionState(tx, context, taskId));
+  }
+
+  async agentActionState(tx, context, taskId, supplied = {}) {
+    // The digest covers every mutable task-scoped authority input and the project
+    // revision. A later mutation must compare and consume it under the same scope
+    // transaction as its first write; this snapshot alone grants no authority.
+    await this.checkContext(context);
+    const task = supplied.task ?? await this.requireTask(tx, taskId);
+    const project = supplied.project ?? await tx.project();
+    assert(project && task.participantId === context.principalId && task.projectId === context.projectId
+      && task.environmentId === project.environmentId && ["active", "cancelled"].includes(task.status),
+    "m1-agent-action-fence-invalid");
+    const proposals = supplied.proposals ?? await tx.list("proposal", taskId);
+    const proposalIds = new Set();
+    for (const proposal of proposals) {
+      this.verifyProposal(proposal);
+      assert(agentProposalStates.has(proposal.status) && proposal.taskId === taskId
+        && proposal.participantId === context.principalId && proposal.projectId === context.projectId
+        && proposal.environmentId === task.environmentId && !proposalIds.has(proposal.proposalId),
+      "m1-agent-action-fence-invalid");
+      proposalIds.add(proposal.proposalId);
+    }
+    const intents = supplied.intents ?? await tx.list("intent", taskId), intentProposalIds = new Set();
+    for (const intent of intents) {
+      assert(agentIntentStates.has(intent?.status) && intent.taskId === taskId
+        && intent.participantId === context.principalId && intent.projectId === context.projectId
+        && proposalIds.has(intent.proposalId) && !intentProposalIds.has(intent.proposalId),
+      "m1-agent-action-fence-invalid");
+      intentProposalIds.add(intent.proposalId);
+    }
+    const grants = supplied.grants ?? await tx.list("grant", taskId);
+    for (const grant of grants) assert(grant.taskId === taskId && grant.participantId === context.principalId
+      && grant.projectId === context.projectId && grant.environmentId === task.environmentId
+      && grant.definitionDigest === grantDefinitionDigest(grant), "m1-agent-action-fence-invalid");
+    const runs = supplied.runs ?? await tx.list("run", taskId);
+    for (const run of runs) assert(run.taskId === taskId && run.participantId === context.principalId
+      && run.projectId === context.projectId && ["agent", "code"].includes(run.plannerRole ?? "agent"),
+    "m1-agent-action-fence-invalid");
+    const pendingReconciliationCount = intents.filter(intent => !reconciledIntentStates.has(intent.status)).length;
+    const unsettledProposalCount = proposals.filter(proposal => agentUnsettledProposalStates.has(proposal.status)).length;
+    const unsettledRunCount = runs.filter(run => (run.plannerRole ?? "agent") === "agent"
+      && (run.status === "needs-reconciliation" || run.activeWindow != null)).length;
+    const settled = task.status === "active" && pendingReconciliationCount === 0
+      && unsettledProposalCount === 0 && unsettledRunCount === 0;
+    const approvableProposals = [];
+    if (settled) for (const proposal of proposals) {
+      if (proposal.status !== "pending-approval" || proposal.policy !== "approval-required") continue;
+      try {
+        await this.authority(tx, context, proposal, { proposal });
+        approvableProposals.push({ proposalId: proposal.proposalId, proposalDigest: proposal.proposalDigest,
+          capabilityId: proposal.capabilityId, grantId: proposal.grantId, grantRevision: proposal.grantRevision });
+      } catch (error) { if (!error.code?.startsWith("m1-")) throw error; }
+    }
+    const revocableGrants = settled ? grants.filter(grant => grant.status === "active"
+      && grant.sessionId === context.sessionId && grant.taskBindingDigest === digest(taskIdentity(task))
+      && new Date(grant.expiresAt).valueOf() > this.now().valueOf()).map(grant => ({
+        grantId: grant.grantId, grantRevision: grant.revision, definitionDigest: grant.definitionDigest,
+        profile: grant.profile,
+      })) : [];
+    const authorityDigest = digest({ schemaVersion: agentAuthoritySchemaVersion, task, project,
+      grants, proposals, intents, runs });
+    return { schemaVersion: agentAuthoritySchemaVersion, atomic: true, taskId, taskStatus: task.status,
+      state: settled ? "settled" : "blocked", authorityDigest, pendingReconciliationCount,
+      unsettledProposalCount, unsettledRunCount, approvableProposals, revocableGrants };
+  }
+
+  async consumeAgentActionAuthority(tx, context, taskId, expected) {
+    assert(expected && Object.getPrototypeOf(expected) === Object.prototype
+      && Object.keys(expected).sort().join(",") === "authorityDigest,schemaVersion,taskId"
+      && expected.schemaVersion === agentAuthoritySchemaVersion && expected.taskId === taskId
+      && /^[a-f0-9]{64}$/u.test(expected.authorityDigest), "m1-agent-action-authority-invalid");
+    const current = await this.agentActionState(tx, context, taskId);
+    assert(current.authorityDigest === expected.authorityDigest, "m1-agent-action-stale");
+    assert(current.state === "settled", "m1-agent-action-blocked");
+    return current;
+  }
+
+  async authorizeAgentMutation(tx, context, taskId, { agentActionAuthority = null, agentRunAuthority = null } = {}) {
+    const agentRuns = (await tx.list("run", taskId)).filter(run => (run.plannerRole ?? "agent") === "agent");
+    if (agentActionAuthority) return this.consumeAgentActionAuthority(tx, context, taskId, agentActionAuthority);
+    if (agentRuns.length === 0) return null;
+    assert(agentRunAuthority && Object.getPrototypeOf(agentRunAuthority) === Object.prototype
+      && Object.keys(agentRunAuthority).sort().join(",") === "runId,schemaVersion,taskId,windowId"
+      && agentRunAuthority.schemaVersion === "runaai-agent-run-authority/v1"
+      && agentRunAuthority.taskId === taskId, "m1-agent-action-authority-required");
+    const run = agentRuns.find(value => value.runId === agentRunAuthority.runId);
+    assert(run && run.sessionId === context.sessionId && run.activeWindow?.windowId === agentRunAuthority.windowId,
+      "m1-agent-run-authority-invalid");
+    const current = await this.agentActionState(tx, context, taskId, { runs: agentRuns });
+    assert(current.taskStatus === "active" && current.pendingReconciliationCount === 0
+      && current.unsettledProposalCount === 0 && current.unsettledRunCount === 1,
+    "m1-agent-action-blocked");
+    return current;
   }
 
   async listTasks(rawContext) {

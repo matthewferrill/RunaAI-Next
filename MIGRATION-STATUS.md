@@ -591,6 +591,15 @@ This authorizes bounded owner-point source-port and HTTP implementation only. No
 model, Control or actual acceptance operation ran. Record:
 `gate7f/function-first/M1-S2-ARTIFACT-RESULT-CORE-PREFLIGHT-2026-09-04.md`.
 
+**Contextual Agent-governance preflight, 2026-09-04:** every consequential Agent action now consumes a task-scoped
+authority digest inside the same transaction before its first write, while run start/resume reserve the exact active
+window under that compare-and-set boundary. Authoritative projection restores ask-every-time approval and explicit
+revoke-before-effect. The first independent review retained a P1=2 stop for a browser TOCTOU path and missing truthful
+controls; the correction now passes 54/54 focused checks and fresh independent review at P0=0/P1=0. Agent remains a
+contextual Code task state. This authorizes the separate browser fixture only; real PostgreSQL and actual browser
+acceptance remain unproved. Record:
+`gate7f/function-first/M1-S2-AGENT-GOVERNANCE-PREFLIGHT-2026-09-04.md`.
+
 **Contextual Review workflow, 2026-09-03:** the application now requires one to six exact selected locators,
 fully resolves and hash-verifies their canonical bytes in requested order before provider access, preserves
 application-owned citations, and isolates the simplified one-revision `accept`/`revise` checker to Review. The first

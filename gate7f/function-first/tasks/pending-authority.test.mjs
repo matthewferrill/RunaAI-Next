@@ -14,6 +14,7 @@ function fixture({ code = "m1-stale-project", status = "pending-approval", inten
   const store = { async transaction(_context, work) {
     const draft = structuredClone(committed);
     const result = await work({ get: async kind => kind === "intent" ? intent : draft.proposal,
+      list: async () => [],
       save: async (_kind, _id, value) => { draft.proposal = structuredClone(value); },
       audit: async (...value) => { draft.audit.push(value); } });
     committed = draft; return result;

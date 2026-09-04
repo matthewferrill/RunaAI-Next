@@ -200,6 +200,14 @@ owner-point source-port and HTTP implementation only. PostgreSQL, HTTP, DOM/brow
 actual acceptance remain unproved. Record:
 `../gate7f/function-first/M1-S2-ARTIFACT-RESULT-CORE-PREFLIGHT-2026-09-04.md`.
 
+The contextual Agent-governance implementation now passes 54/54 focused checks and fresh independent review at
+P0=0/P1=0 after a retained P1=2 stop. Consequential actions consume task-scoped authority inside the same transaction
+before their first write; run start/resume reserve the exact active window under that compare-and-set boundary.
+Authoritative projection restores ask-every-time approval and explicit revoke-before-effect, and stale rendered
+authority produces zero effect. Agent remains a contextual Code task state. The separate browser fixture may proceed;
+real PostgreSQL and actual browser acceptance remain unproved. Record:
+`../gate7f/function-first/M1-S2-AGENT-GOVERNANCE-PREFLIGHT-2026-09-04.md`.
+
 M1-S2B implementation checkpoint, 2026-09-02: the authority foundation and actual PostgreSQL lifecycle
 are green. The prior Omen DPAPI/handle-based file proof was 14/14, but shared native/helper bytes have since
 changed and that evidence is historical until one affected-scope rerun. The first actual

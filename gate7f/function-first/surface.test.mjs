@@ -12,7 +12,15 @@ function fixture() {
     continuity: { async prepareAnswerContext(scope) { called.push("scope"); return createConversationContext(scope); } } };
   const sources = { async list(context) { called.push(["list", context]); return []; },
     async attach(context,input) { called.push(["attach",context,input]); return { indexed: true }; } };
+  const authority = taskId => ({ schemaVersion: "runaai-agent-action-authority/v1", atomic: true, taskId,
+    taskStatus: "active", state: "settled", authorityDigest: "8".repeat(64),
+    pendingReconciliationCount: 0, unsettledProposalCount: 0, unsettledRunCount: 0,
+    approvableProposals: [], revocableGrants: [] });
   const tasks = { async registerProject(context, input) { called.push(["register",context,input]); return input; },
+    async agentActionFence(context, input) { called.push(["agent-fence",context,input]);
+      return authority(input.taskId); },
+    async createGrant(context, input, options) { called.push(["grant-create", context, input, options]);
+      return { grantId: "grant-1", revision: 1 }; },
     async cancel(context, input) { called.push(["cancel",context,input]); return { status: "cancelled" }; } };
   return { called, application, sources, tasks, surface: new M1FunctionSurface({ application, sources, tasks }) };
 }
@@ -109,6 +117,47 @@ test("session revocation, changed principal, restart and expiry cannot reuse aut
 test("code endpoints require a live server-session verifier", async () => {
   const { surface } = fixture(); const value = request("project.prepare"); value.body.experience = "code"; delete value.verifySession;
   await assert.rejects(surface.dispatch(value), /session-verifier-required/);
+});
+test("Agent action fence routes through the authenticated task service", async () => {
+  const { surface, called } = fixture(); const value = request("task.agent-fence", { taskId: "task-1" });
+  value.body.experience = "code";
+  const fence = await surface.dispatch(value);
+  assert.equal(fence.atomic, true);
+  assert.equal(called.at(-1)[0], "agent-fence");
+  assert.equal(called.at(-1)[1].projectId, "project-alice");
+});
+test("Agent mutations route one CAS-bound authority digest into the server mutation", async () => {
+  const { surface, called } = fixture();
+  const value = request("task.agent-action", { schemaVersion: "runaai-agent-action-request/v1",
+    taskId: "task-1", authorityDigest: "7".repeat(64), operation: "grant.create",
+    input: { taskId: "task-1", profile: "ask-every-time" } });
+  value.body.experience = "code";
+  const result = await surface.dispatch(value);
+  const mutation = called.find(entry => Array.isArray(entry) && entry[0] === "grant-create");
+  assert.deepEqual(mutation[3], { agentActionAuthority: {
+    schemaVersion: "runaai-agent-action-authority/v1", taskId: "task-1", authorityDigest: "7".repeat(64) } });
+  assert.equal(result.value.grantId, "grant-1");
+  assert.equal(result.agentActionAuthority.authorityDigest, "8".repeat(64));
+  assert.equal(called.at(-1)[0], "agent-fence");
+});
+test("Agent run start preserves the selected role while forwarding the same CAS authority", async () => {
+  const { application, sources, tasks, called } = fixture();
+  const orchestrator = { async start(context, input, options) {
+    called.push(["run-start", context, input, options]); return { run: { runId: "run-1" } };
+  } };
+  const surface = new M1FunctionSurface({ application, sources, tasks, orchestrator });
+  const value = request("task.agent-action", { schemaVersion: "runaai-agent-action-request/v1",
+    taskId: "task-1", authorityDigest: "7".repeat(64), operation: "run.start",
+    input: { taskId: "task-1", grantId: "grant-1", grantRevision: 1,
+      requestId: "request-1", workflow: "agent" } });
+  value.body.experience = "code";
+  const result = await surface.dispatch(value);
+  const mutation = called.find(entry => Array.isArray(entry) && entry[0] === "run-start");
+  assert.equal(mutation[2].workflow, "agent");
+  assert.deepEqual(mutation[3], { agentActionAuthority: {
+    schemaVersion: "runaai-agent-action-authority/v1", taskId: "task-1", authorityDigest: "7".repeat(64) } });
+  assert.equal(result.value.run.runId, "run-1");
+  assert.equal(result.agentActionAuthority.authorityDigest, "8".repeat(64));
 });
 test("selected Review context preserves server-owned source, artifact and diff kinds", async () => {
   const { application, sources, tasks } = fixture();

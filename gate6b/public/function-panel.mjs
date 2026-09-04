@@ -1,4 +1,6 @@
 import { functionModeAllowed } from "../function-contract.mjs";
+import { agentGovernancePresentation, agentGovernanceResultProjection,
+  contextualAgentWorkflow } from "./agent-governance.mjs";
 
 const element = (root, tag, text, className) => {
   const value = root.createElement(tag); if (text) value.textContent = text;
@@ -8,20 +10,67 @@ const terminalRuns = new Set(["completed", "cancelled", "failed", "budget-exhaus
 const profiles = new Set(["ask-every-time", "safe-autopilot", "read-only"]);
 const workIntents = new Set(["analysis-only", "preview-only", "effect-requested"]);
 export function approvalIsAvailable(result, proposal) {
+  const agentTask = result?.run?.plannerRole === "agent";
   return result?.task?.status === "active" && proposal?.status === "pending-approval"
     && Array.isArray(result.approvableProposalIds) && result.approvableProposalIds.includes(proposal.proposalId)
     && Array.isArray(result.pendingReconciliation) && result.pendingReconciliation.length === 0
-    && (result.grants ?? []).some(grant => grant.status === "active"
-      && grant.grantId === proposal.grantId && grant.revision === proposal.grantRevision);
+    && (agentTask || (result.grants ?? []).some(grant => grant.status === "active"
+      && grant.grantId === proposal.grantId && grant.revision === proposal.grantRevision));
 }
 export function repairContinuationIsAvailable(result) {
   const run = result?.run;
+  const currentGrant = run?.plannerRole === "agent"
+    ? result.agentActionAuthority?.revocableGrants?.some(grant => grant.grantId === run.grantId
+      && grant.grantRevision === run.grantRevision && grant.definitionDigest === run.grantDefinitionDigest)
+    : (result.grants ?? []).some(grant => grant.status === "active"
+      && grant.grantId === run?.grantId && grant.revision === run?.grantRevision);
   return result?.task?.status === "active" && run?.status === "repair-required"
     && result.sessionRebindRequired === false
     && Array.isArray(result.pendingReconciliation) && result.pendingReconciliation.length === 0
-    && run.pendingProposalId === null
-    && (result.grants ?? []).some(grant => grant.status === "active"
-      && grant.grantId === run.grantId && grant.revision === run.grantRevision);
+    && run.pendingProposalId === null && currentGrant === true;
+}
+export function receiptUndoIsAvailable(result, receipt, presentation = null) {
+  return result?.task?.status === "active" && !agentContinuationIsBlocked(result, presentation)
+    && Array.isArray(result.pendingReconciliation) && result.pendingReconciliation.length === 0
+    && receipt?.effectKind === "revision-published"
+    && Array.isArray(result.currentReceiptIds) && result.currentReceiptIds.includes(receipt.receiptId);
+}
+export function agentContinuationIsBlocked(result, presentation) {
+  if (result?.run?.plannerRole !== "agent") return false;
+  return !presentation || result.run.status === "needs-reconciliation"
+    || presentation.state === "unknown" || presentation.recovery === "reconciliation-required"
+    || presentation.actions?.canReconcile === true
+    || (presentation.records?.reconciliationProposalIds?.length ?? 0) > 0
+    || (result.pendingReconciliation?.length ?? 0) > 0;
+}
+export function agentActionFenceIsSettled(value, taskId) {
+  const keys = value && typeof value === "object" ? Reflect.ownKeys(value) : [];
+  if (!value || Object.getPrototypeOf(value) !== Object.prototype
+      || keys.some(key => typeof key !== "string")
+      || [...keys].sort().join(",") !== "approvableProposals,atomic,authorityDigest,pendingReconciliationCount,revocableGrants,schemaVersion,state,taskId,taskStatus,unsettledProposalCount,unsettledRunCount"
+      || value.schemaVersion !== "runaai-agent-action-authority/v1" || value.atomic !== true
+      || value.taskId !== taskId || !["active", "cancelled"].includes(value.taskStatus)
+      || !/^[a-f0-9]{64}$/u.test(value.authorityDigest ?? "")
+      || ![value.pendingReconciliationCount, value.unsettledProposalCount, value.unsettledRunCount]
+        .every(count => Number.isSafeInteger(count) && count >= 0)
+      || !Array.isArray(value.approvableProposals) || !Array.isArray(value.revocableGrants)) return false;
+  const settled = value.taskStatus === "active" && value.pendingReconciliationCount === 0
+    && value.unsettledProposalCount === 0 && value.unsettledRunCount === 0;
+  return value.state === (settled ? "settled" : "blocked") && settled;
+}
+export async function agentMutationWithFreshFence({ agentTask, taskId, readFence, mutate }) {
+  let fence = null;
+  if (agentTask) {
+    try { fence = await readFence(); } catch { return { executed: false, reason: "fence-unavailable" }; }
+    if (!agentActionFenceIsSettled(fence, taskId)) return { executed: false, reason: "fence-blocked" };
+  }
+  return { executed: true, value: await mutate(fence) };
+}
+export async function runContinuationWithNewGrant({ result, agentView, createGrant, resumeRun }) {
+  if (agentContinuationIsBlocked(result, agentView)) return false;
+  const grant = await createGrant();
+  if (!grant) return false;
+  return await resumeRun(grant) !== false;
 }
 export function restoredWorkspaceNotice(result) {
   const current = new Set(result?.currentReceiptIds ?? []);
@@ -267,10 +316,9 @@ export async function initializeFunctionPanel({ root = document, request, getCon
   const codePanel = element(root, "section"); codePanel.id = "m1-code-panel";
   codePanel.append(element(root, "h2", "Disposable Code workspace"), element(root, "p", "A small JavaScript exercise, separate from your files and repositories. Runa can inspect, repair, run fixed tests, and propose undoing her recorded changes.", "navigation-empty"));
   const prepare = element(root, "button", "Prepare exercise"); prepare.type = "button";
-  const workflow = element(root, "select"); workflow.id = "m1-workflow"; workflow.setAttribute("aria-label", "Task workflow");
-  for (const [value, text] of [["code", "Code task"], ["agent", "Guided task"]]) {
-    const option = element(root, "option", text); option.value = value; workflow.append(option);
-  }
+  const agentGuidance = element(root, "input"); agentGuidance.type = "checkbox"; agentGuidance.id = "m1-agent-guidance";
+  const agentGuidanceLabel = element(root, "label");
+  agentGuidanceLabel.append(agentGuidance, root.createTextNode(" Let Agent coordinate this Code task"));
   const workIntent = element(root, "select"); workIntent.id = "m1-work-intent"; workIntent.setAttribute("aria-label", "Task effect intent");
   for (const [value, text] of [["", "Choose what this task may propose"], ["analysis-only", "Analyze only"],
     ["preview-only", "Prepare a preview only"], ["effect-requested", "Complete requested bounded work"]]) {
@@ -286,7 +334,7 @@ export async function initializeFunctionPanel({ root = document, request, getCon
   const clearTaskBinding = () => ["taskId", "projectId", "experience", "taskObjective", "taskStatus", "cancellationAt"]
     .forEach(key => delete taskView.dataset[`m1${key[0].toUpperCase()}${key.slice(1)}`]);
   const reload = element(root, "button", "Reload saved tasks"); reload.type = "button";
-  codePanel.append(prepare, workflow, workIntent, element(root, "p", "Code and guided tasks use their configured model roles. Task intent limits what can be proposed; the approval profile separately controls each permitted effect.", "navigation-empty"),
+  codePanel.append(prepare, workIntent, agentGuidanceLabel, element(root, "p", "Agent is a contextual governed state inside this Code task, not a separate workspace. Task intent limits what may be proposed; the approval profile separately controls each permitted effect.", "navigation-empty"),
     profile, element(root, "h3", "Saved tasks"), reload, catalog, taskView); host.append(codePanel);
   const status = element(root, "p"); status.setAttribute("role", "status"); host.append(status);
   let selected = [], epoch = 0, viewEpoch = 0, sourceAttempt = null, startAttempt = null;
@@ -362,7 +410,7 @@ export async function initializeFunctionPanel({ root = document, request, getCon
   }
   async function refresh() {
     ++epoch; ++viewEpoch; selected = []; sourceAttempt = null; startAttempt = null;
-    profile.value = ""; clearTaskBinding(); taskView.replaceChildren(); catalog.replaceChildren(); status.textContent = "";
+    profile.value = ""; agentGuidance.checked = false; clearTaskBinding(); taskView.replaceChildren(); catalog.replaceChildren(); status.textContent = "";
     const token = ticket(), context = token.context;
     codePanel.hidden = context.experience !== "code";
     if (!functionModeAllowed(context.experience, mode)) mode = "conversation";
@@ -423,15 +471,39 @@ export async function initializeFunctionPanel({ root = document, request, getCon
     if (workIntentValue === "preview-only") return ["project.inspect", "project.preview-change"];
     return ["project.inspect", "project.preview-change", "project.apply-change", "project.run-tests", "project.restore"];
   }
-  function makeGrant(token, taskId, selectedProfile, workIntentValue = "effect-requested", exactCapabilities = null) {
-    return call("grant.create", { taskId, profile: selectedProfile, allowedPaths: ["calculator.js"],
-      allowedSuites: ["calculator-add-v1"], capabilityIds: exactCapabilities ?? capabilitiesFor(workIntentValue),
-      expiresAt: new Date(Date.now() + 3_600_000).toISOString() }, token);
+  async function guardedTaskMutation(token, taskId, agentTask, operation, input, authorityHolder = null) {
+    const outcome = await agentMutationWithFreshFence({ agentTask, taskId,
+      readFence: () => authorityHolder?.current ?? call("task.agent-fence", { taskId }, token),
+      mutate: fence => agentTask
+        ? call("task.agent-action", { schemaVersion: "runaai-agent-action-request/v1", taskId,
+          authorityDigest: fence.authorityDigest, operation, input }, token)
+        : call(operation, input, token) });
+    if (!outcome.executed) {
+      setStatus("Agent state changed or could not be checked atomically. Refresh and reconcile before continuing.", token);
+      return null;
+    }
+    if (!agentTask) return outcome.value;
+    if (!outcome.value?.agentActionAuthority) {
+      setStatus("Agent authority response was incomplete. Refresh before continuing.", token); return null;
+    }
+    if (authorityHolder) authorityHolder.current = outcome.value.agentActionAuthority;
+    return outcome.value.value;
   }
-  function renderTask(result, token, ids) {
+  function makeGrant(token, taskId, selectedProfile, workIntentValue = "effect-requested", exactCapabilities = null,
+    agentTask = false, authorityHolder = null) {
+    return guardedTaskMutation(token, taskId, agentTask, "grant.create", { taskId, profile: selectedProfile,
+      allowedPaths: ["calculator.js"], allowedSuites: ["calculator-add-v1"],
+      capabilityIds: exactCapabilities ?? capabilitiesFor(workIntentValue),
+      expiresAt: new Date(Date.now() + 3_600_000).toISOString() }, authorityHolder);
+  }
+  function renderTask(sourceResult, token, ids) {
     if (!visible(token)) return;
+    const agentView = agentGovernancePresentation(sourceResult);
+    const result = agentGovernanceResultProjection(sourceResult, agentView);
+    const agentAuthorityHolder = { current: result.agentActionAuthority ?? null };
     const { taskId, runId, restored } = ids, run = result.run;
-    const presentation = taskPresentation(result);
+    const invalidAgentState = result.agentPresentationInvalid === true;
+    const presentation = invalidAgentState ? { status: "unavailable", notice: null } : taskPresentation(result);
     const objective = result.task?.objective ?? run?.objective ?? "Saved task";
     clearTaskBinding();
     taskView.dataset.m1TaskId = taskId;
@@ -443,6 +515,25 @@ export async function initializeFunctionPanel({ root = document, request, getCon
       taskView.dataset.m1CancellationAt = result.task.updatedAt;
     taskView.replaceChildren(element(root, "h3", objective),
       element(root, "p", `Task: ${presentation.status}`));
+    if (invalidAgentState) {
+      taskView.append(element(root, "p", "Agent state could not be safely presented because its application records do not match this run. No authority, action, or outcome is shown."));
+      return;
+    }
+    if (agentView) {
+      const section = element(root, "section", null, "agent-governance");
+      section.append(element(root, "h4", `Contextual Agent — ${agentView.state}`),
+        element(root, "p", agentView.notice));
+      if (agentView.authority) section.append(element(root, "p",
+        `Application authority: ${agentView.authority.profile}; grant revision ${agentView.authority.grantRevision}.`));
+      section.append(element(root, "p", `Recovery state: ${agentView.recovery}.`));
+      for (const plan of agentView.plans) {
+        const details = element(root, "details"), summary = element(root, "summary", "Agent plan — proposal, not permission");
+        const list = element(root, "ol");
+        for (const step of plan.steps) list.append(element(root, "li", `${step.capabilityId} — ${step.status}`));
+        details.append(summary, element(root, "p", plan.summary), list); section.append(details);
+      }
+      taskView.append(section);
+    }
     if (presentation.notice) taskView.append(element(root, "p", presentation.notice));
     const restoredNotice = restoredWorkspaceNotice(result);
     if (restoredNotice) taskView.append(element(root, "p", restoredNotice));
@@ -471,17 +562,24 @@ export async function initializeFunctionPanel({ root = document, request, getCon
       }, parent); return control;
     };
     const pendingIds = new Set((result.pendingReconciliation ?? []).map(value => value.proposalId));
-    const repairReady = repairContinuationIsAvailable(result);
+    const continuationBlocked = agentContinuationIsBlocked(result, agentView);
+    const repairReady = !continuationBlocked && repairContinuationIsAvailable(result);
     for (const proposal of result.proposals ?? []) {
       const section = element(root, "section", null, "task-proposal");
       section.append(element(root, "p", `${proposal.capabilityId} — ${proposal.status}`));
       showData("Exact proposed action and preview", { arguments: proposal.arguments, preview: proposal.prepared?.preview,
         proposalId: proposal.proposalId, proposalDigest: proposal.proposalDigest }, section);
-      if (approvalIsAvailable(result, proposal)) action("Approve this exact action", async () => {
-        await call("proposal.approve", { proposalId: proposal.proposalId, proposalDigest: proposal.proposalDigest }, token);
+      if (!continuationBlocked && approvalIsAvailable(result, proposal)) action("Approve this exact action", async () => {
+        if (continuationBlocked) { setStatus("Reconcile the uncertain Agent state before continuing.", token); return; }
+        const approved = await guardedTaskMutation(token, taskId, Boolean(agentView), "proposal.approve",
+          { proposalId: proposal.proposalId, proposalDigest: proposal.proposalDigest }, agentAuthorityHolder);
+        if (!approved) return;
         if (!visible(token)) return;
-        if (runId) await call("run.resume", { runId }, token);
-        else await call("proposal.execute", { proposalId: proposal.proposalId }, token);
+        if (runId) {
+          if (!await guardedTaskMutation(token, taskId, Boolean(agentView), "run.resume", { runId },
+            agentAuthorityHolder)) return;
+        } else if (!await guardedTaskMutation(token, taskId, Boolean(agentView), "proposal.execute",
+          { proposalId: proposal.proposalId }, agentAuthorityHolder)) return;
         await reloadTask(false);
       }, section);
       taskView.append(section);
@@ -498,18 +596,25 @@ export async function initializeFunctionPanel({ root = document, request, getCon
       section.append(element(root, "p", `Actual receipt: ${receipt.capabilityId} — ${receipt.executionStatus}`));
       if (receipt.cancellationRequested) section.append(element(root, "p", "This bounded action finished after cancellation was requested."));
       showData("Application receipt and actual output", receipt, section);
-      if (result.task?.status === "active" && !pendingIds.size && receipt.effectKind === "revision-published" && (result.currentReceiptIds ?? []).includes(receipt.receiptId)) {
+      if (receiptUndoIsAvailable(result, receipt, agentView)) {
         action("Propose undo of this change", async () => {
+          if (continuationBlocked) { setStatus("Reconcile the uncertain Agent state before continuing.", token); return; }
           const choice = profile.value;
           if (!profiles.has(choice)) { setStatus("Choose an approval profile before proposing undo.", token); return; }
           // Restore is deliberately receipt-bound to its originating task. A new
           // task would not own that receipt and must not be used to evade scope.
-          const grant = await makeGrant(token, taskId, choice, result.task?.workIntent, ["project.restore"]);
+          const grant = await makeGrant(token, taskId, choice, result.task?.workIntent, ["project.restore"],
+            Boolean(agentView), agentAuthorityHolder);
+          if (!grant) return;
           if (!visible(token)) return;
-          const proposal = await call("proposal.create", { taskId, grantId: grant.grantId, grantRevision: grant.revision,
-            requestId: `restore-${crypto.randomUUID()}`, capabilityId: "project.restore", arguments: { receiptId: receipt.receiptId } }, token);
+          const proposal = await guardedTaskMutation(token, taskId, Boolean(agentView), "proposal.create",
+            { taskId, grantId: grant.grantId, grantRevision: grant.revision,
+              requestId: `restore-${crypto.randomUUID()}`, capabilityId: "project.restore",
+              arguments: { receiptId: receipt.receiptId } }, agentAuthorityHolder);
+          if (!proposal) return;
           if (!visible(token)) return;
-          if (proposal.status === "authorized") await call("proposal.execute", { proposalId: proposal.proposalId }, token);
+          if (proposal.status === "authorized" && !await guardedTaskMutation(token, taskId, Boolean(agentView),
+            "proposal.execute", { proposalId: proposal.proposalId }, agentAuthorityHolder)) return;
           await openTask(token, taskId, null, false); await savedTasks(token);
         }, section);
       }
@@ -518,12 +623,18 @@ export async function initializeFunctionPanel({ root = document, request, getCon
     if (!(result.receipts ?? []).length) taskView.append(element(root, "p", "No execution receipts have been recorded for this task."));
     action("Refresh task status", () => reloadTask());
     if (repairReady) action("Continue bounded repair", async () => {
-      await call("run.resume", { runId }, token);
+      if (continuationBlocked) { setStatus("Reconcile the uncertain Agent state before continuing.", token); return; }
+      if (!await guardedTaskMutation(token, taskId, Boolean(agentView), "run.resume", { runId },
+        agentAuthorityHolder)) return;
       await reloadTask(false);
     });
-    for (const grant of result.grants ?? []) if (grant.status === "active") {
+    const revocableGrants = agentView ? (agentAuthorityHolder.current?.revocableGrants ?? [])
+      : (result.grants ?? []).filter(grant => grant.status === "active")
+        .map(grant => ({ grantId: grant.grantId, grantRevision: grant.revision }));
+    for (const grant of revocableGrants) {
       action("Revoke task permission", async () => {
-        await call("grant.revoke", { grantId: grant.grantId }, token);
+        if (!await guardedTaskMutation(token, taskId, Boolean(agentView), "grant.revoke",
+          { grantId: grant.grantId }, agentAuthorityHolder)) return;
         await reloadTask(true);
         setStatus("Task permission revoked. Continue requires an explicit new profile selection.", token);
         if (visible(token)) profile.value = "";
@@ -531,20 +642,32 @@ export async function initializeFunctionPanel({ root = document, request, getCon
     }
     const standaloneProposal = !runId ? [...(result.proposals ?? [])].reverse()
       .find(proposal => ["pending-approval", "authorized"].includes(proposal.status)) : null;
-    if (result.task?.status === "active" && !repairReady && ((runId && !terminalRuns.has(run?.status)) || standaloneProposal)) {
+    if (result.task?.status === "active" && !repairReady && !continuationBlocked
+        && ((runId && !terminalRuns.has(run?.status)) || standaloneProposal)) {
       taskView.append(element(root, "p", restored
         ? (result.approvableProposalIds?.length
           ? "Your current session can approve the exact pending action. Reopening this task has not started any work."
           : "No pending action is authorized for this session. Choose a profile, then explicitly continue.")
         : "Continue with the selected profile creates a new grant and retires earlier approvals."));
       action("Continue with selected profile", async () => {
+        if (continuationBlocked) { setStatus("Reconcile the uncertain Agent state before continuing.", token); return; }
         const choice = profile.value;
         if (!profiles.has(choice)) { setStatus("Choose an approval profile before continuing this task.", token); return; }
         if (!runId && pendingIds.size) { setStatus("Reconcile the uncertain action before continuing.", token); return; }
-        const grant = await makeGrant(token, taskId, choice, result.task?.workIntent,
-          !runId && standaloneProposal ? [standaloneProposal.capabilityId] : null); if (!visible(token)) return;
-        if (runId) await call("run.resume", { runId, grantId: grant.grantId, grantRevision: grant.revision }, token);
-        else {
+        if (runId) {
+          await runContinuationWithNewGrant({ result, agentView,
+            createGrant: () => makeGrant(token, taskId, choice, result.task?.workIntent, null,
+              Boolean(agentView), agentAuthorityHolder),
+            resumeRun: async grant => {
+              if (!visible(token)) return false;
+              return Boolean(await guardedTaskMutation(token, taskId, Boolean(agentView), "run.resume",
+                { runId, grantId: grant.grantId, grantRevision: grant.revision }, agentAuthorityHolder));
+            } });
+          if (!visible(token)) return;
+        } else {
+          const grant = await makeGrant(token, taskId, choice, result.task?.workIntent,
+            standaloneProposal ? [standaloneProposal.capabilityId] : null); if (!visible(token)) return;
+          if (!grant) return;
           const proposal = await call("proposal.create", { taskId, grantId: grant.grantId, grantRevision: grant.revision,
             requestId: `resume-${crypto.randomUUID()}`, capabilityId: standaloneProposal.capabilityId,
             arguments: standaloneProposal.arguments }, token);
@@ -562,7 +685,7 @@ export async function initializeFunctionPanel({ root = document, request, getCon
   }
   async function startWork(objective) {
     const token = { ...ticket(), view: ++viewEpoch, selectedWorkIntent: workIntent.value },
-      choice = profile.value, selectedWorkflow = workflow.value;
+      choice = profile.value, selectedWorkflow = contextualAgentWorkflow(agentGuidance.checked, token.context.experience);
     if (!profiles.has(choice)) { setStatus("Choose an approval profile before starting work.", token); return false; }
     if (!workIntents.has(token.selectedWorkIntent)) { setStatus("Choose what this task may propose before starting work.", token); return false; }
     if (token.context.experience !== "code" || ["runa:personal", "runa:ephemeral"].includes(token.context.projectId)) {
@@ -577,11 +700,16 @@ export async function initializeFunctionPanel({ root = document, request, getCon
     try {
       const task = await call("task.create", { requestId: attempt.taskRequestId, objective, workIntent: attempt.workIntent }, token);
       if (!visible(token)) return false;
-      const grant = attempt.grant ?? await makeGrant(token, task.taskId, choice, attempt.workIntent); attempt.grant = grant;
+      const grant = attempt.grant ?? await makeGrant(token, task.taskId, choice, attempt.workIntent, null,
+        selectedWorkflow === "agent");
+      if (!grant) return false;
+      attempt.grant = grant;
       if (!visible(token)) return false;
       setStatus("Planning bounded workspace work…", token);
-      const started = await call("run.start", { taskId: task.taskId, grantId: grant.grantId, grantRevision: grant.revision,
-        requestId: attempt.runRequestId, workflow: selectedWorkflow }, token);
+      const started = await guardedTaskMutation(token, task.taskId, selectedWorkflow === "agent", "run.start",
+        { taskId: task.taskId, grantId: grant.grantId, grantRevision: grant.revision,
+          requestId: attempt.runRequestId, workflow: selectedWorkflow });
+      if (!started) return false;
       if (!visible(token)) return false;
       const run = started.run;
       if (!run?.runId || run.taskId !== task.taskId) throw new Error("run-not-returned");

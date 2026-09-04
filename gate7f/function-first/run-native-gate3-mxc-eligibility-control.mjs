@@ -7,7 +7,8 @@ import { argvDigest, digest, inspectWatchdog, launchWatchdog, packageDigest, pla
   POWERSHELL, prepareWatchdogRequest } from "./control/deployment/watchdog.mjs";
 import { eligibilityEnvelopeSha256, sourceAuthority } from "./native-gate3-control-node-bootstrap.mjs";
 
-const STAGING = "C:\\AI\\RunaAI-Next-Candidate\\staging";
+const STAGING_PARENT = "C:\\Users\\Matthew\\AppData\\Local";
+const STAGING = path.join(STAGING_PARENT, "RunaAI", "Gate7F", "staging");
 const RELEASE = "C:\\AI\\RunaAI-Next-Candidate\\releases\\runaai-next-gate7a-lan-gate7e-2026-08-26-747aabc";
 const NODE = path.join(RELEASE, "runtime", "node.exe");
 const NODE_SHA256 = "bae898add4643fcf890a83ad8ae56e20dce7e781cab161a53991ceba70c99ffb";
@@ -61,21 +62,36 @@ async function writeExclusiveJson(filename, value) {
   return Object.freeze({ bytes: bytes.length, sha256: digest(bytes) });
 }
 
-async function preflightControl() {
-  if (!samePath(await realpath(STAGING), STAGING)) throw coded("native-gate3-eligibility-control-preflight-failed");
-  const target = psLiteral(STAGING);
+async function prepareControlStaging() {
+  if (!samePath(await realpath(STAGING_PARENT), STAGING_PARENT)) {
+    throw coded("native-gate3-eligibility-control-parent-preflight-failed");
+  }
+  const target = psLiteral(STAGING_PARENT);
   const result = runPowerShell(`$ErrorActionPreference='Stop';$p=${target};$me=[Security.Principal.WindowsIdentity]::GetCurrent();
 if($me.Name-cne'RUNA-CONTROL\\Matthew'){throw'identity'};$item=Get-Item -LiteralPath $p -Force;
 if(-not$item.PSIsContainer-or($item.Attributes-band[IO.FileAttributes]::ReparsePoint)-ne0-or[IO.Path]::GetFullPath($item.FullName)-cne$p){throw'path'};
 $q=$item.FullName;while($true){$ancestor=Get-Item -LiteralPath $q -Force;if(($ancestor.Attributes-band[IO.FileAttributes]::ReparsePoint)-ne0){throw'reparse'};
 $parent=[IO.Directory]::GetParent($q);if($null-eq$parent){break};$q=$parent.FullName};
 $acl=Get-Acl -LiteralPath $p;$owner=$acl.GetOwner([Security.Principal.SecurityIdentifier]).Value;$allowed=@($me.User.Value,'S-1-5-18','S-1-5-32-544');
-if($allowed-notcontains$owner){throw'owner'};$write=[Security.AccessControl.FileSystemRights]::Write-bor[Security.AccessControl.FileSystemRights]::Modify-bor
-[Security.AccessControl.FileSystemRights]::Delete-bor[Security.AccessControl.FileSystemRights]::ChangePermissions-bor[Security.AccessControl.FileSystemRights]::TakeOwnership;
+if($allowed-notcontains$owner){throw'owner'};$write=[Security.AccessControl.FileSystemRights]::WriteData-bor[Security.AccessControl.FileSystemRights]::AppendData-bor
+[Security.AccessControl.FileSystemRights]::WriteExtendedAttributes-bor[Security.AccessControl.FileSystemRights]::WriteAttributes-bor
+[Security.AccessControl.FileSystemRights]::DeleteSubdirectoriesAndFiles-bor[Security.AccessControl.FileSystemRights]::Delete-bor
+[Security.AccessControl.FileSystemRights]::ChangePermissions-bor[Security.AccessControl.FileSystemRights]::TakeOwnership;
 $bad=@($acl.GetAccessRules($true,$true,[Security.Principal.SecurityIdentifier])|Where-Object{$_.AccessControlType-eq'Allow'-and
   ($_.FileSystemRights-band$write)-ne0-and$allowed-notcontains$_.IdentityReference.Value});if($bad.Count-ne0){throw'write'};'ok'`,
-  "native-gate3-eligibility-control-preflight-failed");
-  if (result !== "ok") throw coded("native-gate3-eligibility-control-preflight-failed");
+  "native-gate3-eligibility-control-parent-preflight-failed");
+  if (result !== "ok") throw coded("native-gate3-eligibility-control-parent-preflight-failed");
+  for (const directory of [path.join(STAGING_PARENT, "RunaAI"),
+    path.join(STAGING_PARENT, "RunaAI", "Gate7F"), STAGING]) {
+    if (await pathAbsent(directory)) {
+      await mkdir(directory);
+      makeOwnerPrivate(directory);
+    }
+    await assertOwnerPrivate(directory);
+  }
+  if (!samePath(await realpath(STAGING), STAGING)) {
+    throw coded("native-gate3-eligibility-staging-provision-failed");
+  }
 }
 
 function expectedAuthority(authority) {
@@ -161,9 +177,9 @@ export async function run() {
       || digest(await plainFile(NODE, 100 * 1024 * 1024, true)) !== NODE_SHA256) {
     throw coded("native-gate3-eligibility-operator-runtime-invalid");
   }
-  await preflightControl();
   const authority = await sourceAuthority();
   expectedAuthority(authority);
+  await prepareControlStaging();
   const root = path.join(STAGING, `m1-g3-eligibility-${randomUUID().replaceAll("-", "")}`);
   const journal = path.join(root, "journal");
   const scratch = path.join(root, "scratch");

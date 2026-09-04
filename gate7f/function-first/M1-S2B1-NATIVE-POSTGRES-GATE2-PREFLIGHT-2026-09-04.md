@@ -139,7 +139,10 @@ in the marked values of that transient invocation. If the fenced block is mechan
 exact sentinel values must occur once before replacement and zero times after replacement. A broad substring scan for
 the sentinel prefix is forbidden because the wrapper intentionally retains a generic fail-closed wildcard guard that
 contains that prefix. The untouched value sentinels deliberately fail closed. The fixed helper, lock, package, Node and
-PostgreSQL pins are literal. Changing any command, pin, test name or bound requires review.
+PostgreSQL pins are literal. Before execution authorization, the exact substituted in-memory text must be parsed without
+invocation by `System.Management.Automation.Language.Parser.ParseInput`; any parser error stops the stage. The transient
+host must set strict mode and terminating errors before compiling the reviewed text so compilation failure cannot fall
+through to invocation. Changing any command, pin, test name or bound requires review.
 
 Set `$mode = 'Candidate'` for the first authorized attempt. A later `$mode = 'Compatibility'` invocation is a separate
 attempt and authorization; it is forbidden unless Candidate and all cleanup checks are green. Compatibility is also
@@ -233,7 +236,7 @@ function Assert-Hash([string]$literalPath, [string]$expected) {
   if ($expected -notmatch '^[A-Fa-f0-9]{64}$') { throw "unresolved-hash-pin:$literalPath" }
   $actual = (Get-FileHash -Algorithm SHA256 -LiteralPath $literalPath -ErrorAction Stop).Hash
   if (-not [StringComparer]::OrdinalIgnoreCase.Equals($actual, $expected)) {
-    throw "hash-mismatch:$literalPath:$actual"
+    throw "hash-mismatch:${literalPath}:$actual"
   }
 }
 function Get-TextSha256([string]$value) {
@@ -366,7 +369,7 @@ try {
   if (-not $runner.WaitForExit($outerDeadlineMs)) {
     & taskkill.exe /PID $runner.Id /T /F | Out-Null
     [void]$runner.WaitForExit(30000)
-    throw "node-test-outer-timeout:$mode:$outerDeadlineMs"
+    throw "node-test-outer-timeout:${mode}:$outerDeadlineMs"
   }
   $runner.WaitForExit()
   $exitCode = $runner.ExitCode
@@ -374,7 +377,7 @@ try {
   $stderrText = Get-Content -Raw -LiteralPath $stderrPath -ErrorAction Stop
   Write-Output $stdoutText
   if (-not [string]::IsNullOrWhiteSpace($stderrText)) { Write-Output $stderrText }
-  if ($exitCode -ne 0) { throw "node-test-failed:$mode:$exitCode" }
+  if ($exitCode -ne 0) { throw "node-test-failed:${mode}:$exitCode" }
 
   $topLevelResults = @([regex]::Matches($stdoutText,
     '(?m)^(?<status>ok|not ok) (?<ordinal>[1-9][0-9]*) - (?<name>[^#\r\n]*?)(?<directive>[ \t]+#[^\r\n]*)?\r?$'))
@@ -395,7 +398,7 @@ try {
     if ($selected.Groups['directive'].Success) { throw "selected-test-directive-forbidden:$name" }
     if (-not $seenNames.Add($name)) { throw "selected-test-duplicate:$name" }
     if ($name -cne $expectedNames[$index]) {
-      throw "selected-test-name-mismatch:$index:$name"
+      throw "selected-test-name-mismatch:${index}:$name"
     }
     $observedNames.Add($name)
   }

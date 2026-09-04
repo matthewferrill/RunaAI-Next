@@ -54,3 +54,41 @@ sentinel values from intentional generic sentinel-prefix text.
 The authoritative preflight now states the exact-value substitution invariant and forbids broad prefix matching. A fresh
 independent review must approve the corrected document, new commit, updated document hash, and exact transient literals
 before the single affected-stage resume.
+
+## Second pre-execution stop: wrapper parse failure
+
+After the first correction was committed and independently reviewed, the one affected-stage resume stopped again while
+compiling the substituted in-memory wrapper. PowerShell reported four invalid variable references where a colon followed
+an unbraced variable inside a double-quoted string:
+
+```text
+hash-mismatch:$literalPath:$actual
+node-test-outer-timeout:$mode:$outerDeadlineMs
+node-test-failed:$mode:$exitCode
+selected-test-name-mismatch:$index:$name
+```
+
+PowerShell treats the colon as part of a scoped variable reference unless the preceding variable name is braced. The
+wrapper therefore could not compile. The transient host then attempted to invoke an invalid script-block value, producing
+a secondary host error; neither error entered the wrapper.
+
+Post-stop evidence again showed a clean Git worktree, no `node_modules` junction, no Candidate artifact root, and zero
+Runa-owned PostgreSQL processes. The Node test runner, disposable database, product code, and model were not executed.
+
+### Second root cause
+
+The frozen wrapper contained syntactically invalid PowerShell interpolation, and the review gate inspected its logic but
+did not perform a parser-only check of the exact fenced code. The transient host also lacked terminating-error and
+parser-zero-error requirements before invocation. This was a second operator/harness defect, not a product or test-result
+failure.
+
+### Second correction and prevention
+
+1. Brace the four variables that are immediately followed by colons.
+2. Before execution authorization, mechanically instantiate the exact seven reviewed literals and call
+   `System.Management.Automation.Language.Parser.ParseInput` without invoking the result; require zero parser errors.
+3. In the transient host, set strict mode and `$ErrorActionPreference = 'Stop'` before compilation.
+4. Invoke only a non-null script block produced from the exact parser-clean text.
+5. Recommit and independently review the complete method and new exact HEAD before the single affected-stage resume.
+6. Do not replay any product test, start Compatibility, or assign model/product failure credit for either pre-execution
+   stop.

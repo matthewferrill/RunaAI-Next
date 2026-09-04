@@ -24,11 +24,14 @@ function fixedV2Environment(value){
     &&path.basename(temp)==='temp'&&path.dirname(local).toLowerCase()===path.dirname(temp).toLowerCase(),'environment-scratch');
 }
 function v2Contract(value){
+  const warningBound=value.schemaVersion==='runaai-m1-watchdog-request/v3';
   demand(exact(value.admission,'phase,envelopeSha256,eligibilitySealSha256')&&['eligibility','resource-proof'].includes(value.admission.phase)
     &&HASH.test(value.admission.envelopeSha256)&&(value.admission.phase==='eligibility'?value.admission.eligibilitySealSha256===null:HASH.test(value.admission.eligibilitySealSha256)),'admission');
   demand(exact(value.entrypoint,'path,sha256')&&path.isAbsolute(value.entrypoint.path)&&HASH.test(value.entrypoint.sha256)
     &&path.basename(value.entrypoint.path)==='native-gate3-control-node-bootstrap.mjs'
-    &&path.basename(value.executable).toLowerCase()==='node.exe'&&value.arguments.length===1&&value.arguments[0]===value.entrypoint.path,'entrypoint');
+    &&path.basename(value.executable).toLowerCase()==='node.exe'
+    &&(warningBound?value.arguments.length===2&&value.arguments[0]==='--no-warnings'&&value.arguments[1]===value.entrypoint.path
+      :value.arguments.length===1&&value.arguments[0]===value.entrypoint.path),'entrypoint');
   demand(exact(value.manifest,'path,sha256')&&path.isAbsolute(value.manifest.path)&&HASH.test(value.manifest.sha256),'manifest');
   demand(value.environment&&typeof value.environment==='object'&&!Array.isArray(value.environment),'environment');
   const names=Object.keys(value.environment),allowed=['ComSpec','LOCALAPPDATA','OS','PATHEXT','PROCESSOR_ARCHITECTURE','SystemDrive','SystemRoot','TEMP','TMP','WINDIR','RUNAAI_GATE3_RESOURCE_PROOF_METHOD'];
@@ -81,7 +84,7 @@ async function v2ScratchBoundary(environment,assertOwnerPrivate){
   await directoryBoundary(root,assertOwnerPrivate);await directoryBoundary(environment.LOCALAPPDATA,assertOwnerPrivate);await directoryBoundary(environment.TEMP,assertOwnerPrivate);
 }
 function requestContract(value){
-  const v2=value?.schemaVersion==='runaai-m1-watchdog-request/v2';
+  const v2=['runaai-m1-watchdog-request/v2','runaai-m1-watchdog-request/v3'].includes(value?.schemaVersion);
   demand(exact(value,v2?'schemaVersion,operationId,transitionId,descriptorSha256,packageSha256,executable,executableSha256,supervisorExecutable,supervisorExecutableSha256,arguments,argumentsSha256,createdAt,deadline,maximumMs,maximumBytes,pins,admission,entrypoint,environment,manifest':'schemaVersion,operationId,transitionId,descriptorSha256,packageSha256,executable,executableSha256,supervisorExecutable,supervisorExecutableSha256,arguments,argumentsSha256,createdAt,deadline,maximumMs,maximumBytes,pins')
     &&(v2||value.schemaVersion==='runaai-m1-watchdog-request/v1')&&ID.test(value.operationId)&&ID.test(value.transitionId)
     &&['descriptorSha256','packageSha256','executableSha256','supervisorExecutableSha256','argumentsSha256'].every(key=>HASH.test(value[key]))
@@ -105,7 +108,7 @@ export async function prepareWatchdogRequest({directory,transitionId,descriptorS
   arguments:args,pins,admission=null,entrypoint=null,environment=null,manifest=null,maximumMs=WATCHDOG_LIMITS.maximumMs,maximumBytes=WATCHDOG_LIMITS.maximumBytes,assertOwnerPrivate,now=Date.now()}){
   await directoryBoundary(directory,assertOwnerPrivate);demand((await readdir(directory)).length===0,'existing-operation');
   const v2=admission!==null||entrypoint!==null||environment!==null||manifest!==null;demand(!v2||(admission&&entrypoint&&environment&&manifest),'v2-fields');
-  const request=requestContract({schemaVersion:v2?'runaai-m1-watchdog-request/v2':'runaai-m1-watchdog-request/v1',operationId:randomUUID().replaceAll('-',''),transitionId,
+  const request=requestContract({schemaVersion:v2?'runaai-m1-watchdog-request/v3':'runaai-m1-watchdog-request/v1',operationId:randomUUID().replaceAll('-',''),transitionId,
     descriptorSha256,packageSha256,executable,executableSha256,supervisorExecutable,supervisorExecutableSha256,arguments:[...args],argumentsSha256:argvDigest(args),
     createdAt:new Date(now).toISOString(),deadline:new Date(now+maximumMs).toISOString(),maximumMs,maximumBytes,pins:structuredClone(pins),
     ...(v2?{admission:structuredClone(admission),entrypoint:structuredClone(entrypoint),environment:structuredClone(environment),manifest:structuredClone(manifest)}:{})});
@@ -126,6 +129,7 @@ export async function launchWatchdog({prepared,wrapperFile,wrapperSha256,helperF
   demand(digest(await plainFile(prepared.requestFile,65536))===prepared.requestSha256,'request-drift');
   demand(digest(JSON.stringify(prepared.request))===prepared.requestSha256,'prepared-drift');
   requestContract(prepared.request);demand(Date.now()<Date.parse(prepared.request.deadline),'expired');
+  demand(prepared.request.schemaVersion!=='runaai-m1-watchdog-request/v2','legacy-request-read-only');
   demand((await readdir(prepared.directory)).length===1,'existing-operation');
   demand(path.basename(wrapperFile)==='Invoke-ClosedCompanionWatchdog.ps1'&&path.basename(helperFile)==='ClosedCompanionJob.cs'
     &&path.basename(hostFile)==='Watchdog-Host.mjs'&&path.dirname(wrapperFile)===path.dirname(hostFile)
@@ -133,7 +137,7 @@ export async function launchWatchdog({prepared,wrapperFile,wrapperSha256,helperF
     &&digest(await plainFile(hostFile))===hostSha256
     &&digest(await plainFile(helperFile))===helperSha256&&digest(await plainFile(POWERSHELL,104857600,true))===powershellSha256,'supervisor-drift');
   demand(digest(await plainFile(prepared.request.supervisorExecutable,104857600))===prepared.request.supervisorExecutableSha256,'supervisor-runtime-drift');
-  const v2=prepared.request.schemaVersion==='runaai-m1-watchdog-request/v2';
+  const v2=prepared.request.schemaVersion==='runaai-m1-watchdog-request/v3';
   for(const pin of prepared.request.pins)demand(digest(await plainFile(pin.path,v2&&pin.path===prepared.request.manifest.path?16777216:pin.path===prepared.request.executable?104857600:1048576))===pin.sha256,'package-drift');
   if(v2)await validateV2Package(prepared.request,{hostFile,wrapperFile,helperFile});
   for(const [file,pin]of [[wrapperFile,wrapperSha256],[helperFile,helperSha256],[hostFile,hostSha256]])
@@ -168,7 +172,8 @@ export async function inspectWatchdog({directory,requestSha256,assertOwnerPrivat
   demand(names.includes('request.json'),'record-set');
   const raw=await plainFile(path.join(directory,'request.json'),65536);demand(digest(raw)===requestSha256,'request-drift');
   let request;try{request=requestContract(JSON.parse(new TextDecoder('utf8',{fatal:true}).decode(raw)));}catch{throw fail('request');}
-  const v2=request.schemaVersion==='runaai-m1-watchdog-request/v2',supportDirectories=v2?['host-localappdata','host-temp']:[],allowed=[...recordsAllowed,...supportDirectories];
+  const v2=['runaai-m1-watchdog-request/v2','runaai-m1-watchdog-request/v3'].includes(request.schemaVersion);
+  const requestV3=request.schemaVersion==='runaai-m1-watchdog-request/v3',supportDirectories=v2?['host-localappdata','host-temp']:[],allowed=[...recordsAllowed,...supportDirectories];
   demand(names.every(name=>allowed.includes(name)),'record-set');
   for(const name of supportDirectories)if(names.includes(name))await directoryBoundary(path.join(directory,name),assertOwnerPrivate);
   if(v2)await validateV2Package(request);
@@ -206,12 +211,15 @@ export async function inspectWatchdog({directory,requestSha256,assertOwnerPrivat
     &&Number.isFinite(Date.parse(started.processStartedAt))
     &&Date.parse(started.recordedAt)>=Date.parse(supervisor.recordedAt),'started-binding');
   if(!terminal)return {...common,status:'needs-reconciliation',terminalRetained:false,records};
+  const diagnosticV3=requestV3&&terminal?.schemaVersion==='runaai-m1-watchdog-terminal/v3';
   demand(started&&exact(terminal,'schemaVersion,operationId,intentSha256,supervisorSha256,startedSha256,outcome,result,recordedAt,admissionOpened,automaticReplayPermitted,automaticRollbackPermitted')
-    &&terminal.schemaVersion===(v2?'runaai-m1-watchdog-terminal/v2':'runaai-m1-watchdog-terminal/v1')&&terminal.operationId===request.operationId
+    &&(v2?terminal.schemaVersion===(requestV3?'runaai-m1-watchdog-terminal/v3':'runaai-m1-watchdog-terminal/v2')
+      :terminal.schemaVersion==='runaai-m1-watchdog-terminal/v1')&&terminal.operationId===request.operationId
     &&terminal.intentSha256===hashes['intent.json']&&terminal.supervisorSha256===hashes['supervisor.json']&&terminal.startedSha256===hashes['started.json']
     &&terminal.admissionOpened===false&&terminal.automaticRollbackPermitted===false&&terminal.automaticReplayPermitted===false,'terminal-binding');
   const result=terminal.result;
-  const resultKeys=v2?'ProcessId,ExitCode,StdoutBytes,StderrBytes,ActiveProcesses,CreatedSuspended,AtomicJobAssigned,AdmissionWritten,AdmissionSha256,AdmissionAcknowledged,Resumed,StopConfirmed,ProcessAbsent,TreeAbsent,ExitCodeObserved,TimedOut,OutputLimited,OutputComplete,OutputFaulted,ProcessStartedAt,StartedAt,FinishedAt,Acknowledgement'
+  const resultKeys=diagnosticV3?'ProcessId,ExitCode,StdoutBytes,StderrBytes,ActiveProcesses,StdoutSha256,StderrSha256,StderrClassification,AcknowledgementCandidateValid,AcknowledgementCandidateSha256,CreatedSuspended,AtomicJobAssigned,AdmissionWritten,AdmissionSha256,AdmissionAcknowledged,Resumed,StopConfirmed,ProcessAbsent,TreeAbsent,ExitCodeObserved,TimedOut,OutputLimited,OutputComplete,OutputFaulted,ProcessStartedAt,StartedAt,FinishedAt,Acknowledgement'
+    :v2?'ProcessId,ExitCode,StdoutBytes,StderrBytes,ActiveProcesses,CreatedSuspended,AtomicJobAssigned,AdmissionWritten,AdmissionSha256,AdmissionAcknowledged,Resumed,StopConfirmed,ProcessAbsent,TreeAbsent,ExitCodeObserved,TimedOut,OutputLimited,OutputComplete,OutputFaulted,ProcessStartedAt,StartedAt,FinishedAt,Acknowledgement'
     :'ProcessId,ExitCode,StdoutBytes,StderrBytes,ActiveProcesses,CreatedSuspended,AtomicJobAssigned,Resumed,StopConfirmed,TimedOut,OutputLimited,OutputComplete,ProcessStartedAt,StartedAt,FinishedAt,Stdout';
   demand(exact(result,resultKeys)
     &&result.ProcessId===started.processId&&result.ProcessStartedAt===started.processStartedAt
@@ -231,6 +239,16 @@ export async function inspectWatchdog({directory,requestSha256,assertOwnerPrivat
     &&result.Acknowledgement.packageSha256===request.packageSha256&&result.Acknowledgement.nodeVersion==='v22.22.0'
     &&result.Acknowledgement.consumed===true&&result.Acknowledgement.eofObserved===true&&result.Acknowledgement.privateValuesIncluded===false
       :result.Acknowledgement===null),'admission-ack');
+  if(diagnosticV3)demand(typeof result.AcknowledgementCandidateValid==='boolean'
+    &&(result.OutputComplete&&!result.OutputLimited&&!result.OutputFaulted
+      ?HASH.test(result.StdoutSha256)&&HASH.test(result.StderrSha256)
+        &&result.StderrClassification===(result.StderrBytes===0?'none':'unclassified')
+      :result.StdoutSha256===null&&result.StderrSha256===null&&result.StderrClassification==='unavailable')
+    &&(result.AcknowledgementCandidateValid
+      ?result.AcknowledgementCandidateSha256===result.StdoutSha256
+      :result.AcknowledgementCandidateSha256===null)
+    &&(!result.AdmissionAcknowledged||(result.AcknowledgementCandidateValid&&result.StderrBytes===0
+      &&result.StderrClassification==='none')),'diagnostic-binding');
   const complete=result.Resumed===true&&result.StopConfirmed===true&&result.OutputComplete===true&&result.ActiveProcesses===0
     &&result.TimedOut===false&&result.OutputLimited===false&&Number.isInteger(result.ExitCode)
     &&(!v2||(result.ProcessAbsent===true&&result.TreeAbsent===true&&result.ExitCodeObserved===true&&result.OutputFaulted===false

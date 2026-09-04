@@ -69,11 +69,12 @@ namespace RunaAI.Next.M1 {
       public int ProcessId,ExitCode=-1,StdoutBytes,StderrBytes,ActiveProcesses=-1;
       public bool CreatedSuspended,AtomicJobAssigned,AdmissionWritten,Resumed,StopConfirmed,ProcessAbsent,TreeAbsent,
         ExitCodeObserved,TimedOut,OutputLimited,OutputComplete,OutputFaulted;
-      public string ProcessStartedAt,StartedAt,FinishedAt,AdmissionSha256,Stdout="";
+      public string ProcessStartedAt,StartedAt,FinishedAt,AdmissionSha256,Stdout="",StdoutSha256,StderrSha256,
+        StderrClassification="unavailable";
     }
     sealed class Sink { public long count; public int limited,faulted; public MemoryStream bytes=new MemoryStream(); }
     static Task Pump(Stream source,Sink sink,int limit,bool keep) {
-      return Task.Run(()=>{try {var buffer=new byte[4096]; int count;
+      return Task.Run(()=>{var buffer=new byte[4096];try {int count;
         while((count=source.Read(buffer,0,buffer.Length))!=0){
           // Continue draining after the cap so the child cannot deadlock on a
           // full pipe, but retain only the bounded fact that the cap was crossed.
@@ -81,7 +82,11 @@ namespace RunaAI.Next.M1 {
           if(sink.count>limit)Interlocked.Exchange(ref sink.limited,1);
           else if(keep)sink.bytes.Write(buffer,0,count);
         }
-      } catch {Interlocked.Exchange(ref sink.faulted,1);}});
+      } catch {Interlocked.Exchange(ref sink.faulted,1);}finally{Array.Clear(buffer,0,buffer.Length);}});
+    }
+    static void ClearSink(Sink sink) {
+      try {ArraySegment<byte> segment;if(sink.bytes.TryGetBuffer(out segment)&&segment.Array!=null)Array.Clear(segment.Array,0,segment.Array.Length);}
+      finally {sink.bytes.Dispose();}
     }
     public static string Quote(string value) {
       if(value==null||value.IndexOf('\0')>=0)throw new ArgumentException("m1-supervisor-argument");
@@ -161,7 +166,7 @@ namespace RunaAI.Next.M1 {
       if(quoted.Length>30000)throw new ArgumentException("m1-supervisor-argument-cap");
       IntPtr job=IntPtr.Zero,readOut=IntPtr.Zero,writeOut=IntPtr.Zero,readErr=IntPtr.Zero,writeErr=IntPtr.Zero;
       IntPtr readIn=IntPtr.Zero,writeIn=IntPtr.Zero,list=IntPtr.Zero,handles=IntPtr.Zero,jobs=IntPtr.Zero;
-      PI process=new PI();FileStream stdout=null,stderr=null;IntPtr environmentBlock=IntPtr.Zero;
+      PI process=new PI();FileStream stdout=null,stderr=null;Task outTask=null,errTask=null;IntPtr environmentBlock=IntPtr.Zero;
       var result=new Result {StartedAt=DateTime.UtcNow.ToString("o")};var output=new Sink();var error=new Sink();
       try {
         job=CreateJobObjectW(IntPtr.Zero,null);Need(job!=IntPtr.Zero);
@@ -191,7 +196,7 @@ namespace RunaAI.Next.M1 {
         Close(ref writeOut);Close(ref writeErr);Close(ref readIn);
         stdout=new FileStream(new SafeFileHandle(readOut,true),FileAccess.Read);readOut=IntPtr.Zero;
         stderr=new FileStream(new SafeFileHandle(readErr,true),FileAccess.Read);readErr=IntPtr.Zero;
-        var outTask=Pump(stdout,output,maximumBytes,true);var errTask=Pump(stderr,error,maximumBytes,false);
+        outTask=Pump(stdout,output,maximumBytes,true);errTask=Pump(stderr,error,maximumBytes,v2);
         recordStart(result); // fsynced before the first child instruction.
         if(v2){var wire=Admission(admissionSecret,phase,envelopeSha256,eligibilitySealSha256,Process.GetCurrentProcess().Id,process.pid);
           try {using(var sha=SHA256.Create())result.AdmissionSha256=BitConverter.ToString(sha.ComputeHash(wire)).Replace("-","").ToLowerInvariant();
@@ -217,12 +222,25 @@ namespace RunaAI.Next.M1 {
         result.OutputFaulted=output.faulted!=0||error.faulted!=0;
         result.OutputLimited=result.OutputLimited||output.limited!=0||error.limited!=0;
         result.StdoutBytes=(int)output.count;result.StderrBytes=(int)error.count;
-        if(result.OutputComplete&&!result.OutputLimited&&!result.OutputFaulted)result.Stdout=new UTF8Encoding(false,true).GetString(output.bytes.ToArray());
+        if(result.OutputComplete&&!result.OutputLimited&&!result.OutputFaulted){
+          byte[] outputBytes=null,errorBytes=null;
+          try {outputBytes=output.bytes.ToArray();errorBytes=error.bytes.ToArray();
+            result.Stdout=new UTF8Encoding(false,true).GetString(outputBytes);using(var sha=SHA256.Create()){
+            result.StdoutSha256=BitConverter.ToString(sha.ComputeHash(outputBytes)).Replace("-","").ToLowerInvariant();
+            result.StderrSha256=BitConverter.ToString(sha.ComputeHash(errorBytes)).Replace("-","").ToLowerInvariant();}
+            result.StderrClassification=errorBytes.Length==0?"none":"unclassified";
+          } finally {if(outputBytes!=null)Array.Clear(outputBytes,0,outputBytes.Length);if(errorBytes!=null)Array.Clear(errorBytes,0,errorBytes.Length);
+            ArraySegment<byte> segment;if(output.bytes.TryGetBuffer(out segment))Array.Clear(segment.Array,segment.Offset,segment.Count);
+            if(error.bytes.TryGetBuffer(out segment))Array.Clear(segment.Array,segment.Offset,segment.Count);
+          }
+        }
         return result;
       } finally {
         if(job!=IntPtr.Zero){TerminateJobObject(job,124);Close(ref job);}
         Close(ref process.thread);Close(ref process.process);
         if(stdout!=null)stdout.Dispose();if(stderr!=null)stderr.Dispose();
+        try {if(outTask!=null&&errTask!=null)Task.WaitAll(new[]{outTask,errTask});else if(outTask!=null)outTask.Wait();else if(errTask!=null)errTask.Wait();}catch{}
+        ClearSink(output);ClearSink(error);
         Close(ref readOut);Close(ref writeOut);Close(ref readErr);Close(ref writeErr);Close(ref readIn);Close(ref writeIn);
         if(list!=IntPtr.Zero){DeleteProcThreadAttributeList(list);Marshal.FreeHGlobal(list);}
         if(handles!=IntPtr.Zero)Marshal.FreeHGlobal(handles);if(jobs!=IntPtr.Zero)Marshal.FreeHGlobal(jobs);

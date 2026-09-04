@@ -44,7 +44,7 @@ try{
   const self=fileURLToPath(import.meta.url),directory=path.dirname(requestFile);
   check(path.basename(self)==='Watchdog-Host.mjs'&&path.basename(requestFile)==='request.json');
   const raw=bytes(requestFile,65536);check(hash(raw)===requestSha256);const request=JSON.parse(raw);
-  const v2=request.schemaVersion==='runaai-m1-watchdog-request/v2';
+  const v2=request.schemaVersion==='runaai-m1-watchdog-request/v3';
   check((v2||request.schemaVersion==='runaai-m1-watchdog-request/v1')&&request.supervisorExecutable===process.execPath
     &&/^[a-f0-9]{64}$/u.test(request.supervisorExecutableSha256)
     &&Number.isInteger(request.maximumMs)&&request.maximumMs>0&&request.maximumMs<=600000

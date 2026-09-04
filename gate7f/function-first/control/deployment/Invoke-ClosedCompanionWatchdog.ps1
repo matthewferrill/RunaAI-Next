@@ -64,7 +64,8 @@ try {
   while($previewOffset-lt$previewRaw.Length){$previewRead=$previewLock.Read($previewRaw,$previewOffset,$previewRaw.Length-$previewOffset);if($previewRead-le0){throw 'm1-supervisor-short-read'};$previewOffset+=$previewRead}
   if((Digest $previewRaw)-cne$ExpectedRequestSha256){throw 'm1-supervisor-file-drift'}
   $previewRequest=[Text.UTF8Encoding]::new($false,$true).GetString($previewRaw)|ConvertFrom-Json
-  $previewV2=$previewRequest.schemaVersion-ceq'runaai-m1-watchdog-request/v2'
+  if($previewRequest.schemaVersion-ceq'runaai-m1-watchdog-request/v2'){throw 'm1-supervisor-legacy-request-read-only'}
+  $previewV2=$previewRequest.schemaVersion-ceq'runaai-m1-watchdog-request/v3'
   if($previewV2){
     $hostLocal=Join-Path $directory 'host-localappdata';$hostTemp=Join-Path $directory 'host-temp'
     if($env:ComSpec-cne'C:\Windows\System32\cmd.exe'-or$env:LOCALAPPDATA-cne$hostLocal-or$env:OS-cne'Windows_NT'-or
@@ -85,7 +86,8 @@ try {
   $null=Pinned $helper $ExpectedHelperSha256 65536
   $stage='request';$raw=Pinned $full $ExpectedRequestSha256 65536
   $request=[Text.UTF8Encoding]::new($false,$true).GetString($raw)|ConvertFrom-Json
-  $v2=$request.schemaVersion-ceq'runaai-m1-watchdog-request/v2'
+  if($request.schemaVersion-ceq'runaai-m1-watchdog-request/v2'){throw 'm1-supervisor-legacy-request-read-only'}
+  $v2=$request.schemaVersion-ceq'runaai-m1-watchdog-request/v3';$diagnosticV3=$v2
   if($v2-ne$previewV2){throw 'm1-supervisor-request-drift'}
   $expectedKeys=$(if($v2){'admission,arguments,argumentsSha256,createdAt,deadline,descriptorSha256,entrypoint,environment,executable,executableSha256,manifest,maximumBytes,maximumMs,operationId,packageSha256,pins,schemaVersion,supervisorExecutable,supervisorExecutableSha256,transitionId'.Split(',')}else{'arguments,argumentsSha256,createdAt,deadline,descriptorSha256,executable,executableSha256,maximumBytes,maximumMs,operationId,packageSha256,pins,schemaVersion,supervisorExecutable,supervisorExecutableSha256,transitionId'.Split(',')})
   if(-not(ExactKeys $request $expectedKeys)-or($request.schemaVersion-cne'runaai-m1-watchdog-request/v1'-and-not$v2)-or$request.operationId-notmatch'^[a-f0-9]{32}$'-or$request.transitionId-notmatch'^[a-f0-9]{32}$'-or
@@ -104,7 +106,9 @@ try {
     if(-not(ExactKeys $request.entrypoint @('path','sha256'))-or
       [IO.Path]::GetFullPath($request.entrypoint.path)-cne$request.entrypoint.path-or$request.entrypoint.sha256-notmatch'^[a-f0-9]{64}$'-or
       [IO.Path]::GetFileName($request.entrypoint.path)-cne'native-gate3-control-node-bootstrap.mjs'-or
-      [IO.Path]::GetFileName($request.executable)-ine'node.exe'-or@($request.arguments).Count-ne1-or$request.arguments[0]-cne$request.entrypoint.path){throw 'm1-supervisor-entrypoint'}
+      [IO.Path]::GetFileName($request.executable)-ine'node.exe'-or
+      ($diagnosticV3-and(@($request.arguments).Count-ne2-or$request.arguments[0]-cne'--no-warnings'-or$request.arguments[1]-cne$request.entrypoint.path))-or
+      (-not$diagnosticV3-and(@($request.arguments).Count-ne1-or$request.arguments[0]-cne$request.entrypoint.path))){throw 'm1-supervisor-entrypoint'}
     if(-not(ExactKeys $request.manifest @('path','sha256'))-or
       [IO.Path]::GetFullPath($request.manifest.path)-cne$request.manifest.path-or$request.manifest.sha256-notmatch'^[a-f0-9]{64}$'){throw 'm1-supervisor-manifest'}
     $environmentEntries=[Collections.Generic.List[string]]::new();$names=@($request.environment.PSObject.Properties.Name|Sort-Object)
@@ -220,20 +224,29 @@ try {
   }
   $eligibilityBinding=$(if($v2-and$null-eq$request.admission.eligibilitySealSha256){'-'}elseif($v2){$request.admission.eligibilitySealSha256}else{$null})
   $stage='run';$result=$(if($v2){[RunaAI.Next.M1.ClosedCompanionJob]::RunV2($request.executable,[string[]]$request.arguments,$directory,[string[]]$environmentEntries,$deadline.ToUnixTimeMilliseconds(),$request.maximumBytes,$admissionSecret,$request.admission.phase,$request.admission.envelopeSha256,$eligibilityBinding,$observer)}else{[RunaAI.Next.M1.ClosedCompanionJob]::Run($request.executable,[string[]]$request.arguments,$directory,$deadline.ToUnixTimeMilliseconds(),$request.maximumBytes,$observer)})
-  $acknowledgement=$null;$acknowledged=$false
-  if($v2-and$result.OutputComplete-and-not$result.OutputFaulted-and-not$result.OutputLimited-and$result.StdoutBytes-le8192-and$result.StderrBytes-eq0-and$result.Stdout-match'^[^\r\n]{1,8192}\r?\n?$'){
+  $acknowledgement=$null;$acknowledgementCandidateSha256=$null;$candidateValid=$false;$acknowledged=$false
+  if($v2-and$result.OutputComplete-and-not$result.OutputFaulted-and-not$result.OutputLimited-and$result.StdoutBytes-le8192-and$result.Stdout-match'^[^\r\n]{1,8192}\r?\n?$'){
     try{$candidate=$result.Stdout|ConvertFrom-Json
-      $acknowledged=(ExactKeys $candidate @('capabilitySha256','childProcessId','consumed','envelopeSha256','eofObserved','eligibilitySealSha256','manifestSha256','nodeVersion','packageSha256','phase','privateValuesIncluded','schemaVersion','supervisorProcessId'))-and
+      $candidateValid=(ExactKeys $candidate @('capabilitySha256','childProcessId','consumed','envelopeSha256','eofObserved','eligibilitySealSha256','manifestSha256','nodeVersion','packageSha256','phase','privateValuesIncluded','schemaVersion','supervisorProcessId'))-and
         $candidate.schemaVersion-ceq'runaai-m1-supervisor-child-ack/v1'-and$candidate.phase-ceq$request.admission.phase-and
         $candidate.envelopeSha256-ceq$request.admission.envelopeSha256-and$candidate.eligibilitySealSha256-ceq$request.admission.eligibilitySealSha256-and
         $candidate.supervisorProcessId-eq$PID-and$candidate.childProcessId-eq$result.ProcessId-and$candidate.capabilitySha256-ceq$result.AdmissionSha256-and
         $candidate.manifestSha256-ceq$request.manifest.sha256-and$candidate.packageSha256-ceq$request.packageSha256-and$candidate.nodeVersion-ceq'v22.22.0'-and
         $candidate.consumed-eq$true-and$candidate.eofObserved-eq$true-and$candidate.privateValuesIncluded-eq$false
-      if($acknowledged){$acknowledgement=$candidate}
-    }catch{$acknowledged=$false}
+      if($candidateValid){$acknowledgementCandidateSha256=$result.StdoutSha256}
+    }catch{$candidateValid=$false}
   }
+  $acknowledged=$candidateValid-and$result.StderrBytes-eq0-and$result.StderrClassification-ceq'none'
+  if($acknowledged){$acknowledgement=$candidate}
   $confirmed=$result.Resumed-and$result.StopConfirmed-and$result.ProcessAbsent-and$result.TreeAbsent-and$result.ExitCodeObserved-and$result.OutputComplete-and-not$result.OutputFaulted-and-not$result.TimedOut-and-not$result.OutputLimited-and(!$v2-or($result.AdmissionWritten-and$acknowledged))
-  $resultRecord=$(if($v2){[ordered]@{ProcessId=$result.ProcessId;ExitCode=$result.ExitCode;StdoutBytes=$result.StdoutBytes;StderrBytes=$result.StderrBytes;ActiveProcesses=$result.ActiveProcesses;
+  $resultRecord=$(if($diagnosticV3){[ordered]@{ProcessId=$result.ProcessId;ExitCode=$result.ExitCode;StdoutBytes=$result.StdoutBytes;StderrBytes=$result.StderrBytes;ActiveProcesses=$result.ActiveProcesses;
+      StdoutSha256=$result.StdoutSha256;StderrSha256=$result.StderrSha256;StderrClassification=$result.StderrClassification;
+      AcknowledgementCandidateValid=$candidateValid;AcknowledgementCandidateSha256=$acknowledgementCandidateSha256;
+      CreatedSuspended=$result.CreatedSuspended;AtomicJobAssigned=$result.AtomicJobAssigned;AdmissionWritten=$result.AdmissionWritten;AdmissionSha256=$result.AdmissionSha256;AdmissionAcknowledged=$acknowledged;
+      Resumed=$result.Resumed;StopConfirmed=$result.StopConfirmed;ProcessAbsent=$result.ProcessAbsent;TreeAbsent=$result.TreeAbsent;ExitCodeObserved=$result.ExitCodeObserved;
+      TimedOut=$result.TimedOut;OutputLimited=$result.OutputLimited;OutputComplete=$result.OutputComplete;OutputFaulted=$result.OutputFaulted;
+      ProcessStartedAt=$result.ProcessStartedAt;StartedAt=$result.StartedAt;FinishedAt=$result.FinishedAt;Acknowledgement=$acknowledgement}}
+    elseif($v2){[ordered]@{ProcessId=$result.ProcessId;ExitCode=$result.ExitCode;StdoutBytes=$result.StdoutBytes;StderrBytes=$result.StderrBytes;ActiveProcesses=$result.ActiveProcesses;
       CreatedSuspended=$result.CreatedSuspended;AtomicJobAssigned=$result.AtomicJobAssigned;AdmissionWritten=$result.AdmissionWritten;AdmissionSha256=$result.AdmissionSha256;AdmissionAcknowledged=$acknowledged;
       Resumed=$result.Resumed;StopConfirmed=$result.StopConfirmed;ProcessAbsent=$result.ProcessAbsent;TreeAbsent=$result.TreeAbsent;ExitCodeObserved=$result.ExitCodeObserved;
       TimedOut=$result.TimedOut;OutputLimited=$result.OutputLimited;OutputComplete=$result.OutputComplete;OutputFaulted=$result.OutputFaulted;
@@ -241,7 +254,7 @@ try {
     else{[ordered]@{ProcessId=$result.ProcessId;ExitCode=$result.ExitCode;StdoutBytes=$result.StdoutBytes;StderrBytes=$result.StderrBytes;ActiveProcesses=$result.ActiveProcesses;
       CreatedSuspended=$result.CreatedSuspended;AtomicJobAssigned=$result.AtomicJobAssigned;Resumed=$result.Resumed;StopConfirmed=$result.StopConfirmed;TimedOut=$result.TimedOut;
       OutputLimited=$result.OutputLimited;OutputComplete=$result.OutputComplete;ProcessStartedAt=$result.ProcessStartedAt;StartedAt=$result.StartedAt;FinishedAt=$result.FinishedAt;Stdout=$result.Stdout}})
-  $terminal=[ordered]@{schemaVersion=$(if($v2){'runaai-m1-watchdog-terminal/v2'}else{'runaai-m1-watchdog-terminal/v1'});operationId=$request.operationId;intentSha256=$intentSha;
+  $terminal=[ordered]@{schemaVersion=$(if($diagnosticV3){'runaai-m1-watchdog-terminal/v3'}elseif($v2){'runaai-m1-watchdog-terminal/v2'}else{'runaai-m1-watchdog-terminal/v1'});operationId=$request.operationId;intentSha256=$intentSha;
     supervisorSha256=$supervisorSha;startedSha256=$script:startedSha;outcome=$(if($confirmed){'terminal'}else{'unknown'});
     result=$resultRecord;recordedAt=[DateTime]::UtcNow.ToString('o');admissionOpened=$false;automaticReplayPermitted=$false;automaticRollbackPermitted=$false}
   $stage='terminal';$null=Retain 'terminal.json' $terminal;$terminalWritten=$true

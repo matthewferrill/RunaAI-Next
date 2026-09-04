@@ -171,6 +171,7 @@ async function writeEvidence(filename, value) {
 async function main() {
   if (process.platform !== "win32" || process.arch !== "x64" || process.version !== "v22.22.0"
       || !samePath(process.execPath, nodeExecutable) || process.argv.length !== 2
+      || process.execArgv.length !== 1 || process.execArgv[0] !== "--no-warnings"
       || process.env.RUNAAI_GATE3_CONTROL_PHASE !== "eligibility"
       || process.env.RUNAAI_GATE3_EXPECTED_ELIGIBILITY_SEAL_SHA256 !== undefined) {
     throw coded("native-gate3-eligibility-runtime-invalid");

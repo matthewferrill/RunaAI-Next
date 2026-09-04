@@ -51,9 +51,9 @@ const eligibility=process.env.RUNAAI_GATE3_EXPECTED_ELIGIBILITY_SEAL_SHA256??nul
 const binding=Buffer.from(['runaai-native-gate3-control-launch-capability/v1',process.env.RUNAAI_GATE3_CONTROL_PHASE,process.env.RUNAAI_GATE3_EXPECTED_ENVELOPE_SHA256,eligibility??'-',String(process.ppid),String(process.pid)].join('\\0'),'ascii');
 const expected=createHmac('sha256',secret).update(binding).digest(),consumed=mode!=='truncate'&&wire.length===64&&timingSafeEqual(mac,expected)&&!process.env.NODE_OPTIONS&&!process.env.NODE_PATH&&!process.env.OPENSSL_CONF;
 const ack=JSON.stringify({schemaVersion:'runaai-m1-supervisor-child-ack/v1',phase:process.env.RUNAAI_GATE3_CONTROL_PHASE,envelopeSha256:process.env.RUNAAI_GATE3_EXPECTED_ENVELOPE_SHA256,eligibilitySealSha256:eligibility,supervisorProcessId:Number(process.env.RUNAAI_GATE3_CONTROL_LAUNCHER_PID),childProcessId:process.pid,capabilitySha256:createHash('sha256').update(wire).digest('hex'),manifestSha256:process.env.RUNAAI_GATE3_MANIFEST_SHA256,packageSha256:process.env.RUNAAI_GATE3_PACKAGE_SHA256,nodeVersion:process.version,consumed,eofObserved:true,privateValuesIncluded:false});
-process.stdout.write((mode==='exfiltrate'?wire.toString('hex')+'\\n':'')+ack+'\\n');wire.fill(0);expected.fill(0);binding.fill(0);
+process.stdout.write((mode==='exfiltrate'?wire.toString('hex')+'\\n':'')+ack+'\\n');if(mode==='stderr')process.stderr.write('reviewed-direct-stderr\\n');wire.fill(0);expected.fill(0);binding.fill(0);
 `,{flag:'wx'});
-  const entrypoint=v2?bootstrap:program,args=v2?[entrypoint]:[program,mode,side,grand,...(mode==='terminal-loss'?[path.join(directory,'terminal.json')]:['a b','quote"slash\\',"apostrophe'",'λ'])];
+  const entrypoint=v2?bootstrap:program,args=v2?['--no-warnings',entrypoint]:[program,mode,side,grand,...(mode==='terminal-loss'?[path.join(directory,'terminal.json')]:['a b','quote"slash\\',"apostrophe'",'λ'])];
   const roleFor=file=>file===process.execPath?'node-runtime':file===entrypoint?'control-bootstrap':file===hostFile?'supervisor-host':file===wrapperFile?'supervisor-wrapper':'supervisor-helper';
   const memberFiles=v2?[process.execPath,entrypoint,hostFile,wrapperFile,helperFile]:[program,wrapperFile,helperFile,hostFile];
   const memberPins=await Promise.all(memberFiles.map(async file=>({path:file,sha256:digest(await readFile(file))})));
@@ -187,12 +187,61 @@ test('v2 launch rejects a missing private provisioner before creating host suppo
 test('v2 writes one 64-byte bound admission before resume and uses only the replacement environment',async t=>{
   const f=await fixture('v2',{v2:true});let passed=false;try{const run=await f.launch(),completed=await run.completion;
     const actual=await f.observation();t.diagnostic(JSON.stringify(compactObservation(actual)));assert.equal(completed.exitCode,0);
+    assert.equal(f.prepared.request.schemaVersion,'runaai-m1-watchdog-request/v3');
     const output=actual.result.Acknowledgement;
     assert.equal(actual.status,'terminal');assert.equal(actual.result.AdmissionWritten,true);assert.equal(actual.result.ProcessAbsent,true);
     assert.equal(actual.result.TreeAbsent,true);assert.equal(actual.result.ExitCodeObserved,true);
+    assert.equal(actual.result.StderrBytes,0);assert.equal(actual.result.StderrClassification,'none');assert.match(actual.result.StderrSha256,/^[a-f0-9]{64}$/u);
+    assert.equal(actual.result.AcknowledgementCandidateValid,true);assert.equal(actual.result.AcknowledgementCandidateSha256,actual.result.StdoutSha256);
     assert.equal(output.consumed,true);assert.equal(output.phase,'eligibility');assert.equal(output.envelopeSha256,'e'.repeat(64));
     assert.ok(Number.isInteger(output.supervisorProcessId)&&output.supervisorProcessId>0);passed=true;
   }finally{await f.close({preserve:!passed});if(!passed)t.diagnostic('preserved failure journal: '+f.base);}
+});
+
+test('legacy v2 request is read-only and cannot be newly launched',async()=>{
+  const f=await fixture('v2',{v2:true});try{
+    const request={...f.prepared.request,schemaVersion:'runaai-m1-watchdog-request/v2',arguments:[f.entrypoint],argumentsSha256:argvDigest([f.entrypoint])};
+    const raw=Buffer.from(JSON.stringify(request));await writeFile(f.prepared.requestFile,raw);
+    const prepared={...f.prepared,request,requestSha256:digest(raw)};
+    await assert.rejects(launchWatchdog({...f.options,prepared}),/legacy-request-read-only/u);
+    assert.deepEqual(await readdir(f.directory),['request.json']);
+  }finally{await f.close();}
+});
+
+test('direct host and wrapper entrypoints reject a legacy v2 request before execution',async()=>{
+  for(const boundary of ['host','wrapper']){const f=await fixture('v2',{v2:true});try{
+    const request={...f.prepared.request,schemaVersion:'runaai-m1-watchdog-request/v2',arguments:[f.entrypoint],argumentsSha256:argvDigest([f.entrypoint])};
+    const raw=Buffer.from(JSON.stringify(request));await writeFile(f.prepared.requestFile,raw);const requestSha256=digest(raw);
+    const completed=boundary==='host'
+      ?spawnSync(process.execPath,[hostFile,f.prepared.requestFile,requestSha256,f.options.wrapperSha256,f.options.helperSha256,
+        f.options.hostSha256,f.options.powershellSha256],{windowsHide:true,encoding:'utf8',timeout:10000})
+      :spawnSync(POWERSHELL,['-NoProfile','-NonInteractive','-ExecutionPolicy','Bypass','-File',wrapperFile,'-RequestFile',f.prepared.requestFile,
+        '-ExpectedRequestSha256',requestSha256,'-ExpectedHelperSha256',f.options.helperSha256],{windowsHide:true,encoding:'utf8',timeout:10000,
+        env:{...process.env,PSModulePath:String.raw`C:\Windows\system32\WindowsPowerShell\v1.0\Modules;C:\Program Files\WindowsPowerShell\Modules`}});
+    assert.equal(completed.status,2,boundary+' accepted a legacy v2 request');
+    assert.ok(!completed.error,boundary+' did not terminate cleanly');
+  }finally{await f.close();}}
+});
+
+test('historical v2 request and terminal remain read-only inspectable',async()=>{
+  const f=await fixture('v2',{v2:true});try{const run=await f.launch();assert.equal((await run.completion).exitCode,0);
+    const request={...f.prepared.request,schemaVersion:'runaai-m1-watchdog-request/v2',arguments:[f.entrypoint],argumentsSha256:argvDigest([f.entrypoint])};
+    const requestRaw=Buffer.from(JSON.stringify(request));await writeFile(f.prepared.requestFile,requestRaw);const requestSha256=digest(requestRaw);
+    const hostFilePath=path.join(f.directory,'host.json'),host=JSON.parse(await readFile(hostFilePath));host.requestSha256=requestSha256;
+    await writeFile(hostFilePath,JSON.stringify(host));const hostSha256=digest(await readFile(hostFilePath));
+    const intentFile=path.join(f.directory,'intent.json'),intent=JSON.parse(await readFile(intentFile));intent.requestSha256=requestSha256;intent.argumentsSha256=request.argumentsSha256;
+    await writeFile(intentFile,JSON.stringify(intent));const intentSha256=digest(await readFile(intentFile));
+    const supervisorFile=path.join(f.directory,'supervisor.json'),supervisor=JSON.parse(await readFile(supervisorFile));supervisor.hostSha256=hostSha256;supervisor.intentSha256=intentSha256;
+    await writeFile(supervisorFile,JSON.stringify(supervisor));const supervisorSha256=digest(await readFile(supervisorFile));
+    const startedFile=path.join(f.directory,'started.json'),started=JSON.parse(await readFile(startedFile));started.intentSha256=intentSha256;started.supervisorSha256=supervisorSha256;
+    await writeFile(startedFile,JSON.stringify(started));const startedSha256=digest(await readFile(startedFile));
+    const terminalFile=path.join(f.directory,'terminal.json'),terminal=JSON.parse(await readFile(terminalFile));terminal.schemaVersion='runaai-m1-watchdog-terminal/v2';
+    terminal.intentSha256=intentSha256;terminal.supervisorSha256=supervisorSha256;terminal.startedSha256=startedSha256;
+    for(const key of ['StdoutSha256','StderrSha256','StderrClassification','AcknowledgementCandidateValid','AcknowledgementCandidateSha256'])delete terminal.result[key];
+    await writeFile(terminalFile,JSON.stringify(terminal));
+    const observed=await inspectWatchdog({directory:f.directory,requestSha256,assertOwnerPrivate:privateHook});
+    assert.equal(observed.status,'terminal');assert.equal(observed.records['terminal.json'].schemaVersion,'runaai-m1-watchdog-terminal/v2');
+  }finally{await f.close();}
 });
 
 test('v2 rejects incomplete admission, environment, and manifest bindings before launch',async()=>{
@@ -217,6 +266,11 @@ test('v2 rejects incomplete admission, environment, and manifest bindings before
     const missingDirectory=path.join(f.base,'missing-journal');await mkdir(missingDirectory);
     await assert.rejects(prepareWatchdogRequest({...f.prepared.request,directory:missingDirectory,
       manifest:{path:f.program,sha256:'0'.repeat(64)},assertOwnerPrivate:privateHook}),/manifest-binding/u);
+    for(const [index,args]of [[0,[f.entrypoint]],[1,[f.entrypoint,'--no-warnings']],[2,['--trace-warnings',f.entrypoint]]]){
+      const flagDirectory=path.join(f.base,'flag-journal-'+index);await mkdir(flagDirectory);
+      await assert.rejects(prepareWatchdogRequest({...f.prepared.request,directory:flagDirectory,arguments:args,
+        argumentsSha256:argvDigest(args),assertOwnerPrivate:privateHook}),/entrypoint/u);
+    }
   }finally{await f.close();}
 });
 
@@ -247,10 +301,14 @@ test('v2 authenticates a manifest larger than the former one MiB pin ceiling',as
   }finally{await f.close();}
 });
 
-for(const bootstrapMode of ['ignore','truncate','exfiltrate'])test('v2 child '+bootstrapMode+' cannot authorize or durably publish raw output',async()=>{
+for(const bootstrapMode of ['ignore','truncate','exfiltrate','stderr'])test('v2 child '+bootstrapMode+' cannot authorize or durably publish raw output',async()=>{
   const f=await fixture('v2',{v2:true,bootstrapMode});try{const run=await f.launch();await run.completion;
     const actual=await f.observation();assert.equal(actual.status,'needs-reconciliation');assert.equal(actual.result.AdmissionAcknowledged,false);
     assert.equal(Object.hasOwn(actual.result,'Stdout'),false);assert.equal(actual.result.Acknowledgement,null);
+    if(bootstrapMode==='stderr'){assert.equal(actual.result.AcknowledgementCandidateValid,true);assert.ok(actual.result.StderrBytes>0);
+      assert.match(actual.result.StderrSha256,/^[a-f0-9]{64}$/u);assert.equal(actual.result.StderrClassification,'unclassified');
+      const retained=await Promise.all((await readdir(f.directory)).filter(name=>name.endsWith('.json')).map(name=>readFile(path.join(f.directory,name),'utf8')));
+      assert.ok(!JSON.stringify(actual).includes('reviewed-direct-stderr'));assert.ok(!retained.join('\n').includes('reviewed-direct-stderr'));}
   }finally{await f.close();}
 });
 

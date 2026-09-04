@@ -252,11 +252,13 @@ export async function run() {
       transitionId: randomBytes(16).toString("hex"), descriptorSha256: envelopeSha256,
       packageSha256: packageDigest(pins), executable: NODE, executableSha256: NODE_SHA256,
       supervisorExecutable: NODE, supervisorExecutableSha256: NODE_SHA256,
-      arguments: [bootstrap], pins, admission: { phase: "eligibility", envelopeSha256,
+      arguments: ["--no-warnings", bootstrap], pins, admission: { phase: "eligibility", envelopeSha256,
         eligibilitySealSha256: null }, entrypoint: { path: bootstrap, sha256: members[1].sha256 },
       environment, manifest: pins.find(pin => pin.path === manifestPath), maximumMs: 30_000,
       maximumBytes: 64 * 1024, assertOwnerPrivate });
-    if (prepared.request.argumentsSha256 !== argvDigest([bootstrap])) throw coded("native-gate3-eligibility-argv-drift");
+    if (prepared.request.argumentsSha256 !== argvDigest(["--no-warnings", bootstrap])) {
+      throw coded("native-gate3-eligibility-argv-drift");
+    }
     const launched = await launchWatchdog({ prepared, wrapperFile: wrapper, wrapperSha256: members[3].sha256,
       helperFile: helper, helperSha256: members[4].sha256, hostFile: host, hostSha256: members[2].sha256,
       powershellSha256: digest(await plainFile(POWERSHELL, 100 * 1024 * 1024, true)), assertOwnerPrivate,
@@ -312,7 +314,11 @@ export async function run() {
           treeAbsent: terminalResult.TreeAbsent, stopConfirmed: terminalResult.StopConfirmed,
           exitCodeObserved: terminalResult.ExitCodeObserved, outputComplete: terminalResult.OutputComplete,
           outputFaulted: terminalResult.OutputFaulted, timedOut: terminalResult.TimedOut,
-          outputLimited: terminalResult.OutputLimited, admissionAcknowledged: terminalResult.AdmissionAcknowledged,
+          outputLimited: terminalResult.OutputLimited, stderrBytes: terminalResult.StderrBytes,
+          stderrSha256: terminalResult.StderrSha256, stderrClassification: terminalResult.StderrClassification,
+          acknowledgementCandidateValid: terminalResult.AcknowledgementCandidateValid,
+          acknowledgementCandidateSha256: terminalResult.AcknowledgementCandidateSha256,
+          admissionAcknowledged: terminalResult.AdmissionAcknowledged,
           acknowledgementSha256 } : null,
         childResultSha256: childBytes ? digest(childBytes) : null,
         child: child ? { passed: child.passed, status: child.status, errorCode: child.errorCode,
@@ -354,6 +360,11 @@ export async function run() {
         terminalRetained: observation?.terminalRetained === true,
         terminalRecordSha256: terminalBytes ? digest(terminalBytes) : null,
         activeProcesses: observation?.result?.ActiveProcesses ?? null,
+        stderrBytes: observation?.result?.StderrBytes ?? null,
+        stderrSha256: observation?.result?.StderrSha256 ?? null,
+        stderrClassification: observation?.result?.StderrClassification ?? "unavailable",
+        acknowledgementCandidateValid: observation?.result?.AcknowledgementCandidateValid ?? false,
+        acknowledgementCandidateSha256: observation?.result?.AcknowledgementCandidateSha256 ?? null,
         scratchRemoved, primaryFailureCode: primaryError ? errorCode(primaryError) : null,
         cleanupFailureCodes: cleanupErrors.map(error => errorCode(error, "native-gate3-eligibility-cleanup-failed")),
         databaseAttempted: false, modelInvoked: false, browserInvoked: false,

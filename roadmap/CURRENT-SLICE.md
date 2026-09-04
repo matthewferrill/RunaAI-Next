@@ -32,14 +32,15 @@ The actual browser design's listed product prerequisites, Playwright/Edge packag
 built-candidate journey and Artifact/Agent browser acceptance remain open; no release, model, production or customer
 credit is claimed.
 
-Native deterministic gate-1 stop, 2026-09-04: the one authorized seven-file command at exact clean `39fd184` reported
-51/56 passing and five failures, then stopped. Dependency-junction cleanup, both lockfiles, exact HEAD and clean
-worktree were verified. Static RCA found one real `postgres.mjs` parser defect, two executed broken source-text
-assertions and one latent broken ownership-declaration assertion, all originating in the earlier unexecuted `b6725c2`
-bundle. No PostgreSQL server, Native process, Control operation, browser, network or model action ran. The one-source/
-three-test correction and syntax-first, 23-check affected-only resume require fresh independent review and a source
-commit; the 51 green checks must not be replayed. RCA:
-`../gate7f/function-first/M1-S2B1-NATIVE-DETERMINISTIC-GATE1-FAILURE-RCA-2026-09-04.md`.
+Native deterministic gate 1, corrected 2026-09-04: the first authorized command at exact clean `39fd184` stopped at
+51/56 after one real `postgres.mjs` parser defect, two executed broken source-text assertions and one latent broken
+ownership-declaration assertion were traced to the earlier unexecuted `b6725c2` bundle. After full RCA and independent
+`GO P0=0/P1=0`, exact correction commit `48dd9f9` passed all 19 syntax files and only the 23 affected checks. The 51
+earlier green checks were retained, not replayed. The authenticated dependency junction was removed; both lockfiles,
+exact HEAD `48dd9f916e97913deb862ba365b29c1bbff8fb02` and an empty worktree were verified. No PostgreSQL server, Native
+process, Control operation, browser, network or model action ran. The next separate gate is disposable PostgreSQL
+Native-authority validation; it requires fresh review and does not authorize unchanged Artifact, Agent or model
+replay. RCA: `../gate7f/function-first/M1-S2B1-NATIVE-DETERMINISTIC-GATE1-FAILURE-RCA-2026-09-04.md`.
 
 Product-foundation checkpoint, 2026-09-02: the single-canvas workspace now implements participant-scoped
 conversation search/rename/archive/unarchive/branch/export/soft-delete, persisted low-risk appearance
@@ -1053,12 +1054,13 @@ the complete Artifact DOM chain through exact head `bf56905`, including the sepa
 `09d55df`, `907dba5` and `b064842`, together with Artifact-result/native-candidate coexistence, the Playwright package
 preflight and actual-browser design. Native and primary integration work remain unpushed. The first deterministic gate
 at exact `39fd184` stopped with 51/56 passing and five source/harness failures; cleanup was green and no external
-operation ran. Review the one-source/three-test correction and syntax-first affected-only resume, commit it, then run
-only those 23 affected checks. After that, satisfy the actual browser
-design's listed product prerequisites, Playwright/Edge package preflight, server-authentication and built-candidate
-journey and run only still-open acceptance evidence. Do not replay already-passed Artifact, PostgreSQL or model
-operations unchanged. The model campaign remains tabled under the material-change rule above; no browser, release,
-model, production or customer acceptance credit is claimed.
+operation ran. Full RCA and correction commit `48dd9f9` then passed the 19-file syntax-first preflight and only the 23
+affected checks, retaining the prior 51 passes without replay. Next, independently review and run the separate
+disposable PostgreSQL Native-authority gate. Only after it passes may work advance to the reviewed Native source/build/
+hash gate, server-authenticated built-candidate browser journey and still-open acceptance evidence. Do not replay
+already-passed Artifact, Agent or model operations unchanged. The model campaign remains tabled under the material-
+change rule above; no PostgreSQL-server, Native-process, browser, release, model, production or customer-acceptance
+credit is claimed by the deterministic result.
 
 Active work remains M1-S2, specified in
 `../gate7f/function-first/M1-S2-FUNCTIONS-AND-GREEN-CRITERIA.md`. The complete R10

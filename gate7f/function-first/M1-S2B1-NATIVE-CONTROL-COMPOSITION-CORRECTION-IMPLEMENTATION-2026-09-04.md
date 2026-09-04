@@ -354,7 +354,7 @@ tests. This supersedes the historical `c68eb8f` planning digest only for the cor
 not Native, PostgreSQL, Control, browser, network, model, release, production or customer-acceptance evidence, and the
 roadmap command must not be rerun after source-test resume while those planning bytes remain unchanged.
 
-## Corrected affected-scope dependency preflight and cleanup — frozen, not executed
+## Corrected affected-scope dependency preflight and cleanup — retained method
 
 The corrected resume may not use `D:\Projects\Runalab\node_modules` or any ambient ancestor. After the one source and
 three harness corrections receive `GO P0=0/P1=0` and are source-committed, one command may temporarily place the
@@ -513,15 +513,16 @@ if ($nativeFailures.Count -gt 1) {
 }
 ```
 
-## Post-junction current-byte cleanliness — frozen, not executed
+## Post-junction current-byte cleanliness — retained method
 
 Only after the wrapper above returns without an exception and has proved the worktree-local junction absent, run the
 following from exact worktree root `D:\Projects\Runalab\runaai-next-native-control-host`. Stop on the first nonzero
-result. The 19-file syntax list now runs before any junction or test in the corrected wrapper. The `c68eb8f` roadmap
-result belongs to the pre-RCA planning records and remains historical evidence. After review, run
-`npm run verify:roadmap` once on the corrected current records before their commit; do not rerun it after the later
-source-test resume if those planning bytes stay unchanged. Neither syntax nor repository cleanliness can substitute for the 23 affected resumed
-checks, and none receives PostgreSQL, native, Control, browser, network, model, release or customer-acceptance credit.
+result. The 19-file syntax list runs before any junction or test in the corrected wrapper. The `c68eb8f` roadmap result
+belongs to the pre-RCA planning records and remains historical evidence. Before the correction commit, the reviewed
+planning records were verified once as recorded above. Because the retained outcome publication now changes planning
+records, validate them once after review and before the evidence commit; do not rerun source tests. Neither syntax nor
+repository cleanliness can substitute for the 23 affected resumed checks, and none receives PostgreSQL, native,
+Control, browser, network, model, release or customer-acceptance credit.
 
 ```powershell
 & git -c safe.directory=D:/Projects/Runalab/runaai-next-native-control-host diff --check
@@ -534,6 +535,22 @@ $nativeRepositoryStatus = @(& git -c safe.directory=D:/Projects/Runalab/runaai-n
 if ($LASTEXITCODE -ne 0) { throw "native repository status check stopped with exit $LASTEXITCODE" }
 if ($nativeRepositoryStatus.Count -ne 0) { throw 'native deterministic gate changed the committed worktree' }
 ```
+
+## Affected-only resume result — passed
+
+The reviewed correction was source-committed at `48dd9f916e97913deb862ba365b29c1bbff8fb02`. Its one authorized affected-
+only resume passed: all 19 syntax files parsed before the junction, the three formerly parser-blocked files passed
+21/21, and the two corrected source-shape checks passed 1/1 each, for 23/23 affected checks. The earlier 51 green checks
+were retained and not replayed. Authenticated link-only cleanup removed the junction, both lockfiles retained SHA-256
+`CEFCC1B9D086FB5EB8088A1BE3A1D86FD5B4360BB22ABA768C530BBBCF007308`, HEAD remained exact, `git diff --check` passed,
+and repository status including untracked paths was empty. No PostgreSQL server, Native process, Control operation,
+browser, network or model action ran.
+
+After independent review of the four outcome records, the single post-result planning validation passed before their
+evidence commit: `npm run verify:roadmap` reported revision `2026-08-28.1`, digest
+`df48115eb1b519bb721008788187ef2aa90d56a584d20f6439f7f03e8a99868c`, all 17 capability families, and 15/15 roadmap
+tests. The planning bytes remained unchanged after that command, so neither a second roadmap run nor any Native-test
+replay is authorized for this evidence commit.
 
 ## Deliberately deferred gates
 

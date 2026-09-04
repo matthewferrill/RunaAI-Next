@@ -72,3 +72,18 @@ same authenticated junction and link-only cleanup procedure applies to the affec
 Native dependency path absent, both lockfiles unchanged, `git diff --check` green, exact committed HEAD unchanged and
 an empty worktree including untracked paths. Any failure stops again for a new RCA; it does not authorize a full-suite,
 PostgreSQL, Native, browser, network or model retry.
+
+## Corrected affected-only result
+
+After the correction and its execution method received independent `GO P0=0/P1=0`, exact commit
+`48dd9f916e97913deb862ba365b29c1bbff8fb02` passed all 19 syntax checks before any junction was created. The authenticated
+temporary dependency junction then supported only the affected resume: 21/21 checks across the three parser-blocked
+files, 1/1 corrected Control source-shape check, and 1/1 corrected PostgreSQL source-shape check. The result was 23/23.
+The 51 green checks from the stopped attempt were retained and not replayed.
+
+Cleanup removed the junction and verified both lockfiles unchanged at
+`CEFCC1B9D086FB5EB8088A1BE3A1D86FD5B4360BB22ABA768C530BBBCF007308`, the dependency source remained an ordinary
+directory, HEAD remained exactly `48dd9f916e97913deb862ba365b29c1bbff8fb02`, `git diff --check` passed, and the
+worktree including untracked paths was empty. No PostgreSQL server, Native process, Control operation, browser, network
+or model action ran. This closes deterministic gate 1 only; disposable PostgreSQL Native-authority validation remains
+a separate independently reviewed gate.

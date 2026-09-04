@@ -28,14 +28,18 @@ The diagnostic also exposed a classifier defect: the original mutation mask comb
 
 The affected-only resume exposed a second operator defect. The ACL predicates all passed, but the stripped PowerShell child auto-loaded `Get-Acl` and emitted 616 bytes of benign `Preparing modules for first use` progress as CLIXML on stderr. It exited zero and returned exactly `ok` on stdout. The strict wrapper correctly rejects unexplained stderr, but use of a module-loading cmdlet made benign host initialization indistinguishable from an error channel. This was an operator invocation/publication failure, not a staging, MXC, or model failure.
 
+The next affected-only resume at commit `3772a76de84af38f3c95126e5a7503398caeb12d` stopped before product-directory creation with `native-gate3-eligibility-source-snapshot-dirty`. The original source gate collapsed commit format, tree format, tracked membership, and whole-worktree status into one error and retained no predicate-level result. Immediately afterward, the exported source-authority function and every constituent predicate passed against the same commit and tree. The exact transient predicate therefore cannot be recovered from the published error. That inability to classify is itself an operator-publication defect; it is not evidence against MXC or a model.
+
 ## Systemic correction
 
 1. Use the current Control identity's existing `C:\Users\Matthew\AppData\Local` boundary as the trusted parent. Read-only inspection proved it has no reparse ancestors, an allowed owner, and zero untrusted applicable or inheritable mutation rules.
-2. Authenticate the exact reviewed source commit and five active source hashes before creating any product directory.
+2. Authenticate the exact reviewed source commit and six active-method source hashes before creating any product directory.
 3. Provision only the product-owned `RunaAI\Gate7F\staging` hierarchy below that trusted parent. Apply and verify the existing owner-plus-SYSTEM private ACL at each new level. Do not modify ACLs on `C:\`, `C:\AI`, the user profile, or `AppData\Local`.
 4. Detect mutation authority using only primitive write/create/delete/ACL-ownership bits. Do not use Windows composite masks that overlap read-only `Synchronize`.
 5. Continue to reject every reparse ancestor and every existing product directory that is not already the exact owner-private boundary.
 6. Use the .NET `System.IO.Directory` ACL APIs for get/set operations in all three boundary helpers. They avoid the module auto-load progress channel while retaining strict rejection of any nonempty stderr; do not weaken the stderr gate.
+7. Replace the broad, non-evidentiary whole-worktree status predicate with exact admission of every executable source input: the reviewed external commit and six active-method hashes (including the operator's imported watchdog module), hard-coded executor/contracts/lock hashes, tracked membership for all nine source inputs, the exact dependency-tree digest, and the already-sealed runtime/runner hashes. Emit a distinct error for commit format, tree format, and membership instead of collapsing them.
+8. Include `zod` in the source dependency-tree digest because the admitted contracts module imports it. The fixed release's QuickJS runtime remains governed by its existing sealed release-artifact proof; this eligibility gate does not reconstruct or replace that release proof.
 
 This is the reusable correction for every native operator: validate the parent that can replace the child, use primitive rights for ACL classification, authenticate code before mutation, and make the product-owned working hierarchy private before placing evidence or capabilities in it.
 

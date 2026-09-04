@@ -10,7 +10,7 @@ const RUNNER_SHA256 = "64ea2e039e4ec703c681753464d28414d41b4afbfb79b36796f610443
 const EXECUTOR_SHA256 = "e6ab59285cf63ad6bdf4643b63727a7b5e5d863ef642ee283166f59d0fc3988a";
 const CONTRACTS_SHA256 = "46c7640befa34e75332712a1bb400e9265f6b65b5d02294ff244a2c2d02b3976";
 const LOCK_SHA256 = "cefcc1b9d086fb5eb8088a1be3a1d86fd5b4360bb22aba768c530bbbcf007308";
-const DEPENDENCY_SHA256 = "df90c7e449e6ab47251a2b0409fc9895ef37c92d04285dbc5053bcdcd61c5dc4";
+const DEPENDENCY_SHA256 = "13f70f797da871b78e092b07eac2c7e70a23188319bea9ffab041a81d3913203";
 const CONTROL_SOURCE_ROOT = "C:\\AI\\Projects\\RunaAI-Next-supervisor-8783643";
 const GIT = "C:\\Program Files\\Git\\cmd\\git.exe";
 const ADMISSION_MS = 5_000;
@@ -26,6 +26,7 @@ const contractsPath = path.join(sourceRoot, "gate7e", "contracts.mjs");
 const lockPath = path.join(sourceRoot, "package-lock.json");
 const operatorPath = path.join(import.meta.dirname, "run-native-gate3-mxc-eligibility-control.mjs");
 const deploymentRoot = path.join(import.meta.dirname, "control", "deployment");
+const watchdogPath = path.join(deploymentRoot, "watchdog.mjs");
 const hostPath = path.join(deploymentRoot, "Watchdog-Host.mjs");
 const wrapperPath = path.join(deploymentRoot, "Invoke-ClosedCompanionWatchdog.ps1");
 const helperPath = path.join(deploymentRoot, "ClosedCompanionJob.cs");
@@ -69,18 +70,20 @@ export async function sourceAuthority() {
   }
   const sourceCommit = gitText(["rev-parse", "--verify", "HEAD"], "native-gate3-eligibility-source-commit-invalid");
   const sourceTree = gitText(["rev-parse", "--verify", "HEAD^{tree}"], "native-gate3-eligibility-source-tree-invalid");
-  const tracked = [operatorPath, import.meta.filename, hostPath, wrapperPath, helperPath]
+  const tracked = [operatorPath, import.meta.filename, watchdogPath, hostPath, wrapperPath, helperPath,
+    executorPath, contractsPath, lockPath]
     .map(filename => path.relative(sourceRoot, filename).replaceAll("\\", "/"));
   const trackedResult = gitText(["ls-files", "--error-unmatch", "--", ...tracked],
     "native-gate3-eligibility-source-membership-invalid").split(/\r?\n/u).sort();
-  if (!/^[a-f0-9]{40,64}$/u.test(sourceCommit) || !/^[a-f0-9]{40,64}$/u.test(sourceTree)
-      || trackedResult.length !== tracked.length || trackedResult.some((value, index) => value !== tracked.slice().sort()[index])
-      || gitText(["status", "--porcelain=v1", "--untracked-files=no"],
-        "native-gate3-eligibility-source-status-invalid") !== "") {
-    throw coded("native-gate3-eligibility-source-snapshot-dirty");
+  if (!/^[a-f0-9]{40,64}$/u.test(sourceCommit)) throw coded("native-gate3-eligibility-source-commit-format");
+  if (!/^[a-f0-9]{40,64}$/u.test(sourceTree)) throw coded("native-gate3-eligibility-source-tree-format");
+  if (trackedResult.length !== tracked.length
+      || trackedResult.some((value, index) => value !== tracked.slice().sort()[index])) {
+    throw coded("native-gate3-eligibility-source-membership-mismatch");
   }
   const authority = Object.freeze({ schemaVersion: "runaai-native-gate3-source-authority/v1", sourceCommit, sourceTree,
     operatorSha256: digest(await stableFile(operatorPath)), bootstrapSha256: digest(await stableFile(import.meta.filename)),
+    watchdogSha256: digest(await stableFile(watchdogPath)),
     hostSha256: digest(await stableFile(hostPath)), wrapperSha256: digest(await stableFile(wrapperPath)),
     helperSha256: digest(await stableFile(helperPath)), privateValuesIncluded: false });
   return Object.freeze({ ...authority, sourceAuthoritySha256: digest(Buffer.from(JSON.stringify(authority), "utf8")) });
@@ -92,7 +95,7 @@ async function dependencyManifestSha256() {
     throw coded("native-gate3-eligibility-dependency-root-invalid");
   }
   const manifest = createHash("sha256");
-  const roots = ["@microsoft/mxc-sdk", "node-pty", "semver"];
+  const roots = ["@microsoft/mxc-sdk", "node-pty", "semver", "zod"];
   const compare = (left, right) => Buffer.compare(Buffer.from(left, "utf8"), Buffer.from(right, "utf8"));
   async function walk(root, relative = "") {
     const base = path.join(dependencyRoot, root, ...relative.split("/").filter(Boolean));

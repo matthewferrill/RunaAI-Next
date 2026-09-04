@@ -99,6 +99,7 @@ function expectedAuthority(authority) {
     sourceCommit: process.env.RUNAAI_GATE3_EXPECTED_SOURCE_COMMIT,
     operatorSha256: process.env.RUNAAI_GATE3_EXPECTED_OPERATOR_SHA256,
     bootstrapSha256: process.env.RUNAAI_GATE3_EXPECTED_BOOTSTRAP_SHA256,
+    watchdogSha256: process.env.RUNAAI_GATE3_EXPECTED_WATCHDOG_SHA256,
     hostSha256: process.env.RUNAAI_GATE3_EXPECTED_HOST_SHA256,
     wrapperSha256: process.env.RUNAAI_GATE3_EXPECTED_WRAPPER_SHA256,
     helperSha256: process.env.RUNAAI_GATE3_EXPECTED_HELPER_SHA256,

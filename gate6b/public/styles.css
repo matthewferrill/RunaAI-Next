@@ -948,6 +948,22 @@ body.workspace-active .primary-button:hover { filter: brightness(1.07); }
 .product-tabs { display:flex; flex-wrap:wrap; gap:.35rem; margin-bottom:1rem; }
 .product-tabs button { border:1px solid var(--workspace-edge-low); border-radius:99rem; background:rgba(255,255,255,.55); color:var(--workspace-ink); padding:.45rem .7rem; cursor:pointer; }
 .product-tabs button.selected { background:var(--workspace-selected); border-color:var(--workspace-accent); }
+.artifact-status { margin:.25rem 0 0; }
+.artifact-workspace { display:grid; grid-template-columns:minmax(16rem, 2fr) minmax(20rem, 3fr); gap:1rem; align-items:start; }
+.artifact-inventory { display:grid; gap:.75rem; min-width:0; }
+.artifact-row { display:flex; align-items:flex-start; justify-content:space-between; gap:.8rem; min-width:0; }
+.artifact-row h2, .artifact-preview h2 { margin:0 0 .35rem; }
+.artifact-row p { margin:.25rem 0; overflow-wrap:anywhere; }
+.artifact-row-copy { min-width:0; }
+.artifact-filename { color:var(--workspace-ink-strong) !important; font-weight:700; }
+.artifact-provenance { font-size:.78rem; }
+.artifact-readiness { margin-top:.55rem !important; white-space:normal; }
+.artifact-readiness-pending, .artifact-readiness-incomplete { background:#f7ebcf; color:#6f5317; }
+.artifact-readiness-failed, .artifact-readiness-unavailable { background:#f5dfdc; color:#792d28; }
+.artifact-preview { position:sticky; top:0; min-width:0; }
+.artifact-preview-content { max-height:32rem; overflow:auto; white-space:pre-wrap; overflow-wrap:anywhere; border:1px solid var(--workspace-edge-low); border-radius:.65rem; background:rgba(255,255,255,.72); color:var(--workspace-ink-strong); padding:.8rem; }
+.artifact-companion { margin-top:1rem; padding-top:.85rem; border-top:1px solid var(--workspace-edge-low); }
+.artifact-companion h3 { margin:0 0 .55rem; font-size:.92rem; }
 body[data-density="compact"] .message, body[data-density="compact"] .product-card,
 body[data-density="compact"] .setting-row { padding:.55rem .7rem; }
 body[data-text-size="small"] { font-size:14px; }
@@ -961,4 +977,6 @@ body[data-reduced-motion="reduce"] *::after { scroll-behavior:auto !important; t
   .system-grid { grid-template-columns:1fr; }
   .setting-row { align-items:flex-start; flex-direction:column; }
   .setting-row select { width:100%; }
+  .artifact-workspace { grid-template-columns:1fr; }
+  .artifact-preview { position:static; }
 }

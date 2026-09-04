@@ -28,8 +28,8 @@ function readyDescriptor(content, overrides = {}) {
       evidenceSha256: "d".repeat(64), contentSha256 }, privacy: listPrivacy(), ...overrides };
 }
 
-const listFor = (resultOwner, results) => ({ schemaVersion: "runaai-m1-result-list/v1", owner: resultOwner,
-  ownerRevision: "c".repeat(64), results, privacy: listPrivacy() });
+const listFor = (resultOwner, results, ownerRevision = "c".repeat(64)) => ({ schemaVersion: "runaai-m1-result-list/v1", owner: resultOwner,
+  ownerRevision, results, privacy: listPrivacy() });
 const list = results => listFor(owner(), results);
 const read = (descriptor, content) => ({ schemaVersion: "runaai-m1-result-read/v1", descriptor,
   encoding: "base64", contentBase64: Buffer.from(content, "utf8").toString("base64"), privacy: readPrivacy() });
@@ -236,7 +236,7 @@ test("real artifact UI module inserts verified result only as inert text and dow
   assert.equal(objectUrls.length, 0);
   const verify = byText(container, "button", /^Verify and preview$/u); assert.ok(verify);
   await verify.click();
-  assert.deepEqual(calls.map(call => call.operation), ["result.list", "result.read"]);
+  assert.deepEqual(calls.map(call => call.operation), ["result.list", "result.list", "result.read"]);
   const preview = byText(container, "pre", /globalThis\.compromised/u); assert.ok(preview);
   assert.equal(preview.textContent, content);
   assert.equal(descendants(preview).length, 0);
@@ -248,6 +248,176 @@ test("real artifact UI module inserts verified result only as inert text and dow
   assert.deepEqual(Buffer.from(blobs[0].bytes), Buffer.from(content, "utf8"));
   const anchor = root.created.find(node => node.tagName === "A"); assert.equal(anchor.download, descriptor.filename);
   assert.equal(anchor.href, "blob:verified-result"); assert.deepEqual(revoked, ["blob:verified-result"]);
+});
+
+test("a retained primary control revalidates the owner and becomes inert when another page archives it", async () => {
+  const root = new TestDocument(), container = root.createElement("main"), descriptor = readyDescriptor("old private result");
+  const calls = []; let archived = false;
+  const context = { projectId: "project-01", experience: "chat", owner: owner() };
+  await renderArtifactResults({ root, container,
+    context, runtime,
+    request: async (_path, payload) => {
+      calls.push(payload);
+      if (payload.operation !== "result.list") throw new Error("result-read-must-not-run");
+      if (!archived) return list([descriptor]);
+      throw Object.assign(new Error("PRIVATE_OWNER_CANARY"), { code: "result-owner-not-found" });
+    } });
+  const retained = byText(container, "button", /^Verify and preview$/u); assert.ok(retained);
+  context.projectId = "foreign-project"; context.experience = "code"; context.owner.chatId = "foreign-chat";
+  archived = true;
+  await retained.click();
+  assert.deepEqual(calls.map(call => call.operation), ["result.list", "result.list"]);
+  assert.equal(calls[1].projectId, "project-01"); assert.equal(calls[1].experience, "chat");
+  assert.deepEqual(calls[1].input.owner, owner());
+  assert.equal(retained.disabled, true); assert.equal(retained.parentNode, null);
+  assert.equal(byText(container, "button", /^Verify and preview$/u), undefined);
+  assert.equal(byText(container, "button", /^Download verified result$/u), undefined);
+  assert.match(container.textContent, /results are no longer current/u);
+  assert.match(container.textContent, /No result content is shown/u);
+  assert.doesNotMatch(container.textContent, /PRIVATE_OWNER_CANARY|old private result/u);
+});
+
+test("retained owner revision, primary and companion drift is detected by re-listing before any result read", async () => {
+  for (const target of ["owner-revision", "primary", "companion"]) {
+    const root = new TestDocument(), container = root.createElement("main"), pair = conversationPair("research");
+    const changedReport = withReadyContent(pair.report, "PRIVATE_CHANGED_REPORT");
+    const changedMetadata = withReadyContent(pair.metadata,
+      pair.metadataText.replace("Supplied\\t sources only.", "PRIVATE_CHANGED_METADATA"));
+    const changedOwnerRevision = "1".repeat(64);
+    const currentList = target === "owner-revision"
+      ? listFor(owner(), [{ ...pair.report, ownerRevision: changedOwnerRevision },
+        { ...pair.metadata, ownerRevision: changedOwnerRevision }], changedOwnerRevision)
+      : list(target === "primary" ? [changedReport, pair.metadata] : [pair.report, changedMetadata]);
+    const calls = []; let activation = false;
+    await renderArtifactResults({ root, container,
+      context: { projectId: "project-01", experience: "chat", owner: owner() }, runtime,
+      request: async (_path, payload) => {
+        calls.push(payload);
+        if (payload.operation !== "result.list") throw new Error("result-read-must-not-run");
+        return activation ? currentList : list([pair.report, pair.metadata]);
+      } });
+    const retained = byText(container, "button", /^Verify and preview$/u); assert.ok(retained);
+    activation = true;
+    await retained.click();
+    assert.deepEqual(calls.map(call => call.operation), ["result.list", "result.list"]);
+    assert.equal(retained.disabled, true); assert.equal(retained.parentNode, null);
+    assert.equal(byText(container, "button", /^Download verified result$/u), undefined);
+    assert.match(container.textContent, /results are no longer current/u);
+    assert.doesNotMatch(container.textContent, /PRIVATE_CHANGED_REPORT|PRIVATE_CHANGED_METADATA/u);
+  }
+});
+
+test("a report owner changing after companion verification is revalidated before the primary read without leaking either result", async () => {
+  const root = new TestDocument(), container = root.createElement("main"), base = conversationPair("research");
+  const metadataValue = JSON.parse(base.metadataText); metadataValue.limitation = "PRIVATE_COMPANION_CANARY";
+  const metadataText = JSON.stringify(metadataValue), metadata = withReadyContent(base.metadata, metadataText);
+  const changedReport = withReadyContent(base.report, "PRIVATE_PRIMARY_CANARY");
+  const calls = []; let listCount = 0;
+  await renderArtifactResults({ root, container,
+    context: { projectId: "project-01", experience: "chat", owner: owner() }, runtime,
+    request: async (_path, payload) => {
+      calls.push(payload);
+      if (payload.operation === "result.list") {
+        listCount++;
+        return listCount < 3 ? list([base.report, metadata]) : list([changedReport, metadata]);
+      }
+      if (payload.operation === "result.read" && payload.input.resultId === metadata.resultId) {
+        return read(metadata, metadataText);
+      }
+      throw new Error("primary-result-read-must-not-run");
+    } });
+  const retained = byText(container, "button", /^Verify and preview$/u); assert.ok(retained);
+  await retained.click();
+  assert.deepEqual(calls.map(call => call.operation), ["result.list", "result.list", "result.read", "result.list"]);
+  assert.equal(calls[2].input.resultId, metadata.resultId);
+  assert.equal(retained.disabled, true); assert.equal(retained.parentNode, null);
+  assert.equal(byText(container, "button", /^Download verified result$/u), undefined);
+  assert.match(container.textContent, /results are no longer current/u);
+  assert.doesNotMatch(container.textContent, /PRIVATE_COMPANION_CANARY|PRIVATE_PRIMARY_CANARY/u);
+});
+
+test("a production result-stale race on a primary read invalidates every retained control and clears an earlier preview", async () => {
+  const root = new TestDocument(), container = root.createElement("main");
+  const firstContent = "PRIVATE_PRIOR_PRIMARY_PREVIEW", first = readyDescriptor(firstContent);
+  const secondContent = "PRIVATE_STALE_PRIMARY_BYTES", secondBase = readyDescriptor(secondContent);
+  const second = { ...secondBase, resultId: `r1.${"9".repeat(64)}`, sourceRecordId: "turn:2", ordinal: 2,
+    filename: "conversation-answer-000002.txt",
+    provenance: { ...secondBase.provenance, turnOrdinal: 2 } };
+  const calls = []; let staleResultId = null;
+  await renderArtifactResults({ root, container,
+    context: { projectId: "project-01", experience: "chat", owner: owner() }, runtime,
+    request: async (_path, payload) => {
+      calls.push(payload);
+      if (payload.operation === "result.list") return list([first, second]);
+      if (payload.operation === "result.read" && payload.input.resultId === staleResultId) {
+        throw Object.assign(new Error("PRIVATE_STALE_ERROR_CANARY"), { code: "result-stale" });
+      }
+      if (payload.operation === "result.read" && payload.input.resultId === first.resultId) return read(first, firstContent);
+      throw new Error("unexpected-result-read");
+    } });
+  const verifyControls = descendants(container).filter(node => node.tagName === "BUTTON"
+    && node.textContent === "Verify and preview");
+  assert.equal(verifyControls.length, 2);
+  await verifyControls[0].click();
+  const priorDownload = byText(container, "button", /^Download verified result$/u); assert.ok(priorDownload);
+  assert.ok(byText(container, "pre", /PRIVATE_PRIOR_PRIMARY_PREVIEW/u));
+  staleResultId = second.resultId;
+  await verifyControls[1].click();
+  assert.deepEqual(calls.map(call => call.operation),
+    ["result.list", "result.list", "result.read", "result.list", "result.read"]);
+  assert.equal(calls[4].input.resultId, second.resultId);
+  assert.equal(priorDownload.disabled, true); assert.equal(priorDownload.parentNode, null);
+  for (const control of verifyControls) { assert.equal(control.disabled, true); assert.equal(control.parentNode, null); }
+  assert.equal(byText(container, "button", /^Download verified result$/u), undefined);
+  assert.match(container.textContent, /results are no longer current/u);
+  assert.doesNotMatch(container.textContent,
+    /PRIVATE_PRIOR_PRIMARY_PREVIEW|PRIVATE_STALE_PRIMARY_BYTES|PRIVATE_STALE_ERROR_CANARY/u);
+  const stoppedCallCount = calls.length;
+  await verifyControls[0].click(); await verifyControls[1].click(); await priorDownload.click();
+  assert.equal(calls.length, stoppedCallCount);
+});
+
+test("a production result-stale race on a companion read blocks the primary and clears an earlier preview", async () => {
+  const root = new TestDocument(), container = root.createElement("main");
+  const firstContent = "PRIVATE_PRIOR_COMPANION_PREVIEW", first = readyDescriptor(firstContent);
+  const pair = conversationPair("research");
+  const report = { ...pair.report, resultId: `r1.${"4".repeat(64)}`, sourceRecordId: "turn:2", ordinal: 2,
+    filename: "research-report-000002.txt", provenance: { ...pair.report.provenance, turnOrdinal: 2 } };
+  const metadata = { ...pair.metadata, resultId: `r1.${"5".repeat(64)}`, sourceRecordId: "turn:2", ordinal: 3,
+    filename: "research-metadata-000003.json", provenance: { ...pair.metadata.provenance, turnOrdinal: 2 } };
+  const calls = []; let staleCompanion = false;
+  await renderArtifactResults({ root, container,
+    context: { projectId: "project-01", experience: "chat", owner: owner() }, runtime,
+    request: async (_path, payload) => {
+      calls.push(payload);
+      if (payload.operation === "result.list") return list([first, report, metadata]);
+      if (payload.operation === "result.read" && payload.input.resultId === metadata.resultId && staleCompanion) {
+        throw Object.assign(new Error("PRIVATE_COMPANION_STALE_ERROR"), { code: "result-stale" });
+      }
+      if (payload.operation === "result.read" && payload.input.resultId === first.resultId) return read(first, firstContent);
+      throw new Error("primary-or-unexpected-result-read");
+    } });
+  const verifyControls = descendants(container).filter(node => node.tagName === "BUTTON"
+    && node.textContent === "Verify and preview");
+  assert.equal(verifyControls.length, 3);
+  await verifyControls[0].click();
+  const priorDownload = byText(container, "button", /^Download verified result$/u); assert.ok(priorDownload);
+  assert.ok(byText(container, "pre", /PRIVATE_PRIOR_COMPANION_PREVIEW/u));
+  staleCompanion = true;
+  await verifyControls[1].click();
+  assert.deepEqual(calls.map(call => call.operation),
+    ["result.list", "result.list", "result.read", "result.list", "result.read"]);
+  assert.equal(calls[4].input.resultId, metadata.resultId);
+  assert.equal(calls.some(call => call.operation === "result.read" && call.input.resultId === report.resultId), false);
+  assert.equal(priorDownload.disabled, true); assert.equal(priorDownload.parentNode, null);
+  for (const control of verifyControls) { assert.equal(control.disabled, true); assert.equal(control.parentNode, null); }
+  assert.equal(byText(container, "button", /^Download verified result$/u), undefined);
+  assert.match(container.textContent, /results are no longer current/u);
+  assert.doesNotMatch(container.textContent,
+    /PRIVATE_PRIOR_COMPANION_PREVIEW|PRIVATE_COMPANION_STALE_ERROR|Attributable report/u);
+  const stoppedCallCount = calls.length;
+  await verifyControls[0].click(); await verifyControls[1].click(); await verifyControls[2].click();
+  assert.equal(calls.length, stoppedCallCount);
 });
 
 test("digest mismatch leaves the real artifact UI preview and download disabled", async () => {
@@ -273,9 +443,9 @@ test("selecting a ready Research report keeps independently verified citation me
       return read(selected, selected === report ? reportText : metadataText);
   } });
   await byText(container, "button", /^Verify and preview$/u).click();
-  assert.deepEqual(calls.map(call => call.operation), ["result.list", "result.read", "result.read"]);
-  assert.equal(calls[1].input.resultId, metadata.resultId);
-  assert.equal(calls[2].input.resultId, report.resultId);
+  assert.deepEqual(calls.map(call => call.operation), ["result.list", "result.list", "result.read", "result.list", "result.read"]);
+  assert.equal(calls[2].input.resultId, metadata.resultId);
+  assert.equal(calls[4].input.resultId, report.resultId);
   assert.ok(byText(container, "pre", /Attributable report/u));
   assert.ok(byText(container, "pre", /source-01/u));
   assert.equal(root.created.filter(node => ["SCRIPT", "IMG", "IFRAME", "OBJECT"].includes(node.tagName)).length, 0);
@@ -299,7 +469,7 @@ test("a ready Research report is non-actionable when its companion is missing or
     runtime, request: async (_path, payload) => { calls.push(payload); if (payload.operation === "result.list") return list([pair.report, pair.metadata]);
       throw new Error("metadata-read-failed"); } });
   await byText(container, "button", /^Verify and preview$/u).click();
-  assert.deepEqual(calls.map(call => call.operation), ["result.list", "result.read"]);
+  assert.deepEqual(calls.map(call => call.operation), ["result.list", "result.list", "result.read"]);
   assert.match(container.textContent, /Preview and download remain disabled/u);
   assert.equal(byText(container, "button", /^Download verified result$/u), undefined);
 });
@@ -316,7 +486,7 @@ test("Research metadata rejects every frozen SafeText violation before the repor
       runtime, request: async (_path, payload) => { calls.push(payload); if (payload.operation === "result.list") return list([pair.report, metadata]);
         return read(metadata, metadataText); } });
     await byText(container, "button", /^Verify and preview$/u).click();
-    assert.deepEqual(calls.map(call => call.operation), ["result.list", "result.read"]);
+    assert.deepEqual(calls.map(call => call.operation), ["result.list", "result.list", "result.read"]);
     assert.match(container.textContent, /Preview and download remain disabled/u);
     assert.equal(byText(container, "button", /^Download verified result$/u), undefined);
   }
@@ -329,7 +499,8 @@ test("Review rejects an incoherent list and verifies matching context metadata f
       const selected = payload.input.resultId === pair.metadata.resultId ? pair.metadata : pair.report;
       return read(selected, selected === pair.metadata ? pair.metadataText : pair.reportText); } });
   await byText(container, "button", /^Verify and preview$/u).click();
-  assert.equal(calls[1].input.resultId, pair.metadata.resultId); assert.equal(calls[2].input.resultId, pair.report.resultId);
+  assert.deepEqual(calls.map(call => call.operation), ["result.list", "result.list", "result.read", "result.list", "result.read"]);
+  assert.equal(calls[2].input.resultId, pair.metadata.resultId); assert.equal(calls[4].input.resultId, pair.report.resultId);
   assert.ok(byText(container, "pre", /artifact-01/u)); assert.ok(byText(container, "pre", /Accepted review finding/u));
 
   const mismatchRoot = new TestDocument(), mismatchContainer = mismatchRoot.createElement("main"), mismatchCalls = [];
@@ -354,7 +525,7 @@ test("Review rejects an incoherent list and verifies matching context metadata f
     request: async (_path, payload) => { digestCalls.push(payload); if (payload.operation === "result.list") return list([pair.report, pair.metadata]);
       return read(pair.metadata, "tampered metadata"); } });
   await byText(digestContainer, "button", /^Verify and preview$/u).click();
-  assert.deepEqual(digestCalls.map(call => call.operation), ["result.list", "result.read"]);
+  assert.deepEqual(digestCalls.map(call => call.operation), ["result.list", "result.list", "result.read"]);
   assert.match(digestContainer.textContent, /Preview and download remain disabled/u);
   assert.equal(byText(digestContainer, "button", /^Download verified result$/u), undefined);
 });
@@ -368,7 +539,7 @@ test("Review report stays blocked when its verified companion has an invalid pos
     runtime, request: async (_path, payload) => { calls.push(payload); if (payload.operation === "result.list") return list([pair.report, metadata]);
       return read(metadata, metadataText); } });
   await byText(container, "button", /^Verify and preview$/u).click();
-  assert.deepEqual(calls.map(call => call.operation), ["result.list", "result.read"]);
+  assert.deepEqual(calls.map(call => call.operation), ["result.list", "result.list", "result.read"]);
   assert.match(container.textContent, /Preview and download remain disabled/u);
   assert.equal(byText(container, "button", /^Download verified result$/u), undefined);
 });

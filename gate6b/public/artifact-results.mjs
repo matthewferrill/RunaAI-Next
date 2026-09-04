@@ -192,6 +192,16 @@ function sameJson(left, right) {
     && typeof key === "string" && sameJson(left[key], right[key]));
 }
 
+function frozenJsonCopy(value) {
+  if (Array.isArray(value)) return Object.freeze(value.map(frozenJsonCopy));
+  if (value && Object.getPrototypeOf(value) === Object.prototype) {
+    const copy = {};
+    for (const key of Reflect.ownKeys(value)) copy[key] = frozenJsonCopy(value[key]);
+    return Object.freeze(copy);
+  }
+  return value;
+}
+
 export function admitResultList(value, owner) {
   if (!strictObject(value, LIST_KEYS) || value.schemaVersion !== "runaai-m1-result-list/v1"
       || !sameOwner(value.owner, owner) || !sha(value.ownerRevision) || !Array.isArray(value.results)
@@ -356,6 +366,27 @@ async function readAndVerify({ request, context, descriptor, runtime }) {
   return verifyResultRead(response, descriptor, runtime);
 }
 
+async function revalidateRetainedSelection({ request, context, listed, descriptor }) {
+  const current = frozenJsonCopy(admitResultList(await request("/api/m1/workspace", { projectId: context.projectId,
+    experience: context.experience, operation: "result.list", input: { owner: listed.owner } }), listed.owner));
+  if (current.ownerRevision !== listed.ownerRevision) throw fail("result-client-owner-stale");
+  const selected = current.results.find(value => value.resultId === descriptor.resultId);
+  if (!selected || !sameJson(selected, descriptor)) throw fail("result-client-descriptor-stale");
+  const retainedCompanion = companionFor(descriptor, listed.results);
+  const companionRequired = ["research-report", "review-report"].includes(descriptor.kind);
+  if (companionRequired && !retainedCompanion) throw fail("result-client-companion-unavailable");
+  let companion = null;
+  if (retainedCompanion) {
+    companion = current.results.find(value => value.resultId === retainedCompanion.resultId);
+    const selectedCompanion = companionFor(selected, current.results);
+    if (!companion || !sameJson(companion, retainedCompanion)
+        || !selectedCompanion || !sameJson(selectedCompanion, retainedCompanion)) {
+      throw fail("result-client-descriptor-stale");
+    }
+  }
+  return Object.freeze({ descriptor: selected, companion });
+}
+
 function strictArray(value, minimum, maximum) {
   return Array.isArray(value) && Object.getPrototypeOf(value) === Array.prototype
     && value.length >= minimum && value.length <= maximum;
@@ -442,6 +473,7 @@ export async function renderArtifactResults({ root = document, container, reques
       "Files and artifacts shows only the current saved conversation or opened Code task in an authorized project. Local folders and uploads are not enabled here."));
     container.append(empty); return Object.freeze({ resultCount: 0 });
   }
+  const retainedContext = Object.freeze({ projectId: context.projectId, experience: context.experience });
   const status = element(root, "p", "artifact-status", "Loading result metadata…"); status.setAttribute("role", "status");
   const workspace = element(root, "div", "artifact-workspace"), inventory = element(root, "div", "artifact-inventory"),
     preview = element(root, "section", "artifact-preview product-card");
@@ -449,8 +481,8 @@ export async function renderArtifactResults({ root = document, container, reques
   workspace.append(inventory, preview); container.append(status, workspace);
   let listed;
   try {
-    listed = admitResultList(await request("/api/m1/workspace", { projectId: context.projectId,
-      experience: context.experience, operation: "result.list", input: { owner: context.owner } }), context.owner);
+    listed = frozenJsonCopy(admitResultList(await request("/api/m1/workspace", { projectId: retainedContext.projectId,
+      experience: retainedContext.experience, operation: "result.list", input: { owner: context.owner } }), context.owner));
   } catch (error) {
     if (!isCurrent()) return Object.freeze({ resultCount: 0 });
     status.textContent = error?.code === "result-owner-not-found"
@@ -461,41 +493,73 @@ export async function renderArtifactResults({ root = document, container, reques
   if (!isCurrent()) return Object.freeze({ resultCount: 0 });
   status.textContent = listed.results.length ? `${listed.results.length} current result${listed.results.length === 1 ? "" : "s"}.`
     : "This saved conversation or task has no result descriptors yet.";
-  let selection = 0;
+  let selection = 0, selectionInFlight = false, invalidated = false, activeDownload = null;
+  const retainedActions = new Set();
+  const setRetainedActionsDisabled = disabled => {
+    for (const action of retainedActions) action.disabled = disabled;
+  };
+  const clearActiveDownload = () => {
+    if (!activeDownload) return;
+    activeDownload.disabled = true; activeDownload.remove?.(); activeDownload = null;
+  };
+  const invalidateRetainedResults = () => {
+    if (invalidated) return;
+    invalidated = true; selection++;
+    clearActiveDownload();
+    for (const action of retainedActions) { action.disabled = true; action.remove?.(); }
+    status.textContent = "These results are no longer current. Reopen the saved conversation or task to refresh.";
+    preview.replaceChildren(element(root, "h2", null, "Results unavailable"),
+      element(root, "p", "product-muted",
+        "The saved conversation or task changed or is no longer available. No result content is shown from this retained view."));
+  };
+  const authorityChanged = error => ["result-owner-not-found", "result-stale", "result-client-list-invalid",
+    "result-client-owner-stale", "result-client-descriptor-stale"].includes(error?.code);
   const select = async descriptor => {
+    if (invalidated || selectionInFlight) return;
+    selectionInFlight = true; setRetainedActionsDisabled(true);
     const selectedAt = ++selection;
+    clearActiveDownload();
     preview.replaceChildren(element(root, "h2", null, KIND_LABELS[descriptor.kind]),
-      element(root, "p", "product-muted", "Reading and independently verifying bytes…"));
+      element(root, "p", "product-muted", "Revalidating the current owner before reading and independently verifying bytes…"));
     try {
-      const companion = companionFor(descriptor, listed.results);
-      const companionRequired = ["research-report", "review-report"].includes(descriptor.kind);
-      if (companionRequired && !companion) throw fail("result-client-companion-unavailable");
+      const revalidated = await revalidateRetainedSelection({ request, context: retainedContext, listed, descriptor });
+      if (!isCurrent() || selectedAt !== selection) return;
+      let currentDescriptor = revalidated.descriptor;
+      const companion = revalidated.companion;
       let companionVerified = null;
       if (companion) {
-        companionVerified = await readAndVerify({ request, context, descriptor: companion, runtime });
+        companionVerified = await readAndVerify({ request, context: retainedContext, descriptor: companion, runtime });
         admitCompanionMetadata(companionVerified.text, companion.kind);
+        const beforePrimaryRead = await revalidateRetainedSelection({ request, context: retainedContext, listed, descriptor });
+        if (!isCurrent() || selectedAt !== selection) return;
+        currentDescriptor = beforePrimaryRead.descriptor;
       }
-      const verified = await readAndVerify({ request, context, descriptor, runtime });
+      const verified = await readAndVerify({ request, context: retainedContext, descriptor: currentDescriptor, runtime });
       if (!isCurrent() || selectedAt !== selection) return;
-      const heading = element(root, "h2", null, KIND_LABELS[descriptor.kind]);
-      const meta = element(root, "p", "product-muted", `${descriptor.filename} · ${descriptor.format.toUpperCase()} · ${descriptor.byteLength} bytes · SHA-256 ${descriptor.contentSha256}`);
+      const heading = element(root, "h2", null, KIND_LABELS[currentDescriptor.kind]);
+      const meta = element(root, "p", "product-muted", `${currentDescriptor.filename} · ${currentDescriptor.format.toUpperCase()} · ${currentDescriptor.byteLength} bytes · SHA-256 ${currentDescriptor.contentSha256}`);
       const content = element(root, "pre", "artifact-preview-content");
       content.textContent = verified.text;
       const download = element(root, "button", "primary-button", "Download verified result"); download.type = "button";
       download.disabled = true;
-      download.addEventListener("click", () => downloadVerifiedResult(root, descriptor, verified, runtime));
+      download.addEventListener("click", () => downloadVerifiedResult(root, currentDescriptor, verified, runtime));
       preview.replaceChildren(heading, meta, content, download);
-      download.disabled = false;
+      activeDownload = download; download.disabled = false;
       if (companion && companionVerified) {
         const companionBox = element(root, "section", "artifact-companion");
         companionBox.append(element(root, "h3", null, KIND_LABELS[companion.kind])); preview.append(companionBox);
         const companionContent = element(root, "pre", "artifact-preview-content");
         companionContent.textContent = companionVerified.text; companionBox.append(companionContent);
       }
-    } catch {
+    } catch (error) {
       if (!isCurrent() || selectedAt !== selection) return;
-      preview.replaceChildren(element(root, "h2", null, "Preview unavailable"),
+      if (authorityChanged(error)) invalidateRetainedResults();
+      else preview.replaceChildren(element(root, "h2", null, "Preview unavailable"),
         element(root, "p", "product-muted", "The returned bytes, length, digest, descriptor, or UTF-8 text could not be independently verified. Preview and download remain disabled."));
+    } finally {
+      if (!invalidated && selectedAt === selection) {
+        selectionInFlight = false; setRetainedActionsDisabled(false);
+      }
     }
   };
   for (const descriptor of listed.results) {
@@ -511,7 +575,7 @@ export async function renderArtifactResults({ root = document, container, reques
     const companionReady = !companionRequired || companionFor(descriptor, listed.results) !== null;
     if (descriptor.readiness === "ready" && companionReady) {
       const open = element(root, "button", "quiet-button", "Verify and preview"); open.type = "button";
-      open.addEventListener("click", () => select(descriptor)); row.append(open);
+      retainedActions.add(open); open.addEventListener("click", () => select(descriptor)); row.append(open);
     } else if (descriptor.readiness === "ready" && companionRequired) {
       copy.append(element(root, "p", "product-muted",
         "This report is not actionable because its matching ready citation/context metadata is unavailable."));

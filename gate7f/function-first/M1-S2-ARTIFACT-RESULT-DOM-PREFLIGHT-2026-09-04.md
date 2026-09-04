@@ -14,6 +14,26 @@ committed at `b6ece37`. Primary-branch integration, push, and ordinary authentic
 acceptance remain required. This record does not claim a deployed Control release, model acceptance, actual Omen
 browser proof, production route, customer acceptance, artifact creation, or completion of C05.
 
+A subsequent actual-browser design review found one retained-control authority gap in those committed bytes: after
+the initial authoritative `result.list`, a retained Verify control could issue `result.read` without first proving
+that the same owner and descriptor were still current. That review stopped at P0=0/P1=1. The source and deterministic
+fixture then received the execution-free correction described below. At that source freeze, the new bytes had not run
+a syntax check, test, browser, server, database, model, network, roadmap, commit or push command, and the Artifact DOM
+lane was STOP pending a different-agent exact-byte review. The earlier 53/53 result remains valid only for commit
+`b6ece37` and does not cover this correction.
+
+Fresh review of that first correction stopped again at P0=0/P1=1: it invalidated retained controls for a missing
+owner or browser-detected list/descriptor drift, but treated the production read-race code `result-stale` as a generic
+verification failure and re-enabled the controls. No execution followed that verdict. The next source/test/doc freeze
+added only the proven `result-stale` invalidation and was completely unexecuted pending another exact-byte review.
+
+Fresh independent review then authorized one corrected deterministic resume. The exact worktree/primary lock digest
+and installed `zod@4.4.3` were authenticated, the reviewed worktree-local junction was created, and the exact
+seven-file suite passed 58/58 including the new retained-owner and `result-stale` cases. Link-only verified cleanup
+left `node_modules` absent. All five explicit current-byte `node --check` commands passed, followed by 15/15 roadmap
+verification and `git diff --check`. No actual browser, database, model, provider, Control, production or customer
+operation ran. The corrected source/test bytes remain uncommitted and unpushed.
+
 ## Bound scope
 
 - Roadmap revision/digest: `2026-08-28.1` /
@@ -55,6 +75,40 @@ read-failed, digest-failed or invalid-schema metadata leaves the report non-acti
 The existing HTTP transport remains unchanged: successful and error JSON responses retain `Cache-Control: no-store`
 and `X-Content-Type-Options: nosniff`. No `Content-Disposition` response header is claimed.
 
+## Retained-control authority correction
+
+The selected project/experience and initially admitted list are copied into immutable browser-side snapshots. Every retained primary or companion
+selection now issues a fresh authenticated `result.list` before its `result.read`. The response must pass the
+complete existing list admission and match the frozen owner kind/id,
+`ownerRevision`, selected descriptor and, when applicable, exact report companion descriptor. Research and Review
+selection revalidates the pair before reading metadata and revalidates it again after metadata verification and
+immediately before reading the primary report. The control does not treat cross-tab notification or retained DOM
+state as authority.
+
+Missing owners, invalid lists, changed owner revisions, missing descriptors, or any selected/companion descriptor
+drift cause the whole retained action set to be disabled and removed. Any old preview and download are cleared and
+replaced with bounded missing-or-changed-owner copy; service error text and newly listed result content are not shown.
+If authority changes after a valid companion read but before the primary read, the second list gate prevents the
+primary read and the already verified companion remains undisclosed. A server-authorized read can still fail after
+its immediately preceding list because the two HTTP operations are not one transaction; that failure infers no
+success or show bytes. The authoritative missing-owner error and production `result-stale` code both invalidate the
+retained controls. `result-stale` is limited to the production projection's exact wrong owner/result/digest/revision
+collapse; no other 409 or generic verification error is promoted to an authority conclusion.
+
+The deterministic fixture adds a two-page-equivalent archive transition, owner-revision drift, exact primary and
+companion descriptor drift, and a change between companion verification and primary read. It asserts exact service
+call order, zero reads when the first revalidation detects drift, no primary read after a later drift, removal and
+disablement of retained actions, no Download control, bounded copy, and absence of private service/result canaries.
+Existing fresh primary and Research/Review paths now require the additional list-before-each-read calls. At their
+source freeze, all of these changes remained unexecuted pending independent review; they are now covered by the one
+58/58 corrected deterministic run recorded below.
+
+The latest fixtures also create valid-list/read races where production `result.read` returns `result-stale` for a
+primary result and for a report companion. Both cases first create a genuine earlier verified preview and Download
+control, then assert that stale detection clears the prior content, removes and disables its Download control and all
+Verify controls, renders neither result/error canary, permits no successor control request, and in the companion case
+never requests the primary report.
+
 ## Deterministic verification and failure accounting
 
 - Four changed/new JavaScript modules/tests passed `node --check`.
@@ -75,6 +129,10 @@ and `X-Content-Type-Options: nosniff`. No `Content-Disposition` response header 
 - Fresh review of all four corrections returned GO at P0=0/P1=0. The one authorized dependency-bound resume passed
   53/53, authenticated and removed the local junction in `finally`, and left `node_modules` absent. Five current-byte
   syntax checks, 15/15 roadmap checks and the final diff check then passed in the reviewed order.
+- Fresh review of the later retained-control and `result-stale` corrections authorized one new resume. Exact lock and
+  `zod@4.4.3` identity checks passed; the reviewed junction was created only for the exact seven-file suite, which
+  passed 58/58. Verified link-only cleanup left `node_modules` absent. All five current-byte syntax checks, 15/15
+  roadmap checks and the final diff check then passed in the reviewed order.
 
 The first independent implementation review stopped at P0=0/P1=3: insufficient browser-side binding of frozen
 descriptor relationships/order, insufficient report-to-ready-metadata companion gating, and regex-only evidence for
@@ -114,11 +172,14 @@ an actual-system or user acceptance substitute.
 
 ## Remaining gate
 
-The four corrected STOPs now have fresh P0=0/P1=0 review, green 53/53 verification, verified link-only cleanup, five
-green syntax checks, 15/15 roadmap checks, a clean diff check, and exact local source commit `b6ece37`. Remaining gates
-are reviewed primary-branch integration and push plus the frozen ordinary authenticated Omen -> Control browser journey
-once against a built candidate: current Research/Review and Code results, ready/non-ready state, inert markup, exact
-download bytes/type/name/digest, reload and sign-out/sign-in. Actual browser/server-authentication, release, model,
-production and customer acceptance remain open.
+The four earlier corrected STOPs retain their green 53/53 verification and exact local source commit `b6ece37`. The
+later retained-control and `result-stale` corrections now have one separately authorized green 58/58 deterministic
+run, verified junction cleanup, five green syntax checks, 15/15 roadmap checks and a clean diff check. The current
+source/test/doc bytes remain uncommitted and unpushed. Their next gates are evidence-record review, explicit source
+commit and reviewed primary-branch integration/push, then the frozen ordinary authenticated Omen -> Control browser
+journey against a built candidate:
+current Research/Review and Code results, ready/non-ready state, retained-control owner removal/revision, inert markup,
+exact download bytes/type/name/digest, reload and sign-out/sign-in. Actual browser/server-authentication, release,
+model, production and customer acceptance remain open.
 Any actual-system failure stops that exact gate for retained RCA and corrected-design review before one bounded
 resume. Broader C03/C05 formats, artifact production, upload, editing, sharing and publication remain deferred.

@@ -7,6 +7,18 @@ P0=0/P1=0, the one corrected run passed 53/53, and the authenticated dependency 
 checks, 15/15 roadmap checks and the diff check passed afterward in the reviewed order. The earlier broad-suite stop is a retained test-
 environment/method failure, not an Artifact result implementation, model, database or actual-system failure.
 
+After that commit, the actual-browser harness design review found a separate retained-control authority defect at
+P0=0/P1=1. It is not a recurrence of the broad-suite method failure: the product DOM kept an initially authorized
+result descriptor in a button and did not re-run authoritative `result.list` immediately before each later
+`result.read`. No browser journey or result read exposed this; independent source/design review found it before actual
+browser authorization. At its first source freeze the correction was completely unexecuted and remained STOP pending
+exact-byte review. The earlier 53/53 result must not be attributed to the new source/test bytes.
+
+Fresh review of the first retained-control correction then stopped at P0=0/P1=1 because production `result-stale`
+was not classified as authority invalidation after a valid list/read race. The generic failure path re-enabled Verify
+controls instead of clearing every retained action. No command followed that verdict. The next correction added only
+the proven production code and two race adversaries, then remained STOP and unexecuted for another exact-byte review.
+
 ## Exact stop
 
 After the Artifact DOM-focused source/syntax checks passed 12/12, the builder attempted one broader deterministic
@@ -60,6 +72,36 @@ rerun or relabelled as current DOM evidence. Reusing its recorded boundary is no
 still needs its own current-byte DOM tests, independent review and later ordinary-browser acceptance.
 
 ## Independent implementation review stops and corrections
+
+### Subsequent retained-control source stop and correction
+
+The retained action's original authorization could become stale when another page archived the conversation, changed
+the owner revision, or replaced the selected primary/companion descriptor. The server still re-authorized
+`result.read`, so this was not a server authority bypass, but the browser could make an avoidable read request from an
+already stale retained control and could not remove every obsolete action until that read failed. Cross-tab signaling
+would reduce latency but cannot be authoritative and is not part of the correction.
+
+The source correction copies the selected project/experience and initially admitted list into immutable browser-side snapshots, then re-lists
+through the existing authenticated transport and re-admits the complete response before every primary or companion
+read. It binds the original owner kind/id, exposed `ownerRevision`, exact selected
+descriptor, and exact Research/Review companion descriptor. Research/Review performs the gate twice: before companion
+read and again before primary read. A missing owner, invalid list, changed revision, missing descriptor, or descriptor
+drift disables and removes all retained actions, clears preview/download, and shows only bounded copy. No fresh list
+content or service error detail is rendered. The fixture includes two-page-equivalent archive, owner revision,
+primary/companion drift and post-companion/pre-primary change cases with exact call-order and private-canary checks.
+
+No syntax check, import, deterministic test, browser, database, model, network, roadmap, commit or push has followed
+this correction. Its only next action is different-agent exact-byte review. P0=0/P1=0 review is required before a
+new bounded verification method could be authorized; that source-freeze record did not itself authorize execution.
+
+The latest P1 correction classifies production `result-stale` with the existing missing-owner/browser-stale
+invalidation path. Projection source proves that this code collapses a wrong owner/result/digest/revision after the
+read request; `result-not-ready` and generic integrity/transport failures are deliberately not reclassified. The DOM
+now disables and detaches an existing Download control when a successor selection begins and permanently removes all
+Verify controls on `result-stale`. New primary and companion races begin from a valid fresh list and genuine verified
+prior preview, then return a private-canary `result-stale`; they require bounded replacement copy, no canary, no
+successor request, and no primary report read after companion staleness. These bytes remained completely unexecuted
+until the independently authorized corrected resume recorded below.
 
 The first independent review of the retained post-method-stop bytes returned STOP at P0=0/P1=3. No test, browser,
 database, model, network or product operation followed that verdict. The three findings were:
@@ -272,7 +314,7 @@ retaining the earlier database proof truthfully. Only a P0=0/P1=0 verdict may al
 junction and resume once at the corrected command body. Any dependency, source, test, cleanup, roadmap or diff failure
 stops again at its exact gate.
 
-## Corrected resume result
+## Earlier corrected resume result
 
 Fresh review returned GO at P0=0/P1=0. The worktree and primary lockfiles, exact `zod@4.4.3`, all ten reviewed file
 hashes and absent worktree-local `node_modules` precondition were reverified. The authenticated local junction was
@@ -284,10 +326,25 @@ All five explicit current-byte `node --check` commands then passed, followed by 
 prior Artifact source/HTTP PostgreSQL 1/1 evidence was not replayed. The remaining gate is source commit followed by
 the ordinary authenticated browser acceptance defined in the DOM preflight.
 
-## Current UI source and test byte pins
+## Retained-control corrected resume result
 
-These SHA-256 values pin the current corrected UI/test bytes after all four retained review stops (P1=3, P1=2,
-P1=2, P1=1). No test, syntax, roadmap, browser, database, model or network command followed them:
+Fresh independent review of the retained-owner and production `result-stale` corrections authorized exactly one
+deterministic resume. The worktree and reviewed primary lockfiles matched SHA-256
+`cefcc1b9d086fb5eb8088a1be3a1d86fd5b4360bb22aba768c530bbbcf007308`, exact installed `zod@4.4.3` and the absent
+worktree-local `node_modules` precondition were authenticated. The reviewed worktree-local junction was created and
+used only for the exact seven-file suite. That suite passed 58/58, including the new stale-owner, owner/descriptor
+drift, post-companion/pre-primary and production primary/companion `result-stale` races.
+
+The junction was reauthenticated and deleted link-only in `finally`; the worktree-local `node_modules` path was absent
+after cleanup. All five explicit current-byte `node --check` commands passed, followed by `npm run verify:roadmap` at
+15/15 and `git diff --check`. No PostgreSQL or other database test, actual browser, model, provider, Control,
+production or customer operation ran. No prior database/model evidence was replayed. The current source/test bytes
+remain uncommitted and unpushed; the next gate is review of this evidence record before commit/integration.
+
+## Prior committed UI source and test byte pins
+
+These SHA-256 values pin the earlier corrected UI/test bytes after the original four retained review stops (P1=3,
+P1=2, P1=2, P1=1). They were later committed at `b6ece37`; they are retained history, not the latest correction:
 
 | File | SHA-256 |
 |---|---|
@@ -297,3 +354,15 @@ P1=2, P1=1). No test, syntax, roadmap, browser, database, model or network comma
 | `gate6b/public/styles.css` | `c9883fdeaf4de9963499d730974bb6cf2971a0f5841d4648f8edab1763022f89` |
 | `gate7f/function-first/artifact-result-dom.test.mjs` | `319d4fb98c2ac778b63d3daaa68afaabe56d92c840f1d4d7b70beb1d7db52117` |
 | `gate7f/function-first/product-foundation-ui.test.mjs` | `ee322f1da03a605c71e93e40e282de8a984dd7e330c552a1d733f86a748908da` |
+
+## Current verified but uncommitted retained-control correction pins
+
+These SHA-256 values include both retained-control corrections, including the production `result-stale`
+classification and race fixtures. They are the source/test bytes covered by the one 58/58 deterministic run, five
+syntax checks, 15/15 roadmap checks and diff check above. No actual browser, database, model, provider, Control,
+production or customer operation followed them, and they remain uncommitted and unpushed:
+
+| File | SHA-256 |
+|---|---|
+| `gate6b/public/artifact-results.mjs` | `67e41360f77e7fd7e4cd1c8afed760540a13dfeb4708bb51e7f61a2c070b5c04` |
+| `gate7f/function-first/artifact-result-dom.test.mjs` | `2908dca83b59eac624045199ca81ce5deaeeaa33bcf9a1197968d0e2ebfa3c8b` |

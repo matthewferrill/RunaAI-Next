@@ -88,18 +88,51 @@ Correcting only the JSON template would still leave an unverifiable and unreacha
 
 **Systemic correction:** build and activation are corrected together. The sealed dependency graph is acyclic:
 
-`source/runtime/native members -> signed Native manifest -> artifact-files manifest -> external release manifest`.
+`source/runtime/native members -> offline-signed Native manifest -> artifact-files manifest -> external release manifest`.
 
 The Native manifest excludes itself, contains an exact sorted role/path/size/SHA-256 inventory, and is signed by the
-owner-protected watchdog release key. Its final raw-byte SHA-256 is `workerReleaseSha256`. The release schema adds one
+distinct offline owner release-manifest key, never the runtime watchdog authority key. Its final raw-byte SHA-256 is
+`workerReleaseSha256`. The release schema adds one
 strict, default-off owner configuration; no request, repository, database row, model output or environment variable
 can select a path, endpoint, executable, key or hash.
+
+### 6. Runtime watchdog signing-key custody was not constructible from the public pin alone
+
+The transport design requires the watchdog to sign its server handshake and durable operation-authority evidence, but
+the release contract named only a public key. Treating that key as the offline Native release-manifest signer would
+collapse two trust domains. Assuming a persistent non-exportable Ed25519 key in Windows CNG without proving the exact
+Control OS/provider/API behavior would substitute a design claim for an implementable security boundary.
+
+**Systemic correction:** keep distinct offline Ed25519 release-manifest and runtime watchdog signing keys, identities
+and versions. No private key is a release member, JavaScript-readable file, argument, environment value or ordinary
+configuration field. Current Microsoft documentation lists persisted ECDSA P-256 but not Ed25519 for Microsoft
+Software KSP, so the runtime candidate is machine-persisted ECDSA P-256 under that exact provider. Before key-dependent
+transport code, an actual-Control, disposable, separately reviewed capability probe must still prove persistence,
+sign-only usage, denied private export, canonical public export/signature conversion, exact service/SYSTEM ACL,
+process-reopen behavior and Node verification. Missing or ambiguous support is a Gate 3 architecture stop. It does not
+silently use an exportable seed, DPAPI storage, another provider or key reuse. Provisioning, rotation, loss and offline
+recovery require their own owner-authorized, fail-closed ceremony and retained compatibility design.
+The actual-host probe pins service name `RunaAI-Next-Control-Watchdog`, principal
+`NT SERVICE\RunaAI-Next-Control-Watchdog` and derived SID
+`S-1-5-80-2359966601-960405813-89951059-4049279541-459939502`; Windows SCM/account readback must match before ACL use.
+
+### 7. Whole-file source ordering was incorrectly used as runtime evidence
+
+The first bounded activation/configuration check stopped after one passing case because a whole-file `indexOf` matched
+the earlier `readSecretReference` helper definition rather than its production acquisition call. The application order
+was correct; the test method produced a false negative. The complete issue family, replacement actual-product method,
+quarantine inventory and affected-only resume rule are retained in
+`M1-S2B1-NATIVE-GATE3-ACTIVATION-TEST-METHOD-RCA-2026-09-04.md`.
+After independent `GO P0=0/P1=0`, the stable actual-product replacement passed its one affected case. No other case or
+gate was replayed.
 
 ## Containment and resume rules
 
 - Gate 3 and the actual Candidate gate are paused. Gate 1 and Gate 2 evidence remains valid and is not replayed.
 - No unchanged-byte retry, broad suite run, public Git operation, browser journey or model run is permitted while any
   `G3-A` through `G3-E` prerequisite is open.
+- Key-dependent watchdog transport remains paused until the distinct runtime signing-key backend is proven on actual
+  Control hardware and frozen. The algorithm-neutral bootstrap and identity work may continue under review.
 - Builders use isolated worktrees and disjoint file ownership. A separate reviewer checks cross-lane contracts while
   implementation proceeds and again reviews the exact committed union.
 - A compiler, runtime, protocol, root, ACL, identity, signature, manifest or hash mismatch stops before execution.
@@ -121,6 +154,36 @@ can select a path, endpoint, executable, key or hash.
 - The official portable SDK archive was downloaded to ignored local tool storage, publisher SHA-512 verified before
   extraction, and its `dotnet.exe --version` returned `10.0.400`. It is not installed globally and is not production
   evidence.
+
+Authoritative runtime-key API references reviewed on 2026-09-04:
+
+- Microsoft, CNG Key Storage Providers:
+  `https://learn.microsoft.com/en-us/windows/win32/seccertenroll/cng-key-storage-providers`
+- Microsoft, `NCryptCreatePersistedKey`:
+  `https://learn.microsoft.com/en-us/windows/win32/api/ncrypt/nf-ncrypt-ncryptcreatepersistedkey`
+- Microsoft, `NCryptSetProperty`:
+  `https://learn.microsoft.com/en-us/windows/win32/api/ncrypt/nf-ncrypt-ncryptsetproperty`
+- Microsoft, Key Storage Property Identifiers:
+  `https://learn.microsoft.com/en-us/windows/win32/seccng/key-storage-property-identifiers`
+
+### Actual-Control service-identity readback operator stop
+
+The first read-only service-SID/OS command stopped in the local PowerShell parser before `ssh` ran. Its command string
+used backslashes to escape nested double quotes, but PowerShell does not use backslash as its quote escape; it therefore
+parsed the remote `[ordered]` expression as a broken local array index. No remote command, key, service, Native process
+or other Control operation occurred.
+
+This is another command-construction family, not a Control or cryptography failure. The correction removes nested
+remote PowerShell and interpolation entirely: run separate argument-simple read-only SSH invocations for `hostname`,
+`whoami`, `cmd.exe /d /c ver` and `sc.exe showsid RunaAI-Next-Control-Watchdog`. Any future remote preflight with
+structured PowerShell must use a reviewed encoded script file/hash rather than ad-hoc multi-layer quoting. Only these
+four affected reads may resume after independent method review; the disposable key probe remains unexecuted.
+
+Independent method review returned `GO P0=0/P1=0`. The four affected reads then completed on actual Control:
+host and `RUNA-CONTROL\codex-audit` identity matched, Windows reported `10.0.26200.9168`, and `sc.exe showsid`
+matched the frozen derived service SID. This proves only host/identity/build and deterministic service-name-to-SID
+readback. It does not prove that the service exists, its configured account, any key ACL or the key backend. The
+disposable key probe remains a separately reviewed, unexecuted gate.
 
 ## Next bounded action
 

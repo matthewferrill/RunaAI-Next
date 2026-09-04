@@ -10,6 +10,7 @@ import { m1FunctionConfigSchema, assertM1Roles } from "../gate7f/function-first/
 const secretRef = z.string().regex(/^(env|file|vault|secret-store):[A-Za-z0-9._/-]{1,200}$/);
 const url = z.string().url().max(500);
 const bounded = z.string().min(1).max(200);
+const absolutePath = z.string().min(3).max(4096).refine(isAbsolute, "absolute path required");
 const service = z.object({ version: bounded, configurationDigest: z.string().regex(/^[a-f0-9]{64}$/) }).strict();
 const gate6c = z.object({ enabled: z.boolean(), legacyCommit: z.string().regex(/^[a-f0-9]{40}$/),
   expectedPrincipalId: z.string().regex(/^[a-z0-9][a-z0-9-]{0,63}$/) }).strict();
@@ -20,6 +21,21 @@ const gate7a = z.object({ enabled: z.literal(true), canonicalOrigin: url,
     redirectUri: url,
     clientCredentialRef: secretRef,
   }).strict(),
+}).strict();
+const publicGitSource = z.object({
+  environmentId: z.string().regex(/^[a-z0-9][a-z0-9_-]{7,127}$/),
+  displayName: z.string().min(1).max(120),
+  repositoryHttpsUrl: z.string().min(1).max(2048),
+  requestedRef: z.string().min(1).max(255),
+  expectedCommitOid: z.string().regex(/^[a-f0-9]{40}$/),
+}).strict();
+const nativeCandidate = z.discriminatedUnion("enabled", [
+  z.object({ enabled: z.literal(false) }).strict(),
+  z.object({ enabled: z.literal(true), protectedWorkspaceParent: absolutePath }).strict(),
+]);
+const serverWorkspace = z.object({
+  sourceDefinition: publicGitSource,
+  nativeCandidate: nativeCandidate.optional(),
 }).strict();
 const legacySchema = z.object({
   schemaVersion: z.literal("runa2-gate6b-release-config/v1"),
@@ -51,7 +67,11 @@ const roleSchema = legacySchema.extend({
   provider: explicitModelRolesSchema,
   functionFirst: m1FunctionConfigSchema.optional(),
 });
-const schema = z.discriminatedUnion("schemaVersion", [legacySchema, roleSchema]);
+const nativeRoleSchema = roleSchema.extend({
+  schemaVersion: z.literal("runa2-gate6b-release-config/v3"),
+  serverWorkspace,
+});
+const schema = z.discriminatedUnion("schemaVersion", [legacySchema, roleSchema, nativeRoleSchema]);
 
 const coded = (code, message) => Object.assign(new Error(message), { code });
 const sha256 = value => createHash("sha256").update(value).digest("hex");
@@ -102,10 +122,14 @@ export async function loadReleaseConfig(path) {
       throw coded("release-config-gate7a-invalid", "The Gate 7A origin, issuer, backchannel, RP ID, and owner-session boundary must be exact.");
     }
   }
-  const explicit = parsed.schemaVersion === "runa2-gate6b-release-config/v2";
+  const explicit = parsed.schemaVersion !== "runa2-gate6b-release-config/v1";
   if (parsed.functionFirst) {
     assertM1Roles(parsed.provider);
     if (!parsed.gate7a?.ordinaryClient) throw coded("release-config-m1-session-required", "M1 functions require the ordinary browser session client.");
+  }
+  if (parsed.serverWorkspace && !parsed.functionFirst) {
+    throw coded("release-config-server-workspace-requires-m1",
+      "A server workspace requires the M1 function surface.");
   }
   if (explicit && !["chat", "research", "code"].some(role => parsed.provider.models[role] !== null)) {
     throw coded("release-config-invalid", "At least one existing answer role must be configured.");

@@ -65,7 +65,7 @@ capability-set version/digest and sealed worker-release digest. Its one successf
   "authorityDigest": "<digest>",
   "attestation": {
     "schemaVersion": "runa-public-git-operation-authority-attestation/v1",
-    "algorithm": "ed25519",
+    "algorithm": "ecdsa-p256-sha256",
     "signingKeyId": "control-watchdog-authority-...",
     "signingKeyVersion": 1,
     "watchdogIdentitySha256": "<digest>",
@@ -78,7 +78,9 @@ capability-set version/digest and sealed worker-release digest. Its one successf
 `operationId === taskId`; `deadlineAt - requestedAt === 120000`; and `authorityDigest` is the canonical SHA-256 of
 the authority fields preceding `attestation`. The signature covers the domain separator
 `runa-public-git-operation-authority-attestation/v1`, the authority digest, signing-key ID/version and watchdog
-identity digest. The watchdog generates both IDs and both instants from its own OS-backed authority clock, durably
+identity digest. Runtime signatures are canonical base64 of fixed 64-byte IEEE-P1363 `r || s` over SHA-256 and must
+use the low-S representation; malformed, zero, out-of-range or high-S components are rejected. The watchdog generates
+both IDs and both instants from its own OS-backed authority clock, durably
 records the authority and attestation in its ledger, creates the timer plus wait registration, and returns only after
 both are armed. It also returns an opaque in-memory lease token separately; the token is never persisted, logged, sent
 to a child or placed in an environment variable.
@@ -87,16 +89,28 @@ The watchdog never accepts caller-selected replacements for the ID or clock fiel
 `requestedAt`, `deadlineAt`, `authorityDigest` and the full attestation remain byte-identical through Control,
 PostgreSQL, every worker frame, receipts and recovery.
 
-The Ed25519 private key remains only in the external watchdog's owner-protected key store. Trusted candidate
-configuration pins the accepted algorithm, public key, key ID, key version and watchdog executable/identity digest.
-Only the current key version may issue new authority; retained versions may verify still-live operations until those
-operations are terminal and fully cleaned. A key cannot be removed or reused while its ledger contains a nonterminal
-operation.
+The runtime watchdog authority key is distinct from the offline Native release-manifest signing key. The runtime
+private key remains only in an external-watchdog protected signing backend; it is never a release member, JavaScript
+file, argument, environment value or ordinary configuration field. Trusted candidate configuration pins the accepted
+algorithm, public key, key ID, key version and watchdog executable/identity digest. Only the current key version may
+issue new authority; retained versions may verify still-live operations until those operations are terminal and fully
+cleaned. A key cannot be removed or reused while its ledger contains a nonterminal operation. Microsoft's current KSP
+documentation lists persisted ECDSA P-256 but not Ed25519 for the Microsoft Software Key Storage Provider. The
+candidate backend is therefore machine-persisted ECDSA P-256 under that provider, not an assumed Ed25519 container. A
+separately reviewed disposable probe on the actual Control build must still prove exact provider/algorithm
+availability, sign-only use, denied private export, public export, service/SYSTEM ACL, reopen/sign behavior and Node
+public verification before key-dependent transport is implemented. Any missing property is a design stop, not
+permission to reuse the manifest signer or silently substitute DPAPI-wrapped/exportable key bytes or another provider.
+The frozen Windows service name is `RunaAI-Next-Control-Watchdog`; its principal is
+`NT SERVICE\RunaAI-Next-Control-Watchdog` and expected service SID is
+`S-1-5-80-2359966601-960405813-89951059-4049279541-459939502`. Windows SCM/account readback must independently
+match that derivation before the SID is used. Runtime key access is limited to this service SID plus SYSTEM;
+Administrators participate only in the separately gated offline provisioning ceremony, not listener access.
 
 `PostgresServerWorkspaceStore` receives a frozen synchronous `verifyWatchdogAuthority` function from trusted top-level
 composition. Inside the same transaction that inserts intent, it canonicalizes the strict authority, recomputes its
-digest, verifies the Ed25519 signature against the pinned key/version and watchdog identity, and only then persists
-the authority plus attestation unchanged. Verification failure writes no workspace, authority or outbox row. The
+digest, verifies the canonical ECDSA P-256/SHA-256 signature against the pinned key/version and watchdog identity, and
+only then persists the authority plus attestation unchanged. Verification failure writes no workspace, authority or outbox row. The
 database never calls the watchdog over IPC from inside its transaction and never trusts a caller-supplied public key.
 
 ### Ordinary scoped admission and concurrent convergence
@@ -412,7 +426,7 @@ identity from the owner-only application bootstrap, and returns a deeply frozen 
   "watchdogEndpoint": "<fixed local authenticated endpoint>",
   "watchdogSigningKeyId": "control-watchdog-authority-...",
   "watchdogSigningKeyVersion": 1,
-  "watchdogPublicKey": "<canonical Ed25519 public key>",
+  "watchdogPublicKey": "<canonical base64 SEC1 uncompressed P-256 public key>",
   "watchdogIdentitySha256": "<digest>",
   "workerReleaseSha256": "<canonical release-manifest digest>"
 }
@@ -427,10 +441,11 @@ installed release root, an invalid release-manifest signature, or any member/has
 release root and protected workspace parent by native identity before returning. The trusted configuration is never
 serialized into an HTTP response, source row, task, model input or child environment.
 
-The release-manifest verification key/algorithm and candidate manifest basename are compile-time constants in
+The offline release-manifest verification key/algorithm and candidate manifest basename are compile-time constants in
 `native-candidate-config.mjs` and part of independent source/hash review. They cannot be overridden by environment,
 configuration JSON, source definition or request. Key rotation requires a new reviewed source release and manifest;
-it is not a runtime selection.
+it is not a runtime selection. The matching offline private signer is never installed in the Control release and may
+not be the runtime watchdog authority key.
 
 `composition.mjs` uses that one object to construct, in order: the pinned authority verifier; the initialized
 `PostgresServerWorkspaceStore`; the authenticated real watchdog client; the Windows native host; the native
@@ -450,9 +465,21 @@ source record therefore cannot choose what native code runs or which hash is tru
 
 Before every child launch, the native host resolves each executable/module only from the already opened release-root
 identity and the sealed manifest, verifies its bytes, and requires the aggregate manifest digest to equal the
-composition's closed-over `workerReleaseSha256` and the watchdog authority field. Child argv contains only opaque
-operation/resource identifiers from trusted composition; executable/module paths and hashes are never copied from
-source/request data.
+composition's closed-over `workerReleaseSha256` and the watchdog authority field. Operation children receive only
+opaque operation/resource identifiers in argv. The main application Node is the sole exception: its one non-opaque
+argv member is the absolute application entrypoint derived by the Native host from the verified fixed release root
+and exact manifest role/path. It is never accepted from a caller, request, source, database row, model, environment or
+administrator path field; Native code rechecks its stable identity and rejects any additional or nonmatching argv
+member. `NODE_OPTIONS` and all environment/bootstrap entrypoint selectors remain forbidden. Executable/module paths
+and hashes are never copied from source/request data.
+
+Native path trust is segment-aware. Every traversed segment is opened/held without following reparses and must match
+its canonical volume/file identity. The exact protected root and all descendants must satisfy the strict
+owner/service/SYSTEM DACL policy. Drive roots and other ancestors are not incorrectly forced into that descendant
+allowlist; they instead satisfy a separately reviewed system-root/non-redirection policy. A broader inherited ACE on a
+standard DOS drive root therefore cannot be confused with a writable protected subtree, while an ancestor alias,
+reparse or identity change still fails closed. All callers use the same verified-path API contract and build review
+checks its complete call family for signature drift.
 
 ## Finite production change set
 

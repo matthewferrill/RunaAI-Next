@@ -29,6 +29,7 @@ import { PostgresOrdinarySessionStore } from "../gate7a/postgres-ordinary-sessio
 import { HarmlessJavascriptExecutionService, MxcJavascriptExecutor } from "../gate7e/mxc-javascript-executor.mjs";
 import { assertConfiguredReleaseModel, createReleaseAnswerProviders } from "./model-role-providers.mjs";
 import { composeM1Functions } from "../gate7f/function-first/composition.mjs";
+import { createNativeCandidateConfig } from "../gate7f/function-first/server-workspace/native-candidate-config.mjs";
 import { composeUserSystemStatus } from "./product-foundation.mjs";
 
 const coded = (code, message) => Object.assign(new Error(message), { code });
@@ -83,6 +84,16 @@ async function closeProductionCompositionResources(m1, pool) {
   if (failures.length > 1) throw new AggregateError(failures, "production-composition-cleanup-failed");
 }
 
+async function failProductionCompositionConstruction(error, m1, pool) {
+  const cleanupFailures = [];
+  if (typeof m1?.close === "function") {
+    try { await m1.close(); } catch (cleanupError) { cleanupFailures.push(cleanupError); }
+  }
+  try { await pool.end(); } catch (cleanupError) { cleanupFailures.push(cleanupError); }
+  if (cleanupFailures.length === 0) throw error;
+  throw new AggregateError([error, ...cleanupFailures], "production-composition-construction-cleanup-failed");
+}
+
 // This seam owns the exact post-compose boundary used below. It exists so the
 // failure and transfer rules can be driven deterministically without opening
 // PostgreSQL or constructing the production dependency graph.
@@ -101,13 +112,7 @@ export async function createOwnedProductionComposition({ m1, pool, build }) {
           return closeAttempt;
         } });
     } catch (error) {
-      const cleanupFailures = [];
-      if (m1) {
-        try { await m1.close(); } catch (cleanupError) { cleanupFailures.push(cleanupError); }
-      }
-      try { await pool.end(); } catch (cleanupError) { cleanupFailures.push(cleanupError); }
-      if (cleanupFailures.length === 0) throw error;
-      throw new AggregateError([error, ...cleanupFailures], "production-composition-construction-cleanup-failed");
+      return failProductionCompositionConstruction(error, m1, pool);
     }
   }
   throw coded("production-composition-owner-invalid", "The production composition ownership boundary is invalid.");
@@ -125,6 +130,12 @@ export async function createProductionComposition({ loadedConfig, releaseRoot })
     throw coded("release-entrypoint-mismatch", "The release manifest names another application entry point.");
   }
   const artifact = await verifyReleaseArtifact(releaseRoot, manifest.artifactDigest);
+  // Verify the default-off Native release and protected parent before secrets, PostgreSQL, or other owned resources
+  // are acquired. An enabled Native configuration failure must leave nothing to unwind.
+  const nativeCandidateConfig = config.serverWorkspace?.nativeCandidate?.enabled === true
+    ? await createNativeCandidateConfig({ enabled: true,
+        protectedWorkspaceParent: config.serverWorkspace.nativeCandidate.protectedWorkspaceParent })
+    : null;
   const javascriptTransientRoot = resolve(loadedConfig.directory, "..", "transient", "javascript");
   await mkdir(javascriptTransientRoot, { recursive: true });
   const javascriptExecutor = new MxcJavascriptExecutor({
@@ -161,6 +172,9 @@ export async function createProductionComposition({ loadedConfig, releaseRoot })
   const pool = new pg.Pool({ connectionString, connectionTimeoutMillis: 2_000, query_timeout: 8_000,
     application_name: "runaai-next-candidate" });
   pool.on("error", () => {});
+  let m1 = null;
+  let ownershipTransferred = false;
+  try {
   const coreMigrationStore = new PostgresGate4aStore({ pool });
   const learningMigrationStore = new PostgresGate4bStore({ pool });
   const principalStore = new PostgresPrincipalStore({ pool });
@@ -179,9 +193,16 @@ export async function createProductionComposition({ loadedConfig, releaseRoot })
     loadSource: options => learningSource.load(options), cipher: learningCipher,
     expectedSourceClassification: "protected-or-unknown",
   });
-  const m1 = config.functionFirst ? await composeM1Functions({ configuration: config.functionFirst, provider: config.provider,
-    pool, cipher: coreCipher, javascriptExecutor, dataDirectory: resolve(loadedConfig.directory, "..", "state") }) : null;
-  return createOwnedProductionComposition({ m1, pool, build: async () => {
+  m1 = config.functionFirst ? await composeM1Functions({ configuration: config.functionFirst, provider: config.provider,
+    pool, cipher: coreCipher, javascriptExecutor, dataDirectory: resolve(loadedConfig.directory, "..", "state"),
+    ...(config.serverWorkspace ? { serverWorkspace: {
+      sourceDefinition: config.serverWorkspace.sourceDefinition } } : {}),
+    ...(nativeCandidateConfig ? { nativeCandidateConfig } : {}) }) : null;
+  if (m1 && typeof m1.close !== "function") {
+    throw coded("production-composition-m1-owner-invalid", "The M1 composition did not return its resource owner.");
+  }
+  ownershipTransferred = true;
+  return await createOwnedProductionComposition({ m1, pool, build: async () => {
   const providers = { ...createReleaseAnswerProviders(config.provider, { requestControls: config.functionFirst?.requestControls }),
     ...(m1 ? { review: m1.review } : {}) };
   const answerService = new Gate2ReadOnlyService({ records: workspace, index: m1?.index ?? workspace, providers,
@@ -318,4 +339,8 @@ export async function createProductionComposition({ loadedConfig, releaseRoot })
     runtimeStatus, readinessStatus, dependencyHealth,
     releaseManifest: manifest };
   } });
+  } catch (error) {
+    if (ownershipTransferred) throw error;
+    return failProductionCompositionConstruction(error, m1, pool);
+  }
 }

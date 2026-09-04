@@ -1073,6 +1073,23 @@ already-passed Artifact, Agent or model operations unchanged. The model campaign
 change rule above; Gate 2 claims only its owned disposable PostgreSQL boundary and no Native-process, browser, release,
 model, production or customer-acceptance credit.
 
+Gate 3 activation work then stopped on a method false negative before any resource or Native execution: a whole-file
+source-order assertion matched a helper definition instead of the production acquisition call. The systemic RCA at
+`../gate7f/function-first/M1-S2B1-NATIVE-GATE3-ACTIVATION-TEST-METHOD-RCA-2026-09-04.md` inventories the analogous
+assertion family, replaces the affected check with the real fail-closed production entrypoint and quarantines static
+layout checks from runtime acceptance. Independent method review returned `GO P0=0/P1=0`; the one affected-only
+actual-product case then passed 1/1 on Node `v22.22.0`, with no transient resource, Native process, PostgreSQL, network,
+browser or model activity. Separately,
+key-dependent transport is paused until actual Control capability evidence proves a distinct, protected runtime
+watchdog signing-key backend; no manifest-signer reuse or unproved cryptographic fallback is permitted.
+
+A full construction-path review also found that the production PostgreSQL pool was not owned during the interval
+between pool creation and successful M1 composition. The systemic correction now covers every store/M1 constructor,
+not only the Native branch: pre-transfer failure closes M1 then pool with aggregated errors, and post-transfer has one
+owner. The actual no-mock proof remains gated in
+`../gate7f/function-first/M1-S2B1-NATIVE-GATE3-PRODUCTION-RESOURCE-OWNERSHIP-RCA-2026-09-04.md`; it will use disposable
+Control PostgreSQL plus a real failed M1/Qdrant initialization and must prove zero sessions and complete cleanup.
+
 Active work remains M1-S2, specified in
 `../gate7f/function-first/M1-S2-FUNCTIONS-AND-GREEN-CRITERIA.md`. The complete R10
 result leaves only Chat and Code qualified and does not support a customer route.

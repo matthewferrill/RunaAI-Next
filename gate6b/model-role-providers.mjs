@@ -33,7 +33,8 @@ export function releaseModelIdentity(provider) {
 
 export function assertConfiguredReleaseModel(manifest, config) {
   const legacy = config.schemaVersion === "runa2-gate6b-release-config/v1";
-  const explicit = config.schemaVersion === "runa2-gate6b-release-config/v2";
+  const explicit = ["runa2-gate6b-release-config/v2", "runa2-gate6b-release-config/v3"]
+    .includes(config.schemaVersion);
   const expectedVersion = legacy ? "runa2-gate6-release/v1" : "runa2-gate6-release/v2";
   if ((!legacy && !explicit) || manifest.schemaVersion !== expectedVersion
       || canonicalJson(manifest.model) !== canonicalJson(releaseModelIdentity(config.provider))) {

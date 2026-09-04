@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { lstat, mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { canonicalJson, sha256 } from "../gate4/canonical.mjs";
@@ -11,6 +11,8 @@ import { Gate2ReadOnlyService } from "../gate2/core.mjs";
 import { MemoryContinuityStore, MemoryWorkspaceResolver } from "../gate2/continuity.mjs";
 import { syntheticRelease } from "../gate6/fixtures.mjs";
 import { assertReleaseManifest, buildReleaseManifest, releaseRuntimeStatus } from "../gate6/release.mjs";
+import { ARTIFACT_FILE, buildArtifactManifest } from "./artifact.mjs";
+import { createProductionComposition } from "./composition.mjs";
 import { loadReleaseConfig } from "./release-config.mjs";
 import { assertConfiguredReleaseModel, createReleaseAnswerProviders, releaseModelIdentity } from "./model-role-providers.mjs";
 import { CAPABILITY_SET_DIGEST, CAPABILITY_SET_VERSION } from "../gate7f/function-first/tasks/contracts.mjs";
@@ -68,6 +70,96 @@ test("M1 activation requires the real ordinary-session path and exact feature co
   await assert.rejects(temporary.load(config), /configuration could not/);
 });
 
+test("server workspace release configuration is strict, default-off, and Native activation is owner-path only", async t => {
+  const temporary = await temporaryConfig(t), config = configFor(roleProvider());
+  config.publicBaseUrl = "https://runa.bridgebuildersai.com";
+  config.keycloak.issuer = `${config.publicBaseUrl}/auth/realms/runaai-next`;
+  config.keycloak.backchannelIssuer = "http://127.0.0.1:9762/realms/runaai-next";
+  config.gate6c.enabled = true;
+  config.gate7a = { enabled: true, canonicalOrigin: config.publicBaseUrl, relyingPartyId: "runa.bridgebuildersai.com",
+    predecessorManifestDigest: "c".repeat(64), ordinaryClient: { clientId: "runaai-next-user",
+      redirectUri: `${config.publicBaseUrl}/session/user/callback`, clientCredentialRef: "file:secrets/ordinary-client" } };
+  config.functionFirst = { schemaVersion: "runaai-m1-functions/v1", enabled: true,
+    scope: "supplied-text-and-disposable-javascript", capabilitySetVersion: CAPABILITY_SET_VERSION,
+    capabilitySetDigest: CAPABILITY_SET_DIGEST,
+    requestControls: Object.fromEntries(["chat", "research", "code", "review", "agent"].map(role => [role, { reasoningEffort: null }])),
+    qdrant: { endpoint: "http://127.0.0.1:9773", collection: "m1_candidate_sections" },
+    embedding: { baseUrl: "http://127.0.0.1:9770/v1", modelId: "text-embedding-nomic-embed-text-v1.5", dimension: 768 },
+    reranker: { baseUrl: "http://192.168.50.165:8412", windowCharacters: 2000, overlapCharacters: 300, batchSize: 32 } };
+  const sourceDefinition = { environmentId: "environment_0001", displayName: "Reviewed public repository",
+    repositoryHttpsUrl: "https://example.com/org/repository.git", requestedRef: "refs/heads/main",
+    expectedCommitOid: "1".repeat(40) };
+
+  assert.equal((await temporary.load(config)).value.serverWorkspace, undefined);
+  config.serverWorkspace = { sourceDefinition };
+  await assert.rejects(temporary.load(config), /configuration could not/);
+  config.schemaVersion = "runa2-gate6b-release-config/v3";
+  assert.deepEqual((await temporary.load(config)).value.serverWorkspace, { sourceDefinition });
+  assert.doesNotThrow(() => assertConfiguredReleaseModel(manifestFor(config), config));
+  config.serverWorkspace.nativeCandidate = { enabled: false };
+  assert.deepEqual((await temporary.load(config)).value.serverWorkspace.nativeCandidate, { enabled: false });
+  config.serverWorkspace.nativeCandidate = { enabled: true, protectedWorkspaceParent: "C:\\RunaWorkspaces" };
+  assert.deepEqual((await temporary.load(config)).value.serverWorkspace.nativeCandidate,
+    { enabled: true, protectedWorkspaceParent: "C:\\RunaWorkspaces" });
+  config.serverWorkspace.nativeCandidate = { ...config.serverWorkspace.nativeCandidate, watchdogEndpoint: "attacker" };
+  await assert.rejects(temporary.load(config), /configuration could not/);
+  delete config.serverWorkspace.nativeCandidate.watchdogEndpoint;
+  config.serverWorkspace.nativeCandidate.protectedWorkspaceParent = "relative";
+  await assert.rejects(temporary.load(config), /configuration could not/);
+  delete config.functionFirst;
+  config.serverWorkspace.nativeCandidate = { enabled: false };
+  await assert.rejects(temporary.load(config), error => error.code === "release-config-server-workspace-requires-m1");
+});
+
+test("enabled Native verification fails before any production resource can be acquired", async t => {
+  const root = await mkdtemp(join(tmpdir(), "runa-native-startup-order-"));
+  t.after(() => rm(root, { recursive: true, force: true }));
+  const releaseRoot = join(root, "release");
+  const configurationRoot = join(root, "configuration");
+  const protectedWorkspaceParent = join(root, "protected-workspaces");
+  const releaseManifestPath = join(root, "release.json");
+  await Promise.all([mkdir(releaseRoot), mkdir(configurationRoot)]);
+  await writeFile(protectedWorkspaceParent, "not a directory\n", "utf8");
+  await writeFile(join(releaseRoot, "application.mjs"), "export const release = true;\n", "utf8");
+  const artifact = await buildArtifactManifest(releaseRoot);
+  await writeFile(join(releaseRoot, ARTIFACT_FILE), `${canonicalJson(artifact)}\n`, "utf8");
+
+  const config = configFor(roleProvider());
+  config.schemaVersion = "runa2-gate6b-release-config/v3";
+  config.releaseManifestPath = releaseManifestPath;
+  config.publicBaseUrl = "https://runa.bridgebuildersai.com";
+  config.keycloak.issuer = `${config.publicBaseUrl}/auth/realms/runaai-next`;
+  config.keycloak.backchannelIssuer = "http://127.0.0.1:9762/realms/runaai-next";
+  config.gate6c.enabled = true;
+  config.gate7a = { enabled: true, canonicalOrigin: config.publicBaseUrl, relyingPartyId: "runa.bridgebuildersai.com",
+    predecessorManifestDigest: "c".repeat(64), ordinaryClient: { clientId: "runaai-next-user",
+      redirectUri: `${config.publicBaseUrl}/session/user/callback`, clientCredentialRef: "file:secrets/ordinary-client" } };
+  config.functionFirst = { schemaVersion: "runaai-m1-functions/v1", enabled: true,
+    scope: "supplied-text-and-disposable-javascript", capabilitySetVersion: CAPABILITY_SET_VERSION,
+    capabilitySetDigest: CAPABILITY_SET_DIGEST,
+    requestControls: Object.fromEntries(["chat", "research", "code", "review", "agent"].map(role => [role, { reasoningEffort: null }])),
+    qdrant: { endpoint: "http://127.0.0.1:9773", collection: "m1_candidate_sections" },
+    embedding: { baseUrl: "http://127.0.0.1:9770/v1", modelId: "text-embedding-nomic-embed-text-v1.5", dimension: 768 },
+    reranker: { baseUrl: "http://192.168.50.165:8412", windowCharacters: 2000, overlapCharacters: 300, batchSize: 32 } };
+  config.serverWorkspace = { sourceDefinition: { environmentId: "environment_0001",
+    displayName: "Reviewed public repository", repositoryHttpsUrl: "https://example.com/org/repository.git",
+    requestedRef: "refs/heads/main", expectedCommitOid: "1".repeat(40) },
+  nativeCandidate: { enabled: true, protectedWorkspaceParent } };
+  const configPath = join(configurationRoot, "candidate.json");
+  await writeFile(configPath, canonicalJson(config), "utf8");
+  const loadedConfig = await loadReleaseConfig(configPath);
+  const release = buildReleaseManifest({ releaseId: "native-startup-order", commit: "b".repeat(40),
+    artifactDigest: artifact.artifactDigest, configurationDigest: loadedConfig.configurationDigest,
+    applicationEntryPoint: "gate6b/server.mjs", model: releaseModelIdentity(config.provider),
+    services: Object.entries(config.services).map(([name, identity]) => ({ name, ...identity })) },
+  { schemaVersion: "runa2-gate6-release/v2" });
+  await writeFile(releaseManifestPath, canonicalJson(release), "utf8");
+
+  await assert.rejects(createProductionComposition({ loadedConfig, releaseRoot }),
+    error => error.code === "native-candidate-config-root-identity-invalid");
+  await assert.rejects(lstat(join(root, "transient")), error => error.code === "ENOENT");
+});
+
 function manifestInput(config) {
   const old = syntheticRelease();
   return { releaseId: old.releaseId, commit: old.commit, artifactDigest: old.artifactDigest,
@@ -77,7 +169,8 @@ function manifestInput(config) {
 
 function manifestFor(config) {
   return buildReleaseManifest(manifestInput(config), {
-    schemaVersion: config.schemaVersion.endsWith("/v2") ? "runa2-gate6-release/v2" : "runa2-gate6-release/v1",
+    schemaVersion: config.schemaVersion === "runa2-gate6b-release-config/v1"
+      ? "runa2-gate6-release/v1" : "runa2-gate6-release/v2",
   });
 }
 

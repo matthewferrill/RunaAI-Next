@@ -58,6 +58,11 @@ const effectClaimInputSchema = z.object({ operationId: authorityIdSchema, author
   expectedWorkspaceRevision: z.number().int().min(1).max(Number.MAX_SAFE_INTEGER) }).strict();
 const publicationResourcesSchema = z.object({ parentResourceId: authorityIdSchema,
   ingressRootResourceId: authorityIdSchema, stagingRootResourceId: authorityIdSchema }).strict();
+const publicationAuthorityEnvelopeSchema = z.object({
+  schemaVersion: z.literal("runa-workspace-publication-authority-envelope/v1"),
+  authorityManifest: publicationAuthorityManifestSchema,
+  publicationResources: publicationResourcesSchema,
+}).strict();
 const candidateStagingInputSchema = transitionIdentitySchema.extend({
   operationAuthorityDigest: digestSchema,
   fetchClaim: materializationEffectClaimSchema,
@@ -400,7 +405,8 @@ export class PostgresServerWorkspaceStore {
             OR NEW.created_at<>OLD.created_at THEN RAISE EXCEPTION 'workspace publication authority is immutable'; END IF;
           IF NEW.updated_at<OLD.updated_at THEN RAISE EXCEPTION 'workspace publication authority time regressed'; END IF;
           IF NEW.state=OLD.state THEN
-            IF NOT (OLD.state='published-observed' AND NEW.workspace_revision=OLD.workspace_revision+1
+            IF NOT (OLD.state IN ('published-observed','unknown')
+              AND NEW.workspace_revision=OLD.workspace_revision+1
               AND NEW.state_revision=OLD.state_revision
               AND NEW.publication_claim_id IS NOT DISTINCT FROM OLD.publication_claim_id
               AND NEW.publication_claim_revision IS NOT DISTINCT FROM OLD.publication_claim_revision
@@ -426,6 +432,15 @@ export class PostgresServerWorkspaceStore {
               OR NEW.observed_final_identity IS DISTINCT FROM OLD.observed_final_identity
               OR NEW.observed_final_digest IS DISTINCT FROM OLD.observed_final_digest
               THEN RAISE EXCEPTION 'workspace publication unknown transition is invalid'; END IF;
+          ELSIF OLD.state='unknown' AND NEW.state='published-observed' THEN
+            IF NEW.workspace_revision<>OLD.workspace_revision+1 OR NEW.state_revision<>OLD.state_revision+1
+              OR NEW.publication_claim_id IS NULL
+              OR NEW.publication_claim_id IS DISTINCT FROM OLD.publication_claim_id
+              OR NEW.publication_claim_revision IS DISTINCT FROM OLD.publication_claim_revision
+              OR NEW.observed_final_identity IS NULL OR NEW.observed_final_digest IS NULL
+              OR NEW.observed_final_identity IS DISTINCT FROM OLD.observed_final_identity
+              OR NEW.observed_final_digest IS DISTINCT FROM OLD.observed_final_digest
+              THEN RAISE EXCEPTION 'workspace publication reconciliation transition is invalid'; END IF;
           ELSE RAISE EXCEPTION 'workspace publication authority transition is invalid'; END IF;
           RETURN NEW;
         END $$;
@@ -973,6 +988,12 @@ export class PostgresServerWorkspaceStore {
       if (requestScopeDigest !== input.requestScopeDigest) throw fail("workspace-request-scope-stale");
       const authority = publicGitOperationAuthoritySchema.parse(input.operationAuthority);
       if (this.verifyWatchdogAuthority(authority) !== true) throw fail("workspace-operation-authority-invalid");
+      const authorityObservedAt = this.now();
+      if (!Number.isSafeInteger(authorityObservedAt)
+          || Date.parse(authority.requestedAt) > authorityObservedAt
+          || Date.parse(authority.deadlineAt) <= authorityObservedAt) {
+        throw fail("workspace-operation-authority-invalid");
+      }
 
       const operationPrior = (await client.query(`SELECT authority.*,workspace.*,
           authority.workspace_id AS authority_workspace_id,
@@ -1074,15 +1095,27 @@ export class PostgresServerWorkspaceStore {
   }
 
   #effectClaimFromRow(row) {
-    return materializationEffectClaimSchema.parse({ schemaVersion: "runa-workspace-effect-claim/v1",
+    let claim;
+    try {
+      claim = materializationEffectClaimSchema.parse({ schemaVersion: "runa-workspace-effect-claim/v1",
       operationId: row.operation_id, effect: row.effect, claimId: row.claim_id,
       claimRevision: row.claim_revision, state: row.state, claimDigest: row.claim_digest,
       claimedAt: iso(row.claimed_at), updatedAt: iso(row.updated_at) });
+    } catch { throw fail("workspace-effect-claim-authority-invalid"); }
+    const expectedDigest = canonicalSha256({ schemaVersion: claim.schemaVersion,
+      operationId: claim.operationId, effect: claim.effect, claimId: claim.claimId,
+      claimRevision: claim.claimRevision, claimedAt: claim.claimedAt });
+    if (claim.claimDigest !== expectedDigest || Date.parse(claim.updatedAt) < Date.parse(claim.claimedAt)) {
+      throw fail("workspace-effect-claim-authority-invalid");
+    }
+    return claim;
   }
 
   #durablePublicationFromRows(context, workspace, authority, row, publicationClaim) {
     if (!row) return null;
-    if (row.principal_id !== context.principalId || row.project_id !== context.projectId) {
+    if (row.principal_id !== context.principalId || row.project_id !== context.projectId
+        || row.workspace_id !== workspace.workspaceId || row.operation_id !== authority.operationId
+        || row.workspace_revision !== workspace.revision) {
       throw fail("workspace-publication-authority-invalid");
     }
     if (canonicalSha256(row.authority_manifest) !== row.authority_envelope_sha256) {
@@ -1096,9 +1129,50 @@ export class PostgresServerWorkspaceStore {
         }, workspace.workspaceId), row.authority_manifest)
         : row.authority_manifest;
     } catch { throw fail("workspace-publication-authority-invalid"); }
-    let manifest;
-    try { manifest = publicationAuthorityManifestSchema.parse(decoded); }
+    let envelope;
+    try { envelope = publicationAuthorityEnvelopeSchema.parse(decoded); }
     catch { throw fail("workspace-publication-authority-invalid"); }
+    const manifest = envelope.authorityManifest;
+    const authoritativeResources = envelope.publicationResources;
+    const resourceIds = [row.parent_resource_id, row.ingress_root_resource_id, row.staging_root_resource_id];
+    const resourceIdsValid = resourceIds.every(value => authorityIdSchema.safeParse(value).success)
+      && new Set(resourceIds).size === resourceIds.length
+      && row.parent_resource_id === authoritativeResources.parentResourceId
+      && row.ingress_root_resource_id === authoritativeResources.ingressRootResourceId
+      && row.staging_root_resource_id === authoritativeResources.stagingRootResourceId;
+    const claimColumnsMatch = publicationClaim === null
+      ? row.publication_claim_id === null && row.publication_claim_revision === null
+      : row.publication_claim_id === publicationClaim.claimId
+        && row.publication_claim_revision === publicationClaim.claimRevision
+        && publicationClaim.operationId === authority.operationId
+        && publicationClaim.effect === "publication";
+    const observedIdentityPresent = row.observed_final_identity !== null;
+    const observedDigestPresent = row.observed_final_digest !== null;
+    const observedPairCoherent = observedIdentityPresent === observedDigestPresent;
+    const observedValueCoherent = !observedIdentityPresent
+      || (immutableEqual(row.observed_final_identity, manifest.final.expectedIdentity)
+        && row.observed_final_digest === workspace.finalManifestDigest);
+    const stateRevisionCoherent = (row.state === "staging-authorized" && row.state_revision === 1)
+      || (row.state === "publication-claimed" && row.state_revision === 2)
+      || (row.state === "published-observed" && [3, 5].includes(row.state_revision))
+      || (row.state === "unknown"
+        && ((publicationClaim === null && !observedIdentityPresent && row.state_revision === 2)
+          || (publicationClaim?.state === "failed-unknown" && !observedIdentityPresent
+            && row.state_revision === 3)
+          || (publicationClaim?.state === "observed" && observedIdentityPresent
+            && row.state_revision === 4)));
+    const stateCoherent = (row.state === "staging-authorized"
+        && workspace.lifecycle === "staging" && publicationClaim === null && !observedIdentityPresent)
+      || (row.state === "publication-claimed" && workspace.lifecycle === "staging"
+        && publicationClaim?.state === "claimed" && !observedIdentityPresent)
+      || (row.state === "published-observed"
+        && ["published-pending-db", "ready", "expired", "cleanup-pending", "removed"].includes(workspace.lifecycle)
+        && publicationClaim?.state === "observed" && observedIdentityPresent)
+      || (row.state === "unknown"
+        && ["failed", "cancelled", "unknown", "cleanup-pending", "removed"].includes(workspace.lifecycle)
+        && (publicationClaim === null
+          || (publicationClaim.state === "failed-unknown" && !observedIdentityPresent)
+          || (publicationClaim.state === "observed" && observedIdentityPresent)));
     const value = { schemaVersion: "runa-workspace-durable-publication-authority/v1",
       operationId: authority.operationId, workspaceId: workspace.workspaceId,
       workspaceRevision: row.workspace_revision, operationAuthorityDigest: row.operation_authority_digest,
@@ -1108,11 +1182,27 @@ export class PostgresServerWorkspaceStore {
       stagingRootResourceId: row.staging_root_resource_id, publicationClaim,
       workspaceLifecycle: workspace.lifecycle, state: row.state };
     if (canonicalSha256(manifest) !== row.authority_manifest_digest
+        || manifest.workspaceId !== workspace.workspaceId
+        || manifest.workspaceManifestDigest !== workspace.stagingManifestDigest
         || authority.authorityDigest !== row.operation_authority_digest
+        || authority.operationId !== workspace.binding.taskId
+        || authority.authorityDigest !== workspace.operationAuthorityDigest
         || workspace.request.bindingDigest !== row.binding_digest
-        || canonicalSha256(workspace.request) !== row.request_digest) {
+        || canonicalSha256(workspace.request) !== row.request_digest
+        || !resourceIdsValid
+        || row.parent_volume_serial !== manifest.parentIdentity.volumeSerial
+        || row.parent_file_id !== manifest.parentIdentity.fileId
+        || row.staging_name !== manifest.staging.name
+        || row.staging_volume_serial !== manifest.staging.identity.volumeSerial
+        || row.staging_file_id !== manifest.staging.identity.fileId
+        || row.final_name !== manifest.final.name
+        || row.final_volume_serial !== manifest.final.expectedIdentity.volumeSerial
+        || row.final_file_id !== manifest.final.expectedIdentity.fileId
+        || !claimColumnsMatch || !observedPairCoherent || !observedValueCoherent
+        || !Number.isSafeInteger(row.state_revision) || !stateRevisionCoherent || !stateCoherent) {
       throw fail("workspace-publication-authority-invalid");
     }
+    if (["expired", "removed"].includes(workspace.lifecycle)) return null;
     try { return durablePublicationAuthoritySchema.parse(value); }
     catch { throw fail("workspace-publication-authority-invalid"); }
   }
@@ -1145,12 +1235,17 @@ export class PostgresServerWorkspaceStore {
       const claimRows = (await client.query(`SELECT * FROM ${this.sqlSchema}.workspace_effect_claims
         WHERE operation_id=$1 ORDER BY effect`, [authority.operationId])).rows;
       const effectClaims = claimRows.map(claim => this.#effectClaimFromRow(claim));
+      const fetchClaim = effectClaims.find(claim => claim.effect === "git-fetch") ?? null;
       const publicationRow = (await client.query(`SELECT * FROM ${this.sqlSchema}.workspace_publication_authorities
         WHERE operation_id=$1`, [authority.operationId])).rows[0];
       const publicationClaim = effectClaims.find(claim => claim.effect === "publication") ?? null;
+      const publicationRequired = workspace.stagingManifestDigest !== null;
       const publicationClaimRequired = publicationRow?.state === "publication-claimed"
         || publicationRow?.state === "published-observed";
-      if ((publicationRow === undefined && publicationClaim !== null)
+      if ((publicationRequired && publicationRow === undefined)
+          || (!publicationRequired && publicationRow !== undefined)
+          || (publicationRow !== undefined && fetchClaim?.state !== "observed")
+          || (publicationRow === undefined && publicationClaim !== null)
           || (publicationClaimRequired && publicationClaim === null)
           || (publicationRow?.state === "staging-authorized" && publicationClaim !== null)) {
         throw fail("workspace-publication-authority-invalid");
@@ -1165,14 +1260,27 @@ export class PostgresServerWorkspaceStore {
       [context.principalId, context.projectId, authority.operationId])).rows[0];
       let workspaceReceipt = workspaceReceiptRow?.receipt ?? null;
       let operationReceipt = operationReceiptRow?.receipt ?? null;
+      const historicalTerminalLifecycle = ["failed", "cancelled", "unknown", "cleanup-pending", "expired", "removed"]
+        .includes(workspace.lifecycle);
+      if (operationReceiptRow && historicalTerminalLifecycle) {
+        let historicalRevision;
+        try { historicalRevision = externalOperationTerminalReceiptSchema.parse(operationReceipt).workspaceRevision; }
+        catch { throw fail("workspace-operation-authority-invalid"); }
+        try { await this.#readyReceiptAuthority(client, context, workspace, historicalRevision); }
+        catch { throw fail("workspace-operation-authority-invalid"); }
+      }
       if (workspace.lifecycle === "ready") {
         const retained = await this.#readyReceiptAuthority(client, context, workspace, workspace.revision);
         workspaceReceipt = retained.workspaceReceipt; operationReceipt = retained.operationReceipt;
       } else if (["failed", "cancelled", "unknown", "cleanup-pending"].includes(workspace.lifecycle)) {
-        if (!workspaceReceiptRow || operationReceiptRow || canonicalSha256(workspaceReceipt) !== workspaceReceiptRow.receipt_sha256) {
+        if (!workspaceReceiptRow || canonicalSha256(workspaceReceipt) !== workspaceReceiptRow.receipt_sha256) {
           throw fail("workspace-operation-authority-invalid");
         }
         workspaceReceipt = this.receiptFor(workspace, workspaceReceipt, workspace.lifecycle);
+        operationReceipt = null;
+      } else if (["expired", "removed"].includes(workspace.lifecycle)) {
+        if (workspaceReceiptRow) throw fail("workspace-operation-authority-invalid");
+        workspaceReceipt = null;
         operationReceipt = null;
       } else if (workspaceReceiptRow || operationReceiptRow) {
         throw fail("workspace-operation-authority-invalid");
@@ -1227,9 +1335,6 @@ export class PostgresServerWorkspaceStore {
         claim = materializationEffectClaimSchema.parse({ schemaVersion: "runa-workspace-effect-claim/v1",
           operationId: input.operationId, effect: input.effect, claimId, claimRevision: 1,
           state: "claimed", claimDigest, claimedAt, updatedAt: claimedAt });
-        await client.query(`INSERT INTO ${this.sqlSchema}.outbox
-          (principal_id,project_id,event_type,record_id,payload_sha256) VALUES($1,$2,$3,$4,$5)`,
-        [context.principalId, context.projectId, `workspace-${input.effect}-claimed`, input.operationId, claimDigest]);
         created = true;
       }
       let publicationAuthority;
@@ -1255,6 +1360,12 @@ export class PostgresServerWorkspaceStore {
           publicationRow.updated_at = claim.claimedAt;
         }
         publicationAuthority = this.#durablePublicationFromRows(context, workspace, authority, publicationRow, claim);
+      }
+      if (created) {
+        await client.query(`INSERT INTO ${this.sqlSchema}.outbox
+          (principal_id,project_id,event_type,record_id,payload_sha256) VALUES($1,$2,$3,$4,$5)`,
+        [context.principalId, context.projectId, `workspace-${input.effect}-claimed`, input.operationId,
+          claim.claimDigest]);
       }
       return immutable({ created, claim, ...(publicationAuthority ? { publicationAuthority } : {}) });
     });
@@ -1465,12 +1576,23 @@ export class PostgresServerWorkspaceStore {
       const authoritativeSource = this.sourceRecord(context, sourceRow);
       if (identity.idempotencyKey !== row.idempotency_key || identity.bindingDigest !== row.binding_digest
           || identity.capabilitySetDigest !== row.capability_digest) throw fail("workspace-transition-binding-mismatch");
-      if (requireOperationAuthority) {
+      let retainedOperationAuthority = null;
+      if (this.verifyWatchdogAuthority !== null) {
         const authorityRow = (await client.query(`SELECT * FROM ${this.sqlSchema}.operation_authorities
           WHERE workspace_id=$1 FOR UPDATE`, [current.workspaceId])).rows[0];
-        const authority = this.#candidateAuthorityFromRow(context, authorityRow);
-        if (authority.authorityDigest !== inputValue.operationAuthorityDigest
-            || authority.operationId !== current.binding.taskId) {
+        if (authorityRow) {
+          retainedOperationAuthority = this.#candidateAuthorityFromRow(context, authorityRow);
+          if (retainedOperationAuthority.operationId !== current.binding.taskId
+              || retainedOperationAuthority.authorityDigest !== current.operationAuthorityDigest) {
+            throw fail("workspace-operation-authority-invalid");
+          }
+        } else if (current.operationAuthorityDigest !== null && current.operationAuthorityDigest !== undefined) {
+          throw fail("workspace-operation-authority-invalid");
+        }
+      }
+      if (requireOperationAuthority) {
+        if (retainedOperationAuthority === null
+            || retainedOperationAuthority.authorityDigest !== inputValue.operationAuthorityDigest) {
           throw fail("workspace-operation-authority-invalid");
         }
         if (["failed", "cancelled"].includes(successor) && row.lifecycle === "staging") {
@@ -1566,23 +1688,37 @@ export class PostgresServerWorkspaceStore {
         manifest ? canonicalSha256(manifest) : row.manifest_digest,
         operationReceipt ? canonicalSha256(operationReceipt) : row.operation_receipt_sha256]);
       if (changed.rowCount !== 1) throw fail("workspace-transition-conflict");
-      if (requireOperationAuthority && successor === "ready") {
+      if (retainedOperationAuthority && successor === "ready" && row.lifecycle === "published-pending-db") {
         const publicationChanged = await client.query(`UPDATE ${this.sqlSchema}.workspace_publication_authorities
           SET workspace_revision=$2,updated_at=$3
           WHERE workspace_id=$1 AND state='published-observed'`, [row.workspace_id, revision, updatedAt]);
         if (publicationChanged.rowCount !== 1) throw fail("workspace-publication-authority-invalid");
-      } else if (requireOperationAuthority && ["failed", "cancelled"].includes(successor)
+      } else if (retainedOperationAuthority && successor === "ready" && row.lifecycle === "unknown") {
+        const publicationChanged = await client.query(`UPDATE ${this.sqlSchema}.workspace_publication_authorities
+          SET workspace_revision=$2,state='published-observed',state_revision=state_revision+1,updated_at=$3
+          WHERE workspace_id=$1 AND state='unknown' AND publication_claim_id IS NOT NULL
+            AND observed_final_identity IS NOT NULL AND observed_final_digest IS NOT NULL`,
+        [row.workspace_id, revision, updatedAt]);
+        if (publicationChanged.rowCount !== 1) throw fail("workspace-publication-authority-invalid");
+      } else if (retainedOperationAuthority && ["failed", "cancelled"].includes(successor)
           && row.lifecycle === "staging") {
         const publicationChanged = await client.query(`UPDATE ${this.sqlSchema}.workspace_publication_authorities
           SET workspace_revision=$2,state='unknown',state_revision=state_revision+1,updated_at=$3
           WHERE workspace_id=$1 AND state='staging-authorized'`,
         [row.workspace_id, revision, updatedAt]);
         if (publicationChanged.rowCount !== 1) throw fail("workspace-publication-authority-invalid");
-      } else if (requireOperationAuthority && successor === "unknown"
+      } else if (retainedOperationAuthority && successor === "unknown"
           && ["staging", "published-pending-db", "ready"].includes(row.lifecycle)) {
         const publicationChanged = await client.query(`UPDATE ${this.sqlSchema}.workspace_publication_authorities
           SET workspace_revision=$2,state='unknown',state_revision=state_revision+1,updated_at=$3
           WHERE workspace_id=$1 AND state IN ('staging-authorized','publication-claimed','published-observed')`,
+        [row.workspace_id, revision, updatedAt]);
+        if (publicationChanged.rowCount !== 1) throw fail("workspace-publication-authority-invalid");
+      } else if (retainedOperationAuthority && current.stagingManifestDigest !== null
+          && ["expired", "cleanup-pending", "removed"].includes(successor)) {
+        const publicationChanged = await client.query(`UPDATE ${this.sqlSchema}.workspace_publication_authorities
+          SET workspace_revision=$2,updated_at=$3
+          WHERE workspace_id=$1 AND state IN ('published-observed','unknown')`,
         [row.workspace_id, revision, updatedAt]);
         if (publicationChanged.rowCount !== 1) throw fail("workspace-publication-authority-invalid");
       }
@@ -1679,8 +1815,13 @@ export class PostgresServerWorkspaceStore {
         throw fail("workspace-publication-authority-invalid");
       }
       const authorityManifestDigest = canonicalSha256(input.publicationAuthorityManifest);
+      const authorityEnvelopeValue = publicationAuthorityEnvelopeSchema.parse({
+        schemaVersion: "runa-workspace-publication-authority-envelope/v1",
+        authorityManifest: input.publicationAuthorityManifest,
+        publicationResources: input.publicationResources,
+      });
       const authorityEnvelope = this.encode("publication-authority", context, current.workspaceId,
-        input.publicationAuthorityManifest);
+        authorityEnvelopeValue);
       const updatedAt = iso(this.now()), revision = row.revision + 1;
       const transitionDigest = canonicalSha256({ schemaVersion: "runa-workspace-candidate-staging-transition/v1",
         workspaceId: current.workspaceId, expectedRevision: input.expectedRevision,
@@ -1742,6 +1883,7 @@ export class PostgresServerWorkspaceStore {
         VALUES($1,$2,'workspace-staging-authorized',$3,$4)`,
       [context.principalId, context.projectId, current.workspaceId, transitionDigest]);
       const publicationAuthority = this.#durablePublicationFromRows(context, value, authority, {
+        workspace_id: current.workspaceId, operation_id: authority.operationId,
         workspace_revision: revision, operation_authority_digest: authority.authorityDigest,
         request_digest: canonicalSha256(current.request), binding_digest: current.request.bindingDigest,
         authority_manifest: authorityEnvelope, authority_envelope_sha256: canonicalSha256(authorityEnvelope),
@@ -1749,7 +1891,18 @@ export class PostgresServerWorkspaceStore {
         parent_resource_id: input.publicationResources.parentResourceId,
         ingress_root_resource_id: input.publicationResources.ingressRootResourceId,
         staging_root_resource_id: input.publicationResources.stagingRootResourceId,
-        state: "staging-authorized", principal_id: context.principalId, project_id: context.projectId,
+        parent_volume_serial: input.publicationAuthorityManifest.parentIdentity.volumeSerial,
+        parent_file_id: input.publicationAuthorityManifest.parentIdentity.fileId,
+        staging_name: input.publicationAuthorityManifest.staging.name,
+        staging_volume_serial: input.publicationAuthorityManifest.staging.identity.volumeSerial,
+        staging_file_id: input.publicationAuthorityManifest.staging.identity.fileId,
+        final_name: input.publicationAuthorityManifest.final.name,
+        final_volume_serial: input.publicationAuthorityManifest.final.expectedIdentity.volumeSerial,
+        final_file_id: input.publicationAuthorityManifest.final.expectedIdentity.fileId,
+        publication_claim_id: null, publication_claim_revision: null,
+        observed_final_identity: null, observed_final_digest: null,
+        state: "staging-authorized", state_revision: 1,
+        principal_id: context.principalId, project_id: context.projectId,
       }, null);
       return immutable({ changed: true, ...value, publicationAuthority,
         receipt: null, operationReceipt: null });

@@ -4,17 +4,48 @@ import path from "node:path";
 import pg from "pg";
 import { startSyntheticPostgres } from "../synthetic-postgres.mjs";
 import { testCipher } from "../../../gate4/fixtures.mjs";
+import { canonicalStringify } from "./materialization-contracts.mjs";
 import { PostgresServerWorkspaceStore } from "./postgres.mjs";
 import { ServerWorkspaceService } from "./service.mjs";
 
+const SYNTHETIC_POSTGRES_BOUNDS = Object.freeze({ statementTimeoutMs: 30_000, lockTimeoutMs: 5_000,
+  idleInTransactionSessionTimeoutMs: 30_000, processExitTimeoutMs: 30_000, includeProcessEvidence: true });
+
 test("real PostgreSQL retains encrypted scoped source authority and idempotent intent", async t => {
   const root = path.resolve(import.meta.dirname, "../../..");
-  const database = await startSyntheticPostgres({
+  let database;
+  let pool;
+  t.after(async () => {
+    const failures = [];
+    try { await pool?.end(); } catch (error) { failures.push(error); }
+    if (database) {
+      try {
+        const stopReceipt = await database.stop();
+        assert.deepEqual(stopReceipt, {
+          stopped: true,
+          ownedSyntheticDataRemoved: true,
+          productionChanged: false,
+          schemaVersion: "runaai-synthetic-postgres-stop-receipt/v1",
+          postgresProcessId: database.postgresProcessId,
+          controlledStopRequested: true,
+          terminalExitConfirmed: true,
+          exitCode: 0,
+          signal: null,
+        });
+        console.log(`RUNAAI_SYNTHETIC_POSTGRES_STOP_RECEIPT ${canonicalStringify(stopReceipt)}`);
+      } catch (error) { failures.push(error); }
+    }
+    if (failures.length === 1) throw failures[0];
+    if (failures.length > 1) throw new AggregateError(failures, "synthetic-postgres-teardown-failed");
+  });
+  database = await startSyntheticPostgres({
     toolRoot: process.env.RUNALAB_TOOL_ROOT ?? "D:/Projects/Runalab/artifacts/tools",
     artifactRoot: path.join(root, "artifacts/runs/m1-s2b1-postgres"),
+    ...SYNTHETIC_POSTGRES_BOUNDS,
   });
-  const pool = new pg.Pool({ connectionString: database.connectionString });
-  t.after(async () => { try { await pool.end(); } finally { await database.stop(); } });
+  assert.equal(Number.isSafeInteger(database.postgresProcessId) && database.postgresProcessId > 0, true);
+  pool = new pg.Pool({ connectionString: database.connectionString,
+    connectionTimeoutMillis: 15_000, query_timeout: 20_000 });
   const context = { principalId: "alice", projectId: "project-alice", sessionId: "session-1" };
   const definition = { environmentId: "environment-control-01", displayName: "Sealed public fixture",
     repositoryHttpsUrl: "https://example.com/org/fixture.git", requestedRef: "main",

@@ -63,6 +63,7 @@ async function panelPage(t, overrides = {}) {
       catch (error) { return route.fulfill({ status: 503, json: { errorCode: error.code ?? "synthetic-unavailable" } }); }
     }
     if (url.pathname === "/function-panel.mjs") return route.fulfill({ contentType: "text/javascript", body: await readFile(resolve(assets, "function-panel.mjs"), "utf8") });
+    if (url.pathname === "/agent-governance.mjs") return route.fulfill({ contentType: "text/javascript", body: await readFile(resolve(assets, "agent-governance.mjs"), "utf8") });
     return route.abort();
   });
   await page.goto(origin);
@@ -216,17 +217,35 @@ test("actual DOM: a standalone saved undo task can rebind and preview again with
   assert.equal(recreated.input.capabilityId, 'project.restore'); assert.deepEqual(recreated.input.arguments, { receiptId: 'receipt-a' });
   assert.equal(calls.some(call => call.operation === 'run.resume' || call.operation === 'proposal.execute'), false);
 });
-test("actual DOM: Code and guided work capture their explicit role selection without widening the grant", async t => {
+test("actual DOM: Agent is contextual task coordination inside Code without widening the grant", async t => {
+  let authorityDigest = "8".repeat(64);
+  const authority = () => ({ schemaVersion: "runaai-agent-action-authority/v1", atomic: true,
+    taskId: "task-a", taskStatus: "active", state: "settled", authorityDigest,
+    pendingReconciliationCount: 0, unsettledProposalCount: 0, unsettledRunCount: 0,
+    approvableProposals: [], revocableGrants: [] });
   const { page, calls } = await panelPage(t, { handle: async payload => {
-    if (payload.operation === 'run.start') return { run: run(), task: task() };
+    if (payload.operation === "task.agent-fence") return authority();
+    if (payload.operation === "task.agent-action") {
+      assert.equal(payload.input.authorityDigest, authorityDigest);
+      if (payload.input.operation === "grant.create") {
+        authorityDigest = "7".repeat(64);
+        return { value: { grantId: "grant-new", revision: 4 }, agentActionAuthority: authority() };
+      }
+      if (payload.input.operation === "run.start") {
+        authorityDigest = "6".repeat(64);
+        return { value: { run: run(), task: task() }, agentActionAuthority: authority() };
+      }
+    }
   } });
   await page.locator('#m1-profile').selectOption('safe-autopilot');
-  await page.locator('#m1-workflow').selectOption('agent');
+  await page.locator('#m1-agent-guidance').check();
   await page.locator('#m1-work-intent').selectOption('effect-requested');
   assert.equal(await page.evaluate(() => window.syntheticPanel.startWork('Repair this synthetic exercise')), true);
-  assert.equal(calls.find(call => call.operation === 'run.start').input.workflow, 'agent');
-  assert.deepEqual(calls.find(call => call.operation === 'grant.create').input.allowedPaths, ['calculator.js']);
-  assert.deepEqual(calls.find(call => call.operation === 'grant.create').input.allowedSuites, ['calculator-add-v1']);
+  const actions = calls.filter(call => call.operation === "task.agent-action");
+  assert.deepEqual(actions.map(call => call.input.operation), ["grant.create", "run.start"]);
+  assert.equal(actions[1].input.input.workflow, 'agent');
+  assert.deepEqual(actions[0].input.input.allowedPaths, ['calculator.js']);
+  assert.deepEqual(actions[0].input.input.allowedSuites, ['calculator-add-v1']);
 });
 test("actual DOM: an interrupted source attach retries the same request id and never prints a private diagnostic", async t => {
   let attempts = 0;

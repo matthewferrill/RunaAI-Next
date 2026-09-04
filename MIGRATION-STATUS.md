@@ -612,6 +612,15 @@ contextual Code task state. This authorizes the separate browser fixture only; r
 acceptance remain unproved. Record:
 `gate7f/function-first/M1-S2-AGENT-GOVERNANCE-PREFLIGHT-2026-09-04.md`.
 
+**Contextual Agent DOM preflight, 2026-09-04:** a process-local fixture imports the actual product panel, drives its
+registered handlers and crosses the authenticated workspace request boundary. It proves Code-only Agent placement,
+authoritative fences, CAS-wrapped actions, stale-authority zero effect, explicit approval, revoke-before-effect and
+truthful stopped/unknown/reconciled states. The fixture passed 9/9 once and fresh independent review returned GO at
+P0=0/P1=0. The authorized isolated Playwright fixture did not start because no existing Playwright module is present
+and the test forbids installing/downloading one; Edge is present. This is an unmet environment prerequisite, not a
+test failure. No real browser or server-authentication acceptance is claimed. Record:
+`gate7f/function-first/M1-S2-AGENT-DOM-PREFLIGHT-2026-09-04.md`.
+
 **Contextual Review workflow, 2026-09-03:** the application now requires one to six exact selected locators,
 fully resolves and hash-verifies their canonical bytes in requested order before provider access, preserves
 application-owned citations, and isolates the simplified one-revision `accept`/`revise` checker to Review. The first

@@ -218,6 +218,14 @@ authority produces zero effect. Agent remains a contextual Code task state. The 
 real PostgreSQL and actual browser acceptance remain unproved. Record:
 `../gate7f/function-first/M1-S2-AGENT-GOVERNANCE-PREFLIGHT-2026-09-04.md`.
 
+The contextual Agent process-local DOM fixture now passes 9/9 and fresh independent review at P0=0/P1=0. It imports
+the real product panel, drives registered handlers through the authenticated request boundary, and covers Code-only
+placement, authoritative fences, CAS actions, stale zero-effect behavior, explicit approval, revoke-before-effect
+and truthful non-success states. The authorized isolated Playwright fixture did not start because no existing
+Playwright module is present and the test forbids install/download; Edge is present. That is an unmet environment
+prerequisite, not a test failure. Real browser/server-authentication acceptance remains unproved. Record:
+`../gate7f/function-first/M1-S2-AGENT-DOM-PREFLIGHT-2026-09-04.md`.
+
 M1-S2B implementation checkpoint, 2026-09-02: the authority foundation and actual PostgreSQL lifecycle
 are green. The prior Omen DPAPI/handle-based file proof was 14/14, but shared native/helper bytes have since
 changed and that evidence is historical until one affected-scope rerun. The first actual

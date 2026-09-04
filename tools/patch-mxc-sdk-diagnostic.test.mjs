@@ -9,7 +9,8 @@ import { PATCHED_SHA256, VULNERABLE_SHA256, patchDiagnosticSource,
   patchMxcSdkDiagnostic } from "./patch-mxc-sdk-diagnostic.mjs";
 
 const digest = bytes => createHash("sha256").update(bytes).digest("hex");
-const installed = path.resolve("node_modules/@microsoft/mxc-sdk/dist/diagnostic.js");
+const repositoryRoot = path.resolve(import.meta.dirname, "..");
+const installed = path.join(repositoryRoot, "node_modules", "@microsoft", "mxc-sdk", "dist", "diagnostic.js");
 const reverse = Object.freeze([
   ["import { execFileSync } from 'child_process';", "import { execSync } from 'child_process';"],
   ["const output = execFileSync('C:\\\\Windows\\\\System32\\\\whoami.exe', ['/user', '/fo', 'csv', '/nh'], {",
@@ -79,7 +80,7 @@ test("disabled diagnostics import the patched SDK without a parent stderr write"
     PROCESSOR_ARCHITECTURE: "AMD64", SystemDrive: "C:", SystemRoot: "C:\\Windows", WINDIR: "C:\\Windows",
     TEMP: tmpdir(), TMP: tmpdir() };
   const result = spawnSync(process.execPath, ["--no-warnings", "--input-type=module", "-e",
-    "await import('@microsoft/mxc-sdk')"], { cwd: path.resolve("."), env, encoding: "utf8", windowsHide: true, timeout: 10_000 });
+    "await import('@microsoft/mxc-sdk')"], { cwd: repositoryRoot, env, encoding: "utf8", windowsHide: true, timeout: 10_000 });
   assert.equal(result.status, 0); assert.equal(result.signal, null); assert.equal(result.error, undefined);
   assert.equal(result.stdout, ""); assert.equal(result.stderr, "");
 });

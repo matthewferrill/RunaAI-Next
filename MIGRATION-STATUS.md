@@ -17,21 +17,24 @@ permission requests. Human involvement is reserved for genuine customer tests or
 
 ### Current checkpoint: Gemma-primary application implementation active
 
-**Planning/status reconciliation, 2026-09-04:** Artifact DOM result-list/read presentation is locally committed and
-deterministically verified at `b6ece37`, but it is not integrated into the primary branch, not pushed, and not
-accepted in an actual browser. The Agent PostgreSQL concurrency/restart fixture completed its one authorized real
-disposable run and is locally committed at `58ca066`, but it also remains unintegrated and unpushed. These are local
-milestone results only, not release, browser, model, production, or customer acceptance. The earlier accepted
-artifact source/HTTP/PostgreSQL run, the Artifact DOM deterministic verification, and the Agent PostgreSQL run are
-retained evidence and must not be replayed unchanged.
+**Primary integration checkpoint, 2026-09-04:** the Agent PostgreSQL concurrency/restart fixture from exact commit
+`58ca066` is integrated into primary by local merge `5c6b2e1`. This local Artifact integration merge has exact parents
+`5c6b2e1` and `bf56905`; it integrates the full Artifact DOM chain, including the initial `b6ece37` 53/53 result,
+documentation reconciliation `b284aab`, and the current retained-owner/`result-stale` authority correction and its
+separate 58/58 seven-file result at exact Artifact head `bf56905`. Both primary integration results remain unpushed.
+They are implementation and deterministic/owned-PostgreSQL evidence only, not actual browser, release, model,
+production, or customer acceptance. The earlier accepted artifact source/HTTP/PostgreSQL run, both Artifact DOM
+deterministic runs, and the Agent PostgreSQL run are retained evidence and must not be replayed unchanged.
 
 The model campaign remains tabled. Historical R14/R15 evidence remains immutable, and the obsolete fresh 360+12
 campaign must not be scheduled unless a material model-facing artifact, inference setting, role prompt, checker
 semantic, frozen functional contract, or actual production defect creates a new prospectively frozen qualification
-need. Native Control-worker work is stopped before execution pending reconciliation of the work based on `a20fd32`
-with the `9714874` result-read integration and `25190d9` dependency/witness-method controls, followed by fresh review
-and finite authorization. The actual browser harness/server-authentication prerequisite remains open; therefore
-Artifact and Agent have no actual browser acceptance and the application is not product-qualified.
+need. Native Control-worker work is preserved and stopped before deterministic execution at exact local commit
+`b064842`. After this in-progress primary merge is committed and its exact commit identity is frozen, reconcile Native
+with that exact new primary result, obtain fresh independent combined-byte review, and only then consider the finite
+lock-bound Native deterministic gate 1. The actual browser design's separately listed product prerequisites,
+Playwright/Edge package preflight, server-authentication, built-candidate journey, and browser acceptance remain open;
+therefore Artifact and Agent have no actual browser acceptance and the application is not product-qualified.
 
 **M1-S2A checkpoint, 2026-09-02:** the conversation lifecycle, Settings and honest
 Omen/Control/Home status implementation is complete in the working branch and deterministically green.
@@ -628,6 +631,40 @@ complete no-copy/no-write evidence and throw-path authority comparison. Fresh re
 the one disposable PostgreSQL plus authenticated loopback HTTP run passed 1/1. Cleanup left zero owned entries and
 zero Runa-tool PostgreSQL processes. No browser, model, Control, production or customer acceptance is claimed. Record:
 `gate7f/function-first/M1-S2-ARTIFACT-RESULT-SOURCE-HTTP-INTEGRATION-2026-09-04.md`.
+
+**Artifact-result DOM preflight, 2026-09-04:** the existing Files and artifacts canvas now resolves the current saved
+project conversation or opened Code task and lists only bounded `result.list` metadata. A selected ready result is
+base64 decoded and independently checked for exact byte length, SHA-256 and fatal UTF-8 before inert `textContent`
+preview and explicit user-action download are enabled. The download uses the frozen safe filename, exact Blob media
+type and a temporary same-document object URL that is always revoked. Independently verified companion metadata keeps
+Research citations and Review contexts with their reports; unknown/reconciliation-required results remain
+non-actionable. Focused real-module DOM/download and product-foundation checks passed 12/12 on the pre-review bytes. A later broad command
+retained 46 passes and two pre-assertion `ERR_MODULE_NOT_FOUND: pg` loader failures because the isolated UI worktree
+has no worktree-local dependency tree and the ambient ancestor tree lacks `pg`; it stopped before roadmap/diff checks
+and no successor ran. This is a method/
+environment stop, not an application failure. The following review/dependency sequence is retained historical
+evidence and is superseded for current execution status. The first independent implementation review returned STOP at
+P0=0/P1=3 for descriptor relationship/order admission, metadata-first Research/Review companion gating and real
+current-owner/Files wiring evidence. A second review stopped at P0=0/P1=2 for same-source multiplicity/coherence and
+incomplete Research SafeText admission. A third review stopped at P0=0/P1=2 because the selected closure was falsely
+described as dependency-free and the Review revision-mismatch regression expected report-level copy instead of whole-
+list rejection. Its correction bound identical lockfiles, exact `zod@4.4.3`, an authenticated worktree-local
+`node_modules` junction with verified link-only cleanup and no ambient parent fallback, plus
+`result-client-list-invalid`, list-only traffic and no preview/download. A fourth review stopped at P0=0/P1=1 because
+roadmap/diff still ran inside the junction lifetime and current-byte syntax checks were absent. The corrected method
+limited the junction to seven tests, verified/removed it in `finally`, aggregated suite/cleanup failures, and ran five
+syntax checks, roadmap verification and the diff check only after cleanup. Fresh review returned P0=0/P1=0; that
+historical corrected run passed 53/53 and was committed at `b6ece37`.
+
+A later browser-design review retained P0=0/P1=1 for stale retained controls, and review of the first correction
+retained P0=0/P1=1 for production `result-stale` handling. No execution followed either STOP. The final corrected
+seven-file suite subsequently passed 58/58 with verified junction cleanup, five syntax checks, 15/15 roadmap checks and
+a clean diff check. Exact Artifact head `bf56905` commits those corrected source/test/evidence bytes and is now the
+Artifact parent of this in-progress primary merge. Only merge completion and push, ordinary authenticated browser plus
+server-authentication acceptance, release, model, production and customer proof remain outstanding; no such operation
+ran during the deterministic verification. Records:
+`gate7f/function-first/M1-S2-ARTIFACT-RESULT-DOM-PREFLIGHT-2026-09-04.md` and
+`gate7f/function-first/M1-S2-ARTIFACT-DOM-BROAD-SUITE-METHOD-RCA-2026-09-04.md`.
 
 **Contextual Agent-governance preflight, 2026-09-04:** every consequential Agent action now consumes a task-scoped
 authority digest inside the same transaction before its first write, while run start/resume reserve the exact active

@@ -6,7 +6,8 @@ import { resolve } from "node:path";
 const load = name => readFile(resolve("gate6b/public", name), "utf8");
 
 test("the single canvas exposes product navigation without pretending connections are active", async () => {
-  const [html, views, status] = await Promise.all([load("index.html"), load("product-views.mjs"), load("status.js")]);
+  const [html, views, status, artifacts] = await Promise.all([load("index.html"), load("product-views.mjs"),
+    load("status.js"), load("artifact-results.mjs")]);
   for (const view of ["search", "files", "tasks", "connections", "settings"]) {
     assert.match(html, new RegExp(`data-workspace-view="${view}"`, "u"));
   }
@@ -26,6 +27,12 @@ test("the single canvas exposes product navigation without pretending connection
   assert.match(status, /#right-rail-body button/u);
   assert.match(status, /function stopDisplayingActiveAnswer\(\)/u);
   assert.doesNotMatch(status, /function stopDisplayingActiveAnswer\(\)[\s\S]{0,400}activeAnswerController\.abort\(\)/u);
+  assert.match(views, /renderArtifactResults\(\{ root, container: content, request, context: resultContext\(\)/u);
+  assert.match(status, /resultContext: currentResultContext/u);
+  assert.match(artifacts, /operation: "result\.list"/u);
+  assert.match(artifacts, /operation: "result\.read"/u);
+  assert.match(artifacts, /content\.textContent = verified\.text/u);
+  assert.doesNotMatch(artifacts, /innerHTML|insertAdjacentHTML|DOMParser/u);
 });
 
 test("Settings contains the accepted information architecture and bounded editable preferences", async () => {

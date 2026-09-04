@@ -5,6 +5,7 @@ import { executionOutput, javascriptSource } from "./code-execution.mjs";
 import { initializeFunctionPanel, appendAnswerEvidence } from "./function-panel.mjs";
 import { FUNCTION_CATALOG, functionNameForContext, functionTarget } from "./function-navigation.mjs";
 import { initializeProductViews } from "./product-views.mjs";
+import { currentResultContext as resolveCurrentResultContext } from "./artifact-results.mjs";
 
 const byId = id => document.getElementById(id);
 const text = (id, value) => { byId(id).textContent = value; };
@@ -63,6 +64,10 @@ function expandRail(side) {
 const workspaceHeaders = Object.freeze({ "content-type": "application/json", "x-runa-workspace": "1" });
 const activeState = () => states[activeExperience];
 const greeting = () => FUNCTION_CATALOG[activeFunction].greeting;
+
+function currentResultContext() {
+  return resolveCurrentResultContext({ experience: activeExperience, state: activeState(), taskView: byId("m1-task") });
+}
 
 function resetTranscript() {
   transcript.replaceChildren();
@@ -382,7 +387,7 @@ async function initialize() {
         getContext: () => ({ experience: activeExperience, projectId: activeState().projectId }),
         onStatus: value => text("chat-status", value), onModeChange: updateFunctionPresentation });
       productViews = initializeProductViews(document, { request: workspaceJson,
-        experience: () => activeExperience, openChat: loadChat });
+        experience: () => activeExperience, openChat: loadChat, resultContext: currentResultContext });
       message.focus();
     } else if (session.authenticated) {
       sessionLabel.hidden = false;

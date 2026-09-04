@@ -10,7 +10,8 @@ const RUNNER_SHA256 = "64ea2e039e4ec703c681753464d28414d41b4afbfb79b36796f610443
 const EXECUTOR_SHA256 = "e6ab59285cf63ad6bdf4643b63727a7b5e5d863ef642ee283166f59d0fc3988a";
 const CONTRACTS_SHA256 = "46c7640befa34e75332712a1bb400e9265f6b65b5d02294ff244a2c2d02b3976";
 const LOCK_SHA256 = "c5d2f92ac4066fb5ee6f7def8174802a1659b5e8b3d68eba152fb996ac949821";
-const DEPENDENCY_SHA256 = "88260d397be0fff04201336fa95cd02190fe05f07edd4aa853f3ffe6ee2b2daa";
+export const EXPECTED_DEPENDENCY_SHA256 = "fc56863df60137cafc0f6770cf62de031d2abed644743347aca3247c3140e7ea";
+export const DEPENDENCY_ROOTS = Object.freeze(["@microsoft/mxc-sdk", "node-pty", "semver", "zod"]);
 const CONTROL_SOURCE_ROOT = "C:\\AI\\Projects\\RunaAI-Next-supervisor-8783643";
 const GIT = "C:\\Program Files\\Git\\cmd\\git.exe";
 const ADMISSION_MS = 5_000;
@@ -89,13 +90,13 @@ export async function sourceAuthority() {
   return Object.freeze({ ...authority, sourceAuthoritySha256: digest(Buffer.from(JSON.stringify(authority), "utf8")) });
 }
 
-async function dependencyManifestSha256() {
-  const dependencyRoot = path.join(sourceRoot, "node_modules");
+export async function dependencyManifestSha256({
+  dependencyRoot = path.join(sourceRoot, "node_modules"),
+} = {}) {
   if (!samePath(await realpath(dependencyRoot), dependencyRoot)) {
     throw coded("native-gate3-eligibility-dependency-root-invalid");
   }
   const manifest = createHash("sha256");
-  const roots = ["@microsoft/mxc-sdk", "node-pty", "semver", "zod"];
   const compare = (left, right) => Buffer.compare(Buffer.from(left, "utf8"), Buffer.from(right, "utf8"));
   async function walk(root, relative = "") {
     const base = path.join(dependencyRoot, root, ...relative.split("/").filter(Boolean));
@@ -115,10 +116,8 @@ async function dependencyManifestSha256() {
       } else throw coded("native-gate3-eligibility-dependency-type");
     }
   }
-  for (const root of roots) await walk(root);
-  const actual = manifest.digest("hex");
-  if (actual !== DEPENDENCY_SHA256) throw coded("native-gate3-eligibility-dependency-drift");
-  return actual;
+  for (const root of DEPENDENCY_ROOTS) await walk(root);
+  return manifest.digest("hex");
 }
 
 export async function eligibilityEnvelopeSha256() {
@@ -128,7 +127,9 @@ export async function eligibilityEnvelopeSha256() {
   await exactFile(executorPath, EXECUTOR_SHA256, 1024 * 1024);
   await exactFile(contractsPath, CONTRACTS_SHA256, 1024 * 1024);
   await exactFile(lockPath, LOCK_SHA256, 4 * 1024 * 1024);
-  await dependencyManifestSha256();
+  if (await dependencyManifestSha256() !== EXPECTED_DEPENDENCY_SHA256) {
+    throw coded("native-gate3-eligibility-dependency-drift");
+  }
   const resolvedSdk = import.meta.resolve("@microsoft/mxc-sdk");
   if (!resolvedSdk.startsWith(pathToFileURL(path.join(sourceRoot, "node_modules", "@microsoft", "mxc-sdk")).href)) {
     throw coded("native-gate3-eligibility-ambient-dependency");
@@ -136,7 +137,8 @@ export async function eligibilityEnvelopeSha256() {
   const material = Object.freeze({ schemaVersion: "runaai-native-gate3-mxc-eligibility-envelope/v1",
     nodeSha256: NODE_SHA256, runnerSha256: RUNNER_SHA256, executorSha256: EXECUTOR_SHA256,
     contractsSha256: CONTRACTS_SHA256, packageLockSha256: LOCK_SHA256,
-    dependencyManifestSha256: DEPENDENCY_SHA256, sourceAuthoritySha256: authority.sourceAuthoritySha256,
+    dependencyManifestSha256: EXPECTED_DEPENDENCY_SHA256,
+    sourceAuthoritySha256: authority.sourceAuthoritySha256,
     privateValuesIncluded: false });
   return digest(Buffer.from(JSON.stringify(material), "utf8"));
 }

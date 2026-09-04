@@ -5,6 +5,8 @@
   "main": "index.js",
   "scripts": {
     "postinstall": "node tools/patch-mxc-sdk-diagnostic.mjs",
+    "gate7f:dependency-manifest": "node tools/print-gate7f-dependency-manifest.mjs",
+    "test:gate7f:dependency-manifest": "node --test tools/gate7f-dependency-manifest.test.mjs",
     "verify:roadmap": "node roadmap/read-next-slice.mjs --check && node --test roadmap/roadmap.test.mjs",
     "roadmap:next": "node roadmap/read-next-slice.mjs",
     "test": "node tools/run-tracked-tests.mjs",

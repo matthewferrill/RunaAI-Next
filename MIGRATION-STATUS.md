@@ -1,6 +1,6 @@
 # RunaAI migration status
 
-Status date: 2026-09-03. This is the living migration handoff for RunaAI-Next. Update it in the same
+Status date: 2026-09-04. This is the living migration handoff for RunaAI-Next. Update it in the same
 commit whenever a gate changes repository direction, authority, implementation status, safety
 boundaries, verification state, or the next planned work.
 
@@ -16,6 +16,25 @@ The steward authorized necessary non-destructive work and commit/push to RunaAI-
 permission requests. Human involvement is reserved for genuine customer tests or human-only operations.
 
 ### Current checkpoint: Gemma-primary application implementation active
+
+**Planning/status reconciliation, 2026-09-04:** Artifact DOM result-list/read presentation is locally committed and
+deterministically verified at `b6ece37`, but it is not integrated into the primary branch, not pushed, and not
+accepted in an actual browser. The Agent PostgreSQL concurrency/restart fixture completed its one authorized real
+disposable run and is locally committed at `58ca066`, but it also remains unintegrated and unpushed. These are local
+milestone results only, not release, browser, model, production, or customer acceptance. The earlier accepted
+artifact source/HTTP/PostgreSQL run, the Artifact DOM deterministic verification, and the Agent PostgreSQL run are
+retained evidence and must not be replayed unchanged.
+
+The model campaign remains tabled. Historical R14/R15 evidence remains immutable, and the obsolete fresh 360+12
+campaign must not be scheduled unless a material model-facing artifact, inference setting, role prompt, checker
+semantic, frozen functional contract, or actual production defect creates a new prospectively frozen qualification
+need. Native Control-worker work remains stopped before execution. Its independently reviewed bytes were preserved
+locally at `b6725c2`; a no-commit merge of accepted primary `5e78891` is in progress, and the working-tree semantic
+union retains the `9714874` result-read ports plus `25190d9` dependency/witness-method controls alongside the native
+candidate. The working-tree conflict resolution remains unstaged and the merge remains uncommitted pending fresh
+exact-byte review; no deterministic, PostgreSQL, native, browser, network or model command has run for the reconciled
+bytes. The actual browser harness/server-authentication prerequisite remains open; therefore Artifact and Agent have
+no actual browser acceptance and the application is not product-qualified.
 
 **M1-S2A checkpoint, 2026-09-02:** the conversation lifecycle, Settings and honest
 Omen/Control/Home status implementation is complete in the working branch and deterministically green.
@@ -615,6 +634,16 @@ deterministic source order, contradictory-check rejection and complete Research/
 This authorizes bounded owner-point source-port and HTTP implementation only. No PostgreSQL, HTTP, browser, provider,
 model, Control or actual acceptance operation ran. Record:
 `gate7f/function-first/M1-S2-ARTIFACT-RESULT-CORE-PREFLIGHT-2026-09-04.md`.
+
+**Artifact-result source/HTTP integration, 2026-09-04:** exact owner-point conversation/task ports now bound row IDs,
+encrypted source integrity, nullable personal and managed-project ownership, migrated legacy chats, and the complete
+proposal/intent/receipt graph before projection. Authenticated Chat and Code expose bounded `result.list`/`result.read`
+with frozen public HTTP errors. Independent source/fixture reviews retained P1=2, P1=2, P1=2 and P1=1 stops before
+execution; corrections added cryptographic owner binding, strict legacy admission, a real fresh-process restart,
+complete no-copy/no-write evidence and throw-path authority comparison. Fresh review returned GO at P0=0/P1=0, and
+the one disposable PostgreSQL plus authenticated loopback HTTP run passed 1/1. Cleanup left zero owned entries and
+zero Runa-tool PostgreSQL processes. No browser, model, Control, production or customer acceptance is claimed. Record:
+`gate7f/function-first/M1-S2-ARTIFACT-RESULT-SOURCE-HTTP-INTEGRATION-2026-09-04.md`.
 
 **Contextual Agent-governance preflight, 2026-09-04:** every consequential Agent action now consumes a task-scoped
 authority digest inside the same transaction before its first write, while run start/resume reserve the exact active

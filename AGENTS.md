@@ -27,6 +27,18 @@ RunaAI; `Next` is only a temporary repository and checkout label during migratio
    historical evidence, product security, or the selected-stack contracts.
 
 1. Use a separate worktree or clone per agent. Never run Codex and Claude in the same checkout.
+   Before any dependency-bound import, test or build in a fresh worktree, prove its package lock is byte-identical to
+   the reviewed dependency source and provision a worktree-local dependency tree. On Windows, an ignored
+   `node_modules` junction may be used only after rejecting occupied or dangling targets and then verifying the
+   created item is a `Junction` reparse point with one target resolving to that exact reviewed source. Never accept
+   ambient parent-directory module resolution as test evidence. Reauthenticate and remove only the junction object
+   after the bounded command; do not recursively delete or mutate its target. A lane-specific evidence record must
+   freeze the dependency versions, lock hash, command and cleanup before execution.
+   Before a resource-consuming integration or acceptance run, preflight every external witness command under the
+   same operating-system identity. Do not depend on CIM/WMI or another privileged census unless that exact read-only
+   query is already proven available. Prefer an owned PID plus start/path identity, or a fail-closed exact executable-
+   root census, and keep unrelated processes outside that root out of the result. A witness-method failure must not
+   cause a passed database, browser or model operation to be rerun; resume only the corrected evidence step.
 2. Create a short-lived branch from `runa2/integration` for one approved migration gate.
 3. Baseline the behavior before implementing it and commit the green criteria before the implementation.
 4. Keep old and new adapters side by side until parity, restart, duplicate, dependency-loss, and rollback

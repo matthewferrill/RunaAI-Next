@@ -12,6 +12,26 @@ model, production, or end-user acceptance. No test, syntax command, compilation,
 network action, commit, or push was run while authoring these bytes. The next gate is a different independent
 reviewer examining the frozen source, tests, diff, and hashes before any deterministic command is authorized.
 
+## Baseline reconciliation working-tree correction — unexecuted
+
+After a fresh independent review returned `GO P0=0/P1=0`, the exact native lane was preserved in local commit
+`b6725c2`. A no-commit merge of accepted primary `5e78891` was then started to bring in the `9714874` Artifact
+result-read source/HTTP integration and `25190d9` dependency/witness rules without rewriting either history. The sole
+textual conflict is `composition.mjs`; this working-tree correction resolves it as a semantic union while leaving the
+conflict resolution unstaged and the merge uncommitted for another exact-byte review.
+
+The union imports and constructs `createPostgresArtifactResultSourcePorts` independently of native enablement,
+returns `conversationResults` and `taskResults` on every composed M1 result, and passes both into the same
+`M1FunctionSurface` that receives `serverWorkspaces`. It also retains every native static import, private/default-off
+candidate construction, reverse cleanup boundary, attachment ownership and one-use close. A bounded source assertion
+in `native-candidate-wiring.test.mjs` proves those Artifact ports remain unconditional and coexist at the native
+attachment point. Current-state prose retains the primary Artifact/Agent/no-replay/browser/model limits and the native
+STOP/preservation/reconciliation history.
+
+No test, syntax check, import, junction, PostgreSQL, native process, Control operation, browser, model, network, commit
+or push was run for these merged bytes. The next action is a different-agent exact-byte review; even a GO authorizes
+only completion of the local reconciliation commit, not execution acceptance.
+
 ## Retained STOP history
 
 The independently reviewed preflight/RCA remains unchanged at
@@ -133,8 +153,9 @@ different-agent exact-byte review.
   control-frame, TLS, or materialization implementation required by the later native source/build/hash gate.
 
 The branch was subsequently found to be a sibling of accepted application work rather than a descendant of accepted
-`9714874` plus method-rules commit `25190d9`. This correction does not attempt that reconciliation. These exact bytes
-must be preserved, then reconciled in a separately reviewed step before any deterministic gate-1 execution.
+`9714874` plus method-rules commit `25190d9`. At that stage this correction did not attempt reconciliation. Those exact
+bytes were later preserved at `b6725c2`; the current no-commit working tree now contains the semantic reconciliation
+described above and remains stopped for fresh review before any deterministic gate-1 execution.
 
 ## Authored deterministic checks — not executed
 
@@ -164,10 +185,11 @@ must be preserved, then reconciled in a separately reviewed step before any dete
   executes the pure determinate-publication-state barrier against allowed and ambiguous states.
   It contains no PostgreSQL server or network operation.
 
-## Fourth-correction frozen source/test hashes — not executed
+## Fourth-correction pre-reconciliation frozen source/test hashes — not executed
 
-These SHA-256 values pin the source and deterministic test bytes submitted for the next independent review. They do
-not record a syntax, import, test, PostgreSQL, native, browser, model, network, release, or acceptance result.
+These SHA-256 values pin the source and deterministic test bytes that received independent GO before local preservation
+at `b6725c2`. They remain historical pre-reconciliation identities and do not record a syntax, import, test,
+PostgreSQL, native, browser, model, network, release, or acceptance result for the merged working tree.
 
 - `gate6b/composition.mjs`: `D6062ECB24F86D705273001CB32B7266BA7F7104B32342868E08B7A0FDDD7D2B`
 - `composition.mjs`: `8EACDCFDDF9DCF1AD63A4B62F3B662194059B7E32DD7CDE5DAA789F8297ACC59`
@@ -184,6 +206,20 @@ not record a syntax, import, test, PostgreSQL, native, browser, model, network, 
 - `server-workspace/postgres-native-authority-source.test.mjs`: `E46F5F4C63F64CCB5EE65C2F5E2822F3DB47FA90BDDC474B6EC55119291E98C3`
 - `server-workspace/postgres-native-interface.test.mjs`: `A3AA81BB5B425F2324A508ED642EE73A6BD101CF078BF6D28F85518488F35E57`
 - `server-workspace/publication-owned-primitive.test.mjs`: `C08ACD342E0D7CBBF5B248A9562CA9044B0C85DBE0DCD7F562CA067ED954D61D`
+
+## Baseline-reconciled working-tree hashes — not executed
+
+These hashes supersede only the corresponding pre-reconciliation identities above. They freeze the unstaged semantic
+union and status reconciliation for fresh independent review; they are not test, import, merge-completion or execution
+evidence.
+
+- `composition.mjs`: `D40A422B3418D0E5EBA9DF32960E8425EF1FE42FC27A997EF729CD43AE38C687`
+- `server-workspace/native-candidate-wiring.test.mjs`:
+  `F3A417B62C39722699A293451E5A4916D8379442254F429C620C356A0A02ABC6`
+- `MIGRATION-STATUS.md`: `32CED499AC86405316651EC64BBA8F294A4E9773FBAFA73363AAE11A1C79413A`
+- `roadmap/CURRENT-SLICE.md`: `378CE13F999B5EE943360D7E652B08297737D0A72B33A30BD97C69DDEA893D85`
+- unchanged reconciled `package-lock.json` witness:
+  `CEFCC1B9D086FB5EB8088A1BE3A1D86FD5B4360BB22ABA768C530BBBCF007308`
 
 ## Exact dependency preflight and cleanup — frozen, not executed
 

@@ -21,6 +21,7 @@ import { assertNativeCandidateConfig } from "./server-workspace/native-candidate
 import { createWatchdogAuthorityVerifier, createControlWatchdogClient } from "./server-workspace/control-watchdog-host.mjs";
 import { createWindowsNativeWorkspaceHost } from "./server-workspace/windows-native-host.mjs";
 import { createPublicGitControlWorkerComposition } from "./server-workspace/control-worker-composition.mjs";
+import { createPostgresArtifactResultSourcePorts } from "./artifact-result-postgres.mjs";
 
 const TRUSTED_TASK_HOOK_NAMES = new Set(["afterIntent", "beforeDispatch", "afterMaterialize", "afterTests", "afterCommit", "beforeCommit"]);
 export function validateTrustedTaskHooks(value) {
@@ -122,6 +123,7 @@ export async function composeM1Functions({ configuration, provider, pool, cipher
   const adapter = new DisposableJavascriptProjectAdapter({ baseDirectory, executor: javascriptExecutor,
     suites: projectFixtures?.suites ?? { [M1_EXERCISE_SUITE.suiteId]: M1_EXERCISE_SUITE } });
   const store = new PostgresTaskStore({ pool, cipher }); await store.initialize();
+  const { conversationResults, taskResults } = createPostgresArtifactResultSourcePorts({ pool, cipher });
   const sessions = new M1SessionAuthority();
   let serverWorkspaces = null;
   let nativeCandidateResources = null;
@@ -178,9 +180,9 @@ export async function composeM1Functions({ configuration, provider, pool, cipher
     }
     const candidateAttachment = createNativeCandidateAttachment(nativeCandidateResources,
       application => new M1FunctionSurface({ application, sources, tasks, orchestrator, sessions,
-        serverWorkspaces,
+        serverWorkspaces, conversationResults, taskResults,
         ...(projectFixtures ? { prepareProject: projectFixtures.prepare } : {}) }));
-    const composed = { index, sources, tasks, orchestrator, review, health,
+    const composed = { index, sources, tasks, orchestrator, review, health, conversationResults, taskResults,
       attach: application => candidateAttachment.attach(application),
       close: () => candidateAttachment.close() };
     return composed;

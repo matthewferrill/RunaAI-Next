@@ -96,3 +96,17 @@ test("top-level candidate construction is static, default-off and not steerable 
     assert.equal(composition.includes(denied), false, denied);
   }
 });
+
+test("artifact result ports remain unconditional and attach beside the native candidate", async () => {
+  const composition = await readFile(new URL("../composition.mjs", import.meta.url), "utf8");
+  const portsImport = "import { createPostgresArtifactResultSourcePorts } from \"./artifact-result-postgres.mjs\";";
+  const portsConstruction = "const { conversationResults, taskResults } = createPostgresArtifactResultSourcePorts({ pool, cipher });";
+  const nativeAdmission = "if (nativeCandidateConfig !== undefined && nativeCandidateConfig !== null)";
+  assert.equal(composition.includes(portsImport), true);
+  assert.equal(composition.indexOf(portsConstruction) >= 0, true);
+  assert.equal(composition.indexOf(portsConstruction) < composition.indexOf(nativeAdmission), true);
+  assert.match(composition,
+    /createNativeCandidateAttachment\(nativeCandidateResources,[\s\S]*new M1FunctionSurface\(\{[\s\S]*serverWorkspaces, conversationResults, taskResults,/u);
+  assert.match(composition,
+    /const composed = \{ index, sources, tasks, orchestrator, review, health, conversationResults, taskResults,[\s\S]*attach:[\s\S]*close:/u);
+});

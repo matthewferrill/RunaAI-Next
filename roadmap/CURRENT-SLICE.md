@@ -1,12 +1,29 @@
 # Current slice: Milestone 1, function-first Runa
 
-Roadmap revision: 2026-08-28.1
+Roadmap revision: 2026-09-04.1
 Milestone: M1
 Slice ID: M1-S2
 Status: M1-S2A product-foundation implementation and independent review are green. On 2026-09-03 the steward
 replaced the Omen-local primary Code path with Control-orchestrated server-managed Git workspaces. M1-S2B
 server-worker criteria, implementation, actual-system acceptance, application release and product qualification
 remain open. The Omen transition is historical/deferred and must not run on the primary path.
+
+Planning reconciliation checkpoint, 2026-09-04: the Artifact DOM result-list/read presentation is locally committed
+and deterministically verified at `b6ece37`, but it is not integrated into this primary branch, not pushed, and not
+accepted in an actual browser. The Agent PostgreSQL concurrency/restart fixture completed its one authorized real
+disposable run and is locally committed at `58ca066`, but it too is not integrated or pushed. These are distinct local
+milestone results, not primary-branch, release, browser, model, or customer acceptance. Their already-passed
+operations and the earlier accepted artifact source/HTTP/PostgreSQL integration must not be replayed unchanged.
+
+The model campaign remains tabled. The formerly planned fresh 360+12 campaign is obsolete and must not be scheduled
+unless a material model-facing artifact, inference setting, role prompt, checker semantic, frozen functional contract,
+or actual production defect creates a new prospectively frozen qualification need. Native Control-worker work remains
+stopped before execution. Its independently reviewed bytes were preserved locally at `b6725c2`; a no-commit merge of
+accepted primary `5e78891` is now in progress, and the working-tree semantic union retains the `9714874` result-read
+ports plus `25190d9` dependency/witness controls alongside the native candidate. The working-tree conflict resolution
+remains unstaged and the merge remains uncommitted pending fresh exact-byte review; no deterministic, PostgreSQL,
+native, browser, network or model command has run for the reconciled bytes. The actual browser harness and server-
+authentication prerequisite remains open for Artifact and Agent browser acceptance.
 
 Product-foundation checkpoint, 2026-09-02: the single-canvas workspace now implements participant-scoped
 conversation search/rename/archive/unarchive/branch/export/soft-delete, persisted low-risk appearance
@@ -220,6 +237,14 @@ contradictory-check rejection, and complete Research/Review/inspected-text state
 owner-point source-port and HTTP implementation only. PostgreSQL, HTTP, DOM/browser, provider/model, Control and
 actual acceptance remain unproved. Record:
 `../gate7f/function-first/M1-S2-ARTIFACT-RESULT-CORE-PREFLIGHT-2026-09-04.md`.
+
+Artifact owner-point source ports and authenticated Chat/Code `result.list`/`result.read` now pass their one allowed
+disposable PostgreSQL plus loopback HTTP integration test. Four retained source/fixture review stops corrected task
+row and receipt/effect graph binding, cryptographic nullable owner and strict migrated-chat admission, genuine fresh-
+process restart evidence, complete schema/table/canary/row-digest no-copy proof, and throw-path authority comparison.
+Fresh review returned GO at P0=0/P1=0; the actual integration passed 1/1 and cleanup left zero owned entries/processes.
+This does not prove DOM/browser, model, Control, production or customer acceptance. Record:
+`../gate7f/function-first/M1-S2-ARTIFACT-RESULT-SOURCE-HTTP-INTEGRATION-2026-09-04.md`.
 
 The contextual Agent-governance implementation now passes 54/54 focused checks and fresh independent review at
 P0=0/P1=0 after a retained P1=2 stop. Consequential actions consume task-scoped authority inside the same transaction
@@ -973,13 +998,22 @@ function to work without erasing passed historical evidence or unrelated roadmap
 
 ## Next implementation slice
 
+Current direction, 2026-09-04: integrate the separately verified Artifact DOM (`b6ece37`) and Agent PostgreSQL
+fixture (`58ca066`) through reviewed, non-destructive landing. Native bytes originating from `a20fd32` are preserved at
+`b6725c2`; their no-commit reconciliation with accepted primary `5e78891` now has a working-tree semantic union that
+awaits fresh review before staging, commit or any finite deterministic gate. Then satisfy the actual browser
+harness/server-authentication prerequisite and run only the still-open acceptance evidence. Do not replay
+already-passed Artifact, PostgreSQL, or model operations unchanged. The model campaign is tabled under the
+material-change rule above.
+
 Active work remains M1-S2, specified in
 `../gate7f/function-first/M1-S2-FUNCTIONS-AND-GREEN-CRITERIA.md`. The complete R10
 result leaves only Chat and Code qualified and does not support a customer route.
 R12 was the next finite correction under its prospectively frozen criteria. The
 steward reaffirmed continuation until completion or genuinely needed human
 testing. Internal module, commit and publication checkpoints are not turn-ending
-gates. R12, R13 and R14 model execution and independent review are complete. R14 provides qualifying
+gates. R12, R13 and R14 model execution and independent review are complete. The remainder of this paragraph is
+the historical pre-selection plan and is superseded by the 2026-09-04 direction above. R14 provides qualifying
 Chat, Research, Code and Agent routes but no Review route. The prospective R15 contract and deterministic
 implementation now address the measured generic Review evidence-limit/structured-output defects and the
 two nonqualifying Agent defects without candidate branching, case-answer injection, threshold change,
@@ -999,11 +1033,11 @@ chat/context and real project functions. The Qwen3.6 readiness plan is
 `../gate7f/function-first/QWEN36-READINESS-PLAN-2026-08-28.md`; it can run alongside shared function work.
 Neither the old two-arm runner nor its seals may be widened in place.
 
-Live R15 gate update: inference is still paused. Three fresh create-only stages exposed only method
+Historical R15 gate update: inference was paused. Three fresh create-only stages exposed only method
 defects: stale archive-count publication, transient-root exact-set admission, and a resource watchdog
 whose 15-minute lifetime equaled the permitted 15-minute browser-witness wait. The first two stopped
 before controls; the third completed controls 01-09, timed out at the browser witness, and invoked no
 model. Functional-control resources now live 30 minutes for one 15-minute witness window; the separate
 publication proof lives 45 minutes for its two sequential witness windows. Deterministic tests require
-both resource windows to exceed their complete permitted waits. Commit/reseal and one fresh
-controls/browser pair must pass before the Gemma-first arm begins.
+both resource windows to exceed their complete permitted waits. The former commit/reseal, controls/browser, and
+Gemma-first scheduling is superseded by the five-function selection and 2026-09-04 material-change rule above.

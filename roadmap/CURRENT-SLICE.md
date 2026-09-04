@@ -176,6 +176,16 @@ provenance, inherited handles, process/Job fencing, external deadline/recovery b
 remain unproved. Record:
 `../gate7f/function-first/M1-S2B1-BOOTSTRAP-CONTRACT-PREFLIGHT-2026-09-04.md`.
 
+The first independently authorized disposable PostgreSQL lifecycle run stopped at 3/4 passed before the intended
+product action. A harness fault-injection constraint was validated against an older legitimate
+`source-disconnected` outbox row, so PostgreSQL rejected fixture setup with code `23514`. The compatibility run did
+not start and cleanup left zero owned PostgreSQL processes/directories. The constraint is corrected with `NOT VALID`
+to preserve accepted history while rejecting the intended new insert. Fresh review returned GO at P0=0/P1=0; the
+one resumed lifecycle run passed 4/4 and the separately gated compatibility run passed 1/1. Post-run inspection found
+zero owned entries and zero Runa-tool PostgreSQL processes. This accepts the disposable lifecycle boundary only, not
+Control, production, browser, model or customer behavior. RCA:
+`../gate7f/function-first/M1-S2B1-POSTGRES-LIFECYCLE-ACTUAL-RUN-RCA-2026-09-04.md`.
+
 The deterministic publication primitive now passes 29/29 focused materialization/publication compatibility checks
 and independent review at P0=0/P1=0 after two explicit review stops. It owns and closes or recovery-retains every
 accessible native handle, distinguishes attempted from confirmed moves, permits only a one-shot non-replacing

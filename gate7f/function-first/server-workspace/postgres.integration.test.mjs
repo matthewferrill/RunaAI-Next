@@ -81,6 +81,6 @@ test("real PostgreSQL retains encrypted scoped source authority and idempotent i
   assert.equal(stored.includes(definition.repositoryHttpsUrl), false);
   assert.equal(stored.includes(definition.expectedCommitOid), false);
   const outbox = (await pool.query("SELECT event_type FROM runa_m1_server_workspaces.outbox ORDER BY sequence")).rows;
-  assert.deepEqual(outbox.map(row => row.event_type), ["source-record-create", "workspace-intent-recorded",
-    "source-record-create", "source-record-create", "workspace-intent-recorded"]);
+  assert.deepEqual(outbox.map(row => row.event_type), ["source-known", "source-configured", "workspace-intent-recorded",
+    "source-known", "source-configured", "source-known", "source-configured", "workspace-intent-recorded"]);
 });

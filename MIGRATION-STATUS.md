@@ -565,6 +565,18 @@ at P0=0/P1=0. This authorizes native source-port implementation only. It does no
 inherited handles, process/Job fencing, deadline/recovery wiring, native execution or acceptance. Record:
 `gate7f/function-first/M1-S2B1-BOOTSTRAP-CONTRACT-PREFLIGHT-2026-09-04.md`.
 
+**M1-S2B1 PostgreSQL lifecycle actual-run stop, 2026-09-04:** after fresh implementation review authorized one
+disposable lifecycle run and one later compatibility run, the lifecycle command stopped at 3/4 passed. PostgreSQL
+code `23514` occurred while the harness installed a table-wide rollback fault constraint over an older legitimate
+`source-disconnected` event; the intended product action never ran. This is a harness/fixture defect, not a product
+or model failure. The compatibility run was not started, and cleanup left zero owned PostgreSQL processes or
+directories. The constraint is narrowed with `NOT VALID` so it permits retained history while rejecting the intended
+new insert. Fresh review returned GO at P0=0/P1=0; the one resumed lifecycle run passed 4/4 and the separately gated
+compatibility run passed 1/1. Post-run inspection found zero owned disposable entries and zero Runa-tool PostgreSQL
+processes. The lifecycle increment is accepted for this disposable integration boundary, not Control, production,
+browser, model or customer acceptance. RCA:
+`gate7f/function-first/M1-S2B1-POSTGRES-LIFECYCLE-ACTUAL-RUN-RCA-2026-09-04.md`.
+
 **M1-S2B1 publication-primitive preflight, 2026-09-03:** the digest- and identity-bound deterministic
 publication contract now passes 29/29 focused compatibility checks and fresh independent review at P0=0/P1=0.
 Two review stops corrected malformed-handle ownership, exhaustive inspection cleanup, failed-close retention and

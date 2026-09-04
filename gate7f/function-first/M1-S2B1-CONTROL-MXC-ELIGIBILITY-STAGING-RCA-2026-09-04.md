@@ -18,11 +18,15 @@ Actual-system eligibility is paused. The first invocation of the authenticated C
 
 The failure occurred before `mkdir(root)`, watchdog launch, MXC preflight, or any model admission. It must not be counted as an MXC or model failure.
 
+The first affected-only resume at commit `b43671ce8fb158a74480d2cc48f9e318fdc9c64d` also stopped before product-directory creation with `native-gate3-eligibility-control-parent-preflight-failed`. Its result again records model/browser/database/production effects as false.
+
 ## Root cause
 
 The proposed operation root used the shared `C:\AI\RunaAI-Next-Candidate\staging` directory. Its identity, canonical path, owner, and non-reparse topology were valid, but its ACL contains Authenticated Users rules with real Modify/Delete-child authority. A private child created below that parent could therefore be replaced through parent authority during an operation. The fail-closed rejection was correct.
 
 The diagnostic also exposed a classifier defect: the original mutation mask combined the Windows `Write` and `Modify` composite values. Those composites contain the `Synchronize` bit, so three read-only application-package/Users rules were incorrectly counted as writable. Two Authenticated Users rules were genuine mutation authority; the unsafe result was real even though the count of five was inflated.
+
+The affected-only resume exposed a second operator defect. The ACL predicates all passed, but the stripped PowerShell child auto-loaded `Get-Acl` and emitted 616 bytes of benign `Preparing modules for first use` progress as CLIXML on stderr. It exited zero and returned exactly `ok` on stdout. The strict wrapper correctly rejects unexplained stderr, but use of a module-loading cmdlet made benign host initialization indistinguishable from an error channel. This was an operator invocation/publication failure, not a staging, MXC, or model failure.
 
 ## Systemic correction
 
@@ -31,6 +35,7 @@ The diagnostic also exposed a classifier defect: the original mutation mask comb
 3. Provision only the product-owned `RunaAI\Gate7F\staging` hierarchy below that trusted parent. Apply and verify the existing owner-plus-SYSTEM private ACL at each new level. Do not modify ACLs on `C:\`, `C:\AI`, the user profile, or `AppData\Local`.
 4. Detect mutation authority using only primitive write/create/delete/ACL-ownership bits. Do not use Windows composite masks that overlap read-only `Synchronize`.
 5. Continue to reject every reparse ancestor and every existing product directory that is not already the exact owner-private boundary.
+6. Use the .NET `System.IO.Directory` ACL APIs for get/set operations in all three boundary helpers. They avoid the module auto-load progress channel while retaining strict rejection of any nonempty stderr; do not weaken the stderr gate.
 
 This is the reusable correction for every native operator: validate the parent that can replace the child, use primitive rights for ACL classification, authenticate code before mutation, and make the product-owned working hierarchy private before placing evidence or capabilities in it.
 

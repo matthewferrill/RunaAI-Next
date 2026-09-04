@@ -35,7 +35,7 @@ function makeOwnerPrivate(directory) {
 if($me.Name-cne'RUNA-CONTROL\\Matthew'){throw'identity'};$system=New-Object Security.Principal.SecurityIdentifier('S-1-5-18');
 $acl=New-Object Security.AccessControl.DirectorySecurity;$acl.SetOwner($me.User);$acl.SetAccessRuleProtection($true,$false);
 $inherit=[Security.AccessControl.InheritanceFlags]'ContainerInherit, ObjectInherit';$prop=[Security.AccessControl.PropagationFlags]::None;
-foreach($sid in @($me.User,$system)){$rule=New-Object Security.AccessControl.FileSystemAccessRule($sid,[Security.AccessControl.FileSystemRights]::FullControl,$inherit,$prop,[Security.AccessControl.AccessControlType]::Allow);$acl.AddAccessRule($rule)|Out-Null};Set-Acl -LiteralPath $p -AclObject $acl`,
+foreach($sid in @($me.User,$system)){$rule=New-Object Security.AccessControl.FileSystemAccessRule($sid,[Security.AccessControl.FileSystemRights]::FullControl,$inherit,$prop,[Security.AccessControl.AccessControlType]::Allow);$acl.AddAccessRule($rule)|Out-Null};[IO.Directory]::SetAccessControl($p,$acl)`,
   "native-gate3-eligibility-acl-create-failed");
 }
 
@@ -46,7 +46,7 @@ async function assertOwnerPrivate(directory) {
   }
   const target = psLiteral(directory);
   const result = runPowerShell(`$ErrorActionPreference='Stop';$p=${target};$me=[Security.Principal.WindowsIdentity]::GetCurrent();
-$acl=Get-Acl -LiteralPath $p;$rules=@($acl.GetAccessRules($true,$true,[Security.Principal.SecurityIdentifier]));
+$acl=[IO.Directory]::GetAccessControl($p);$rules=@($acl.GetAccessRules($true,$true,[Security.Principal.SecurityIdentifier]));
 $owner=$acl.GetOwner([Security.Principal.SecurityIdentifier]).Value;$ids=@($rules|ForEach-Object{$_.IdentityReference.Value}|Sort-Object -Unique);if($owner-cne$me.User.Value-or$ids.Count-ne2-or
   $ids-notcontains$me.User.Value-or$ids-notcontains'S-1-5-18'-or@($rules|Where-Object{$_.AccessControlType-ne'Allow'-or
   ($_.FileSystemRights-band[Security.AccessControl.FileSystemRights]::FullControl)-ne[Security.AccessControl.FileSystemRights]::FullControl}).Count-ne0){throw'acl'};'ok'`,
@@ -72,7 +72,7 @@ if($me.Name-cne'RUNA-CONTROL\\Matthew'){throw'identity'};$item=Get-Item -Literal
 if(-not$item.PSIsContainer-or($item.Attributes-band[IO.FileAttributes]::ReparsePoint)-ne0-or[IO.Path]::GetFullPath($item.FullName)-cne$p){throw'path'};
 $q=$item.FullName;while($true){$ancestor=Get-Item -LiteralPath $q -Force;if(($ancestor.Attributes-band[IO.FileAttributes]::ReparsePoint)-ne0){throw'reparse'};
 $parent=[IO.Directory]::GetParent($q);if($null-eq$parent){break};$q=$parent.FullName};
-$acl=Get-Acl -LiteralPath $p;$owner=$acl.GetOwner([Security.Principal.SecurityIdentifier]).Value;$allowed=@($me.User.Value,'S-1-5-18','S-1-5-32-544');
+$acl=[IO.Directory]::GetAccessControl($p);$owner=$acl.GetOwner([Security.Principal.SecurityIdentifier]).Value;$allowed=@($me.User.Value,'S-1-5-18','S-1-5-32-544');
 if($allowed-notcontains$owner){throw'owner'};$write=[Security.AccessControl.FileSystemRights]::WriteData-bor[Security.AccessControl.FileSystemRights]::AppendData-bor
 [Security.AccessControl.FileSystemRights]::WriteExtendedAttributes-bor[Security.AccessControl.FileSystemRights]::WriteAttributes-bor
 [Security.AccessControl.FileSystemRights]::DeleteSubdirectoriesAndFiles-bor[Security.AccessControl.FileSystemRights]::Delete-bor

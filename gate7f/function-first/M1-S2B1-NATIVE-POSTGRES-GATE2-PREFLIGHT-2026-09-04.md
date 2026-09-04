@@ -135,8 +135,11 @@ exact spawned child.
 The wrapper below is the whole operator boundary; the prose above is not a substitute. It is pasted into the approved
 unrestricted PowerShell identity and is not saved as another repository script. Before authorization, a fresh reviewer
 must supply the final 40-hex committed HEAD, final lane-A source/test hashes, and the exact three candidate test names
-in the marked values of that transient invocation. The untouched sentinels deliberately fail closed. The fixed helper,
-lock, package, Node and PostgreSQL pins are literal. Changing any command, pin, test name or bound requires review.
+in the marked values of that transient invocation. If the fenced block is mechanically extracted, each of the seven
+exact sentinel values must occur once before replacement and zero times after replacement. A broad substring scan for
+the sentinel prefix is forbidden because the wrapper intentionally retains a generic fail-closed wildcard guard that
+contains that prefix. The untouched value sentinels deliberately fail closed. The fixed helper, lock, package, Node and
+PostgreSQL pins are literal. Changing any command, pin, test name or bound requires review.
 
 Set `$mode = 'Candidate'` for the first authorized attempt. A later `$mode = 'Compatibility'` invocation is a separate
 attempt and authorization; it is forbidden unless Candidate and all cleanup checks are green. Compatibility is also

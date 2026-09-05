@@ -3,6 +3,21 @@
 Roadmap revision: 2026-08-28.1
 Milestone: M1
 Slice ID: M1-S2
+
+## Latest sequencing correction: 2026-09-04
+
+The remaining delivery and triage sequence is [COMPLETION-PLAN-2026-09-04.md](COMPLETION-PLAN-2026-09-04.md).
+Expanding shell-boundary and runtime-key drafts are paused for necessity, existing-fix and actual-version review;
+they are not verified fixes. Gemma's five-role selection, Native Gate 1/2 and the one Control MXC prerequisite pass
+remain retained; do not restart retired model campaigns or replay those operations unchanged. Four shared lifecycle,
+preflight, cleanup and identity families still block the affected resource proof. Native construction, Candidate,
+built-browser acceptance and the human trial remain open. Current preparation checkout is
+`codex/m1-native-control-host` at baseline `f1ee25b`; later claims below are retained chronological history, not
+permission to execute superseded next actions. See the root [Claude review packet](../CLAUDE-ROLLOUT-REVIEW-HANDOFF-2026-09-04.md)
+and [fix register](../FIX-REGISTER.md). This update makes no new product-test or runtime-completion claim.
+
+## Retained checkpoint history
+
 Status: M1-S2A product-foundation implementation and independent review are green. On 2026-09-03 the steward
 replaced the Omen-local primary Code path with Control-orchestrated server-managed Git workspaces. M1-S2B
 server-worker criteria, implementation, actual-system acceptance, application release and product qualification

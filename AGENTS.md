@@ -18,6 +18,42 @@ RunaAI; `Next` is only a temporary repository and checkout label during migratio
 
 ## Working method
 
+### Environment and scope discipline (steward direction, 2026-09-04)
+
+- Search [FIX-REGISTER.md](FIX-REGISTER.md) by cause, API and error before designing a correction; follow its
+  linked evidence and check applicability to the actual host/version. Prefer a supported vendor fix/configuration
+  or an applicable proved repository implementation. Research official version-specific documentation, release notes
+  and known issues before inventing an alternative. A custom fix is a last resort: record which established options
+  were checked, why they do not satisfy the observed requirement, its limits and removal/replacement condition.
+  Do not describe local code as vendor-approved or a proposed fix as verified. Log actual corrections in the register
+  with source, affected callers, verification, rollback and reuse limits; amend the same cause entry on recurrence.
+- Before a correction, identify its actual execution host, executable, runtime/version, account, and relevant
+  hardware or OS capability. Read the official documentation for those installed versions and the specific API
+  being changed. Record the supporting link and observed facts in the existing correction record; memory and
+  another host's successful check are not compatibility evidence.
+- Control readback on 2026-09-04 observed Windows 11 Pro x64 build 26200, Windows PowerShell Desktop
+  `5.1.26100.9168`, and release Node `v22.22.0`. Design PowerShell code for 5.1 and its .NET Framework API surface.
+  Do not substitute PowerShell 7, ambient Node, or a new SDK/runtime without an explicit deployment decision.
+  Recheck relevant facts before execution; this recorded baseline is not a permanent assumption.
+- A shared correction must identify the observed defect and affected active callers. Do not turn an analogous-path
+  search into a general framework rewrite. Freeze each batch's files, concrete acceptance condition, and link to the
+  required user workflow before implementation; a newly proposed blocker requires evidence of that dependency.
+- Reuse a suitable implementation already proved on the target system before creating another launcher, supervisor,
+  signing service, or test framework. Keep one exclusive writer per worktree and preserve interrupted changes.
+- Use inexpensive syntax and version checks early. Resource-consuming checks must use the target runtime and
+  identity. A passing unit check or documentation review is not a completed user workflow. Preserve passed evidence
+  and resume only the affected stage after an actual failure's correction and independent review.
+- RCA must separate the observed failure, its technical cause, why that defect entered the design, and why the
+  existing verification/review did not catch it. Support causal claims with retained evidence; mark inference and
+  unknowns explicitly. Do not stop at "incorrect design", "operator error", or "missing test".
+  For each upstream cause name the preventive change, its owner, and observable evidence of effectiveness. A passing
+  repaired case closes that case only; it does not prove the process cause eliminated. Investigate analogous active
+  paths, but expand implementation only for a confirmed shared cause or a demonstrated dependency of the workflow.
+
+Official compatibility references: [Windows PowerShell 5.1 versus PowerShell 7](https://learn.microsoft.com/en-us/powershell/scripting/whats-new/differences-from-windows-powershell),
+[Start-Process for 5.1](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.management/start-process?view=powershell-5.1),
+and [Windows Job Objects](https://learn.microsoft.com/en-us/windows/win32/procthread/job-objects).
+
 0. Before deciding or proposing any next slice, run `node roadmap/read-next-slice.mjs` and read its
    complete planning context, `PRODUCT-ROADMAP.md`, `roadmap/CURRENT-SLICE.md`, and `MIGRATION-STATUS.md`.
    Use `roadmap/SLICE-TEMPLATE.md`; record the printed roadmap digest and capability IDs. Milestone 1

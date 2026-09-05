@@ -20,7 +20,76 @@ The failure occurred before `mkdir(root)`, watchdog launch, MXC preflight, or an
 
 The first affected-only resume at commit `b43671ce8fb158a74480d2cc48f9e318fdc9c64d` also stopped before product-directory creation with `native-gate3-eligibility-control-parent-preflight-failed`. Its result again records model/browser/database/production effects as false.
 
-## Root cause
+## Upstream causes and failed preventive controls
+
+This section corrects the earlier RCA's depth. The mechanisms below explain individual failures; by themselves they
+do not explain why defective designs and methods repeatedly reached execution. This analysis covers the retained
+actual-system/operator failures in this record and the linked proof-launch record, not historical mock campaigns.
+
+### Known environment facts were not made requirements of the executable method
+
+Evidence: the proof-launch RCA records a PowerShell 7 caller location combined with a Windows PowerShell executable
+name, then a corrected executable inheriting incompatible Core modules. The supervisor preflight record separately
+records selection of ambient Node 24 despite the documented requirement for release Node 22.22.0. The information
+existed before execution but did not constrain how the invocation was assembled.
+
+Upstream finding: documentation retrieval and command construction were disconnected. "Check the documentation"
+alone cannot correct this recurrence. The method must identify its target executable, runtime/API version, identity,
+module environment and working directory, and check those relevant facts before allocating test resources. The root
+agent owns that invocation; the reviewer checks compatibility evidence as well as source safety. Effectiveness is
+demonstrated when the next required invocation uses the recorded environment without an environment-selection repair.
+No process-wide closure is claimed yet.
+
+### Corrections followed the first rejected operation instead of the complete affected path
+
+Evidence: replacing `Get-Acl` did not prevent first-use progress from another cmdlet; privatizing operator directories
+left the watchdog's two directories with the same owner/protection defect. Both defects recurred inside the same
+invocation path after a purported correction.
+
+Upstream finding: the remediation boundary followed the edited function rather than all users of the broken
+assumption. Before editing, trace the affected call path and identify every creation/launch using that assumption.
+The builder owns that short inventory; the reviewer checks its coverage. This does not authorize rewriting unrelated
+launchers. The retained corrected eligibility result verifies this particular path; other paths require their own
+evidence if used.
+
+### Verification and publication used assumptions different from the runtime
+
+Evidence: direct PowerShell checks differed from the stripped child environment; the patch test depended on the SSH
+working directory; a separately calculated dependency pin disagreed with the runtime's canonical stream despite
+matching package contents. These were failures of method equivalence, not changed dependencies.
+
+Upstream finding: a locally successful check was promoted without proving it exercised the actual entrypoint and
+inputs. The pin producer and verifier also duplicated an algorithm. Use the same runtime implementation for both;
+exercise working-directory independence only where invocation context can differ. The generator/runtime unification
+and subsequent local/Control results establish this specific correction. The root agent must carry that rule into
+future required methods; a static GO does not substitute for execution evidence.
+
+### Observability was designed to reject uncertainty without sufficiently explaining it
+
+Evidence: several source predicates shared one error code, and the initial stderr record retained only a count.
+That prevented distinguishing hypotheses before another run. The earlier Node-warning explanation was later
+disproved by the diagnostic attribution to the SDK import.
+
+Upstream finding: the evidence contract prioritized rejection and privacy but omitted enough safe classification to
+diagnose the rejection. Define bounded stage/predicate codes, byte counts/digests and terminal facts before execution.
+Do not retain secrets or arbitrary output. The exact lost historical predicate remains unknown; do not invent a cause
+to fill that gap. The root agent owns the evidence contract and the reviewer checks that failures are diagnosable.
+
+### Review approval and activity were overstated as readiness
+
+Evidence: independently reviewed methods still failed on executable selection, module environment and later
+publication. The records show GO for narrower properties than successful operation of the whole workflow.
+
+Process conclusion: review was useful for detecting defects, but its result was used too broadly when authorizing
+execution and reporting progress. Report separately what was inspected, what ran on the target, and what user workflow
+is usable. Keep batches small enough to verify those relationships before adding dependencies. Root owns sequencing
+and claims; reviewers must identify evidence limits. The shared process causes remain open until subsequent required
+work demonstrates these controls. Adding this text or passing the one repaired eligibility case is not that proof.
+
+References: [proof-launch RCA](M1-S2B1-NATIVE-GATE3-PROOF-LAUNCH-RCA-2026-09-04.md),
+[actual supervisor preflight](M1-S2B1-CONTROL-SUPERVISOR-ACTUAL-PREFLIGHT-2026-09-04.md), and the retained sequence below.
+
+## Technical causes and retained sequence
 
 The proposed operation root used the shared `C:\AI\RunaAI-Next-Candidate\staging` directory. Its identity, canonical path, owner, and non-reparse topology were valid, but its ACL contains Authenticated Users rules with real Modify/Delete-child authority. A private child created below that parent could therefore be replaced through parent authority during an operation. The fail-closed rejection was correct.
 

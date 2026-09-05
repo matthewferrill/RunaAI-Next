@@ -4,6 +4,17 @@ Status date: 2026-09-04. This is the living migration handoff for RunaAI-Next. U
 commit whenever a gate changes repository direction, authority, implementation status, safety
 boundaries, verification state, or the next planned work.
 
+## Latest sequencing correction: 2026-09-04
+
+Use [the remaining completion/triage plan](roadmap/COMPLETION-PLAN-2026-09-04.md),
+[the fix register](FIX-REGISTER.md), and [the Claude rollout review packet](CLAUDE-ROLLOUT-REVIEW-HANDOFF-2026-09-04.md)
+alongside the current-slice JSON. Gemma selection and the exact Control eligibility pass are retained. The expanding
+shell/key drafts are paused for scope and actual-version review; the four shared correction families, Native worker,
+Candidate/browser acceptance and human trial remain open. Preparation baseline is `f1ee25b` on
+`codex/m1-native-control-host`. This is a planning/documentation update, not completion of those corrections.
+Older "current", "next" and unpublished-state prose below is historical when it conflicts with this notice or the
+latest exact result. It must not restart obsolete campaigns, the deferred Omen worker or its C-drive ACL transition.
+
 ## Required product-roadmap retrieval
 
 Before choosing the next slice, run `node roadmap/read-next-slice.mjs` and read `PRODUCT-ROADMAP.md`

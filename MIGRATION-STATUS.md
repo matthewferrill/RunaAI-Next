@@ -30,7 +30,7 @@ The model campaign remains tabled. Historical R14/R15 evidence remains immutable
 campaign must not be scheduled unless a material model-facing artifact, inference setting, role prompt, checker
 semantic, frozen functional contract, or actual production defect creates a new prospectively frozen qualification
 need. Native Control-worker work has completed deterministic and actual disposable-PostgreSQL gates but remains stopped
-before Native execution. Its reviewed history was preserved at `b6725c2`,
+before the Native Gate 3 resource-ownership proof. Its reviewed history was preserved at `b6725c2`,
 semantically reconciled with accepted primary `5e78891` at `422cc6d`, carried through Playwright package preflight by
 `9a1bde5`, recorded at `09d55df`, carried through browser-harness design `5cf13f1` at `907dba5`, and frozen in the
 three-record checkpoint `b064842`. Reviewed local merge `6709a0f` now integrates exact primary `b99f8bf`, whose
@@ -2046,6 +2046,16 @@ by exact contained path, ordinary non-reparse type, Windows device/inode/birth i
 154-file/95,077,638-byte manifest, confirmed the owned PostgreSQL PID and temporary `node_modules` junction absent,
 removed only the 95 MB generated scratch root, and proved it absent. All four compact parent/operator logs remain.
 This closes retained scratch only; it does not convert `parent-03` into a product result or resume the stopped stage.
+
+The separately gated actual-Control MXC prerequisite is now green once at exact reviewed commit `e309435`. Its retained
+public result has status `executed`, isolation tier `appcontainer-dacl`, child exit 0, 20 output bytes, zero stderr,
+valid acknowledgement, zero active processes and authenticated scratch removal. It invoked no model or browser,
+attempted no database or network operation, and changed no production state. This closes only prerequisite eligibility;
+it does not convert `parent-03` or authorize a resource-proof replay. Four shared P1 correction families remain before
+that one affected proof: bounded process/tree lifecycle and cleanup, a single exact consumer preflight contract,
+aggregate cleanup across active callers, and enrolled shell plus exact PostgreSQL/Qdrant/watchdog identity evidence.
+The complete retained sequence and hashes are in
+`gate7f/function-first/M1-S2B1-CONTROL-MXC-ELIGIBILITY-STAGING-RCA-2026-09-04.md`.
 
 ## Previous qualification closeout (2026-08-27, retained evidence)
 

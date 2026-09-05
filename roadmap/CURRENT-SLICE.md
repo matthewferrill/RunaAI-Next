@@ -19,7 +19,8 @@ earlier accepted artifact source/HTTP/PostgreSQL integration must not be replaye
 The model campaign remains tabled. The formerly planned fresh 360+12 campaign is obsolete and must not be scheduled
 unless a material model-facing artifact, inference setting, role prompt, checker semantic, frozen functional contract,
 or actual production defect creates a new prospectively frozen qualification need. Native Control-worker work has
-completed deterministic and actual disposable-PostgreSQL gates but remains stopped before Native execution. Its
+completed deterministic and actual disposable-PostgreSQL gates but remains stopped before the Native Gate 3
+resource-ownership proof. Its
 reviewed history was preserved at `b6725c2`, semantically reconciled with accepted
 primary `5e78891` at `422cc6d`, carried through Playwright package preflight by `9a1bde5`, recorded at `09d55df`,
 carried through browser-harness design `5cf13f1` at `907dba5`, and frozen in the three-record checkpoint `b064842`.
@@ -1118,6 +1119,17 @@ Commit `f0abd88` sealed the systemic RCA before cleanup. The retained 95 MB fixt
 contained path, non-reparse type, Windows identity and unchanged canonical manifest, removed by its exact literal
 path, and proved absent; the owned PostgreSQL PID and temporary junction were absent and all four compact logs remain.
 Only generated scratch was removed. `parent-03` remains a failed method/eligibility attempt and the stage stays paused.
+
+Control MXC prerequisite update, 2026-09-04: after retaining and correcting the staging, watchdog-publication, SDK
+import-side-effect, ambient-cwd test, and dependency-pin publication failures, exact reviewed commit `e309435` passed
+the one affected-only actual eligibility invocation. The retained public result is `executed` with
+`appcontainer-dacl`, child exit 0, 20 output bytes, zero stderr, valid acknowledgement, zero active processes and
+authenticated scratch cleanup. No model, browser, database, network or production action ran. This closes only the
+Control MXC prerequisite. The resource-ownership proof remains stopped on four independently identified P1 families:
+bounded process/tree lifecycle and cleanup, one exact consumer preflight contract, aggregate cleanup across active
+callers, and enrolled shell plus exact PostgreSQL/Qdrant/watchdog identity evidence. Correct those shared shapes,
+review exact bytes, and then run the one affected resource proof; do not replay eligibility or earlier green gates.
+Evidence: `../gate7f/function-first/M1-S2B1-CONTROL-MXC-ELIGIBILITY-STAGING-RCA-2026-09-04.md`.
 
 Active work remains M1-S2, specified in
 `../gate7f/function-first/M1-S2-FUNCTIONS-AND-GREEN-CRITERIA.md`. The complete R10

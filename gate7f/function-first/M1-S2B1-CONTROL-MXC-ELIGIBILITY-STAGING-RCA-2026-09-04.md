@@ -2,7 +2,7 @@
 
 ## Status
 
-Actual-system eligibility is paused. The latest sealed Control envelope read at reviewed commit `ab1b4e7bfcb2f8596083f6a243a644e92372d8f0` stopped before eligibility because the newly published dependency-tree pin did not match the canonical runtime verifier. Local and Control dependency contents match exactly. This is a pin-publication and test-method failure, not dependency drift, an MXC result, or a model result.
+Actual-system eligibility passed once at exact reviewed commit `e309435d7fa95fb18b24643c4db186a275036fab`. This closes only the preflight prerequisite. The affected resource-ownership proof remains stopped on four shared correction families: bounded process/tree lifecycle and cleanup; one exact consumer preflight contract; aggregate cleanup across active callers; and enrolled shell plus exact PostgreSQL/Qdrant/watchdog identity evidence.
 
 ## Retained actual result
 
@@ -48,6 +48,12 @@ The first focused Control verification of the applied dependency patch stopped b
 
 After that correction passed all three focused cases on Control, the sealed dependency-envelope read stopped before eligibility with `native-gate3-eligibility-dependency-drift`. Read-only comparison proved that all four dependency roots on local and Control had identical file counts, directory counts, byte counts, and per-root digests. The runtime verifier's one ordered record stream deterministically produced `fc56863df60137cafc0f6770cf62de031d2abed644743347aca3247c3140e7ea`; the published pin was `88260d397be0fff04201336fa95cd02190fe05f07edd4aa853f3ffe6ee2b2daa`. This is a pin-publication defect caused by calculating the replacement pin outside the canonical runtime implementation, not dependency drift, an MXC result, or a model result. No eligibility, model, browser, database, network, or production action occurred.
 
+## Corrected actual result
+
+The shared manifest correction passed 5/5 focused local checks and 5/5 equivalent Control checks from the SSH session's non-repository working directory. Independent review returned `GO P0=0/P1=0`. The exact dependency patch was a verified no-op, the canonical dependency digest matched `fc56863df60137cafc0f6770cf62de031d2abed644743347aca3247c3140e7ea`, and the sealed envelope was `ca04f1d70efd66d70ea1b5e1609dcfa15f77e780b1156184a8d44c713233f70e`.
+
+The one authorized affected-only Control invocation created operation `m1-g3-eligibility-cfb9444689a94abb831cf20aa16316bd` and passed. Its public result SHA-256 is `2e36c147931e96fbd24cee1380c315813ead4525a9b74843ce5d4e7d5a9d756e`: status `executed`, isolation tier `appcontainer-dacl`, child exit 0, 20 combined output bytes, zero stderr bytes, valid acknowledgement candidate, zero active or matching processes, scratch removed, and no primary or cleanup failure. It invoked no model or browser, attempted no database or network operation, changed no production state, and retained no private value.
+
 ## Systemic correction
 
 1. Use the current Control identity's existing `C:\Users\Matthew\AppData\Local` boundary as the trusted parent. Read-only inspection proved it has no reparse ancestors, an allowed owner, and zero untrusted applicable or inheritable mutation rules.
@@ -80,4 +86,4 @@ This is the reusable correction for every native operator: validate the parent t
 
 ## Resume gate
 
-No retry is permitted until the shared runtime/generator implementation, corrected dependency pin, cwd-independent generator test, mutation test, and updated bootstrap authority pass syntax/diff checks, focused local and Control verification, and independent review with P0=0/P1=0. The exact dependency patch and canonical manifest must match in the real local and Control trees. After publication, only the stopped affected Control eligibility invocation may be resumed. Any new actual failure stops the campaign again for retained evidence and RCA.
+This eligibility resume gate is satisfied at exact commit `e309435d7fa95fb18b24643c4db186a275036fab`; do not replay it unchanged. Its green result permits work on the next blocked correction but does not by itself authorize the affected resource-ownership proof. That proof remains gated by exact correction and independent `GO P0=0/P1=0` for bounded process/tree lifecycle and cleanup; one exact consumer preflight contract; aggregate cleanup across active callers; and enrolled shell plus exact PostgreSQL/Qdrant/watchdog identity evidence. Any new actual failure stops the affected stage again for retained evidence and RCA.
